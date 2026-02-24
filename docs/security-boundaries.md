@@ -1,7 +1,7 @@
 # Security Boundaries Documentation
 
-**Who this is for:** engineers and operators responsible for keeping GeoSite’s data secure.  
-**What you’ll get:** the trust model, RLS boundaries, and storage rules that must never be violated.
+**Who this is for:** engineers and operators responsible for keeping GeoSite data secure.  
+**What you'll get:** the trust model, RLS boundaries, and storage rules that must never be violated.
 
 See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`, and `decisions.md` (D2).
 
@@ -15,7 +15,7 @@ See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`, and `dec
 
 **Invariant**
 
-- Only authenticated requests (with valid JWT) can reach RLS‑protected tables.
+- Only authenticated requests (with valid JWT) can reach RLS-protected tables.
 
 ---
 
@@ -29,27 +29,44 @@ See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`, and `dec
 
 **Invariant**
 
-- Any new table containing user‑ or project‑scoped data must ship with RLS policies before it is used.
+- Any new table containing user- or project-scoped data must ship with RLS policies before it is used.
 
 ---
 
 ## 3. Row-Level Security Policies
 
-### Images Table
+### 3.1 Images Table
 
 Conceptual policy:
 
-- **SELECT** – A user can view:
+- **SELECT**: A user can view:
   - Images where `user_id = auth.uid()`, or
   - Images if the user has role `admin`.
-
-- **INSERT** – Allowed only if `user_id = auth.uid()`.
-
-- **UPDATE** – Allowed only if:
+- **INSERT**: Allowed only if `user_id = auth.uid()`.
+- **UPDATE**: Allowed only if:
   - `user_id = auth.uid()`, or
   - User has role `admin`.
+- **DELETE**: Same rule as UPDATE.
 
-- **DELETE** – Same rule as UPDATE.
+### 3.2 Profiles Table
+
+- **SELECT / UPDATE**: User can access only their own profile (`id = auth.uid()`), except `admin`.
+- **INSERT / DELETE**: Trigger/system-managed, not client-managed.
+
+### 3.3 Roles and User Roles
+
+- `roles`: readable by authenticated users; write access restricted to admins.
+- `user_roles`:
+  - Self-read allowed for UX (`user_id = auth.uid()`).
+  - Role assignment/revocation restricted to admins.
+  - Prevent self-demotion if it would remove the last admin account.
+  - Prevent removing the final role for any user.
+
+### 3.4 Projects and Metadata
+
+- `projects`: read by authorized users, write by owner/admin according to product rules.
+- `metadata_keys`: create/read under user namespace; admin has global visibility.
+- `image_metadata`: inherits visibility/write permissions from the parent image.
 
 ### Role Check Logic (Conceptual)
 
@@ -76,7 +93,7 @@ Policy (conceptual):
 - Users can upload only into their own folder / namespace.
 - File naming uses UUIDs to avoid collisions and information leaks.
 - Public vs signed access is determined by explicit storage policies:
-  - MVP can choose conservative defaults (e.g., signed URLs).
+  - MVP should default to signed URLs unless there is a clear need for public access.
 
 ---
 

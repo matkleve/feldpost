@@ -1,27 +1,25 @@
 # Features (MVP and Beyond)
 
 **Who this is for:** engineers and product owners deciding what to implement.  
-**What you’ll get:** a clear, numbered list of capabilities and constraints for GeoSite.
+**What you'll get:** a numbered list of capabilities and constraints for GeoSite.
 
 ---
 
 ## 1. MVP Features
 
-These features define the first shippable version of GeoSite. They map directly to the use cases in `docs/use-cases.md`.
+These features define the first shippable version of GeoSite and map to `use-cases.md`.
 
-### 1.1 Authentication & User Management
+### 1.1 Authentication and User Management
 
 1. **User registration and login**
    - Implemented via Supabase Auth (email/password).
-   - New users automatically receive a default role (e.g., `user`) via database trigger.
-
+   - New users automatically receive a default role (for example, `user`) via trigger.
 2. **Session handling**
-   - Angular stores the active session/JWT and forwards it with all Supabase calls.
-
+   - Angular stores the active session/JWT and forwards it with Supabase calls.
 3. **Account deletion**
-   - Deleting a user from `auth.users` cascades to `profiles`, `user_roles`, and `images` via `ON DELETE CASCADE`.
+   - Deleting a user from `auth.users` cascades to `profiles`, `user_roles`, and owned `images`.
 
-See `docs/user-lifecycle.md` for full lifecycle details.
+See `user-lifecycle.md` for lifecycle details.
 
 ---
 
@@ -29,141 +27,87 @@ See `docs/user-lifecycle.md` for full lifecycle details.
 
 4. **Image upload from device**
    - User selects one or more photos.
-   - Files are uploaded to Supabase Storage with UUID-based file names.
-
+   - Files are uploaded to Supabase Storage with UUID-based paths/names.
 5. **Automatic EXIF extraction**
-   - On upload, the system extracts (when available):
-     - Latitude
-     - Longitude
-     - Timestamp
-     - Direction / bearing
-   - EXIF coordinates are stored as original source of truth.
-   - Direction / bearing is stored for future directional features, but **not used in MVP filtering**.
-
+   - Extract latitude, longitude, timestamp, and direction/bearing when available.
+   - Store EXIF coordinates separately from corrected coordinates.
 6. **Map preview before save**
-   - After upload and EXIF parsing, the image appears as a marker on the map.
-   - User can confirm or adjust the location before persisting the final record.
-
+   - Image appears as a map marker after EXIF parse.
+   - User can confirm or adjust location before final save.
 7. **Marker correction**
-   - User may drag the marker to correct small positional errors.
-   - Corrected coordinates are stored in separate fields; EXIF coordinates are retained.
+   - User may drag marker to correct positional error.
+   - Corrected coordinates are stored in separate fields.
 
 ---
 
-### 1.3 Spatial & Temporal Exploration
+### 1.3 Spatial and Temporal Exploration
 
 8. **Map-first main screen layout**
-   - Map is the primary canvas.
-   - Prominent address search bar with autocomplete sits above the map.
-   - A filter panel (time, project, metadata, max distance) is adjacent to the map.
-   - An upload button is available in the map pane.
-   - A left sidebar provides navigation (e.g., Map / Projects / Admin / …).
-
+   - Map as primary canvas.
+   - Address search bar with autocomplete.
+   - Adjacent filter panel (time, project, metadata, max distance).
+   - Upload entry point in map pane.
 9. **Address search via geocoding service**
-   - Address search uses a **geocoding service (provider-agnostic)**.
-   - Behaviour:
-     - On exact or high-confidence match: center map on the result.
-     - If the exact address cannot be resolved: jump to the closest match and explicitly show a notice (e.g., “Using closest match to ...”); never fail silently.
-
+   - Uses a provider-agnostic geocoding boundary.
+   - Behavior contract is defined in `architecture.md` and `decisions.md` (D6).
 10. **Interactive map navigation**
-    - Map rendered via Leaflet + OpenStreetMap tiles.
-    - Users can pan and zoom; markers update based on viewport.
-
-11. **Bounding-box queries and lazy loading**
-    - Only images within the visible map region are fetched from the database.
-    - Pagination and limits applied server-side.
-    - The frontend never requests “all images”.
-
+    - Leaflet + OpenStreetMap rendering.
+    - Markers update based on viewport.
+11. **Viewport-bounded loading**
+    - Fetch only images in visible map region.
+    - Server-side pagination and limits.
 12. **Marker clustering**
-    - Clusters represent dense image regions to maintain map readability.
-
+    - Cluster dense regions to preserve readability and performance.
 13. **Timeline filtering**
-    - Time range filter (slider or date range) restricts which images are shown.
-    - Default range: last N years (e.g., 2), configurable.
-    - Visual cues (e.g., color/opacity) differentiate older vs newer images.
-
+    - Time range filter limits displayed images.
 14. **Detail view**
-    - Clicking a marker or image opens a detail panel with:
-      - Image thumbnail (then full image on demand)
-      - Capture time
-      - Project
-      - Metadata
-      - Owner information
+    - Thumbnail/full image, capture time, project, metadata, and owner.
 
 ---
 
-### 1.4 Project Grouping & Metadata
+### 1.4 Project and Metadata
 
-13. **Project assignment**
-    - Each image can be associated with a project.
-    - The same user may work on multiple projects; projects may span locations.
-
-14. **Project filtering**
+15. **Project assignment**
+    - Each image can be associated with one project.
+16. **Project filtering**
     - Users can filter images by one or more projects.
-
-15. **Flexible metadata system**
-    - Users can define arbitrary metadata keys (e.g., “Fang”, “Türe”, “Material”).
-    - Values can be assigned per image.
-    - UI supports filtering by metadata key/value.
+17. **Flexible metadata system**
+    - User-defined metadata keys and values per image.
+    - Filter by metadata key/value.
 
 ---
 
 ### 1.5 Distance Filtering
 
-16. **Distance-based filtering**
-    - Users can restrict results by maximum distance from a reference point (e.g., map center or cluster click point).
-    - Preset distances such as 25m / 50m / 100m are provided, plus an optional custom slider.
-    - Distance is computed using **effective display coordinates** (corrected coordinates when present, otherwise EXIF coordinates).
+18. **Distance-based filtering**
+    - Restrict results by max distance from a reference point.
+    - Presets (for example, 25m/50m/100m) and optional custom value.
+    - Distance uses effective display coordinates (corrected first, else EXIF).
 
 ---
 
-### 1.6 Security & Performance
+### 1.6 Security and Performance
 
-17. **RLS-enforced ownership and roles**
-    - Users see images they own and, depending on role, additional data.
-    - All access enforcement is implemented in PostgreSQL RLS, not in Angular.
+19. **RLS-enforced ownership and roles**
+    - All access enforcement in PostgreSQL RLS, not in Angular.
+20. **Storage security**
+    - User-scoped upload paths with UUID naming.
+    - Explicit policy for signed vs public access.
+21. **Performance guardrails**
+    - Spatial and temporal filtering is server-side.
+    - Thumbnails for overview, full-resolution on demand.
+    - Indexes support viewport, timeline, and metadata filters.
 
-18. **Storage security**
-    - Images are stored in Supabase Storage with policies that:
-      - Restrict upload paths to the owning user.
-      - Use UUID-based paths or filenames.
-      - Control whether images are public or require signed URLs.
-
-19. **Performance guardrails**
-    - All spatial and temporal filters are executed server-side.
-    - Thumbnails are used for map and list views; full-resolution images only fetched when needed.
-    - DB indexes support efficient bounding-box and time-range queries.
-
-See `docs/architecture.md`, `docs/database-schema.md`, and `docs/security-boundaries.md` for detailed enforcement and schema.
+See `architecture.md`, `database-schema.md`, and `security-boundaries.md`.
 
 ---
 
-## 2. Post‑MVP / Future Considerations
+## 2. Post-MVP / Future Considerations
 
-These are *not* in the MVP (see `project-description.md` non-goals), but are natural extensions:
-
-1. **Advanced image editing**
-   - Cropping, annotations, measurements.
-
-2. **Before/after overlays**
-   - Visual comparison of the same area over time.
-
-3. **Heatmaps and analytics**
-   - Density maps of work, issues, or materials.
-
-4. **Offline mode**
-   - Local cache and sync for poor connectivity environments.
-
-5. **Richer permission models**
-   - Project-based sharing, temporary access links, external stakeholders.
-
-6. **Directional relevance**
-   - Use stored camera bearing and view direction to further refine which images are considered relevant.
-   - Builds on top of the existing distance and time filters.
-
-7. **Right-click map actions (Upload/Create marker here)**
-   - Allow users to right-click on the map and choose “Upload here” or “Create marker here” to start an upload flow anchored at that coordinate.
-   - Acts as an additional entry point on top of the standard upload screen.
-
-These should only be tackled once MVP success criteria in `project-description.md` are consistently met.
-
+1. Advanced image editing (crop, annotate, measure).
+2. Before/after overlays.
+3. Heatmaps and analytics.
+4. Offline mode.
+5. Richer permission models.
+6. Directional relevance.
+7. Right-click map actions (upload/create marker here).

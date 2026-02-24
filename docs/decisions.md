@@ -54,7 +54,7 @@ All authorization is enforced in the database using Row-Level Security policies:
 - Any new table that contains user- or project-bound data must ship with RLS policies.
 - Frontend role checks are allowed only as UX optimizations, never as security guarantees.
 
-See `docs/security-boundaries.md` for policy details.
+See `security-boundaries.md` for policy details.
 
 ---
 

@@ -32,7 +32,7 @@
   An office user preparing quotes and documentation from historical images. May have role `user` or `viewer`.
 
 - **Admin**  
-  User with elevated permissions (see `docs/security-boundaries.md`), including broader visibility and management tasks.
+  User with elevated permissions (see `security-boundaries.md`), including broader visibility and management tasks.
 
 ---
 
