@@ -1,9 +1,31 @@
 <div class="map-shell">
-  <!-- Header / toolbar placeholder — will be filled in M-IMPL4+ -->
+  <!-- Header / toolbar -->
   <header class="map-toolbar">
     <span class="map-toolbar__brand">SiteSnap</span>
+
+    <div class="map-toolbar__actions">
+      <!-- Toggle upload panel -->
+      <button
+        class="map-toolbar__btn"
+        type="button"
+        [class.map-toolbar__btn--active]="uploadPanelVisible()"
+        aria-label="Upload images"
+        (click)="toggleUploadPanel()"
+      >
+        &#128247; Upload
+      </button>
+    </div>
   </header>
 
-  <!-- Leaflet renders into this element -->
-  <div #mapContainer class="map-container" aria-label="Site map"></div>
+  <!-- Map area (position:relative so the upload panel can be positioned within it) -->
+  <div class="map-area">
+    <!-- Leaflet renders into this element -->
+    <div #mapContainer class="map-container" aria-label="Site map"></div>
+
+    <!-- Upload panel overlay -->
+    <app-upload-panel
+      [visible]="uploadPanelVisible()"
+      (imageUploaded)="onImageUploaded($event)"
+    />
+  </div>
 </div>

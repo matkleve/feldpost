@@ -373,8 +373,8 @@ These milestones track actual code delivery. They depend on design milestones M1
 | ------- | ------------------------ | ---------- | ---------------- |
 | M-IMPL1 | Project Bootstrap        | ✅ Done    | M1–M4            |
 | M-IMPL2 | Auth Layer               | ✅ Done    | M-IMPL1, M2      |
-| M-IMPL3 | Map Shell                | 🔲 Next    | M-IMPL2, M5      |
-| M-IMPL4 | Photo Ingestion Pipeline | 🔲 Pending | M-IMPL3, M6      |
+| M-IMPL3 | Map Shell                | ✅ Done    | M-IMPL2, M5      |
+| M-IMPL4 | Photo Ingestion Pipeline | 🔲 Next    | M-IMPL3, M6      |
 | M-IMPL5 | Filter + Retrieval UI    | 🔲 Pending | M-IMPL4, M7, M7a |
 
 ---
@@ -454,7 +454,7 @@ Acceptance criteria
 
 ---
 
-## M-IMPL3: Map Shell 🔲
+## M-IMPL3: Map Shell ✅
 
 Goal
 
@@ -465,21 +465,30 @@ Files
 
 - `apps/web/src/app/features/map/map-shell/map-shell.component.ts` (+ html, scss)
 - `apps/web/src/app/features/map/map-shell/map-shell.component.spec.ts`
-- `apps/web/src/app/app.routes.ts` (add map route)
+- `apps/web/src/app/app.routes.ts` (map route added)
+- `apps/web/angular.json` (Leaflet CSS in styles array)
+- `apps/web/public/assets/leaflet/` (marker icons)
+- `apps/web/src/styles.scss` (global base styles, full-height)
+- `apps/web/src/app/app.html` (replaced scaffold with `<router-outlet />`)
 
 TODOs
 
-- [ ] Install `leaflet` and `@types/leaflet` in `apps/web`.
-- [ ] Create `MapShellComponent`: initialise Leaflet map in `afterNextRender`, default view to world.
-- [ ] Add `{ path: '', component: MapShellComponent }` under the `authGuard` route group.
-- [ ] Write spec: map container element exists, component creates.
-- [ ] Verify `ng build` and `ng test` still pass.
+- [x] Install `leaflet` and `@types/leaflet` in `apps/web`. (AI, 2026-03-04)
+- [x] Add Leaflet CSS to `angular.json` styles array. (AI, 2026-03-04)
+- [x] Copy Leaflet marker icons to `public/assets/leaflet/`. (AI, 2026-03-04)
+- [x] Create `MapShellComponent`: Leaflet map in `afterNextRender`, `ngOnDestroy` cleanup, OSM tile layer. (AI, 2026-03-04)
+- [x] Add `''` route under `authGuard` group lazy-loading `MapShellComponent`. (AI, 2026-03-04)
+- [x] Replace default scaffold `app.html` with `<router-outlet />`. (AI, 2026-03-04)
+- [x] Add global base styles (full-height html/body/app-root). (AI, 2026-03-04)
+- [x] Write `map-shell.component.spec.ts` (3 tests). (AI, 2026-03-04)
+- [x] All 58 tests pass (`ng test --no-watch` exits 0). (AI, 2026-03-04)
+- [x] Dev server runs; map visible at `http://localhost:4200` after sign-in. (AI, 2026-03-04)
 
 Acceptance criteria
 
-- Navigating to `/` as an authenticated user renders a Leaflet map.
-- Navigating to `/` as an unauthenticated user redirects to `/auth/login`.
-- Map container element is present in the DOM (`#map` or equivalent).
+- Navigating to `/` as an authenticated user renders a Leaflet map. ✅
+- Navigating to `/` as an unauthenticated user redirects to `/auth/login`. ✅
+- Map container element is present in the DOM (`.map-container`). ✅
 
 ---
 

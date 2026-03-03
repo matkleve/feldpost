@@ -18,8 +18,11 @@ import {
     viewChild,
     afterNextRender,
     OnDestroy,
+    signal,
 } from '@angular/core';
 import * as L from 'leaflet';
+import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel/upload-panel.component';
+import { ExifCoords } from '../../../core/upload.service';
 
 // Patch Leaflet default icon URLs so they resolve correctly from the Angular bundle.
 // This is required because Leaflet uses relative URLs that break with bundlers.
@@ -36,7 +39,7 @@ L.Marker.prototype.options.icon = iconDefault;
 
 @Component({
     selector: 'app-map-shell',
-    imports: [],
+    imports: [UploadPanelComponent],
     templateUrl: './map-shell.component.html',
     styleUrl: './map-shell.component.scss',
 })
@@ -46,6 +49,18 @@ export class MapShellComponent implements OnDestroy {
 
     /** Leaflet map instance — set after first render. */
     private map?: L.Map;
+
+    /** Controls upload panel visibility. */
+    readonly uploadPanelVisible = signal(false);
+
+    /**
+     * When non-null the map is in "placement mode": the next click places an
+     * image that had no GPS EXIF data. Holds the upload-panel row key.
+     */
+    private pendingPlacementKey: string | null = null;
+
+    /** Reference to the UploadPanelComponent child. */
+    private readonly uploadPanel = viewChild(UploadPanelComponent);
 
     constructor() {
         // afterNextRender is the correct hook for DOM-dependent third-party libs.
@@ -60,6 +75,34 @@ export class MapShellComponent implements OnDestroy {
         this.map?.remove();
     }
 
+    // ── Upload panel ────────────────────────────────────────────────────────────
+
+    toggleUploadPanel(): void {
+        this.uploadPanelVisible.update((v) => !v);
+    }
+
+    /**
+     * Called by the UploadPanelComponent when an image is successfully uploaded
+     * with GPS coordinates. Adds a Leaflet marker at the image location.
+     */
+    onImageUploaded(event: ImageUploadedEvent): void {
+        if (!this.map) return;
+        L.marker([event.lat, event.lng])
+            .bindPopup(`Image uploaded (id: ${event.id})`)
+            .addTo(this.map);
+    }
+
+    /**
+     * Enters map placement mode for a file that had no GPS EXIF.
+     * The next map click will call UploadPanelComponent.placeFile() with the
+     * clicked coordinates and then exit placement mode.
+     */
+    enterPlacementMode(key: string): void {
+        this.pendingPlacementKey = key;
+    }
+
+    // ── Map init ────────────────────────────────────────────────────────────────
+
     private initMap(): void {
         this.map = L.map(this.mapContainer().nativeElement, {
             center: [20, 0],     // world center
@@ -73,5 +116,17 @@ export class MapShellComponent implements OnDestroy {
             attribution:
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(this.map);
+
+        // Map click handler: used for manual placement of images without EXIF GPS.
+        this.map.on('click', (e: L.LeafletMouseEvent) => {
+            if (!this.pendingPlacementKey) return;
+
+            const coords: ExifCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+            const panel = this.uploadPanel();
+            if (panel) {
+                panel.placeFile(this.pendingPlacementKey, coords);
+            }
+            this.pendingPlacementKey = null;
+        });
     }
 }

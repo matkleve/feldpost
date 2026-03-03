@@ -298,7 +298,288 @@ Quickly anchor a new upload or marker at an arbitrary point on the map, even if 
 
 ---
 
+---
+
+## UC6 – Technician Resuming Work After Connectivity Loss
+
+**Goal**
+Continue using the app productively after returning from an area with no network, and ensure images uploaded in degraded conditions are still correctly placed.
+
+**Actors**
+
+- Technician (role: `user`) — see [Persona: Technician](#persona-technician)
+
+**Preconditions**
+
+- Technician was earlier working with images on-site.
+- The device lost mobile data in a basement, tunnel, or remote location.
+
+**Main Flow**
+
+1. Technician opens GeoSite after connectivity returns.
+2. The app detects a restored network connection and resumes any interrupted uploads automatically.
+3. For each previously interrupted upload, the app displays a per-file retry indicator.
+4. Technician can trigger manual retry for individual failed uploads or use "Retry All".
+5. Successfully resumed uploads are placed on the map with their EXIF coordinates.
+6. Technician reviews the newly uploaded markers to confirm correct placement.
+7. Any image lacking EXIF coordinates (e.g., taken in airplane mode without GPS) is flagged with a "Missing location" warning and must be manually placed before saving.
+
+**Postconditions**
+
+- All previously interrupted uploads are either successfully committed or clearly flagged for the technician to resolve.
+
+**Key Invariants**
+
+- Upload state (progress, retry count) is tracked client-side; the backend does not receive partial uploads.
+- EXIF coordinates, once parsed, are stored as the immutable reference regardless of when the save completes.
+
+---
+
+## UC7 – Technician Batch-Uploading After a Full Site Visit
+
+**Goal**
+Upload a full day's photo set (20–80 images) in one go at the end of the workday, without needing to review each image individually.
+
+**Actors**
+
+- Technician (role: `user`) — see [Persona: Technician](#persona-technician)
+
+**Preconditions**
+
+- Technician has a valid account and is logged in.
+- Device has a stable connection (end-of-day, back at the office or on Wi-Fi).
+
+**Main Flow**
+
+1. Technician opens the upload screen and selects all photos from the day (multi-file select).
+2. GeoSite validates each file (size, type, dimensions) and shows a summary: `42 of 44 files valid – 2 exceeded 25 MB limit`.
+3. EXIF data is extracted for all valid files in the background before upload begins.
+4. GeoSite shows a pre-upload map view with all pending markers rendered at their EXIF locations. Images missing EXIF coordinates are listed separately and shown with a "No location" badge.
+5. Technician assigns a **project** to all images at once (bulk project assignment dropdown before save).
+6. Technician optionally assigns shared **metadata** values (e.g., `Material: Beton`) to all selected images in one action.
+7. For images missing location, the technician either manually places them or dismisses them (they will be uploaded without coordinates and flagged for later correction).
+8. Technician confirms and upload begins (max 3 parallel uploads). A consolidated progress bar shows overall batch progress alongside per-file indicators.
+9. On completion, GeoSite shows: `44 uploaded, 0 failed` or a per-file error summary.
+
+**Postconditions**
+
+- All valid images are committed to the system with accurate placement and shared metadata.
+- Technician does not need desktop follow-up for correctly geo-tagged images.
+
+**Alternative Flow: Mid-Batch Failure**
+
+8a. One or more uploads fail mid-batch (network drop).
+8b. Remaining uploads continue (partial failure is not a full abort).
+8c. Failed files are shown in a "Failed – Retry" list. Technician can retry individually or all at once.
+
+**Key Invariants**
+
+- Bulk project assignment does not overwrite previously saved images — it applies only to the current upload batch.
+- Validation is client-side first; Supabase Storage enforces server-side limits.
+
+---
+
+## UC8 – Viewer Reviewing Site for a Project Meeting
+
+**Goal**
+A read-only team member (e.g., project owner, external auditor) reviews documented site conditions before a project review meeting, without the ability to modify anything.
+
+**Actors**
+
+- Viewer (role: `viewer`) — read-only variant of the Clerk persona
+
+**Preconditions**
+
+- Viewer has been granted `viewer` access by an admin.
+- Relevant images are already in the system.
+
+**Main Flow**
+
+1. Viewer opens GeoSite in a desktop browser and logs in.
+2. Viewer navigates to the address of interest.
+3. Viewer uses time range and project filters to scope results to the relevant phase.
+4. Viewer browses image markers on the map. Upload buttons and correction actions are hidden.
+5. Viewer opens individual images for full-resolution review.
+6. Viewer creates a named group ("Project review – Site A – March 2026") for the set of images relevant to the meeting.
+7. Viewer opens the group tab and reviews images sequentially (arrow / swipe navigation).
+
+**Postconditions**
+
+- Viewer has a curated, referenceable set of images for the meeting.
+- No data has been modified.
+
+**Key Invariants**
+
+- RLS prevents the viewer from uploading, editing, or deleting any images.
+- Group creation is the only write operation permitted for `viewer` accounts.
+- Upload and correction UI elements are not rendered for `viewer` role.
+
+---
+
+## UC9 – Clerk Building a Multi-Site Quote
+
+**Goal**
+Compare conditions across several geographically dispersed sites to produce a single consolidated quote covering multiple locations.
+
+**Actors**
+
+- Clerk (role: `user` or `viewer`) — see [Persona: Clerk](#persona-clerk)
+
+**Preconditions**
+
+- Clerk has a valid account and is logged in.
+- Image history exists for all relevant locations.
+
+**Main Flow**
+
+1. Clerk opens GeoSite and navigates to the first site (address search).
+2. Clerk draws a radius selection around the site and adds relevant images to a named group: "Quote 2026-03 Multi-Site".
+3. Clerk navigates to the second and third sites, repeating the radius-select-and-add pattern for each.
+4. After covering all locations, Clerk opens the group tab.
+5. Clerk reviews all collected images in one scrollable gallery, sorted by site (proximity to each address) or by date.
+6. Clerk identifies the work complexity per site from material metadata and image condition.
+7. Clerk uses this visual evidence directly when composing the quote in an external tool (export is post-MVP).
+
+**Postconditions**
+
+- One named group contains representative images from all relevant sites, enabling side-by-side review in the workspace pane.
+
+**Key Invariants**
+
+- A single group may contain images from any number of geographic locations.
+- Adding images from multiple map viewports to one group does not change the group's scope; it accumulates.
+
+---
+
+## UC10 – Technician Correcting a Misplaced Marker After Save
+
+**Goal**
+Fix an incorrectly placed image after it has already been saved, without destroying the original EXIF reference.
+
+**Actors**
+
+- Technician (role: `user`) — see [Persona: Technician](#persona-technician)
+
+**Preconditions**
+
+- An image has been saved with incorrect map placement (EXIF drift, wrong address, or manual error during upload).
+- The technician has since visited the site and confirmed the correct location.
+
+**Main Flow**
+
+1. Technician searches for the address or navigates the map to find the incorrectly placed marker.
+2. Technician opens the image detail view.
+3. Detail view shows: current (corrected) coordinates, or the EXIF coordinates if never corrected.
+4. Technician taps "Edit Location".
+5. The map zooms to the marker's current position. The marker becomes draggable.
+6. Technician drags the marker to the correct position. Distance from original is shown as a live label ("Moving 43 m from EXIF position").
+7. Technician taps "Save correction".
+8. Corrected coordinates are stored. `coordinate_corrections` table receives a new entry (user, timestamp, original, corrected).
+9. A "Reset to EXIF" link is visible in the detail view.
+
+**Alternative Flow: Undo Correction**
+
+9a. Technician opens detail view and taps "Reset to EXIF".
+9b. Corrected coordinates are cleared; the image reverts to EXIF-source position.
+9c. A confirmation dialog is shown before the reset is applied.
+
+**Postconditions**
+
+- Image is now visible at the correct map location.
+- Original EXIF coordinates are preserved and auditable.
+
+**Key Invariants**
+
+- `coordinate_corrections` records are append-only; old corrections are not deleted when a new one is saved.
+- Marker correction is only available to the image owner or an `admin`.
+
+---
+
+## UC11 – Admin Offboarding a Departed Team Member
+
+**Goal**
+Cleanly remove access for a team member who has left the company, without losing their uploaded images.
+
+**Actors**
+
+- Admin (role: `admin`) — see [Persona: Admin](#persona-admin)
+
+**Preconditions**
+
+- Admin is logged in.
+- The departing user has an active account and owns images in the system.
+
+**Main Flow**
+
+1. Admin opens the user management view.
+2. Admin searches for the departing user by name or email.
+3. Admin reviews the user's current roles.
+4. Admin revokes all elevated roles (e.g., removes `admin` if applicable).
+5. Admin deactivates or deletes the user account via the admin UI (or Supabase dashboard for early phases).
+6. Images previously uploaded by the user remain in the system, now associated with `user_id` of the deleted account.
+
+**Alternative Flow: Transfer Ownership**
+
+6a. Admin optionally re-assigns the departed user's images to a different user or to a shared "archive" project before account deletion.
+6b. Admin confirms the reassignment and then deletes the account.
+
+**Postconditions**
+
+- Departed user can no longer authenticate.
+- All uploaded images remain intact and are still searchable by the remaining team.
+- No lingering permissions exist for the removed account.
+
+**Key Invariants**
+
+- Only admins can delete accounts or reassign images.
+- Deleting a user cascades to `profiles`, `user_roles`. Owned images are NOT deleted automatically — this is intentional, to preserve site history.
+- RLS re-evaluation for the deleted user's `user_id` naturally prevents any further access.
+
+---
+
+## UC12 – Clerk Investigating a Disputed Job (Audit Trail)
+
+**Goal**
+Reconstruct the documented sequence of events at a site to resolve a contractual dispute or insurance claim by tracing what was photographed, when, and by whom.
+
+**Actors**
+
+- Clerk (role: `user`) — see [Persona: Clerk](#persona-clerk)
+- Admin (may assist in role: `admin`)
+
+**Preconditions**
+
+- Images related to the disputed site exist in the system.
+- Clerk or admin has appropriate access to the relevant project.
+
+**Main Flow**
+
+1. Clerk navigates to the disputed address on the map.
+2. Clerk sets the time range filter to bracket the disputed period (e.g., "June 2025 – September 2025").
+3. All images taken at the site during that period appear on the map and in the Active Selection tab.
+4. Clerk opens each image in sequence, reviewing:
+   - Capture timestamp (`captured_at` from EXIF; `created_at` as fallback).
+   - Uploader identity (visible in detail view).
+   - GPS coordinates (EXIF vs. corrected, with correction history).
+   - Any attached metadata (e.g., "Work stage: Pre-treatment").
+5. Clerk assembles a named group: "Dispute Documentation – Site X – Q3 2025".
+6. Clerk passes the group reference and image list to the legal or management team.
+
+**Postconditions**
+
+- A timestamped, spatially accurate documentary record has been assembled.
+- Original EXIF data and correction history are available as supporting evidence.
+
+**Key Invariants**
+
+- Images are immutable after save (no overwrite of content).
+- Coordinate correction history is preserved (`coordinate_corrections` table).
+- Metadata values are timestamped at creation.
+
+---
+
 ## Notes
 
 - Additional use cases (e.g., exporting data, advanced filtering) can be added here as the product evolves.
 - Any new use case should link back to relevant features and, if needed, trigger new decisions in `decisions.md`.
+- UC6–UC12 are not gated on MVP. UC6, UC7, UC10, UC11 are natural MVP extensions. UC8, UC9, UC12 are MVP-compatible but depend on group functionality (Feature 24–26) being complete.

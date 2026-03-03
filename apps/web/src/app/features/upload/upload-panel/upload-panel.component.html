@@ -1,0 +1,100 @@
+<section
+  class="upload-panel"
+  [class.upload-panel--visible]="visible()"
+  role="region"
+  aria-label="Upload images"
+>
+  <!-- Drop zone / file picker trigger -->
+  <div
+    class="upload-panel__dropzone"
+    [class.upload-panel__dropzone--dragging]="isDragging()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    role="button"
+    tabindex="0"
+    aria-label="Drag images here or click to select"
+    (click)="fileInput.click()"
+    (keydown.enter)="fileInput.click()"
+    (keydown.space)="fileInput.click()"
+  >
+    <span class="upload-panel__dropzone-icon" aria-hidden="true">📷</span>
+    <p class="upload-panel__dropzone-label">
+      Drag &amp; drop images here<br />
+      <span class="upload-panel__dropzone-sub">or click to select files</span>
+    </p>
+    <p class="upload-panel__dropzone-hint">JPEG · PNG · HEIC · WebP · max 25 MB</p>
+    <!-- Hidden file input; trigger by clicking the drop zone -->
+    <input
+      #fileInput
+      type="file"
+      class="upload-panel__file-input"
+      accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+      multiple
+      aria-hidden="true"
+      tabindex="-1"
+      (change)="onFileInputChange($event)"
+    />
+  </div>
+
+  <!-- Per-file progress list -->
+  @if (fileStates().length > 0) {
+    <ul class="upload-panel__file-list" aria-label="Upload queue">
+      @for (state of fileStates(); track trackByKey($index, state)) {
+        <li class="upload-panel__file-item upload-panel__file-item--{{ state.status }}">
+          <span class="upload-panel__file-name" [title]="state.file.name">
+            {{ state.file.name }}
+          </span>
+
+          <!-- Status badge -->
+          <span class="upload-panel__file-status">
+            @switch (state.status) {
+              @case ('pending') { Queued }
+              @case ('parsing') { Reading EXIF… }
+              @case ('uploading') { Uploading… }
+              @case ('complete') { ✓ Done }
+              @case ('error') { ✗ Error }
+              @case ('awaiting_placement') { 📍 Place on map }
+            }
+          </span>
+
+          <!-- Progress bar (shown while uploading) -->
+          @if (state.status === 'uploading') {
+            <progress
+              class="upload-panel__progress"
+              [value]="state.progress"
+              max="100"
+              [attr.aria-valuenow]="state.progress"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            ></progress>
+          }
+
+          <!-- Inline error message -->
+          @if (state.status === 'error' && state.error) {
+            <p class="upload-panel__file-error" role="alert">{{ state.error }}</p>
+          }
+
+          <!-- Missing-EXIF placement prompt -->
+          @if (state.status === 'awaiting_placement') {
+            <p class="upload-panel__placement-prompt" role="status">
+              No GPS data found — click the map to place this image at the correct location.
+            </p>
+          }
+
+          <!-- Dismiss button for terminal states -->
+          @if (state.status === 'complete' || state.status === 'error') {
+            <button
+              class="upload-panel__dismiss"
+              type="button"
+              aria-label="Dismiss {{ state.file.name }}"
+              (click)="dismissFile(state.key)"
+            >
+              ×
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

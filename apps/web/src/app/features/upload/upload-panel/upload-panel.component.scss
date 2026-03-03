@@ -1,0 +1,161 @@
+:host {
+  display: block;
+}
+
+.upload-panel {
+  position: absolute;
+  top: 56px; // below the map toolbar
+  right: 16px;
+  z-index: 1000;
+  width: 340px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  display: none; // hidden by default; toggled by visible input
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+
+  &--visible {
+    display: flex;
+  }
+
+  // ── Drop zone ──────────────────────────────────────────────────────────────
+
+  &__dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px 12px;
+    border: 2px dashed #c0cdd8;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+    outline: none;
+
+    &:hover,
+    &:focus-visible {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    &--dragging {
+      border-color: #2563eb;
+      background: #dbeafe;
+    }
+  }
+
+  &__dropzone-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  &__dropzone-label {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  &__dropzone-sub {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  &__dropzone-hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  &__file-input {
+    display: none;
+  }
+
+  // ── File list ──────────────────────────────────────────────────────────────
+
+  &__file-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__file-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-rows: auto auto auto;
+    column-gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: #f9fafb;
+    font-size: 0.8rem;
+
+    &--complete { background: #f0fdf4; }
+    &--error    { background: #fef2f2; }
+    &--awaiting_placement { background: #fffbeb; }
+  }
+
+  &__file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #111827;
+    grid-column: 1;
+  }
+
+  &__file-status {
+    grid-column: 2;
+    white-space: nowrap;
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+
+  &__dismiss {
+    grid-column: 3;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 2px;
+
+    &:hover { color: #374151; }
+  }
+
+  &__progress {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    appearance: none;
+    margin-top: 4px;
+
+    &::-webkit-progress-bar   { background: #e5e7eb; border-radius: 2px; }
+    &::-webkit-progress-value { background: #2563eb; border-radius: 2px; }
+    &::-moz-progress-bar      { background: #2563eb; border-radius: 2px; }
+  }
+
+  &__file-error {
+    grid-column: 1 / -1;
+    margin: 4px 0 0;
+    color: #dc2626;
+    font-size: 0.75rem;
+  }
+
+  &__placement-prompt {
+    grid-column: 1 / -1;
+    margin: 4px 0 0;
+    color: #d97706;
+    font-size: 0.75rem;
+  }
+}

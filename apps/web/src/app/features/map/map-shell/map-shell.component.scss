@@ -25,12 +25,44 @@
     font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.05em;
+    flex: 1 1 auto;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.82rem;
+    padding: 5px 10px;
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    &--active {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
   }
 }
 
-.map-container {
+.map-area {
   flex: 1 1 auto;
-  // Leaflet requires an explicit height; flex-grow handles it here
-  // but the element must have a non-zero computed height.
+  position: relative;
   min-height: 0;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  // Leaflet requires an explicit height; the parent .map-area handles it.
 }
