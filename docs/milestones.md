@@ -369,13 +369,13 @@ Success condition
 
 These milestones track actual code delivery. They depend on design milestones M1–M7a being complete.
 
-| ID      | Name                     | Status     | Depends On       |
-| ------- | ------------------------ | ---------- | ---------------- |
-| M-IMPL1 | Project Bootstrap        | ✅ Done    | M1–M4            |
-| M-IMPL2 | Auth Layer               | ✅ Done    | M-IMPL1, M2      |
-| M-IMPL3 | Map Shell                | ✅ Done    | M-IMPL2, M5      |
-| M-IMPL4 | Photo Ingestion Pipeline | 🔲 Next    | M-IMPL3, M6      |
-| M-IMPL5 | Filter + Retrieval UI    | 🔲 Pending | M-IMPL4, M7, M7a |
+| ID      | Name                     | Status  | Depends On       |
+| ------- | ------------------------ | ------- | ---------------- |
+| M-IMPL1 | Project Bootstrap        | ✅ Done | M1–M4            |
+| M-IMPL2 | Auth Layer               | ✅ Done | M-IMPL1, M2      |
+| M-IMPL3 | Map Shell                | ✅ Done | M-IMPL2, M5      |
+| M-IMPL4 | Photo Ingestion Pipeline | ✅ Done | M-IMPL3, M6      |
+| M-IMPL5 | Filter + Retrieval UI    | 🔲 Next | M-IMPL4, M7, M7a |
 
 ---
 
@@ -492,7 +492,7 @@ Acceptance criteria
 
 ---
 
-## M-IMPL4: Photo Ingestion Pipeline 🔲
+## M-IMPL4: Photo Ingestion Pipeline ✅
 
 Goal
 
@@ -506,19 +506,22 @@ Files (planned)
 
 TODOs
 
-- [ ] Create Supabase Storage bucket `images` with signed-URL access.
-- [ ] Install `exifr` for browser-side EXIF parsing.
-- [ ] Create `UploadService`: validate file (25 MB, MIME), parse EXIF, upload to Storage, insert `images` row.
-- [ ] Create `UploadPanelComponent`: drag-and-drop or file picker, progress display, error display.
-- [ ] Show uploaded markers on the map immediately after ingestion.
-- [ ] Write unit tests for `UploadService` (mock Storage + Supabase insert).
+- [x] Create Supabase Storage bucket `images` with signed-URL access. (AI, 2026-03-04)
+- [x] Install `exifr` for browser-side EXIF parsing. (AI, 2026-03-04)
+- [x] Create `UploadService`: validate file (25 MB, MIME), parse EXIF, upload to Storage, insert `images` row. (AI, 2026-03-04)
+- [x] Create `UploadPanelComponent`: drag-and-drop or file picker, progress display, error display. (AI, 2026-03-04)
+- [x] Show uploaded markers on the map immediately after ingestion. (AI, 2026-03-04)
+- [x] Write unit tests for `UploadService` (mock Storage + Supabase insert). (AI, 2026-03-04)
+- [x] Write unit tests for `UploadPanelComponent` (30 tests). (AI, 2026-03-04)
+- [x] All 119 tests pass (`ng test --no-watch` exits 0). (AI, 2026-03-04)
+- [x] `ng build --configuration development` exits 0. (AI, 2026-03-04)
 
 Acceptance criteria
 
-- JPEG / PNG / HEIC with GPS EXIF → marker appears on map.
-- Files > 25 MB or wrong MIME are rejected with a user-visible error.
-- Missing EXIF → user is prompted to place marker manually.
-- Storage URL is signed (not public).
+- JPEG / PNG / HEIC with GPS EXIF → marker appears on map. ✅
+- Files > 25 MB or wrong MIME are rejected with a user-visible error. ✅
+- Missing EXIF → user is prompted to place marker manually. ✅
+- Storage URL is signed (not public). ✅
 
 ---
 

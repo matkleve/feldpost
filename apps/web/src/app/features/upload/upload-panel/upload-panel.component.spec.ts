@@ -132,11 +132,15 @@ describe('UploadPanelComponent', () => {
     });
 
     describe('drag-and-drop interactions', () => {
+        /** jsdom does not implement DragEvent; use a plain stub. */
+        function makeDragEventStub(): DragEvent {
+            return { preventDefault: vi.fn(), stopPropagation: vi.fn() } as unknown as DragEvent;
+        }
+
         it('sets isDragging to true on dragover', async () => {
             const { component } = await setup();
-            const event = new DragEvent('dragover');
 
-            component.onDragOver(event);
+            component.onDragOver(makeDragEventStub());
 
             expect(component.isDragging()).toBe(true);
         });
@@ -144,9 +148,8 @@ describe('UploadPanelComponent', () => {
         it('sets isDragging to false on dragleave', async () => {
             const { component } = await setup();
             component.isDragging.set(true);
-            const event = new DragEvent('dragleave');
 
-            component.onDragLeave(event);
+            component.onDragLeave(makeDragEventStub());
 
             expect(component.isDragging()).toBe(false);
         });
@@ -154,9 +157,8 @@ describe('UploadPanelComponent', () => {
         it('sets isDragging to false on drop', async () => {
             const { component } = await setup();
             component.isDragging.set(true);
-            const event = new DragEvent('drop');
 
-            component.onDrop(event);
+            component.onDrop(makeDragEventStub());
 
             expect(component.isDragging()).toBe(false);
         });
