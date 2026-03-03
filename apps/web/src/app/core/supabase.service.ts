@@ -4,8 +4,8 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
-  readonly client: SupabaseClient = createClient(
-    environment.supabase.url,
-    environment.supabase.anonKey,
-  );
+    readonly client: SupabaseClient = createClient(
+        environment.supabase.url,
+        environment.supabase.anonKey,
+    );
 }
