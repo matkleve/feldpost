@@ -23,9 +23,6 @@
     <div #mapContainer class="map-container" aria-label="Site map"></div>
 
     <!-- Upload panel overlay -->
-    <app-upload-panel
-      [visible]="uploadPanelVisible()"
-      (imageUploaded)="onImageUploaded($event)"
-    />
+    <app-upload-panel [visible]="uploadPanelVisible()" (imageUploaded)="onImageUploaded($event)" />
   </div>
 </div>

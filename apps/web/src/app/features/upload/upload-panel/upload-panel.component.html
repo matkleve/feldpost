@@ -49,12 +49,24 @@
           <!-- Status badge -->
           <span class="upload-panel__file-status">
             @switch (state.status) {
-              @case ('pending') { Queued }
-              @case ('parsing') { Reading EXIF… }
-              @case ('uploading') { Uploading… }
-              @case ('complete') { ✓ Done }
-              @case ('error') { ✗ Error }
-              @case ('awaiting_placement') { 📍 Place on map }
+              @case ('pending') {
+                Queued
+              }
+              @case ('parsing') {
+                Reading EXIF…
+              }
+              @case ('uploading') {
+                Uploading…
+              }
+              @case ('complete') {
+                ✓ Done
+              }
+              @case ('error') {
+                ✗ Error
+              }
+              @case ('awaiting_placement') {
+                📍 Place on map
+              }
             }
           </span>
 

@@ -35,7 +35,9 @@
     border-radius: 6px;
     cursor: pointer;
     text-align: center;
-    transition: border-color 0.15s, background 0.15s;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
     outline: none;
 
     &:hover,
@@ -99,9 +101,15 @@
     background: #f9fafb;
     font-size: 0.8rem;
 
-    &--complete { background: #f0fdf4; }
-    &--error    { background: #fef2f2; }
-    &--awaiting_placement { background: #fffbeb; }
+    &--complete {
+      background: #f0fdf4;
+    }
+    &--error {
+      background: #fef2f2;
+    }
+    &--awaiting_placement {
+      background: #fffbeb;
+    }
   }
 
   &__file-name {
@@ -129,7 +137,9 @@
     line-height: 1;
     padding: 0 2px;
 
-    &:hover { color: #374151; }
+    &:hover {
+      color: #374151;
+    }
   }
 
   &__progress {
@@ -140,9 +150,18 @@
     appearance: none;
     margin-top: 4px;
 
-    &::-webkit-progress-bar   { background: #e5e7eb; border-radius: 2px; }
-    &::-webkit-progress-value { background: #2563eb; border-radius: 2px; }
-    &::-moz-progress-bar      { background: #2563eb; border-radius: 2px; }
+    &::-webkit-progress-bar {
+      background: #e5e7eb;
+      border-radius: 2px;
+    }
+    &::-webkit-progress-value {
+      background: #2563eb;
+      border-radius: 2px;
+    }
+    &::-moz-progress-bar {
+      background: #2563eb;
+      border-radius: 2px;
+    }
   }
 
   &__file-error {

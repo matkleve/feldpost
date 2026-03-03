@@ -14,6 +14,7 @@ These four principles filter every design decision. When two choices conflict, t
 ### 1.1 Field-First
 
 The technician using this app in direct sunlight, with dirty gloves, at arm's length is the hardest user to serve. If a UI element works for them, it works for everyone. Consequences:
+
 - Tap targets ≥ 48 × 48 px on mobile, ≥ 44 × 44 px on desktop.
 - High-contrast labels; do not rely on color alone to convey state.
 - Critical actions (confirm upload, save correction) require only one tap after review — no buried confirmation flows.
@@ -21,6 +22,7 @@ The technician using this app in direct sunlight, with dirty gloves, at arm's le
 ### 1.2 Map is the Primary Canvas
 
 The map is not a support feature. It is the main interface. All other panels — filters, workspace, detail views — exist to serve the map interaction. Consequences:
+
 - The map is never fully occluded on any breakpoint during normal use.
 - Panels animate in over the map (overlay/sheet) rather than pushing it aside on smaller screens.
 - The map retains its position, zoom, and state when panels open or close.
@@ -28,6 +30,7 @@ The map is not a support feature. It is the main interface. All other panels —
 ### 1.3 Progressive Disclosure
 
 Show only what the user needs for the task at hand. Complexity surfaces on demand. Consequences:
+
 - Thumbnails before full-resolution images.
 - Collapsed filter panel by default; expand on demand.
 - Detail metadata shown inline but collapsed; expand on tap.
@@ -36,6 +39,7 @@ Show only what the user needs for the task at hand. Complexity surfaces on deman
 ### 1.4 Legibility in All Conditions
 
 Outdoor light, dark basements, OLED phones, wide-gamut monitors — the product must be readable everywhere. Consequences:
+
 - Full dark mode, matching the system preference by default.
 - Map tiles swap to a dark style in dark mode.
 - Text never renders below 4.5:1 contrast ratio (WCAG AA).
@@ -48,62 +52,76 @@ Outdoor light, dark basements, OLED phones, wide-gamut monitors — the product 
 These products solve adjacent problems with notable design decisions worth studying. GeoSite should not copy them, but should learn from what they do well.
 
 ### 2.1 Mapillary (`mapillary.com`)
+
 **What it does:** street-level photo crowdsourcing on a world map.  
 **Why it is relevant:** The core interaction — a map covered in photo markers that open into a viewer — is structurally identical to GeoSite.  
 **Design takeaways:**
+
 - Splits the screen into a full-bleed map pane and a sliding image viewer. The map never disappears.
 - Dense marker clusters are rendered as numbered circles; clicking a cluster zooms in. This is the model for GeoSite's cluster behavior.
 - The transition between "map with markers" and "full image view" uses a right-side panel rather than a modal overlay on desktop. This keeps spatial context while viewing a photo.
 - Filter controls float above the map as a compact toolbar, not as a sidebar that competes with map space.
 
 ### 2.2 iNaturalist (`inaturalist.org/observations`)
+
 **What it does:** nature observation mapping with user-uploaded photos and taxonomy metadata.  
 **Why it is relevant:** photo+metadata+map combination with filter panel and gallery view.  
 **Design takeaways:**
+
 - Shows observations as a dual view: map on the left, card grid on the right. Both update simultaneously as filters change.
 - Filter panel uses clear, grouped controls (date slider, category chips, keyword search) — a good model for GeoSite's time/project/metadata filter grouping.
 - Each card in the grid shows: thumbnail, time, location name, uploader name, and one primary tag — no more. GeoSite's thumbnail cards should follow the same density.
 - Active filter chips appear as a persistent strip above the results. Users see what is currently applied without opening the filter panel.
 
 ### 2.3 Windy.com
+
 **What it does:** meteorological map visualization with layered data overlays.  
 **Why it is relevant:** best-in-class example of a data-rich dark-map app with minimal chrome.  
 **Design takeaways:**
+
 - The main UI is almost entirely the map. All controls collapse to a thin sidebar and a single toolbar row.
 - Dark mode map tile (`--color-bg-map`) bleeds to the edge of the screen; UI panels float above it on a slightly lighter surface with a very subtle border.
 - The "active layer" concept — clicking a data point opens an inline card that sticks to the map rather than navigating away — is the pattern GeoSite uses for image detail cards.
 - Icon-only toolbar with tooltips on hover: appropriate for expert users (technicians using the app repeatedly). Labels on first-use onboarding is sufficient.
 
 ### 2.4 Google Maps (Mobile Web)
+
 **What it does:** ubiquitous maps, marker taps, bottom sheets.  
 **Why it is relevant:** defines user expectations for bottom-sheet map interactions on mobile.  
 **Design takeaways:**
+
 - Bottom sheet with three snap points: minimized (handle only), half-screen, full-screen. The map remains interactive in all but the full-screen state.
 - Search bar is always visible at the top of the screen, even when the bottom sheet is expanded. GeoSite's search bar stays pinned to the top in mobile layout.
 - Place cards animate upward from a minimized state to a full detail view — this pattern maps directly to GeoSite's image detail on mobile (tapping a marker expands the bottom sheet to half-height, revealing the thumbnail and metadata).
 
 ### 2.5 PlanRadar (`planradar.com`)
+
 **What it does:** construction and real estate field documentation platform.  
 **Why it is relevant:** direct domain competitor; solves the same "document a site with photos tied to a location" problem.  
 **Design takeaways:**
+
 - Uses a floor-plan / site-plan overlay rather than a map, but the marker-pin interaction model is identical. This validates the core UX pattern.
 - Prominent "Add issue" / "New report" floating action button in the bottom-right corner on mobile — a pattern GeoSite should consider for the upload trigger.
 - Photo cards in the list view display: thumbnail (left), short description, tag badge (right), and a timestamp — compact but information-rich. Mirror this in GeoSite's thumbnail grid.
 - Status badges on markers use color encoding: useful precedent for GeoSite's corrected-vs-EXIF markers (e.g., a small indicator dot on a marker showing whether it has been manually corrected).
 
 ### 2.6 Procore (`procore.com`) – Photos Module
+
 **What it does:** enterprise construction management; photos module manages site photos by project and location.  
 **Why it is relevant:** mature approach to construction photo organization at scale.  
 **Design takeaways:**
+
 - Album-style group view with project/location breadcrumbs — validates GeoSite's named-group model.
 - "Filter by location, date, trade" sidebar with applied filter chips is a near-exact match for GeoSite's filter panel requirements.
 - Bulk-select mode: tapping a checkbox enters multi-select; a floating action bar appears at the bottom. GeoSite's batch metadata assignment and group-add actions should adopt this pattern.
 - Full-screen image viewer includes: next/prev arrows, metadata panel on the right (collapsible), download button (post-MVP for GeoSite), and a map thumbnail in the corner showing the photo's location.
 
 ### 2.7 Linear (`linear.app`)
+
 **What it does:** project management SaaS with highly regarded UI design.  
 **Why it is relevant:** best living example of dark-mode-first, clean typography and the "sidebar + content + detail" three-panel layout GeoSite uses on desktop.  
 **Design takeaways:**
+
 - Dark surface hierarchy: `--color-bg-base` (deepest), `--color-bg-surface` (+slightly lighter), `--color-bg-elevated` (cards, dropdowns). GeoSite's token system should mirror this three-level surface model.
 - Keyboard shortcuts encouraged throughout; shortcuts are shown inline in tooltips and menus.
 - Monospace font used sparingly for code/IDs; clean sans-serif for all other content.
@@ -119,34 +137,34 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 #### Semantic token hierarchy
 
-| Token | Light value | Dark value | Usage |
-|---|---|---|---|
-| `--color-bg-base` | `#F4F5F7` | `#0D0E12` | Page/app background |
-| `--color-bg-surface` | `#FFFFFF` | `#17191F` | Panels, sidebar, workspace pane |
-| `--color-bg-elevated` | `#FFFFFF` | `#22252E` | Dropdowns, tooltips, modal ovelays |
-| `--color-bg-map` | — (tile) | — (tile) | Map canvas; tile URL swaps on dark mode |
-| `--color-border` | `#E2E5EA` | `#2C303A` | Panel borders, dividers |
-| `--color-border-strong` | `#C4CAD4` | `#3E4452` | Inputs, focused borders |
-| `--color-text-primary` | `#111318` | `#EAECF0` | Headlines, body, labels |
-| `--color-text-secondary` | `#5B6370` | `#8B93A1` | Subtext, timestamps, metadata labels |
-| `--color-text-disabled` | `#A0A8B4` | `#484F5C` | Disabled states |
-| `--color-primary` | `#2563EB` | `#3B82F6` | Primary actions, active markers, focus rings |
-| `--color-primary-hover` | `#1D4ED8` | `#60A5FA` | Hover state for primary |
-| `--color-success` | `#16A34A` | `#22C55E` | Upload success, confirmed correction |
-| `--color-warning` | `#D97706` | `#F59E0B` | Missing GPS, low-confidence EXIF |
-| `--color-danger` | `#DC2626` | `#EF4444` | Upload error, deletion confirmation |
-| `--color-accent` | `#7C3AED` | `#A78BFA` | Named group tabs, badge accents |
+| Token                    | Light value | Dark value | Usage                                        |
+| ------------------------ | ----------- | ---------- | -------------------------------------------- |
+| `--color-bg-base`        | `#F4F5F7`   | `#0D0E12`  | Page/app background                          |
+| `--color-bg-surface`     | `#FFFFFF`   | `#17191F`  | Panels, sidebar, workspace pane              |
+| `--color-bg-elevated`    | `#FFFFFF`   | `#22252E`  | Dropdowns, tooltips, modal ovelays           |
+| `--color-bg-map`         | — (tile)    | — (tile)   | Map canvas; tile URL swaps on dark mode      |
+| `--color-border`         | `#E2E5EA`   | `#2C303A`  | Panel borders, dividers                      |
+| `--color-border-strong`  | `#C4CAD4`   | `#3E4452`  | Inputs, focused borders                      |
+| `--color-text-primary`   | `#111318`   | `#EAECF0`  | Headlines, body, labels                      |
+| `--color-text-secondary` | `#5B6370`   | `#8B93A1`  | Subtext, timestamps, metadata labels         |
+| `--color-text-disabled`  | `#A0A8B4`   | `#484F5C`  | Disabled states                              |
+| `--color-primary`        | `#2563EB`   | `#3B82F6`  | Primary actions, active markers, focus rings |
+| `--color-primary-hover`  | `#1D4ED8`   | `#60A5FA`  | Hover state for primary                      |
+| `--color-success`        | `#16A34A`   | `#22C55E`  | Upload success, confirmed correction         |
+| `--color-warning`        | `#D97706`   | `#F59E0B`  | Missing GPS, low-confidence EXIF             |
+| `--color-danger`         | `#DC2626`   | `#EF4444`  | Upload error, deletion confirmation          |
+| `--color-accent`         | `#7C3AED`   | `#A78BFA`  | Named group tabs, badge accents              |
 
 **Map marker colors (semantic):**
 
-| State | Color token | Meaning |
-|---|---|---|
-| Default | `--color-primary` | Normal EXIF-placed image |
-| Corrected | `--color-accent` | Marker has been manually corrected |
-| Selected | `#FFFFFF` with primary ring | Currently active/selected marker |
-| Pending upload | `--color-warning` | In upload queue, not yet saved |
-| Error | `--color-danger` | Upload failed |
-| Cluster | `--color-bg-elevated` with `--color-text-primary` badge | Aggregated cluster |
+| State          | Color token                                             | Meaning                            |
+| -------------- | ------------------------------------------------------- | ---------------------------------- |
+| Default        | `--color-primary`                                       | Normal EXIF-placed image           |
+| Corrected      | `--color-accent`                                        | Marker has been manually corrected |
+| Selected       | `#FFFFFF` with primary ring                             | Currently active/selected marker   |
+| Pending upload | `--color-warning`                                       | In upload queue, not yet saved     |
+| Error          | `--color-danger`                                        | Upload failed                      |
+| Cluster        | `--color-bg-elevated` with `--color-text-primary` badge | Aggregated cluster                 |
 
 #### Dark mode tile layers
 
@@ -166,15 +184,15 @@ font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 
 **Type scale (rem, base 16px):**
 
-| Role | Token | Size | Weight | Line-height | Usage |
-|---|---|---|---|---|---|
-| Display | `--text-display` | 1.5rem (24px) | 600 | 1.3 | Panel headings, empty state titles |
-| Heading 1 | `--text-h1` | 1.25rem (20px) | 600 | 1.35 | Group tab names, modal headers |
-| Heading 2 | `--text-h2` | 1rem (16px) | 600 | 1.4 | Section labels, filter group headers |
-| Body | `--text-body` | 0.9375rem (15px) | 400 | 1.55 | Descriptions, metadata values, form labels |
-| Small | `--text-small` | 0.8125rem (13px) | 400 | 1.5 | Timestamps, subtitles, secondary labels |
-| Caption | `--text-caption` | 0.75rem (12px) | 400 | 1.4 | Badge text, cluster counts, hints |
-| Mono / ID | `--text-mono` | 0.8125rem (13px) | 400 | 1.4 | Coordinates, UUIDs, file names |
+| Role      | Token            | Size             | Weight | Line-height | Usage                                      |
+| --------- | ---------------- | ---------------- | ------ | ----------- | ------------------------------------------ |
+| Display   | `--text-display` | 1.5rem (24px)    | 600    | 1.3         | Panel headings, empty state titles         |
+| Heading 1 | `--text-h1`      | 1.25rem (20px)   | 600    | 1.35        | Group tab names, modal headers             |
+| Heading 2 | `--text-h2`      | 1rem (16px)      | 600    | 1.4         | Section labels, filter group headers       |
+| Body      | `--text-body`    | 0.9375rem (15px) | 400    | 1.55        | Descriptions, metadata values, form labels |
+| Small     | `--text-small`   | 0.8125rem (13px) | 400    | 1.5         | Timestamps, subtitles, secondary labels    |
+| Caption   | `--text-caption` | 0.75rem (12px)   | 400    | 1.4         | Badge text, cluster counts, hints          |
+| Mono / ID | `--text-mono`    | 0.8125rem (13px) | 400    | 1.4         | Coordinates, UUIDs, file names             |
 
 Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is never below 15px.
 
@@ -184,44 +202,44 @@ GeoSite uses a **4px base unit** with a Tailwind-standard scale (4, 8, 12, 16, 2
 
 Key layout dimensions:
 
-| Element | Value |
-|---|---|
-| Sidebar width (collapsed) | 48px |
-| Sidebar width (expanded) | 240px |
-| Workspace pane width (default) | 360px |
-| Workspace pane width (min) | 280px |
-| Workspace pane width (max) | 640px |
-| Top toolbar height | 56px |
+| Element                          | Value               |
+| -------------------------------- | ------------------- |
+| Sidebar width (collapsed)        | 48px                |
+| Sidebar width (expanded)         | 240px               |
+| Workspace pane width (default)   | 360px               |
+| Workspace pane width (min)       | 280px               |
+| Workspace pane width (max)       | 640px               |
+| Top toolbar height               | 56px                |
 | Bottom sheet (min / half / full) | 64px / 50vh / 100vh |
-| Map padding (viewport pre-fetch) | 10% on each edge |
-| Filter panel width (desktop) | 280px |
-| Thumbnail size (grid) | 128×128px |
-| Thumbnail size (list) | 64×64px |
-| Tap target minimum (mobile) | 48×48px |
-| Tap target minimum (desktop) | 44×44px |
+| Map padding (viewport pre-fetch) | 10% on each edge    |
+| Filter panel width (desktop)     | 280px               |
+| Thumbnail size (grid)            | 128×128px           |
+| Thumbnail size (list)            | 64×64px             |
+| Tap target minimum (mobile)      | 48×48px             |
+| Tap target minimum (desktop)     | 44×44px             |
 
 ### 3.4 Border Radius
 
 The UI uses a consistent "friendly but professional" radius system:
 
-| Element | Radius |
-|---|---|
-| Cards, panels, workspace pane | `rounded-xl` (12px) |
-| Buttons, inputs, dropdowns | `rounded-lg` (8px) |
-| Chips, badges, tags | `rounded-full` |
-| Thumbnails in grid | `rounded-md` (6px) |
+| Element                       | Radius                   |
+| ----------------------------- | ------------------------ |
+| Cards, panels, workspace pane | `rounded-xl` (12px)      |
+| Buttons, inputs, dropdowns    | `rounded-lg` (8px)       |
+| Chips, badges, tags           | `rounded-full`           |
+| Thumbnails in grid            | `rounded-md` (6px)       |
 | Map overlays / floating cards | `rounded-xl` with shadow |
-| Modals | `rounded-2xl` (16px) |
+| Modals                        | `rounded-2xl` (16px)     |
 
 ### 3.5 Shadows and Elevation
 
 Three elevation levels, used consistently:
 
-| Level | Token | Usage |
-|---|---|---|
-| Low | `shadow-sm` | Toolbar separators, subtle panel lift |
-| Medium | `shadow-md` | Floating panels, filter drawer |
-| High | `shadow-xl` | Modals, image detail overlay, dropdowns |
+| Level  | Token       | Usage                                   |
+| ------ | ----------- | --------------------------------------- |
+| Low    | `shadow-sm` | Toolbar separators, subtle panel lift   |
+| Medium | `shadow-md` | Floating panels, filter drawer          |
+| High   | `shadow-xl` | Modals, image detail overlay, dropdowns |
 
 In dark mode, shadows are less visible — increase surface contrast (`--color-bg-elevated` vs `--color-bg-surface`) to compensate.
 
@@ -230,6 +248,7 @@ In dark mode, shadows are less visible — increase surface contrast (`--color-b
 Use a single coherent icon set throughout. Default: **Lucide Icons** (MIT licensed, clean, consistent stroke width).
 
 Icon sizing conventions:
+
 - Toolbar / navigation: 20px
 - Inline with text: 16px
 - Large actions (FAB, empty states): 32–40px
@@ -298,6 +317,7 @@ All interactive icons must have a visible label or a `title` / `aria-label` attr
 ### 5.1 Map Marker
 
 A custom SVG pin, not a default Leaflet marker. Anatomy:
+
 - **Pin body:** drop-shaped, filled with the semantic marker color (`--color-primary` by default).
 - **Inner icon:** a small photo icon (16×16) centered in the pin body. Acts as a visual affordance that this is a photo, not a generic map pin.
 - **Correction indicator:** a small dot in `--color-accent` at the top-right corner, visible only for corrected markers.
@@ -306,6 +326,7 @@ A custom SVG pin, not a default Leaflet marker. Anatomy:
 Marker tap/click area is extended to 48×48px via a transparent hit zone, regardless of the visual pin size (32×40px). On desktop, a hover state elevates the marker (scale 1.15, `transition: transform 120ms ease-out`).
 
 **Cluster:**
+
 - A circle of radius 20–36px (scales logarithmically with cluster size).
 - Background: `--color-bg-elevated`, border: `--color-border-strong`, 2px.
 - Count badge: `--text-caption`, `--color-text-primary`.
@@ -316,6 +337,7 @@ Marker tap/click area is extended to 48×48px via a transparent hit zone, regard
 The filter panel is a grouped accordion. Each group has a header with a collapse chevron and a live "active count" badge that shows how many values are currently selected.
 
 Groups (in order):
+
 1. **Time range** — dual date picker (from / to). "Last 7 days", "Last 30 days", "Last year" quick presets.
 2. **Project** — multi-select checkboxes with search input. Max 5 visible; scroll for more.
 3. **Metadata** — key/value pair builder. Select a key from a dropdown (autocompletes from org keys), enter a value (autocompletes from existing values for that key).
@@ -327,6 +349,7 @@ Filter panel animation: slides in from the top-right (desktop) or bottom (mobile
 ### 5.3 Workspace Pane — Group Tabs
 
 The workspace pane header is a scrollable tab row. Tab types:
+
 - **Active Selection** (pinned left, ephemeral): shows images from the current radius selection or marker interaction. Icon: crosshair. Cannot be renamed or closed.
 - **Named group tabs** (scrollable): user-created groups. Each tab shows a group name. Long-press → rename/delete context menu.
 
@@ -335,6 +358,7 @@ Tab overflow: if more than 5 named groups exist, tabs become horizontally scroll
 Within each tab, the gallery is a responsive masonry or fixed-grid of thumbnail cards:
 
 **Thumbnail card:**
+
 - 128×128px thumbnail (object-cover).
 - Bottom-left: capture date in `--text-caption` on a semi-transparent dark scrim.
 - Bottom-right: project badge (short name, colored chip in `--color-accent` or project-assigned color).
@@ -350,6 +374,7 @@ Desktop: inline in the workspace pane (replaces the gallery, back arrow to retur
 Mobile: full-screen overlay (back button top-left).
 
 Layout:
+
 ```
 ┌─────────────────────────────────────────────┐
 │ ← Back                              [Actions ⋯] │
@@ -412,6 +437,7 @@ Each step is a distinct scrollable screen within the upload sheet. Progress pers
 ### 5.6 Radius Selection Circle
 
 When the technician long-presses (mobile) or right-click-drags (desktop) the map:
+
 - A blue semi-transparent circle expands from the press point.
 - The circle border is `--color-primary` at 60% opacity, 2px dashed stroke.
 - The fill is `--color-primary` at 10% opacity.
@@ -422,6 +448,7 @@ When the technician long-presses (mobile) or right-click-drags (desktop) the map
 ### 5.7 Empty States
 
 Each empty state includes:
+
 - A centered illustration (line-art, matches the current light/dark theme).
 - A primary message in `--text-display`.
 - A secondary explanation in `--text-body`, `--color-text-secondary`.
@@ -429,12 +456,12 @@ Each empty state includes:
 
 **Examples:**
 
-| Context | Message | Action |
-|---|---|---|
-| No images in viewport | "Nothing here yet" + "Try expanding the radius or adjusting your filters." | "Clear filters" |
-| Empty group tab | "This group is empty" + "Add images by selecting them on the map." | "Go to map" |
-| No search results | "No address found" + "Try a different address or pin a location manually." | "Drop pin manually" |
-| First login (no uploads) | "Welcome to GeoSite" + "Start by uploading your first site photos." | "Upload photos" |
+| Context                  | Message                                                                    | Action              |
+| ------------------------ | -------------------------------------------------------------------------- | ------------------- |
+| No images in viewport    | "Nothing here yet" + "Try expanding the radius or adjusting your filters." | "Clear filters"     |
+| Empty group tab          | "This group is empty" + "Add images by selecting them on the map."         | "Go to map"         |
+| No search results        | "No address found" + "Try a different address or pin a location manually." | "Drop pin manually" |
+| First login (no uploads) | "Welcome to GeoSite" + "Start by uploading your first site photos."        | "Upload photos"     |
 
 ---
 
@@ -442,15 +469,15 @@ Each empty state includes:
 
 All motion serves clarity or orientation — no decorative animation.
 
-| Interaction | Effect | Duration | Easing |
-|---|---|---|---|
-| Panel slide in/out (desktop) | `transform: translateX` | 200ms | `ease-out` |
-| Bottom sheet snap (mobile) | `transform: translateY` | 250ms | `cubic-bezier(0.4, 0, 0.2, 1)` |
-| Marker appear (map load) | `opacity: 0→1`, slight upward translate | 150ms | `ease-out` (staggered by 30ms per batch) |
-| Marker tap (highlight) | `scale: 1→1.2→1.1` | 200ms | spring-like `ease-in-out` |
-| Thumbnail load | `opacity: 0→1` from placeholder blur | 300ms | `ease-out` |
-| Filter chip add/remove | `opacity + max-width` (chip appear/collapse) | 180ms | `ease-in-out` |
-| Page navigation | No full-page transitions; panels update in place | — | — |
+| Interaction                  | Effect                                           | Duration | Easing                                   |
+| ---------------------------- | ------------------------------------------------ | -------- | ---------------------------------------- |
+| Panel slide in/out (desktop) | `transform: translateX`                          | 200ms    | `ease-out`                               |
+| Bottom sheet snap (mobile)   | `transform: translateY`                          | 250ms    | `cubic-bezier(0.4, 0, 0.2, 1)`           |
+| Marker appear (map load)     | `opacity: 0→1`, slight upward translate          | 150ms    | `ease-out` (staggered by 30ms per batch) |
+| Marker tap (highlight)       | `scale: 1→1.2→1.1`                               | 200ms    | spring-like `ease-in-out`                |
+| Thumbnail load               | `opacity: 0→1` from placeholder blur             | 300ms    | `ease-out`                               |
+| Filter chip add/remove       | `opacity + max-width` (chip appear/collapse)     | 180ms    | `ease-in-out`                            |
+| Page navigation              | No full-page transitions; panels update in place | —        | —                                        |
 
 `prefers-reduced-motion: reduce` disables all transforms and fades, keeping only immediate state changes.
 
@@ -486,11 +513,11 @@ Dark mode is first-class, not an afterthought. Every component ships with dark-m
 
 ## 9. Responsive Behavior Quick Reference
 
-| Breakpoint | Map | Workspace | Filters | Sidebar | Upload |
-|---|---|---|---|---|---|
-| Mobile `< 768px` | Full bleed | Bottom sheet (3 snaps) | Bottom modal | Hamburger | FAB (bottom-right) |
-| Tablet `768–1023px` | Full width | Slide-over drawer | Sheet | Icon-only sidebar | Toolbar button |
-| Desktop `≥ 1024px` | Left pane, fills remaining | Right pane (360px, resizable) | Drops from toolbar | Left sidebar (collapsible) | Toolbar button |
+| Breakpoint          | Map                        | Workspace                     | Filters            | Sidebar                    | Upload             |
+| ------------------- | -------------------------- | ----------------------------- | ------------------ | -------------------------- | ------------------ |
+| Mobile `< 768px`    | Full bleed                 | Bottom sheet (3 snaps)        | Bottom modal       | Hamburger                  | FAB (bottom-right) |
+| Tablet `768–1023px` | Full width                 | Slide-over drawer             | Sheet              | Icon-only sidebar          | Toolbar button     |
+| Desktop `≥ 1024px`  | Left pane, fills remaining | Right pane (360px, resizable) | Drops from toolbar | Left sidebar (collapsible) | Toolbar button     |
 
 ---
 
