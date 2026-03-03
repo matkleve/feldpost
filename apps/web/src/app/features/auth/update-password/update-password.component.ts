@@ -16,49 +16,49 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
-  const password = control.get('password')?.value;
-  const confirm = control.get('confirmPassword')?.value;
-  return password === confirm ? null : { passwordsMismatch: true };
+    const password = control.get('password')?.value;
+    const confirm = control.get('confirmPassword')?.value;
+    return password === confirm ? null : { passwordsMismatch: true };
 }
 
 @Component({
-  selector: 'app-update-password',
-  imports: [ReactiveFormsModule],
-  templateUrl: './update-password.component.html',
-  styleUrl: './update-password.component.scss',
+    selector: 'app-update-password',
+    imports: [ReactiveFormsModule],
+    templateUrl: './update-password.component.html',
+    styleUrl: './update-password.component.scss',
 })
 export class UpdatePasswordComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
+    private readonly fb = inject(FormBuilder);
+    private readonly auth = inject(AuthService);
+    private readonly router = inject(Router);
 
-  protected readonly form = this.fb.nonNullable.group(
-    {
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required],
-    },
-    { validators: passwordsMatch },
-  );
+    protected readonly form = this.fb.nonNullable.group(
+        {
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            confirmPassword: ['', Validators.required],
+        },
+        { validators: passwordsMatch },
+    );
 
-  protected readonly loading = signal(false);
-  protected readonly errorMessage = signal<string | null>(null);
+    protected readonly loading = signal(false);
+    protected readonly errorMessage = signal<string | null>(null);
 
-  protected async submit(): Promise<void> {
-    if (this.form.invalid) return;
+    protected async submit(): Promise<void> {
+        if (this.form.invalid) return;
 
-    this.loading.set(true);
-    this.errorMessage.set(null);
+        this.loading.set(true);
+        this.errorMessage.set(null);
 
-    const { password } = this.form.getRawValue();
-    const { error } = await this.auth.updatePassword(password);
+        const { password } = this.form.getRawValue();
+        const { error } = await this.auth.updatePassword(password);
 
-    if (error) {
-      this.errorMessage.set(error.message);
-      this.loading.set(false);
-      return;
+        if (error) {
+            this.errorMessage.set(error.message);
+            this.loading.set(false);
+            return;
+        }
+
+        // Recovery session is now consumed — redirect to login
+        this.router.navigate(['/auth/login']);
     }
-
-    // Recovery session is now consumed — redirect to login
-    this.router.navigate(['/auth/login']);
-  }
 }

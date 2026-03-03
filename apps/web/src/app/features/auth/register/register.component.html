@@ -3,7 +3,10 @@
     @if (success()) {
       <div class="auth-success">
         <h1 class="auth-title">Check your email</h1>
-        <p>We sent a confirmation link to <strong>{{ form.controls.email.value }}</strong>. Click it to activate your account.</p>
+        <p>
+          We sent a confirmation link to <strong>{{ form.controls.email.value }}</strong
+          >. Click it to activate your account.
+        </p>
         <p class="auth-footer"><a routerLink="/auth/login">Back to sign in</a></p>
       </div>
     } @else {
@@ -79,13 +82,15 @@
         }
 
         <button type="submit" class="btn-primary" [disabled]="loading()">
-          @if (loading()) { Creating account… } @else { Create account }
+          @if (loading()) {
+            Creating account…
+          } @else {
+            Create account
+          }
         </button>
       </form>
 
-      <p class="auth-footer">
-        Already have an account? <a routerLink="/auth/login">Sign in</a>
-      </p>
+      <p class="auth-footer">Already have an account? <a routerLink="/auth/login">Sign in</a></p>
     }
   </div>
 </div>

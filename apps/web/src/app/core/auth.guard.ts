@@ -21,22 +21,22 @@ import { AuthService } from './auth.service';
  * Used internally by both guards.
  */
 function waitForAuth(): Promise<{ session: ReturnType<AuthService['session']>; router: Router }> {
-  const auth = inject(AuthService);
-  const router = inject(Router);
+    const auth = inject(AuthService);
+    const router = inject(Router);
 
-  return new Promise((resolve) => {
-    if (!auth.loading()) {
-      resolve({ session: auth.session, router });
-      return;
-    }
-    // loading is true — wait for it to flip to false
-    toObservable(auth.loading)
-      .pipe(
-        filter((loading) => !loading),
-        take(1),
-      )
-      .subscribe(() => resolve({ session: auth.session, router }));
-  });
+    return new Promise((resolve) => {
+        if (!auth.loading()) {
+            resolve({ session: auth.session, router });
+            return;
+        }
+        // loading is true — wait for it to flip to false
+        toObservable(auth.loading)
+            .pipe(
+                filter((loading) => !loading),
+                take(1),
+            )
+            .subscribe(() => resolve({ session: auth.session, router }));
+    });
 }
 
 /**
@@ -44,14 +44,14 @@ function waitForAuth(): Promise<{ session: ReturnType<AuthService['session']>; r
  * Usage: canActivate: [authGuard]
  */
 export const authGuard: CanActivateFn = async () => {
-  const { session, router } = await waitForAuth();
+    const { session, router } = await waitForAuth();
 
-  if (session()) {
-    return true;
-  }
+    if (session()) {
+        return true;
+    }
 
-  // Redirect to login, preserving nothing — user must re-authenticate
-  return router.createUrlTree(['/auth/login']);
+    // Redirect to login, preserving nothing — user must re-authenticate
+    return router.createUrlTree(['/auth/login']);
 };
 
 /**
@@ -59,12 +59,12 @@ export const authGuard: CanActivateFn = async () => {
  * Usage: canActivate: [guestGuard]
  */
 export const guestGuard: CanActivateFn = async () => {
-  const { session, router } = await waitForAuth();
+    const { session, router } = await waitForAuth();
 
-  if (!session()) {
-    return true;
-  }
+    if (!session()) {
+        return true;
+    }
 
-  // Already logged in — go to the main app
-  return router.createUrlTree(['/']);
+    // Already logged in — go to the main app
+    return router.createUrlTree(['/']);
 };

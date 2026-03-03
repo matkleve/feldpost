@@ -46,12 +46,14 @@
 
       <!-- Submit -->
       <button type="submit" class="btn-primary" [disabled]="loading()">
-        @if (loading()) { Signing in… } @else { Sign in }
+        @if (loading()) {
+          Signing in…
+        } @else {
+          Sign in
+        }
       </button>
     </form>
 
-    <p class="auth-footer">
-      Don't have an account? <a routerLink="/auth/register">Create one</a>
-    </p>
+    <p class="auth-footer">Don't have an account? <a routerLink="/auth/register">Create one</a></p>
   </div>
 </div>
