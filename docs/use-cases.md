@@ -7,6 +7,78 @@ See `project-description.md` for the high-level vision and `features.md` for the
 
 ---
 
+## Personas
+
+These personas describe the primary human actors in GeoSite. Each use case references one or more of them. Personas provide realistic context for why actors behave as they do — they are not user stories.
+
+---
+
+### Persona: Technician
+
+**Real-world context:** A field worker employed by a construction or maintenance company. Works on-site, often without reliable internet. Uses a smartphone in varying conditions — direct sunlight, wet gloves, awkward angles. Their primary question when arriving at a location is: *"What has been done here before?"* They are not interested in folder navigation or system administration.
+
+**Device:** Smartphone (iOS or Android). Occasionally a ruggedized tablet.  
+**Connectivity:** Intermittent. May have weak LTE, a Wi-Fi hotspot, or nothing at all in basements or remote sites.  
+**Technical literacy:** Moderate. Comfortable with mobile apps; not comfortable with SQL, admin UIs, or file systems.  
+
+**Primary goals:**
+- Find historical photos of the site they are currently standing on, ordered by proximity and recency.
+- Upload new photos from the field and confirm correct map placement.
+- Correct GPS drift without losing the original EXIF reading.
+
+**Frustrations:**
+- Folder-navigation systems that require knowing the exact file path or project code.
+- Apps that fail silently when GPS is off or imprecise.
+- Upload flows that lose metadata, give no feedback, or require desktop follow-up.
+
+**Primary use cases:** UC1, UC3.
+
+---
+
+### Persona: Clerk
+
+**Real-world context:** An office-based employee responsible for preparing quotes, material estimates, and project reports. Works at a desktop browser with stable connectivity. Has read access to multiple projects and needs to cross-reference historical site imagery when pricing or planning new work. Does not normally upload images.
+
+**Device:** Desktop or laptop, modern browser.  
+**Connectivity:** Reliable office or home Wi-Fi.  
+**Technical literacy:** Moderate. Fluent in web apps and spreadsheets; not a developer.
+
+**Primary goals:**
+- Search historical images by address, project, time range, and material/metadata values.
+- Review image detail and site condition without navigating complex folder trees.
+- Build enough visual context to produce a confident, documented quote.
+
+**Frustrations:**
+- Retrieval systems that require knowing exact folder paths or project codes from memory.
+- Slow image loads when reviewing many sites in sequence.
+- Losing context (filter state, viewport position) when switching between images.
+
+**Primary use cases:** UC2.
+
+---
+
+### Persona: Admin
+
+**Real-world context:** A lead engineer, IT contact, or team lead responsible for access management. Understands team structure and project boundaries but is not necessarily a database administrator. Manages who can access what, sets up new team members, and troubleshoots permission issues. May use both the GeoSite admin UI and the Supabase dashboard depending on the task.
+
+**Device:** Desktop browser; may also use Supabase dashboard directly.  
+**Connectivity:** Reliable.  
+**Technical literacy:** High. Comfortable with admin UIs, role models, and — when necessary — SQL consoles.
+
+**Primary goals:**
+- Grant or revoke elevated roles for team members without direct DB intervention.
+- Understand at a glance who has access to which projects and images.
+- Ensure new team members are correctly provisioned and existing ones are cleanly offboarded.
+
+**Frustrations:**
+- Permission systems that require a developer for every role change.
+- Role models that are undocumented or opaque to non-developers.
+- No audit trail or history of access changes.
+
+**Primary use cases:** UC4.
+
+---
+
 ## MVP Boundary
 
 - In scope for MVP: UC1, UC2, UC3, UC4.
@@ -20,7 +92,7 @@ See `project-description.md` for the high-level vision and `features.md` for the
 See relevant historical images for the exact spot the technician is currently standing on, without guessing folder names.
 
 **Actors**  
-- Technician (role: `user`)
+- Technician (role: `user`) — see [Persona: Technician](#persona-technician)
 
 **Preconditions**
 
@@ -58,7 +130,7 @@ See relevant historical images for the exact spot the technician is currently st
 Use historical images to estimate work and materials for a new quote.
 
 **Actors**  
-- Clerk (role: `user` or `viewer`)
+- Clerk (role: `user` or `viewer`) — see [Persona: Clerk](#persona-clerk)
 
 **Preconditions**
 
@@ -98,7 +170,7 @@ Use historical images to estimate work and materials for a new quote.
 Upload a new photo from the field and correct its position if EXIF coordinates are off.
 
 **Actors**  
-- Technician (role: `user`)
+- Technician (role: `user`) — see [Persona: Technician](#persona-technician)
 
 **Preconditions**
 
@@ -138,7 +210,7 @@ Upload a new photo from the field and correct its position if EXIF coordinates a
 Grant or revoke elevated access for certain users (e.g., to act as admins).
 
 **Actors**  
-- Admin (role: `admin`)
+- Admin (role: `admin`) — see [Persona: Admin](#persona-admin)
 
 **Preconditions**
 
@@ -168,7 +240,7 @@ Grant or revoke elevated access for certain users (e.g., to act as admins).
 Quickly anchor a new upload or marker at an arbitrary point on the map, even if there is no existing address match or EXIF data.
 
 **Actors**  
-- Technician or clerk (role: `user` / `viewer`), post‑MVP.
+- Technician or clerk (role: `user` / `viewer`), post‑MVP — see [Persona: Technician](#persona-technician) and [Persona: Clerk](#persona-clerk).
 
 **Preconditions**
 

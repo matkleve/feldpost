@@ -166,6 +166,77 @@ For MVP:
 
 ---
 
+## D8 – Map Rendering as a Swappable Adapter
+
+**Context**  
+GeoSite's map is a core UI surface. Leaflet + OpenStreetMap is a solid default, but tile providers, licensing constraints, and feature requirements can change. Coupling Angular components directly to Leaflet would make a future swap expensive and risky.
+
+**Decision**  
+Abstract map rendering behind a `MapAdapter` interface:
+
+- Angular components interact only with `MapAdapter` (injected via Angular DI token).
+- Default implementation: `LeafletOSMAdapter` (Leaflet + OpenStreetMap tiles).
+- Tile-provider-specific config (URLs, API keys, attribution) lives entirely inside the adapter.
+- `MapAdapter` exposes a `setTileStyle('light' | 'dark')` method so the theming layer can request dark tiles without knowing the provider.
+
+**Consequences**
+
+- Swapping the map provider requires only replacing the adapter and updating the DI registration. No component changes.
+- Leaflet is the default and there is no active plan to change it; the boundary prevents lock-in, not churn.
+- The interface must not expose Leaflet-specific types in its public contract (e.g., `L.LatLng`). Use plain `{ lat, lng }` objects.
+
+See `architecture.md` sections 3 and 6.
+
+---
+
+## D9 – Tailwind CSS with First-Class Dark Mode
+
+**Context**  
+GeoSite is a field-facing tool used in varied lighting conditions. Dark mode is a real ergonomic requirement for technicians working at night or in low-light environments, not a cosmetic option. Without a deliberate theming architecture, dark mode tends to be bolted on late and incompletely.
+
+**Decision**  
+Use Tailwind CSS as the sole styling foundation with first-class dark mode support:
+
+- Configure Tailwind with `darkMode: 'class'` for explicit, JavaScript-controlled activation.
+- Manage the `dark` class on `<html>` via an Angular `ThemeService` that persists preference to `localStorage`.
+- Define all brand colors, surfaces, and text tokens as CSS custom properties so they can be overridden at runtime.
+- Every component ships with both light and `dark:` variants. Shipping without dark mode is a defect.
+
+**Consequences**
+
+- Tailwind's JIT compiler keeps the CSS bundle small regardless of token count.
+- No CSS-in-JS or separate theming library is needed.
+- The CSS custom property contract is the stable surface for theming; component classes change freely as long as the tokens are honored.
+- Designers and engineers must coordinate on the token set; ad-hoc color usage is prohibited.
+
+See `architecture.md` section 7.
+
+---
+
+## D10 – Provider-Agnostic Image Input Layer
+
+**Context**  
+MVP requires local device upload. Google Drive import is a high-priority near-term request. Without an abstraction, adding Google Drive (or any future source) would require modifying the ingestion pipeline — the most sensitive part of the write path.
+
+**Decision**  
+Abstract all image input sources behind an `ImageInputAdapter` interface:
+
+- The core ingestion pipeline (EXIF parse → Supabase Storage upload → DB record write) depends only on `ImageInputAdapter`, never on a concrete adapter.
+- Default implementation: `LocalUploadAdapter` (browser `<input type="file">`).
+- Post-MVP: `GoogleDriveAdapter` (Drive Picker API) is a drop-in replacement or parallel option.
+- Adding new sources requires implementing the interface and registering in DI. Zero changes to ingestion logic.
+
+**Consequences**
+
+- The ingestion pipeline is testable in isolation with a mock adapter.
+- Google Drive and future sources are genuinely isolated from the upload UI and core logic.
+- The adapter interface must stay narrow; source-specific metadata (e.g., Drive file ID) goes into `ImageInputMetadata`'s open extension field, not into the interface contract.
+- MVP ships with only `LocalUploadAdapter`; `GoogleDriveAdapter` is not a gate for MVP release.
+
+See `architecture.md` section 5.
+
+---
+
 ## Adding New Decisions
 
 When you introduce a change that:
