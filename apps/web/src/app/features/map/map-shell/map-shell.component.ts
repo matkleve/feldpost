@@ -28,6 +28,7 @@ import * as L from 'leaflet';
 import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel/upload-panel.component';
 import { ExifCoords } from '../../../core/upload.service';
 import { AuthService } from '../../../core/auth.service';
+import { SupabaseService } from '../../../core/supabase.service';
 
 const RECENT_SEARCH_STORAGE_PREFIX = 'sitesnap_recent_searches_';
 const RECENT_SEARCH_STORAGE_LIMIT = 8;
@@ -75,6 +76,7 @@ export interface NominatimResult {
 })
 export class MapShellComponent implements OnDestroy {
     private readonly authService = inject(AuthService);
+    private readonly supabaseService = inject(SupabaseService);
 
     /** Reference to the Leaflet map container div. */
     private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -149,6 +151,8 @@ export class MapShellComponent implements OnDestroy {
         string,
         { marker: L.Marker; count: number; thumbnailUrl?: string }
     >();
+
+    private readonly initialPhotoMarkerLimit = 500;
 
     constructor() {
         this.loadRecentSearches();
@@ -530,19 +534,11 @@ export class MapShellComponent implements OnDestroy {
 
         // Request user GPS position; fall back to Vienna if denied.
         this.initGeolocation();
+        void this.loadInitialPhotoMarkers();
 
-        // Map click handler: places images that had no GPS EXIF data.
-        this.map.on('click', (e: L.LeafletMouseEvent) => {
-            if (!this.pendingPlacementKey) return;
-            const coords: ExifCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
-            const panel = this.uploadPanelChild();
-            if (panel) {
-                panel.placeFile(this.pendingPlacementKey, coords);
-            }
-            this.pendingPlacementKey = null;
-            this.placementActive.set(false);
-            this.map?.getContainer().classList.remove('map-container--placing');
-        });
+        // Map click handler: closes upload panel and, when active, places images
+        // that had no GPS EXIF data.
+        this.map.on('click', (e: L.LeafletMouseEvent) => this.handleMapClick(e));
 
     }
 
@@ -567,6 +563,19 @@ export class MapShellComponent implements OnDestroy {
         const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
         this.map?.setView(coords, zoom);
         return true;
+    }
+
+    private handleMapClick(e: L.LeafletMouseEvent): void {
+        this.uploadPanelPinned.set(false);
+        if (!this.pendingPlacementKey) return;
+        const coords: ExifCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+        const panel = this.uploadPanelChild();
+        if (panel) {
+            panel.placeFile(this.pendingPlacementKey, coords);
+        }
+        this.pendingPlacementKey = null;
+        this.placementActive.set(false);
+        this.map?.getContainer().classList.remove('map-container--placing');
     }
 
     private renderOrUpdateUserLocationMarker(coords: [number, number]): void {
@@ -645,6 +654,75 @@ export class MapShellComponent implements OnDestroy {
             count: 1,
             thumbnailUrl: event.thumbnailUrl,
         });
+    }
+
+    private async loadInitialPhotoMarkers(): Promise<void> {
+        if (!this.map) return;
+
+        const { data, error } = await this.supabaseService.client
+            .from('images')
+            .select('id, latitude, longitude, thumbnail_path, storage_path, created_at')
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null)
+            .order('created_at', { ascending: false })
+            .limit(this.initialPhotoMarkerLimit);
+
+        if (error || !data || data.length === 0) return;
+
+        type ImageMarkerRow = {
+            id: string;
+            latitude: number;
+            longitude: number;
+            thumbnail_path: string | null;
+            storage_path: string;
+            created_at: string;
+        };
+
+        const grouped = new Map<string, { rows: ImageMarkerRow[]; lat: number; lng: number }>();
+
+        for (const row of data as ImageMarkerRow[]) {
+            if (typeof row.latitude !== 'number' || typeof row.longitude !== 'number') continue;
+            const key = this.toMarkerKey(row.latitude, row.longitude);
+            const existing = grouped.get(key);
+            if (existing) {
+                existing.rows.push(row);
+                continue;
+            }
+
+            grouped.set(key, {
+                rows: [row],
+                lat: row.latitude,
+                lng: row.longitude,
+            });
+        }
+
+        for (const [key, group] of grouped) {
+            const count = group.rows.length;
+            let thumbnailUrl: string | undefined;
+
+            if (count === 1) {
+                const sourcePath = group.rows[0].thumbnail_path ?? group.rows[0].storage_path;
+                const signed = await this.supabaseService.client.storage
+                    .from('images')
+                    .createSignedUrl(sourcePath, 3600);
+
+                if (!signed.error) {
+                    thumbnailUrl = signed.data.signedUrl;
+                }
+            }
+
+            const marker = L.marker([group.lat, group.lng], {
+                icon: this.buildPhotoMarkerIcon(count, thumbnailUrl),
+            })
+                .bindPopup(count === 1 ? `Image uploaded (id: ${group.rows[0].id})` : `${count} images uploaded here`)
+                .addTo(this.map);
+
+            this.uploadedPhotoMarkers.set(key, {
+                marker,
+                count,
+                thumbnailUrl,
+            });
+        }
     }
 
     private buildPhotoMarkerIcon(count: number, thumbnailUrl?: string): L.DivIcon {
