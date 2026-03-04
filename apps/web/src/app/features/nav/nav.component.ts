@@ -41,10 +41,10 @@ export class NavComponent {
     /** Nav items in display order. Items with disabled: true are visually greyed
      *  out and non-interactive — reserved for future features. */
     navItems: NavItem[] = [
-        { icon: 'map',          label: 'Map',      route: '/' },
-        { icon: 'photo_camera', label: 'Photos',   route: '/photos' },
-        { icon: 'folder',       label: 'Groups',   route: '/groups' },
-        { icon: 'settings',     label: 'Settings', route: '/settings' },
+        { icon: 'map', label: 'Map', route: '/' },
+        { icon: 'photo_camera', label: 'Photos', route: '/photos' },
+        { icon: 'folder', label: 'Groups', route: '/groups' },
+        { icon: 'settings', label: 'Settings', route: '/settings' },
     ];
 
     /** First letter of the authenticated user's email, upper-cased.

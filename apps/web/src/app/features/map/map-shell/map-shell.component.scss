@@ -37,10 +37,14 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
-  transition: background 120ms ease-out, transform 120ms ease-out;
+  transition:
+    background 120ms ease-out,
+    transform 120ms ease-out;
   flex-shrink: 0;
 
-  .material-icons { font-size: 1.25rem; }
+  .material-icons {
+    font-size: 1.25rem;
+  }
 
   &:hover {
     background: color-mix(in srgb, var(--color-clay) 80%, var(--color-text-primary));
@@ -121,7 +125,9 @@
     box-shadow: var(--shadow-md);
     transition: border-color 120ms ease-out;
 
-    &::placeholder { color: var(--color-text-disabled); }
+    &::placeholder {
+      color: var(--color-text-disabled);
+    }
 
     &:focus {
       border-color: var(--color-primary);
@@ -179,7 +185,9 @@
     font-size: 0.8125rem;
     transition: background 80ms ease-out;
 
-    &:hover { background: var(--color-bg-base); }
+    &:hover {
+      background: var(--color-bg-base);
+    }
   }
 
   &__item-icon {
@@ -213,9 +221,14 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-md);
-  transition: background 120ms ease-out, color 120ms ease-out, transform 120ms ease-out;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out,
+    transform 120ms ease-out;
 
-  .material-icons { font-size: 1.25rem; }
+  .material-icons {
+    font-size: 1.25rem;
+  }
 
   &:hover {
     background: var(--color-bg-elevated);
@@ -247,7 +260,10 @@
   font-size: 0.875rem;
   white-space: nowrap;
 
-  .material-icons { font-size: 1rem; color: var(--color-warning); }
+  .material-icons {
+    font-size: 1rem;
+    color: var(--color-warning);
+  }
 
   &__cancel {
     padding: 0.125rem var(--spacing-3); // 2px top/bottom
@@ -259,20 +275,24 @@
     cursor: pointer;
     transition: background 80ms ease-out;
 
-    &:hover { background: var(--color-bg-base); }
+    &:hover {
+      background: var(--color-bg-base);
+    }
   }
 }
 
 // ── Drag divider ──────────────────────────────────────────────────────────────
 
 .drag-divider {
-  width: 0.25rem;   // 4px
+  width: 0.25rem; // 4px
   flex-shrink: 0;
   background: var(--color-border);
   cursor: col-resize;
   transition: background 120ms ease-out;
 
-  &:hover { background: var(--color-border-strong); }
+  &:hover {
+    background: var(--color-border-strong);
+  }
 
   @media (max-width: 767px) {
     width: 100%;
@@ -324,7 +344,9 @@
     color: var(--color-text-secondary);
     cursor: pointer;
     border-bottom: 2px solid transparent;
-    transition: color 120ms ease-out, border-color 120ms ease-out;
+    transition:
+      color 120ms ease-out,
+      border-color 120ms ease-out;
     margin-bottom: -1px;
 
     &--active {
@@ -332,7 +354,9 @@
       border-bottom-color: var(--color-primary);
     }
 
-    &:hover { color: var(--color-text-primary); }
+    &:hover {
+      color: var(--color-text-primary);
+    }
   }
 
   &__grid {
@@ -348,4 +372,3 @@
     padding: var(--spacing-6) 0;
   }
 }
-

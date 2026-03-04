@@ -6,44 +6,44 @@
 // ── Light-mode tokens (default) ──────────────────────────────────────────────
 :root {
   // Backgrounds (warm off-whites, never cold grays)
-  --color-bg-base:     #F9F7F4;
-  --color-bg-surface:  #FFFFFF;
-  --color-bg-elevated: #FFFFFF;
+  --color-bg-base: #f9f7f4;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #ffffff;
 
   // Borders
-  --color-border:        #E8E4DE;
-  --color-border-strong: #C8C1B8;
+  --color-border: #e8e4de;
+  --color-border-strong: #c8c1b8;
 
   // Text (warm near-black / warm secondary)
-  --color-text-primary:   #1A1714;
-  --color-text-secondary: #6B6259;
-  --color-text-disabled:  #A89E95;
+  --color-text-primary: #1a1714;
+  --color-text-secondary: #6b6259;
+  --color-text-disabled: #a89e95;
 
   // Brand / semantic
-  --color-primary:       #2563EB;
-  --color-primary-hover: #1D4ED8;
-  --color-success:       #16A34A;
-  --color-warning:       #C2610A;
-  --color-danger:        #DC2626;
-  --color-accent:        #7C3AED;
-  --color-clay:          #CC7A4A; // upload CTA, active selection — used sparingly
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-success: #16a34a;
+  --color-warning: #c2610a;
+  --color-danger: #dc2626;
+  --color-accent: #7c3aed;
+  --color-clay: #cc7a4a; // upload CTA, active selection — used sparingly
 
   // Border radius
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   16px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
   // Shadows — warm-tinted black (not cold blue)
   --shadow-sm: 0 1px 3px rgba(15, 14, 12, 0.12), 0 1px 2px rgba(15, 14, 12, 0.08);
-  --shadow-md: 0 4px 12px rgba(15, 14, 12, 0.15), 0 2px 4px rgba(15, 14, 12, 0.10);
+  --shadow-md: 0 4px 12px rgba(15, 14, 12, 0.15), 0 2px 4px rgba(15, 14, 12, 0.1);
 
   // Z-index stacking ladder (audit issue #2, #13)
-  --z-map:            0;
-  --z-panel:        300;
+  --z-map: 0;
+  --z-panel: 300;
   --z-upload-button: 350;
-  --z-dropdown:     400;
-  --z-modal:        500;
+  --z-dropdown: 400;
+  --z-modal: 500;
 
   // Spacing scale — 4 px base unit
   --spacing-1: 4px;
@@ -57,50 +57,50 @@
 }
 
 // ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
-[data-theme="dark"] {
-  --color-bg-base:     #0F0E0C;
-  --color-bg-surface:  #1A1917;
+[data-theme='dark'] {
+  --color-bg-base: #0f0e0c;
+  --color-bg-surface: #1a1917;
   --color-bg-elevated: #252320;
 
-  --color-border:        #2E2B27;
-  --color-border-strong: #3D3830;
+  --color-border: #2e2b27;
+  --color-border-strong: #3d3830;
 
-  --color-text-primary:   #EDEBE7;
+  --color-text-primary: #edebe7;
   --color-text-secondary: #908880;
-  --color-text-disabled:  #4A4540;
+  --color-text-disabled: #4a4540;
 
-  --color-primary:       #3B82F6;
-  --color-primary-hover: #60A5FA;
-  --color-success:       #22C55E;
-  --color-warning:       #F59E0B;
-  --color-danger:        #EF4444;
-  --color-accent:        #A78BFA;
-  --color-clay:          #D9895A;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-accent: #a78bfa;
+  --color-clay: #d9895a;
 }
 
 // ── Dark-mode tokens — system preference fallback (audit issue #10) ───────────
 // Applies dark tokens when the user's OS is in dark mode and they haven't
 // explicitly set a preference in the app.
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-bg-base:     #0F0E0C;
-    --color-bg-surface:  #1A1917;
+  :root:not([data-theme='light']) {
+    --color-bg-base: #0f0e0c;
+    --color-bg-surface: #1a1917;
     --color-bg-elevated: #252320;
 
-    --color-border:        #2E2B27;
-    --color-border-strong: #3D3830;
+    --color-border: #2e2b27;
+    --color-border-strong: #3d3830;
 
-    --color-text-primary:   #EDEBE7;
+    --color-text-primary: #edebe7;
     --color-text-secondary: #908880;
-    --color-text-disabled:  #4A4540;
+    --color-text-disabled: #4a4540;
 
-    --color-primary:       #3B82F6;
-    --color-primary-hover: #60A5FA;
-    --color-success:       #22C55E;
-    --color-warning:       #F59E0B;
-    --color-danger:        #EF4444;
-    --color-accent:        #A78BFA;
-    --color-clay:          #D9895A;
+    --color-primary: #3b82f6;
+    --color-primary-hover: #60a5fa;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-accent: #a78bfa;
+    --color-clay: #d9895a;
   }
 }
 

@@ -27,4 +27,4 @@ import { Component } from '@angular/core';
         h1 { color: var(--color-text-primary); }
     `],
 })
-export class AccountComponent {}
+export class AccountComponent { }

@@ -44,7 +44,6 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-
   <!-- Leaflet target -->
   <div
     #mapContainer
@@ -70,7 +69,6 @@
     <!-- Results dropdown -->
     @if (dropdownOpen()) {
       <div class="search-dropdown" role="listbox" aria-label="Search results">
-
         @if (!searchQuery().trim()) {
           <!-- Idle state: recent searches placeholder -->
           <div class="search-dropdown__section-label">Recent searches</div>
@@ -91,7 +89,9 @@
               role="option"
               (click)="selectSearchResult(result)"
             >
-              <span class="material-icons search-dropdown__item-icon" aria-hidden="true">location_on</span>
+              <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
+                >location_on</span
+              >
               <span class="search-dropdown__item-text">{{ result.display_name }}</span>
             </button>
           }
@@ -100,7 +100,6 @@
             <div class="search-dropdown__empty">No locations found.</div>
           }
         }
-
       </div>
     }
   </div>
@@ -122,14 +121,11 @@
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
       Click the map to place the image
-      <button
-        class="map-placement-banner__cancel"
-        type="button"
-        (click)="cancelPlacement()"
-      >Cancel</button>
+      <button class="map-placement-banner__cancel" type="button" (click)="cancelPlacement()">
+        Cancel
+      </button>
     </div>
   }
-
 </div>
 
 <!-- Drag divider (shown only when PhotoPanel is open) -->
@@ -140,7 +136,6 @@
 <!-- Photo panel — slides in from right on desktop / bottom on mobile -->
 @if (photoPanelOpen()) {
   <div class="photo-panel" role="region" aria-label="Photo panel">
-
     <!-- Tab bar -->
     <div class="photo-panel__tabs" role="tablist">
       <button class="photo-panel__tab photo-panel__tab--active" role="tab" aria-selected="true">
@@ -152,7 +147,5 @@
     <div class="photo-panel__grid">
       <p class="photo-panel__empty">Select a marker on the map to see photos.</p>
     </div>
-
   </div>
 }
-

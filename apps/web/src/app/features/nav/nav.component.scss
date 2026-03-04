@@ -25,10 +25,10 @@
 
   @media (min-width: 768px) {
     top: 50%;
-    left: 1rem;           // ~16px from screen edge — never flush
+    left: 1rem; // ~16px from screen edge — never flush
     transform: translateY(-50%);
-    height: 61.8vh;       // golden ratio
-    width: 3rem;          // collapsed: 48px — icon-only pill
+    height: 61.8vh; // golden ratio
+    width: 3rem; // collapsed: 48px — icon-only pill
     display: flex;
     align-items: stretch;
     transition: width 150ms ease-out;
@@ -149,7 +149,9 @@
   color: var(--color-text-secondary);
   border-radius: var(--radius-md);
   white-space: nowrap;
-  transition: background 120ms ease-out, color 120ms ease-out;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
 
   @media (min-width: 768px) {
     width: 100%;
@@ -195,14 +197,14 @@
   font-size: 1.25rem;
   line-height: 1;
   flex-shrink: 0;
-  width: 1.5rem;     // 24px fixed column — stays aligned as sidebar expands
+  width: 1.5rem; // 24px fixed column — stays aligned as sidebar expands
   text-align: center;
 }
 
 // ── Label text ────────────────────────────────────────────────────────────────
 
 .nav__label {
-  font-size: 0.8125rem;   // 13px — readable, not tiny
+  font-size: 0.8125rem; // 13px — readable, not tiny
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -210,7 +212,9 @@
   // Hidden at rest — slides in when parent expands.
   opacity: 0;
   transform: translateX(-0.375rem); // -6px
-  transition: opacity 150ms ease-out, transform 150ms ease-out;
+  transition:
+    opacity 150ms ease-out,
+    transform 150ms ease-out;
 
   @media (max-width: 767px) {
     opacity: 1;
@@ -251,7 +255,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;  // 32px
+  width: 2rem; // 32px
   height: 2rem; // 32px
   flex-shrink: 0;
   border-radius: var(--radius-full);
@@ -260,7 +264,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background 120ms ease-out, transform 120ms ease-out;
+  transition:
+    background 120ms ease-out,
+    transform 120ms ease-out;
   user-select: none;
 
   &:hover {
