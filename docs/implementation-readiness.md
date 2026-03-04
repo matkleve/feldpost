@@ -101,16 +101,16 @@ These are the highest-leverage items to close for MVP. Order reflects dependency
 
 ## 5. Cross-References
 
-| Document                          | What it covers                               | Relationship to this file                                 |
-| --------------------------------- | -------------------------------------------- | --------------------------------------------------------- |
-| `features.md`                     | Canonical feature specs (numbered 1–44)      | Defines _what_; this file tracks _how far along_          |
-| `use-cases.md`                    | User narratives (UC1–UC13) with personas     | Defines _why_; this file tracks readiness per UC          |
-| `milestones.md`                   | Delivery milestones (M1–M10, M-IMPL, M-UI)   | Defines _when_; this file scores current state            |
-| `architecture.md`                 | System design, adapter interfaces, data flow | Defines _how_; gaps here map to missing adapters/services |
-| `audits/audit.md`                        | Triaged documentation audit backlog       | Issue-level detail; this file aggregates into scores      |
-| `audits/audit-ui-design-interactions.md` | Triaged UI/UX audit backlog               | Issue-level detail for UI; feeds scores here              |
-| `audits/audit-upload-map-interaction.md` | Triaged upload/map audit backlog          | Issue-level detail for upload; feeds scores here          |
-| `security-boundaries.md`          | RLS policies, role model, storage rules      | Security readiness feeds row 11 and row 15                |
-| `address-resolver.md`             | `AddressResolverService` contract            | Spec for row 17                                           |
-| `folder-import.md`                | `FolderImportAdapter` contract               | Spec for row 16                                           |
-| `search-experience-spec.md`       | Search UX, ranking, requirements             | Spec for row 6                                            |
+| Document                                 | What it covers                               | Relationship to this file                                 |
+| ---------------------------------------- | -------------------------------------------- | --------------------------------------------------------- |
+| `features.md`                            | Canonical feature specs (numbered 1–44)      | Defines _what_; this file tracks _how far along_          |
+| `use-cases.md`                           | User narratives (UC1–UC13) with personas     | Defines _why_; this file tracks readiness per UC          |
+| `milestones.md`                          | Delivery milestones (M1–M10, M-IMPL, M-UI)   | Defines _when_; this file scores current state            |
+| `architecture.md`                        | System design, adapter interfaces, data flow | Defines _how_; gaps here map to missing adapters/services |
+| `audits/audit.md`                        | Triaged documentation audit backlog          | Issue-level detail; this file aggregates into scores      |
+| `audits/audit-ui-design-interactions.md` | Triaged UI/UX audit backlog                  | Issue-level detail for UI; feeds scores here              |
+| `audits/audit-upload-map-interaction.md` | Triaged upload/map audit backlog             | Issue-level detail for upload; feeds scores here          |
+| `security-boundaries.md`                 | RLS policies, role model, storage rules      | Security readiness feeds row 11 and row 15                |
+| `address-resolver.md`                    | `AddressResolverService` contract            | Spec for row 17                                           |
+| `folder-import.md`                       | `FolderImportAdapter` contract               | Spec for row 16                                           |
+| `search-experience-spec.md`              | Search UX, ranking, requirements             | Spec for row 6                                            |

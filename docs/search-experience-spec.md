@@ -222,6 +222,24 @@ Search operates as a single component with these states:
 - Flow: Commit search, pan around, inspect images, then return to search target.
 - Success: prior committed target is recoverable from search area.
 
+**UC-S9 — Missing-letter street typo recovery**
+
+- Actor: Technician
+- Flow: Type `Denisgase 46` (missing `s`) → strict miss → fallback normalization resolves to `Denisgasse 46`.
+- Success: user sees location candidates or a clear suggestion row without hitting a dead end.
+
+**UC-S10 — Street-suffix abbreviation recovery**
+
+- Actor: Clerk
+- Flow: Type `Hauptstr 12` or `Hauptstr. 12` → normalization expands suffix to `Hauptstrasse 12`.
+- Success: address appears in top results with no manual retry needed.
+
+**UC-S11 — House-number recovery path**
+
+- Actor: Technician
+- Flow: Type mistyped number variant or unknown house number (`Denisgasse 64`) → strict miss → street-only fallback (`Denisgasse`) still returns nearby candidates.
+- Success: user can still commit to correct street context in ≤2 interactions.
+
 ---
 
 ## 9. Requirements list

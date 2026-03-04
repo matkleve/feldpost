@@ -284,14 +284,14 @@ At the end of the import phase, a summary is shown on the map with newly importe
 
 ## 10. Cross-References
 
-| Topic                                  | Document                                    |
-| -------------------------------------- | ------------------------------------------- |
-| `ImageInputAdapter` interface contract | `architecture.md` §5                        |
-| `AddressResolverService`               | `address-resolver.md`                       |
-| EXIF parsing and ingestion pipeline    | `architecture.md` §5                        |
-| Single-file upload flow                | `use-cases.md` UC3                          |
-| Batch metadata assignment              | `features.md` §1.4 feature 18               |
-| Folder import use case                 | `use-cases.md` UC13                         |
-| ADR: Filename-first resolution         | `decisions.md` D16                          |
-| ADR: Provider-agnostic image input     | `decisions.md` D10                          |
+| Topic                                  | Document                                           |
+| -------------------------------------- | -------------------------------------------------- |
+| `ImageInputAdapter` interface contract | `architecture.md` §5                               |
+| `AddressResolverService`               | `address-resolver.md`                              |
+| EXIF parsing and ingestion pipeline    | `architecture.md` §5                               |
+| Single-file upload flow                | `use-cases.md` UC3                                 |
+| Batch metadata assignment              | `features.md` §1.4 feature 18                      |
+| Folder import use case                 | `use-cases.md` UC13                                |
+| ADR: Filename-first resolution         | `decisions.md` D16                                 |
+| ADR: Provider-agnostic image input     | `decisions.md` D10                                 |
 | Marker lifecycle after upload          | `audits/audit-upload-map-interaction.md` Pattern 3 |
