@@ -102,9 +102,8 @@
 
 // ── Floating search bar — top-center, unified expanding box ──────────────────
 //
-// The container IS the box. When collapsed it looks like a pill input.
-// When results appear (.map-search-bar--open) it stretches downward and
-// border-radius switches to --radius-lg so corners stay proportional.
+// The container IS the box. It keeps a fixed corner radius in all states
+// so expansion never causes a visible corner "jump".
 // No separate overlay or dropdown — results live inside the same element.
 
 .map-search-bar {
@@ -120,15 +119,9 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  transition: border-radius 120ms ease-out;
-
-  // When results are visible, switch to a rounded rect so content fits.
-  &--open {
-    border-radius: var(--radius-lg);
-  }
 
   &__input {
     width: 100%;
@@ -220,7 +213,7 @@
   border: none;
   border-radius: var(--radius-full);
   background: var(--color-bg-surface);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -241,7 +234,7 @@
     transform: scale(1.04);
   }
 
-  &--located {
+  &--tracking {
     color: var(--color-primary);
   }
 }

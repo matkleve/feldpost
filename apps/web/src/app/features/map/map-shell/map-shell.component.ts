@@ -87,6 +87,9 @@ export class MapShellComponent implements OnDestroy {
      */
     readonly userPosition = signal<[number, number] | null>(null);
 
+    /** Whether GPS follow mode is currently enabled by the user. */
+    readonly gpsTrackingEnabled = signal(false);
+
     // ── Search state ─────────────────────────────────────────────────────────
 
     /** Current search input value. */
@@ -106,6 +109,7 @@ export class MapShellComponent implements OnDestroy {
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+    private gpsWatchId: number | null = null;
 
     constructor() {
         afterNextRender(() => {
@@ -117,6 +121,7 @@ export class MapShellComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+        this.stopGpsTracking();
         this.map?.remove();
     }
 
@@ -154,22 +159,20 @@ export class MapShellComponent implements OnDestroy {
     // ── GPS button ────────────────────────────────────────────────────────────
 
     /**
-     * Actively requests the current GPS position and flies the map there.
-     * Re-requests on every click so it works even after initial denial.
+     * Toggles GPS follow mode.
+     * - When enabling: starts watchPosition and keeps centering map on updates.
+     * - When disabling: clears watcher and stops re-centering.
      */
     goToUserPosition(): void {
-        if (!this.map || typeof navigator === 'undefined' || !navigator.geolocation) return;
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-                this.userPosition.set(coords);
-                this.map?.setView(coords, 15);
-            },
-            () => {
-                // Permission denied or unavailable — do nothing.
-            },
-            { enableHighAccuracy: true, timeout: 10000 },
-        );
+        if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+
+        if (this.gpsTrackingEnabled()) {
+            this.stopGpsTracking();
+            return;
+        }
+
+        this.gpsTrackingEnabled.set(true);
+        this.startGpsTracking();
     }
 
     // ── Search ────────────────────────────────────────────────────────────────
@@ -251,6 +254,14 @@ export class MapShellComponent implements OnDestroy {
             this.placementActive.set(false);
             this.map?.getContainer().classList.remove('map-container--placing');
         });
+
+        // Any direct mouse interaction with the map exits GPS follow mode.
+        // This makes tracking state clear immediately when the user starts to move manually.
+        this.map.on('mousedown', () => {
+            if (this.gpsTrackingEnabled()) {
+                this.stopGpsTracking();
+            }
+        });
     }
 
     private initGeolocation(): void {
@@ -265,6 +276,38 @@ export class MapShellComponent implements OnDestroy {
                 // Geolocation denied or unavailable — Vienna fallback already set.
             },
         );
+    }
+
+    private startGpsTracking(): void {
+        if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+
+        if (this.gpsWatchId !== null) {
+            navigator.geolocation.clearWatch(this.gpsWatchId);
+            this.gpsWatchId = null;
+        }
+
+        this.gpsWatchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+                this.userPosition.set(coords);
+                const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
+                this.map?.setView(coords, zoom);
+            },
+            (error) => {
+                if (error.code === GeolocationPositionError.PERMISSION_DENIED) {
+                    this.stopGpsTracking();
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
+        );
+    }
+
+    private stopGpsTracking(): void {
+        if (typeof navigator !== 'undefined' && navigator.geolocation && this.gpsWatchId !== null) {
+            navigator.geolocation.clearWatch(this.gpsWatchId);
+        }
+        this.gpsWatchId = null;
+        this.gpsTrackingEnabled.set(false);
     }
 }
 

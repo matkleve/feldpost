@@ -172,27 +172,69 @@ describe('MapShellComponent', () => {
         expect((btn as HTMLButtonElement).getAttribute('aria-label')).toBe('Go to my location');
     });
 
+    it('gpsTrackingEnabled signal defaults to false', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        expect(fixture.componentInstance.gpsTrackingEnabled()).toBe(false);
+    });
+
     it('userPosition signal defaults to null', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         expect(fixture.componentInstance.userPosition()).toBeNull();
     });
 
-    it('goToUserPosition() does nothing when userPosition is null (no error)', () => {
+    it('goToUserPosition() does not throw when map is undefined', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
-        // map is undefined in tests; goToUserPosition should not throw
         expect(() => fixture.componentInstance.goToUserPosition()).not.toThrow();
     });
 
-    it('GPS button has --located modifier class when userPosition is set', () => {
+    it('GPS button has --tracking modifier class when tracking is enabled', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
 
-        fixture.componentInstance.userPosition.set([48.2, 16.37]);
+        fixture.componentInstance.gpsTrackingEnabled.set(true);
         fixture.detectChanges();
 
         const btn = (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn');
-        expect(btn?.classList).toContain('map-gps-btn--located');
+        expect(btn?.classList).toContain('map-gps-btn--tracking');
+    });
+
+    it('goToUserPosition() toggles GPS tracking on and off', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        const mapStub = {
+            setView: vi.fn(),
+            getZoom: vi.fn().mockReturnValue(13),
+            remove: vi.fn(),
+        };
+        (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
+
+        const originalGeolocation = navigator.geolocation;
+        const watchPosition = vi.fn().mockReturnValue(7);
+        const clearWatch = vi.fn();
+
+        Object.defineProperty(navigator, 'geolocation', {
+            configurable: true,
+            value: {
+                getCurrentPosition: vi.fn(),
+                watchPosition,
+                clearWatch,
+            },
+        });
+
+        fixture.componentInstance.goToUserPosition();
+        expect(fixture.componentInstance.gpsTrackingEnabled()).toBe(true);
+        expect(watchPosition).toHaveBeenCalledTimes(1);
+
+        fixture.componentInstance.goToUserPosition();
+        expect(fixture.componentInstance.gpsTrackingEnabled()).toBe(false);
+        expect(clearWatch).toHaveBeenCalledWith(7);
+
+        Object.defineProperty(navigator, 'geolocation', {
+            configurable: true,
+            value: originalGeolocation,
+        });
     });
 
     // ── Search bar ─────────────────────────────────────────────────────────────

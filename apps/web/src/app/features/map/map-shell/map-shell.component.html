@@ -108,9 +108,9 @@
   <button
     class="map-gps-btn"
     type="button"
-    aria-label="Go to my location"
-    title="Go to my location"
-    [class.map-gps-btn--located]="userPosition() !== null"
+    [attr.aria-label]="gpsTrackingEnabled() ? 'Stop following my location' : 'Go to my location'"
+    [title]="gpsTrackingEnabled() ? 'Stop following my location' : 'Go to my location'"
+    [class.map-gps-btn--tracking]="gpsTrackingEnabled()"
     (click)="goToUserPosition()"
   >
     <span class="material-icons" aria-hidden="true">my_location</span>
