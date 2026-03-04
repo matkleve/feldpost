@@ -950,7 +950,7 @@ Files
 
 TODOs
 
-- [ ] Anchor upload button to `position: absolute; top: 1rem; right: 1rem` inside the map pane.
+- [x] Anchor upload button to `position: fixed; top: var(--spacing-3); right: var(--spacing-3)` in the map shell overlay. (AI, 2026-03-04)
 - [ ] Add hover expand animation: `max-height` / `opacity` transition (120 ms) previewing a ghost panel.
 - [ ] On click: panel fully open with drag-and-drop drop zone + file picker button.
 - [ ] Panel expands left and down; never obscures the upload button itself.
