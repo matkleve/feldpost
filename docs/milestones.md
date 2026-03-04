@@ -710,6 +710,7 @@ TODOs
 - [ ] Implement DB-first resolver path and external geocoder path via provider-agnostic adapter.
 - [ ] Implement ranking + dedupe rules (DB-first order, within-family ordering, geocoder dedupe within 30m).
 - [ ] Refactor map search UI to explicit states: `Idle`, `FocusedEmpty`, `Typing`, `ResultsPartial`, `ResultsComplete`, `Committed`.
+- [ ] Add explicit committed-state clear control (`×`) in the search input; clear query + committed target while preserving active filters.
 - [ ] Add recent searches persistence (deduped MRU list with cap) and clear/commit behavior.
 - [ ] Implement keyboard contract (`Cmd/Ctrl+K`, arrows, Enter, Escape, Backspace on empty committed query).
 - [ ] Implement accessibility contract (`listbox`/`option`, separator presentation roles, announcements).
@@ -1093,6 +1094,14 @@ Acceptance criteria
 - User can see their current email.
 - Password and email change flows work end-to-end.
 - Delete account requires explicit confirmation before calling the service.
+
+---
+
+## Implementation Readiness
+
+For a consolidated view of implementation maturity across all feature groups and use cases — with scores, gap analysis, and a prioritized top-10 list — see **`implementation-readiness.md`**.
+
+That document is the single source of truth for "how far along are we?". This file (`milestones.md`) tracks _when_ work is planned; `implementation-readiness.md` tracks _current state_.
 
 ---
 

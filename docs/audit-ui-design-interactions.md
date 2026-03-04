@@ -12,11 +12,10 @@
   - [Pattern 1: Search Bar — From Idle to Result](#pattern-1-search-bar--from-idle-to-result)
   - [Pattern 2: Live Marker Highlighting on Search Term](#pattern-2-live-marker-highlighting-on-search-term)
   - [Pattern 3: Side Panel Hover-Expand Lifecycle](#pattern-3-side-panel-hover-expand-lifecycle)
-- [Part B — Full Issue Registry (100 Issues)](#part-b--full-issue-registry-100-issues)
-  - [Tier 1 — Critical (Issues 1–20)](#tier-1--critical-issues-1-20)
-  - [Tier 2 — High (Issues 21–50)](#tier-2--high-issues-21-50)
-  - [Tier 3 — Medium (Issues 51–80)](#tier-3--medium-issues-51-80)
-  - [Tier 4 — Low / Nice-to-Have (Issues 81–100)](#tier-4--low--nice-to-have-issues-81-100)
+- [Part B — Open UI Backlog (Triaged)](#part-b--open-ui-backlog-triaged)
+  - [Backlog Table](#backlog-table)
+  - [Recently Closed (Reference)](#recently-closed-reference)
+  - [Working Rules](#working-rules)
 
 ---
 
@@ -214,33 +213,33 @@ This section replaces the old 100-item mixed registry with a focused **open issu
 
 ## Backlog Table
 
-| ID | Priority | Status | Area | Issue | Milestone |
-| --- | --- | --- | --- | --- | --- |
-| UI-01 | P0 | Open | Search | Add committed-state clear `×` control in input; clear query + committed target while preserving active filters. | M-IMPL6 |
-| UI-02 | P0 | Open | Search | Implement per-user recent searches (`sitesnap_recent_searches_<user_id>`) with deduped MRU list. | M-IMPL6 |
-| UI-03 | P0 | Open | Search | Focused-empty state must render recent searches and allow one-click commit. | M-IMPL6 |
-| UI-04 | P0 | Open | Search | Keyboard contract: arrows/Enter/Escape/Cmd(or Ctrl)+K and Backspace-on-empty committed behavior. | M-IMPL6 |
-| UI-05 | P0 | Open | Search | Show explicit no-results and loading states without blocking map interaction. | M-IMPL6 |
-| UI-06 | P0 | Open | Search | Keep dropdown layered above map events (`z-index`) while preserving click behavior. | M-IMPL6 |
-| UI-07 | P0 | Open | Map panel | Build side panel content (`ImageDetailPanelComponent`) for marker/cluster selection. | M-UI4 |
-| UI-08 | P0 | Open | Map panel | Make panel header sticky + content scrollable (`overflow-y: auto`) for long metadata. | M-UI4 |
-| UI-09 | P0 | Open | Photos | Replace placeholder with responsive grid + empty state + cursor pagination. | M-UI6 |
-| UI-10 | P0 | Open | Groups | Replace placeholder with groups list + detail + create/rename/delete baseline. | M-UI7 |
-| UI-11 | P0 | Open | Settings | Replace placeholder with `Light/Dark/System` segmented theme control and persisted preference. | M-UI8 |
-| UI-12 | P0 | Open | Account | Replace placeholder with email/password change + delete-account flow. | M-UI9 |
-| UI-13 | P1 | Open | Upload entry | Complete hover ghost, open/close behavior, outside-click and `Escape` close contract. | M-UI5 |
-| UI-14 | P1 | Open | Upload entry | `dragover` on map pane should open upload panel and show visual drop guidance. | M-UI5 |
-| UI-15 | P1 | Open | Filters | Add always-visible active filter chips strip; prevent hidden-active-filter state. | M-IMPL5, M-UI6 |
-| UI-16 | P1 | Open | Filters | Add filter panel UI + AND/OR semantics wiring to viewport query state. | M-IMPL5 |
-| UI-17 | P1 | Open | Accessibility | Ensure search dropdown uses `listbox`/`option` roles and proper announcements. | M-IMPL6 |
-| UI-18 | P1 | Open | Accessibility | Ensure all close/icon-only controls meet 44×44 hit-target minimum. | M-UI4, M-UI5 |
-| UI-19 | P1 | Open | Theming | Apply theme before first paint to avoid flicker. | M-UI8 |
-| UI-20 | P1 | Open | Theming | Ensure dark mode updates map tile style immediately when theme toggles. | M-UI8 |
-| UI-21 | P2 | Open | Search | Optional “Clear history” control at bottom of recent-search list. | M-IMPL6 |
-| UI-22 | P2 | Open | Search | Add relative timestamps for recent-search items (e.g., “2 hours ago”). | M-IMPL6 |
-| UI-23 | P2 | Open | Photos | Add sort control (date desc/asc/name). | M-UI6 |
-| UI-24 | P2 | Open | Groups | Preserve scroll position when returning from group detail list. | M-UI7 |
-| UI-25 | P2 | Open | Motion | Gate non-essential animations under `prefers-reduced-motion`. | M-UI1, M-UI3 |
+| ID    | Priority | Status | Area          | Issue                                                                                                           | Milestone      |
+| ----- | -------- | ------ | ------------- | --------------------------------------------------------------------------------------------------------------- | -------------- |
+| UI-01 | P0       | Open   | Search        | Add committed-state clear `×` control in input; clear query + committed target while preserving active filters. | M-IMPL6        |
+| UI-02 | P0       | Open   | Search        | Implement per-user recent searches (`sitesnap_recent_searches_<user_id>`) with deduped MRU list.                | M-IMPL6        |
+| UI-03 | P0       | Open   | Search        | Focused-empty state must render recent searches and allow one-click commit.                                     | M-IMPL6        |
+| UI-04 | P0       | Open   | Search        | Keyboard contract: arrows/Enter/Escape/Cmd(or Ctrl)+K and Backspace-on-empty committed behavior.                | M-IMPL6        |
+| UI-05 | P0       | Open   | Search        | Show explicit no-results and loading states without blocking map interaction.                                   | M-IMPL6        |
+| UI-06 | P0       | Open   | Search        | Keep dropdown layered above map events (`z-index`) while preserving click behavior.                             | M-IMPL6        |
+| UI-07 | P0       | Open   | Map panel     | Build side panel content (`ImageDetailPanelComponent`) for marker/cluster selection.                            | M-UI4          |
+| UI-08 | P0       | Open   | Map panel     | Make panel header sticky + content scrollable (`overflow-y: auto`) for long metadata.                           | M-UI4          |
+| UI-09 | P0       | Open   | Photos        | Replace placeholder with responsive grid + empty state + cursor pagination.                                     | M-UI6          |
+| UI-10 | P0       | Open   | Groups        | Replace placeholder with groups list + detail + create/rename/delete baseline.                                  | M-UI7          |
+| UI-11 | P0       | Open   | Settings      | Replace placeholder with `Light/Dark/System` segmented theme control and persisted preference.                  | M-UI8          |
+| UI-12 | P0       | Open   | Account       | Replace placeholder with email/password change + delete-account flow.                                           | M-UI9          |
+| UI-13 | P1       | Open   | Upload entry  | Complete hover ghost, open/close behavior, outside-click and `Escape` close contract.                           | M-UI5          |
+| UI-14 | P1       | Open   | Upload entry  | `dragover` on map pane should open upload panel and show visual drop guidance.                                  | M-UI5          |
+| UI-15 | P1       | Open   | Filters       | Add always-visible active filter chips strip; prevent hidden-active-filter state.                               | M-IMPL5, M-UI6 |
+| UI-16 | P1       | Open   | Filters       | Add filter panel UI + AND/OR semantics wiring to viewport query state.                                          | M-IMPL5        |
+| UI-17 | P1       | Open   | Accessibility | Ensure search dropdown uses `listbox`/`option` roles and proper announcements.                                  | M-IMPL6        |
+| UI-18 | P1       | Open   | Accessibility | Ensure all close/icon-only controls meet 44×44 hit-target minimum.                                              | M-UI4, M-UI5   |
+| UI-19 | P1       | Open   | Theming       | Apply theme before first paint to avoid flicker.                                                                | M-UI8          |
+| UI-20 | P1       | Open   | Theming       | Ensure dark mode updates map tile style immediately when theme toggles.                                         | M-UI8          |
+| UI-21 | P2       | Open   | Search        | Optional “Clear history” control at bottom of recent-search list.                                               | M-IMPL6        |
+| UI-22 | P2       | Open   | Search        | Add relative timestamps for recent-search items (e.g., “2 hours ago”).                                          | M-IMPL6        |
+| UI-23 | P2       | Open   | Photos        | Add sort control (date desc/asc/name).                                                                          | M-UI6          |
+| UI-24 | P2       | Open   | Groups        | Preserve scroll position when returning from group detail list.                                                 | M-UI7          |
+| UI-25 | P2       | Open   | Motion        | Gate non-essential animations under `prefers-reduced-motion`.                                                   | M-UI1, M-UI3   |
 
 ---
 

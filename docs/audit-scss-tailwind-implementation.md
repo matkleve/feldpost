@@ -265,22 +265,29 @@ The largest issues are:
 
 ---
 
-## Suggested Remediation Plan
+## Open SCSS/Tailwind Backlog (Triaged)
 
-1. **Decide styling direction:** SCSS-first vs hybrid Tailwind (team-level decision).
-2. **Close token gaps:** add semantic tints/focus/map/type tokens in `styles.scss`.
-3. **Replace hard-coded values:** remove remaining raw colors/radii in auth/upload/map/nav styles.
-4. **Accessibility pass:** enforce `:focus-visible` and minimum target-size rules globally.
-5. **Layering + layout cleanup:** normalize z-index role mapping and upload panel positioning ownership.
-6. **Consolidate responsiveness:** central breakpoint source (Sass mixins or Tailwind-driven).
-7. **Refactor duplication:** shared placeholder style and shared control primitives.
+Status values: `Open`, `In Progress`, `Done`, `Won’t Do`  
+Priority values: `P0` (blocker), `P1` (high), `P2` (polish)
+
+| ID     | Priority | Status | Area           | Open Item                                                                                                    | Milestone                  |
+| ------ | -------- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| CSS-01 | P0       | Open   | Strategy       | Decide and document style strategy (`SCSS-first` or `Hybrid Tailwind`) and enforce it in contribution rules. | M-UI1, M10                 |
+| CSS-02 | P0       | Open   | Tokens         | Add missing semantic tokens from `design.md` (map/type/tint/focus token gaps).                               | M-UI1                      |
+| CSS-03 | P0       | Open   | Consistency    | Remove remaining raw hex/RGBA color values from component SCSS.                                              | M-UI1                      |
+| CSS-04 | P1       | Open   | Accessibility  | Implement global `:focus-visible` contract and apply parity where hover exists.                              | M-UI1, M-UI4               |
+| CSS-05 | P1       | Open   | Accessibility  | Enforce minimum tap/click target policy for icon/text controls.                                              | M-UI4, M-UI5, M-UI6        |
+| CSS-06 | P1       | Open   | Layout         | Normalize z-index role mapping (`map`, `panel`, `dropdown`, `modal`) to avoid collisions.                    | M-UI4, M-UI5               |
+| CSS-07 | P1       | Open   | Layout         | Resolve upload panel positioning ownership (single geometry owner pattern).                                  | M-UI5                      |
+| CSS-08 | P1       | Open   | Responsiveness | Centralize breakpoints via shared Sass mixins or Tailwind breakpoint policy.                                 | M-UI6, M-UI7               |
+| CSS-09 | P2       | Open   | Duplication    | Remove repeated inline placeholder styling and replace with shared primitive.                                | M-UI6, M-UI7, M-UI8, M-UI9 |
+| CSS-10 | P2       | Open   | Motion         | Ensure transition/animation contract respects `prefers-reduced-motion`.                                      | M-UI1, M-UI3               |
 
 ---
 
-## Quick Wins (1 Sprint)
+## Quick Wins (Next Session)
 
-- Add semantic subtle/tint + focus tokens in `styles.scss`.
-- Replace all hard-coded hex in auth + upload styles.
-- Add global `:focus-visible` policy and patch all primary controls.
-- Resolve sidebar width discrepancy against `design.md`.
-- Pick and document the Tailwind usage policy to prevent further drift.
+- Add semantic subtle/tint/focus tokens in `styles.scss`.
+- Replace hard-coded auth/upload hex values with semantic tokens.
+- Add global `:focus-visible` rule and patch primary interactive controls.
+- Resolve nav width discrepancy against `design.md` and lock the source of truth.
