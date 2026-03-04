@@ -14,6 +14,7 @@
 
 import {
     Component,
+    OnDestroy,
     input,
     output,
     signal,
@@ -21,7 +22,7 @@ import {
     inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UploadService, ExifCoords, FileValidation } from '../../../core/upload.service';
+import { UploadService, ExifCoords, FileValidation, ParsedExif } from '../../../core/upload.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,10 @@ export interface FileUploadState {
     coords?: ExifCoords;
     /** UUID of the inserted images row (present when status === 'complete'). */
     imageId?: string;
+    /** Object URL for inline thumbnail preview; revoked on dismiss. */
+    thumbnailUrl?: string;
+    /** Cached EXIF result from first parse; passed to uploadFile to avoid re-parsing. */
+    parsedExif?: ParsedExif;
 }
 
 /** Emitted to the parent after a successful upload with valid GPS coordinates. */
@@ -53,6 +58,8 @@ export interface ImageUploadedEvent {
     id: string;
     lat: number;
     lng: number;
+    /** Camera compass direction (0–360°), if available from EXIF. */
+    direction?: number;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -67,7 +74,7 @@ const MAX_CONCURRENT = 3;
     templateUrl: './upload-panel.component.html',
     styleUrl: './upload-panel.component.scss',
 })
-export class UploadPanelComponent {
+export class UploadPanelComponent implements OnDestroy {
     private readonly uploadService = inject(UploadService);
 
     // ── Inputs / outputs ───────────────────────────────────────────────────────
@@ -158,6 +165,7 @@ export class UploadPanelComponent {
                     status: 'error' as FileUploadStatus,
                     progress: 0,
                     error: validation.error,
+                    thumbnailUrl: URL.createObjectURL(file),
                 };
             }
             return {
@@ -165,6 +173,7 @@ export class UploadPanelComponent {
                 file,
                 status: 'pending' as FileUploadStatus,
                 progress: 0,
+                thumbnailUrl: URL.createObjectURL(file),
             };
         });
 
@@ -199,30 +208,40 @@ export class UploadPanelComponent {
 
         // ── EXIF parsing phase ─────────────────────────────────────────────────
         this.setStatus(key, 'parsing');
-        const { coords: exifCoords } = await this.uploadService.parseExif(state.file);
+        const parsedExif = await this.uploadService.parseExif(state.file);
 
-        if (exifCoords == null) {
-            // No GPS data — prompt the user to place manually.
-            this.setStatus(key, 'awaiting_placement');
+        if (parsedExif.coords == null) {
+            // No GPS data — store parsed EXIF for reuse, then prompt manual placement.
+            this.fileStates.update((prev) =>
+                prev.map((s) =>
+                    s.key === key
+                        ? { ...s, status: 'awaiting_placement' as FileUploadStatus, parsedExif }
+                        : s,
+                ),
+            );
             this.placementRequested.emit(key);
             this.drainQueue();
             return;
         }
 
-        await this.doUpload(key, exifCoords);
+        await this.doUpload(key, parsedExif.coords, parsedExif);
     }
 
     /**
      * Uploads the file and updates state on completion.
-     * @param manualCoords  Coordinates to use when EXIF was absent (manual placement).
+     * @param coords        Coordinates to use (EXIF or manually placed).
+     * @param parsedExif    Already-parsed EXIF data; passed to uploadFile to avoid
+     *                      a second exifr parse of the same file.
      */
-    private async doUpload(key: string, coords: ExifCoords): Promise<void> {
+    private async doUpload(key: string, coords: ExifCoords, parsedExif?: ParsedExif): Promise<void> {
         const state = this.findState(key);
         if (!state) return;
 
         this.setStatus(key, 'uploading', { progress: 0 });
 
-        const result = await this.uploadService.uploadFile(state.file, coords);
+        // Pass cached parsedExif (parameter takes precedence; fall back to stored state).
+        const exif = parsedExif ?? state.parsedExif;
+        const result = await this.uploadService.uploadFile(state.file, coords, exif);
 
         if (result.error !== null) {
             const msg =
@@ -244,6 +263,7 @@ export class UploadPanelComponent {
                     id: result.id,
                     lat: result.coords.lat,
                     lng: result.coords.lng,
+                    direction: result.direction,
                 });
             }
         }
@@ -261,14 +281,36 @@ export class UploadPanelComponent {
     async placeFile(key: string, coords: ExifCoords): Promise<void> {
         const state = this.findState(key);
         if (!state || state.status !== 'awaiting_placement') return;
-        await this.doUpload(key, coords);
+        await this.doUpload(key, coords, state.parsedExif);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     /** Remove a completed or errored file entry from the list. */
     dismissFile(key: string): void {
+        const state = this.findState(key);
+        if (state?.thumbnailUrl) {
+            URL.revokeObjectURL(state.thumbnailUrl);
+        }
         this.fileStates.update((prev) => prev.filter((s) => s.key !== key));
+    }
+
+    /**
+     * Resets an errored file back to pending so it re-enters the upload queue.
+     * The existing thumbnail and parsedExif are retained.
+     */
+    retryFile(key: string): void {
+        const state = this.findState(key);
+        if (!state || state.status !== 'error') return;
+        this.setStatus(key, 'pending', { error: undefined });
+        this.drainQueue();
+    }
+
+    ngOnDestroy(): void {
+        // Revoke all object URLs to avoid memory leaks.
+        for (const s of this.fileStates()) {
+            if (s.thumbnailUrl) URL.revokeObjectURL(s.thumbnailUrl);
+        }
     }
 
     private findState(key: string): FileUploadState | undefined {

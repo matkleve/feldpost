@@ -185,6 +185,7 @@ export class UploadService {
     async uploadFile(
         file: File,
         manualCoords?: ExifCoords,
+        parsedExif?: ParsedExif,
     ): Promise<UploadResult> {
         // ── 0. Auth guard ──────────────────────────────────────────────────────
         const user = this.auth.user();
@@ -226,7 +227,9 @@ export class UploadService {
         }
 
         // ── 5. Parse EXIF ──────────────────────────────────────────────────────
-        const { coords: exifCoords, capturedAt, direction } = await this.parseExif(file);
+        // Re-use caller-supplied result when available to avoid parsing the file twice.
+        const { coords: exifCoords, capturedAt, direction } =
+            parsedExif ?? (await this.parseExif(file));
 
         // Determine the persisted lat/lng:
         //  - EXIF GPS takes precedence over manual placement for the EXIF columns.

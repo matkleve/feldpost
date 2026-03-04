@@ -42,6 +42,16 @@
     <ul class="upload-panel__file-list" aria-label="Upload queue">
       @for (state of fileStates(); track trackByKey($index, state)) {
         <li class="upload-panel__file-item upload-panel__file-item--{{ state.status }}">
+          <!-- Thumbnail preview -->
+          @if (state.thumbnailUrl) {
+            <img
+              class="upload-panel__thumbnail"
+              [src]="state.thumbnailUrl"
+              [alt]="state.file.name"
+              aria-hidden="true"
+            />
+          }
+
           <span class="upload-panel__file-name" [title]="state.file.name">
             {{ state.file.name }}
           </span>
@@ -94,8 +104,24 @@
             </p>
           }
 
-          <!-- Dismiss button for terminal states -->
-          @if (state.status === 'complete' || state.status === 'error') {
+          <!-- Retry button for failed uploads -->
+          @if (state.status === 'error') {
+            <button
+              class="upload-panel__retry"
+              type="button"
+              aria-label="Retry uploading {{ state.file.name }}"
+              (click)="retryFile(state.key)"
+            >
+              ↺ Retry
+            </button>
+          }
+
+          <!-- Dismiss button for terminal states + awaiting_placement (handles canceled placement) -->
+          @if (
+            state.status === 'complete' ||
+            state.status === 'error' ||
+            state.status === 'awaiting_placement'
+          ) {
             <button
               class="upload-panel__dismiss"
               type="button"
