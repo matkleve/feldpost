@@ -1,126 +1,351 @@
-// MapShellComponent styles
+// MapShellComponent styles — full-screen map shell.
+// All colours use design-system tokens. No raw hex values.
+
+// ── Host — horizontal flex row ────────────────────────────────────────────────
 
 :host {
-  display: block;
+  display: flex;
+  flex-direction: row;
   height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-bg-base);
 }
 
-.map-shell {
+// ── Upload button zone — fixed top-left, expands into panel ──────────────────
+
+.upload-btn-zone {
+  position: fixed;
+  top: var(--spacing-3);
+  left: var(--spacing-3);
+  z-index: var(--z-upload-button);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  align-items: flex-start;
+  gap: var(--spacing-2);
 }
 
-.map-toolbar {
-  flex: 0 0 auto;
+.map-upload-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-clay);
+  color: var(--color-bg-surface);
+  cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0 1rem;
-  height: 3rem;
-  background: #1a1a2e;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: background 120ms ease-out, transform 120ms ease-out;
+  flex-shrink: 0;
 
-  &__brand {
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    flex: 1 1 auto;
+  .material-icons { font-size: 1.25rem; }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 80%, var(--color-text-primary));
+    transform: scale(1.04);
   }
 
-  &__actions {
+  &--active {
+    background: color-mix(in srgb, var(--color-clay) 80%, var(--color-text-primary));
+  }
+}
+
+// Expanded panel slides down from upload button.
+.upload-expand {
+  display: none;
+  flex-direction: column;
+  width: min(340px, calc(100vw - var(--spacing-6)));
+  max-height: 66vh;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-bg-surface) 95%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-md);
+
+  &--visible {
     display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  &__btn {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 0.82rem;
-    padding: 5px 10px;
-    transition: background 0.15s;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.22);
-    }
-
-    &--active {
-      background: #2563eb;
-      border-color: #2563eb;
-    }
   }
 }
 
-.map-area {
-  flex: 1 1 auto;
+// ── Map zone — fills remaining width ─────────────────────────────────────────
+
+.map-zone {
   position: relative;
-  min-height: 0;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
 }
+
+// ── Leaflet container ─────────────────────────────────────────────────────────
 
 .map-container {
   width: 100%;
   height: 100%;
-  // Leaflet requires an explicit height; the parent .map-area handles it.
+  z-index: var(--z-map);
 
   &--placing {
     cursor: crosshair !important;
 
-    // Force crosshair on all Leaflet child elements too
     * {
       cursor: crosshair !important;
     }
   }
 }
 
-// ── Placement mode banner ──────────────────────────────────────────────────────
+// ── Floating search bar — top-center ─────────────────────────────────────────
 
-.map-placement-banner {
+.map-search-bar {
   position: absolute;
-  top: 8px;
+  top: var(--spacing-3);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1001;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: #1e40af;
-  color: #fff;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
-  pointer-events: auto;
-  animation: banner-slide-in 0.2s ease-out;
+  z-index: var(--z-upload-button);
+  width: min(480px, calc(100% - 120px));
 
-  &__cancel {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 0.78rem;
-    padding: 3px 10px;
-    transition: background 0.15s;
+  &__input {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--spacing-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    outline: none;
+    box-shadow: var(--shadow-md);
+    transition: border-color 120ms ease-out;
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.35);
+    &::placeholder { color: var(--color-text-disabled); }
+
+    &:focus {
+      border-color: var(--color-primary);
     }
   }
 }
 
-@keyframes banner-slide-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-12px);
+// ── Search results dropdown ───────────────────────────────────────────────────
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + var(--spacing-1));
+  left: 0;
+  right: 0;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  z-index: var(--z-dropdown);
+  padding: var(--spacing-1) 0;
+
+  &__section-label {
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-disabled);
   }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+
+  &__empty {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+  }
+
+  &__divider {
+    height: 1px;
+    margin: var(--spacing-1) 0;
+    background: var(--color-border);
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-2);
+    width: 100%;
+    padding: var(--spacing-2) var(--spacing-3);
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    color: var(--color-text-primary);
+    font-size: 0.8125rem;
+    transition: background 80ms ease-out;
+
+    &:hover { background: var(--color-bg-base); }
+  }
+
+  &__item-icon {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  &__item-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
+
+// ── GPS button — bottom-right of map zone ─────────────────────────────────────
+
+.map-gps-btn {
+  position: absolute;
+  bottom: var(--spacing-5);
+  right: var(--spacing-4);
+  z-index: var(--z-upload-button);
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: background 120ms ease-out, color 120ms ease-out, transform 120ms ease-out;
+
+  .material-icons { font-size: 1.25rem; }
+
+  &:hover {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    transform: scale(1.04);
+  }
+
+  &--located {
+    color: var(--color-primary);
+  }
+}
+
+// ── Placement mode banner — bottom-center ─────────────────────────────────────
+
+.map-placement-banner {
+  position: absolute;
+  bottom: var(--spacing-5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-upload-button);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  white-space: nowrap;
+
+  .material-icons { font-size: 1rem; color: var(--color-warning); }
+
+  &__cancel {
+    padding: 0.125rem var(--spacing-3); // 2px top/bottom
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-full);
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 80ms ease-out;
+
+    &:hover { background: var(--color-bg-base); }
+  }
+}
+
+// ── Drag divider ──────────────────────────────────────────────────────────────
+
+.drag-divider {
+  width: 0.25rem;   // 4px
+  flex-shrink: 0;
+  background: var(--color-border);
+  cursor: col-resize;
+  transition: background 120ms ease-out;
+
+  &:hover { background: var(--color-border-strong); }
+
+  @media (max-width: 767px) {
+    width: 100%;
+    height: 0.25rem;
+    cursor: row-resize;
+  }
+}
+
+// ── Photo panel — slides in from right (desktop) / bottom (mobile) ────────────
+
+.photo-panel {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-md);
+
+  @media (min-width: 768px) {
+    width: 20rem; // 320px
+    height: 100%;
+    overflow: hidden;
+  }
+
+  @media (max-width: 767px) {
+    width: 100%;
+    height: 40vh;
+    position: fixed;
+    bottom: 3.5rem; // above 56px mobile tab bar
+    left: 0;
+    right: 0;
+    z-index: var(--z-panel);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  &__tabs {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 var(--spacing-3);
+    flex-shrink: 0;
+  }
+
+  &__tab {
+    padding: var(--spacing-3) var(--spacing-3);
+    border: none;
+    background: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 120ms ease-out, border-color 120ms ease-out;
+    margin-bottom: -1px;
+
+    &--active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    &:hover { color: var(--color-text-primary); }
+  }
+
+  &__grid {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: var(--spacing-4);
+  }
+
+  &__empty {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    padding: var(--spacing-6) 0;
+  }
+}
+

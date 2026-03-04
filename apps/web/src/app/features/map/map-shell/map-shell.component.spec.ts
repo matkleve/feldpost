@@ -2,14 +2,9 @@
  * MapShellComponent unit tests.
  *
  * Strategy:
- *  - Leaflet is NOT initialised in tests because afterNextRender does not fire
- *    in the jsdom test environment. We verify the DOM structure only.
- *  - The map container element is required to be present so that when Leaflet
- *    does run in the browser it can attach to a real DOM node.
- *  - No real tile requests are made because the Leaflet init hook never fires.
- *  - UploadService, AuthService, and SupabaseService are faked so no real
- *    Supabase calls occur (ground rule: no real HTTP in unit tests).
- *  - Router is provided as a spy to avoid NG04002 from AuthService injection.
+ *  - Leaflet is NOT initialised in tests (afterNextRender doesn't fire in jsdom).
+ *  - UploadService, AuthService, and SupabaseService are faked.
+ *  - All existing tests preserved + new tests for GPS, search, photo panel.
  */
 
 import { TestBed } from '@angular/core/testing';
@@ -63,16 +58,18 @@ describe('MapShellComponent', () => {
         await buildTestBed();
     });
 
+    // ── Basic structure ────────────────────────────────────────────────────────
+
     it('creates', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         expect(fixture.componentInstance).toBeTruthy();
     });
 
-    it('renders a header toolbar with the SiteSnap brand', () => {
+    it('renders the floating search bar', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
-        const brand = (fixture.nativeElement as HTMLElement).querySelector('.map-toolbar__brand');
-        expect(brand?.textContent).toContain('SiteSnap');
+        const bar = (fixture.nativeElement as HTMLElement).querySelector('.map-search-bar');
+        expect(bar).not.toBeNull();
     });
 
     it('renders the map container element', () => {
@@ -82,17 +79,20 @@ describe('MapShellComponent', () => {
         expect(container).not.toBeNull();
     });
 
-    it('renders the Upload button in the toolbar', () => {
+    it('renders the floating upload button', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
-        const btn = (fixture.nativeElement as HTMLElement).querySelector('.map-toolbar__btn');
-        expect(btn?.textContent).toContain('Upload');
+        const btn = (fixture.nativeElement as HTMLElement).querySelector('.map-upload-btn');
+        expect(btn).not.toBeNull();
+        expect((btn as HTMLButtonElement)?.getAttribute('aria-label')).toBe('Upload images');
     });
+
+    // ── Upload panel state ─────────────────────────────────────────────────────
 
     it('upload panel is not visible by default', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
-        expect(fixture.componentInstance.uploadPanelVisible()).toBe(false);
+        expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
     });
 
     it('toggleUploadPanel() makes the panel visible', () => {
@@ -101,7 +101,7 @@ describe('MapShellComponent', () => {
 
         fixture.componentInstance.toggleUploadPanel();
 
-        expect(fixture.componentInstance.uploadPanelVisible()).toBe(true);
+        expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
     });
 
     it('toggleUploadPanel() hides the panel when called twice', () => {
@@ -111,7 +111,7 @@ describe('MapShellComponent', () => {
         fixture.componentInstance.toggleUploadPanel();
         fixture.componentInstance.toggleUploadPanel();
 
-        expect(fixture.componentInstance.uploadPanelVisible()).toBe(false);
+        expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
     });
 
     it('renders the app-upload-panel element', () => {
@@ -120,6 +120,8 @@ describe('MapShellComponent', () => {
         const panel = (fixture.nativeElement as HTMLElement).querySelector('app-upload-panel');
         expect(panel).not.toBeNull();
     });
+
+    // ── Placement mode ─────────────────────────────────────────────────────────
 
     it('enterPlacementMode sets placementActive to true', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
@@ -158,5 +160,119 @@ describe('MapShellComponent', () => {
 
         const banner = (fixture.nativeElement as HTMLElement).querySelector('.map-placement-banner');
         expect(banner).toBeNull();
+    });
+
+    // ── GPS button ─────────────────────────────────────────────────────────────
+
+    it('renders the GPS button', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+        const btn = (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn');
+        expect(btn).not.toBeNull();
+        expect((btn as HTMLButtonElement).getAttribute('aria-label')).toBe('Go to my location');
+    });
+
+    it('userPosition signal defaults to null', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        expect(fixture.componentInstance.userPosition()).toBeNull();
+    });
+
+    it('goToUserPosition() does nothing when userPosition is null (no error)', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+        // map is undefined in tests; goToUserPosition should not throw
+        expect(() => fixture.componentInstance.goToUserPosition()).not.toThrow();
+    });
+
+    it('GPS button has --located modifier class when userPosition is set', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        fixture.componentInstance.userPosition.set([48.2, 16.37]);
+        fixture.detectChanges();
+
+        const btn = (fixture.nativeElement as HTMLElement).querySelector('.map-gps-btn');
+        expect(btn?.classList).toContain('map-gps-btn--located');
+    });
+
+    // ── Search bar ─────────────────────────────────────────────────────────────
+
+    it('searchQuery signal defaults to empty string', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        expect(fixture.componentInstance.searchQuery()).toBe('');
+    });
+
+    it('dropdownOpen signal defaults to false', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        expect(fixture.componentInstance.dropdownOpen()).toBe(false);
+    });
+
+    it('onSearchFocus() opens the dropdown', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.componentInstance.onSearchFocus();
+        expect(fixture.componentInstance.dropdownOpen()).toBe(true);
+    });
+
+    it('onSearchInput() updates searchQuery signal', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+        const input = Object.assign(document.createElement('input'), { value: 'Vienna' });
+        fixture.componentInstance.onSearchInput({ target: input } as unknown as Event);
+        expect(fixture.componentInstance.searchQuery()).toBe('Vienna');
+    });
+
+    it('dropdown is visible when dropdownOpen is true', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        fixture.componentInstance.dropdownOpen.set(true);
+        fixture.detectChanges();
+
+        const dropdown = (fixture.nativeElement as HTMLElement).querySelector('.search-dropdown');
+        expect(dropdown).not.toBeNull();
+    });
+
+    it('dropdown is not rendered when dropdownOpen is false', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        const dropdown = (fixture.nativeElement as HTMLElement).querySelector('.search-dropdown');
+        expect(dropdown).toBeNull();
+    });
+
+    // ── Photo panel ────────────────────────────────────────────────────────────
+
+    it('photoPanelOpen signal defaults to false', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        expect(fixture.componentInstance.photoPanelOpen()).toBe(false);
+    });
+
+    it('photo panel is not rendered when photoPanelOpen is false', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+        const panel = (fixture.nativeElement as HTMLElement).querySelector('.photo-panel');
+        expect(panel).toBeNull();
+    });
+
+    it('photo panel is rendered when photoPanelOpen is true', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        fixture.componentInstance.photoPanelOpen.set(true);
+        fixture.detectChanges();
+
+        const panel = (fixture.nativeElement as HTMLElement).querySelector('.photo-panel');
+        expect(panel).not.toBeNull();
+    });
+
+    it('drag divider is visible when photoPanelOpen is true', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        fixture.componentInstance.photoPanelOpen.set(true);
+        fixture.detectChanges();
+
+        const divider = (fixture.nativeElement as HTMLElement).querySelector('.drag-divider');
+        expect(divider).not.toBeNull();
     });
 });

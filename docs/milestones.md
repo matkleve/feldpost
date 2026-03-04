@@ -681,9 +681,9 @@ These milestones cover the full visual design and front-end layout work. They ru
 
 | ID    | Name                          | Status         | Depends On      |
 | ----- | ----------------------------- | -------------- | --------------- |
-| M-UI1 | Design System Foundation      | 🔲 Not started | M-IMPL1         |
-| M-UI2 | App Shell & Navigation        | 🔲 Not started | M-UI1           |
-| M-UI3 | Map Page – Split Layout       | 🔲 Not started | M-UI2, M-IMPL3  |
+| M-UI1 | Design System Foundation      | ✅ Done        | M-IMPL1         |
+| M-UI2 | App Shell & Navigation        | ✅ Done        | M-UI1           |
+| M-UI3 | Map Page – Split Layout       | ✅ Done        | M-UI2, M-IMPL3  |
 | M-UI4 | Map Page – Side Panel         | 🔲 Not started | M-UI3           |
 | M-UI5 | Map Page – Upload Entry Point | 🔲 Not started | M-UI3, M-IMPL4b |
 | M-UI6 | Photos Page                   | 🔲 Not started | M-UI2           |
@@ -693,7 +693,7 @@ These milestones cover the full visual design and front-end layout work. They ru
 
 ---
 
-## M-UI1: Design System Foundation
+## M-UI1: Design System Foundation ✅ Done
 
 Goal
 
@@ -706,11 +706,11 @@ Files
 
 TODOs
 
-- [ ] Define all `--color-*` tokens (light + dark) from design.md §3.1 in `:root` and `[data-theme="dark"]`.
-- [ ] Define `--radius-*`, `--shadow-*`, `--spacing-*`, and `--font-*` scale tokens.
-- [ ] Add `prefers-color-scheme` media-query fallback alongside `[data-theme]` selector.
-- [ ] Audit existing component `.scss` files and replace raw hex values with tokens.
-- [ ] Confirm `ng build` and all tests pass after token rollout.
+- [x] Define all `--color-*` tokens (light + dark) from design.md §3.1 in `:root` and `[data-theme="dark"]`. (AI, 2026-03-04)
+- [x] Define `--radius-*`, `--shadow-*`, `--spacing-*`, and `--font-*` scale tokens. (AI, 2026-03-04)
+- [x] Add `prefers-color-scheme` media-query fallback alongside `[data-theme]` selector. (AI, 2026-03-04)
+- [x] Audit existing component `.scss` files and replace raw hex values with tokens. (AI, 2026-03-04)
+- [x] Confirm `ng build` and all tests pass after token rollout. (AI, 2026-03-04)
 
 Acceptance criteria
 
@@ -720,7 +720,7 @@ Acceptance criteria
 
 ---
 
-## M-UI2: App Shell & Navigation
+## M-UI2: App Shell & Navigation ✅ Done
 
 Goal
 
@@ -756,11 +756,11 @@ Files
 
 TODOs
 
-- [ ] Create `NavComponent`: icon-only vertical sidebar, active-link highlight, tooltips on hover.
-- [ ] Add a `disabled` variant: greyed-out items with `pointer-events: none` and a "Coming soon" tooltip.
-- [ ] Wire lazy-loaded routes for `/photos`, `/groups`, `/settings`, `/account` (placeholder shell components for now).
-- [ ] Nav collapses to a bottom tab bar on mobile (< 768 px breakpoint).
-- [ ] Write unit tests for `NavComponent` (active route, disabled state).
+- [x] Create `NavComponent`: icon-only vertical sidebar, active-link highlight, tooltips on hover. (AI, 2026-03-04)
+- [x] Add a `disabled` variant: greyed-out items with `pointer-events: none` and a "Coming soon" tooltip. (AI, 2026-03-04)
+- [x] Wire lazy-loaded routes for `/photos`, `/groups`, `/settings`, `/account` (placeholder shell components for now). (AI, 2026-03-04)
+- [x] Nav collapses to a bottom tab bar on mobile (< 768 px breakpoint). (AI, 2026-03-04)
+- [x] Write unit tests for `NavComponent` (active route, disabled state). (AI, 2026-03-04)
 
 Acceptance criteria
 
@@ -771,7 +771,7 @@ Acceptance criteria
 
 ---
 
-## M-UI3: Map Page – Split Layout
+## M-UI3: Map Page – Split Layout ✅ Done
 
 Goal
 
@@ -808,14 +808,14 @@ Files
 
 TODOs
 
-- [ ] Convert `MapShellComponent` to a CSS Flexbox row with a left panel and a map column.
-- [ ] Left panel has two CSS states: `collapsed` (width: 14 px, overflow hidden) and `expanded` (width: 320 px). Transition: `width 120ms ease-out`.
-- [ ] Panel expands on `mouseenter` and collapses on `mouseleave` unless `panelPinned()` signal is true.
-- [ ] `panelPinned` is set to `true` when a marker is selected (M-UI4) and `false` when deselected or the × close button is clicked.
-- [ ] The collapsed strip has a subtle visual affordance: a faint `--color-border` right edge and a centred drag-bar pill (like a browser scrollbar thumb) so users know it is interactive.
-- [ ] Map pane always occupies remaining width; Leaflet `invalidateSize()` is called after every expand/collapse transition ends (`transitionend` event).
-- [ ] Pin the search bar inside the **left panel header**; it is only visible when the panel is expanded.
-- [ ] Write tests: hover opens, mouseleave closes, pinned state prevents close, `invalidateSize` called on transition end.
+- [x] Convert `MapShellComponent` to a CSS Flexbox row with a left panel and a map column. (AI, 2026-03-04)
+- [x] Left panel has two CSS states: `collapsed` (width: 14 px, overflow hidden) and `expanded` (width: 320 px). Transition: `width 120ms ease-out`. (AI, 2026-03-04)
+- [x] Panel expands on `mouseenter` and collapses on `mouseleave` unless `panelPinned()` signal is true. (AI, 2026-03-04)
+- [x] `panelPinned` is set to `true` when a marker is selected (M-UI4) and `false` when deselected or the × close button is clicked. (AI, 2026-03-04)
+- [x] The collapsed strip has a subtle visual affordance: a faint `--color-border` right edge and a centred drag-bar pill (like a browser scrollbar thumb) so users know it is interactive. (AI, 2026-03-04)
+- [x] Map pane always occupies remaining width; Leaflet `invalidateSize()` is called after every expand/collapse transition ends (`transitionend` event). (AI, 2026-03-04)
+- [x] Pin the search bar inside the **left panel header**; it is only visible when the panel is expanded. (AI, 2026-03-04)
+- [x] Write tests: hover opens, mouseleave closes, pinned state prevents close, `invalidateSize` called on transition end. (AI, 2026-03-04)
 
 Acceptance criteria
 

@@ -3,6 +3,7 @@
  *
  * Ground rule: all auth component SCSS files import this partial.
  * Never duplicate these rules in individual component files.
+ * M-UI1: raw hex values replaced with design-system tokens.
  */
 
 // Full-viewport centered shell
@@ -11,15 +12,15 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f4f5f7;
+  background: var(--color-bg-base);
   padding: 1.5rem;
 }
 
 // Card container
 .auth-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   padding: 2.5rem 2rem;
   width: 100%;
   max-width: 420px;
@@ -30,12 +31,12 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 0.25rem;
-  color: #111;
+  color: var(--color-text-primary);
 }
 
 .auth-subtitle {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0 0 1.75rem;
 }
 
@@ -51,32 +52,34 @@
     align-items: center;
     font-size: 0.85rem;
     font-weight: 500;
-    color: #333;
+    color: var(--color-text-primary);
     margin-bottom: 0.35rem;
   }
 
   input {
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     padding: 0.6rem 0.75rem;
     font-size: 0.95rem;
     outline: none;
     transition: border-color 0.15s;
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
 
     &:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
 
     &::placeholder {
-      color: #aaa;
+      color: var(--color-text-disabled);
     }
   }
 }
 
 .field-error {
   font-size: 0.78rem;
-  color: #dc2626;
+  color: var(--color-danger);
   margin-top: 0.3rem;
 }
 
@@ -84,7 +87,7 @@
 .forgot-link {
   font-size: 0.8rem;
   font-weight: 400;
-  color: #3b82f6;
+  color: var(--color-primary);
   text-decoration: none;
 
   &:hover {
@@ -94,25 +97,25 @@
 
 // Alert banners
 .alert {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0.65rem 0.85rem;
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
 
 .alert-error {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #fee2e2; // derived from --color-danger; no exact token for tinted backgrounds
+  color: var(--color-danger);
   border: 1px solid #fca5a5;
 }
 
 // Primary button
 .btn-primary {
   width: 100%;
-  background: #3b82f6;
+  background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0.7rem 1rem;
   font-size: 0.95rem;
   font-weight: 600;
@@ -121,7 +124,7 @@
   margin-top: 0.5rem;
 
   &:hover:not(:disabled) {
-    background: #2563eb;
+    background: var(--color-primary-hover);
   }
 
   &:disabled {
@@ -134,11 +137,11 @@
 .auth-footer {
   text-align: center;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-top: 1.5rem;
 
   a {
-    color: #3b82f6;
+    color: var(--color-primary);
     text-decoration: none;
 
     &:hover {
@@ -152,7 +155,7 @@
   text-align: center;
 
   p {
-    color: #444;
+    color: var(--color-text-secondary);
     line-height: 1.6;
   }
 }

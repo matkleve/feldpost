@@ -1,0 +1,289 @@
+// NavComponent styles — LeftSidebar (desktop) / bottom tab bar (mobile).
+//
+// Unit convention: rem for all explicit sizes (1rem = 16px at default root).
+//   Use var(--spacing-N) tokens for padding / gap where applicable.
+//
+// Desktop rules:
+//   collapsed  → 3rem (48px) pill, icons centred, left: 1rem from edge.
+//   expanded   → 11.25rem (180px) card, icon + label, border-radius: 1.5rem.
+//   border-radius animates 9999px → 1.5rem so pill never clips text.
+//   padding-block: 1.5rem clears the curved end-caps so items aren't clipped.
+//
+// Mobile: fixed full-width bottom tab bar.
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+
+:host {
+  display: contents; // no extra box
+}
+
+// ── LeftSidebar — positions + owns the hover trigger ─────────────────────────
+
+.sidebar {
+  position: fixed;
+  z-index: var(--z-panel);
+
+  @media (min-width: 768px) {
+    top: 50%;
+    left: 1rem;           // ~16px from screen edge — never flush
+    transform: translateY(-50%);
+    height: 61.8vh;       // golden ratio
+    width: 3rem;          // collapsed: 48px — icon-only pill
+    display: flex;
+    align-items: stretch;
+    transition: width 150ms ease-out;
+
+    &:hover,
+    &:focus-within {
+      width: 11.25rem; // 180px — expanded card
+
+      .sidebar__panel {
+        border-radius: 1.5rem; // 24px — rounded card, not pill
+      }
+
+      .nav__label {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  }
+
+  @media (max-width: 767px) {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    transform: none;
+    width: 100%;
+    height: 3.5rem; // 56px
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    background: var(--color-bg-surface);
+    border-top: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+// ── Pill panel — visual container ────────────────────────────────────────────
+//
+// overflow: hidden is required for the pill clip. padding-block: 1.5rem
+// keeps items away from the 24px curved end-caps so nothing is clipped.
+
+.sidebar__panel {
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    // 1.5rem top+bottom clears the 24px pill end-caps (border-radius effective
+    // radius = min(9999px, 1.5rem) when width is 3rem).
+    padding: 1.5rem 0;
+    height: 100%;
+    width: 100%; // fills whatever .sidebar width is at any point in transition
+    overflow: hidden;
+
+    // Full pill when collapsed (9999px on 3rem wide = 1.5rem effective radius).
+    border-radius: 9999px;
+
+    // Frosted glass, warm surface.
+    background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-md);
+
+    // Radius transitions alongside parent width.
+    transition: border-radius 150ms ease-out;
+  }
+
+  @media (max-width: 767px) {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    align-items: stretch;
+  }
+}
+
+// ── Nav list ──────────────────────────────────────────────────────────────────
+
+.nav__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-2) 0;
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; // 4px — tight vertical rhythm
+    width: 100%;
+  }
+
+  @media (max-width: 767px) {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    align-items: stretch;
+    padding: 0;
+  }
+}
+
+.sidebar__item {
+  @media (min-width: 768px) {
+    width: 100%;
+  }
+
+  @media (max-width: 767px) {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// ── Nav link ──────────────────────────────────────────────────────────────────
+
+.nav__link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  transition: background 120ms ease-out, color 120ms ease-out;
+
+  @media (min-width: 768px) {
+    width: 100%;
+    min-height: 2.75rem; // 44px tap target
+    padding: var(--spacing-2);
+    gap: var(--spacing-2);
+  }
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    min-height: 3rem; // 48px tap target
+    padding: var(--spacing-1) var(--spacing-2);
+    gap: 0.125rem;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-bg-elevated) 80%, transparent);
+    color: var(--color-text-primary);
+  }
+
+  &--active {
+    background: color-mix(in srgb, var(--color-bg-elevated) 80%, transparent);
+    color: var(--color-primary);
+
+    .nav__icon {
+      color: var(--color-primary);
+    }
+  }
+
+  &--disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
+    color: var(--color-text-disabled);
+  }
+}
+
+// ── Material Icon span ────────────────────────────────────────────────────────
+
+.nav__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 1.5rem;     // 24px fixed column — stays aligned as sidebar expands
+  text-align: center;
+}
+
+// ── Label text ────────────────────────────────────────────────────────────────
+
+.nav__label {
+  font-size: 0.8125rem;   // 13px — readable, not tiny
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: inherit;
+  // Hidden at rest — slides in when parent expands.
+  opacity: 0;
+  transform: translateX(-0.375rem); // -6px
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+
+  @media (max-width: 767px) {
+    opacity: 1;
+    transform: none;
+    font-size: 0.625rem; // 10px
+  }
+}
+
+// ── Spacer + Avatar ───────────────────────────────────────────────────────────
+
+.sidebar__spacer {
+  @media (min-width: 768px) {
+    flex: 1 1 auto;
+  }
+
+  @media (max-width: 767px) {
+    display: none;
+  }
+}
+
+.sidebar__avatar-slot {
+  @media (min-width: 768px) {
+    width: 100%;
+    display: flex;
+    padding: 0 var(--spacing-2) var(--spacing-3);
+  }
+
+  @media (max-width: 767px) {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// 2rem × 2rem (32px) avatar — centred in the 3rem collapsed pill column.
+.nav__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;  // 32px
+  height: 2rem; // 32px
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-bg-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 120ms ease-out, transform 120ms ease-out;
+  user-select: none;
+
+  &:hover {
+    background: var(--color-primary-hover);
+    transform: scale(1.05);
+  }
+
+  &--active {
+    outline: 0.125rem solid var(--color-primary);
+    outline-offset: 0.125rem;
+  }
+}
+
+// ── Screen-reader only ────────────────────────────────────────────────────────
+
+.nav__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,42 +1,158 @@
-<div class="map-shell">
-  <!-- Header / toolbar -->
-  <header class="map-toolbar">
-    <span class="map-toolbar__brand">SiteSnap</span>
+<!--
+  MapShellComponent — full-screen map shell.
 
-    <div class="map-toolbar__actions">
-      <!-- Toggle upload panel -->
-      <button
-        class="map-toolbar__btn"
-        type="button"
-        [class.map-toolbar__btn--active]="uploadPanelVisible()"
-        aria-label="Upload images"
-        (click)="toggleUploadPanel()"
-      >
-        &#128247; Upload
-      </button>
-    </div>
-  </header>
+  Layout (left→right):
+    UploadButton (fixed, top-left, z-upload-button)
+    MapZone (flex-fill)
+      LeafletMap
+      SearchBar (floating, top-center)
+        ResultsDropdown (conditional)
+      GPSButton (floating, bottom-right)
+      PlacementBanner (conditional)
+    DragDivider (hidden when PhotoPanel closed)
+    PhotoPanel (slides in from right / bottom)
+-->
 
-  <!-- Map area (position:relative so the upload panel can be positioned within it) -->
-  <div class="map-area">
-    <!-- Leaflet renders into this element -->
-    <div #mapContainer class="map-container" aria-label="Site map"></div>
+<!-- Upload button — top-left corner FAB that hover-expands into UploadPanel -->
+<div
+  class="upload-btn-zone"
+  [class.upload-btn-zone--open]="uploadPanelOpen()"
+  (mouseenter)="uploadPanelOpen.set(true)"
+  (mouseleave)="uploadPanelOpen.set(false)"
+>
+  <!-- Icon button (always visible) -->
+  <button
+    class="map-upload-btn"
+    type="button"
+    aria-label="Upload images"
+    title="Upload images"
+    [class.map-upload-btn--active]="uploadPanelOpen()"
+    (click)="toggleUploadPanel()"
+  >
+    <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
+  </button>
 
-    <!-- Upload panel overlay -->
+  <!-- Expanded panel -->
+  <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">
     <app-upload-panel
-      [visible]="uploadPanelVisible()"
+      [visible]="uploadPanelOpen()"
       (imageUploaded)="onImageUploaded($event)"
       (placementRequested)="enterPlacementMode($event)"
     />
+  </div>
+</div>
 
-    <!-- Placement mode banner -->
-    @if (placementActive()) {
-      <div class="map-placement-banner" role="status">
-        📍 Click the map to place the image
-        <button class="map-placement-banner__cancel" type="button" (click)="cancelPlacement()">
-          Cancel
-        </button>
+<!-- Map zone — fills remaining space -->
+<div class="map-zone">
+
+  <!-- Leaflet target -->
+  <div
+    #mapContainer
+    class="map-container"
+    [class.map-container--placing]="placementActive()"
+    aria-label="Site map"
+  ></div>
+
+  <!-- Floating search bar — top-center over the map -->
+  <div class="map-search-bar" role="search">
+    <input
+      class="map-search-bar__input"
+      type="search"
+      placeholder="Search places or photos…"
+      aria-label="Search places or photos"
+      autocomplete="off"
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      (focus)="onSearchFocus()"
+      (blur)="onSearchBlur()"
+    />
+
+    <!-- Results dropdown -->
+    @if (dropdownOpen()) {
+      <div class="search-dropdown" role="listbox" aria-label="Search results">
+
+        @if (!searchQuery().trim()) {
+          <!-- Idle state: recent searches placeholder -->
+          <div class="search-dropdown__section-label">Recent searches</div>
+          <div class="search-dropdown__empty">No recent searches yet.</div>
+        } @else {
+          <!-- DB results header (placeholder) -->
+          <div class="search-dropdown__section-label">Projects</div>
+          <div class="search-dropdown__empty">No matching projects.</div>
+
+          <!-- Separator -->
+          <div class="search-dropdown__divider" role="separator"></div>
+
+          <!-- Nominatim results -->
+          @for (result of searchResults(); track result.display_name) {
+            <button
+              class="search-dropdown__item"
+              type="button"
+              role="option"
+              (click)="selectSearchResult(result)"
+            >
+              <span class="material-icons search-dropdown__item-icon" aria-hidden="true">location_on</span>
+              <span class="search-dropdown__item-text">{{ result.display_name }}</span>
+            </button>
+          }
+
+          @if (searchResults().length === 0) {
+            <div class="search-dropdown__empty">No locations found.</div>
+          }
+        }
+
       </div>
     }
   </div>
+
+  <!-- GPS button — bottom-right of map zone -->
+  <button
+    class="map-gps-btn"
+    type="button"
+    aria-label="Go to my location"
+    title="Go to my location"
+    [class.map-gps-btn--located]="userPosition() !== null"
+    (click)="goToUserPosition()"
+  >
+    <span class="material-icons" aria-hidden="true">my_location</span>
+  </button>
+
+  <!-- Placement mode banner -->
+  @if (placementActive()) {
+    <div class="map-placement-banner" role="status" aria-live="assertive">
+      <span class="material-icons" aria-hidden="true">pin_drop</span>
+      Click the map to place the image
+      <button
+        class="map-placement-banner__cancel"
+        type="button"
+        (click)="cancelPlacement()"
+      >Cancel</button>
+    </div>
+  }
+
 </div>
+
+<!-- Drag divider (shown only when PhotoPanel is open) -->
+@if (photoPanelOpen()) {
+  <div class="drag-divider" role="separator" aria-hidden="true"></div>
+}
+
+<!-- Photo panel — slides in from right on desktop / bottom on mobile -->
+@if (photoPanelOpen()) {
+  <div class="photo-panel" role="region" aria-label="Photo panel">
+
+    <!-- Tab bar -->
+    <div class="photo-panel__tabs" role="tablist">
+      <button class="photo-panel__tab photo-panel__tab--active" role="tab" aria-selected="true">
+        Selection
+      </button>
+    </div>
+
+    <!-- Photo grid placeholder -->
+    <div class="photo-panel__grid">
+      <p class="photo-panel__empty">Select a marker on the map to see photos.</p>
+    </div>
+
+  </div>
+}
+

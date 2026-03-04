@@ -65,9 +65,40 @@ export const routes: Routes = [
                     ),
                 pathMatch: 'full',
             },
+
+            // M-UI2: placeholder routes — full pages implemented in M-UI6–9
+            {
+                path: 'photos',
+                loadComponent: () =>
+                    import('./features/photos/photos.component').then(
+                        (m) => m.PhotosComponent,
+                    ),
+            },
+            {
+                path: 'groups',
+                loadComponent: () =>
+                    import('./features/groups/groups.component').then(
+                        (m) => m.GroupsComponent,
+                    ),
+            },
+            {
+                path: 'settings',
+                loadComponent: () =>
+                    import('./features/settings/settings.component').then(
+                        (m) => m.SettingsComponent,
+                    ),
+            },
+            {
+                path: 'account',
+                loadComponent: () =>
+                    import('./features/account/account.component').then(
+                        (m) => m.AccountComponent,
+                    ),
+            },
         ],
     },
 
     // ── Fallback ──────────────────────────────────────────────────────────────
     { path: '**', redirectTo: 'auth/login' },
 ];
+
