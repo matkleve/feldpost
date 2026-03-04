@@ -380,6 +380,32 @@ All interactive icons must have a visible label or a `title` / `aria-label` attr
 
 A well-designed map has four distinct visual layers, each lower in visual weight than the layer above it. This hierarchy must be enforced via tile styling, z-index management, and proximity/collision logic:
 
+```mermaid
+block-beta
+  columns 1
+  block:l4:1
+    columns 1
+    A["Layer 4 — UI Chrome\nToolbar · Filter panel · Workspace pane\nMedium visual weight"]
+  end
+  block:l3:1
+    columns 1
+    B["Layer 3 — Interactive Elements\nRadius circle · Selection handles · Hover states\nMedium-high visual weight"]
+  end
+  block:l2:1
+    columns 1
+    C["Layer 2 — Data Layer (HIGHEST)\nPhoto markers · Clusters\nSquare body + pointer tail · White outline + shadow"]
+  end
+  block:l1:1
+    columns 1
+    D["Layer 1 — Base Map (LOWEST)\nRoads · Buildings · Water · Terrain\nMuted fills · Desaturated · No POI clutter"]
+  end
+
+  style l4 fill:#f0edea,stroke:#c8c1b8
+  style l3 fill:#dbeafe,stroke:#2563eb
+  style l2 fill:#2563eb,stroke:#1d4ed8,color:#fff
+  style l1 fill:#e8e4de,stroke:#c8c1b8
+```
+
 | Layer                | Visual weight | Elements                                       | Design rule                                                                                             |
 | -------------------- | ------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Base map             | Lowest        | Roads, buildings, water, terrain               | Muted — no POI clutter, desaturated fills, thin outlines                                                |
@@ -403,6 +429,33 @@ Clustering is proximity-based, not tied to fixed city/street/address zoom bands.
 ---
 
 ## 4. Layout System
+
+### Layout Overview — All Breakpoints
+
+```mermaid
+flowchart TB
+    subgraph Desktop["Desktop ≥ 1024px"]
+        direction LR
+        DS["Sidebar\n48–240px"] --- DM["Map Pane\n(fills remaining)"]
+        DM --- DW["Workspace Pane\n360px (resizable)"]
+        DT["Top Toolbar 56px"] -.-> DM
+        DF["Filter Panel\nSlides from top-right\nOver map"] -.-> DM
+    end
+
+    subgraph Tablet["Tablet 768–1023px"]
+        direction LR
+        TS["Icon-only\nSidebar 48px"] --- TM["Map\n(full width)"]
+        TM --- TW["Workspace\nSlide-over drawer"]
+        TF["Filter sheet\nFull-width from top"] -.-> TM
+    end
+
+    subgraph Mobile["Mobile < 768px"]
+        direction TB
+        MSB["Search bar — always top"] --- MM["Map — full bleed"]
+        MM --- MFAB["Upload FAB\n56px, bottom-right"]
+        MM --- MBS["Bottom Sheet\nmin 64px · half 50vh · full 100vh\n(drag handle)"]
+    end
+```
 
 ### 4.1 Desktop Layout (≥ 1024px)
 
@@ -458,7 +511,69 @@ Clustering is proximity-based, not tied to fixed city/street/address zoom bands.
 
 ## 5. Component Patterns
 
+### Marker State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> PendingUpload : Image selected for upload
+    PendingUpload --> Default : Upload succeeds (EXIF placed)
+    PendingUpload --> Error : Upload fails
+    Error --> PendingUpload : Retry
+    Default --> Selected : User taps/clicks marker
+    Default --> Corrected : User drags marker to new position
+    Selected --> Default : User deselects / clicks elsewhere
+    Selected --> Corrected : User edits location
+    Corrected --> Selected : User taps corrected marker
+    Corrected --> Default : User resets to EXIF
+
+    state Default {
+        [*] --> Idle
+        Idle --> Hovered : Mouse enter (desktop)
+        Hovered --> Idle : Mouse leave
+    }
+
+    note right of PendingUpload
+        Color: --color-clay
+        Pulsing ring animation
+    end note
+    note right of Default
+        Color: --color-primary
+        Photo icon centered
+    end note
+    note right of Corrected
+        Color: --color-accent
+        Correction dot visible
+    end note
+    note right of Selected
+        Color: #FFFFFF + primary ring
+    end note
+    note right of Error
+        Color: --color-danger
+    end note
+```
+
 ### 5.1 Map Marker
+
+#### Marker Anatomy
+
+```mermaid
+flowchart TD
+    subgraph MarkerAnatomy["Map Marker Anatomy (32×40px visual, 48×48px hit zone)"]
+        direction TB
+        HZ["Transparent hit zone 48×48px"] --- PB["Pin body: drop shape\nFilled with semantic color"]
+        PB --- II["Inner icon: 16×16 photo icon\nCentered in pin body"]
+        PB --- PT["Pointer tail: anchors to\nexact GPS coordinate"]
+        PB --- CI["Correction indicator: small dot\n--color-accent, top-right\n(visible only if corrected)"]
+        PB --- PI["Pending indicator: pulsing ring\n--color-warning\n(visible only during upload)"]
+        PB --- OL["2px white outline + drop shadow\n(always present for legibility)"]
+    end
+
+    subgraph ClusterAnatomy["Cluster Marker (20–36px radius)"]
+        direction TB
+        CB["Circle body\n--color-bg-elevated"] --- CBR["Border: --color-border-strong, 2px"]
+        CB --- CNT["Count badge\n--text-caption, --color-text-primary"]
+    end
+```
 
 A custom SVG pin, not a default Leaflet marker. Anatomy:
 
@@ -479,6 +594,29 @@ Marker tap/click area is extended to 48×48px via a transparent hit zone, regard
 
 ### 5.2 Filter Panel
 
+#### Filter Panel Accordion Structure
+
+```mermaid
+flowchart TD
+    subgraph FilterPanel["Filter Panel — Grouped Accordion"]
+        direction TB
+        AFS["Applied Filters Summary\nChip row at top — always visible\nEach chip has × to remove"]
+        AFS --> TR["1. Time Range\nDual date picker (from / to)\nPresets: Last 7d · 30d · 1y"]
+        TR --> PR["2. Project\nMulti-select checkboxes + search\nMax 5 visible, scroll for more"]
+        PR --> MD["3. Metadata\nKey/value pair builder\nKey dropdown autocomplete\nValue autocomplete per key"]
+        MD --> MX["4. Max Distance\nRadio: 25m · 50m · 100m · 250m · Custom\nCustom → number input in meters"]
+    end
+
+    subgraph FilterLogic["Filter Combination Logic"]
+        direction LR
+        AND1["Time Range"] --- ANDOP1((AND))
+        AND2["Project A OR B"] --- ANDOP1
+        AND3["Metadata key=val"] --- ANDOP1
+        AND4["Max Distance"] --- ANDOP1
+        ANDOP1 --- RESULT["Filtered Result Set"]
+    end
+```
+
 The filter panel is a grouped accordion. Each group has a header with a collapse chevron and a live "active count" badge that shows how many values are currently selected.
 
 Groups (in order):
@@ -492,6 +630,37 @@ Groups (in order):
 Filter panel animation: slides in from the top-right (desktop) or bottom (mobile) using `transform: translateY(-100%)` → `translateY(0)` with `transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1)`.
 
 ### 5.3 Workspace Pane — Group Tabs
+
+#### Workspace Pane Architecture
+
+```mermaid
+flowchart TD
+    subgraph WorkspacePane["Workspace Pane (Right Panel)"]
+        direction TB
+        TH["Tab Header — scrollable row"] --> AS["Active Selection tab\n(pinned left, ephemeral)\nIcon: crosshair"]
+        TH --> G1["Named Group 1"]
+        TH --> G2["Named Group 2"]
+        TH --> GN["… more groups"]
+        TH --> PLUS["+  New Group"]
+
+        AS --> GALLERY["Thumbnail Gallery\n128×128px grid"]
+        GALLERY --> SORT["Sort: Date ↓ · Date ↑\nDistance · Name"]
+    end
+
+    subgraph ThumbnailCard["Thumbnail Card Anatomy"]
+        direction TB
+        IMG["128×128 thumbnail\nobject-cover, rounded-md"] --> BL["Bottom-left: capture date\n--text-caption on dark scrim"]
+        IMG --> BR["Bottom-right: project badge\ncolored chip"]
+        IMG --> TR["Top-right: metadata preview\nsingle key=value"]
+        IMG --> CD["Correction dot\n--color-accent (if corrected)"]
+    end
+
+    subgraph HoverReveals["Hover-to-Reveal Controls (Notion pattern)"]
+        direction LR
+        CB["☑ Selection checkbox\ntop-left, 16px"] --- CTX["⋯ Context menu\ntop-right, .btn-compact"]
+        CTX --- MICRO["Floating micro-toolbar\nabove card, 4px gap\n'Add to group' · 'View detail'"]
+    end
+```
 
 The workspace pane header is a scrollable tab row. Tab types:
 
@@ -562,6 +731,45 @@ Actions menu (`⋯`): "Delete image", "Add to group", "Copy coordinates", "Downl
 
 ### 5.5 Upload Flow
 
+#### Upload Pipeline State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> SelectFiles : User opens upload (FAB / toolbar / drag-drop)
+
+    state SelectFiles {
+        [*] --> BrowseOrDrop
+        BrowseOrDrop --> Validating : Files chosen
+        Validating --> FilesReady : All valid
+        Validating --> PartialValid : Some invalid
+        PartialValid --> FilesReady : User acknowledges
+    }
+
+    SelectFiles --> ReviewLocations : Files ready
+
+    state ReviewLocations {
+        [*] --> EXIFParsing
+        EXIFParsing --> MarkersPlaced : GPS found
+        EXIFParsing --> MissingGPS : No GPS → manual placement
+        MissingGPS --> MarkersPlaced : User places manually
+        MarkersPlaced --> AssignProject : Optional
+        AssignProject --> AssignMetadata : Optional
+    }
+
+    ReviewLocations --> UploadProgress : User confirms
+
+    state UploadProgress {
+        [*] --> Uploading
+        Uploading --> FileSuccess : File done ✓
+        Uploading --> FileFailed : File error ✗
+        FileFailed --> Uploading : Retry
+        FileSuccess --> Uploading : Next file
+        Uploading --> BatchComplete : All files processed
+    }
+
+    UploadProgress --> [*] : Done
+```
+
 Upload entry: a FAB on mobile (56px circle, upload icon), a button in the top toolbar on desktop, or via drag-and-drop onto the map pane.
 
 Upload sheet / modal:
@@ -623,6 +831,32 @@ Each empty state includes:
 ---
 
 ## 6. Motion and Transitions
+
+### Motion Overview
+
+```mermaid
+flowchart LR
+    subgraph PanelMotion["Panel Transitions"]
+        P1["Panel slide in/out"] -->|200ms ease-out| P2["translateX"]
+        P3["Bottom sheet snap"] -->|250ms cubic-bezier| P4["translateY"]
+        P5["Filter panel"] -->|220ms cubic-bezier| P6["translateY -100% → 0"]
+    end
+
+    subgraph MarkerMotion["Marker Animations"]
+        M1["Marker appear"] -->|150ms ease-out| M2["opacity 0→1 + translate up\nstaggered 30ms/batch"]
+        M3["Marker tap"] -->|200ms spring| M4["scale 1→1.2→1.1"]
+    end
+
+    subgraph ContentMotion["Content Transitions"]
+        C1["Thumbnail load"] -->|300ms ease-out| C2["opacity 0→1 from blur"]
+        C3["Filter chip add/remove"] -->|180ms ease-in-out| C4["opacity + max-width"]
+        C5["Hover reveal"] -->|80ms| C6["opacity 0→1"]
+    end
+
+    RDM["prefers-reduced-motion"] -.->|disables all| PanelMotion
+    RDM -.->|disables all| MarkerMotion
+    RDM -.->|disables all| ContentMotion
+```
 
 All motion serves clarity or orientation — no decorative animation.
 

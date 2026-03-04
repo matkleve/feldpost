@@ -35,6 +35,126 @@ The system uses a **Client–BaaS** architecture:
 
 All critical invariants (ownership, access control, data integrity) are enforced in the database and Supabase configuration.
 
+### System Architecture Diagram
+
+```mermaid
+graph TB
+  subgraph Client["Angular SPA (Untrusted)"]
+    UI["UI Components<br/>(Map Shell, Upload Panel, Nav, Auth)"]
+    Services["Angular Services<br/>(AuthService, UploadService,<br/>FilterService, SelectionService,<br/>AddressResolverService)"]
+    MapAdapter["MapAdapter Interface<br/>(LeafletOSMAdapter)"]
+    GeoAdapter["GeocodingAdapter<br/>(Nominatim)"]
+    InputAdapter["ImageInputAdapter<br/>(LocalUploadAdapter,<br/>FolderImportAdapter)"]
+  end
+
+  subgraph Supabase["Supabase BaaS (Trusted)"]
+    Auth["Supabase Auth<br/>(JWT, Sessions)"]
+    DB["PostgreSQL + PostGIS<br/>(RLS Enforced)"]
+    Storage["Supabase Storage<br/>(Private Bucket: images/)"]
+  end
+
+  subgraph External["External Services"]
+    Nominatim["Nominatim / OSM<br/>(Geocoding)"]
+    Tiles["CartoDB Tiles<br/>(Positron / Dark Matter)"]
+  end
+
+  UI --> Services
+  Services --> Auth
+  Services --> DB
+  Services --> Storage
+  MapAdapter --> Tiles
+  GeoAdapter --> Nominatim
+  InputAdapter --> Services
+  Services --> MapAdapter
+  Services --> GeoAdapter
+
+  style Client fill:#1a1917,stroke:#2E2B27,color:#EDEBE7
+  style Supabase fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
+  style External fill:#0F0E0C,stroke:#3D3830,color:#EDEBE7
+```
+
+### Architectural Layer Stack
+
+```mermaid
+graph TD
+  L1["Layer 1 — Identity<br/>(Supabase Auth → auth.users)"]
+  L2["Layer 2 — Domain Profile<br/>(profiles table, 1:1 with auth.users)"]
+  L3["Layer 3 — Authorization<br/>(roles + user_roles, RLS policies)"]
+  L4["Layer 4 — Domain Data<br/>(images, projects, metadata_keys,<br/>saved_groups, coordinate_corrections)"]
+
+  L1 --> L2
+  L2 --> L3
+  L3 --> L4
+
+  style L1 fill:#2563EB,stroke:#1D4ED8,color:#fff
+  style L2 fill:#7C3AED,stroke:#6D28D9,color:#fff
+  style L3 fill:#CC7A4A,stroke:#B86B3E,color:#fff
+  style L4 fill:#16A34A,stroke:#15803D,color:#fff
+```
+
+### Adapter Pattern Overview
+
+```mermaid
+classDiagram
+  class ImageInputAdapter {
+    <<interface>>
+    +listSources() Promise~ImageInputRef[]~
+    +fetchFile(ref) Promise~File~
+    +getMetadata(ref) Promise~ImageInputMetadata~
+  }
+  class LocalUploadAdapter {
+    +listSources()
+    +fetchFile()
+    +getMetadata()
+  }
+  class FolderImportAdapter {
+    +listSources()
+    +fetchFile()
+    +getMetadata()
+  }
+  class GoogleDriveAdapter {
+    +listSources()
+    +fetchFile()
+    +getMetadata()
+  }
+
+  class MapAdapter {
+    <<interface>>
+    +init(container, options)
+    +setCenter(lat, lng, zoom)
+    +addMarker(lat, lng, options) MarkerHandle
+    +removeMarker(handle)
+    +renderClusters(groups)
+    +onViewportChange(callback)
+    +setTileStyle(style)
+    +enableRadiusSelection()
+    +destroy()
+  }
+  class LeafletOSMAdapter {
+    +init()
+    +setCenter()
+    +addMarker()
+    +renderClusters()
+    +setTileStyle()
+  }
+
+  class GeocodingAdapter {
+    <<interface>>
+    +search(query) Promise~GeocodingResult[]~
+    +reverse(lat, lng) Promise~GeocodingResult~
+  }
+  class NominatimAdapter {
+    +search()
+    +reverse()
+  }
+
+  ImageInputAdapter <|.. LocalUploadAdapter : implements
+  ImageInputAdapter <|.. FolderImportAdapter : implements
+  ImageInputAdapter <|.. GoogleDriveAdapter : implements
+  MapAdapter <|.. LeafletOSMAdapter : implements
+  GeocodingAdapter <|.. NominatimAdapter : implements
+```
+
 ---
 
 ## 2. Architectural Layers
@@ -229,6 +349,47 @@ See `address-resolver.md` for the full interface contract, UI presentation spec,
 GeoSite treats image ingestion as a **provider-agnostic pipeline**. The core ingestion flow — EXIF parsing, Supabase Storage upload, and database record write — never imports a concrete input source directly. All input sources implement a common `ImageInputAdapter` interface.
 
 This mirrors the same adapter-boundary pattern used for geocoding (section 3) and map rendering (section 6).
+
+### Upload Pipeline Flow
+
+```mermaid
+flowchart TD
+  A[User selects files] --> B{Source?}
+
+  B -->|Local file picker| C[LocalUploadAdapter]
+  B -->|Folder picker| D[FolderImportAdapter]
+  B -->|"Google Drive (post-MVP)"| E[GoogleDriveAdapter]
+
+  C --> F[ImageInputAdapter.fetchFile]
+  D --> F
+  E --> F
+
+  F --> G[Client-side Validation<br/>size ≤ 25MB, MIME check,<br/>dimensions 100–8192px]
+  G -->|Invalid| H[Reject with message]
+  G -->|Valid| I{HEIC/HEIF?}
+
+  I -->|Yes| J[Convert to JPEG client-side]
+  I -->|No| K{Dimensions > 4096px?}
+
+  J --> K
+  K -->|Yes| L[Resize to 4096px, JPEG 85%]
+  K -->|No| M[Parse EXIF<br/>GPS, timestamp, direction]
+
+  L --> M
+  M --> N{GPS coords found?}
+
+  N -->|Yes| O[Show marker on map preview]
+  N -->|No| P[Enter placement mode:<br/>user must click map]
+
+  O --> Q{User confirms or drags marker}
+  P --> R[User clicks map position]
+
+  Q --> S[Upload to Supabase Storage<br/>org_id/user_id/uuid.ext + thumbnail]
+  R --> S
+
+  S --> T[Insert images row<br/>exif coords + corrected coords<br/>+ latitude/longitude + geog trigger]
+  T --> U[✅ Upload complete<br/>Marker appears on map]
+```
 
 ### Interface Contract
 
@@ -500,6 +661,35 @@ See `decisions.md` (D9) for rationale.
 
 Viewport-bounded loading (Feature 12) requires careful orchestration to avoid flooding the database on rapid pan/zoom.
 
+### Viewport Query Flow Diagram
+
+```mermaid
+sequenceDiagram
+  participant Map as MapAdapter
+  participant VQS as ViewportQueryService
+  participant Filter as FilterService
+  participant DB as PostgreSQL (PostGIS)
+  participant Render as Map Renderer
+
+  Map->>VQS: onViewportChange(bounds, zoom)
+  Note over VQS: Debounce 300ms
+  VQS->>VQS: Abort previous in-flight query
+  VQS->>Filter: Get active filters
+  Filter-->>VQS: time, project, metadata, distance
+  VQS->>VQS: Expand bounds by 10% padding
+  VQS->>DB: Bounding-box query + filters<br/>(ST_Intersects on geog, cursor pagination)
+
+  alt zoom ≤ 14 (city/district)
+    DB-->>VQS: ClusterGroup[] (ST_SnapToGrid)
+    VQS->>Render: renderClusters(groups)
+  else zoom ≥ 15 (street/building)
+    DB-->>VQS: Individual image markers
+    VQS->>Render: addMarker() for each
+  end
+
+  Note over Render: Max 2000 results per viewport
+```
+
 ### Query Flow
 
 1. `MapAdapter.onViewportChange()` fires on every pan or zoom event.
@@ -530,6 +720,30 @@ Viewport-bounded loading (Feature 12) requires careful orchestration to avoid fl
 ## 9. Progressive Image Loading
 
 Images are loaded in three tiers to minimize bandwidth and maximize perceived speed. This applies everywhere images are displayed: map popups, workspace pane, detail views.
+
+### Progressive Loading Tiers
+
+```mermaid
+graph LR
+  subgraph "Tier 1 — Markers Only"
+    T1["Position + count badge<br/>0 image bytes<br/>Cluster/overview zoom"]
+  end
+
+  subgraph "Tier 2 — Thumbnails"
+    T2["128×128 JPEG<br/>~5–15 KB each<br/>Workspace pane, popup,<br/>individual marker zoom"]
+  end
+
+  subgraph "Tier 3 — Full Resolution"
+    T3["Original image<br/>Signed URL (1h TTL)<br/>Detail view only,<br/>on explicit user action"]
+  end
+
+  T1 -->|"Zoom in / expand cluster"| T2
+  T2 -->|"Click image → detail view"| T3
+
+  style T1 fill:#2563EB,stroke:#1D4ED8,color:#fff
+  style T2 fill:#7C3AED,stroke:#6D28D9,color:#fff
+  style T3 fill:#CC7A4A,stroke:#B86B3E,color:#fff
+```
 
 ### Tier 1 — Marker Only (Zero Image Bytes)
 
@@ -641,6 +855,60 @@ flowchart TD
 
 The workspace pane uses a **group-based tabbed model**. Each tab represents a named collection of images, not a single image.
 
+### Group Workspace Data Flow
+
+```mermaid
+flowchart TD
+  A[User draws radius on map<br/>or clicks markers] --> B[Spatial query via PostGIS<br/>ST_DWithin + active filters]
+  B --> C[Results populate<br/>Active Selection tab]
+
+  C --> D{User action?}
+  D -->|Browse thumbnails| E[Virtual-scrolled<br/>thumbnail grid]
+  D -->|Click 'Save as Group'| F[Prompt for group name]
+  D -->|Click thumbnail| G[Inline detail view<br/>full-res loads on demand]
+
+  F --> H[API writes to<br/>saved_groups + saved_group_images]
+  H --> I[New named tab appears<br/>in workspace pane]
+
+  subgraph "Workspace Pane Tabs"
+    AS["🎯 Active Selection<br/>(ephemeral, always visible)"]
+    NG1["📁 Named Group 1<br/>(persisted server-side)"]
+    NG2["📁 Named Group 2<br/>(persisted server-side)"]
+    NGn["📁 ...more groups"]
+  end
+
+  I --> NG1
+```
+
+### Spatial Selection Interaction
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Map as Map (Leaflet)
+  participant VQS as ViewportQueryService
+  participant DB as PostgreSQL
+  participant WS as Workspace Pane
+
+  alt Desktop
+    User->>Map: Right-click + drag
+  else Mobile
+    User->>Map: Long-press (≥500ms) + drag
+  end
+
+  Map->>Map: Show expanding circle overlay<br/>with radius label ("143m")
+  User->>Map: Release (mouse-up / touch-end)
+  Map->>VQS: onRadiusSelect(center, radius)
+
+  VQS->>DB: ST_DWithin(geog, center, radius)<br/>+ active filters + RLS
+  DB-->>VQS: Matching image records
+  VQS->>WS: Populate Active Selection tab
+  WS->>WS: Render thumbnail grid
+
+  Note over Map: Circle persists with<br/>drag handles for refinement
+  Note over User: Escape or ✕ to dismiss
+```
+
 ### Tab Types
 
 | Tab                  | Persistent                                                                                | Source                                                                                                |
@@ -739,6 +1007,79 @@ Every asynchronous operation in GeoSite must handle four states. Components that
 ## 14. Angular State Management
 
 GeoSite uses **Angular Signals** as the primary state management approach. No external state library (NgRx, Akita) is used for MVP.
+
+### Service Dependency Graph
+
+```mermaid
+graph TD
+  subgraph "UI Components"
+    MapShell["MapShellComponent"]
+    UploadPanel["UploadPanelComponent"]
+    Nav["NavComponent"]
+    Auth["Auth Components"]
+  end
+
+  subgraph "Core Services (Signals)"
+    AuthSvc["AuthService<br/>session, user, loading"]
+    UploadSvc["UploadService<br/>file pipeline"]
+    VQS["ViewportQueryService<br/>bounds, debounce, abort"]
+    FilterSvc["FilterService<br/>time, project, metadata, distance"]
+    SelectionSvc["SelectionService<br/>circle center/radius, image IDs"]
+    GroupSvc["GroupService<br/>saved groups, active tab"]
+    CacheSvc["ImageCacheService<br/>LRU map, max 5000"]
+    ThemeSvc["ThemeService<br/>light/dark/system"]
+    MapState["MapStateService<br/>center + zoom"]
+    AddrResolver["AddressResolverService<br/>DB-first + geocoder"]
+    SearchOrch["SearchOrchestratorService<br/>unified search pipeline"]
+  end
+
+  subgraph "Infrastructure"
+    Supa["SupabaseService<br/>(client singleton)"]
+    GeoAdapt["GeocodingAdapter"]
+  end
+
+  MapShell --> VQS
+  MapShell --> FilterSvc
+  MapShell --> SelectionSvc
+  MapShell --> MapState
+  MapShell --> AddrResolver
+  MapShell --> ThemeSvc
+  MapShell --> AuthSvc
+  UploadPanel --> UploadSvc
+  Nav --> AuthSvc
+  Auth --> AuthSvc
+
+  VQS --> Supa
+  UploadSvc --> Supa
+  GroupSvc --> Supa
+  AddrResolver --> Supa
+  AddrResolver --> GeoAdapt
+  AuthSvc --> Supa
+  SearchOrch --> AddrResolver
+  SearchOrch --> GeoAdapt
+  FilterSvc -.->|localStorage| FilterSvc
+  ThemeSvc -.->|localStorage| ThemeSvc
+  MapState -.->|localStorage| MapState
+```
+
+### UI State Machine (Async Operations)
+
+```mermaid
+stateDiagram-v2
+  [*] --> Loading : Operation starts
+  Loading --> Success : Data received
+  Loading --> Empty : No results
+  Loading --> Error : Request failed
+
+  Success --> Loading : Viewport change / filter change
+  Empty --> Loading : Filter changed
+  Error --> Loading : User clicks Retry
+
+  state Loading {
+    [*] --> Skeleton
+    Skeleton --> Spinner : Long wait
+  }
+```
 
 ### Service Responsibilities
 

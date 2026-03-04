@@ -9,6 +9,26 @@ See also: `architecture.md` §5, `address-resolver.md`, `features.md` §1.14, `d
 
 ## 1. Overview
 
+### Folder Import Pipeline
+
+```mermaid
+flowchart TD
+    A["User selects folder\nshowDirectoryPicker()"] --> B["Phase 1: SCAN\nRecursive traverse\nCollect ImageInputRef list"]
+    B -->|"Live counter: '142 images found'"| C["Phase 2: RESOLUTION\nFilenameLocationParser + EXIF parse\n+ AddressResolverService"]
+    C --> D["Phase 3: REVIEW\nUser reviews conflicts,\nneeds-confirmation, unresolved"]
+    D --> E["Phase 4: IMPORT\nConfirmed files enter\ningestion pipeline"]
+    E --> F["Markers on map\ngreen pulse animation"]
+
+    style A fill:#2563eb,color:#fff
+    style B fill:#f59e0b,color:#000
+    style C fill:#f59e0b,color:#000
+    style D fill:#7c3aed,color:#fff
+    style E fill:#16a34a,color:#fff
+    style F fill:#16a34a,color:#fff
+```
+
+Phases 1–3 happen entirely client-side before any data is sent to Supabase.
+
 Folder-based bulk import lets a user point GeoSite at a local folder on their computer. GeoSite recursively scans the folder for images, attempts to resolve a geographic location for each one, and imports the full set in one operation after the user reviews and confirms the results.
 
 Typical use cases:
@@ -43,6 +63,43 @@ The `FolderImportAdapter` wraps `showDirectoryPicker()` and implements the `Imag
 ---
 
 ## 3. FolderImportAdapter
+
+### Adapter Architecture
+
+```mermaid
+classDiagram
+    class ImageInputAdapter {
+        <<interface>>
+        +listSources() Promise~ImageInputRef[]~
+        +fetchFile(ref) Promise~File~
+        +getMetadata(ref) Promise~ImageInputMetadata~
+    }
+
+    class FolderImportAdapter {
+        -dirHandle: FileSystemDirectoryHandle
+        +listSources() Promise~ImageInputRef[]~
+        +fetchFile(ref) Promise~File~
+        +getMetadata(ref) Promise~ImageInputMetadata~
+    }
+
+    class LocalUploadAdapter {
+        +listSources() Promise~ImageInputRef[]~
+        +fetchFile(ref) Promise~File~
+        +getMetadata(ref) Promise~ImageInputMetadata~
+    }
+
+    class CoreIngestionPipeline {
+        -adapter: ImageInputAdapter
+        +validate()
+        +parseEXIF()
+        +uploadToStorage()
+        +writeDBRecord()
+    }
+
+    ImageInputAdapter <|.. FolderImportAdapter
+    ImageInputAdapter <|.. LocalUploadAdapter
+    CoreIngestionPipeline --> ImageInputAdapter : depends on interface only
+```
 
 `FolderImportAdapter` implements the `ImageInputAdapter` interface defined in `architecture.md` §5:
 
@@ -105,6 +162,28 @@ Phases 1–3 happen entirely client-side before any data is sent to Supabase.
 ---
 
 ## 4. Location Resolution Algorithm
+
+### Resolution Decision Flowchart
+
+```mermaid
+flowchart TD
+    IMG["Image file"] --> FP{"Filename/path\nhas address hint?"}
+    FP -->|Yes| RESOLVE["AddressResolverService.resolve(hint)"]
+    FP -->|No| EXIF_ONLY{"EXIF GPS present?"}
+
+    RESOLVE --> CONF{"Confidence level?"}
+    CONF -->|High| EXIF_CHECK{"EXIF GPS present?"}
+    CONF -->|Low| NEEDS_CONFIRM["❓ Needs Confirmation\nUser must confirm top candidate"]
+
+    EXIF_CHECK -->|Yes| DIST{"Distance between\nfilename ↔ EXIF?"}
+    EXIF_CHECK -->|No| FILENAME_ONLY["✅ Resolved (filename only)\nUse filename coordinates"]
+
+    DIST -->|"≤ 50m"| CONCORDANT["✅ Concordant\nUse EXIF coords (more precise)\nStore filename as address_label"]
+    DIST -->"|> 50m"| CONFLICT["⚠️ Conflict\nSurface both to user\nUser must choose"]
+
+    EXIF_ONLY -->|Yes| EXIF_RESOLVED["✅ Resolved (EXIF only)\nNote: 'Location from EXIF only'"]
+    EXIF_ONLY -->|No| UNRESOLVED["❌ Unresolved\nManual review queue"]
+```
 
 Every image must have geographic coordinates before it can be committed to the database. Folder imports have two information sources per image:
 

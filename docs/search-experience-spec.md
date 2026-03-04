@@ -66,6 +66,49 @@ The user should not need to decide mode first. The UI infers intent from ranking
 
 ## 4. Interaction model
 
+### Search State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+
+    Idle --> FocusedEmpty : User focuses input
+    FocusedEmpty --> Idle : Blur without typing
+    FocusedEmpty --> Typing : User types character
+
+    Typing --> ResultsPartial : First source returns
+    Typing --> Typing : More characters (debounce resets)
+    Typing --> FocusedEmpty : Backspace to empty
+
+    ResultsPartial --> ResultsComplete : All sources returned or timed out
+    ResultsPartial --> Typing : User modifies query
+
+    ResultsComplete --> Committed : User selects a result
+    ResultsComplete --> Typing : User modifies query
+    ResultsComplete --> Idle : Escape → Escape (two presses)
+
+    Committed --> Typing : User modifies query text
+    Committed --> Idle : Clear button or Backspace on empty
+
+    state Committed {
+        [*] --> PlaceCommit : Address/location selected
+        [*] --> ContentCommit : Photo/group/project selected
+        [*] --> CommandCommit : Action executed
+    }
+
+    note right of Idle
+        Search visible, no dropdown
+    end note
+    note right of FocusedEmpty
+        Dropdown: recent searches
+        + fallback action row
+    end note
+    note right of ResultsPartial
+        Sections render independently
+        No list reflow
+    end note
+```
+
 ### 4.1 Core states
 
 Search operates as a single component with these states:
@@ -107,6 +150,35 @@ Search operates as a single component with these states:
 
 ## 5. Ranking and merge rules
 
+### Ranking & Merge Pipeline
+
+```mermaid
+flowchart TD
+    Q["User Query"] --> DB["Step 1: Query DB\naddress_label via pg_trgm\n+ image count weighting"]
+    Q --> GEO["Step 2: Query Geocoder\n(parallel, via GeocodingAdapter)"]
+
+    DB --> DB_R["DB Address Candidates\n(up to 3)"]
+    DB --> DB_C["DB Content Candidates\nprojects / groups / metadata"]
+    GEO --> GEO_R["Geocoder Candidates\n(up to 5)"]
+
+    DB_R & DB_C & GEO_R --> MERGE["Step 3: Merge & Deduplicate"]
+
+    MERGE --> DEDUP{"Geocoder result\n< 30m from DB candidate?"}
+    DEDUP -->|Yes| REMOVE["Remove from geocoder tier"]
+    DEDUP -->|No| KEEP["Keep in geocoder tier"]
+
+    REMOVE & KEEP --> FINAL["Step 4: Return AddressCandidateGroup"]
+
+    subgraph FinalOrder["Global Ranking Order"]
+        direction TB
+        R1["1. DB address candidates"] --> R2["2. DB content candidates"]
+        R2 --> R3["3. External geocoder candidates"]
+        R3 --> R4["4. Command candidates"]
+    end
+
+    FINAL --> FinalOrder
+```
+
 ### 5.1 Global ranking order
 
 1. DB address candidates (organization-known places)
@@ -130,6 +202,24 @@ Search operates as a single component with these states:
 ---
 
 ## 6. Keyboard, pointer, and accessibility contract
+
+### Keyboard Interaction Flow
+
+```mermaid
+flowchart TD
+    START["Any state"] -->|"Cmd/Ctrl+K"| FOCUS["Focus search\n+ command mode"]
+
+    FOCUS -->|"Type characters"| TYPING["Typing state\n(debounce 300ms)"]
+    TYPING -->|"ArrowDown / ArrowUp"| NAV["Navigate results\n(skip separators)"]
+    NAV -->|"Enter"| COMMIT["Commit highlighted\nor top-selectable"]
+    NAV -->|"Escape"| CLOSE["Close dropdown"]
+    CLOSE -->|"Escape again"| BLUR["Blur input"]
+
+    TYPING -->|"Backspace to empty"| FOCUSED_EMPTY["FocusedEmpty\nRecent searches shown"]
+    COMMIT -->|"Tab"| MOVE_FOCUS["Move focus out\nPreserve committed state"]
+
+    COMMIT -->|"Backspace on empty committed"| CLEAR["Clear committed context"]
+```
 
 ### 6.1 Keyboard
 
@@ -156,6 +246,37 @@ Search operates as a single component with these states:
 ---
 
 ## 7. Search + map + filters integration
+
+### Search ↔ Map ↔ Filters Integration
+
+```mermaid
+flowchart LR
+    subgraph SearchComponent["Search Component"]
+        SI["Search Input"]
+        DD["Dropdown Results"]
+    end
+
+    subgraph MapComponent["Map"]
+        MV["Viewport"]
+        MK["Markers"]
+        RF["Reference Point"]
+    end
+
+    subgraph FilterComponent["Filters"]
+        FC["Active Filter Chips"]
+        DP["Distance Filter"]
+    end
+
+    SI -->|"query"| DD
+    DD -->|"Place commit"| MV
+    DD -->|"Place commit"| RF
+    RF -->|"sets reference"| DP
+    FC -->|"visible during search"| SI
+    MV -->|"pan far away"| RET["'Return to selected'\naffordance"]
+    RET -->|"click"| MV
+
+    FC -.->|"never reset by search"| FC
+```
 
 1. Search commits can set the **distance reference point** used by distance filters.
 2. Applied filter chips remain visible while search is active.

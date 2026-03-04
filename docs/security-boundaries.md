@@ -9,6 +9,26 @@ See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`, and `dec
 
 ## 1. Authentication Boundary
 
+```mermaid
+flowchart LR
+    subgraph Untrusted["Untrusted Zone"]
+        BR["Browser / Angular"]
+    end
+
+    subgraph Trusted["Trusted Zone"]
+        SA["Supabase Auth\n(JWT issuance)"]
+        PG["PostgreSQL + RLS\n(authorization)"]
+        ST["Supabase Storage\n(file access policies)"]
+    end
+
+    BR -->|"1. Login credentials"| SA
+    SA -->|"2. JWT token"| BR
+    BR -->|"3. Request + JWT"| PG
+    PG -->|"4. RLS checks auth.uid()\n+ user_roles + org_id"| PG
+    BR -->|"3. Request + JWT"| ST
+    ST -->|"4. Storage policy checks\norg_id / user_id path"| ST
+```
+
 - All access requires a valid Supabase JWT.
 - Supabase verifies the token before any database access.
 - The frontend is never trusted for identity validation.
@@ -22,6 +42,35 @@ See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`, and `dec
 ---
 
 ## 2. Authorization Boundary
+
+### RLS Decision Tree
+
+```mermaid
+flowchart TD
+    REQ["Incoming DB request"] --> JWT{"Valid JWT?"}
+    JWT -->|No| DENY1["DENY — unauthenticated"]
+    JWT -->|Yes| UID["Extract auth.uid()"]
+    UID --> ORG["Lookup user_org_id()\nfrom profiles"]
+    ORG --> OP{"Operation type?"}
+
+    OP -->|SELECT| ORGCHECK{"Row org_id =\nuser_org_id()?"}
+    ORGCHECK -->|No| DENY2["DENY — wrong org"]
+    ORGCHECK -->|Yes| ALLOW_READ["✅ ALLOW read"]
+
+    OP -->|INSERT| VIEWER{"is_viewer()?"}
+    VIEWER -->|Yes| DENY3["DENY — viewer cannot write"]
+    VIEWER -->|No| OWN_INSERT{"user_id = auth.uid()\nAND org matches?"}
+    OWN_INSERT -->|Yes| ALLOW_WRITE["✅ ALLOW write"]
+    OWN_INSERT -->|No| DENY4["DENY"]
+
+    OP -->|UPDATE / DELETE| VIEWER2{"is_viewer()?"}
+    VIEWER2 -->|Yes| DENY5["DENY — viewer cannot write"]
+    VIEWER2 -->|No| OWNER{"user_id = auth.uid()\nOR is_admin()?"}
+    OWNER -->|Yes| ORGCHECK2{"org_id = user_org_id()?"}
+    ORGCHECK2 -->|Yes| ALLOW_MUT["✅ ALLOW mutate"]
+    ORGCHECK2 -->|No| DENY6["DENY"]
+    OWNER -->|No| DENY7["DENY — not owner/admin"]
+```
 
 - Authorization is enforced via Row-Level Security (RLS) in PostgreSQL.
 - The frontend does **not** decide permissions; it only displays what the database allows.
@@ -158,6 +207,32 @@ Viewers are blocked from INSERT/UPDATE/DELETE on `images`, `projects`, and `meta
 
 ## 4. Storage Security
 
+### Storage Path & Policy Diagram
+
+```mermaid
+flowchart TD
+    subgraph Bucket["Supabase Storage: images/ (private)"]
+        direction TB
+        ORG["{org_id}/"] --> USR["{user_id}/"]
+        USR --> ORIG["{uuid}.jpg\n(original, compressed)"]
+        USR --> THUMB["{uuid}_thumb.jpg\n(128×128 thumbnail)"]
+    end
+
+    subgraph Policies["Storage Policies"]
+        direction TB
+        UP["Upload (INSERT):\nauth.uid() = {user_id}\nAND user_org_id() = {org_id}\nAND NOT is_viewer()"]
+        RD["Read (SELECT):\nuser_org_id() = {org_id}\n(all org members)"]
+        DEL["Delete:\nauth.uid() = {user_id}\nOR is_admin() within org"]
+    end
+
+    subgraph Access["URL Generation"]
+        SIGN["Signed URLs\n1-hour TTL\nFrontend requests from Supabase\nNever constructs paths directly"]
+    end
+
+    Bucket --> Policies
+    Policies --> Access
+```
+
 - Images are stored in Supabase Storage in a private bucket named `images`.
 
 ### 4.1 Bucket Structure
@@ -204,6 +279,31 @@ Supabase Storage CORS must allow:
 ---
 
 ## 5. Trust Model
+
+### Trust Boundary Diagram
+
+```mermaid
+flowchart TB
+    subgraph UNTRUSTED["UNTRUSTED — UX only, no security guarantees"]
+        direction TB
+        BROWSER["Browser"]
+        ANGULAR["Angular frontend"]
+        CLIENT["Client-side logic"]
+        URL_PARAMS["URL params / file names / metadata"]
+        EXIF["EXIF GPS from uploaded images"]
+    end
+
+    subgraph TRUSTED["TRUSTED — Security enforcement"]
+        direction TB
+        SUPA_AUTH["Supabase Auth\n(identity)"]
+        PG_RLS["PostgreSQL + RLS\n(authorization + integrity)"]
+        STORAGE_POL["Storage policies\n(file access control)"]
+        SEC_DEF["security definer functions\n(user_org_id, is_admin)"]
+        CHECKS["CHECK constraints\nlat -90..90, lng -180..180"]
+    end
+
+    UNTRUSTED -->|"All requests validated\nserver-side"| TRUSTED
+```
 
 **Trusted:**
 

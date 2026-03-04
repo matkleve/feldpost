@@ -6,6 +6,73 @@
 See `search-experience-spec.md` for the detailed search UX, ranking, use-case expansion, and requirements breakdown.  
 See **`implementation-readiness.md`** for current implementation scores, gap analysis, and prioritized work items per feature group.
 
+### Feature Dependency Map
+
+```mermaid
+flowchart TD
+    AUTH["1.1 Authentication\n& User Mgmt"] --> IMG["1.2 Image Ingestion"]
+    AUTH --> SEC["1.6 Security & Perf"]
+    AUTH --> ROLE["UC4 Admin Roles"]
+
+    IMG --> SPATIAL["1.3 Spatial & Temporal\nExploration"]
+    IMG --> UPLOAD_VAL["1.9 Upload Validation\n& Feedback"]
+    IMG --> PROJ["1.4 Project & Metadata"]
+
+    SPATIAL --> DIST["1.5 Distance &\nSpatial Selection"]
+    SPATIAL --> GROUPS["1.7 Group-Based\nWorkspace"]
+    SPATIAL --> FILTER["1.8 Filter Semantics"]
+
+    PROJ --> FILTER
+    PROJ --> GROUPS
+
+    SEC --> SPATIAL
+    SEC --> IMG
+
+    GROUPS --> LAYOUT["1.10 Responsive Layout"]
+    FILTER --> LAYOUT
+    SPATIAL --> LAYOUT
+
+    AUTH --> THEME["1.13 UI & Theming"]
+    THEME --> LAYOUT
+
+    IMG --> FOLDER["1.14 Folder-Based\nBulk Import"]
+    FOLDER --> ADDR["1.15 Smart Address\nResolution"]
+    SPATIAL --> ADDR
+
+    AUTH --> PWD["1.11 Password Mgmt"]
+
+    style AUTH fill:#2563eb,color:#fff
+    style SEC fill:#dc2626,color:#fff
+    style IMG fill:#cc7a4a,color:#fff
+    style SPATIAL fill:#16a34a,color:#fff
+    style GROUPS fill:#7c3aed,color:#fff
+```
+
+### Image Ingestion Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Input["Image Input Layer"]
+        LUA["LocalUploadAdapter\n(browser file input)"]
+        FIA["FolderImportAdapter\n(File System Access API)"]
+        GDA["GoogleDriveAdapter\n(post-MVP)"]
+    end
+
+    LUA & FIA & GDA -->|ImageInputAdapter| PIPE
+
+    subgraph PIPE["Core Ingestion Pipeline"]
+        direction LR
+        VAL["Validate\ntype, size, dims"] --> HEIC["HEIC/HEIF\n→ JPEG"]
+        HEIC --> RESIZE["Resize\nif > 4096px"]
+        RESIZE --> EXIF["Parse EXIF\nlat, lng, ts, dir"]
+        EXIF --> THUMB["Generate\n128×128 thumb"]
+        THUMB --> STORE["Upload to\nSupabase Storage"]
+        STORE --> DB["Write images row\n+ metadata"]
+    end
+
+    DB --> MAP["Marker appears\non map"]
+```
+
 ---
 
 ## 1. MVP Features
@@ -170,6 +237,26 @@ See `architecture.md`, `database-schema.md`, and `security-boundaries.md`.
 ---
 
 ### 1.8 Filter Semantics
+
+#### Filter Combination Diagram
+
+```mermaid
+flowchart TD
+    subgraph OR_combine["Within Category: OR (Union)"]
+        PA["Project A"] -->|OR| PU["Project Union"]
+        PB["Project B"] -->|OR| PU
+    end
+
+    subgraph AND_combine["Across Categories: AND (Intersection)"]
+        TR["Time Range"] --> RESULT
+        PU --> RESULT
+        MD["Metadata key=val"] --> RESULT
+        DIST["Max Distance"] --> RESULT
+        RESULT["Final Filtered Set"]
+    end
+
+    CLEAR["Clear a category"] -.->|removes from AND chain| AND_combine
+```
 
 28. **Filter combination rules**
     - All filter categories are **AND-combined** (intersection): time AND project AND metadata AND distance.

@@ -96,6 +96,29 @@ These personas describe the primary human actors in GeoSite. Each use case refer
 
 ## UC1 – Technician on Site (View History)
 
+```mermaid
+flowchart TD
+    A["Open GeoSite on mobile"] --> B{"GPS available?"}
+    B -->|Yes| C["Map centers on current location"]
+    B -->|No| D["Search address"]
+    D --> C
+    C --> E{"Adjust filters?"}
+    E -->|Yes| F["Set time / project / metadata / distance"]
+    E -->|No| G["View markers on map"]
+    F --> G
+    G --> H{"Tap marker or use radius selection?"}
+    H -->|Tap marker| I["Open image detail\nThumb → full-res"]
+    H -->|Long-press drag| J["Draw selection circle"]
+    J --> K["Active Selection tab populates"]
+    K --> L["Review thumbnails"]
+    L --> I
+    I --> M["Swipe through related images"]
+    M --> N{"Save to group?"}
+    N -->|Yes| O["Save as Group"]
+    N -->|No| P["Done: site history reviewed"]
+    O --> P
+```
+
 **Goal**  
 See relevant historical images for the exact spot the technician is currently standing on, without guessing folder names.
 
@@ -141,6 +164,27 @@ See relevant historical images for the exact spot the technician is currently st
 ---
 
 ## UC2 – Clerk Preparing a Quote
+
+```mermaid
+flowchart TD
+    A["Open GeoSite on desktop"] --> B["Search address / navigate map"]
+    B --> C["Select project(s)"]
+    C --> D["Set time range"]
+    D --> E["Optional: metadata + distance filters"]
+    E --> F["Map + workspace show matching images"]
+    F --> G["Create named group\n'Quote 2026-03 Zürich'"]
+    G --> H["Navigate to other locations"]
+    H --> I["Add more images to group"]
+    I --> J["Open images from group tab"]
+    J --> K["Inspect condition / materials"]
+    K --> L["Use group for quote prep"]
+
+    F --> ALT{"Alternative: radius selection?"}
+    ALT -->|Yes| M["Right-click drag circle"]
+    M --> N["Active Selection populates"]
+    N --> O["Save to named group"]
+    O --> H
+```
 
 **Goal**  
 Use historical images to estimate work and materials for a new quote.
@@ -193,6 +237,30 @@ Use historical images to estimate work and materials for a new quote.
 
 ## UC3 – Upload and Correct a New Image
 
+```mermaid
+flowchart TD
+    A["Open upload screen"] --> B["Select image(s)"]
+    B --> C{"Valid file?"}
+    C -->|No| D["Show error:\nsize / type / dims"]
+    C -->|Yes| E{"HEIC/HEIF?"}
+    E -->|Yes| F["Convert to JPEG client-side"]
+    E -->|No| G[">4096px?"]
+    F --> G
+    G -->|Yes| H["Resize client-side (JPEG 85%)"]
+    G -->|No| I["Parse EXIF\nlat, lng, ts, direction"]
+    H --> I
+    I --> J{"GPS in EXIF?"}
+    J -->|Yes| K["Place marker on map"]
+    J -->|No| L["'No location found'\nUser must place manually"]
+    L --> K
+    K --> M["Upload to Storage\n(max 3 parallel)"]
+    M --> N{"Marker correct?"}
+    N -->|Yes| O["Confirm & save"]
+    N -->|No| P["Drag marker to correct position"]
+    P --> O
+    O --> Q["Store EXIF coords immutably\nStore corrected coords separately\nAssign project + metadata"]
+```
+
 **Goal**  
 Upload a new photo from the field and correct its position if EXIF coordinates are off.
 
@@ -237,6 +305,19 @@ Upload a new photo from the field and correct its position if EXIF coordinates a
 ---
 
 ## UC4 – Admin Managing Roles
+
+```mermaid
+flowchart TD
+    A["Admin logs in"] --> B["Navigate to user management"]
+    B --> C["Select user"]
+    C --> D{"Action?"}
+    D -->|Assign role| E["Add role to user_roles"]
+    D -->|Revoke role| F{"Last admin?"}
+    F -->|Yes| G["Block: cannot remove last admin"]
+    F -->|No| H["Remove role from user_roles"]
+    E --> I["RLS checks updated for future queries"]
+    H --> I
+```
 
 **Goal**  
 Grant or revoke elevated access for certain users (e.g., to act as admins).
@@ -581,6 +662,31 @@ Reconstruct the documented sequence of events at a site to resolve a contractual
 ---
 
 ## UC13 – Bulk Import from a Local Folder
+
+```mermaid
+flowchart TD
+    A["Select 'From folder…'\nin upload menu"] --> B{"Chromium browser?"}
+    B -->|No| C["Fallback: multi-file select"]
+    B -->|Yes| D["OS folder picker\nshowDirectoryPicker()"]
+    D --> E["Recursive scan\n'Scanning… 147 images found'"]
+    E --> F["Resolution phase\nFilenameLocationParser + EXIF + AddressResolverService"]
+
+    F --> G{"Classification per image"}
+    G -->|"✅ Concordant"| H["Ready to import"]
+    G -->|"⚠️ Conflict (>50m)"| I["User chooses:\nfilename vs EXIF"]
+    G -->|"❓ Low confidence"| J["User confirms\ntop candidate"]
+    G -->|"❌ No location"| K["Manual review queue\nenter address / drag-to-map / skip"]
+
+    I --> H
+    J --> H
+    K --> H
+    K -->|Skip| L["location_unresolved = TRUE\nHidden from map"]
+
+    H --> M["Optional: batch project\n+ batch metadata"]
+    M --> N["Import: up to 10 parallel uploads"]
+    N --> O["Summary: N uploaded, N failed"]
+    O --> P["New markers on map\ngreen pulse animation"]
+```
 
 **Goal**  
 Import an entire folder of field photos in one operation, resolving their locations automatically from folder names and filenames, with a structured review step for any images that cannot be resolved automatically.

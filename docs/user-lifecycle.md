@@ -5,6 +5,42 @@
 
 See also: `glossary.md`, `security-boundaries.md`, `database-schema.md`, and `decisions.md` (D1, D2, D12).
 
+### User Lifecycle Overview
+
+```mermaid
+stateDiagram-v2
+    [*] --> Registration : User signs up
+
+    state Registration {
+        [*] --> SupabaseAuth : Create auth.users row
+        SupabaseAuth --> Trigger : DB trigger fires
+        Trigger --> ProfileCreated : Create profiles row (with org_id)
+        Trigger --> RoleAssigned : Assign default 'user' role
+    }
+
+    Registration --> Active : Registration succeeds
+    Registration --> Failed : Trigger failure → transaction rolls back
+
+    state Active {
+        [*] --> LoggedIn : JWT valid
+        LoggedIn --> LoggedOut : Session expires / logout
+        LoggedOut --> LoggedIn : Re-login
+        LoggedIn --> PasswordReset : Forgot password flow
+        PasswordReset --> LoggedIn : New password set
+    }
+
+    Active --> RoleChanged : Admin assigns/revokes role
+    RoleChanged --> Active
+
+    Active --> Deleted : Account deleted from auth.users
+    Deleted --> [*]
+
+    note right of Registration
+        Invariant: never leave user
+        without profile or role
+    end note
+```
+
 ---
 
 ## 1. Registration Flow
@@ -101,6 +137,25 @@ Admin role assignment:
 ---
 
 ## 5. Account Deletion
+
+### Deletion Cascade Flow
+
+```mermaid
+flowchart TD
+    DEL["DELETE from auth.users"] --> P["profiles → CASCADE → deleted"]
+    DEL --> UR["user_roles → CASCADE → deleted"]
+    DEL --> I["images → CASCADE → deleted"]
+    I --> IM["image_metadata → CASCADE"]
+    I --> CC["coordinate_corrections → CASCADE"]
+    I --> SGI["saved_group_images → CASCADE"]
+    DEL --> SG["saved_groups → CASCADE → deleted"]
+    SG --> SGI2["saved_group_images → CASCADE"]
+    DEL --> PR["projects.created_by → SET NULL\n(project survives)"]
+    DEL --> MK["metadata_keys.created_by → SET NULL\n(key survives)"]
+    DEL --> CORR["coordinate_corrections.corrected_by\n→ orphaned UUID (audit preserved)"]
+
+    I -->|"Storage cleanup"| STOR["Scheduled job:\ndelete {org_id}/{user_id}/* files"]
+```
 
 When a user is deleted from `auth.users`:
 

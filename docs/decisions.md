@@ -5,6 +5,46 @@
 
 ---
 
+### Decision Dependency Map
+
+```mermaid
+flowchart TD
+    D1[\"D1 Supabase\\n(Auth+DB+Storage)\"] --> D2[\"D2 DB-First Security\\n(RLS)\"]
+    D1 --> D11[\"D11 PostGIS\\nSpatial Index\"]
+    D1 --> D15[\"D15 Progressive\\nImage Loading\"]
+
+    D2 --> D12[\"D12 Organization-Scoped\\nVisibility\"]
+
+    D3[\"D3 Map-First Nav\\n(Leaflet+OSM)\"] --> D8[\"D8 MapAdapter\\nSwappable\"]
+    D3 --> D13[\"D13 Right-Click\\nRadius Selection\"]
+    D3 --> D7[\"D7 Filter Set\\n& Cluster Ordering\"]
+
+    D4[\"D4 EXIF vs Corrected\\nCoords Separate\"] --> D16[\"D16 Filename-First\\nLocation Resolution\"]
+
+    D6[\"D6 Provider-Agnostic\\nGeocoding\"] --> D17[\"D17 DB-First Address\\nRanking\"]
+
+    D8 --> D9[\"D9 Tailwind CSS\\n+ Dark Mode\"]
+
+    D10[\"D10 Provider-Agnostic\\nImage Input\"] --> D16
+    D10 --> D15
+
+    D11 --> D7
+
+    D12 --> D2
+
+    D13 --> D14[\"D14 Group-Based\\nTabbed Workspace\"]
+
+    D5[\"D5 MVP Scope\\nNarrow by Design\"]
+
+    style D1 fill:#2563eb,color:#fff
+    style D2 fill:#dc2626,color:#fff
+    style D3 fill:#16a34a,color:#fff
+    style D12 fill:#dc2626,color:#fff
+    style D17 fill:#7c3aed,color:#fff
+```
+
+---
+
 ## Format
 
 Each decision has:

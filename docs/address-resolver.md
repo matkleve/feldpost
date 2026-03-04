@@ -122,6 +122,34 @@ interface AddressCandidate {
 
 ## 4. Ranking Algorithm
 
+### Ranking Pipeline
+
+```mermaid
+flowchart TD
+    Q["User query: 'Burgs'"] --> S1["Step 1: Query DB\n(parallel)"]
+    Q --> S2["Step 2: Query Geocoder\n(parallel via GeocodingAdapter)"]
+
+    S1 --> DB_INDEX["Materialized address index\nGROUP BY address_label\nST_Centroid + COUNT(*)"]
+    DB_INDEX --> TRGM["pg_trgm fuzzy match\nORDER BY similarity DESC,\nimage_count DESC"]
+    TRGM --> DB_OUT["DB Candidates\n(max 3)"]
+
+    S2 --> GEO_OUT["Geocoder Candidates\n(max 5)"]
+
+    DB_OUT --> MERGE["Step 3: Merge & Deduplicate"]
+    GEO_OUT --> MERGE
+
+    MERGE --> DEDUP{"Geocoder result\n< 30m from any\nDB candidate?"}
+    DEDUP -->|Yes| DROP["Remove from\ngeocoder tier"]
+    DEDUP -->|No| KEEP["Keep"]
+
+    DROP --> RESULT["Step 4: Return\nAddressCandidateGroup"]
+    KEEP --> RESULT
+
+    RESULT --> UI_DB["databaseCandidates[]\n(shown first, bold, with photo count)"]
+    RESULT --> UI_SEP["--- separator ---"]
+    RESULT --> UI_GEO["geocoderCandidates[]\n(shown after, normal weight)"]
+```
+
 ### Step 1 — Query the Database
 
 The resolver queries a **materialized address index** derived from the `images` table. This index contains:
@@ -260,6 +288,25 @@ Reverse geocoding (`AddressResolverService.reverse()`) can be used to back-fill 
 
 ## 8. Integration Points
 
+### Integration Map
+
+```mermaid
+flowchart TD
+    ARS["AddressResolverService"]
+
+    MSB["Map Search Bar\nAutocomplete dropdown"] -->|"resolve(query)\non each debounced keystroke"| ARS
+    UPM["Upload Panel\nManual placement"]--->|"resolve(query)"| ARS
+    FIR["Folder Import\nFilename resolution"] -->|"resolve(filenameHint)\nonce per image"| ARS
+    FIRV["Folder Import\nReview UI"] -->|"Full candidate group\nas radio-group"| ARS
+    MCR["Marker Correction\nEdit Location"] -->|"resolve(query)"| ARS
+    REV["Detail View\nReverse geocode"] -->|"reverse(lat, lng)"| ARS
+
+    ARS --> DB[("DB: images.address_label\npg_trgm similarity")]
+    ARS --> GEO["GeocodingAdapter\n(Nominatim default)"]
+
+    ARS -->|"Cache: 5min TTL\nDebounce: 300ms\nAbort previous"| ARS
+```
+
 | Integration point                       | How `AddressResolverService` is used                                                                                                                                             |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Map search bar**                      | `resolve(query)` on each debounced keystroke. Result group rendered as autocomplete dropdown. Selecting a candidate pans/zooms the map.                                          |
@@ -272,6 +319,33 @@ Reverse geocoding (`AddressResolverService.reverse()`) can be used to back-fill 
 ---
 
 ## 9. Error States
+
+### Error State Flow
+
+```mermaid
+flowchart TD
+    Q["Query submitted"] --> DB{"DB query?"}
+    Q --> GEO{"Geocoder query?"}
+
+    DB -->|Succeeds| DB_OK["DB candidates available"]
+    DB -->|Fails| DB_FAIL["Suppress DB tier silently\nLog warning to console"]
+
+    GEO -->|Succeeds| GEO_OK["Geocoder candidates available"]
+    GEO -->|Timeout / Fails| GEO_FAIL["Show: 'External search\nunavailable'"]
+
+    DB_OK --> SHOW_BOTH["Show both tiers"]
+    GEO_OK --> SHOW_BOTH
+
+    DB_FAIL --> GEO_OK --> SHOW_GEO["Show geocoder only"]
+    DB_OK --> GEO_FAIL --> SHOW_DB["Show DB only + note"]
+
+    DB_FAIL --> GEO_FAIL --> BOTH_FAIL["Error: 'Address search unavailable'\n+ Retry button"]
+
+    subgraph EdgeCases["Edge Cases"]
+        SHORT["Query < 2 chars"] --> HINT["Show: 'Keep typing…'"]
+        ZERO["Both return 0 results"] --> NORES["Show: 'No results for query'"]
+    end
+```
 
 All error states follow the GeoSite UI state contract (`architecture.md` §13):
 

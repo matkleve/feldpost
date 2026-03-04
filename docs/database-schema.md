@@ -7,6 +7,123 @@ See also: `project-description.md`, `architecture.md`, `security-boundaries.md`,
 
 Database: PostgreSQL (Supabase) with **PostGIS extension** enabled.
 
+### Entity-Relationship Diagram
+
+```mermaid
+erDiagram
+    auth_users ||--|| profiles : "1:1"
+    auth_users ||--o{ user_roles : "has roles"
+    auth_users ||--o{ images : "uploads"
+    auth_users ||--o{ saved_groups : "creates"
+    auth_users ||--o{ coordinate_corrections : "corrects"
+    auth_users ||--o{ projects : "created_by (SET NULL)"
+    auth_users ||--o{ metadata_keys : "created_by (SET NULL)"
+
+    organizations ||--o{ profiles : "has members"
+    organizations ||--o{ projects : "scopes"
+    organizations ||--o{ images : "scopes"
+    organizations ||--o{ metadata_keys : "scopes"
+
+    roles ||--o{ user_roles : "assigned via"
+
+    projects ||--o{ images : "groups (SET NULL)"
+
+    images ||--o{ image_metadata : "has metadata"
+    images ||--o{ coordinate_corrections : "has corrections"
+    images ||--o{ saved_group_images : "in groups"
+
+    saved_groups ||--o{ saved_group_images : "contains"
+
+    metadata_keys ||--o{ image_metadata : "defines key"
+
+    auth_users {
+        uuid id PK
+        text email
+        text encrypted_password
+        timestamptz created_at
+    }
+    organizations {
+        uuid id PK
+        text name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    profiles {
+        uuid id PK_FK
+        text full_name
+        uuid organization_id FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    roles {
+        uuid id PK
+        text name UK
+    }
+    user_roles {
+        uuid user_id PK_FK
+        uuid role_id PK_FK
+    }
+    projects {
+        uuid id PK
+        uuid organization_id FK
+        text name
+        uuid created_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    images {
+        uuid id PK
+        uuid user_id FK
+        uuid organization_id FK
+        uuid project_id FK
+        text storage_path
+        text thumbnail_path
+        numeric exif_latitude
+        numeric exif_longitude
+        numeric corrected_latitude
+        numeric corrected_longitude
+        numeric latitude
+        numeric longitude
+        geography geog
+        timestamptz captured_at
+        timestamptz created_at
+        text address_label
+        boolean location_unresolved
+    }
+    metadata_keys {
+        uuid id PK
+        text key_name
+        uuid organization_id FK
+        uuid created_by FK
+    }
+    image_metadata {
+        uuid image_id PK_FK
+        uuid metadata_key_id PK_FK
+        text value_text
+    }
+    saved_groups {
+        uuid id PK
+        uuid user_id FK
+        text name
+        int tab_order
+    }
+    saved_group_images {
+        uuid group_id PK_FK
+        uuid image_id PK_FK
+        timestamptz added_at
+    }
+    coordinate_corrections {
+        uuid id PK
+        uuid image_id FK
+        uuid corrected_by FK
+        numeric previous_latitude
+        numeric previous_longitude
+        numeric new_latitude
+        numeric new_longitude
+        timestamptz corrected_at
+    }
+```
+
 Required extensions:
 
 ```sql
@@ -182,6 +299,16 @@ CHECK (direction_degrees IS NULL OR direction_degrees BETWEEN 0 AND 360)
 
 **Computed Column / Trigger**
 
+```mermaid
+flowchart LR
+    A[INSERT or UPDATE<br>latitude / longitude] --> B[trg_images_geog<br>BEFORE trigger]
+    B --> C[update_image_geog]
+    C --> D["SET geog = ST_SetSRID(<br>ST_MakePoint(lng, lat), 4326)<br>::geography"]
+    C --> E["SET updated_at = now()"]
+    D --> F[Row written to disk]
+    E --> F
+```
+
 The `geog` column is maintained by a trigger that fires on INSERT and UPDATE of `latitude` or `longitude`:
 
 ```sql
@@ -348,6 +475,40 @@ This table is append-only. A trigger on `images` captures the previous effective
 ---
 
 ## 12. Foreign Key Cascade Summary
+
+### Cascade Flow Diagram
+
+```mermaid
+flowchart TD
+    subgraph "DELETE auth.users"
+        U[auth.users] -->|CASCADE| P[profiles]
+        U -->|CASCADE| UR[user_roles]
+        U -->|CASCADE| I[images]
+        U -->|CASCADE| SG[saved_groups]
+        U -->|CASCADE| CC[coordinate_corrections]
+        U -->|SET NULL| PR[projects.created_by]
+        U -->|SET NULL| MK[metadata_keys.created_by]
+        I -->|CASCADE| IM[image_metadata]
+        I -->|CASCADE| CC2[coordinate_corrections]
+        I -->|CASCADE| SGI[saved_group_images]
+        SG -->|CASCADE| SGI2[saved_group_images]
+    end
+
+    subgraph "DELETE organizations"
+        O[organizations] -->|CASCADE| PR2[projects]
+        O -->|CASCADE| I2[images]
+        O -->|CASCADE| MK2[metadata_keys]
+        O -.->|RESTRICT| P2[profiles — blocked if members exist]
+    end
+
+    subgraph "DELETE projects"
+        PRD[projects] -->|SET NULL| I3[images.project_id]
+    end
+
+    subgraph "DELETE metadata_keys"
+        MKD[metadata_keys] -->|CASCADE| IM2[image_metadata]
+    end
+```
 
 | Parent Table    | Child Table              | FK Column         | On Delete | Rationale                                     |
 | --------------- | ------------------------ | ----------------- | --------- | --------------------------------------------- |
