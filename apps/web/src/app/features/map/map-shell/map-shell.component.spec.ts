@@ -136,6 +136,22 @@ describe('MapShellComponent', () => {
         expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
     });
 
+    it('map click closes upload panel when it is open', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        fixture.componentInstance.uploadPanelPinned.set(true);
+        expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
+
+        (
+            fixture.componentInstance as unknown as {
+                handleMapClick: (event: { latlng: { lat: number; lng: number } }) => void;
+            }
+        ).handleMapClick({ latlng: { lat: 48.2082, lng: 16.3738 } });
+
+        expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
+    });
+
     it('renders the app-upload-panel element', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();

@@ -600,9 +600,40 @@ GeoSite must function across desktop (Clerk) and mobile (Technician) form factor
 
 ### Map Initial State
 
-- **First load (no state):** If the browser provides geolocation, center on user's GPS coordinates at zoom 15. If geolocation is denied or unavailable, center on a configurable default location (e.g., company HQ coordinates from environment config) at zoom 12.
+- **First load (no state):** Start at fallback center. A background geolocation attempt may update internal `userPosition`, but must not add a user marker or force a recenter after the user has started interacting with the map.
 - **Returning user:** Restore last viewport (center + zoom) from `localStorage`.
 - **After address search:** Center and zoom as specified in the geocoding section (section 3).
+
+```mermaid
+flowchart TD
+  A[Map initializes] --> B{Saved viewport exists?}
+  B -->|Yes| C[Apply saved center + zoom]
+  B -->|No| D[Apply fallback center + zoom]
+
+  C --> E[Request one-shot background geolocation]
+  D --> E
+
+  E --> F{Geolocation success?}
+  F -->|No| G[Keep current map view]
+  F -->|Yes| H[Store userPosition only]
+
+  H --> I{User already interacted with map?}
+  I -->|Yes| G
+  I -->|No| J{Current view came from saved viewport?}
+  J -->|Yes| G
+  J -->|No| K[Optional soft recenter near user, no marker]
+
+  K --> L[Persist current viewport]
+  G --> L
+
+  L --> M{GPS button clicked?}
+  M -->|No| N[No user marker shown]
+  M -->|Yes| O[Request explicit geolocation]
+  O --> P{Valid coordinates?}
+  P -->|No| Q[Stop locating state, keep current view]
+  P -->|Yes| R[Show/update user marker + recenter]
+  R --> S[Persist viewport]
+```
 
 ---
 
