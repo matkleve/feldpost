@@ -70,9 +70,25 @@
     @if (dropdownOpen()) {
       <div class="search-dropdown" role="listbox" aria-label="Search results">
         @if (!searchQuery().trim()) {
-          <!-- Idle state: recent searches placeholder -->
+          <!-- Focused-empty state: recent searches -->
           <div class="search-dropdown__section-label">Recent searches</div>
-          <div class="search-dropdown__empty">No recent searches yet.</div>
+          @if (getVisibleRecentSearches().length === 0) {
+            <div class="search-dropdown__empty">No recent searches yet.</div>
+          } @else {
+            @for (recentSearch of getVisibleRecentSearches(); track recentSearch) {
+              <button
+                class="search-dropdown__item"
+                type="button"
+                role="option"
+                (click)="selectRecentSearch(recentSearch)"
+              >
+                <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
+                  >history</span
+                >
+                <span class="search-dropdown__item-text">{{ recentSearch }}</span>
+              </button>
+            }
+          }
         } @else {
           <!-- DB results header (placeholder) -->
           <div class="search-dropdown__section-label">Projects</div>
@@ -80,6 +96,20 @@
 
           <!-- Separator -->
           <div class="search-dropdown__divider" role="separator"></div>
+
+          @if (searchSuggestion()) {
+            <button
+              class="search-dropdown__item"
+              type="button"
+              role="option"
+              (click)="applySearchSuggestion()"
+            >
+              <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
+                >tips_and_updates</span
+              >
+              <span class="search-dropdown__item-text">Did you mean {{ searchSuggestion() }}?</span>
+            </button>
+          }
 
           <!-- Nominatim results -->
           @for (result of searchResults(); track result.display_name) {
@@ -92,7 +122,7 @@
               <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
                 >location_on</span
               >
-              <span class="search-dropdown__item-text">{{ result.display_name }}</span>
+              <span class="search-dropdown__item-text">{{ formatSearchResultLabel(result) }}</span>
             </button>
           }
 
@@ -108,21 +138,8 @@
   <button
     class="map-gps-btn"
     type="button"
-    [attr.aria-label]="
-      gpsLocating()
-        ? 'Finding my location'
-        : gpsTrackingEnabled()
-          ? 'Stop following my location'
-          : 'Go to my location'
-    "
-    [title]="
-      gpsLocating()
-        ? 'Finding my location'
-        : gpsTrackingEnabled()
-          ? 'Stop following my location'
-          : 'Go to my location'
-    "
-    [class.map-gps-btn--tracking]="gpsTrackingEnabled()"
+    [attr.aria-label]="gpsLocating() ? 'Finding my location' : 'Go to my location'"
+    [title]="gpsLocating() ? 'Finding my location' : 'Go to my location'"
     [class.map-gps-btn--locating]="gpsLocating()"
     (click)="goToUserPosition()"
   >

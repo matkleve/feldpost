@@ -306,7 +306,7 @@ The following items are out of scope for MVP and may be considered post-MVP:
 4. Before/after overlays.
 5. Heatmaps and analytics.
 6. Offline mode (graceful degradation for intermittent connectivity IS in scope; full offline is not).
-7. Directional relevance (bearing data is stored and exposed via direction cone on markers — see `audit-upload-map-interaction.md` Pattern 2).
+7. Directional relevance (bearing data is stored and exposed via direction cone on markers — see `audits/audit-upload-map-interaction.md` Pattern 2).
 8. Right-click map actions for upload/create marker here — UC5.
 9. `GoogleDriveAdapter` and other `ImageInputAdapter` implementations beyond local upload and folder import. `FolderImportAdapter` (Feature 41–43) is planned. `GoogleDriveAdapter` and further remote sources are post-MVP.
 10. Alternative `MapAdapter` implementations (Google Maps, Mapbox, etc.); `LeafletOSMAdapter` is the MVP default.

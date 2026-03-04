@@ -100,6 +100,30 @@
   }
 }
 
+:host ::ng-deep .map-user-location-marker {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  border: 3px solid var(--color-bg-surface);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-primary) 28%, transparent),
+    var(--shadow-sm);
+}
+
+:host ::ng-deep .map-search-location-marker {
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  border-radius: var(--radius-full);
+  background: var(--color-clay);
+  border: 3px solid var(--color-bg-surface);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-clay) 30%, transparent),
+    var(--shadow-sm);
+}
+
 // ── Floating search bar — top-center, unified expanding box ──────────────────
 //
 // The container IS the box. It keeps a fixed corner radius in all states
@@ -232,10 +256,6 @@
     background: var(--color-bg-elevated);
     color: var(--color-text-primary);
     transform: scale(1.04);
-  }
-
-  &--tracking {
-    color: var(--color-primary);
   }
 
   &__spinner {

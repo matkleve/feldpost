@@ -532,7 +532,7 @@ Acceptance criteria
 
 Goal
 
-- Fix the placement bug (no-GPS images can now be placed on the map), extract GPSImgDirection EXIF data, and add user feedback for placement mode. Full UX audit documented in `docs/audit-upload-map-interaction.md`.
+- Fix the placement bug (no-GPS images can now be placed on the map), extract GPSImgDirection EXIF data, and add user feedback for placement mode. Full UX audit documented in `docs/audits/audit-upload-map-interaction.md`.
 
 Files
 
@@ -542,7 +542,7 @@ Files
 - `apps/web/src/app/core/upload.service.spec.ts`
 - `apps/web/src/app/features/upload/upload-panel/upload-panel.component.spec.ts`
 - `apps/web/src/app/features/map/map-shell/map-shell.component.spec.ts`
-- `docs/audit-upload-map-interaction.md` (new — 100 UX ideas)
+- `docs/audits/audit-upload-map-interaction.md` (new — 100 UX ideas)
 - `docs/features.md` (updated direction spec)
 - `docs/decisions.md` (updated D7)
 
@@ -556,7 +556,7 @@ TODOs
 - [x] Write 12 new tests (direction EXIF, placement mode, placementRequested output). (AI, 2026-03-04)
 - [x] All 131 tests pass (`ng test --no-watch` exits 0). (AI, 2026-03-04)
 - [x] `ng build` exits 0. (AI, 2026-03-04)
-- [x] Create `docs/audit-upload-map-interaction.md` — 100 UX ideas for upload/map/direction. (AI, 2026-03-04)
+- [x] Create `docs/audits/audit-upload-map-interaction.md` — 100 UX ideas for upload/map/direction. (AI, 2026-03-04)
 - [x] Update `features.md` and `decisions.md` to reflect direction is now persisted and will be exposed. (AI, 2026-03-04)
 
 Acceptance criteria
@@ -712,6 +712,7 @@ TODOs
 - [ ] Refactor map search UI to explicit states: `Idle`, `FocusedEmpty`, `Typing`, `ResultsPartial`, `ResultsComplete`, `Committed`.
 - [ ] Add explicit committed-state clear control (`×`) in the search input; clear query + committed target while preserving active filters.
 - [ ] Add recent searches persistence (deduped MRU list with cap) and clear/commit behavior.
+- [x] Add forgiving address matching rollout A+B in map search (normalization + fallback query pass) with explicit "Did you mean …?" suggestion row. (AI, 2026-03-04)
 - [ ] Implement keyboard contract (`Cmd/Ctrl+K`, arrows, Enter, Escape, Backspace on empty committed query).
 - [ ] Implement accessibility contract (`listbox`/`option`, separator presentation roles, announcements).
 - [ ] Integrate search commit with map centering and distance-reference update without implicit filter resets.

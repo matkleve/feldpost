@@ -15,7 +15,7 @@ Search behavior currently exists across multiple docs and implementation notes:
 - Product-level feature intent in `features.md`.
 - User intent and flow context in `use-cases.md`.
 - Detailed address ranking and dropdown behavior in `address-resolver.md`.
-- Additional interaction ideas (idle/focused/typing/committed, live marker feedback, command behavior) in `audit-ui-design-interactions.md`.
+- Additional interaction ideas (idle/focused/typing/committed, live marker feedback, command behavior) in `audits/audit-ui-design-interactions.md`.
 
 This document consolidates those ideas and extends them into one implementation-ready contract.
 
@@ -310,3 +310,86 @@ Search operates as a single component with these states:
 2. Whether command results are always visible or only in explicit command mode.
 3. Exact scope of DB content search in MVP (projects/groups only vs metadata/file names included).
 4. Whether live marker highlight on typing ships in MVP or next milestone.
+
+---
+
+## 13. Forgiving address matching options (for typo/variant resilience)
+
+Problem example observed in implementation testing:
+
+- User searches a near-miss variant of a valid address (for example `Denisgass 46` while the real address is `Denisgasse 46`) and gets no useful candidate.
+
+### Option A — Query normalization + street-token expansion (lowest risk)
+
+Apply normalization before DB and geocoder lookup:
+
+- lowercase + trim + collapse repeated spaces
+- transliteration/diacritic normalization for matching (`straße` ↔ `strasse`)
+- street suffix expansion/compression dictionary (`g.` ↔ `gasse`, `str.` ↔ `straße`, etc.)
+- punctuation-insensitive comparison (`denisgasse,46` matches `denisgasse 46`)
+
+Pros:
+
+- Predictable behavior, easy to test
+- Minimal ranking disruption
+- Works for common Austrian/German street variants
+
+Cons:
+
+- Does not recover all real typos (missing letters/transpositions)
+
+### Option B — Two-pass fallback query strategy (balanced)
+
+If first pass returns zero or very low-confidence results, run fallback passes in order:
+
+1. street + house number (`denisgasse 46`)
+2. street only (`denisgasse`)
+3. nearest token-corrected variant (`denisgass` → `denisgasse`)
+
+Then merge with confidence tiers:
+
+- exact > normalized > corrected > street-only
+
+Pros:
+
+- High practical recovery for real-world typing mistakes
+- Keeps strict matches prioritized
+
+Cons:
+
+- Slightly more compute/requests
+- Needs clear confidence labels in UI
+
+### Option C — Edit-distance fuzzy candidate generation (highest recall, highest complexity)
+
+Generate typo-candidates using bounded edit distance (for example Levenshtein ≤ 1 or 2), then query DB/geocoder with top-k candidates.
+
+Pros:
+
+- Best typo tolerance
+- Strong recovery for short-miss queries
+
+Cons:
+
+- More complex ranking and noise control
+- Higher risk of irrelevant matches in dense city data
+
+### Recommended rollout
+
+For MVP/next milestone, implement **Option A + Option B** together:
+
+1. Always normalize input (Option A).
+2. Trigger fallback pass only when strict pass is empty or below confidence threshold (Option B).
+3. Show an explicit **suggestion row** when fallback produced the best candidate: _"Did you mean Denisgasse 46?"_
+
+- The typed text stays unchanged until user clicks/commits the suggestion.
+- Selecting the row replaces the query with the suggested text and reruns search once.
+- If strict matches exist, do not show the suggestion row.
+
+Keep Option C as post-MVP optimization after telemetry validates need.
+
+### Acceptance addendum for forgiving matching
+
+- Query variant `Denisgass 46` must surface `Denisgasse 46` within top 3 suggestions when available from DB or geocoder.
+- Fallback/corrected matches must be visually labeled (for example `Approximate match`).
+- Strict exact matches remain ranked above corrected/fallback matches.

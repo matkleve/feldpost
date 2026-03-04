@@ -21,12 +21,18 @@ import {
     OnDestroy,
     afterNextRender,
     computed,
+    inject,
     signal,
     viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel/upload-panel.component';
 import { ExifCoords } from '../../../core/upload.service';
+import { AuthService } from '../../../core/auth.service';
+
+const RECENT_SEARCH_STORAGE_PREFIX = 'sitesnap_recent_searches_';
+const RECENT_SEARCH_STORAGE_LIMIT = 8;
+const RECENT_SEARCH_RENDER_LIMIT = 5;
 
 // Patch Leaflet default icon URLs so they resolve correctly from the Angular bundle.
 const iconDefault = L.icon({
@@ -41,10 +47,25 @@ const iconDefault = L.icon({
 L.Marker.prototype.options.icon = iconDefault;
 
 /** A single result from the Nominatim geocoding API. */
+export interface NominatimAddress {
+    house_number?: string;
+    road?: string;
+    postcode?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    hamlet?: string;
+    county?: string;
+    country?: string;
+}
+
 export interface NominatimResult {
     lat: string;
     lon: string;
     display_name: string;
+    importance?: number;
+    address?: NominatimAddress;
 }
 
 @Component({
@@ -54,6 +75,8 @@ export interface NominatimResult {
     styleUrl: './map-shell.component.scss',
 })
 export class MapShellComponent implements OnDestroy {
+    private readonly authService = inject(AuthService);
+
     /** Reference to the Leaflet map container div. */
     private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
 
@@ -96,10 +119,7 @@ export class MapShellComponent implements OnDestroy {
      */
     readonly userPosition = signal<[number, number] | null>(null);
 
-    /** Whether GPS follow mode is currently enabled by the user. */
-    readonly gpsTrackingEnabled = signal(false);
-
-    /** True while waiting for the first GPS fix after pressing the button. */
+    /** True while waiting for a GPS fix after pressing the button. */
     readonly gpsLocating = signal(false);
 
     // ── Search state ─────────────────────────────────────────────────────────
@@ -109,6 +129,12 @@ export class MapShellComponent implements OnDestroy {
 
     /** Nominatim geocoding results for the current query. */
     readonly searchResults = signal<NominatimResult[]>([]);
+
+    /** Most-recent-first list of committed searches (persisted per user). */
+    readonly recentSearches = signal<string[]>([]);
+
+    /** Optional fallback suggestion when typo-tolerant matching is used. */
+    readonly searchSuggestion = signal<string | null>(null);
 
     /** Whether the search results dropdown is visible. */
     readonly dropdownOpen = signal(false);
@@ -121,9 +147,14 @@ export class MapShellComponent implements OnDestroy {
     // ── Private helpers ───────────────────────────────────────────────────────
 
     private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-    private gpsWatchId: number | null = null;
+    private userLocationMarker: L.Marker | null = null;
+    private searchLocationMarker: L.Marker | null = null;
+    private activeSearchMarkerLabel: string | null = null;
+    private latestSearchRequestId = 0;
 
     constructor() {
+        this.loadRecentSearches();
+
         afterNextRender(() => {
             this.initMap();
         });
@@ -133,7 +164,10 @@ export class MapShellComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
-        this.stopGpsTracking();
+        this.gpsLocating.set(false);
+        this.userLocationMarker?.remove();
+        this.userLocationMarker = null;
+        this.clearSearchLocationMarker();
         this.map?.remove();
     }
 
@@ -179,22 +213,32 @@ export class MapShellComponent implements OnDestroy {
     // ── GPS button ────────────────────────────────────────────────────────────
 
     /**
-     * Toggles GPS follow mode.
-     * - When enabling: starts watchPosition and keeps centering map on updates.
-     * - When disabling: clears watcher and stops re-centering.
+     * Recenters on the user's position once.
+     * If a recent position is already known, reuses it without requesting GPS again.
      */
     goToUserPosition(): void {
         if (typeof navigator === 'undefined' || !navigator.geolocation) return;
 
-        if (this.gpsTrackingEnabled()) {
-            this.stopGpsTracking();
+        const hasKnownPosition = this.recenterOnKnownUserPosition();
+        if (hasKnownPosition) {
             return;
         }
 
-        this.gpsTrackingEnabled.set(true);
-        const hasKnownPosition = this.recenterOnKnownUserPosition();
-        this.gpsLocating.set(!hasKnownPosition);
-        this.startGpsTracking();
+        this.gpsLocating.set(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+                this.userPosition.set(coords);
+                this.renderOrUpdateUserLocationMarker(coords);
+                const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
+                this.map?.setView(coords, zoom);
+                this.gpsLocating.set(false);
+            },
+            () => {
+                this.gpsLocating.set(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
+        );
     }
 
     // ── Search ────────────────────────────────────────────────────────────────
@@ -205,16 +249,27 @@ export class MapShellComponent implements OnDestroy {
         this.searchQuery.set(value);
         this.dropdownOpen.set(true);
 
+        if (
+            this.activeSearchMarkerLabel &&
+            this.normalizeSearchMarkerLabel(value) !==
+            this.normalizeSearchMarkerLabel(this.activeSearchMarkerLabel)
+        ) {
+            this.clearSearchLocationMarker();
+        }
+
         if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
 
         if (!value.trim()) {
             this.searchResults.set([]);
+            this.searchSuggestion.set(null);
+            this.clearSearchLocationMarker();
             return;
         }
         this.searchDebounceTimer = setTimeout(() => this.fetchNominatim(value), 300);
     }
 
     onSearchFocus(): void {
+        this.loadRecentSearches();
         this.dropdownOpen.set(true);
     }
 
@@ -227,22 +282,205 @@ export class MapShellComponent implements OnDestroy {
     selectSearchResult(result: NominatimResult): void {
         const lat = parseFloat(result.lat);
         const lon = parseFloat(result.lon);
+        const label = this.formatSearchResultLabel(result);
         if (!isNaN(lat) && !isNaN(lon) && this.map) {
             this.map.setView([lat, lon], 14);
+            this.renderOrUpdateSearchLocationMarker([lat, lon]);
         }
+        this.addRecentSearch(label);
         this.dropdownOpen.set(false);
-        this.searchQuery.set(result.display_name);
+        this.searchSuggestion.set(null);
+        this.searchQuery.set(label);
+        this.activeSearchMarkerLabel = label;
+    }
+
+    selectRecentSearch(label: string): void {
+        const normalized = label.trim();
+        if (!normalized) return;
+
+        if (this.searchDebounceTimer) {
+            clearTimeout(this.searchDebounceTimer);
+        }
+
+        this.searchQuery.set(normalized);
+        this.searchSuggestion.set(null);
+        this.addRecentSearch(normalized);
+        void this.fetchNominatim(normalized);
+    }
+
+    getVisibleRecentSearches(): string[] {
+        return this.recentSearches().slice(0, RECENT_SEARCH_RENDER_LIMIT);
+    }
+
+    applySearchSuggestion(): void {
+        const suggestion = this.searchSuggestion();
+        if (!suggestion) return;
+
+        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+        this.clearSearchLocationMarker();
+        this.searchQuery.set(suggestion);
+        this.searchSuggestion.set(null);
+        void this.fetchNominatim(suggestion);
     }
 
     private async fetchNominatim(query: string): Promise<void> {
-        try {
-            const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`;
-            const res = await fetch(url);
-            const data: NominatimResult[] = await res.json();
-            this.searchResults.set(data);
-        } catch {
-            this.searchResults.set([]);
+        const requestId = ++this.latestSearchRequestId;
+        const normalizedQuery = this.normalizeSearchQuery(query);
+
+        if (!normalizedQuery) {
+            if (requestId === this.latestSearchRequestId) {
+                this.searchResults.set([]);
+                this.searchSuggestion.set(null);
+            }
+            return;
         }
+
+        try {
+            const primaryResults = await this.fetchNominatimByQuery(normalizedQuery);
+            if (requestId !== this.latestSearchRequestId) return;
+
+            if (primaryResults.length > 0) {
+                this.searchResults.set(primaryResults);
+                this.searchSuggestion.set(null);
+                return;
+            }
+
+            const fallbackQueries = this.buildFallbackQueries(normalizedQuery);
+            for (const fallbackQuery of fallbackQueries) {
+                const fallbackResults = await this.fetchNominatimByQuery(fallbackQuery);
+                if (requestId !== this.latestSearchRequestId) return;
+
+                if (fallbackResults.length > 0) {
+                    this.searchResults.set(fallbackResults);
+                    this.searchSuggestion.set(this.prettifyQueryLabel(fallbackQuery));
+                    return;
+                }
+            }
+
+            this.searchResults.set([]);
+            this.searchSuggestion.set(null);
+        } catch {
+            if (requestId !== this.latestSearchRequestId) return;
+            this.searchResults.set([]);
+            this.searchSuggestion.set(null);
+        }
+    }
+
+    private async fetchNominatimByQuery(query: string): Promise<NominatimResult[]> {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`;
+        const response = await fetch(url);
+        if (!response.ok) return [];
+        const data: NominatimResult[] = await response.json();
+        return Array.isArray(data) ? data : [];
+    }
+
+    private normalizeSearchQuery(query: string): string {
+        const canonical = query
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/ß/g, 'ss')
+            .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        return this.applyStreetTokenCorrections(canonical);
+    }
+
+    private applyStreetTokenCorrections(query: string): string {
+        const corrected = query
+            .split(' ')
+            .map((token) => {
+                if (!token) return token;
+
+                if (token.endsWith('gass')) return `${token}e`;
+                if (token === 'g' || token === 'g.') return 'gasse';
+                if (token === 'str' || token === 'str.') return 'strasse';
+                if (token.endsWith('str')) return `${token}asse`;
+                if (token.endsWith('str.')) return `${token.slice(0, -1)}asse`;
+
+                return token;
+            })
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        return corrected;
+    }
+
+    private buildFallbackQueries(normalizedQuery: string): string[] {
+        const candidates: string[] = [];
+        const correctedStreetHouse = this.applyStreetTokenCorrections(normalizedQuery);
+
+        if (correctedStreetHouse && correctedStreetHouse !== normalizedQuery) {
+            candidates.push(correctedStreetHouse);
+        }
+
+        const streetOnly = this.toStreetOnlyQuery(correctedStreetHouse || normalizedQuery);
+        if (
+            streetOnly &&
+            streetOnly !== normalizedQuery &&
+            streetOnly !== correctedStreetHouse
+        ) {
+            candidates.push(streetOnly);
+        }
+
+        return candidates;
+    }
+
+    private toStreetOnlyQuery(query: string): string {
+        return query.replace(/\s+\d+[a-zA-Z]?\s*$/, '').trim();
+    }
+
+    private prettifyQueryLabel(query: string): string {
+        return query
+            .split(' ')
+            .map((token) => {
+                if (!token) return token;
+                if (/^\d+[a-zA-Z]?$/.test(token)) return token;
+                return token.charAt(0).toUpperCase() + token.slice(1);
+            })
+            .join(' ');
+    }
+
+    formatSearchResultLabel(result: NominatimResult): string {
+        const address = result.address;
+        if (address) {
+            const street = [address.road, address.house_number].filter(Boolean).join(' ').trim();
+            const city =
+                address.city ||
+                address.town ||
+                address.village ||
+                address.municipality ||
+                address.hamlet ||
+                address.county;
+            const zipCity = [address.postcode, city].filter(Boolean).join(' ').trim();
+            const rightPart = [zipCity, address.country].filter(Boolean).join(' ').trim();
+
+            if (street && rightPart) return `${street}, ${rightPart}`;
+            if (street) return street;
+            if (rightPart) return rightPart;
+        }
+
+        const parts = result.display_name
+            .split(',')
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        if (parts.length === 0) return result.display_name;
+
+        const street = parts[0] ?? '';
+        const country = parts[parts.length - 1] ?? '';
+        const zipCity =
+            parts.find((part) => /\b\d{4,6}\b/.test(part)) ??
+            parts.slice(1, -1).find((part) => /\b\d{4,6}\b/.test(part)) ??
+            parts[1] ?? '';
+
+        const rightPart = [zipCity, country].filter(Boolean).join(' ').trim();
+        if (street && rightPart) return `${street}, ${rightPart}`;
+        if (street) return street;
+        return result.display_name;
     }
 
     // ── Map init ──────────────────────────────────────────────────────────────
@@ -277,13 +515,6 @@ export class MapShellComponent implements OnDestroy {
             this.map?.getContainer().classList.remove('map-container--placing');
         });
 
-        // Any direct mouse interaction with the map exits GPS follow mode.
-        // This makes tracking state clear immediately when the user starts to move manually.
-        this.map.on('mousedown', () => {
-            if (this.gpsTrackingEnabled()) {
-                this.stopGpsTracking();
-            }
-        });
     }
 
     private initGeolocation(): void {
@@ -292,37 +523,12 @@ export class MapShellComponent implements OnDestroy {
             (pos) => {
                 const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
                 this.userPosition.set(coords);
+                this.renderOrUpdateUserLocationMarker(coords);
                 this.map?.setView(coords, 13);
             },
             () => {
                 // Geolocation denied or unavailable — Vienna fallback already set.
             },
-        );
-    }
-
-    private startGpsTracking(): void {
-        if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-
-        if (this.gpsWatchId !== null) {
-            navigator.geolocation.clearWatch(this.gpsWatchId);
-            this.gpsWatchId = null;
-        }
-
-        this.gpsWatchId = navigator.geolocation.watchPosition(
-            (pos) => {
-                const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-                this.userPosition.set(coords);
-                this.gpsLocating.set(false);
-                const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
-                this.map?.setView(coords, zoom);
-            },
-            (error) => {
-                this.gpsLocating.set(false);
-                if (error.code === GeolocationPositionError.PERMISSION_DENIED) {
-                    this.stopGpsTracking();
-                }
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
         );
     }
 
@@ -334,13 +540,123 @@ export class MapShellComponent implements OnDestroy {
         return true;
     }
 
-    private stopGpsTracking(): void {
-        if (typeof navigator !== 'undefined' && navigator.geolocation && this.gpsWatchId !== null) {
-            navigator.geolocation.clearWatch(this.gpsWatchId);
+    private renderOrUpdateUserLocationMarker(coords: [number, number]): void {
+        if (!this.map) return;
+
+        if (!this.userLocationMarker) {
+            const icon = L.divIcon({
+                className: 'map-user-location-marker',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
+            });
+
+            this.userLocationMarker = L.marker(coords, {
+                icon,
+                interactive: false,
+                keyboard: false,
+            }).addTo(this.map);
+            return;
         }
-        this.gpsWatchId = null;
-        this.gpsTrackingEnabled.set(false);
-        this.gpsLocating.set(false);
+
+        this.userLocationMarker.setLatLng(coords);
+    }
+
+    private renderOrUpdateSearchLocationMarker(coords: [number, number]): void {
+        if (!this.map) return;
+
+        if (!this.searchLocationMarker) {
+            const icon = L.divIcon({
+                className: 'map-search-location-marker',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10],
+            });
+
+            this.searchLocationMarker = L.marker(coords, {
+                icon,
+                interactive: false,
+                keyboard: false,
+            }).addTo(this.map);
+            return;
+        }
+
+        this.searchLocationMarker.setLatLng(coords);
+    }
+
+    private clearSearchLocationMarker(): void {
+        this.searchLocationMarker?.remove();
+        this.searchLocationMarker = null;
+        this.activeSearchMarkerLabel = null;
+    }
+
+    private loadRecentSearches(): void {
+        const storage = this.getStorage();
+        if (!storage) {
+            this.recentSearches.set([]);
+            return;
+        }
+
+        try {
+            const raw = storage.getItem(this.getRecentSearchesStorageKey());
+            if (!raw) {
+                this.recentSearches.set([]);
+                return;
+            }
+
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) {
+                this.recentSearches.set([]);
+                return;
+            }
+
+            const normalized = parsed
+                .filter((item): item is string => typeof item === 'string')
+                .map((item) => item.trim())
+                .filter((item) => item.length > 0)
+                .slice(0, RECENT_SEARCH_STORAGE_LIMIT);
+
+            this.recentSearches.set(normalized);
+        } catch {
+            this.recentSearches.set([]);
+        }
+    }
+
+    private addRecentSearch(label: string): void {
+        const normalized = label.trim();
+        if (!normalized) return;
+
+        const existing = this.recentSearches();
+        const withoutDuplicate = existing.filter(
+            (item) => item.toLowerCase() !== normalized.toLowerCase(),
+        );
+
+        const next = [normalized, ...withoutDuplicate].slice(0, RECENT_SEARCH_STORAGE_LIMIT);
+        this.recentSearches.set(next);
+        this.persistRecentSearches(next);
+    }
+
+    private persistRecentSearches(items: string[]): void {
+        const storage = this.getStorage();
+        if (!storage) return;
+
+        try {
+            storage.setItem(this.getRecentSearchesStorageKey(), JSON.stringify(items));
+        } catch {
+            // Ignore storage failures and keep in-memory state.
+        }
+    }
+
+    private getRecentSearchesStorageKey(): string {
+        const userId = this.authService.user()?.id ?? 'anonymous';
+        return `${RECENT_SEARCH_STORAGE_PREFIX}${userId}`;
+    }
+
+    private getStorage(): Storage | null {
+        if (typeof window === 'undefined') return null;
+        return window.localStorage;
+    }
+
+    private normalizeSearchMarkerLabel(value: string): string {
+        return value.trim().toLowerCase();
     }
 }
 

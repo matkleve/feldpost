@@ -161,7 +161,7 @@ For MVP:
 **Consequences**
 
 - Engineers have a clear, testable contract for filter parameters and sorting order.
-- Direction data (GPSImgDirection) is now extracted during EXIF parsing and persisted in the `direction` column. Direction cone visualization and editing will be exposed in the MVP UI as part of the marker interaction layer. See `audit-upload-map-interaction.md` Pattern 2.
+- Direction data (GPSImgDirection) is now extracted during EXIF parsing and persisted in the `direction` column. Direction cone visualization and editing will be exposed in the MVP UI as part of the marker interaction layer. See `audits/audit-upload-map-interaction.md` Pattern 2.
 - UI implementations should treat this ordering as part of the product behaviour, not as an incidental choice.
 
 ---
