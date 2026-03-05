@@ -1,0 +1,153 @@
+# Search Bar
+
+## What It Is
+
+A pill-shaped input floating over the map that lets users find places, photos, groups, and projects. It's the main way people navigate the map and find evidence. Supports keyboard shortcut `Cmd/Ctrl+K` for quick access.
+
+## What It Looks Like
+
+Pill-shaped container pinned top-center over the map. White/surface background, rounded-full, subtle shadow. 40px tall input with a search icon on the left. On focus, a dropdown panel slides open below (same width, not a separate overlay — it's in-flow inside the search container). Dropdown has section headers, clickable result rows, and a divider between DB results and geocoder results. On commit, a small `×` clear button appears inside the input. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
+
+## Where It Lives
+
+- **Route**: Global — rendered inside `MapShellComponent` template
+- **Parent**: `MapShellComponent` at `features/map/map-shell/map-shell.component.ts`
+- **Appears when**: Always visible when map page is active
+- **Dropdown appears when**: Input is focused or has query text
+
+## Actions
+
+| #   | User Action                                | System Response                                                           | Triggers                                                  |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | Focuses input (click or tab)               | Opens dropdown with recent searches                                       | State → `focused-empty`                                   |
+| 2   | Presses `Cmd/Ctrl+K`                       | Focuses input, opens dropdown                                             | State → `focused-empty`                                   |
+| 3   | Types characters                           | Debounces 300ms, queries DB + geocoder in parallel                        | State → `typing` → `results-partial` → `results-complete` |
+| 4   | Presses ArrowDown                          | Moves highlight to next selectable item (skips headers/dividers)          | `activeIndex` increments                                  |
+| 5   | Presses ArrowUp                            | Moves highlight to previous selectable item                               | `activeIndex` decrements                                  |
+| 6   | Presses Enter                              | Commits highlighted item (or top item if none highlighted)                | Fires `SearchCommitAction`                                |
+| 7   | Clicks a DB address result                 | Map centers on that location, adds Search Location Marker                 | `commit` type `map-center`                                |
+| 8   | Clicks a DB content result (project/group) | Navigates to that content's context                                       | `commit` type `open-content`                              |
+| 9   | Clicks a geocoder result                   | Map centers on location                                                   | `commit` type `map-center`                                |
+| 10  | Clicks a recent search item                | Re-executes that query                                                    | `commit` type `recent-selected`                           |
+| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                | State → `idle`                                            |
+| 12  | Clicks outside search                      | Closes dropdown                                                           | State → `idle` or `committed`                             |
+| 13  | Clicks `×` clear button                    | Clears query + committed state, removes Search Location Marker            | State → `idle`                                            |
+| 14  | Backspace on empty committed input         | Clears committed context                                                  | State → `focused-empty`                                   |
+| 15  | Query returns no results                   | Shows empty state with "No address found" + suggested actions             | —                                                         |
+| 16  | Geocoder slow/fails                        | DB results render immediately, geocoder section shows skeleton then hides | Graceful degradation                                      |
+
+## Component Hierarchy
+
+```
+SearchBar                                  ← positioned top-center in Map Zone, z-30
+├── InputRow                               ← pill shape, rounded-full, --color-bg-surface, shadow, h-10
+│   ├── SearchIcon                         ← 16px, left side
+│   ├── <input type="search">              ← flex-1, role="combobox", placeholder "Search address, project, group…"
+│   └── ClearButton (×)                    ← shown only in committed state, ghost style
+│
+└── Dropdown                               ← in-flow below input (not an overlay), role="listbox", same width
+    │
+    ├── [focused-empty] RecentSection
+    │   ├── SectionLabel "Recent searches"
+    │   └── DropdownItem × N               ← clock icon + label, role="option"
+    │
+    ├── [has results] AddressSection
+    │   ├── SectionLabel "Addresses"
+    │   └── DropdownItem × N               ← map-pin icon + label + "N photos" meta
+    │
+    ├── [has results] ContentSection
+    │   ├── SectionLabel "Projects & Groups"
+    │   └── DropdownItem × N               ← folder/tag icon + label + subtitle
+    │
+    ├── Divider                            ← 1px line, only if both DB and geocoder have results
+    │
+    ├── [has results] GeocoderSection
+    │   ├── SectionLabel "Places"
+    │   └── DropdownItem × N               ← globe icon + label + "External result"
+    │
+    ├── [loading] GeocoderSkeleton         ← 2 pulse rows while geocoder is fetching
+    │
+    └── [no results] EmptyState
+        ├── "No address found for {query}"
+        ├── "Try a different address or pin manually"
+        └── GhostButton "Drop pin"         ← starts placement mode
+```
+
+### DropdownItem (shared child component)
+
+Each result row: icon (varies by family) + label (truncated) + optional meta line.  
+Highlighted state via `activeIndex`. Icons by family:
+
+- `db-address` → map-pin
+- `db-content` → folder / image / tag (by contentType)
+- `geocoder` → globe
+- `recent` → clock
+- `command` → terminal
+
+## Data
+
+| Field                 | Source                                            | Type                          |
+| --------------------- | ------------------------------------------------- | ----------------------------- |
+| DB address candidates | `SearchOrchestratorService` → `dbAddressResolver` | `SearchAddressCandidate[]`    |
+| DB content candidates | `SearchOrchestratorService` → `dbContentResolver` | `SearchContentCandidate[]`    |
+| Geocoder candidates   | `SearchOrchestratorService` → `geocoderResolver`  | `SearchAddressCandidate[]`    |
+| Recent searches       | `localStorage` key `geosite-recent-searches`      | `SearchRecentCandidate[]`     |
+| Search result set     | `SearchOrchestratorService.searchInput()`         | `Observable<SearchResultSet>` |
+
+The `SearchOrchestratorService` already exists at `core/search/search-orchestrator.service.ts`. It handles debouncing, caching, deduplication, and ranking. The component drives it with a query observable + context observable.
+
+## State
+
+| Name                 | Type                                                                              | Default        | Controls                                                |
+| -------------------- | --------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------- |
+| `state`              | `SearchState`                                                                     | `'idle'`       | Current search state machine position                   |
+| `query`              | `string`                                                                          | `''`           | Text in the input                                       |
+| `dropdownOpen`       | `boolean`                                                                         | `false`        | Whether dropdown is visible                             |
+| `activeIndex`        | `number`                                                                          | `-1`           | Currently highlighted item for keyboard nav (-1 = none) |
+| `sections`           | `{ dbAddress: SearchSection, dbContent: SearchSection, geocoder: SearchSection }` | empty sections | Parsed from `SearchResultSet`                           |
+| `recentSearches`     | `SearchRecentCandidate[]`                                                         | `[]`           | Loaded from localStorage on init                        |
+| `committedCandidate` | `SearchCandidate \| null`                                                         | `null`         | The last committed result                               |
+| `allEmpty`           | `boolean`                                                                         | `true`         | Derived: all sections have 0 items                      |
+
+Types are defined in `core/search/search.models.ts` (already exists).
+
+## File Map
+
+| File                                                        | Purpose                                         |
+| ----------------------------------------------------------- | ----------------------------------------------- |
+| `features/map/search-bar/search-bar.component.ts`           | Main search bar component (standalone)          |
+| `features/map/search-bar/search-bar.component.html`         | Template matching hierarchy above               |
+| `features/map/search-bar/search-bar.component.scss`         | Scoped styles (pill shape, dropdown, skeleton)  |
+| `features/map/search-bar/search-dropdown-item.component.ts` | Single result row (standalone, inline template) |
+| `features/map/search-bar/search-bar.component.spec.ts`      | Unit tests covering Actions table               |
+
+## Wiring
+
+- Import `SearchBarComponent` in `MapShellComponent`'s template
+- Place `<search-bar />` inside the Map Zone area of `map-shell.component.html`
+- Global `Cmd/Ctrl+K` listener registered in `SearchBarComponent.ngOnInit()` via `@HostListener`
+- Click-outside detection via a `(document:click)` check or CDK overlay backdrop
+- On commit type `map-center`: call `MapAdapter` to center map + place Search Location Marker
+- On commit type `open-content`: use Angular Router to navigate
+
+## Acceptance Criteria
+
+- [ ] Search bar is visible top-center over the map on both desktop and mobile
+- [ ] Clicking input opens dropdown with recent searches
+- [ ] `Cmd/Ctrl+K` focuses input from anywhere on the map page
+- [ ] Typing shows debounced results grouped by section (Addresses, Projects & Groups, Places)
+- [ ] DB results appear before geocoder results
+- [ ] Geocoder results that are <30m from a DB result are hidden (dedup)
+- [ ] Section divider only shows when both DB and geocoder sections have items
+- [ ] ArrowUp/ArrowDown navigates results, skipping headers and dividers
+- [ ] Enter commits the highlighted item (or top item if none highlighted)
+- [ ] Clicking a result commits it
+- [ ] Address commit centers the map and shows Search Location Marker
+- [ ] Content commit navigates to the correct route
+- [ ] Escape closes dropdown; second Escape blurs input
+- [ ] Click outside closes dropdown
+- [ ] `×` clear button appears after commit; clicking it resets everything
+- [ ] Empty state shows "No address found" with "Drop pin" recovery action
+- [ ] Geocoder failure is non-blocking — DB results still render
+- [ ] Dropdown uses `role="listbox"`, items use `role="option"`
+- [ ] Screen reader announces result count on query completion
