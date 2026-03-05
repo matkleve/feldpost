@@ -1,4 +1,13 @@
-<div class="auth-shell">
+<div class="auth-shell auth-shell--map">
+  <div class="auth-map-bg" aria-hidden="true">
+    <iframe
+      class="auth-map-frame"
+      src="https://www.openstreetmap.org/export/embed.html?bbox=8.46%2C47.34%2C8.62%2C47.43&amp;layer=mapnik&amp;marker=47.3769%2C8.5417"
+      tabindex="-1"
+      title="Decorative city map background"
+    ></iframe>
+  </div>
+  <div class="auth-map-overlay" aria-hidden="true"></div>
   <div class="auth-card">
     @if (success()) {
       <div class="auth-success">

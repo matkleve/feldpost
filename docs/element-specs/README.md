@@ -59,6 +59,7 @@ Status: ✅ spec written | 🔲 needs spec
 
 ### Pages
 
+- ✅ `auth-map-background.md` — Auth Map Background (fixed city backdrop for login/register)
 - ✅ `photos-page.md` — Photos Page
 - ✅ `groups-page.md` — Groups Page
 - ✅ `settings-page.md` — Settings Page
