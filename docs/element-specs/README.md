@@ -19,10 +19,10 @@ Status: ✅ spec written | 🔲 needs spec
 
 ### Shell & Layout
 
-- 🔲 `map-shell.md` — Map Shell (top-level host)
-- 🔲 `map-zone.md` — Map Zone (flex container for map + floating controls)
-- 🔲 `sidebar.md` — Sidebar navigation rail
-- 🔲 `workspace-pane.md` — Right-side collapsible panel with group tabs
+- ✅ `map-shell.md` — Map Shell (top-level host)
+- ✅ `map-zone.md` — Map Zone (flex container for map + floating controls)
+- ✅ `sidebar.md` — Sidebar navigation rail
+- ✅ `workspace-pane.md` — Right-side collapsible panel with group tabs
 
 ### Search
 
@@ -30,35 +30,41 @@ Status: ✅ spec written | 🔲 needs spec
 
 ### Map Markers
 
-- 🔲 `photo-marker.md` — Photo Marker (square thumbnail marker)
-- 🔲 `count-marker.md` — Count Marker / Cluster
-- 🔲 `user-location-marker.md` — GPS user location marker
+- ✅ `photo-marker.md` — Photo Marker (square thumbnail marker + cluster)
+- ✅ `user-location-marker.md` — GPS user location marker
 
 ### Upload
 
-- 🔲 `upload-button.md` — Upload Button + Panel toggle
-- 🔲 `upload-panel.md` — Upload Panel (drop zone + file list)
-- 🔲 `placement-mode.md` — Placement Mode (banner + crosshair)
+- ✅ `upload-button-zone.md` — Upload Button Zone (FAB toggle)
+- ✅ `upload-panel.md` — Upload Panel (drop zone + file list)
+- ✅ `placement-mode.md` — Placement Mode (banner + crosshair)
 
 ### Workspace & Groups
 
-- 🔲 `group-tab-bar.md` — Group Tab Bar
-- 🔲 `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
-- 🔲 `thumbnail-card.md` — Thumbnail Card (128×128 with hover actions)
+- ✅ `group-tab-bar.md` — Group Tab Bar
+- ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
+- ✅ `thumbnail-card.md` — Thumbnail Card (128×128 with hover actions)
 
 ### Panels & Detail
 
-- 🔲 `filter-panel.md` — Filter Panel (accordion filters)
-- 🔲 `filter-chips.md` — Active Filter Chips Strip
-- 🔲 `image-detail.md` — Image Detail View
+- ✅ `filter-panel.md` — Filter Panel (accordion filters)
+- ✅ `active-filter-chips.md` — Active Filter Chips Strip
+- ✅ `image-detail-view.md` — Image Detail View
+
+### Controls
+
+- ✅ `gps-button.md` — GPS Button (center on user location)
+- ✅ `theme-toggle.md` — Theme Toggle (light / dark / system)
+- ✅ `radius-selection.md` — Radius Selection (right-click-drag circle)
 
 ### Pages
 
-- 🔲 `photos-page.md` — Photos Page
-- 🔲 `groups-page.md` — Groups Page
-- 🔲 `settings-page.md` — Settings Page
-- 🔲 `account-page.md` — Account Page
+- ✅ `photos-page.md` — Photos Page
+- ✅ `groups-page.md` — Groups Page
+- ✅ `settings-page.md` — Settings Page
+- ✅ `account-page.md` — Account Page
 
 ## Priority
 
-Write specs for whatever you're building next. The search bar spec is the example to follow.
+All specs are written. Use the search bar spec as the format reference.
+Pick the spec for whatever you're building and follow the `#implement-element` prompt workflow.
