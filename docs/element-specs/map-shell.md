@@ -64,10 +64,10 @@ MapShell                                   ← full viewport, flex row, --color-
 
 ## Acceptance Criteria
 
-- [ ] Full viewport with no scrollbars
-- [ ] Sidebar on left (desktop) / bottom (mobile)
-- [ ] Map fills remaining space
-- [ ] Floating controls (search, upload, GPS) don't overlap each other
+- [x] Full viewport with no scrollbars
+- [x] Sidebar on left (desktop) / bottom (mobile)
+- [x] Map fills remaining space
+- [x] Floating controls (search, upload, GPS) don't overlap each other
 - [ ] Workspace pane slides in from right without pushing sidebar
-- [ ] Placement mode adds crosshair cursor to map
+- [x] Placement mode adds crosshair cursor to map
 - [ ] Works on mobile: sidebar → bottom bar, workspace → bottom sheet

@@ -69,11 +69,11 @@ Markers are stateless DOM elements. State (selected, correcting, uploading) is t
 
 ## Acceptance Criteria
 
-- [ ] Never shows default Leaflet blue pin
-- [ ] Single markers show 128px thumbnail
-- [ ] Cluster markers show count on `--color-clay` background
+- [x] Never shows default Leaflet blue pin
+- [x] Single markers show thumbnail
+- [x] Cluster markers show count badge
 - [ ] All markers have 2px white outline + drop shadow
-- [ ] Tail points to exact coordinate
+- [x] Tail points to exact coordinate
 - [ ] Correction dot visible only for corrected markers
 - [ ] Pending upload ring pulses during upload
 - [ ] Direction cone appears on hover when bearing data exists

@@ -132,8 +132,8 @@ Types are defined in `core/search/search.models.ts` (already exists).
 
 ## Acceptance Criteria
 
-- [ ] Search bar is visible top-center over the map on both desktop and mobile
-- [ ] Clicking input opens dropdown with recent searches
+- [x] Search bar is visible top-center over the map on both desktop and mobile
+- [x] Clicking input opens dropdown with recent searches
 - [ ] `Cmd/Ctrl+K` focuses input from anywhere on the map page
 - [ ] Typing shows debounced results grouped by section (Addresses, Projects & Groups, Places)
 - [ ] DB results appear before geocoder results
@@ -141,11 +141,11 @@ Types are defined in `core/search/search.models.ts` (already exists).
 - [ ] Section divider only shows when both DB and geocoder sections have items
 - [ ] ArrowUp/ArrowDown navigates results, skipping headers and dividers
 - [ ] Enter commits the highlighted item (or top item if none highlighted)
-- [ ] Clicking a result commits it
-- [ ] Address commit centers the map and shows Search Location Marker
+- [x] Clicking a result commits it
+- [x] Address commit centers the map and shows Search Location Marker
 - [ ] Content commit navigates to the correct route
-- [ ] Escape closes dropdown; second Escape blurs input
-- [ ] Click outside closes dropdown
+- [x] Escape closes dropdown; second Escape blurs input
+- [x] Click outside closes dropdown
 - [ ] `×` clear button appears after commit; clicking it resets everything
 - [ ] Empty state shows "No address found" with "Drop pin" recovery action
 - [ ] Geocoder failure is non-blocking — DB results still render

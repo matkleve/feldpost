@@ -75,11 +75,11 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 
 ## Acceptance Criteria
 
-- [ ] Desktop: pill on left, expands on hover with 150ms transition
-- [ ] Desktop: shows icon + label when expanded, icon only when collapsed
-- [ ] Mobile: bottom tab bar, icons only, 56px tall
-- [ ] Active route highlighted with `--color-clay` accent
-- [ ] Disabled items are non-interactive with `aria-disabled`
-- [ ] Avatar shows first letter of user email
-- [ ] Avatar links to `/account`
-- [ ] Frosted glass effect on supporting browsers
+- [x] Desktop: pill on left, expands on hover with 150ms transition
+- [x] Desktop: shows icon + label when expanded, icon only when collapsed
+- [x] Mobile: bottom tab bar, icons only, 56px tall
+- [x] Active route highlighted with `--color-clay` accent
+- [x] Disabled items are non-interactive with `aria-disabled`
+- [x] Avatar shows first letter of user email
+- [x] Avatar links to `/account`
+- [x] Frosted glass effect on supporting browsers

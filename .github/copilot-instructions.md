@@ -53,6 +53,8 @@ supabase/         → migrations, config
 2. **Check `docs/glossary.md`** — use canonical UI element names
 3. **Check `docs/architecture.md`** — respect the layer stack and adapter pattern
 4. **Check `docs/design.md`** — follow design principles (field-first, map-primary, progressive disclosure, warmth, calm confidence)
+5. **Check design patterns in relevant element specs** — sidebar/ghost buttons/quiet actions/layout rhythm should match existing specs
+6. **Use Context7 MCP for external libraries before implementation** — consult current docs for Angular, Leaflet, Supabase, and Tailwind APIs; if Context7 conflicts with project docs, prefer project docs
 
 ## Design Tokens Reference
 

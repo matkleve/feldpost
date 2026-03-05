@@ -94,12 +94,12 @@ Types: `FileUploadState` and `FileUploadStatus` are defined in the component fil
 
 - [ ] Slide-down animation from upload button
 - [ ] Glassmorphic background with blur
-- [ ] Drag-and-drop works (visual feedback on drag-over)
-- [ ] Click on drop zone opens file picker
-- [ ] Per-file progress with status labels
-- [ ] Up to 3 parallel uploads
-- [ ] Failed files show Retry button
-- [ ] Missing-GPS files show placement prompt
-- [ ] Dismiss button removes file and revokes object URL
-- [ ] Accepted types: JPEG, PNG, HEIF; max 20MB
-- [ ] New marker appears on map after successful upload
+- [x] Drag-and-drop works (visual feedback on drag-over)
+- [x] Click on drop zone opens file picker
+- [x] Per-file progress with status labels
+- [x] Up to 3 parallel uploads
+- [x] Failed files show Retry button
+- [x] Missing-GPS files show placement prompt
+- [x] Dismiss button removes file and revokes object URL
+- [x] Accepted types: JPEG, PNG, HEIF/HEIC, WebP; max 25MB
+- [x] New marker appears on map after successful upload

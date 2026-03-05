@@ -48,10 +48,10 @@ Part of `MapShellComponent` template and styles — not a separate component. Th
 
 ## Acceptance Criteria
 
-- [ ] Banner appears when placement mode is active
-- [ ] Map cursor changes to crosshair
-- [ ] Clicking map places the marker and completes the upload
-- [ ] Cancel button exits placement mode
+- [x] Banner appears when placement mode is active
+- [x] Map cursor changes to crosshair
+- [x] Clicking map places the marker and completes the upload
+- [x] Cancel button exits placement mode
 - [ ] Escape key exits placement mode
-- [ ] Only one file can be placed at a time
+- [x] Only one file can be placed at a time
 - [ ] Banner has `role="status"` for accessibility

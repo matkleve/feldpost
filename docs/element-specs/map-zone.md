@@ -46,7 +46,7 @@ Not a separate component — part of `map-shell.component.html` and `.scss`.
 
 ## Acceptance Criteria
 
-- [ ] Map tiles fill the entire zone
-- [ ] Floating controls are positioned correctly and don't overlap
-- [ ] Placement click only fires when `placementActive` is true
-- [ ] Map interactions (pan, zoom) work even with floating controls on top
+- [x] Map tiles fill the entire zone
+- [x] Floating controls are positioned correctly and don't overlap
+- [x] Placement click only fires when `placementActive` is true
+- [x] Map interactions (pan, zoom) work even with floating controls on top

@@ -43,9 +43,9 @@ Part of `MapShellComponent` template (button + zone container are in `map-shell.
 
 ## Acceptance Criteria
 
-- [ ] Button always visible on map page
-- [ ] Desktop: 44px, top-right
+- [x] Button always visible on map page
+- [x] Desktop: 44px, top-right
 - [ ] Mobile: 56px FAB, bottom-right
-- [ ] Click toggles Upload Panel
-- [ ] Button shows active state when panel is open
-- [ ] `--color-clay` background, white icon
+- [x] Click toggles Upload Panel
+- [x] Button shows active state when panel is open
+- [x] `--color-clay` background, white icon

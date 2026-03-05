@@ -29,6 +29,9 @@ The agent reads the spec and implements exactly that. No guessing.
 ## Quick Start
 
 1. Write or review the element spec: `docs/element-specs/[element].md`
-2. Ask agent to **plan first**: use `#plan-before-build` prompt
-3. Review the plan, then ask agent to **implement**: use `#implement-element` prompt
-4. Verify: use `#review-against-spec` prompt or run through `implementation-checklist.md`
+2. Do preflight context checks before coding:
+   - Read `docs/design.md` and relevant element specs for pattern alignment
+   - Query Context7 MCP for external library usage (Angular, Leaflet, Supabase, Tailwind)
+3. Ask agent to **plan first**: use `#plan-before-build` prompt
+4. Review the plan, then ask agent to **implement**: use `#implement-element` prompt
+5. Verify: use `#review-against-spec` prompt or run through `implementation-checklist.md`

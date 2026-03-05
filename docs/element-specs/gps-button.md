@@ -49,9 +49,9 @@ GpsButton                                  ← 44/48px circle, floating bottom-r
 
 ## Acceptance Criteria
 
-- [ ] Floating bottom-right in Map Zone
+- [x] Floating bottom-right in Map Zone
 - [ ] 44px desktop, 48px mobile tap target
 - [ ] Pulse animation while seeking GPS
-- [ ] Pans map to user location on successful fix
+- [x] Pans map to user location on successful fix
 - [ ] Shows toast on GPS failure
-- [ ] Places/updates User Location Marker
+- [x] Places/updates User Location Marker

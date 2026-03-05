@@ -39,7 +39,7 @@ Part of `core/map/leaflet-osm-adapter.ts` (MapAdapter manages this marker).
 ## Acceptance Criteria
 
 - [ ] 18px diameter, blue, white border, outer glow
-- [ ] Appears only after successful GPS fix
+- [x] Appears only after successful GPS fix
 - [ ] Does not obscure nearby photo markers
 - [ ] Updates position if Geolocation watch is active
 - [ ] Disappears when user navigates away from map page
