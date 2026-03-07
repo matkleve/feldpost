@@ -2,11 +2,11 @@
 
 ## What It Is
 
-A pill-shaped input floating over the map that lets users find places, photos, groups, and projects. It's the main way people navigate the map and find evidence. Supports keyboard shortcut `Cmd/Ctrl+K` for quick access.
+A search surface floating over the map that lets users find places, photos, groups, and projects. It is the main way people navigate the map and find evidence. Supports keyboard shortcut `Cmd/Ctrl+K` for quick access.
 
 ## What It Looks Like
 
-Floating search surface pinned top-center over the map. Use the shared `.ui-container` panel geometry with the same corner radius as the Sidebar, subtle shadow, and warm `--color-bg-surface` background. The input row stays compact inside that container; do not morph the container into a pill in any state. On focus, the dropdown opens below inside the same surface (same width, not a separate overlay). Dropdown sections use headers, dividers, and clickable result rows built from the shared `.ui-item` row pattern. On commit, a small `×` clear button appears inside the input. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
+Floating search surface pinned top-center over the map. Use the shared `.ui-container` panel geometry with the same corner radius and tight panel inset as the Sidebar, subtle shadow, and warm `--color-bg-surface` background. The structure is: panel container → compact search row → results panel revealed inside the same surface. Do not morph the container into a pill in any state. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. On commit, a small `×` clear button appears inside the input using the same square control geometry language as the rest of the system. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
 
 ## Where It Lives
 
@@ -43,9 +43,9 @@ SearchBar                                  ← positioned top-center in Map Zone
 ├── InputRow                               ← compact search row inside shared panel surface
 │   ├── SearchIcon                         ← 16px, left side
 │   ├── <input type="search">              ← flex-1, role="combobox", placeholder "Search address, project, group…"
-│   └── ClearButton (×)                    ← shown only in committed state, ghost style
+│   └── ClearButton (×)                    ← shown only in committed state, square control using control-radius/media-size tokens
 │
-└── Dropdown                               ← in-flow below input (not an overlay), role="listbox", same width
+└── ResultsPanel                           ← revealed inside the same surface (not an overlay), role="listbox", same width
     │
     ├── [focused-empty] RecentSection
     │   ├── SectionLabel "Recent searches"
@@ -113,13 +113,13 @@ Types are defined in `core/search/search.models.ts` (already exists).
 
 ## File Map
 
-| File                                                        | Purpose                                         |
-| ----------------------------------------------------------- | ----------------------------------------------- |
-| `features/map/search-bar/search-bar.component.ts`           | Main search bar component (standalone)          |
-| `features/map/search-bar/search-bar.component.html`         | Template matching hierarchy above               |
-| `features/map/search-bar/search-bar.component.scss`         | Scoped styles (pill shape, dropdown, skeleton)  |
-| `features/map/search-bar/search-dropdown-item.component.ts` | Single result row (standalone, inline template) |
-| `features/map/search-bar/search-bar.component.spec.ts`      | Unit tests covering Actions table               |
+| File                                                        | Purpose                                                      |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| `features/map/search-bar/search-bar.component.ts`           | Main search bar component (standalone)                       |
+| `features/map/search-bar/search-bar.component.html`         | Template matching hierarchy above                            |
+| `features/map/search-bar/search-bar.component.scss`         | Scoped styles (shared panel surface, reveal panel, skeleton) |
+| `features/map/search-bar/search-dropdown-item.component.ts` | Single result row (standalone, inline template)              |
+| `features/map/search-bar/search-bar.component.spec.ts`      | Unit tests covering Actions table                            |
 
 ## Wiring
 
@@ -137,6 +137,7 @@ Types are defined in `core/search/search.models.ts` (already exists).
 - [ ] `Cmd/Ctrl+K` focuses input from anywhere on the map page
 - [ ] Typing shows debounced results grouped by section (Addresses, Projects & Groups, Places)
 - [ ] Search surface uses `.ui-container` with the same panel radius as the Sidebar in all states
+- [ ] Search surface uses the same tight panel inset tokens as the Sidebar
 - [ ] DB results appear before geocoder results
 - [ ] Geocoder results that are <30m from a DB result are hidden (dedup)
 - [ ] Section divider only shows when both DB and geocoder sections have items
@@ -149,8 +150,10 @@ Types are defined in `core/search/search.models.ts` (already exists).
 - [x] Escape closes dropdown; second Escape blurs input
 - [x] Click outside closes dropdown
 - [ ] `×` clear button appears after commit; clicking it resets everything
+- [ ] `×` clear button uses square control geometry aligned to shared control/media sizing tokens
 - [ ] Empty state shows "No address found" with "Drop pin" recovery action
 - [ ] Geocoder failure is non-blocking — DB results still render
 - [ ] Dropdown uses `role="listbox"`, items use `role="option"`
+- [ ] Results panel is revealed inside the same surface and does not behave like a detached floating dropdown
 - [ ] Opening and closing the dropdown does not change outer corner radius, item padding, or media-column width
 - [ ] Screen reader announces result count on query completion

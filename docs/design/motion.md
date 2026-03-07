@@ -35,9 +35,10 @@ All motion serves clarity or orientation — no decorative animation.
 ### Geometry stability rules
 
 - Shared layout primitives keep their geometry during transitions.
-- Do not animate row padding, row height, media-column width, item gap, or panel corner radius.
+- Do not animate container padding, row padding, row height, media-column width, item gap, or panel corner radius.
 - Sidebar expand/collapse may animate outer container width and label opacity/clipping only.
-- Search surfaces may animate dropdown visibility, opacity, or reveal, but keep the same panel radius as the closed state.
+- Search surfaces may animate visibility or opacity of revealed content, but keep the same panel radius and container padding as the closed state.
+- Search results should reveal within the existing panel surface rather than translating like a detached dropdown.
 - If a pill-style treatment causes layout errors, clipping issues, or geometry shifts during state changes, fall back to the standard `.ui-container` panel shape.
 
 | Interaction                  | Effect                                           | Duration | Easing                                   |
@@ -50,6 +51,6 @@ All motion serves clarity or orientation — no decorative animation.
 | Filter chip add/remove       | `opacity + max-width` (chip appear/collapse)     | 180ms    | `ease-in-out`                            |
 | Page navigation              | No full-page transitions; panels update in place | —        | —                                        |
 
-Panel and row geometry remain fixed while these transitions run.
+Panel and row geometry remain fixed while these transitions run, including container padding, row padding, media-column width, and panel radius.
 
 `prefers-reduced-motion: reduce` disables all transforms and fades, keeping only immediate state changes.

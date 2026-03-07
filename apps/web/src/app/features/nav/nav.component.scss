@@ -77,9 +77,6 @@
 
 .sidebar__panel {
   @media (min-width: 768px) {
-    --ui-container-padding-inline: var(--container-gap-tight);
-    --ui-container-padding-block: var(--container-gap-tight);
-    --ui-container-gap: var(--container-gap-tight);
     --ui-container-radius: var(--container-radius-panel);
 
     height: 100%;
@@ -143,11 +140,6 @@
 }
 
 .sidebar__item--spacer {
-  @media (min-width: 768px) {
-    flex: 1 1 auto;
-    min-height: var(--spacing-2);
-  }
-
   @media (max-width: 767px) {
     display: none;
   }
@@ -162,13 +154,19 @@
 // ── Nav link — ghost button pattern (Notion-inspired) ────────────────────────
 
 .nav__link {
+  --ui-item-min-height: var(--sidebar-row-height);
+  --ui-item-padding-inline: var(--sidebar-row-padding-inline);
+  --ui-item-padding-block: var(--sidebar-row-padding-block);
+  --ui-item-gap: var(--sidebar-row-gap);
+  --ui-item-radius: var(--container-radius-control);
+  --ui-item-media-size: var(--sidebar-media-size);
+
   display: grid;
   grid-template-columns: var(--sidebar-media-size) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--sidebar-row-gap);
   text-decoration: none;
   color: var(--color-text-secondary);
-  border-radius: var(--container-radius-control);
   white-space: nowrap;
   cursor: pointer;
   margin: 0;
@@ -178,9 +176,6 @@
 
   @media (min-width: 768px) {
     width: 100%;
-    min-height: var(--sidebar-row-height);
-    padding-block: var(--sidebar-row-padding-block);
-    padding-inline: var(--sidebar-row-padding-inline);
     overflow: hidden;
   }
 
@@ -233,9 +228,6 @@
 }
 
 .nav__media {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   inline-size: var(--sidebar-media-size);
   block-size: var(--sidebar-media-size);
   min-inline-size: var(--sidebar-media-size);

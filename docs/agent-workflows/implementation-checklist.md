@@ -37,12 +37,13 @@ Run through this after every agent-generated feature. Compare against the elemen
 
 - [ ] Design tokens used (`--color-clay`, `--color-bg-base`, etc.)
 - [ ] Shared layout primitives reused where applicable (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`)
+- [ ] Panel surfaces that should align share the same container padding tokens or shared container modifier
 - [ ] Loading state renders correctly
 - [ ] Error state renders correctly
 - [ ] Empty state renders correctly with recovery action
 - [ ] Ghost buttons for secondary actions, filled for primary CTA
 - [ ] Hover-to-reveal for card actions (Quiet Actions principle)
-- [ ] Transitions do not change panel corners, row padding, row height, or fixed media-column width
+- [ ] Transitions do not change container padding, panel corners, row padding, row height, or fixed media-column width
 
 ## Accessibility
 

@@ -14,6 +14,7 @@ The design system has three shared layout primitives that should be reused befor
 - Uses panel corners via `--container-radius-panel`.
 - Defines the alignment boundary that child rows inherit.
 - Components may override padding and gap through `--ui-container-*` variables, but should not swap between panel and pill corners across states.
+- Use `.ui-container--panel-tight` when a panel should share the stabilized Sidebar/Search Bar inset geometry.
 
 #### `.ui-item`
 
@@ -38,7 +39,8 @@ The design system has three shared layout primitives that should be reused befor
 Layout stability rules:
 
 - The Search Bar uses the same outer corner radius as the Sidebar.
-- Dropdown expansion happens inside the same `ui-container` surface; the container does not morph into or out of a pill.
+- Sidebar and Search Bar share the same tight panel alignment boundary.
+- Search results are revealed inside the same `ui-container` surface; the container does not morph into or out of a pill and the results panel should not behave like a detached floating dropdown.
 - If a decorative shape introduces transition artifacts or unstable geometry, remove the decorative shape and keep the primitive geometry intact.
 
 ### Layout Overview — All Breakpoints

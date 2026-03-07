@@ -206,6 +206,12 @@ router-outlet + * {
   --ui-container-padding-block: var(--container-padding-block-compact);
 }
 
+.ui-container--panel-tight {
+  --ui-container-padding-inline: var(--container-gap-tight);
+  --ui-container-padding-block: var(--container-gap-tight);
+  --ui-container-gap: var(--container-gap-tight);
+}
+
 .ui-item {
   --ui-item-min-height: 2.5rem;
   --ui-item-padding-inline: var(--container-padding-inline-compact);
