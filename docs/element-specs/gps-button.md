@@ -6,16 +6,18 @@ A small floating button that centers the map on the user's current GPS position.
 
 ## What It Looks Like
 
-44px circle (desktop) / 48px circle (mobile). `--color-bg-surface` background, crosshair/location icon in `--color-text-primary`. Subtle shadow. Three visual states:
+`2.75rem` circle (desktop / ~44px) / `3rem` circle (mobile / ~48px). `--color-bg-surface` background, crosshair/location icon in `--color-text-primary`. Subtle `box-shadow` (px). Three visual states:
 
 - **Idle**: Default icon, no highlight
 - **Seeking**: Pulsing animation while waiting for GPS fix
 - **Active**: Icon filled or highlighted to show map is tracking location
 
+> **Unit note:** Sizes use `rem` so the button scales with the user's browser font-size preference (accessibility). Shadow and border values stay in `px` — precision details that should not inflate.
+
 ## Where It Lives
 
-- **Parent**: Map Zone (floating, bottom-right cluster)
-- **Position**: Below or beside Upload Button Zone
+- **Parent**: Map Zone (floating)
+- **Position**: Bottom Right Corner
 
 ## Actions
 
@@ -29,10 +31,21 @@ A small floating button that centers the map on the user's current GPS position.
 ## Component Hierarchy
 
 ```
-GpsButton                                  ← 44/48px circle, floating bottom-right
+GpsButton                                  ← 2.75rem/3rem circle, floating bottom-right
 ├── LocationIcon                           ← crosshair or location pin icon
 └── [seeking] PulseRing                    ← CSS animation while awaiting fix
 ```
+
+## Design Tokens
+
+| Token                   | Value                       | Notes                  |
+| ----------------------- | --------------------------- | ---------------------- |
+| `--touch-target-base`   | `2.75rem` (≈44px)           | Desktop min tap target |
+| `--touch-target-mobile` | `3rem` (≈48px)              | Mobile min tap target  |
+| `--radius-circle`       | `50%`                       | Makes it a circle      |
+| `--shadow-float`        | `0 2px 8px rgba(0,0,0,0.2)` | px fine for shadows    |
+| `--color-bg-surface`    | (from design system)        | Button background      |
+| `--color-text-primary`  | (from design system)        | Icon color             |
 
 ## State
 
@@ -50,7 +63,7 @@ GpsButton                                  ← 44/48px circle, floating bottom-r
 ## Acceptance Criteria
 
 - [x] Floating bottom-right in Map Zone
-- [ ] 44px desktop, 48px mobile tap target
+- [ ] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
 - [ ] Pulse animation while seeking GPS
 - [x] Pans map to user location on successful fix
 - [ ] Shows toast on GPS failure
