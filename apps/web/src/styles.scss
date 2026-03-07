@@ -69,6 +69,20 @@
   --spacing-6: 32px;
   --spacing-7: 48px;
   --spacing-8: 64px;
+
+  // Container geometry — containers define the alignment boundaries that
+  // nested content, dropdowns, and panels should inherit.
+  --container-inset: var(--spacing-3);
+  --container-inset-mobile: var(--spacing-3);
+  --container-padding-inline-compact: var(--spacing-3);
+  --container-padding-inline: var(--spacing-4);
+  --container-padding-block-compact: var(--spacing-2);
+  --container-padding-block: var(--spacing-3);
+  --container-gap-tight: var(--spacing-1);
+  --container-gap: var(--spacing-2);
+  --container-radius-control: var(--radius-md);
+  --container-radius-panel: var(--radius-lg);
+  --container-radius-pill: var(--radius-full);
 }
 
 // ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
@@ -156,4 +170,25 @@ app-root {
 router-outlet + * {
   display: block;
   height: 100%;
+}
+
+// ── Shared container layout helpers ─────────────────────────────────────────
+.ui-container {
+  --ui-container-padding-inline: var(--container-padding-inline);
+  --ui-container-padding-block: var(--container-padding-block);
+  --ui-container-gap: var(--container-gap);
+  --ui-container-radius: var(--container-radius-panel);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-container-gap);
+  padding-block: var(--ui-container-padding-block);
+  padding-inline: var(--ui-container-padding-inline);
+  border-radius: var(--ui-container-radius);
+}
+
+.ui-container--compact {
+  --ui-container-padding-inline: var(--container-padding-inline-compact);
+  --ui-container-padding-block: var(--container-padding-block-compact);
 }

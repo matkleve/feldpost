@@ -2,13 +2,13 @@
 
 ## What It Is
 
-The main navigation rail. Desktop: a frosted-glass pill floating on the left that expands on hover to show labels. Mobile: a fixed bottom tab bar. Contains nav links to Map, Photos, Groups, Settings, and a user avatar at the bottom.
+The main navigation rail. Desktop: a frosted-glass floating panel on the left that expands on hover to show labels. Mobile: a fixed bottom tab bar. Contains nav links to Map, Photos, Groups, Settings, and a user avatar at the bottom.
 
 ## What It Looks Like
 
-**Desktop (≥768px):** Collapsed = 48px wide pill, left edge, vertically centered. On hover expands to 240px showing icon + label. Frosted glass background (`backdrop-filter: blur`). Contains 4 nav items stacked vertically + avatar slot at bottom.
+**Desktop (≥ 48rem / 768px):** Collapsed = `3rem` wide compact rail, left edge, vertically centered. The outer sidebar surface uses the shared container geometry system (`.ui-container`) with panel radius, light inset, and frosted-glass background. At rest, nav items render as centered square icon buttons inside the rail. On hover or keyboard focus, the rail expands to `15rem` and labels reveal without the icons jumping sideways.
 
-**Mobile (<768px):** Fixed bottom bar spanning full width, 56px tall. Icons only, evenly spaced. No avatar (avatar moves to account page).
+**Mobile (< 48rem / 768px):** Fixed bottom bar spanning full width, `3.5rem` tall. Icons only, evenly spaced. No avatar (avatar moves to account page).
 
 Warm surface: `--color-bg-surface` at 85% opacity with blur. Active nav link highlighted with `--color-clay`.
 
@@ -50,53 +50,52 @@ Every nav link has these visual states. Agents must implement **all** of them �
 
 ## Spacing & Sizing
 
-All values from the 4px base unit scale (`docs/design/tokens.md` §3.3). **No ad-hoc values.**
+All values from the `0.25rem` (4px) base unit scale (`docs/design/tokens.md` §3.3). **No ad-hoc values.**
 
 ### Desktop sidebar
 
-| Property                      | Value                               | Tailwind                     |
-| ----------------------------- | ----------------------------------- | ---------------------------- |
-| Collapsed width               | 48px                                | `w-12`                       |
-| Expanded width                | 240px                               | `w-60`                       |
-| Outer padding (top + bottom)  | 16px                                | `py-4`                       |
-| Outer padding (left + right)  | 8px (collapsed), 12px (expanded)    | `px-2` / `px-3`              |
-| Gap between nav items         | 4px                                 | `gap-1`                      |
-| NavLink internal padding      | 8px vertical, 12px horizontal       | `py-2 px-3`                  |
-| NavLink border-radius         | 8px                                 | `rounded-lg`                 |
-| Icon size                     | 20px                                | `text-xl` (Material Symbols) |
-| Icon-to-label gap (expanded)  | 12px                                | `gap-3`                      |
-| Label font size               | 14px (0.875rem)                     | `text-sm`                    |
-| Avatar diameter               | 32px                                | `w-8 h-8`                    |
-| Avatar bottom margin          | 0 (flush with `py-4` outer padding) | —                            |
-| Expand/collapse transition    | 150ms                               | `duration-150`               |
-| Expand easing                 | `ease-out`                          | `ease-out`                   |
-| Sidebar border-radius         | 12px                                | `rounded-xl`                 |
-| Sidebar shadow                | `shadow-md`                         | `shadow-md`                  |
-| Sidebar left offset from edge | 12px                                | `left-3`                     |
-| Sidebar vertical centering    | `top-1/2 -translate-y-1/2`          | —                            |
+| Property                      | Value                       | Tailwind                     |
+| ----------------------------- | --------------------------- | ---------------------------- |
+| Collapsed width               | `3rem` (48px)               | `w-12`                       |
+| Expanded width                | `15rem` (240px)             | `w-60`                       |
+| Container padding             | `0.25rem` (4px) all sides   | token-based                  |
+| Container radius              | `0.75rem` (12px)            | panel token                  |
+| Gap between nav items         | `0`                         | —                            |
+| Collapsed NavLink size        | `2.5rem × 2.5rem` (40×40px) | token-based                  |
+| Expanded NavLink min-height   | `2.75rem` (44px)            | token-based                  |
+| Expanded NavLink inline inset | `0.5rem` (8px)              | token-based                  |
+| NavLink border-radius         | `0.5rem` (8px)              | `rounded-lg`                 |
+| Icon size                     | `1.25rem` (20px)            | `text-xl` (Material Symbols) |
+| Icon-to-label gap (expanded)  | `0.75rem` (12px)            | `gap-3`                      |
+| Label font size               | `0.8125rem` (13px)          | `text-sm`                    |
+| Avatar diameter               | `2.25rem` (36px)            | token-based                  |
+| Expand/collapse transition    | `180ms`                     | `duration-180`               |
+| Expand easing                 | `ease-out`                  | `ease-out`                   |
+| Sidebar left offset from edge | `0.75rem` (12px)            | `left-3`                     |
+| Sidebar shadow                | `shadow-md`                 | `shadow-md`                  |
+| Sidebar vertical centering    | `top-1/2 -translate-y-1/2`  | —                            |
 
 ### Mobile bottom bar
 
 | Property                          | Value                            | Tailwind                           |
 | --------------------------------- | -------------------------------- | ---------------------------------- |
-| Bar height                        | 56px                             | `h-14`                             |
-| Bar horizontal padding            | 16px                             | `px-4`                             |
+| Bar height                        | `3.5rem` (56px)                  | `h-14`                             |
+| Bar horizontal padding            | `1rem` (16px)                    | `px-4`                             |
 | Safe area bottom                  | `env(safe-area-inset-bottom)`    | `pb-[env(safe-area-inset-bottom)]` |
 | Item distribution                 | Even                             | `justify-around`                   |
-| Icon size                         | 24px                             | `text-2xl`                         |
+| Icon size                         | `1.5rem` (24px)                  | `text-2xl`                         |
 | Active indicator                  | 2px bottom border `--color-clay` | —                                  |
 | No avatar (moves to account page) | —                                | —                                  |
 
-### SidebarPill affordance (collapsed only)
+### Desktop container geometry
 
-| Property      | Value                                   |
-| ------------- | --------------------------------------- |
-| Width         | 4px                                     |
-| Height        | 40px                                    |
-| Color         | `--color-border-strong`                 |
-| Border-radius | 2px                                     |
-| Position      | centered, 50% height                    |
-| Behavior      | fades out on expand (`opacity 0`, 80ms) |
+The desktop sidebar surface is a standard panel container, not a capsule. It must use the shared container geometry abstraction so panel radius, padding, and relative positioning stay consistent with the Search Bar and Upload Panel.
+
+- Container class: `.ui-container`
+- Container radius: `--container-radius-panel`
+- Container padding: `--ui-container-padding-inline` / `--ui-container-padding-block`
+- Child rows align to the container boundary in expanded state
+- Collapsed state centers square icon buttons without shifting the icon column on expand
 
 ## Keyboard Contract
 
@@ -116,34 +115,33 @@ All values from the 4px base unit scale (`docs/design/tokens.md` §3.3). **No ad
 
 ## Actions
 
-| #   | User Action                 | System Response                    | Triggers                      |
-| --- | --------------------------- | ---------------------------------- | ----------------------------- |
-| 1   | Hovers sidebar (desktop)    | Sidebar expands, shows labels      | CSS transition 150ms ease-out |
-| 2   | Mouse leaves sidebar        | Sidebar collapses to icons         | CSS transition 150ms ease-out |
-| 3   | Clicks nav link             | Navigates to route                 | Angular Router                |
-| 4   | Clicks disabled nav link    | Nothing (pointer-events: none)     | —                             |
-| 5   | Clicks avatar slot          | Navigates to `/account`            | Angular Router                |
-| 6   | Resizes below 768px         | Sidebar becomes bottom tab bar     | CSS media query               |
-| 7   | Focuses nav link (keyboard) | Sidebar expands (same as hover)    | Focus-within trigger          |
-| 8   | Focus leaves sidebar        | Sidebar collapses (if not hovered) | Focus-out                     |
+| #   | User Action                 | System Response                                                         | Triggers                      |
+| --- | --------------------------- | ----------------------------------------------------------------------- | ----------------------------- |
+| 1   | Hovers sidebar (desktop)    | Sidebar expands, shows labels                                           | CSS transition 150ms ease-out |
+| 2   | Mouse leaves sidebar        | Sidebar collapses to centered square icon buttons with no sideways jump | CSS transition 180ms ease-out |
+| 3   | Clicks nav link             | Navigates to route                                                      | Angular Router                |
+| 4   | Clicks disabled nav link    | Nothing (pointer-events: none)                                          | —                             |
+| 5   | Clicks avatar slot          | Navigates to `/account`                                                 | Angular Router                |
+| 6   | Resizes below `48rem`       | Sidebar becomes bottom tab bar                                          | CSS media query               |
+| 7   | Focuses nav link (keyboard) | Sidebar expands (same as hover)                                         | Focus-within trigger          |
+| 8   | Focus leaves sidebar        | Sidebar collapses (if not hovered)                                      | Focus-out                     |
 
 ## Component Hierarchy
 
 ```
 Sidebar                                    ← nav element, fixed/absolute left, frosted glass
-├── SidebarPanel                           ← inner flex column, gap between items
+├── SidebarPanel                           ← `.ui-container`, standard panel radius
 │   ├── NavLink "Map"                      ← icon: map, route: /
 │   ├── NavLink "Photos"                   ← icon: photo_camera, route: /photos
 │   ├── NavLink "Groups"                   ← icon: folder, route: /groups
 │   ├── NavLink "Settings"                 ← icon: settings, route: /settings
 │   ├── Spacer                             ← flex-1 pushes avatar to bottom
 │   └── AvatarSlot                         ← circle with user initial, links to /account
-└── SidebarPill                            ← 40×4px pill affordance at 50% height (collapsed only)
 ```
 
 ### NavLink (repeated child)
 
-Each link: Material Icon (20px) + label text. Active state via `routerLinkActive`. Disabled items get `aria-disabled="true"` and muted styling.
+Each link: Material Icon (`1.25rem` / 20px) + label text. Active state via `routerLinkActive`. Disabled items get `aria-disabled="true"` and muted styling.
 
 ## Data
 
@@ -176,10 +174,10 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 
 ### Structure
 
-- [x] Desktop: pill on left, expands on hover (150ms ease-out transition)
-- [x] Desktop: shows icon + label when expanded, icon only when collapsed
-- [x] Desktop: width matches design system (48px collapsed → 240px expanded)
-- [x] Mobile: bottom tab bar, icons only, 56px tall
+- [x] Desktop: floating panel on left, expands on hover
+- [x] Desktop: shows icon + label when expanded, centered square icon buttons when collapsed
+- [x] Desktop: width matches design system (`3rem` collapsed → `15rem` expanded)
+- [x] Mobile: bottom tab bar, icons only, `3.5rem` tall
 - [x] Frosted glass effect on supporting browsers (with fallback solid bg)
 
 ### States (all required)
@@ -197,10 +195,10 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 
 ### Spacing (no ad-hoc values)
 
-- [ ] Outer padding: `py-4 px-2` (collapsed) / `py-4 px-3` (expanded)
-- [ ] Nav item gap: `gap-1` (4px)
-- [ ] NavLink padding: `py-2 px-3`
-- [ ] Icon-to-label gap: `gap-3` (12px)
+- [ ] Desktop container uses `.ui-container` with panel radius and token-driven padding
+- [ ] Collapsed desktop nav items are square and icon-centered
+- [ ] Expanded desktop nav items reveal labels without the icon shifting sideways
+- [ ] Expanded desktop icon-to-label gap uses `0.75rem` (12px)
 - [ ] Mobile: `h-14 px-4 justify-around` + `env(safe-area-inset-bottom)`
 
 ### Keyboard

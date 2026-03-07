@@ -1,20 +1,39 @@
 :host {
+  --search-bar-safe-inline: max(var(--container-inset), calc(3rem + var(--spacing-4)));
+
   position: absolute;
-  top: 1rem;
+  top: var(--container-inset);
   left: 50%;
   z-index: var(--z-upload-button);
-  width: min(36rem, calc(100% - 7.5rem));
+  width: min(36rem, calc(100% - (2 * var(--search-bar-safe-inline))));
   transform: translateX(-50%);
 
   @media (max-width: 47.9375rem) {
-    width: calc(100% - 1.5rem);
-    top: 0.75rem;
+    --search-bar-safe-inline: var(--container-inset-mobile);
+
+    width: calc(100% - (2 * var(--search-bar-safe-inline)));
+    top: var(--container-inset-mobile);
   }
 }
 
 .search-bar {
+  --ui-container-radius: var(--container-radius-panel);
+  --ui-container-padding-block: 0;
+  --ui-container-gap: 0;
+  --search-bar-padding-inline: var(
+    --ui-container-padding-inline,
+    var(--container-padding-inline-compact)
+  );
+  --search-bar-padding-block: var(--container-padding-block-compact);
+  --search-bar-gap: var(--container-gap);
+  --search-dropdown-item-padding-inline: var(--search-bar-padding-inline);
+  --search-dropdown-item-padding-block: var(--container-padding-block-compact);
+  --search-dropdown-item-gap: var(--search-bar-gap);
+  --search-dropdown-item-radius: var(--container-radius-control);
+
+  width: 100%;
   border: 1px solid var(--color-border);
-  border-radius: 1.75rem;
+  border-radius: var(--ui-container-radius);
   background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(14px);
@@ -24,11 +43,11 @@
 
 .search-bar__input-row {
   display: flex;
+  width: 100%;
   min-height: 2.5rem;
   align-items: center;
-  gap: 0.5rem;
-  padding-left: 0.875rem;
-  padding-right: 0.5rem;
+  gap: var(--search-bar-gap);
+  padding-block: var(--search-bar-padding-block);
 }
 
 .search-bar__icon,
@@ -61,7 +80,7 @@
   min-width: 2.75rem;
   min-height: 2.75rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -76,13 +95,14 @@
 }
 
 .search-bar__dropdown {
+  width: 100%;
   border-top: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
   background: var(--color-bg-elevated);
-  padding-block: 0.5rem;
+  padding-block: var(--search-bar-padding-block);
 }
 
 .search-bar__section-label {
-  padding: 0.25rem 1rem 0.375rem;
+  padding: 0 var(--search-bar-padding-inline) var(--spacing-1);
   color: var(--color-text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -92,15 +112,15 @@
 
 .search-bar__divider {
   height: 1px;
-  margin: 0.25rem 1rem 0.5rem;
+  margin: var(--spacing-1) var(--search-bar-padding-inline) var(--search-bar-gap);
   background: var(--color-border);
 }
 
 .search-bar__empty-state {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.875rem 1rem 0.5rem;
+  gap: var(--search-bar-gap);
+  padding: var(--search-bar-padding-block) var(--search-bar-padding-inline);
 }
 
 .search-bar__empty-title {
@@ -112,6 +132,7 @@
 
 .search-bar__empty-copy {
   margin: 0;
+  padding-inline: var(--search-bar-padding-inline);
   color: var(--color-text-secondary);
   font-size: 0.8125rem;
   line-height: 1.5;
@@ -120,19 +141,19 @@
 .search-bar__ghost-action {
   min-width: 0;
   align-self: flex-start;
-  padding-inline: 0.875rem;
+  padding-inline: var(--search-bar-padding-inline);
   color: var(--color-clay);
 }
 
 .search-bar__skeleton-list {
   display: grid;
-  gap: 0.5rem;
-  padding: 0 1rem 0.5rem;
+  gap: var(--search-bar-gap);
+  padding: 0 var(--search-bar-padding-inline) var(--search-bar-padding-block);
 }
 
 .search-bar__skeleton-row {
   height: 2.5rem;
-  border-radius: 0.75rem;
+  border-radius: var(--container-radius-control);
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--color-border) 70%, transparent) 0%,

@@ -1,5 +1,5 @@
 <section
-  class="upload-panel"
+  class="upload-panel ui-container"
   [class.upload-panel--visible]="visible()"
   role="region"
   aria-label="Upload images"
@@ -66,7 +66,10 @@
                 aria-hidden="true"
               />
             } @else {
-              <div class="upload-panel__thumbnail upload-panel__thumbnail--placeholder" aria-hidden="true">
+              <div
+                class="upload-panel__thumbnail upload-panel__thumbnail--placeholder"
+                aria-hidden="true"
+              >
                 <span class="material-icons">image</span>
               </div>
             }

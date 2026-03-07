@@ -37,9 +37,12 @@ import { SearchCandidate } from '../../../core/search/search.models';
                 width: 100%;
                 min-height: 3rem;
                 align-items: flex-start;
-                gap: 0.75rem;
-                padding: 0.75rem 1rem;
+                gap: var(--search-dropdown-item-gap, var(--container-gap));
+                padding:
+                    var(--search-dropdown-item-padding-block, var(--container-padding-block-compact))
+                    var(--search-dropdown-item-padding-inline, var(--container-padding-inline));
                 border: 0;
+                border-radius: var(--search-dropdown-item-radius, var(--container-radius-control));
                 background: transparent;
                 color: var(--color-text-primary);
                 text-align: left;
@@ -66,7 +69,7 @@ import { SearchCandidate } from '../../../core/search/search.models';
                 min-width: 0;
                 flex: 1 1 auto;
                 flex-direction: column;
-                gap: 0.125rem;
+                gap: var(--container-gap-tight, 0.25rem);
             }
 
             .search-dropdown-item__label,

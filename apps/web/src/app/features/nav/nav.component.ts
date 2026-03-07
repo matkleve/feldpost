@@ -1,12 +1,13 @@
 /**
- * NavComponent — LeftSidebar: floating pill sidebar (desktop) or
+ * NavComponent — LeftSidebar: floating sidebar panel (desktop) or
  * bottom tab bar (mobile < 768 px).
  *
  * M-UI2: App Shell & Navigation
  *
- * Design: Claude-inspired frosted glass, vertically centred pill on the left
- * edge. At rest: icon-only (~52 px wide). On hover: expands right to show
- * icon + label (150 ms ease-out). Uses Google Material Icons.
+ * Design: Claude-inspired frosted glass, vertically centred compact rail on the
+ * left edge. At rest, nav items are square icon buttons. On hover, the rail
+ * expands right and reveals labels without shifting icon alignment. Uses Google
+ * Material Icons.
  *
  * Ground rules:
  *  - Standalone component; imports only what the template uses.

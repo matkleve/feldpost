@@ -23,24 +23,36 @@
 
   @media (min-width: 768px) {
     top: 50%;
-    left: 0.75rem;
+    left: var(--container-inset);
     transform: translateY(-50%);
     width: 3rem; // 48px collapsed
     height: auto; // fit content
     max-height: 80vh;
-    border-radius: 1.5rem;
+    border-radius: var(--container-radius-panel);
     display: flex;
     align-items: stretch;
+    overflow: clip;
     transition: width 180ms ease-out;
 
     &:hover,
     &:focus-within {
       width: 15rem; // 240px expanded per design spec
 
+      .nav__link {
+        max-width: 100%;
+        min-height: 2.75rem;
+        padding-inline: var(--spacing-2);
+        gap: var(--spacing-3);
+      }
+
       .nav__label {
         max-width: 10rem; // enough for any label text
         opacity: 1;
         transform: translateX(0);
+      }
+
+      .sidebar__avatar-slot {
+        justify-content: flex-start;
       }
     }
   }
@@ -66,15 +78,14 @@
 
 .sidebar__panel {
   @media (min-width: 768px) {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    // Keep top/bottom breathing room, but avoid a "top-heavy" feel vs link side insets.
-    padding: 0.3125rem 0; // 5px vertical, horizontal spacing comes from .nav__link
+    --ui-container-padding-inline: var(--container-gap-tight);
+    --ui-container-padding-block: var(--container-gap-tight);
+    --ui-container-gap: var(--container-gap-tight);
+    --ui-container-radius: var(--container-radius-panel);
+
     height: 100%;
     width: 100%;
-    overflow: hidden;
-    border-radius: 1.5rem;
+    min-height: 0;
 
     // Frosted glass
     background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
@@ -104,7 +115,7 @@
   @media (min-width: 768px) {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
     width: 100%;
   }
 
@@ -138,20 +149,27 @@
   align-items: center;
   text-decoration: none;
   color: var(--color-text-secondary);
-  border-radius: var(--radius-md);
+  border-radius: var(--container-radius-control);
   white-space: nowrap;
   cursor: pointer;
   transition:
     background 80ms ease-out,
-    color 80ms ease-out;
+    color 80ms ease-out,
+    max-width 180ms ease-out,
+    min-height 180ms ease-out,
+    padding 180ms ease-out,
+    gap 180ms ease-out;
 
   @media (min-width: 768px) {
     width: 100%;
-    min-height: 2.75rem; // 44px tap target
-    // 48px sidebar − 2px border = 46px inner.
-    // 13px pad + 20px icon + 13px pad = 46px → icon centred.
-    padding: 0.5rem 0.8125rem;
-    gap: 0.75rem; // 12px between icon and label
+    max-width: 2.5rem;
+    min-height: 2.5rem; // square icon rail at rest
+    min-width: 2.5rem;
+    justify-content: center;
+    padding-block: 0;
+    padding-inline: 0;
+    gap: 0;
+    margin-inline: auto;
   }
 
   @media (max-width: 767px) {
@@ -244,8 +262,8 @@
   @media (min-width: 768px) {
     width: 100%;
     display: flex;
-    justify-content: center; // centre avatar in collapsed pill
-    padding: 0.25rem 0;
+    justify-content: center;
+    padding-block: 0;
   }
 
   @media (max-width: 767px) {
