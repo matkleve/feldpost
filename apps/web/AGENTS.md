@@ -37,6 +37,14 @@ src/app/
 - Component naming: `PascalCaseComponent` (e.g., `MapShellComponent`)
 - Never call Leaflet or Supabase APIs directly from components — use service abstractions
 
+## Commenting Guidance
+
+- Add short explanatory comments when the reader would otherwise need to infer intent from implementation details
+- Prefer comments for complex function purpose, non-obvious control flow, architectural constraints, data normalization, and side effects
+- Use brief docblocks for orchestration-heavy methods when inputs, outputs, or failure modes are not obvious from the signature
+- Avoid comments that only restate the code immediately below them
+- Keep comments local and specific, for example stale-state guards, normalization decisions, or why a service boundary exists
+
 ## Design Tokens
 
 - Background: `--color-bg-base` (#F9F7F4 light / #0F0E0C dark)
