@@ -63,8 +63,8 @@ GpsButton                                  ← 2.75rem/3rem circle, floating bot
 ## Acceptance Criteria
 
 - [x] Floating bottom-right in Map Zone
-- [ ] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
-- [ ] Pulse animation while seeking GPS
+- [x] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
+- [x] Pulse animation while seeking GPS
 - [x] Pans map to user location on successful fix
-- [ ] Shows toast on GPS failure
+- [x] Shows toast on GPS failure
 - [x] Places/updates User Location Marker
