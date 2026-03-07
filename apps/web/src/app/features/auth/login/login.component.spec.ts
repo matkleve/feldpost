@@ -67,6 +67,13 @@ describe('LoginComponent', () => {
         expect(h1?.textContent).toContain('Sign in');
     });
 
+    it('renders map background container', () => {
+        const { fixture } = setup();
+        const host = fixture.nativeElement as HTMLElement;
+        expect(host.querySelector('.auth-shell--map')).toBeTruthy();
+        expect(host.querySelector('.auth-map-frame')).toBeTruthy();
+    });
+
     it('form is invalid when empty', () => {
         const { fixture } = setup();
         expect(fixture.componentInstance['form'].invalid).toBe(true);

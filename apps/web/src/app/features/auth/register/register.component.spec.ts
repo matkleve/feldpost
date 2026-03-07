@@ -68,6 +68,14 @@ describe('RegisterComponent', () => {
         expect(h1?.textContent).toContain('Create account');
     });
 
+    it('renders map background and form scroll region', () => {
+        const { fixture } = setup();
+        const host = fixture.nativeElement as HTMLElement;
+        expect(host.querySelector('.auth-shell--map')).toBeTruthy();
+        expect(host.querySelector('.auth-map-frame')).toBeTruthy();
+        expect(host.querySelector('.auth-card-scroll')).toBeTruthy();
+    });
+
     it('form is invalid when empty', () => {
         const { fixture } = setup();
         expect(fixture.componentInstance['form'].invalid).toBe(true);

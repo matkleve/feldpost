@@ -69,7 +69,8 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 0.625rem 0; // vertical only — let links handle horizontal centering
+    // Keep top/bottom breathing room, but avoid a "top-heavy" feel vs link side insets.
+    padding: 0.3125rem 0; // 5px vertical, horizontal spacing comes from .nav__link
     height: 100%;
     width: 100%;
     overflow: hidden;
