@@ -16,15 +16,17 @@ Your job is to build UI elements exactly as specified in element specs.
 
 1. Read the element spec from `docs/element-specs/`
 2. Follow ALL conventions in the project's AGENTS.md and instruction files
-3. Create every file listed in the spec's **File Map**
-4. Match the **Component Hierarchy** (pseudo-HTML) exactly
-5. Implement every row from the **Actions** table — skip nothing
-6. Use the exact **State** variables, types, and defaults listed
-7. Use the exact **Data** sources and Supabase queries listed
-8. Follow the **Wiring** section for parent integration and routing
-9. Use glossary names from `docs/glossary.md` for all components
-10. Provide loading, error, and empty states as described
-11. Mark the corresponding spec checklist items as done in the element spec file when the implementation is complete
+3. Check what is already implemented in the files from the spec's **File Map** and related wiring before making changes
+4. Compare the existing implementation against the spec, identify anything incomplete or deviating that needs attention, and continue from that state instead of starting over
+5. Create every missing file listed in the spec's **File Map**
+6. Match the **Component Hierarchy** (pseudo-HTML) exactly
+7. Implement every row from the **Actions** table — skip nothing
+8. Use the exact **State** variables, types, and defaults listed
+9. Use the exact **Data** sources and Supabase queries listed
+10. Follow the **Wiring** section for parent integration and routing
+11. Use glossary names from `docs/glossary.md` for all components
+12. Provide loading, error, and empty states as described
+13. Mark the corresponding spec checklist items as done in the element spec file when the implementation is complete
 
 ## Constraints
 
