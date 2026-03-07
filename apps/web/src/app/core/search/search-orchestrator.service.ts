@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
 import {
     Observable,
+    catchError,
     combineLatest,
+    concat,
     debounceTime,
     distinctUntilChanged,
     map,
     of,
     shareReplay,
     switchMap,
+    take,
+    tap,
 } from 'rxjs';
 import {
     DEFAULT_SEARCH_ORCHESTRATOR_OPTIONS,
@@ -77,7 +81,7 @@ export class SearchOrchestratorService {
                 ([prevQuery, prevContext], [nextQuery, nextContext]) =>
                     prevQuery === nextQuery && JSON.stringify(prevContext) === JSON.stringify(nextContext),
             ),
-            switchMap(([query, context]) => this.searchOnce(query, context)),
+            switchMap(([query, context]) => this.searchSequence(query, context)),
             shareReplay({ bufferSize: 1, refCount: true }),
         );
     }
@@ -210,6 +214,7 @@ export class SearchOrchestratorService {
         dbAddress: SearchAddressCandidate[],
         dbContent: SearchContentCandidate[],
         geocoder: SearchAddressCandidate[],
+        options?: { geocoderLoading?: boolean },
     ): SearchSection[] {
         const sections: SearchSection[] = [];
 
@@ -227,9 +232,14 @@ export class SearchOrchestratorService {
             (left, right) => (right.score ?? 0) - (left.score ?? 0),
         );
 
-        sections.push({ family: 'db-address', title: 'Known places', items: rankedDbAddress });
-        sections.push({ family: 'db-content', title: 'Photos and groups', items: rankedDbContent });
-        sections.push({ family: 'geocoder', title: 'Other locations', items: rankedGeocoder });
+        sections.push({ family: 'db-address', title: 'Addresses', items: rankedDbAddress });
+        sections.push({ family: 'db-content', title: 'Projects & Groups', items: rankedDbContent });
+        sections.push({
+            family: 'geocoder',
+            title: 'Places',
+            items: rankedGeocoder,
+            loading: options?.geocoderLoading ?? false,
+        });
 
         if (context.commandMode) {
             sections.push({
@@ -318,5 +328,82 @@ export class SearchOrchestratorService {
 
     private buildCacheKey(query: string, context: SearchQueryContext): string {
         return `${query}::${JSON.stringify(context)}`;
+    }
+
+    private searchSequence(query: string, context: SearchQueryContext): Observable<SearchResultSet> {
+        const trimmedQuery = query.trim();
+
+        if (!trimmedQuery) {
+            return of(this.buildFocusedEmptyResult(query));
+        }
+
+        const cacheKey = this.buildCacheKey(trimmedQuery, context);
+        const cached = this.cache.get(cacheKey);
+        if (cached && cached.expiresAt > Date.now()) {
+            return of(cached.result);
+        }
+
+        const dbAddress$ = (this.adapters.dbAddressResolver
+            ? this.adapters.dbAddressResolver(trimmedQuery, context)
+            : of([])
+        ).pipe(catchError(() => of([])), shareReplay({ bufferSize: 1, refCount: false }));
+
+        const dbContent$ = (this.adapters.dbContentResolver
+            ? this.adapters.dbContentResolver(trimmedQuery, context)
+            : of([])
+        ).pipe(catchError(() => of([])), shareReplay({ bufferSize: 1, refCount: false }));
+
+        const geocoder$ = (this.adapters.geocoderResolver
+            ? this.adapters.geocoderResolver(trimmedQuery, context)
+            : of([])
+        ).pipe(catchError(() => of([])), shareReplay({ bufferSize: 1, refCount: false }));
+
+        const typingResult: SearchResultSet = {
+            query,
+            state: 'typing',
+            sections: this.buildSections(trimmedQuery, context, [], [], [], { geocoderLoading: true }),
+            empty: false,
+        };
+
+        const partial$ = combineLatest([dbAddress$, dbContent$]).pipe(
+            take(1),
+            map(([dbAddress, dbContent]) => ({
+                query,
+                state: 'results-partial' as const,
+                sections: this.buildSections(trimmedQuery, context, dbAddress, dbContent, [], {
+                    geocoderLoading: true,
+                }),
+                empty: false,
+            })),
+        );
+
+        const complete$ = combineLatest([dbAddress$, dbContent$, geocoder$]).pipe(
+            take(1),
+            map(([dbAddress, dbContent, geocoder]) => {
+                const dedupedGeocoder = this.deduplicateGeocoderNearDb(dbAddress, geocoder);
+                const sections = this.buildSections(
+                    trimmedQuery,
+                    context,
+                    dbAddress,
+                    dbContent,
+                    dedupedGeocoder,
+                );
+
+                return {
+                    query,
+                    state: 'results-complete' as const,
+                    sections,
+                    empty: sections.every((section) => section.items.length === 0),
+                };
+            }),
+            tap((result) => {
+                this.cache.set(cacheKey, {
+                    result,
+                    expiresAt: Date.now() + this.options.cacheTtlMs,
+                });
+            }),
+        );
+
+        return concat(of(typingResult), partial$, complete$);
     }
 }

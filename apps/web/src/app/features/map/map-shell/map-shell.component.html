@@ -14,10 +14,7 @@
 -->
 
 <!-- Upload button — top-right corner FAB that hover-expands into UploadPanel -->
-<div
-  class="upload-btn-zone"
-  [class.upload-btn-zone--open]="uploadPanelOpen()"
->
+<div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
   <!-- Icon button (always visible) -->
   <button
     class="map-upload-btn"
@@ -46,91 +43,15 @@
   <div
     #mapContainer
     class="map-container"
-    [class.map-container--placing]="placementActive()"
+    [class.map-container--placing]="placementActive() || searchPlacementActive()"
     aria-label="Site map"
   ></div>
 
-  <!-- Floating search bar — top-center over the map; grows downward when results are shown -->
-  <div class="map-search-bar" role="search" [class.map-search-bar--open]="dropdownOpen()">
-    <input
-      class="map-search-bar__input"
-      type="search"
-      placeholder="Search places or photos…"
-      aria-label="Search places or photos"
-      autocomplete="off"
-      [value]="searchQuery()"
-      (input)="onSearchInput($event)"
-      (focus)="onSearchFocus()"
-      (blur)="onSearchBlur()"
-    />
-
-    <!-- Results — rendered inside the same container; no separate overlay -->
-    @if (dropdownOpen()) {
-      <div class="search-dropdown" role="listbox" aria-label="Search results">
-        @if (!searchQuery().trim()) {
-          <!-- Focused-empty state: recent searches -->
-          <div class="search-dropdown__section-label">Recent searches</div>
-          @if (getVisibleRecentSearches().length === 0) {
-            <div class="search-dropdown__empty">No recent searches yet.</div>
-          } @else {
-            @for (recentSearch of getVisibleRecentSearches(); track recentSearch) {
-              <button
-                class="search-dropdown__item"
-                type="button"
-                role="option"
-                (click)="selectRecentSearch(recentSearch)"
-              >
-                <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
-                  >history</span
-                >
-                <span class="search-dropdown__item-text">{{ recentSearch }}</span>
-              </button>
-            }
-          }
-        } @else {
-          <!-- DB results header (placeholder) -->
-          <div class="search-dropdown__section-label">Projects</div>
-          <div class="search-dropdown__empty">No matching projects.</div>
-
-          <!-- Separator -->
-          <div class="search-dropdown__divider" role="separator"></div>
-
-          @if (searchSuggestion()) {
-            <button
-              class="search-dropdown__item"
-              type="button"
-              role="option"
-              (click)="applySearchSuggestion()"
-            >
-              <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
-                >tips_and_updates</span
-              >
-              <span class="search-dropdown__item-text">Did you mean {{ searchSuggestion() }}?</span>
-            </button>
-          }
-
-          <!-- Nominatim results -->
-          @for (result of searchResults(); track result.display_name) {
-            <button
-              class="search-dropdown__item"
-              type="button"
-              role="option"
-              (click)="selectSearchResult(result)"
-            >
-              <span class="material-icons search-dropdown__item-icon" aria-hidden="true"
-                >location_on</span
-              >
-              <span class="search-dropdown__item-text">{{ formatSearchResultLabel(result) }}</span>
-            </button>
-          }
-
-          @if (searchResults().length === 0) {
-            <div class="search-dropdown__empty">No locations found.</div>
-          }
-        }
-      </div>
-    }
-  </div>
+  <ss-search-bar
+    (mapCenterRequested)="onSearchMapCenterRequested($event)"
+    (clearRequested)="onSearchClearRequested()"
+    (dropPinRequested)="onSearchDropPinRequested()"
+  />
 
   <!-- GPS button — bottom-right of map zone -->
   <button
@@ -149,10 +70,10 @@
   </button>
 
   <!-- Placement mode banner -->
-  @if (placementActive()) {
+  @if (placementActive() || searchPlacementActive()) {
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
-      Click the map to place the image
+      {{ placementActive() ? 'Click the map to place the image' : 'Click the map to drop a pin' }}
       <button class="map-placement-banner__cancel" type="button" (click)="cancelPlacement()">
         Cancel
       </button>

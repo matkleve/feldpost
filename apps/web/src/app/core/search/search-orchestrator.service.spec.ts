@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, toArray } from 'rxjs';
 import { SearchOrchestratorService } from './search-orchestrator.service';
 
 describe('SearchOrchestratorService', () => {
@@ -87,5 +87,35 @@ describe('SearchOrchestratorService', () => {
         expect(recent.length).toBe(2);
         expect(recent[0].label).toBe('zurich');
         expect(recent[1].label).toBe('Bern');
+    });
+
+    it('emits typing, partial, and complete states for non-empty queries', async () => {
+        const { service } = setup();
+
+        service.configureSources({
+            dbAddressResolver: () =>
+                of([
+                    {
+                        id: 'db-1',
+                        label: 'Burgstrasse 7',
+                        family: 'db-address',
+                        lat: 47.3769,
+                        lng: 8.5417,
+                        imageCount: 12,
+                        score: 0.9,
+                    },
+                ]),
+            dbContentResolver: () => of([]),
+            geocoderResolver: () => of([]),
+        });
+
+        const states = await firstValueFrom(service.searchInput(of('burg'), of({})).pipe(toArray()));
+
+        expect(states.map((state) => state.state)).toEqual([
+            'typing',
+            'results-partial',
+            'results-complete',
+        ]);
+        expect(states[1].sections.find((section) => section.family === 'geocoder')?.loading).toBe(true);
     });
 });

@@ -27,44 +27,18 @@ import {
 import * as L from 'leaflet';
 import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel/upload-panel.component';
 import { ExifCoords } from '../../../core/upload.service';
-import { AuthService } from '../../../core/auth.service';
 import { SupabaseService } from '../../../core/supabase.service';
+import { SearchBarComponent } from '../search-bar/search-bar.component';
 
-const RECENT_SEARCH_STORAGE_PREFIX = 'sitesnap_recent_searches_';
-const RECENT_SEARCH_STORAGE_LIMIT = 8;
-const RECENT_SEARCH_RENDER_LIMIT = 5;
 const PHOTO_MARKER_CLUSTER_GRID_DECIMALS = 4;
-
-/** A single result from the Nominatim geocoding API. */
-export interface NominatimAddress {
-    house_number?: string;
-    road?: string;
-    postcode?: string;
-    city?: string;
-    town?: string;
-    village?: string;
-    municipality?: string;
-    hamlet?: string;
-    county?: string;
-    country?: string;
-}
-
-export interface NominatimResult {
-    lat: string;
-    lon: string;
-    display_name: string;
-    importance?: number;
-    address?: NominatimAddress;
-}
 
 @Component({
     selector: 'app-map-shell',
-    imports: [UploadPanelComponent],
+    imports: [UploadPanelComponent, SearchBarComponent],
     templateUrl: './map-shell.component.html',
     styleUrl: './map-shell.component.scss',
 })
 export class MapShellComponent implements OnDestroy {
-    private readonly authService = inject(AuthService);
     private readonly supabaseService = inject(SupabaseService);
 
     /** Reference to the Leaflet map container div. */
@@ -95,6 +69,7 @@ export class MapShellComponent implements OnDestroy {
 
     /** Whether the map is in placement mode (drives the banner + cursor class). */
     readonly placementActive = signal(false);
+    readonly searchPlacementActive = signal(false);
 
     // ── GPS state ────────────────────────────────────────────────────────────
 
@@ -107,23 +82,6 @@ export class MapShellComponent implements OnDestroy {
     /** True while waiting for a GPS fix after pressing the button. */
     readonly gpsLocating = signal(false);
 
-    // ── Search state ─────────────────────────────────────────────────────────
-
-    /** Current search input value. */
-    readonly searchQuery = signal('');
-
-    /** Nominatim geocoding results for the current query. */
-    readonly searchResults = signal<NominatimResult[]>([]);
-
-    /** Most-recent-first list of committed searches (persisted per user). */
-    readonly recentSearches = signal<string[]>([]);
-
-    /** Optional fallback suggestion when typo-tolerant matching is used. */
-    readonly searchSuggestion = signal<string | null>(null);
-
-    /** Whether the search results dropdown is visible. */
-    readonly dropdownOpen = signal(false);
-
     // ── Photo panel state ────────────────────────────────────────────────────
 
     /** Whether the PhotoPanel is slid open. */
@@ -131,11 +89,8 @@ export class MapShellComponent implements OnDestroy {
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
-    private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
     private userLocationMarker: L.Marker | null = null;
     private searchLocationMarker: L.Marker | null = null;
-    private activeSearchMarkerLabel: string | null = null;
-    private latestSearchRequestId = 0;
     private readonly uploadedPhotoMarkers = new Map<
         string,
         { marker: L.Marker; count: number; thumbnailUrl?: string }
@@ -144,8 +99,6 @@ export class MapShellComponent implements OnDestroy {
     private readonly initialPhotoMarkerLimit = 500;
 
     constructor() {
-        this.loadRecentSearches();
-
         afterNextRender(() => {
             this.initMap();
         });
@@ -154,7 +107,6 @@ export class MapShellComponent implements OnDestroy {
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     ngOnDestroy(): void {
-        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
         this.gpsLocating.set(false);
         this.uploadedPhotoMarkers.clear();
         this.userLocationMarker?.remove();
@@ -189,6 +141,7 @@ export class MapShellComponent implements OnDestroy {
     cancelPlacement(): void {
         this.pendingPlacementKey = null;
         this.placementActive.set(false);
+        this.searchPlacementActive.set(false);
         this.map?.getContainer().classList.remove('map-container--placing');
     }
 
@@ -223,286 +176,22 @@ export class MapShellComponent implements OnDestroy {
         );
     }
 
-    // ── Search ────────────────────────────────────────────────────────────────
+    onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
+        if (!this.map) return;
 
-    /** Called on every keystroke in the search input. */
-    onSearchInput(event: Event): void {
-        const value = (event.target as HTMLInputElement).value;
-        this.searchQuery.set(value);
-        this.dropdownOpen.set(true);
-
-        if (
-            this.activeSearchMarkerLabel &&
-            this.normalizeSearchMarkerLabel(value) !==
-            this.normalizeSearchMarkerLabel(this.activeSearchMarkerLabel)
-        ) {
-            this.clearSearchLocationMarker();
-        }
-
-        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
-
-        if (!value.trim()) {
-            this.searchResults.set([]);
-            this.searchSuggestion.set(null);
-            this.clearSearchLocationMarker();
-            return;
-        }
-        this.searchDebounceTimer = setTimeout(() => this.fetchNominatim(value), 300);
+        this.map.setView([event.lat, event.lng], 14);
+        this.renderOrUpdateSearchLocationMarker([event.lat, event.lng]);
     }
 
-    onSearchFocus(): void {
-        this.loadRecentSearches();
-        this.dropdownOpen.set(true);
-    }
-
-    onSearchBlur(): void {
-        // Delay so click on a result fires before dropdown closes.
-        setTimeout(() => this.dropdownOpen.set(false), 150);
-    }
-
-    /** Pan map to selected geocode result. */
-    selectSearchResult(result: NominatimResult): void {
-        const lat = parseFloat(result.lat);
-        const lon = parseFloat(result.lon);
-        const label = this.formatSearchResultLabel(result);
-        if (!isNaN(lat) && !isNaN(lon) && this.map) {
-            this.map.setView([lat, lon], 14);
-            this.renderOrUpdateSearchLocationMarker([lat, lon]);
-        }
-        this.addRecentSearch(label);
-        this.dropdownOpen.set(false);
-        this.searchSuggestion.set(null);
-        this.searchQuery.set(label);
-        this.activeSearchMarkerLabel = label;
-    }
-
-    selectRecentSearch(label: string): void {
-        const normalized = label.trim();
-        if (!normalized) return;
-
-        if (this.searchDebounceTimer) {
-            clearTimeout(this.searchDebounceTimer);
-        }
-
-        this.searchQuery.set(normalized);
-        this.searchSuggestion.set(null);
-        this.addRecentSearch(normalized);
-        void this.fetchNominatim(normalized);
-    }
-
-    getVisibleRecentSearches(): string[] {
-        return this.recentSearches().slice(0, RECENT_SEARCH_RENDER_LIMIT);
-    }
-
-    applySearchSuggestion(): void {
-        const suggestion = this.searchSuggestion();
-        if (!suggestion) return;
-
-        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    onSearchClearRequested(): void {
         this.clearSearchLocationMarker();
-        this.searchQuery.set(suggestion);
-        this.searchSuggestion.set(null);
-        void this.fetchNominatim(suggestion);
     }
 
-    private async fetchNominatim(query: string): Promise<void> {
-        const requestId = ++this.latestSearchRequestId;
-        const normalizedQuery = this.normalizeSearchQuery(query);
-
-        if (!normalizedQuery) {
-            if (requestId === this.latestSearchRequestId) {
-                this.searchResults.set([]);
-                this.searchSuggestion.set(null);
-            }
-            return;
-        }
-
-        try {
-            const primaryResults = await this.fetchNominatimByQuery(normalizedQuery);
-            if (requestId !== this.latestSearchRequestId) return;
-
-            if (primaryResults.length > 0) {
-                this.searchResults.set(primaryResults);
-                this.searchSuggestion.set(null);
-                return;
-            }
-
-            const fallbackQueries = this.buildFallbackQueries(normalizedQuery);
-            for (const fallbackQuery of fallbackQueries) {
-                const fallbackResults = await this.fetchNominatimByQuery(fallbackQuery);
-                if (requestId !== this.latestSearchRequestId) return;
-
-                if (fallbackResults.length > 0) {
-                    this.searchResults.set(fallbackResults);
-                    this.searchSuggestion.set(this.prettifyQueryLabel(fallbackQuery));
-                    return;
-                }
-            }
-
-            this.searchResults.set([]);
-            this.searchSuggestion.set(null);
-        } catch {
-            if (requestId !== this.latestSearchRequestId) return;
-            this.searchResults.set([]);
-            this.searchSuggestion.set(null);
-        }
-    }
-
-    private async fetchNominatimByQuery(query: string): Promise<NominatimResult[]> {
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`;
-        const response = await fetch(url);
-        if (!response.ok) return [];
-        const data: NominatimResult[] = await response.json();
-        return Array.isArray(data) ? data : [];
-    }
-
-    private normalizeSearchQuery(query: string): string {
-        const canonical = query
-            .trim()
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/ß/g, 'ss')
-            .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        return this.applyStreetTokenCorrections(canonical);
-    }
-
-    private applyStreetTokenCorrections(query: string): string {
-        const corrected = query
-            .split(' ')
-            .map((token) => {
-                if (!token) return token;
-
-                if (token === 'g' || token === 'g.') return 'gasse';
-                if (token === 'str' || token === 'str.') return 'strasse';
-
-                if (token.endsWith('str.')) {
-                    return `${token.slice(0, -1)}asse`;
-                }
-
-                if (token.endsWith('gass') || token.endsWith('gasse')) {
-                    return token.endsWith('gasse') ? token : `${token}e`;
-                }
-
-                if (token.endsWith('gase')) {
-                    return `${token.slice(0, -4)}gasse`;
-                }
-
-                if (token.endsWith('gas')) {
-                    return `${token}se`;
-                }
-
-                if (token.endsWith('stras')) {
-                    return `${token}se`;
-                }
-
-                if (token.endsWith('strase')) {
-                    return `${token.slice(0, -6)}strasse`;
-                }
-
-                if (token.endsWith('strassee')) {
-                    return token.slice(0, -1);
-                }
-
-                if (token.endsWith('str')) {
-                    return `${token}asse`;
-                }
-
-                return token;
-            })
-            .join(' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        return corrected;
-    }
-
-    private buildFallbackQueries(normalizedQuery: string): string[] {
-        const candidates = new Set<string>();
-        const correctedStreetHouse = this.applyStreetTokenCorrections(normalizedQuery);
-
-        if (correctedStreetHouse && correctedStreetHouse !== normalizedQuery) {
-            candidates.add(correctedStreetHouse);
-        }
-
-        const streetOnlyBase = correctedStreetHouse || normalizedQuery;
-        const streetOnly = this.toStreetOnlyQuery(streetOnlyBase);
-        if (
-            streetOnly &&
-            streetOnly !== normalizedQuery &&
-            streetOnly !== correctedStreetHouse
-        ) {
-            candidates.add(streetOnly);
-        }
-
-        const correctedStreetOnly = this.applyStreetTokenCorrections(streetOnly);
-        if (
-            correctedStreetOnly &&
-            correctedStreetOnly !== normalizedQuery &&
-            correctedStreetOnly !== correctedStreetHouse &&
-            correctedStreetOnly !== streetOnly
-        ) {
-            candidates.add(correctedStreetOnly);
-        }
-
-        return [...candidates];
-    }
-
-    private toStreetOnlyQuery(query: string): string {
-        return query.replace(/\s+\d+[a-zA-Z]?\s*$/, '').trim();
-    }
-
-    private prettifyQueryLabel(query: string): string {
-        return query
-            .split(' ')
-            .map((token) => {
-                if (!token) return token;
-                if (/^\d+[a-zA-Z]?$/.test(token)) return token;
-                return token.charAt(0).toUpperCase() + token.slice(1);
-            })
-            .join(' ');
-    }
-
-    formatSearchResultLabel(result: NominatimResult): string {
-        const address = result.address;
-        if (address) {
-            const street = [address.road, address.house_number].filter(Boolean).join(' ').trim();
-            const city =
-                address.city ||
-                address.town ||
-                address.village ||
-                address.municipality ||
-                address.hamlet ||
-                address.county;
-            const zipCity = [address.postcode, city].filter(Boolean).join(' ').trim();
-            const rightPart = [zipCity, address.country].filter(Boolean).join(' ').trim();
-
-            if (street && rightPart) return `${street}, ${rightPart}`;
-            if (street) return street;
-            if (rightPart) return rightPart;
-        }
-
-        const parts = result.display_name
-            .split(',')
-            .map((part) => part.trim())
-            .filter(Boolean);
-
-        if (parts.length === 0) return result.display_name;
-
-        const street = parts[0] ?? '';
-        const country = parts[parts.length - 1] ?? '';
-        const zipCity =
-            parts.find((part) => /\b\d{4,6}\b/.test(part)) ??
-            parts.slice(1, -1).find((part) => /\b\d{4,6}\b/.test(part)) ??
-            parts[1] ?? '';
-
-        const rightPart = [zipCity, country].filter(Boolean).join(' ').trim();
-        if (street && rightPart) return `${street}, ${rightPart}`;
-        if (street) return street;
-        return result.display_name;
+    onSearchDropPinRequested(): void {
+        this.pendingPlacementKey = null;
+        this.placementActive.set(false);
+        this.searchPlacementActive.set(true);
+        this.map?.getContainer().classList.add('map-container--placing');
     }
 
     // ── Map init ──────────────────────────────────────────────────────────────
@@ -556,14 +245,24 @@ export class MapShellComponent implements OnDestroy {
 
     private handleMapClick(e: L.LeafletMouseEvent): void {
         this.uploadPanelPinned.set(false);
-        if (!this.pendingPlacementKey) return;
-        const coords: ExifCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
-        const panel = this.uploadPanelChild();
-        if (panel) {
-            panel.placeFile(this.pendingPlacementKey, coords);
+        if (this.pendingPlacementKey) {
+            const coords: ExifCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
+            const panel = this.uploadPanelChild();
+            if (panel) {
+                panel.placeFile(this.pendingPlacementKey, coords);
+            }
+            this.pendingPlacementKey = null;
+            this.placementActive.set(false);
+            this.map?.getContainer().classList.remove('map-container--placing');
+            return;
         }
-        this.pendingPlacementKey = null;
-        this.placementActive.set(false);
+
+        if (!this.searchPlacementActive()) {
+            return;
+        }
+
+        this.renderOrUpdateSearchLocationMarker([e.latlng.lat, e.latlng.lng]);
+        this.searchPlacementActive.set(false);
         this.map?.getContainer().classList.remove('map-container--placing');
     }
 
@@ -612,7 +311,6 @@ export class MapShellComponent implements OnDestroy {
     private clearSearchLocationMarker(): void {
         this.searchLocationMarker?.remove();
         this.searchLocationMarker = null;
-        this.activeSearchMarkerLabel = null;
     }
 
     private upsertUploadedPhotoMarker(event: ImageUploadedEvent): void {
@@ -742,75 +440,5 @@ export class MapShellComponent implements OnDestroy {
             .replace(/>/g, '&gt;');
     }
 
-    private loadRecentSearches(): void {
-        const storage = this.getStorage();
-        if (!storage) {
-            this.recentSearches.set([]);
-            return;
-        }
-
-        try {
-            const raw = storage.getItem(this.getRecentSearchesStorageKey());
-            if (!raw) {
-                this.recentSearches.set([]);
-                return;
-            }
-
-            const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed)) {
-                this.recentSearches.set([]);
-                return;
-            }
-
-            const normalized = parsed
-                .filter((item): item is string => typeof item === 'string')
-                .map((item) => item.trim())
-                .filter((item) => item.length > 0)
-                .slice(0, RECENT_SEARCH_STORAGE_LIMIT);
-
-            this.recentSearches.set(normalized);
-        } catch {
-            this.recentSearches.set([]);
-        }
-    }
-
-    private addRecentSearch(label: string): void {
-        const normalized = label.trim();
-        if (!normalized) return;
-
-        const existing = this.recentSearches();
-        const withoutDuplicate = existing.filter(
-            (item) => item.toLowerCase() !== normalized.toLowerCase(),
-        );
-
-        const next = [normalized, ...withoutDuplicate].slice(0, RECENT_SEARCH_STORAGE_LIMIT);
-        this.recentSearches.set(next);
-        this.persistRecentSearches(next);
-    }
-
-    private persistRecentSearches(items: string[]): void {
-        const storage = this.getStorage();
-        if (!storage) return;
-
-        try {
-            storage.setItem(this.getRecentSearchesStorageKey(), JSON.stringify(items));
-        } catch {
-            // Ignore storage failures and keep in-memory state.
-        }
-    }
-
-    private getRecentSearchesStorageKey(): string {
-        const userId = this.authService.user()?.id ?? 'anonymous';
-        return `${RECENT_SEARCH_STORAGE_PREFIX}${userId}`;
-    }
-
-    private getStorage(): Storage | null {
-        if (typeof window === 'undefined') return null;
-        return window.localStorage;
-    }
-
-    private normalizeSearchMarkerLabel(value: string): string {
-        return value.trim().toLowerCase();
-    }
 }
 

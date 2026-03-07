@@ -101,7 +101,7 @@ describe('MapShellComponent', () => {
     it('renders the floating search bar', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
-        const bar = (fixture.nativeElement as HTMLElement).querySelector('.map-search-bar');
+        const bar = (fixture.nativeElement as HTMLElement).querySelector('ss-search-bar');
         expect(bar).not.toBeNull();
     });
 
@@ -340,345 +340,88 @@ describe('MapShellComponent', () => {
 
     // ── Search bar ─────────────────────────────────────────────────────────────
 
-    it('searchQuery signal defaults to empty string', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        expect(fixture.componentInstance.searchQuery()).toBe('');
-    });
-
-    it('dropdownOpen signal defaults to false', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        expect(fixture.componentInstance.dropdownOpen()).toBe(false);
-    });
-
-    it('onSearchFocus() opens the dropdown', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.componentInstance.onSearchFocus();
-        expect(fixture.componentInstance.dropdownOpen()).toBe(true);
-    });
-
-    it('onSearchInput() updates searchQuery signal', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-        const input = Object.assign(document.createElement('input'), { value: 'Vienna' });
-        fixture.componentInstance.onSearchInput({ target: input } as unknown as Event);
-        expect(fixture.componentInstance.searchQuery()).toBe('Vienna');
-    });
-
-    it('normalizes street token variants before geocoder request (Denisgass -> denisgasse)', async () => {
+    it('onSearchMapCenterRequested() recenters the map and shows a search marker', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
 
-        const fetchSpy = vi
-            .spyOn(globalThis, 'fetch')
-            .mockResolvedValue(createJsonResponse([]));
-
-        await (fixture.componentInstance as unknown as { fetchNominatim: (query: string) => Promise<void> }).fetchNominatim(
-            'Denisgass 46',
-        );
-
-        const calledUrl = String(fetchSpy.mock.calls[0]?.[0] ?? '');
-        expect(calledUrl).toContain('q=denisgasse%2046');
-
-        fetchSpy.mockRestore();
-    });
-
-    it('normalizes multiple common typo variants (gase/str/strase)', async () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(createJsonResponse([]));
-
-        const firstRequestUrlFor = async (input: string): Promise<string> => {
-            const before = fetchSpy.mock.calls.length;
-            await (
-                fixture.componentInstance as unknown as {
-                    fetchNominatim: (query: string) => Promise<void>;
-                }
-            ).fetchNominatim(input);
-            return String(fetchSpy.mock.calls[before]?.[0] ?? '');
+        const mapStub = {
+            addLayer: vi.fn(),
+            setView: vi.fn(),
+            getZoom: vi.fn().mockReturnValue(13),
+            remove: vi.fn(),
         };
+        (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
-        expect(await firstRequestUrlFor('Denisgase 46')).toContain('q=denisgasse%2046');
-        expect(await firstRequestUrlFor('Hauptstr 12')).toContain('q=hauptstrasse%2012');
-        expect(await firstRequestUrlFor('Burgstrase 7')).toContain('q=burgstrasse%207');
+        fixture.componentInstance.onSearchMapCenterRequested({
+            lat: 48.2082,
+            lng: 16.3738,
+            label: 'Stephansplatz 1, 1010 Wien Austria',
+        });
 
-        fetchSpy.mockRestore();
+        expect(mapStub.setView).toHaveBeenCalledWith([48.2082, 16.3738], 14);
+        expect(
+            (fixture.componentInstance as unknown as { searchLocationMarker: unknown }).searchLocationMarker,
+        ).not.toBeNull();
     });
 
-    it('shows a suggestion when strict query misses and fallback street-only query returns results', async () => {
+    it('onSearchClearRequested() removes the search marker', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
 
-        const fallbackResult = {
-            lat: '48.2082',
-            lon: '16.3738',
-            display_name: 'Denisgasse, Wien, Austria',
-            address: {
-                road: 'Denisgasse',
-                city: 'Wien',
-                country: 'Austria',
-            },
+        const mapStub = {
+            addLayer: vi.fn(),
+            setView: vi.fn(),
+            getZoom: vi.fn().mockReturnValue(13),
+            remove: vi.fn(),
         };
+        (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
-        const fetchSpy = vi
-            .spyOn(globalThis, 'fetch')
-            .mockResolvedValueOnce(createJsonResponse([]))
-            .mockResolvedValueOnce(createJsonResponse([fallbackResult]));
+        fixture.componentInstance.onSearchMapCenterRequested({
+            lat: 48.2082,
+            lng: 16.3738,
+            label: 'Stephansplatz 1, 1010 Wien Austria',
+        });
+        fixture.componentInstance.onSearchClearRequested();
 
-        await (fixture.componentInstance as unknown as { fetchNominatim: (query: string) => Promise<void> }).fetchNominatim(
-            'Denisgasse 46',
-        );
-
-        expect(fixture.componentInstance.searchSuggestion()).toBe('Denisgasse');
-        expect(fixture.componentInstance.searchResults().length).toBe(1);
-
-        const firstCalledUrl = String(fetchSpy.mock.calls[0]?.[0] ?? '');
-        const secondCalledUrl = String(fetchSpy.mock.calls[1]?.[0] ?? '');
-        expect(firstCalledUrl).toContain('q=denisgasse%2046');
-        expect(secondCalledUrl).toContain('q=denisgasse');
-
-        fetchSpy.mockRestore();
+        expect(
+            (fixture.componentInstance as unknown as { searchLocationMarker: unknown }).searchLocationMarker,
+        ).toBeNull();
     });
 
-    it('does not show a suggestion when strict query already returns matches', async () => {
+    it('onSearchDropPinRequested() enables manual pin placement mode', () => {
         const fixture = TestBed.createComponent(MapShellComponent);
         fixture.detectChanges();
 
-        const strictResult = {
-            lat: '48.2082',
-            lon: '16.3738',
-            display_name: 'Denisgasse 46, Wien, Austria',
-            address: {
-                road: 'Denisgasse',
-                house_number: '46',
-                city: 'Wien',
-                country: 'Austria',
-            },
+        fixture.componentInstance.onSearchDropPinRequested();
+
+        expect(fixture.componentInstance.searchPlacementActive()).toBe(true);
+    });
+
+    it('map click in search placement mode drops a search marker and exits the mode', () => {
+        const fixture = TestBed.createComponent(MapShellComponent);
+        fixture.detectChanges();
+
+        const mapStub = {
+            addLayer: vi.fn(),
+            setView: vi.fn(),
+            getZoom: vi.fn().mockReturnValue(13),
+            remove: vi.fn(),
+            getContainer: vi.fn().mockReturnValue({ classList: { add: vi.fn(), remove: vi.fn() } }),
         };
+        (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
-        const fetchSpy = vi
-            .spyOn(globalThis, 'fetch')
-            .mockResolvedValueOnce(createJsonResponse([strictResult]));
+        fixture.componentInstance.onSearchDropPinRequested();
 
-        await (
+        (
             fixture.componentInstance as unknown as {
-                fetchNominatim: (query: string) => Promise<void>;
+                handleMapClick: (event: { latlng: { lat: number; lng: number } }) => void;
             }
-        ).fetchNominatim('Denisgase 46');
+        ).handleMapClick({ latlng: { lat: 48.2082, lng: 16.3738 } });
 
-        expect(fixture.componentInstance.searchResults().length).toBe(1);
-        expect(fixture.componentInstance.searchSuggestion()).toBeNull();
-        expect(fetchSpy).toHaveBeenCalledTimes(1);
-
-        fetchSpy.mockRestore();
-    });
-
-    it('applySearchSuggestion() sets query, clears suggestion, and reruns search once', async () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        fixture.componentInstance.searchSuggestion.set('Denisgasse 46');
-        const fetchNominatimSpy = vi
-            .spyOn(
-                fixture.componentInstance as unknown as {
-                    fetchNominatim: (query: string) => Promise<void>;
-                },
-                'fetchNominatim',
-            )
-            .mockResolvedValue(undefined);
-
-        fixture.componentInstance.applySearchSuggestion();
-
-        expect(fixture.componentInstance.searchQuery()).toBe('Denisgasse 46');
-        expect(fixture.componentInstance.searchSuggestion()).toBeNull();
-        expect(fetchNominatimSpy).toHaveBeenCalledTimes(1);
-        expect(fetchNominatimSpy).toHaveBeenCalledWith('Denisgasse 46');
-
-        fetchNominatimSpy.mockRestore();
-    });
-
-    it('renders "Did you mean …" row when a fallback suggestion is available', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        fixture.componentInstance.searchQuery.set('Denisgase 46');
-        fixture.componentInstance.dropdownOpen.set(true);
-        fixture.componentInstance.searchSuggestion.set('Denisgasse 46');
-        fixture.detectChanges();
-
-        const suggestionRow = Array.from(
-            (fixture.nativeElement as HTMLElement).querySelectorAll('.search-dropdown__item-text'),
-        ).find((node) => (node.textContent ?? '').includes('Did you mean Denisgasse 46?'));
-
-        expect(suggestionRow).toBeTruthy();
-    });
-
-    it('dropdown is visible when dropdownOpen is true', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        fixture.componentInstance.dropdownOpen.set(true);
-        fixture.detectChanges();
-
-        const dropdown = (fixture.nativeElement as HTMLElement).querySelector('.search-dropdown');
-        expect(dropdown).not.toBeNull();
-    });
-
-    it('shows stored recent searches in focused-empty state', () => {
-        localStorage.setItem(
-            'sitesnap_recent_searches_anonymous',
-            JSON.stringify(['Burgstrasse 7, Zurich', 'Bern Bahnhof']),
-        );
-
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        fixture.componentInstance.onSearchFocus();
-        fixture.detectChanges();
-
-        const recentItems = Array.from(
-            (fixture.nativeElement as HTMLElement).querySelectorAll('.search-dropdown__item-text'),
-        ).map((item) => item.textContent?.trim());
-
-        expect(recentItems).toContain('Burgstrasse 7, Zurich');
-        expect(recentItems).toContain('Bern Bahnhof');
-    });
-
-    it('stores committed search labels to localStorage as deduped MRU', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        fixture.componentInstance.selectSearchResult({
-            lat: '47.3769',
-            lon: '8.5417',
-            display_name: 'Burgstrasse 7, Zurich, Switzerland',
-            address: {
-                road: 'Burgstrasse',
-                house_number: '7',
-                postcode: '8000',
-                city: 'Zurich',
-                country: 'Switzerland',
-            },
-        });
-
-        fixture.componentInstance.selectSearchResult({
-            lat: '46.9480',
-            lon: '7.4474',
-            display_name: 'Bahnhofplatz 1, Bern, Switzerland',
-            address: {
-                road: 'Bahnhofplatz',
-                house_number: '1',
-                postcode: '3011',
-                city: 'Bern',
-                country: 'Switzerland',
-            },
-        });
-
-        fixture.componentInstance.selectSearchResult({
-            lat: '47.3769',
-            lon: '8.5417',
-            display_name: 'Burgstrasse 7, Zurich, Switzerland',
-            address: {
-                road: 'Burgstrasse',
-                house_number: '7',
-                postcode: '8000',
-                city: 'Zurich',
-                country: 'Switzerland',
-            },
-        });
-
-        const saved = JSON.parse(
-            localStorage.getItem('sitesnap_recent_searches_anonymous') ?? '[]',
-        ) as string[];
-
-        expect(saved).toEqual(['Burgstrasse 7, 8000 Zurich Switzerland', 'Bahnhofplatz 1, 3011 Bern Switzerland']);
-    });
-
-    it('dropdown is not rendered when dropdownOpen is false', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        const dropdown = (fixture.nativeElement as HTMLElement).querySelector('.search-dropdown');
-        expect(dropdown).toBeNull();
-    });
-
-    it('selectSearchResult() creates a search marker and keeps it while input matches label', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        const mapStub = {
-            addLayer: vi.fn(),
-            setView: vi.fn(),
-            getZoom: vi.fn().mockReturnValue(13),
-            remove: vi.fn(),
-        };
-        (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
-
-        const result = {
-            lat: '48.2082',
-            lon: '16.3738',
-            display_name: 'Stephansplatz 1, 1010 Wien, Austria',
-            address: {
-                road: 'Stephansplatz',
-                house_number: '1',
-                postcode: '1010',
-                city: 'Wien',
-                country: 'Austria',
-            },
-        };
-
-        fixture.componentInstance.selectSearchResult(result);
-
-        const marker = (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
-            .searchLocationMarker;
-        expect(marker).not.toBeNull();
-
-        const input = Object.assign(document.createElement('input'), {
-            value: 'Stephansplatz 1, 1010 Wien Austria',
-        });
-        fixture.componentInstance.onSearchInput({ target: input } as unknown as Event);
-
-        const markerAfterSameText =
-            (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
-                .searchLocationMarker;
-        expect(markerAfterSameText).not.toBeNull();
-    });
-
-    it('onSearchInput() removes search marker when selected address text changes', () => {
-        const fixture = TestBed.createComponent(MapShellComponent);
-        fixture.detectChanges();
-
-        const mapStub = {
-            addLayer: vi.fn(),
-            setView: vi.fn(),
-            getZoom: vi.fn().mockReturnValue(13),
-            remove: vi.fn(),
-        };
-        (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
-
-        const result = {
-            lat: '48.2082',
-            lon: '16.3738',
-            display_name: 'Stephansplatz 1, 1010 Wien, Austria',
-            address: {
-                road: 'Stephansplatz',
-                house_number: '1',
-                postcode: '1010',
-                city: 'Wien',
-                country: 'Austria',
-            },
-        };
-
-        fixture.componentInstance.selectSearchResult(result);
-
-        const changedInput = Object.assign(document.createElement('input'), {
-            value: 'Karlsplatz 1, 1010 Wien Austria',
-        });
-        fixture.componentInstance.onSearchInput({ target: changedInput } as unknown as Event);
-
-        const marker = (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
-            .searchLocationMarker;
-        expect(marker).toBeNull();
+        expect(fixture.componentInstance.searchPlacementActive()).toBe(false);
+        expect(
+            (fixture.componentInstance as unknown as { searchLocationMarker: unknown }).searchLocationMarker,
+        ).not.toBeNull();
     });
 
     // ── Photo panel ────────────────────────────────────────────────────────────
