@@ -127,17 +127,32 @@
 :host ::ng-deep .map-photo-marker-wrapper {
   background: none !important;
   border: none !important;
+  --ui-item-media-size: var(--ui-item-media-size-default);
+  --photo-marker-body-size: calc(var(--ui-item-media-size) * 1.25);
 }
 
 :host ::ng-deep .map-photo-marker {
   position: relative;
-  width: 3.5rem;
-  height: 4.1rem;
-  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--color-text-primary) 24%, transparent));
+  display: flex;
+  justify-content: center;
+  width: var(--photo-marker-hit-size);
+  height: calc(var(--photo-marker-hit-size) + var(--photo-marker-tail-height));
+  filter: drop-shadow(var(--photo-marker-drop-shadow));
+  transform-origin: center bottom;
+  transition: transform 200ms ease-in-out;
+
+  .map-photo-marker__hit-zone {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: var(--photo-marker-hit-size);
+    height: 100%;
+    padding-top: calc((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2);
+  }
 
   .map-photo-marker__body {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: var(--photo-marker-body-size);
+    height: var(--photo-marker-body-size);
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 2px solid var(--color-bg-surface);
@@ -146,15 +161,85 @@
 
   .map-photo-marker__tail {
     position: absolute;
-    top: 3.45rem;
+    top: calc(
+      ((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2) +
+        var(--photo-marker-body-size) - 1px
+    );
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 0.4rem solid transparent;
-    border-right: 0.4rem solid transparent;
-    border-top: 0.6rem solid var(--color-bg-surface);
+    border-left: calc(var(--photo-marker-tail-width) / 2) solid transparent;
+    border-right: calc(var(--photo-marker-tail-width) / 2) solid transparent;
+    border-top: var(--photo-marker-tail-height) solid var(--color-bg-surface);
   }
+
+  .map-photo-marker__correction-dot {
+    position: absolute;
+    top: calc(((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2) - 1px);
+    right: calc((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2);
+    width: var(--photo-marker-correction-dot-size);
+    height: var(--photo-marker-correction-dot-size);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-bg-surface);
+    background: var(--color-accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .map-photo-marker__pending-ring {
+    position: absolute;
+    inset: calc((var(--photo-marker-hit-size) - var(--photo-marker-body-size)) / 2);
+    width: var(--photo-marker-body-size);
+    height: var(--photo-marker-body-size);
+    border-radius: calc(var(--radius-md) + 2px);
+    border: 2px solid color-mix(in srgb, var(--color-warning) 82%, transparent);
+    animation: map-photo-marker-pulse 1200ms ease-in-out infinite;
+  }
+
+  .map-photo-marker__direction-cone {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--photo-marker-tail-height) + 2px);
+    width: calc(var(--photo-marker-body-size) * 1.2);
+    height: calc(var(--photo-marker-body-size) * 1.2);
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    clip-path: polygon(50% 50%, 100% 38%, 100% 62%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-8%) rotate(-90deg);
+    transition: opacity 120ms ease-out;
+  }
+}
+
+:host ::ng-deep .map-photo-marker--selected {
+  transform: scale(var(--photo-marker-selected-scale));
+
+  .map-photo-marker__body {
+    box-shadow:
+      0 0 0 2px var(--color-accent),
+      var(--shadow-md);
+  }
+}
+
+:host ::ng-deep .map-photo-marker--zoom-far {
+  transform: scale(0.94);
+}
+
+:host ::ng-deep .map-photo-marker--zoom-near {
+  transform: scale(1.06);
+}
+
+:host ::ng-deep .map-photo-marker--selected.map-photo-marker--zoom-far {
+  transform: scale(calc(0.94 * var(--photo-marker-selected-scale)));
+}
+
+:host ::ng-deep .map-photo-marker--selected.map-photo-marker--zoom-near {
+  transform: scale(calc(1.06 * var(--photo-marker-selected-scale)));
+}
+
+:host ::ng-deep .map-photo-marker--has-bearing:hover .map-photo-marker__direction-cone,
+:host ::ng-deep .map-photo-marker--has-bearing:focus-within .map-photo-marker__direction-cone {
+  opacity: 1;
 }
 
 :host ::ng-deep .map-photo-marker--single {
@@ -178,11 +263,24 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--photo-marker-cluster-font-size);
   }
 
   .map-photo-marker__tail {
     border-top-color: var(--color-clay);
+  }
+}
+
+@keyframes map-photo-marker-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
   }
 }
 

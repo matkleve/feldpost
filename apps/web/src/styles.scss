@@ -84,6 +84,19 @@
   --container-radius-panel: var(--radius-lg);
   --container-radius-pill: var(--radius-full);
 
+  // Shared media sizing primitives
+  --ui-item-media-size-default: var(--spacing-6);
+
+  // Photo marker geometry derives from the shared media token system.
+  --photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25);
+  --photo-marker-hit-size: 3rem;
+  --photo-marker-tail-width: 0.875rem;
+  --photo-marker-tail-height: 0.625rem;
+  --photo-marker-correction-dot-size: 8px;
+  --photo-marker-drop-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --photo-marker-selected-scale: 1.05;
+  --photo-marker-cluster-font-size: calc(var(--photo-marker-body-size) * 0.38);
+
   // Sidebar layout dimensions — standardized from docs/design/tokens.md.
   --layout-sidebar-width-collapsed: var(--spacing-7);
   --layout-sidebar-width-expanded: 15rem;
@@ -212,7 +225,7 @@ router-outlet + * {
   --ui-item-padding-block: var(--container-padding-block-compact);
   --ui-item-gap: var(--container-gap);
   --ui-item-radius: var(--container-radius-control);
-  --ui-item-media-size: var(--spacing-6);
+  --ui-item-media-size: var(--ui-item-media-size-default);
   --ui-item-content-gap: var(--container-gap-panel);
 
   display: grid;

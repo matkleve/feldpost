@@ -2,81 +2,101 @@
 
 ## What It Is
 
-The map pin representing a single photo or a cluster of nearby photos. It's a square thumbnail with a pointer tail — never the default Leaflet blue pin. Clusters show a count number instead of a thumbnail. Markers carry visual indicators for correction status and upload state.
+The map pin representing either a single Image or a proximity-based Cluster of nearby Images. It is always a custom square thumbnail marker with a pointer tail, never the default Leaflet blue pin, and it reflects selection, correction, and upload state through CSS classes applied to Leaflet DivIcon HTML.
 
 ## What It Looks Like
 
-**Single marker:** 3.5rem square body with rounded corners, 2px white border, drop shadow. Contains a thumbnail image. Below the body: a small CSS triangle tail (0.6rem) pointing to the exact coordinate. On hover: shows Direction Cone if camera bearing is available.
-
-**Cluster marker:** Same square shape but `--color-clay` background with white count number instead of thumbnail. Triggered by proximity density (server-side `ST_SnapToGrid`), not by fixed zoom levels.
-
-**Indicators:**
-
-- Correction Indicator Dot — small `--color-accent` dot at top-right, visible only if marker has corrected coordinates
-- Pending Upload Indicator — pulsing `--color-warning` ring around marker during upload
-
-**All markers:** 2px white outline + `drop-shadow(0 1px 3px rgba(0,0,0,0.45))` for readability on any tile background.
+The marker body geometry is derived from the shared media token system instead of a hardcoded rem size: `--photo-marker-body-size: calc(var(--ui-item-media-size) * 1.25)`, with `--ui-item-media-size` seeded from the shared UI item token in `styles.scss`. Single markers render a thumbnail inside a square body with `border-radius: var(--radius-md)`, a 2px white outline, and a persistent shadow for readability on light and dark tiles. Cluster markers reuse the same body geometry but swap the thumbnail for a centered count label on `--color-clay`. Selected markers add a clear accent ring and a slight scale lift, while zoom-level classes (`.map-photo-marker--zoom-far`, `.map-photo-marker--zoom-mid`, `.map-photo-marker--zoom-near`) slightly adjust visual prominence without changing the underlying marker structure. On desktop, the Direction Cone appears on hover when bearing data exists; on touch devices, the same affordance appears on long press.
 
 ## Where It Lives
 
-- **Parent**: Map Zone (rendered by `MapAdapter`, not directly in Angular template)
-- **Appears when**: Images are loaded for the current viewport
+- **Route**: Global within the Map Shell at `/`
+- **Parent**: Map Zone via Leaflet DivIcon rendering in the map layer
+- **Appears when**: Images are loaded for the current viewport or newly uploaded onto the current map
 
-## Actions
+## Actions & Interactions
 
-| #   | User Action                    | System Response                                                    | Triggers                 |
-| --- | ------------------------------ | ------------------------------------------------------------------ | ------------------------ |
-| 1   | Clicks single marker           | Adds image to Active Selection, opens Workspace Pane               | Selection state          |
-| 2   | Ctrl+clicks marker             | Adds image to Active Selection without clearing previous selection | Multi-select             |
-| 3   | Clicks cluster marker          | Zooms in to expand cluster, or opens all images in selection       | `MapAdapter.setCenter()` |
-| 4   | Hovers single marker           | Shows Direction Cone (if bearing available)                        | CSS/Leaflet popup        |
-| 5   | Right-clicks marker            | Opens context menu (view detail, edit location, add to group)      | Context menu             |
-| 6   | Drags marker (correction mode) | Moves marker to new position, stores corrected coordinates         | Correction flow          |
+| #   | User Action                         | System Response                                                    | Triggers                 |
+| --- | ----------------------------------- | ------------------------------------------------------------------ | ------------------------ |
+| 1   | Clicks single marker                | Adds image to Active Selection, opens Workspace Pane               | Selection state          |
+| 2   | Ctrl+clicks marker                  | Adds image to Active Selection without clearing previous selection | Multi-select             |
+| 3   | Clicks cluster marker               | Zooms in to expand cluster, or opens all images in selection       | `MapAdapter.setCenter()` |
+| 4   | Hovers single marker                | Shows Direction Cone (if bearing available)                        | CSS/Leaflet popup        |
+| 5   | Long-presses single marker on touch | Shows Direction Cone (if bearing available)                        | Touch fallback           |
+| 6   | Right-clicks marker                 | Opens context menu (view detail, edit location, add to group)      | Context menu             |
+| 7   | Drags marker in correction mode     | Moves marker to new position, stores corrected coordinates         | Correction flow          |
 
 ## Component Hierarchy
 
 ```
-PhotoMarker                                ← Leaflet DivIcon, custom HTML, not an Angular component
-├── MarkerBody                             ← 3.5rem square, rounded-md, overflow-hidden, 2px white border
-│   ├── [single] ThumbnailImage            ← <img> with signed URL, object-fit cover
-│   └── [cluster] CountLabel               ← white text, --color-clay background
-├── MarkerTail                             ← CSS triangle, 0.6rem, points to coordinate
-├── [corrected] CorrectionDot              ← 8px circle, --color-accent, top-right corner
-├── [uploading] PendingRing                ← pulsing ring, --color-warning
-└── [hover + bearing] DirectionCone        ← 30° semi-transparent cone showing camera direction
+PhotoMarker                                      ← Leaflet DivIcon, custom HTML, not an Angular component
+├── MarkerHitZone                                ← 3rem × 3rem touch target minimum, centers visual body
+│   ├── MarkerBody                               ← square body sized by `--photo-marker-body-size`, rounded with `--radius-md`
+│   │   ├── [single] ThumbnailImage              ← signed thumbnail URL, object-fit cover
+│   │   └── [cluster] CountLabel                 ← count text on `--color-clay`
+│   ├── MarkerTail                               ← CSS triangle sized by token, points to exact coordinate
+│   ├── [corrected] CorrectionDot                ← 8px circle, `--color-accent`, top-right corner
+│   ├── [uploading] PendingRing                  ← pulsing ring, `--color-warning`
+│   └── [bearing + hover-or-long-press] DirectionCone ← 30° semi-transparent directional wedge
+└── [selected] SelectedRing                      ← accent outline + slight scale lift
 ```
 
-Note: Markers are Leaflet `DivIcon` elements managed by `MapAdapter`, not standalone Angular components. The HTML is generated as strings or via a utility function.
+Note: Markers remain Leaflet DivIcon elements managed outside the Angular template. Marker HTML is generated by a utility function so large marker sets do not become Angular component trees.
 
-## Data
+## Data Requirements
 
-| Field          | Source                               | Type                          |
-| -------------- | ------------------------------------ | ----------------------------- |
-| Image data     | Viewport query via `SupabaseService` | `Image[]` from `images` table |
-| Cluster groups | Server-side `ST_SnapToGrid`          | `{ lat, lng, count }[]`       |
-| Thumbnails     | Supabase Storage signed URLs         | `string` (URL)                |
+| Field           | Source                                         | Type                          |
+| --------------- | ---------------------------------------------- | ----------------------------- | ----- |
+| Image data      | Viewport query via `SupabaseService`           | `Image[]` from `images` table |
+| Cluster groups  | Server-side `ST_SnapToGrid`                    | `{ lat, lng, count }[]`       |
+| Thumbnails      | Supabase Storage signed URLs                   | `string` (URL)                |
+| Selection state | Map/workspace selection service or shell state | `string[]` / marker key state |
+| Bearing data    | EXIF-derived image metadata                    | `number                       | null` |
 
 ## State
 
-Markers are stateless DOM elements. State (selected, correcting, uploading) is tracked in services and reflected via CSS classes on the marker HTML.
+Markers are stateless DOM elements. State is held in services or the map shell and reflected through CSS classes on the marker HTML.
+
+| Name                | Type      | Default | Controls                           |
+| ------------------- | --------- | ------- | ---------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
+| `selectedMarkerKey` | `string   | null`   | `null`                             | Which single marker renders the selected ring state |
+| `markerZoomLevel`   | `'far'    | 'mid'   | 'near'`                            | `'mid'`                                             | Which zoom modifier class is applied to marker HTML |
+| `isCorrected`       | `boolean` | `false` | Whether the correction dot renders |
+| `isUploading`       | `boolean` | `false` | Whether the pending ring renders   |
+| `bearing`           | `number   | null`   | `null`                             | Whether the Direction Cone can render               |
 
 ## File Map
 
-| File                              | Purpose                                                     |
-| --------------------------------- | ----------------------------------------------------------- |
-| `core/map/marker-factory.ts`      | Utility to generate marker HTML for single/cluster variants |
-| `core/map/leaflet-osm-adapter.ts` | `MapAdapter` implementation that manages markers on the map |
+| File                                                               | Purpose                                                                        |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `apps/web/src/app/core/map/marker-factory.ts`                      | Generates marker HTML and marker class variants for single and cluster markers |
+| `apps/web/src/app/features/map/map-shell/map-shell.component.ts`   | Applies marker state, click behavior, and Leaflet marker updates               |
+| `apps/web/src/app/features/map/map-shell/map-shell.component.scss` | Defines token-driven marker geometry and state styles                          |
+| `apps/web/src/styles.scss`                                         | Defines shared marker sizing variables derived from the UI media token system  |
+
+## Wiring
+
+- The Map Shell creates Leaflet markers and delegates DivIcon HTML generation to `marker-factory.ts`.
+- Marker sizing variables are declared in `styles.scss` so marker geometry derives from shared design tokens instead of hardcoded body sizes.
+- The Map Shell updates marker icons when selection state, cluster size, upload state, or map zoom changes.
+- Marker click handling opens the Workspace Pane for single markers and zooms toward cluster contents for cluster markers.
+- Hover and long-press direction cues are driven by CSS classes and Leaflet pointer events rather than Angular templates.
 
 ## Acceptance Criteria
 
 - [x] Never shows default Leaflet blue pin
+- [x] Marker geometry derives from `--ui-item-media-size`
 - [x] Single markers show thumbnail
 - [x] Cluster markers show count badge
-- [ ] All markers have 2px white outline + drop shadow
+- [x] Cluster markers reuse the same base geometry as single markers
+- [x] All markers have 2px white outline + drop shadow
 - [x] Tail points to exact coordinate
+- [x] Selected markers have a clear visual state
 - [ ] Correction dot visible only for corrected markers
 - [ ] Pending upload ring pulses during upload
-- [ ] Direction cone appears on hover when bearing data exists
+- [x] Direction cone appears on hover when bearing data exists
+- [ ] Direction cone appears on long press when bearing data exists on touch devices
 - [ ] Click selects image and opens workspace pane
-- [ ] Cluster click zooms in or expands selection
-- [ ] Readable on both light and dark map tiles
+- [x] Cluster click zooms in or expands selection
+- [x] Zoom modifier classes adjust prominence without changing marker structure
+- [x] Readable on both light and dark map tiles

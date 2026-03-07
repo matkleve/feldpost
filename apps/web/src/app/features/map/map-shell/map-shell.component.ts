@@ -29,6 +29,13 @@ import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-pa
 import { ExifCoords } from '../../../core/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
+import {
+    buildPhotoMarkerHtml,
+    PHOTO_MARKER_ICON_ANCHOR,
+    PHOTO_MARKER_ICON_SIZE,
+    PHOTO_MARKER_POPUP_ANCHOR,
+    PhotoMarkerZoomLevel,
+} from '../../../core/map/marker-factory';
 
 const PHOTO_MARKER_CLUSTER_GRID_DECIMALS = 4;
 
@@ -86,6 +93,7 @@ export class MapShellComponent implements OnDestroy {
 
     /** Whether the PhotoPanel is slid open. */
     readonly photoPanelOpen = signal(false);
+    readonly selectedMarkerKey = signal<string | null>(null);
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
@@ -93,7 +101,14 @@ export class MapShellComponent implements OnDestroy {
     private searchLocationMarker: L.Marker | null = null;
     private readonly uploadedPhotoMarkers = new Map<
         string,
-        { marker: L.Marker; count: number; thumbnailUrl?: string }
+        {
+            marker: L.Marker;
+            count: number;
+            lat: number;
+            lng: number;
+            thumbnailUrl?: string;
+            direction?: number;
+        }
     >();
 
     private readonly initialPhotoMarkerLimit = 500;
@@ -217,6 +232,7 @@ export class MapShellComponent implements OnDestroy {
         // Map click handler: closes upload panel and, when active, places images
         // that had no GPS EXIF data.
         this.map.on('click', (e: L.LeafletMouseEvent) => this.handleMapClick(e));
+        this.map.on('zoomend', () => this.refreshAllPhotoMarkers());
 
     }
 
@@ -258,6 +274,8 @@ export class MapShellComponent implements OnDestroy {
         }
 
         if (!this.searchPlacementActive()) {
+            this.setSelectedMarker(null);
+            this.photoPanelOpen.set(false);
             return;
         }
 
@@ -324,22 +342,37 @@ export class MapShellComponent implements OnDestroy {
             const nextThumb = existing.thumbnailUrl ?? event.thumbnailUrl;
             existing.count = nextCount;
             existing.thumbnailUrl = nextThumb;
+            existing.direction ??= event.direction;
 
-            existing.marker.setIcon(this.buildPhotoMarkerIcon(nextCount, nextThumb));
+            if (nextCount > 1 && this.selectedMarkerKey() === markerKey) {
+                this.setSelectedMarker(null);
+                this.photoPanelOpen.set(false);
+            }
+
+            existing.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
             existing.marker.bindPopup(`${nextCount} images uploaded here`);
             return;
         }
 
         const marker = L.marker([event.lat, event.lng], {
-            icon: this.buildPhotoMarkerIcon(1, event.thumbnailUrl),
+            icon: this.buildPhotoMarkerIcon(markerKey, {
+                count: 1,
+                thumbnailUrl: event.thumbnailUrl,
+                direction: event.direction,
+            }),
         })
             .bindPopup(`Image uploaded (id: ${event.id})`)
             .addTo(this.map);
 
+        marker.on('click', () => this.handlePhotoMarkerClick(markerKey));
+
         this.uploadedPhotoMarkers.set(markerKey, {
             marker,
             count: 1,
+            lat: event.lat,
+            lng: event.lng,
             thumbnailUrl: event.thumbnailUrl,
+            direction: event.direction,
         });
     }
 
@@ -399,45 +432,119 @@ export class MapShellComponent implements OnDestroy {
             }
 
             const marker = L.marker([group.lat, group.lng], {
-                icon: this.buildPhotoMarkerIcon(count, thumbnailUrl),
+                icon: this.buildPhotoMarkerIcon(key, {
+                    count,
+                    thumbnailUrl,
+                }),
             })
                 .bindPopup(count === 1 ? `Image uploaded (id: ${group.rows[0].id})` : `${count} images uploaded here`)
                 .addTo(this.map);
 
+            marker.on('click', () => this.handlePhotoMarkerClick(key));
+
             this.uploadedPhotoMarkers.set(key, {
                 marker,
                 count,
+                lat: group.lat,
+                lng: group.lng,
                 thumbnailUrl,
             });
         }
     }
 
-    private buildPhotoMarkerIcon(count: number, thumbnailUrl?: string): L.DivIcon {
-        const hasSingleThumbnail = count === 1 && !!thumbnailUrl;
-        const html = hasSingleThumbnail
-            ? `<div class="map-photo-marker map-photo-marker--single"><div class="map-photo-marker__body"><img src="${this.escapeHtmlAttribute(thumbnailUrl)}" alt="Uploaded photo marker" /></div><span class="map-photo-marker__tail" aria-hidden="true"></span></div>`
-            : `<div class="map-photo-marker map-photo-marker--count"><div class="map-photo-marker__body"><span>${count}</span></div><span class="map-photo-marker__tail" aria-hidden="true"></span></div>`;
+    private buildPhotoMarkerIcon(
+        markerKey: string,
+        override?: Partial<{
+            count: number;
+            thumbnailUrl?: string;
+            direction?: number;
+        }>,
+    ): L.DivIcon {
+        const markerState = this.uploadedPhotoMarkers.get(markerKey);
+        const count = override?.count ?? markerState?.count ?? 1;
+        const thumbnailUrl = override?.thumbnailUrl ?? markerState?.thumbnailUrl;
+        const direction = override?.direction ?? markerState?.direction;
 
         return L.divIcon({
             className: 'map-photo-marker-wrapper',
-            html,
-            iconSize: [56, 66],
-            iconAnchor: [28, 66],
-            popupAnchor: [0, -66],
+            html: buildPhotoMarkerHtml({
+                count,
+                thumbnailUrl,
+                bearing: direction,
+                selected: markerKey === this.selectedMarkerKey(),
+                zoomLevel: this.getPhotoMarkerZoomLevel(),
+            }),
+            iconSize: PHOTO_MARKER_ICON_SIZE,
+            iconAnchor: PHOTO_MARKER_ICON_ANCHOR,
+            popupAnchor: PHOTO_MARKER_POPUP_ANCHOR,
         });
+    }
+
+    private handlePhotoMarkerClick(markerKey: string): void {
+        const markerState = this.uploadedPhotoMarkers.get(markerKey);
+        if (!markerState || !this.map) {
+            return;
+        }
+
+        if (markerState.count > 1) {
+            this.setSelectedMarker(null);
+            this.photoPanelOpen.set(false);
+            this.map.setView([markerState.lat, markerState.lng], Math.min(this.map.getZoom() + 2, 18));
+            return;
+        }
+
+        this.setSelectedMarker(markerKey);
+        this.photoPanelOpen.set(true);
+    }
+
+    private setSelectedMarker(markerKey: string | null): void {
+        const previousMarkerKey = this.selectedMarkerKey();
+        if (previousMarkerKey === markerKey) {
+            return;
+        }
+
+        this.selectedMarkerKey.set(markerKey);
+
+        if (previousMarkerKey) {
+            this.refreshPhotoMarker(previousMarkerKey);
+        }
+
+        if (markerKey) {
+            this.refreshPhotoMarker(markerKey);
+        }
+    }
+
+    private refreshAllPhotoMarkers(): void {
+        for (const markerKey of this.uploadedPhotoMarkers.keys()) {
+            this.refreshPhotoMarker(markerKey);
+        }
+    }
+
+    private refreshPhotoMarker(markerKey: string): void {
+        const markerState = this.uploadedPhotoMarkers.get(markerKey);
+        if (!markerState) {
+            return;
+        }
+
+        markerState.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
+    }
+
+    private getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
+        const zoom = this.map?.getZoom() ?? 13;
+
+        if (zoom >= 16) {
+            return 'near';
+        }
+
+        if (zoom >= 13) {
+            return 'mid';
+        }
+
+        return 'far';
     }
 
     private toMarkerKey(lat: number, lng: number): string {
         return `${lat.toFixed(PHOTO_MARKER_CLUSTER_GRID_DECIMALS)}:${lng.toFixed(PHOTO_MARKER_CLUSTER_GRID_DECIMALS)}`;
-    }
-
-    private escapeHtmlAttribute(value?: string): string {
-        if (!value) return '';
-        return value
-            .replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
     }
 
 }
