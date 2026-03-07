@@ -32,6 +32,14 @@ flowchart LR
 
 All motion serves clarity or orientation — no decorative animation.
 
+### Geometry stability rules
+
+- Shared layout primitives keep their geometry during transitions.
+- Do not animate row padding, row height, media-column width, item gap, or panel corner radius.
+- Sidebar expand/collapse may animate outer container width and label opacity/clipping only.
+- Search surfaces may animate dropdown visibility, opacity, or reveal, but keep the same panel radius as the closed state.
+- If a pill-style treatment causes layout errors, clipping issues, or geometry shifts during state changes, fall back to the standard `.ui-container` panel shape.
+
 | Interaction                  | Effect                                           | Duration | Easing                                   |
 | ---------------------------- | ------------------------------------------------ | -------- | ---------------------------------------- |
 | Panel slide in/out (desktop) | `transform: translateX`                          | 200ms    | `ease-out`                               |
@@ -41,5 +49,7 @@ All motion serves clarity or orientation — no decorative animation.
 | Thumbnail load               | `opacity: 0→1` from placeholder blur             | 300ms    | `ease-out`                               |
 | Filter chip add/remove       | `opacity + max-width` (chip appear/collapse)     | 180ms    | `ease-in-out`                            |
 | Page navigation              | No full-page transitions; panels update in place | —        | —                                        |
+
+Panel and row geometry remain fixed while these transitions run.
 
 `prefers-reduced-motion: reduce` disables all transforms and fades, keeping only immediate state changes.

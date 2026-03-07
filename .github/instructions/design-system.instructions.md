@@ -40,6 +40,15 @@ applyTo: "**/*.component.html, **/*.component.ts, **/*.scss"
 - **Quiet Actions**: hover-to-reveal for secondary actions on cards
 - Ghost buttons for secondary actions, filled `--color-clay` for primary CTA
 
+## Shared Layout Primitives
+
+- Prefer `.ui-container` for panel shells before creating a custom panel wrapper
+- Prefer `.ui-item`, `.ui-item-media`, and `.ui-item-label` for row-based UI before creating custom row geometry
+- Use `.ui-spacer` to push terminal rows/actions in vertical layouts instead of ad-hoc margins
+- Keep the media column width fixed across row states
+- Keep panel corners, row padding, row height, and row gap stable during transitions
+- If a pill treatment causes state-change instability, use the standard `.ui-container` panel corners instead
+
 ## Dark Mode
 
 - Toggle via `[data-theme="dark"]` on ancestor element
@@ -51,6 +60,7 @@ Load order:
 - Always: [docs/design/constitution.md](../../docs/design/constitution.md), [docs/design.md](../../docs/design.md)
 - Styling/sizing: [docs/design/tokens.md](../../docs/design/tokens.md)
 - Layout: [docs/design/layout.md](../../docs/design/layout.md)
+- Shared primitives: `apps/web/src/styles.scss` (`.ui-container`, `.ui-item`, `.ui-spacer`)
 - Motion: [docs/design/motion.md](../../docs/design/motion.md)
 - Map hierarchy: [docs/design/map-system.md](../../docs/design/map-system.md)
 - Component-specific rules: [docs/design/components/](../../docs/design/components/)

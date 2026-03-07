@@ -205,3 +205,49 @@ router-outlet + * {
   --ui-container-padding-inline: var(--container-padding-inline-compact);
   --ui-container-padding-block: var(--container-padding-block-compact);
 }
+
+.ui-item {
+  --ui-item-min-height: 2.5rem;
+  --ui-item-padding-inline: var(--container-padding-inline-compact);
+  --ui-item-padding-block: var(--container-padding-block-compact);
+  --ui-item-gap: var(--container-gap);
+  --ui-item-radius: var(--container-radius-control);
+  --ui-item-media-size: var(--spacing-6);
+  --ui-item-content-gap: var(--container-gap-tight);
+
+  display: grid;
+  grid-template-columns: var(--ui-item-media-size) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--ui-item-gap);
+  min-height: var(--ui-item-min-height);
+  padding-block: var(--ui-item-padding-block);
+  padding-inline: var(--ui-item-padding-inline);
+  border-radius: var(--ui-item-radius);
+}
+
+.ui-item-media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-item-media-size);
+  block-size: var(--ui-item-media-size);
+  min-inline-size: var(--ui-item-media-size);
+  flex-shrink: 0;
+}
+
+.ui-item-label {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ui-item-content-gap);
+}
+
+.ui-item-label > * {
+  min-width: 0;
+}
+
+.ui-spacer {
+  flex: 1 1 auto;
+  min-block-size: var(--spacing-2);
+}

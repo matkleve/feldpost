@@ -4,6 +4,43 @@ Load this file for any task involving breakpoints, panel dimensions, or responsi
 
 ## 4. Layout System
 
+### Shared layout primitives
+
+The design system has three shared layout primitives that should be reused before creating custom panel or row geometry.
+
+#### `.ui-container`
+
+- Standard panel shell for floating and docked surfaces such as the Sidebar, Search Bar, search dropdown surface, and Upload Panel.
+- Uses panel corners via `--container-radius-panel`.
+- Defines the alignment boundary that child rows inherit.
+- Components may override padding and gap through `--ui-container-*` variables, but should not swap between panel and pill corners across states.
+
+#### `.ui-item`
+
+- Standard row shell for navigation rows, dropdown items, search results, and future menu/list items.
+- Structure:
+
+```text
+.ui-item
+├── .ui-item-media
+└── .ui-item-label
+```
+
+- `.ui-item-media` is a fixed-width leading column.
+- `.ui-item-label` is the flexible text/meta column.
+- Row padding, media width, label gap, and row height stay stable during hover, active, expanded, and loading states.
+
+#### `.ui-spacer`
+
+- Standard flex spacer for vertical panel layouts.
+- Use to push account rows, footer actions, or terminal controls to the bottom of a container.
+
+Layout stability rules:
+
+- The Search Bar uses the same outer corner radius as the Sidebar.
+- Dropdown expansion happens inside the same `ui-container` surface; the container does not morph into or out of a pill.
+- If a decorative shape introduces transition artifacts or unstable geometry, remove the decorative shape and keep the primitive geometry intact.
+
 ### Layout Overview — All Breakpoints
 
 ```mermaid

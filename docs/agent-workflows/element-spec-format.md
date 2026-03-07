@@ -38,6 +38,8 @@ The most important section. Shows what nests inside what, using a simple tree di
 
 Keep it readable — this is a structural guideline, not copy-pasteable code.
 
+When a panel or list row matches an existing shared primitive, name it directly in the hierarchy (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`) instead of describing new bespoke geometry.
+
 ### 6. Data Requirements (table)
 
 Where does data come from? Which Supabase tables, which columns, which service methods.
@@ -154,6 +156,7 @@ ElementRoot ← positioning, size, role
 - Specs are the **source of truth** — code must match spec, not the other way around
 - Update specs BEFORE asking agents to modify features
 - Keep "What It Is" and "What It Looks Like" short — detail goes in Actions and Hierarchy
+- Prefer shared layout primitives in the spec before inventing new panel or row patterns
 - Use `rem` as the primary unit for accessibility-sensitive UI dimensions: touch targets, button heights, interactive sizes, spacing, and layout dimensions. Include the px equivalent as an annotation when the exact reference size matters.
 - Use `em` only for component-internal spacing that should scale with the component's own font size.
 - Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.

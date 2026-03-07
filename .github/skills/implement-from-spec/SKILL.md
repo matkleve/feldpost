@@ -21,7 +21,8 @@ argument-hint: "Element spec name or path (e.g., search-bar)"
 2. Read ALL sections: What It Is, Actions, Hierarchy, State, File Map, Wiring
 3. Read `docs/glossary.md` for canonical component names
 4. Read `docs/design/constitution.md` and `docs/design.md`
-5. Load the relevant task-specific design files from `docs/design/` before implementation
+5. Load the relevant task-specific design files from `docs/design/` before implementation in this order: `tokens.md` → `layout.md` → `motion.md` → task-specific component docs
+6. Check `apps/web/src/styles.scss` for reusable layout primitives before inventing a new panel or row shell
 
 ### Step 2: Audit Current Implementation
 
@@ -52,6 +53,8 @@ argument-hint: "Element spec name or path (e.g., search-bar)"
 7. Use the exact Data sources and queries
 8. Wire into parent per the Wiring section
 9. Use design tokens, not hardcoded values
+10. Prefer shared primitives `.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, and `.ui-spacer` before creating bespoke layout classes
+11. If a decorative shape or animated geometry causes unstable transitions, keep the primitive geometry static and simplify the decoration
 
 ### Step 5: Verify
 

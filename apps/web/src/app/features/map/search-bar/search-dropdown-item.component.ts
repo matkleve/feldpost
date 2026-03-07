@@ -8,7 +8,7 @@ import { SearchCandidate } from '../../../core/search/search.models';
     imports: [CommonModule],
     template: `
         <button
-            class="search-dropdown-item"
+            class="search-dropdown-item ui-item"
             type="button"
             role="option"
             [id]="optionId()"
@@ -17,11 +17,11 @@ import { SearchCandidate } from '../../../core/search/search.models';
             (mousedown)="$event.preventDefault()"
             (click)="selected.emit(candidate())"
         >
-            <span class="material-icons search-dropdown-item__icon" aria-hidden="true">
-                {{ iconName() }}
+            <span class="search-dropdown-item__media ui-item-media" aria-hidden="true">
+                <span class="material-icons search-dropdown-item__icon">{{ iconName() }}</span>
             </span>
 
-            <span class="search-dropdown-item__content">
+            <span class="search-dropdown-item__content ui-item-label">
                 <span class="search-dropdown-item__label">{{ candidate().label }}</span>
 
                 @if (metaText()) {
@@ -33,16 +33,28 @@ import { SearchCandidate } from '../../../core/search/search.models';
     styles: [
         `
             .search-dropdown-item {
-                display: flex;
+                --ui-item-min-height: 3rem;
+                --ui-item-padding-inline: var(
+                    --search-dropdown-item-padding-inline,
+                    var(--container-padding-inline)
+                );
+                --ui-item-padding-block: var(
+                    --search-dropdown-item-padding-block,
+                    var(--container-padding-block-compact)
+                );
+                --ui-item-gap: var(--search-dropdown-item-gap, var(--container-gap));
+                --ui-item-radius: var(
+                    --search-dropdown-item-radius,
+                    var(--container-radius-control)
+                );
+                --ui-item-media-size: var(--search-dropdown-item-media-size, var(--spacing-6));
+                --ui-item-content-gap: var(
+                    --search-dropdown-item-content-gap,
+                    var(--container-gap-tight)
+                );
+
                 width: 100%;
-                min-height: 3rem;
-                align-items: flex-start;
-                gap: var(--search-dropdown-item-gap, var(--container-gap));
-                padding:
-                    var(--search-dropdown-item-padding-block, var(--container-padding-block-compact))
-                    var(--search-dropdown-item-padding-inline, var(--container-padding-inline));
                 border: 0;
-                border-radius: var(--search-dropdown-item-radius, var(--container-radius-control));
                 background: transparent;
                 color: var(--color-text-primary);
                 text-align: left;
@@ -57,19 +69,14 @@ import { SearchCandidate } from '../../../core/search/search.models';
                 background: color-mix(in srgb, var(--color-clay) 12%, var(--color-bg-elevated));
             }
 
+            .search-dropdown-item__media {
+                align-self: start;
+            }
+
             .search-dropdown-item__icon {
-                flex-shrink: 0;
                 font-size: 1rem;
                 line-height: 1.5rem;
                 color: var(--color-text-secondary);
-            }
-
-            .search-dropdown-item__content {
-                display: flex;
-                min-width: 0;
-                flex: 1 1 auto;
-                flex-direction: column;
-                gap: var(--container-gap-tight, 0.25rem);
             }
 
             .search-dropdown-item__label,

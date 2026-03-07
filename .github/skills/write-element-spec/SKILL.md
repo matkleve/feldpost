@@ -23,10 +23,11 @@ argument-hint: "Element name and brief description"
 ### Step 2: Research Context
 
 1. Read `docs/design/constitution.md` and `docs/design.md` for always-load design rules
-2. Load the relevant task-specific design files from `docs/design/` (`tokens.md`, `layout.md`, `motion.md`, `map-system.md`, `components/*.md`)
-3. Read `docs/architecture.md` for layer constraints and adapter patterns
-4. Review related specs in `docs/element-specs/` for consistency
-5. Check `docs/database-schema.md` for available data sources
+2. Load the relevant task-specific design files from `docs/design/` in this order: `tokens.md` → `layout.md` → `motion.md` → `map-system.md` / `components/*.md`
+3. Check `apps/web/src/styles.scss` for shared primitives (`.ui-container`, `.ui-item`, `.ui-spacer`) that the spec should reuse
+4. Read `docs/architecture.md` for layer constraints and adapter patterns
+5. Review related specs in `docs/element-specs/` for consistency
+6. Check `docs/database-schema.md` for available data sources
 
 ### Step 3: Write the Spec
 
@@ -42,6 +43,8 @@ Create `docs/element-specs/{element-name}.md` following the [element spec format
 8. **File Map** — every file to create
 9. **Wiring** — parent integration
 10. **Acceptance Criteria** — testable checklist
+
+When applicable, specs should explicitly call for the shared layout primitives instead of describing one-off row or panel geometry.
 
 Unit rules for every new spec:
 

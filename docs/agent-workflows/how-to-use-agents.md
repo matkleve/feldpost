@@ -70,10 +70,11 @@ We ran into this with search. Root causes:
 1. Check `docs/glossary.md` for the element's canonical name
 2. Create `docs/element-specs/[element].md` using the template in `element-spec-format.md`
 3. Fill in: What It Is, hierarchy, actions, state, data, file map, acceptance criteria
-4. Read `docs/design/constitution.md`, `docs/design.md`, and the relevant task-specific files in `docs/design/` to lock visual patterns before coding
-5. Query Context7 MCP for external library usage details (Angular, Leaflet, Supabase, Tailwind)
-6. If Context7 and project docs conflict, follow project docs first
-7. If unsure about structure, ask the agent: _"Review this spec — what's missing?"_
+4. Read `docs/design/constitution.md` and `docs/design.md`, then load design files in this order: `docs/design/tokens.md` → `docs/design/layout.md` → `docs/design/motion.md` → task-specific design docs
+5. Check `apps/web/src/styles.scss` for shared layout primitives before creating new panel or row shells
+6. Query Context7 MCP for external library usage details (Angular, Leaflet, Supabase, Tailwind)
+7. If Context7 and project docs conflict, follow project docs first
+8. If unsure about structure, ask the agent: _"Review this spec — what's missing?"_
 
 ### Phase 2: Plan (agent does this)
 
@@ -105,6 +106,8 @@ Element: docs/element-specs/search-bar.md
 ```
 
 Agent creates all files following the spec.
+
+Implementation rule: agents should prefer existing layout primitives (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`) before introducing new geometry classes.
 
 ### Phase 4: Verify (you + agent)
 

@@ -6,7 +6,7 @@ A pill-shaped input floating over the map that lets users find places, photos, g
 
 ## What It Looks Like
 
-Pill-shaped container pinned top-center over the map. White/surface background, rounded-full, subtle shadow. 40px tall input with a search icon on the left. On focus, a dropdown panel slides open below (same width, not a separate overlay — it's in-flow inside the search container). Dropdown has section headers, clickable result rows, and a divider between DB results and geocoder results. On commit, a small `×` clear button appears inside the input. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
+Floating search surface pinned top-center over the map. Use the shared `.ui-container` panel geometry with the same corner radius as the Sidebar, subtle shadow, and warm `--color-bg-surface` background. The input row stays compact inside that container; do not morph the container into a pill in any state. On focus, the dropdown opens below inside the same surface (same width, not a separate overlay). Dropdown sections use headers, dividers, and clickable result rows built from the shared `.ui-item` row pattern. On commit, a small `×` clear button appears inside the input. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
 
 ## Where It Lives
 
@@ -39,8 +39,8 @@ Pill-shaped container pinned top-center over the map. White/surface background, 
 ## Component Hierarchy
 
 ```
-SearchBar                                  ← positioned top-center in Map Zone, z-30
-├── InputRow                               ← pill shape, rounded-full, --color-bg-surface, shadow, h-10
+SearchBar                                  ← positioned top-center in Map Zone, z-30, `.ui-container`
+├── InputRow                               ← compact search row inside shared panel surface
 │   ├── SearchIcon                         ← 16px, left side
 │   ├── <input type="search">              ← flex-1, role="combobox", placeholder "Search address, project, group…"
 │   └── ClearButton (×)                    ← shown only in committed state, ghost style
@@ -49,21 +49,21 @@ SearchBar                                  ← positioned top-center in Map Zone
     │
     ├── [focused-empty] RecentSection
     │   ├── SectionLabel "Recent searches"
-    │   └── DropdownItem × N               ← clock icon + label, role="option"
+    │   └── DropdownItem × N               ← `.ui-item` row, clock icon + label, role="option"
     │
     ├── [has results] AddressSection
     │   ├── SectionLabel "Addresses"
-    │   └── DropdownItem × N               ← map-pin icon + label + "N photos" meta
+    │   └── DropdownItem × N               ← `.ui-item` row, map-pin icon + label + "N photos" meta
     │
     ├── [has results] ContentSection
     │   ├── SectionLabel "Projects & Groups"
-    │   └── DropdownItem × N               ← folder/tag icon + label + subtitle
+    │   └── DropdownItem × N               ← `.ui-item` row, folder/tag icon + label + subtitle
     │
     ├── Divider                            ← 1px line, only if both DB and geocoder have results
     │
     ├── [has results] GeocoderSection
     │   ├── SectionLabel "Places"
-    │   └── DropdownItem × N               ← globe icon + label + "External result"
+    │   └── DropdownItem × N               ← `.ui-item` row, globe icon + label + "External result"
     │
     ├── [loading] GeocoderSkeleton         ← 2 pulse rows while geocoder is fetching
     │
@@ -75,7 +75,7 @@ SearchBar                                  ← positioned top-center in Map Zone
 
 ### DropdownItem (shared child component)
 
-Each result row: icon (varies by family) + label (truncated) + optional meta line.  
+Each result row uses the shared row contract: `.ui-item` → `.ui-item-media` + `.ui-item-label`. The leading media column stays fixed width across all result families. Labels and optional meta lines truncate inside the flexible label column rather than changing row geometry.  
 Highlighted state via `activeIndex`. Icons by family:
 
 - `db-address` → map-pin
@@ -136,9 +136,11 @@ Types are defined in `core/search/search.models.ts` (already exists).
 - [x] Clicking input opens dropdown with recent searches
 - [ ] `Cmd/Ctrl+K` focuses input from anywhere on the map page
 - [ ] Typing shows debounced results grouped by section (Addresses, Projects & Groups, Places)
+- [ ] Search surface uses `.ui-container` with the same panel radius as the Sidebar in all states
 - [ ] DB results appear before geocoder results
 - [ ] Geocoder results that are <30m from a DB result are hidden (dedup)
 - [ ] Section divider only shows when both DB and geocoder sections have items
+- [ ] Dropdown rows use `.ui-item` with a fixed leading media column
 - [ ] ArrowUp/ArrowDown navigates results, skipping headers and dividers
 - [ ] Enter commits the highlighted item (or top item if none highlighted)
 - [x] Clicking a result commits it
@@ -150,4 +152,5 @@ Types are defined in `core/search/search.models.ts` (already exists).
 - [ ] Empty state shows "No address found" with "Drop pin" recovery action
 - [ ] Geocoder failure is non-blocking — DB results still render
 - [ ] Dropdown uses `role="listbox"`, items use `role="option"`
+- [ ] Opening and closing the dropdown does not change outer corner radius, item padding, or media-column width
 - [ ] Screen reader announces result count on query completion

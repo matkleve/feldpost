@@ -14,47 +14,47 @@
         <li class="sidebar__item">
           @if (item.disabled) {
             <span
-              class="nav__link nav__link--disabled"
+              class="nav__link nav__link--disabled ui-item"
               role="link"
               aria-disabled="true"
               tabindex="-1"
               [title]="'Coming soon: ' + item.label"
               [attr.aria-describedby]="'nav-disabled-tip'"
             >
-              <span class="nav__media" aria-hidden="true">
+              <span class="nav__media ui-item-media" aria-hidden="true">
                 <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-              <span class="nav__label">{{ item.label }}</span>
+              <span class="nav__label ui-item-label">{{ item.label }}</span>
             </span>
           } @else {
             <a
-              class="nav__link"
+              class="nav__link ui-item"
               [routerLink]="item.route"
               routerLinkActive="nav__link--active"
               [routerLinkActiveOptions]="item.route === '/' ? { exact: true } : { exact: false }"
               [attr.aria-current]="null"
               [title]="item.label"
             >
-              <span class="nav__media" aria-hidden="true">
+              <span class="nav__media ui-item-media" aria-hidden="true">
                 <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-              <span class="nav__label">{{ item.label }}</span>
+              <span class="nav__label ui-item-label">{{ item.label }}</span>
             </a>
           }
         </li>
       }
 
-      <li class="sidebar__item sidebar__item--spacer" aria-hidden="true"></li>
+      <li class="sidebar__item sidebar__item--spacer ui-spacer" aria-hidden="true"></li>
 
       <li class="sidebar__item sidebar__item--account">
         <a
-          class="nav__link nav__account-link"
+          class="nav__link nav__account-link ui-item"
           routerLink="/account"
           routerLinkActive="nav__link--active"
           title="Account"
           aria-label="Go to Account page"
         >
-          <span class="nav__media" aria-hidden="true">
+          <span class="nav__media ui-item-media" aria-hidden="true">
             <span class="nav__avatar-badge">
               @if (avatarUrl(); as avatarImage) {
                 <img class="nav__avatar-image" [src]="avatarImage" alt="" />
@@ -63,7 +63,7 @@
               }
             </span>
           </span>
-          <span class="nav__label nav__account-name">{{ displayName() }}</span>
+          <span class="nav__label nav__account-name ui-item-label">{{ displayName() }}</span>
         </a>
       </li>
     </ul>
