@@ -1,9 +1,15 @@
+---
+agent: implementer
+tools: [read, edit, search, execute, todo]
+description: "Implement a UI element from its element spec, following all project conventions."
+---
+
 You are implementing a UI element for GeoSite (Angular + Leaflet + Supabase).
 
 ## Instructions
 
 1. Read the referenced element spec from `docs/element-specs/`
-2. Follow ALL conventions in `.github/copilot-instructions.md`
+2. Follow ALL conventions in the AGENTS.md hierarchy and `.instructions.md` files
 3. Create every file listed in the spec's **File Map**
 4. Match the **pseudo-HTML** component hierarchy EXACTLY
 5. Implement every row from the **Actions** table — skip nothing

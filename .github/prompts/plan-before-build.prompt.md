@@ -1,3 +1,9 @@
+---
+agent: planner
+tools: [read, search, web, todo]
+description: "Create an implementation plan from an element spec before writing any code."
+---
+
 Before writing code, create an implementation plan for the element spec.
 
 ## Instructions

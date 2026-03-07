@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "toolNames": [
+          "create_file",
+          "replace_string_in_file",
+          "multi_replace_string_in_file"
+        ],
+        "command": "npx prettier --write ${filePath}",
+        "cwd": "apps/web",
+        "fileMatch": "apps/web/**/*.{ts,html,scss,json}"
+      }
+    ]
+  }
+}

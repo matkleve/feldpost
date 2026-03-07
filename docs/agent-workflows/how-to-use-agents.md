@@ -17,16 +17,35 @@
 ### Prompt Files — reusable instructions
 
 - Files in `.github/prompts/*.prompt.md`
-- Reference in chat with `#` → select the prompt
-- We have three:
-  - `#implement-element` — build from spec
-  - `#review-against-spec` — verify correctness
-  - `#plan-before-build` — get a plan before writing code
+- Reference in chat with `/` → select the prompt
+- Available prompts:
+  - `/plan-before-build` — routes to @planner agent
+  - `/implement-element` — routes to @implementer agent
+  - `/review-against-spec` — routes to @reviewer agent
+  - `/audit-design` — design & accessibility audit
+  - `/write-spec` — routes to @spec-writer agent
 
-### Custom Instructions — auto-loaded context
+### Custom Agents — specialized roles
 
-- `.github/copilot-instructions.md` is loaded into every Copilot interaction
-- Already configured with our tech stack, conventions, and design tokens
+- Files in `.github/agents/*.agent.md`
+- Invoke with `@` in chat: `@planner`, `@implementer`, `@reviewer`, `@spec-writer`
+- Each has scoped tools and handoff → next agent
+
+### AGENTS.md — auto-loaded workspace context
+
+- `AGENTS.md` at root + nested in `apps/web/`, `supabase/`, `docs/`
+- Loaded automatically when `chat.useAgentsMdFile` is enabled
+- Replaces the old `.github/copilot-instructions.md`
+
+### Skills — reusable domain knowledge
+
+- `.github/skills/implement-from-spec/SKILL.md` — full spec-to-code workflow
+- `.github/skills/write-element-spec/SKILL.md` — structured spec authoring
+
+### File-Scoped Instructions
+
+- `.github/instructions/*.instructions.md` — loaded based on file pattern (e.g., `**/*.component.ts`)
+- 8 instruction files covering: Angular, styling, Supabase, Leaflet, testing, specs, migrations, design
 
 ---
 
@@ -61,7 +80,7 @@ We ran into this with search. Root causes:
 Prompt in chat:
 
 ```
-#plan-before-build
+/plan-before-build
 
 Element: docs/element-specs/search-bar.md
 ```
@@ -80,7 +99,7 @@ Review the plan. Answer questions. Adjust spec if needed.
 Prompt in chat:
 
 ```
-#implement-element
+/implement-element
 
 Element: docs/element-specs/search-bar.md
 ```
@@ -92,7 +111,7 @@ Agent creates all files following the spec.
 Option A — ask agent:
 
 ```
-#review-against-spec
+/review-against-spec
 
 Element: docs/element-specs/search-bar.md
 Files: [list the created files]

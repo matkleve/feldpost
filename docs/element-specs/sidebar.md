@@ -26,25 +26,25 @@ Source of truth for standardized sizing/tokens:
 
 Every nav link has these visual states. Agents must implement **all** of them — not just active.
 
-| State          | Background                           | Text / Icon color          | Extra                                               | Transition |
-| -------------- | ------------------------------------ | -------------------------- | --------------------------------------------------- | ---------- |
-| Default        | `transparent`                        | `--color-text-secondary`   | —                                                   | —          |
-| Hover          | `--color-bg-elevated` at 40% opacity | `--color-text-primary`     | —                                                   | 80ms       |
-| Active route   | `--color-clay` at 12% opacity        | `--color-clay`             | 3px left border `--color-clay` (desktop), 2px bottom border (mobile) | —          |
-| Focus-visible  | `transparent`                        | `--color-text-primary`     | 2px `--color-primary` focus ring, 2px offset        | instant    |
-| Pressed        | `--color-bg-elevated` at 55% opacity | `--color-text-primary`     | —                                                   | 40ms       |
-| Disabled       | `transparent`                        | `--color-text-disabled`    | `pointer-events: none`, `aria-disabled="true"`, `opacity: 0.6` | —          |
+| State         | Background                           | Text / Icon color        | Extra                                                                | Transition |
+| ------------- | ------------------------------------ | ------------------------ | -------------------------------------------------------------------- | ---------- |
+| Default       | `transparent`                        | `--color-text-secondary` | —                                                                    | —          |
+| Hover         | `--color-bg-elevated` at 40% opacity | `--color-text-primary`   | —                                                                    | 80ms       |
+| Active route  | `--color-clay` at 12% opacity        | `--color-clay`           | 3px left border `--color-clay` (desktop), 2px bottom border (mobile) | —          |
+| Focus-visible | `transparent`                        | `--color-text-primary`   | 2px `--color-primary` focus ring, 2px offset                         | instant    |
+| Pressed       | `--color-bg-elevated` at 55% opacity | `--color-text-primary`   | —                                                                    | 40ms       |
+| Disabled      | `transparent`                        | `--color-text-disabled`  | `pointer-events: none`, `aria-disabled="true"`, `opacity: 0.6`       | —          |
 
 **Dark mode:** All tokens resolve correctly. The frosted glass (85% opacity `--color-bg-surface` + `backdrop-filter: blur(12px)`) must be verified against both `--color-bg-base` values — light `#F9F7F4` and dark `#0F0E0C`.
 
 **Avatar states:**
 
-| State              | Visual                                                              |
-| ------------------ | ------------------------------------------------------------------- |
-| User loaded        | Circle with first letter of email, `--color-clay` background, white text |
-| User null / loading| Circle with `?` placeholder, `--color-bg-elevated` background      |
-| Hover              | `ring-2 ring-offset-2 --color-primary`                              |
-| Focus-visible      | Same as hover + 2px `--color-primary` focus ring                    |
+| State               | Visual                                                                   |
+| ------------------- | ------------------------------------------------------------------------ |
+| User loaded         | Circle with first letter of email, `--color-clay` background, white text |
+| User null / loading | Circle with `?` placeholder, `--color-bg-elevated` background            |
+| Hover               | `ring-2 ring-offset-2 --color-primary`                                   |
+| Focus-visible       | Same as hover + 2px `--color-primary` focus ring                         |
 
 ## Spacing & Sizing
 
@@ -52,61 +52,61 @@ All values from the 4px base unit scale (`docs/design.md` §3.3). **No ad-hoc va
 
 ### Desktop sidebar
 
-| Property                       | Value       | Tailwind          |
-| ------------------------------ | ----------- | ----------------- |
-| Collapsed width                | 48px        | `w-12`            |
-| Expanded width                 | 240px       | `w-60`            |
-| Outer padding (top + bottom)   | 16px        | `py-4`            |
-| Outer padding (left + right)   | 8px (collapsed), 12px (expanded) | `px-2` / `px-3` |
-| Gap between nav items          | 4px         | `gap-1`           |
-| NavLink internal padding       | 8px vertical, 12px horizontal | `py-2 px-3`  |
-| NavLink border-radius          | 8px         | `rounded-lg`      |
-| Icon size                      | 20px        | `text-xl` (Material Symbols) |
-| Icon-to-label gap (expanded)   | 12px        | `gap-3`           |
-| Label font size                | 14px (0.875rem) | `text-sm`     |
-| Avatar diameter                | 32px        | `w-8 h-8`         |
-| Avatar bottom margin           | 0 (flush with `py-4` outer padding) | —     |
-| Expand/collapse transition     | 150ms       | `duration-150`    |
-| Expand easing                  | `ease-out`  | `ease-out`        |
-| Sidebar border-radius          | 12px        | `rounded-xl`      |
-| Sidebar shadow                 | `shadow-md` | `shadow-md`       |
-| Sidebar left offset from edge  | 12px        | `left-3`          |
-| Sidebar vertical centering     | `top-1/2 -translate-y-1/2` | —      |
+| Property                      | Value                               | Tailwind                     |
+| ----------------------------- | ----------------------------------- | ---------------------------- |
+| Collapsed width               | 48px                                | `w-12`                       |
+| Expanded width                | 240px                               | `w-60`                       |
+| Outer padding (top + bottom)  | 16px                                | `py-4`                       |
+| Outer padding (left + right)  | 8px (collapsed), 12px (expanded)    | `px-2` / `px-3`              |
+| Gap between nav items         | 4px                                 | `gap-1`                      |
+| NavLink internal padding      | 8px vertical, 12px horizontal       | `py-2 px-3`                  |
+| NavLink border-radius         | 8px                                 | `rounded-lg`                 |
+| Icon size                     | 20px                                | `text-xl` (Material Symbols) |
+| Icon-to-label gap (expanded)  | 12px                                | `gap-3`                      |
+| Label font size               | 14px (0.875rem)                     | `text-sm`                    |
+| Avatar diameter               | 32px                                | `w-8 h-8`                    |
+| Avatar bottom margin          | 0 (flush with `py-4` outer padding) | —                            |
+| Expand/collapse transition    | 150ms                               | `duration-150`               |
+| Expand easing                 | `ease-out`                          | `ease-out`                   |
+| Sidebar border-radius         | 12px                                | `rounded-xl`                 |
+| Sidebar shadow                | `shadow-md`                         | `shadow-md`                  |
+| Sidebar left offset from edge | 12px                                | `left-3`                     |
+| Sidebar vertical centering    | `top-1/2 -translate-y-1/2`          | —                            |
 
 ### Mobile bottom bar
 
-| Property                       | Value       | Tailwind          |
-| ------------------------------ | ----------- | ----------------- |
-| Bar height                     | 56px        | `h-14`            |
-| Bar horizontal padding         | 16px        | `px-4`            |
-| Safe area bottom               | `env(safe-area-inset-bottom)` | `pb-[env(safe-area-inset-bottom)]` |
-| Item distribution              | Even        | `justify-around`  |
-| Icon size                      | 24px        | `text-2xl`        |
-| Active indicator                | 2px bottom border `--color-clay` | —  |
-| No avatar (moves to account page) | —        | —                 |
+| Property                          | Value                            | Tailwind                           |
+| --------------------------------- | -------------------------------- | ---------------------------------- |
+| Bar height                        | 56px                             | `h-14`                             |
+| Bar horizontal padding            | 16px                             | `px-4`                             |
+| Safe area bottom                  | `env(safe-area-inset-bottom)`    | `pb-[env(safe-area-inset-bottom)]` |
+| Item distribution                 | Even                             | `justify-around`                   |
+| Icon size                         | 24px                             | `text-2xl`                         |
+| Active indicator                  | 2px bottom border `--color-clay` | —                                  |
+| No avatar (moves to account page) | —                                | —                                  |
 
 ### SidebarPill affordance (collapsed only)
 
-| Property     | Value  |
-| ------------ | ------ |
-| Width        | 4px    |
-| Height       | 40px   |
-| Color        | `--color-border-strong` |
-| Border-radius| 2px    |
-| Position     | centered, 50% height |
-| Behavior     | fades out on expand (`opacity 0`, 80ms) |
+| Property      | Value                                   |
+| ------------- | --------------------------------------- |
+| Width         | 4px                                     |
+| Height        | 40px                                    |
+| Color         | `--color-border-strong`                 |
+| Border-radius | 2px                                     |
+| Position      | centered, 50% height                    |
+| Behavior      | fades out on expand (`opacity 0`, 80ms) |
 
 ## Keyboard Contract
 
-| Key             | Context           | Behavior                                                                 |
-| --------------- | ----------------- | ------------------------------------------------------------------------ |
-| `Tab`           | Page              | Moves focus into sidebar, then through each nav link in DOM order        |
-| `Shift+Tab`     | First nav link    | Moves focus out of sidebar to previous page element                      |
-| `Enter` / `Space` | Focused nav link | Activates the link (navigates to route)                                  |
-| `Enter` / `Space` | Focused avatar   | Navigates to `/account`                                                  |
-| `ArrowDown`     | Inside sidebar    | Moves focus to next nav link (wraps to first after avatar)               |
-| `ArrowUp`       | Inside sidebar    | Moves focus to previous nav link (wraps to avatar after first)           |
-| `Escape`        | Sidebar focused   | Moves focus to the map (returns keyboard control to map pane)            |
+| Key               | Context          | Behavior                                                          |
+| ----------------- | ---------------- | ----------------------------------------------------------------- |
+| `Tab`             | Page             | Moves focus into sidebar, then through each nav link in DOM order |
+| `Shift+Tab`       | First nav link   | Moves focus out of sidebar to previous page element               |
+| `Enter` / `Space` | Focused nav link | Activates the link (navigates to route)                           |
+| `Enter` / `Space` | Focused avatar   | Navigates to `/account`                                           |
+| `ArrowDown`       | Inside sidebar   | Moves focus to next nav link (wraps to first after avatar)        |
+| `ArrowUp`         | Inside sidebar   | Moves focus to previous nav link (wraps to avatar after first)    |
+| `Escape`          | Sidebar focused  | Moves focus to the map (returns keyboard control to map pane)     |
 
 **Focus behavior on expand:** When a nav link receives keyboard focus, the sidebar expands to show labels (same as hover). It collapses when focus leaves the sidebar entirely.
 
@@ -114,16 +114,16 @@ All values from the 4px base unit scale (`docs/design.md` §3.3). **No ad-hoc va
 
 ## Actions
 
-| #   | User Action              | System Response                | Triggers             |
-| --- | ------------------------ | ------------------------------ | -------------------- |
-| 1   | Hovers sidebar (desktop) | Sidebar expands, shows labels  | CSS transition 150ms ease-out |
-| 2   | Mouse leaves sidebar     | Sidebar collapses to icons     | CSS transition 150ms ease-out |
-| 3   | Clicks nav link          | Navigates to route             | Angular Router       |
-| 4   | Clicks disabled nav link | Nothing (pointer-events: none) | —                    |
-| 5   | Clicks avatar slot       | Navigates to `/account`        | Angular Router       |
-| 6   | Resizes below 768px      | Sidebar becomes bottom tab bar | CSS media query      |
-| 7   | Focuses nav link (keyboard) | Sidebar expands (same as hover) | Focus-within trigger |
-| 8   | Focus leaves sidebar     | Sidebar collapses (if not hovered) | Focus-out         |
+| #   | User Action                 | System Response                    | Triggers                      |
+| --- | --------------------------- | ---------------------------------- | ----------------------------- |
+| 1   | Hovers sidebar (desktop)    | Sidebar expands, shows labels      | CSS transition 150ms ease-out |
+| 2   | Mouse leaves sidebar        | Sidebar collapses to icons         | CSS transition 150ms ease-out |
+| 3   | Clicks nav link             | Navigates to route                 | Angular Router                |
+| 4   | Clicks disabled nav link    | Nothing (pointer-events: none)     | —                             |
+| 5   | Clicks avatar slot          | Navigates to `/account`            | Angular Router                |
+| 6   | Resizes below 768px         | Sidebar becomes bottom tab bar     | CSS media query               |
+| 7   | Focuses nav link (keyboard) | Sidebar expands (same as hover)    | Focus-within trigger          |
+| 8   | Focus leaves sidebar        | Sidebar collapses (if not hovered) | Focus-out                     |
 
 ## Component Hierarchy
 
@@ -173,6 +173,7 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 ## Acceptance Criteria
 
 ### Structure
+
 - [x] Desktop: pill on left, expands on hover (150ms ease-out transition)
 - [x] Desktop: shows icon + label when expanded, icon only when collapsed
 - [x] Desktop: width matches design system (48px collapsed → 240px expanded)
@@ -180,6 +181,7 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 - [x] Frosted glass effect on supporting browsers (with fallback solid bg)
 
 ### States (all required)
+
 - [ ] NavLink default: transparent bg, `--color-text-secondary`
 - [ ] NavLink hover: `--color-bg-elevated` at 40%, `--color-text-primary`, 80ms
 - [ ] NavLink active route: `--color-clay` at 12% bg, `--color-clay` text/icon, 3px left border (desktop) / 2px bottom border (mobile)
@@ -192,6 +194,7 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 - [ ] Dark mode: frosted glass readable against `#0F0E0C` base
 
 ### Spacing (no ad-hoc values)
+
 - [ ] Outer padding: `py-4 px-2` (collapsed) / `py-4 px-3` (expanded)
 - [ ] Nav item gap: `gap-1` (4px)
 - [ ] NavLink padding: `py-2 px-3`
@@ -199,6 +202,7 @@ Each link: Material Icon (20px) + label text. Active state via `routerLinkActive
 - [ ] Mobile: `h-14 px-4 justify-around` + `env(safe-area-inset-bottom)`
 
 ### Keyboard
+
 - [ ] `Tab` / `Shift+Tab` moves in/out of sidebar
 - [ ] `ArrowDown` / `ArrowUp` moves between nav links
 - [ ] `Enter` / `Space` activates focused link

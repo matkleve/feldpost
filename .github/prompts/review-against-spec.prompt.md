@@ -1,3 +1,9 @@
+---
+agent: reviewer
+tools: [read, search]
+description: "Review an implemented element against its spec, reporting matches and deviations."
+---
+
 You are reviewing an implemented UI element against its spec in GeoSite.
 
 ## Instructions
