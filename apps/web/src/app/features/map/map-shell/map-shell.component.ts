@@ -20,6 +20,7 @@ import {
     ElementRef,
     OnDestroy,
     afterNextRender,
+    computed,
     inject,
     signal,
     viewChild,
@@ -94,6 +95,14 @@ export class MapShellComponent implements OnDestroy {
     /** Whether the PhotoPanel is slid open. */
     readonly photoPanelOpen = signal(false);
     readonly selectedMarkerKey = signal<string | null>(null);
+
+    /** Thumbnail URL for the currently selected single marker. */
+    readonly selectedMarkerThumbnail = computed(() => {
+        const key = this.selectedMarkerKey();
+        if (!key) return null;
+        const state = this.uploadedPhotoMarkers.get(key);
+        return state?.thumbnailUrl ?? null;
+    });
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
@@ -350,7 +359,6 @@ export class MapShellComponent implements OnDestroy {
             }
 
             existing.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
-            existing.marker.bindPopup(`${nextCount} images uploaded here`);
             return;
         }
 
@@ -360,9 +368,7 @@ export class MapShellComponent implements OnDestroy {
                 thumbnailUrl: event.thumbnailUrl,
                 direction: event.direction,
             }),
-        })
-            .bindPopup(`Image uploaded (id: ${event.id})`)
-            .addTo(this.map);
+        }).addTo(this.map);
 
         marker.on('click', () => this.handlePhotoMarkerClick(markerKey));
 
@@ -436,9 +442,7 @@ export class MapShellComponent implements OnDestroy {
                     count,
                     thumbnailUrl,
                 }),
-            })
-                .bindPopup(count === 1 ? `Image uploaded (id: ${group.rows[0].id})` : `${count} images uploaded here`)
-                .addTo(this.map);
+            }).addTo(this.map);
 
             marker.on('click', () => this.handlePhotoMarkerClick(key));
 

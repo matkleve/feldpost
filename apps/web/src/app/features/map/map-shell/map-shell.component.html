@@ -96,9 +96,13 @@
       </button>
     </div>
 
-    <!-- Photo grid placeholder -->
+    <!-- Photo grid / selected image preview -->
     <div class="photo-panel__grid">
-      <p class="photo-panel__empty">Select a marker on the map to see photos.</p>
+      @if (selectedMarkerThumbnail(); as thumb) {
+        <img class="photo-panel__preview" [src]="thumb" alt="Selected photo" />
+      } @else {
+        <p class="photo-panel__empty">Select a marker on the map to see photos.</p>
+      }
     </div>
   </div>
 }
