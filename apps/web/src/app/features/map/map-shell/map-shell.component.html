@@ -100,20 +100,36 @@
     aria-label="Photo panel"
     [style.width.px]="workspacePaneWidth()"
   >
-    <!-- Tab bar -->
-    <div class="photo-panel__tabs" role="tablist">
-      <button class="photo-panel__tab photo-panel__tab--active" role="tab" aria-selected="true">
-        Selection
-      </button>
-    </div>
+    <!-- Image Detail View — replaces grid when a detail image is selected -->
+    @if (detailImageId()) {
+      <app-image-detail-view
+        [imageId]="detailImageId()"
+        (closed)="closeDetailView()"
+        (editLocationRequested)="onEditLocationRequested($event)"
+      />
+    } @else {
+      <!-- Tab bar -->
+      <div class="photo-panel__tabs" role="tablist">
+        <button class="photo-panel__tab photo-panel__tab--active" role="tab" aria-selected="true">
+          Selection
+        </button>
+      </div>
 
-    <!-- Photo grid / selected image preview -->
-    <div class="photo-panel__grid">
-      @if (selectedMarkerThumbnail(); as thumb) {
-        <img class="photo-panel__preview" [src]="thumb" alt="Selected photo" />
-      } @else {
-        <p class="photo-panel__empty">Select a marker on the map to see photos.</p>
-      }
-    </div>
+      <!-- Photo grid / selected image preview -->
+      <div class="photo-panel__grid">
+        @if (selectedMarkerThumbnail(); as thumb) {
+          <button
+            class="photo-panel__preview-btn"
+            [disabled]="!selectedMarkerImageId()"
+            (click)="selectedMarkerImageId() && openDetailView(selectedMarkerImageId()!)"
+            aria-label="View photo detail"
+          >
+            <img class="photo-panel__preview" [src]="thumb" alt="Selected photo" />
+          </button>
+        } @else {
+          <p class="photo-panel__empty">Select a marker on the map to see photos.</p>
+        }
+      </div>
+    }
   </div>
 }

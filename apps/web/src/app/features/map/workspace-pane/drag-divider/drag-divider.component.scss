@@ -72,17 +72,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  // Pill band: height matches --ui-item-media-size-default (32px)
+  // Same width as ui-item-media (32px), taller to form a vertical band
   width: var(--ui-item-media-size-default);
-  height: var(--ui-item-media-size-default);
-  border-radius: var(--radius-full);
+  height: var(--spacing-7); // 48px — taller than wide
+  border-radius: var(--container-radius-control); // same corners as .ui-item-media (8px)
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   opacity: 0;
   transition:
     opacity 80ms ease-out,
-    border-color 80ms ease-out;
+    border-color 80ms ease-out,
+    box-shadow 80ms ease-out;
   pointer-events: none;
 }
 
@@ -91,6 +92,7 @@
 :host.dragging .drag-divider__grip {
   opacity: 1;
   border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .drag-divider__grip-icon {

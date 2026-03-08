@@ -31,6 +31,7 @@ import { ExifCoords } from '../../../core/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
+import { ImageDetailViewComponent } from '../workspace-pane/image-detail-view.component';
 import {
     buildPhotoMarkerHtml,
     PHOTO_MARKER_ICON_ANCHOR,
@@ -41,7 +42,7 @@ import {
 
 @Component({
     selector: 'app-map-shell',
-    imports: [UploadPanelComponent, SearchBarComponent, DragDividerComponent],
+    imports: [UploadPanelComponent, SearchBarComponent, DragDividerComponent, ImageDetailViewComponent],
     templateUrl: './map-shell.component.html',
     styleUrl: './map-shell.component.scss',
 })
@@ -111,12 +112,26 @@ export class MapShellComponent implements OnDestroy {
     });
     readonly selectedMarkerKey = signal<string | null>(null);
 
+    /**
+     * When non-null, the Image Detail View is shown inside the photo panel.
+     * Set to a DB image UUID when the user clicks a thumbnail or marker detail action.
+     * Set to null to return to the thumbnail grid.
+     */
+    readonly detailImageId = signal<string | null>(null);
+
     /** Thumbnail URL for the currently selected single marker. */
     readonly selectedMarkerThumbnail = computed(() => {
         const key = this.selectedMarkerKey();
         if (!key) return null;
         const state = this.uploadedPhotoMarkers.get(key);
         return state?.thumbnailUrl ?? null;
+    });
+
+    /** DB image UUID for the currently selected single marker. */
+    readonly selectedMarkerImageId = computed(() => {
+        const key = this.selectedMarkerKey();
+        if (!key) return null;
+        return this.uploadedPhotoMarkers.get(key)?.imageId ?? null;
     });
 
     // ── Private helpers ───────────────────────────────────────────────────────
@@ -135,6 +150,8 @@ export class MapShellComponent implements OnDestroy {
             direction?: number;
             corrected?: boolean;
             uploading?: boolean;
+            /** DB UUID of the image — set for single-image markers only. */
+            imageId?: string;
             /** True for markers added via upload before the next viewport query. */
             optimistic?: boolean;
             /** Snapshot of the last rendered state for dirty-checking. */
@@ -202,6 +219,28 @@ export class MapShellComponent implements OnDestroy {
         this.workspacePaneWidth.set(newWidth);
         // After resize, invalidate the Leaflet map size so tiles re-render.
         this.map?.invalidateSize();
+    }
+
+    /** Closes the Image Detail View and returns to the thumbnail grid. */
+    closeDetailView(): void {
+        this.detailImageId.set(null);
+    }
+
+    /**
+     * Opens the Image Detail View for the given DB image UUID.
+     * Also ensures the photo panel is open.
+     */
+    openDetailView(imageId: string): void {
+        this.detailImageId.set(imageId);
+        this.photoPanelOpen.set(true);
+    }
+
+    /**
+     * Handles the editLocationRequested output from ImageDetailViewComponent.
+     * Enters correction mode — placeholder for the correction flow spec.
+     */
+    onEditLocationRequested(_imageId: string): void {
+        // Location correction mode will be implemented in the correction flow spec.
     }
 
     // ── Upload panel ──────────────────────────────────────────────────────────
@@ -456,6 +495,7 @@ export class MapShellComponent implements OnDestroy {
             lng: event.lng,
             thumbnailUrl: event.thumbnailUrl,
             direction: event.direction,
+            imageId: event.id,
             optimistic: true,
         });
     }
@@ -589,6 +629,7 @@ export class MapShellComponent implements OnDestroy {
                 direction,
                 corrected,
                 thumbnailSourcePath,
+                imageId: count === 1 ? (row.image_id ?? undefined) : undefined,
             });
         }
 
@@ -645,6 +686,11 @@ export class MapShellComponent implements OnDestroy {
         // (spec: photo-marker.md § Cluster Click Behaviour)
         this.setSelectedMarker(markerKey);
         this.photoPanelOpen.set(true);
+
+        // Single-image marker: open the detail view directly.
+        if (markerState.count === 1 && markerState.imageId) {
+            this.openDetailView(markerState.imageId);
+        }
     }
 
     /** Attach click + touch long-press interactions consistently for each new marker. */

@@ -89,12 +89,12 @@ ImageDetailView                            ← fills Workspace Pane content area
 
 ## Acceptance Criteria
 
-- [ ] Desktop: replaces grid in workspace pane, back arrow returns
-- [ ] Mobile: full-screen overlay with close button
-- [ ] Full-res image loads on demand (shows thumbnail first)
-- [ ] Metadata rows: click value → inline edit → save on Enter/blur
-- [ ] Coordinates displayed with correction indicator if corrected
-- [ ] Original EXIF coordinates shown when correction exists (Honesty principle)
-- [ ] Edit location button starts marker correction mode
-- [ ] Add to group opens group picker
-- [ ] Delete confirmation before removal
+- [x] Desktop: replaces grid in workspace pane, back arrow returns
+- [x] Mobile: full-screen overlay with close button
+- [x] Full-res image loads on demand (shows thumbnail first)
+- [x] Metadata rows: click value → inline edit → save on Enter/blur
+- [x] Coordinates displayed with correction indicator if corrected
+- [x] Original EXIF coordinates shown when correction exists (Honesty principle)
+- [x] Edit location button starts marker correction mode
+- [x] Add to group opens group picker
+- [x] Delete confirmation before removal
