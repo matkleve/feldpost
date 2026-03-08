@@ -4,6 +4,13 @@
 
 The top-level full-screen host component for the map page. It's the main screen of GeoSite — everything the user sees after login lives inside Map Shell.
 
+**Related docs:**
+
+- Interaction scenarios: [use-cases/map-shell.md](../use-cases/map-shell.md)
+- Implementation blueprint: [implementation-blueprints/map-shell.md](../implementation-blueprints/map-shell.md)
+- Child specs: [workspace-pane](workspace-pane.md), [drag-divider](drag-divider.md), [search-bar](search-bar.md), [upload-button-zone](upload-button-zone.md), [photo-marker](photo-marker.md)
+- Product use cases: [UC1](../use-cases.md#uc1--technician-on-site-view-history), [UC2](../use-cases.md#uc2--clerk-preparing-a-quote), [UC3](../use-cases.md#uc3--upload-and-correct-a-new-image)
+
 ## What It Looks Like
 
 Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remaining space). Right: Workspace Pane (slides in when opened). Background: `--color-bg-base`. No chrome, no header bar — the map dominates.
@@ -16,13 +23,15 @@ Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remai
 
 ## Actions
 
-| #   | User Action                       | System Response                                                                                         | Triggers                       |
-| --- | --------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| 1   | Navigates to `/` (authenticated)  | Renders full map shell with sidebar, map, floating controls                                             | Map init via `MapAdapter`      |
-| 2   | Resizes browser window            | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet | Responsive breakpoint          |
-| 3   | Opens workspace pane              | Drag Divider appears, map zone shrinks                                                                  | Workspace Pane slides in       |
-| 4   | Enters placement mode             | Map Container gets crosshair cursor, Placement Banner appears                                           | `placementActive` signal       |
-| 5   | Requests pin-drop from search bar | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")        | `searchPlacementActive` signal |
+| #   | User Action                       | System Response                                                                                         | Triggers                                                                     |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1   | Navigates to `/` (authenticated)  | Renders full map shell with sidebar, map, floating controls                                             | Map init via `MapAdapter`                                                    |
+| 2   | Resizes browser window            | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet | Responsive breakpoint                                                        |
+| 3   | Opens workspace pane              | Drag Divider appears, map zone shrinks via clip-path reveal                                             | Workspace Pane slides in; see [workspace-pane spec](workspace-pane.md) §1/1b |
+| 4   | Enters placement mode             | Map Container gets crosshair cursor, Placement Banner appears                                           | `placementActive` signal                                                     |
+| 5   | Requests pin-drop from search bar | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")        | `searchPlacementActive` signal                                               |
+| 6   | Closes workspace pane             | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                   | `workspacePaneOpen` → false; see [workspace-pane spec](workspace-pane.md) §3 |
+| 7   | Clicks empty map area             | Deselects the active marker (selection highlight clears); workspace pane stays open                     | `selectedMarkerKey` → null                                                   |
 
 ## Component Hierarchy
 
@@ -63,13 +72,17 @@ MapShell                                   ← full viewport, flex row, --color-
 - Initializes Leaflet in `afterNextRender` (browser-only)
 - All child floating components are positioned via CSS within Map Zone
 - Never calls Leaflet directly from template — uses `MapAdapter`
+- WorkspacePane close button emits `(closed)` → MapShell sets `workspacePaneOpen` → false
+- Clicking empty map deselects the active marker but does **not** close the workspace pane
 
 ## Acceptance Criteria
 
 - [x] Full viewport with no scrollbars
-- [ ] Sidebar on left (desktop) / bottom (mobile)
+- [x] Sidebar on left (desktop) / bottom (mobile)
 - [x] Map fills remaining space
 - [x] Floating controls (search, upload, GPS) don't overlap each other
-- [ ] Workspace pane slides in from right without pushing sidebar
+- [x] Workspace pane slides in from right without pushing sidebar
 - [x] Placement mode adds crosshair cursor to map
-- [ ] Works on mobile: sidebar → bottom bar, workspace → bottom sheet
+- [x] Workspace pane has a close button that hides the pane
+- [x] Clicking empty map deselects marker but keeps pane open
+- [x] Works on mobile: sidebar → bottom bar, workspace → bottom sheet

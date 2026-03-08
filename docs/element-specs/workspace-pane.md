@@ -4,6 +4,14 @@
 
 The right-side panel that shows image groups, thumbnails, and detail views. It's the user's working area for reviewing and organizing photos. Desktop: slides in from the right. Mobile: becomes a bottom sheet with three snap points.
 
+**Related docs:**
+
+- Interaction scenarios: [use-cases/map-shell.md](../use-cases/map-shell.md) (IS-2, IS-3, IS-4)
+- Implementation blueprint: [implementation-blueprints/workspace-pane.md](../implementation-blueprints/workspace-pane.md) (if exists)
+- Parent spec: [map-shell](map-shell.md)
+- Child specs: [drag-divider](drag-divider.md), [group-tab-bar](group-tab-bar.md), [thumbnail-grid](thumbnail-grid.md), [image-detail-view](image-detail-view.md)
+- Product use cases: [UC1](../use-cases.md#uc1--technician-on-site-view-history) §6–7, [UC2](../use-cases.md#uc2--clerk-preparing-a-quote) §6–10
+
 ## What It Looks Like
 
 **Desktop:** 320px wide by default, resizable 280–640px via Drag Divider. Uses the shared `.ui-container` panel shell so the workspace aligns with the same outer radius and panel padding language as other app surfaces. `--color-bg-surface` background. Slides in from the right edge when opened. Contains Group Tab Bar at top, content area below (thumbnail grid or image detail).

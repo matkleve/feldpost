@@ -1,6 +1,7 @@
 # Map Shell — Implementation Blueprint
 
 > **Spec**: [element-specs/map-shell.md](../element-specs/map-shell.md)
+> **Interaction scenarios**: [use-cases/map-shell.md](../use-cases/map-shell.md)
 > **Status**: Partially implemented — core map, upload, search, GPS, markers work. Missing sidebar, workspace pane integration, responsive bottom bar.
 
 ## Existing Infrastructure

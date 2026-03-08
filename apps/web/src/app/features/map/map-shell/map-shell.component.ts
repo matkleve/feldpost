@@ -226,6 +226,15 @@ export class MapShellComponent implements OnDestroy {
         this.detailImageId.set(null);
     }
 
+    /** Closes the workspace pane entirely and clears selection state. */
+    closeWorkspacePane(): void {
+        this.photoPanelOpen.set(false);
+        this.detailImageId.set(null);
+        this.setSelectedMarker(null);
+        // Let Angular remove the pane from the DOM, then tell Leaflet to reclaim the space.
+        setTimeout(() => this.map?.invalidateSize(), 0);
+    }
+
     /**
      * Opens the Image Detail View for the given DB image UUID.
      * Also ensures the photo panel is open.
@@ -398,8 +407,9 @@ export class MapShellComponent implements OnDestroy {
         }
 
         if (!this.searchPlacementActive()) {
+            // Deselect the active marker but keep the workspace pane open.
+            // The pane is closed only via its own close button.
             this.setSelectedMarker(null);
-            this.photoPanelOpen.set(false);
             return;
         }
 

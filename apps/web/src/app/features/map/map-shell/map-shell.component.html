@@ -2,8 +2,8 @@
   MapShellComponent — full-screen map shell.
 
   Layout (left→right):
-    UploadButton (fixed, top-right, z-upload-button)
     MapZone (flex-fill)
+      UploadButton (absolute, top-right, z-upload-button, visually over map)
       LeafletMap
       SearchBar (floating, top-center)
         ResultsDropdown (conditional)
@@ -13,32 +13,31 @@
     PhotoPanel (slides in from right / bottom)
 -->
 
-<!-- Upload button — top-right corner FAB that hover-expands into UploadPanel -->
-<div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
-  <!-- Icon button (always visible) -->
-  <button
-    class="map-upload-btn"
-    type="button"
-    aria-label="Upload images"
-    title="Upload images"
-    [class.map-upload-btn--active]="uploadPanelOpen()"
-    (click)="toggleUploadPanel()"
-  >
-    <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
-  </button>
-
-  <!-- Expanded panel -->
-  <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">
-    <app-upload-panel
-      [visible]="uploadPanelOpen()"
-      (imageUploaded)="onImageUploaded($event)"
-      (placementRequested)="enterPlacementMode($event)"
-    />
-  </div>
-</div>
-
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
+  <!-- Upload button — top-right of map zone, visually over map -->
+  <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
+    <!-- Icon button (always visible) -->
+    <button
+      class="map-upload-btn"
+      type="button"
+      aria-label="Upload images"
+      title="Upload images"
+      [class.map-upload-btn--active]="uploadPanelOpen()"
+      (click)="toggleUploadPanel()"
+    >
+      <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
+    </button>
+
+    <!-- Expanded panel -->
+    <div class="upload-expand" [class.upload-expand--visible]="uploadPanelOpen()">
+      <app-upload-panel
+        [visible]="uploadPanelOpen()"
+        (imageUploaded)="onImageUploaded($event)"
+        (placementRequested)="enterPlacementMode($event)"
+      />
+    </div>
+  </div>
   <!-- Leaflet target -->
   <div
     #mapContainer
@@ -100,6 +99,20 @@
     aria-label="Photo panel"
     [style.width.px]="workspacePaneWidth()"
   >
+    <!-- Pane header with close button -->
+    <div class="photo-panel__header">
+      <span class="photo-panel__header-title">Workspace</span>
+      <button
+        class="photo-panel__close-btn"
+        type="button"
+        aria-label="Close workspace pane"
+        title="Close workspace pane"
+        (click)="closeWorkspacePane()"
+      >
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+    </div>
+
     <!-- Image Detail View — replaces grid when a detail image is selected -->
     @if (detailImageId()) {
       <app-image-detail-view
