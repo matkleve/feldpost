@@ -38,8 +38,6 @@ import {
     PhotoMarkerZoomLevel,
 } from '../../../core/map/marker-factory';
 
-const PHOTO_MARKER_CLUSTER_GRID_DECIMALS = 4;
-
 @Component({
     selector: 'app-map-shell',
     imports: [UploadPanelComponent, SearchBarComponent],
@@ -116,9 +114,12 @@ export class MapShellComponent implements OnDestroy {
             lat: number;
             lng: number;
             thumbnailUrl?: string;
+            thumbnailSourcePath?: string;
             direction?: number;
             corrected?: boolean;
             uploading?: boolean;
+            /** True for markers added via upload before the next viewport query. */
+            optimistic?: boolean;
             /** Snapshot of the last rendered state for dirty-checking. */
             lastRendered?: {
                 count: number;
@@ -132,10 +133,11 @@ export class MapShellComponent implements OnDestroy {
         }
     >();
 
-    private readonly initialPhotoMarkerLimit = 500;
-
     /** Timer handle for the moveend debounce. */
     private moveEndDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    /** AbortController for in-flight viewport queries. */
+    private viewportQueryController: AbortController | null = null;
 
     /** Tracks the last zoom level to detect threshold crossings. */
     private lastZoomLevel: PhotoMarkerZoomLevel = 'mid';
@@ -154,6 +156,8 @@ export class MapShellComponent implements OnDestroy {
             clearTimeout(this.moveEndDebounceTimer);
             this.moveEndDebounceTimer = null;
         }
+        this.viewportQueryController?.abort();
+        this.viewportQueryController = null;
         this.uploadedPhotoMarkers.clear();
         this.userLocationMarker?.remove();
         this.userLocationMarker = null;
@@ -258,7 +262,7 @@ export class MapShellComponent implements OnDestroy {
 
         // Request user GPS position; fall back to Vienna if denied.
         this.initGeolocation();
-        void this.loadInitialPhotoMarkers();
+        void this.queryViewportMarkers();
 
         // Map click handler: closes upload panel and, when active, places images
         // that had no GPS EXIF data.
@@ -404,99 +408,133 @@ export class MapShellComponent implements OnDestroy {
             lng: event.lng,
             thumbnailUrl: event.thumbnailUrl,
             direction: event.direction,
+            optimistic: true,
         });
     }
 
-    private async loadInitialPhotoMarkers(): Promise<void> {
+    /**
+     * Viewport-driven marker query.
+     * Calls the `viewport_markers` RPC which returns server-side clusters
+     * at low zoom and individual markers at high zoom. Reconciles the
+     * result against existing markers (add / remove / update).
+     */
+    private async queryViewportMarkers(): Promise<void> {
         if (!this.map) return;
 
-        const { data, error } = await this.supabaseService.client
-            .from('images')
-            .select('id, latitude, longitude, exif_latitude, exif_longitude, direction, thumbnail_path, storage_path, created_at')
-            .not('latitude', 'is', null)
-            .not('longitude', 'is', null)
-            .order('created_at', { ascending: false })
-            .limit(this.initialPhotoMarkerLimit);
+        // Abort any in-flight query.
+        this.viewportQueryController?.abort();
+        const controller = new AbortController();
+        this.viewportQueryController = controller;
 
-        if (error || !data || data.length === 0) return;
+        const bounds = this.map.getBounds();
+        const zoom = this.map.getZoom();
 
-        type ImageMarkerRow = {
-            id: string;
-            latitude: number;
-            longitude: number;
+        // 10 % buffer on each edge for pre-fetch.
+        const latPad = (bounds.getNorth() - bounds.getSouth()) * 0.1;
+        const lngPad = (bounds.getEast() - bounds.getWest()) * 0.1;
+
+        const { data, error } = await this.supabaseService.client.rpc(
+            'viewport_markers',
+            {
+                min_lat: bounds.getSouth() - latPad,
+                min_lng: bounds.getWest() - lngPad,
+                max_lat: bounds.getNorth() + latPad,
+                max_lng: bounds.getEast() + lngPad,
+                zoom: Math.round(zoom),
+            },
+        );
+
+        // If this query was aborted, discard the result.
+        if (controller.signal.aborted) return;
+        this.viewportQueryController = null;
+
+        if (error || !data) return;
+
+        type ViewportRow = {
+            cluster_lat: number;
+            cluster_lng: number;
+            image_count: number;
+            image_id: string | null;
+            direction: number | null;
+            storage_path: string | null;
+            thumbnail_path: string | null;
             exif_latitude: number | null;
             exif_longitude: number | null;
-            direction: number | null;
-            thumbnail_path: string | null;
-            storage_path: string;
-            created_at: string;
+            created_at: string | null;
         };
 
-        const grouped = new Map<string, { rows: ImageMarkerRow[]; lat: number; lng: number }>();
+        // Build the incoming marker set keyed the same way we store them.
+        const incoming = new Map<string, ViewportRow>();
+        for (const row of data as ViewportRow[]) {
+            if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
+            const key = this.toMarkerKey(row.cluster_lat, row.cluster_lng);
+            incoming.set(key, row);
+        }
 
-        for (const row of data as ImageMarkerRow[]) {
-            if (typeof row.latitude !== 'number' || typeof row.longitude !== 'number') continue;
-            const key = this.toMarkerKey(row.latitude, row.longitude);
-            const existing = grouped.get(key);
+        // --- Remove markers that left the viewport (skip optimistic ones) ---
+        for (const [key, state] of this.uploadedPhotoMarkers) {
+            if (state.optimistic) continue; // keep until next reconciliation
+            if (!incoming.has(key)) {
+                state.marker.remove();
+                this.uploadedPhotoMarkers.delete(key);
+            }
+        }
+
+        // --- Add or update markers ---
+        for (const [key, row] of incoming) {
+            const existing = this.uploadedPhotoMarkers.get(key);
+            const count = Number(row.image_count);
+            const direction = row.direction ?? undefined;
+            const corrected =
+                count === 1 &&
+                row.exif_latitude != null &&
+                row.exif_longitude != null &&
+                (row.cluster_lat !== row.exif_latitude || row.cluster_lng !== row.exif_longitude);
+            const thumbnailSourcePath =
+                count === 1 ? (row.thumbnail_path ?? row.storage_path ?? undefined) : undefined;
+
             if (existing) {
-                existing.rows.push(row);
+                // Update if data changed.
+                if (
+                    existing.count !== count ||
+                    existing.direction !== direction ||
+                    existing.corrected !== corrected
+                ) {
+                    existing.count = count;
+                    existing.direction = direction;
+                    existing.corrected = corrected;
+                    existing.thumbnailSourcePath = thumbnailSourcePath;
+                    existing.optimistic = false;
+                    this.refreshPhotoMarker(key);
+                }
                 continue;
             }
 
-            grouped.set(key, {
-                rows: [row],
-                lat: row.latitude,
-                lng: row.longitude,
-            });
-        }
-
-        for (const [key, group] of grouped) {
-            const count = group.rows.length;
-            let thumbnailUrl: string | undefined;
-
-            if (count === 1) {
-                const sourcePath = group.rows[0].thumbnail_path ?? group.rows[0].storage_path;
-                const signed = await this.supabaseService.client.storage
-                    .from('images')
-                    .createSignedUrl(sourcePath, 3600);
-
-                if (!signed.error) {
-                    thumbnailUrl = signed.data.signedUrl;
-                }
-            }
-
-            // Direction from the first row that has one.
-            const direction = group.rows.find((r) => r.direction != null)?.direction ?? undefined;
-
-            // Corrected = coordinates differ from immutable EXIF originals.
-            const corrected =
-                count === 1 &&
-                group.rows[0].exif_latitude != null &&
-                group.rows[0].exif_longitude != null &&
-                (group.rows[0].latitude !== group.rows[0].exif_latitude ||
-                    group.rows[0].longitude !== group.rows[0].exif_longitude);
-
-            const marker = L.marker([group.lat, group.lng], {
-                icon: this.buildPhotoMarkerIcon(key, {
-                    count,
-                    thumbnailUrl,
-                    direction,
-                    corrected,
-                }),
-            }).addTo(this.map);
+            // New marker.
+            const marker = L.marker([row.cluster_lat, row.cluster_lng], {
+                icon: this.buildPhotoMarkerIcon(key, { count, direction, corrected }),
+            }).addTo(this.map!);
 
             marker.on('click', () => this.handlePhotoMarkerClick(key));
 
             this.uploadedPhotoMarkers.set(key, {
                 marker,
                 count,
-                lat: group.lat,
-                lng: group.lng,
-                thumbnailUrl,
+                lat: row.cluster_lat,
+                lng: row.cluster_lng,
                 direction,
                 corrected,
+                thumbnailSourcePath,
             });
         }
+
+        // Clear optimistic flag from surviving markers.
+        for (const state of this.uploadedPhotoMarkers.values()) {
+            state.optimistic = false;
+        }
+
+        // Lazy-load thumbnails if at near zoom.
+        this.maybeLoadThumbnails();
     }
 
     private buildPhotoMarkerIcon(
@@ -576,8 +614,8 @@ export class MapShellComponent implements OnDestroy {
 
     /**
      * Debounced handler for the Leaflet `moveend` event.
-     * Only refreshes all marker icons when the zoom-level threshold
-     * (far / mid / near) has changed, avoiding unnecessary DOM churn.
+     * Fires a viewport query on every moveend (pan or zoom) so the
+     * marker set always matches the visible area + zoom-level grid.
      */
     private handleMoveEnd(): void {
         if (this.moveEndDebounceTimer) {
@@ -586,17 +624,59 @@ export class MapShellComponent implements OnDestroy {
 
         this.moveEndDebounceTimer = setTimeout(() => {
             this.moveEndDebounceTimer = null;
+
+            // Always re-query so the server returns the right cluster grid for the new viewport/zoom.
+            void this.queryViewportMarkers();
+
+            // Also refresh existing marker icons if zoom-level threshold changed.
             const currentZoom = this.getPhotoMarkerZoomLevel();
             if (currentZoom !== this.lastZoomLevel) {
                 this.lastZoomLevel = currentZoom;
-                this.refreshAllPhotoMarkers();
+                for (const markerKey of this.uploadedPhotoMarkers.keys()) {
+                    this.refreshPhotoMarker(markerKey);
+                }
             }
         }, 300);
     }
 
-    private refreshAllPhotoMarkers(): void {
-        for (const markerKey of this.uploadedPhotoMarkers.keys()) {
-            this.refreshPhotoMarker(markerKey);
+    /**
+     * Lazy-load thumbnails for single-image markers visible at near zoom.
+     * Only fires signed-URL requests for markers in the current viewport
+     * that don't already have a thumbnail URL.
+     */
+    private maybeLoadThumbnails(): void {
+        if (this.getPhotoMarkerZoomLevel() !== 'near' || !this.map) return;
+
+        const bounds = this.map.getBounds();
+        for (const [key, state] of this.uploadedPhotoMarkers) {
+            if (
+                state.count === 1 &&
+                !state.thumbnailUrl &&
+                state.thumbnailSourcePath &&
+                bounds.contains([state.lat, state.lng])
+            ) {
+                void this.lazyLoadThumbnail(key, state);
+            }
+        }
+    }
+
+    /**
+     * Fetch a signed thumbnail URL for one marker. Fire-and-forget;
+     * updates the marker icon once the URL is available.
+     */
+    private async lazyLoadThumbnail(
+        key: string,
+        state: { thumbnailSourcePath?: string; thumbnailUrl?: string },
+    ): Promise<void> {
+        if (!state.thumbnailSourcePath || state.thumbnailUrl) return;
+
+        const { data, error } = await this.supabaseService.client.storage
+            .from('images')
+            .createSignedUrl(state.thumbnailSourcePath, 3600);
+
+        if (!error && data?.signedUrl) {
+            state.thumbnailUrl = data.signedUrl;
+            this.refreshPhotoMarker(key);
         }
     }
 
@@ -651,8 +731,13 @@ export class MapShellComponent implements OnDestroy {
         return 'far';
     }
 
+    /**
+     * Build a stable key from snapped coordinates the server returns.
+     * Uses 7 decimal places (server rounds to 7) so the key matches
+     * exactly as long as the same server row is returned.
+     */
     private toMarkerKey(lat: number, lng: number): string {
-        return `${lat.toFixed(PHOTO_MARKER_CLUSTER_GRID_DECIMALS)}:${lng.toFixed(PHOTO_MARKER_CLUSTER_GRID_DECIMALS)}`;
+        return `${lat.toFixed(7)}:${lng.toFixed(7)}`;
     }
 
 }
