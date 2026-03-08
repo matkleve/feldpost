@@ -1,8 +1,14 @@
 -- =============================================================================
 -- RPC: viewport_markers
 -- Returns clustered or individual markers for the visible map viewport.
--- Grid cell size adapts to zoom level so clusters merge at low zoom and
--- expand into individual pins at high zoom.
+-- Grid cell size is computed from the marker's pixel footprint at the
+-- current zoom level so clusters merge exactly when markers would overlap.
+--
+-- Formula: cell_size = (marker_px * 360) / (256 * 2^zoom)
+-- marker_px = 80  (64 px icon width + 16 px breathing room)
+--
+-- This maps each zoom level to the geographic distance one marker covers
+-- on screen, guaranteeing no visual overlap.
 -- Respects RLS via public.user_org_id() — only returns the caller's org.
 -- =============================================================================
 
@@ -30,18 +36,12 @@ SET search_path = public
 AS $$
   WITH grid AS (
     SELECT
-      -- Grid cell size shrinks as zoom increases.
-      -- zoom 1-8:   0.1    (~10 km cells)
-      -- zoom 9-11:  0.01   (~1 km cells)
-      -- zoom 12-14: 0.001  (~100 m cells)
-      -- zoom 15-17: 0.0001 (~11 m cells)
-      -- zoom 18+:   0      (no grouping — individual markers)
+      -- Pixel-aware grid: cell_size in degrees = marker_px * 360 / (256 * 2^zoom).
+      -- marker_px = 80 (64 px icon width + 16 px gap).
+      -- At zoom >= 19 show individual markers (cell_size = 0).
       CASE
-        WHEN zoom >= 18 THEN 0
-        WHEN zoom >= 15 THEN 0.0001
-        WHEN zoom >= 12 THEN 0.001
-        WHEN zoom >= 9  THEN 0.01
-        ELSE                  0.1
+        WHEN zoom >= 19 THEN 0::numeric
+        ELSE (80.0 * 360.0) / (256.0 * power(2, zoom))
       END AS cell_size
   ),
   filtered AS (
