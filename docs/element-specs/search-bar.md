@@ -135,29 +135,29 @@ Types are defined in `core/search/search.models.ts` (already exists).
 
 - [x] Search bar is visible top-center over the map on both desktop and mobile
 - [x] Clicking input opens dropdown with recent searches
-- [ ] `Cmd/Ctrl+K` focuses input from anywhere on the map page
-- [ ] Typing shows debounced results grouped by section (Addresses, Projects & Groups, Places)
-- [ ] Search surface uses `.ui-container` with the same panel radius as the Sidebar in all states
-- [ ] Search surface uses the same shared panel padding and gap tokens as the Sidebar
-- [ ] Leading search icon uses a fixed square media slot aligned to shared media-size tokens
-- [ ] Leading search icon and trailing clear button use wrappers that preserve the fixed media slot alignment within the taller search row
-- [ ] DB results appear before geocoder results
+- [x] `Cmd/Ctrl+K` focuses input from anywhere on the map page
+- [x] Typing shows debounced results grouped by section (Addresses, Projects & Groups, Places)
+- [x] Search surface uses `.ui-container` with the same panel radius as the Sidebar in all states
+- [x] Search surface uses the same shared panel padding and gap tokens as the Sidebar
+- [x] Leading search icon uses a fixed square media slot aligned to shared media-size tokens
+- [x] Leading search icon and trailing clear button use wrappers that preserve the fixed media slot alignment within the taller search row
+- [x] DB results appear before geocoder results
 - [ ] Geocoder results that are <30m from a DB result are hidden (dedup)
-- [ ] Section divider only shows when both DB and geocoder sections have items
-- [ ] Dropdown rows use `.ui-item` with a fixed leading media column
-- [ ] ArrowUp/ArrowDown navigates results, skipping headers and dividers
-- [ ] Enter commits the highlighted item (or top item if none highlighted)
+- [x] Section divider only shows when both DB and geocoder sections have items
+- [x] Dropdown rows use `.ui-item` with a fixed leading media column
+- [x] ArrowUp/ArrowDown navigates results, skipping headers and dividers
+- [x] Enter commits the highlighted item (or top item if none highlighted)
 - [x] Clicking a result commits it
 - [x] Address commit centers the map and shows Search Location Marker
 - [ ] Content commit navigates to the correct route
 - [x] Escape closes dropdown; second Escape blurs input
 - [x] Click outside closes dropdown
-- [ ] `×` clear button appears after commit; clicking it resets everything
-- [ ] `×` clear button uses square control geometry aligned to shared control/media sizing tokens
-- [ ] Empty state shows "No address found" with "Drop pin" recovery action
+- [x] `×` clear button appears after commit; clicking it resets everything
+- [x] `×` clear button uses square control geometry aligned to shared control/media sizing tokens
+- [x] Empty state shows "No address found" with "Drop pin" recovery action
 - [ ] Geocoder failure is non-blocking — DB results still render
-- [ ] Dropdown uses `role="listbox"`, items use `role="option"`
-- [ ] Results panel is revealed inside the same surface and does not behave like a detached floating dropdown
+- [x] Dropdown uses `role="listbox"`, items use `role="option"`
+- [x] Results panel is revealed inside the same surface and does not behave like a detached floating dropdown
 - [ ] Results panel expansion animates outer panel height without animating row height, row padding, media width, or panel radius
 - [ ] Opening and closing the dropdown does not change outer corner radius, item padding, or media-column width
 - [ ] Screen reader announces result count on query completion

@@ -54,4 +54,4 @@ Part of `MapShellComponent` template and styles — not a separate component. Th
 - [x] Cancel button exits placement mode
 - [ ] Escape key exits placement mode
 - [x] Only one file can be placed at a time
-- [ ] Banner has `role="status"` for accessibility
+- [x] Banner has `role="status"` for accessibility

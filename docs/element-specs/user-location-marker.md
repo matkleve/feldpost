@@ -38,8 +38,8 @@ Part of `core/map/leaflet-osm-adapter.ts` (MapAdapter manages this marker).
 
 ## Acceptance Criteria
 
-- [ ] 18px diameter, blue, white border, outer glow
+- [x] 18px diameter, blue, white border, outer glow
 - [x] Appears only after successful GPS fix
 - [ ] Does not obscure nearby photo markers
 - [ ] Updates position if Geolocation watch is active
-- [ ] Disappears when user navigates away from map page
+- [x] Disappears when user navigates away from map page

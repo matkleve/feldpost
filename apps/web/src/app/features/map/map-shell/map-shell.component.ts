@@ -463,9 +463,14 @@ export class MapShellComponent implements OnDestroy {
             created_at: string | null;
         };
 
+        // Client-side pixel-distance merge: collapse clusters whose on-screen
+        // distance is less than the marker icon width. This fixes the grid
+        // boundary problem where adjacent grid cells produce overlapping markers.
+        const merged = this.mergeOverlappingClusters(data as ViewportRow[]);
+
         // Build the incoming marker set keyed the same way we store them.
         const incoming = new Map<string, ViewportRow>();
-        for (const row of data as ViewportRow[]) {
+        for (const row of merged) {
             if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
             const key = this.toMarkerKey(row.cluster_lat, row.cluster_lng);
             incoming.set(key, row);
@@ -729,6 +734,77 @@ export class MapShellComponent implements OnDestroy {
         }
 
         return 'far';
+    }
+
+    /**
+     * Client-side pixel-distance merge pass.
+     *
+     * Grid-based clustering can leave cluster centers right at cell
+     * boundaries, producing overlapping markers. This greedy merge
+     * converts each cluster to screen-space pixels and collapses any
+     * pair whose distance is less than the marker icon width (+ 20 %
+     * breathing room). Runs in O(n²) on the already-small result set
+     * (≤ 2 000 rows), so sub-millisecond.
+     */
+    private mergeOverlappingClusters<
+        T extends { cluster_lat: number; cluster_lng: number; image_count: number;
+            image_id: string | null; direction: number | null;
+            storage_path: string | null; thumbnail_path: string | null;
+            exif_latitude: number | null; exif_longitude: number | null;
+            created_at: string | null },
+    >(rows: T[]): T[] {
+        if (!this.map || rows.length === 0) return rows;
+
+        const minDist = PHOTO_MARKER_ICON_SIZE[0] * 1.2; // 64 px + 20 % gap
+        const minDistSq = minDist * minDist;
+
+        // Pre-compute pixel positions once.
+        const points = rows.map((row) =>
+            this.map!.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]),
+        );
+
+        const consumed = new Set<number>();
+        const result: T[] = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            if (consumed.has(i)) continue;
+
+            // Accumulate weighted position + totals for the merge group.
+            let totalCount = Number(rows[i].image_count);
+            let wLat = rows[i].cluster_lat * totalCount;
+            let wLng = rows[i].cluster_lng * totalCount;
+
+            for (let j = i + 1; j < rows.length; j++) {
+                if (consumed.has(j)) continue;
+                const dx = points[i].x - points[j].x;
+                const dy = points[i].y - points[j].y;
+                if (dx * dx + dy * dy < minDistSq) {
+                    consumed.add(j);
+                    const jCount = Number(rows[j].image_count);
+                    wLat += rows[j].cluster_lat * jCount;
+                    wLng += rows[j].cluster_lng * jCount;
+                    totalCount += jCount;
+                }
+            }
+
+            const isSingle = totalCount === 1;
+            result.push({
+                ...rows[i],
+                cluster_lat: wLat / totalCount,
+                cluster_lng: wLng / totalCount,
+                image_count: totalCount,
+                // Preserve single-image fields only when there's truly one image.
+                image_id: isSingle ? rows[i].image_id : null,
+                direction: isSingle ? rows[i].direction : null,
+                storage_path: isSingle ? rows[i].storage_path : null,
+                thumbnail_path: isSingle ? rows[i].thumbnail_path : null,
+                exif_latitude: isSingle ? rows[i].exif_latitude : null,
+                exif_longitude: isSingle ? rows[i].exif_longitude : null,
+                created_at: isSingle ? rows[i].created_at : null,
+            } as T);
+        }
+
+        return result;
     }
 
     /**

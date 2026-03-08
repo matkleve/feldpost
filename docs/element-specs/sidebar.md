@@ -207,37 +207,37 @@ Uses the same row shell as NavLink. The leading media column contains either the
 
 ### States (all required)
 
-- [ ] NavLink default: transparent bg, `--color-text-secondary`
+- [x] NavLink default: transparent bg, `--color-text-secondary`
 - [ ] NavLink hover: `--color-bg-elevated` at 40%, `--color-text-primary`, 80ms
 - [ ] NavLink active route: `--color-clay` at 12% bg, `--color-clay` text/icon, 3px left border (desktop) / 2px bottom border (mobile)
 - [ ] NavLink focus-visible: 2px `--color-primary` ring, 2px offset
 - [ ] NavLink pressed: `--color-bg-elevated` at 55%
 - [ ] NavLink disabled: `--color-text-disabled`, `opacity: 0.6`, `pointer-events: none`, `aria-disabled`
-- [ ] Account row uses the same row shell as nav items
-- [ ] Expanded desktop account row shows avatar image or initial and visible account name
-- [ ] Avatar loaded: avatar image when available, otherwise first letter of display name on `--color-clay` bg
-- [ ] Avatar null/loading: `?` placeholder with `Account` label fallback
+- [x] Account row uses the same row shell as nav items
+- [x] Expanded desktop account row shows avatar image or initial and visible account name
+- [x] Avatar loaded: avatar image when available, otherwise first letter of display name on `--color-clay` bg
+- [x] Avatar null/loading: `?` placeholder with `Account` label fallback
 - [ ] Dark mode: frosted glass readable against `#0F0E0C` base
 
 ### Spacing (no ad-hoc values)
 
-- [ ] Desktop container uses `.ui-container` with panel radius and the shared panel padding/gap tokens
-- [ ] Collapsed desktop nav items are square and icon-centered
-- [ ] Expanded desktop rows keep the same height as collapsed rows
-- [ ] Expanded desktop rows have visible token-based gaps between items
-- [ ] Expanded desktop nav items reveal labels without the icon shifting sideways
-- [ ] Expanded desktop account row aligns to the same leading column as nav items
+- [x] Desktop container uses `.ui-container` with panel radius and the shared panel padding/gap tokens
+- [x] Collapsed desktop nav items are square and icon-centered
+- [x] Expanded desktop rows keep the same height as collapsed rows
+- [x] Expanded desktop rows have visible token-based gaps between items
+- [x] Expanded desktop nav items reveal labels without the icon shifting sideways
+- [x] Expanded desktop account row aligns to the same leading column as nav items
 - [ ] Expanded desktop icon-to-label gap uses `0.75rem` (12px)
-- [ ] Desktop expand/collapse only animates sidebar width and label opacity/visibility
-- [ ] Desktop rows keep the same padding, alignment, margins, and media-column width in both states
+- [x] Desktop expand/collapse only animates sidebar width and label opacity/visibility
+- [x] Desktop rows keep the same padding, alignment, margins, and media-column width in both states
 - [ ] Mobile: `h-14 px-4 justify-around` + `env(safe-area-inset-bottom)`
 
 ### Keyboard
 
 - [ ] `Tab` / `Shift+Tab` moves in/out of sidebar
 - [ ] `ArrowDown` / `ArrowUp` moves between nav links
-- [ ] `Enter` / `Space` activates focused link
+- [x] `Enter` / `Space` activates focused link
 - [ ] `Escape` returns focus to map
-- [ ] Keyboard focus expands sidebar (same as hover)
-- [ ] `aria-label="Main navigation"` on `<nav>`
+- [x] Keyboard focus expands sidebar (same as hover)
+- [x] `aria-label="Main navigation"` on `<nav>`
 - [ ] `aria-current="page"` on active route link

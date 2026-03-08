@@ -93,8 +93,8 @@ Types: `FileUploadState` and `FileUploadStatus` are defined in the component fil
 ## Acceptance Criteria
 
 - [ ] Slide-down animation from upload button
-- [ ] Glassmorphic background with blur
-- [ ] Uses `.ui-container` as the shared panel shell
+- [x] Glassmorphic background with blur
+- [x] Uses `.ui-container` as the shared panel shell
 - [x] Drag-and-drop works (visual feedback on drag-over)
 - [x] Click on drop zone opens file picker
 - [x] Per-file progress with status labels
