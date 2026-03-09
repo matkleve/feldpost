@@ -16,6 +16,7 @@
 import { Injectable, inject } from '@angular/core';
 import * as exifr from 'exifr';
 import { AuthService } from './auth.service';
+import { GeocodingService } from './geocoding.service';
 import { SupabaseService } from './supabase.service';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ export interface FileValidation {
 export class UploadService {
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
+  private readonly geocoding = inject(GeocodingService);
 
   // ── File validation ────────────────────────────────────────────────────────
 
@@ -251,12 +253,18 @@ export class UploadService {
         longitude: finalCoords?.lng ?? null,
         captured_at: capturedAt ?? null,
         direction: direction ?? null,
+        location_unresolved: finalCoords != null,
       })
       .select('id')
       .single();
 
     if (dbError) {
       return { error: dbError };
+    }
+
+    // Fire-and-forget: reverse-geocode coordinates to populate address fields.
+    if (finalCoords) {
+      this.resolveAddress(imageRow.id as string, finalCoords.lat, finalCoords.lng);
     }
 
     return {
@@ -266,6 +274,31 @@ export class UploadService {
       direction,
       error: null,
     };
+  }
+
+  /**
+   * Reverse-geocode coordinates and update the image row with structured address fields.
+   * Runs asynchronously after upload — failures are logged but do not block the upload result.
+   */
+  private async resolveAddress(imageId: string, lat: number, lng: number): Promise<void> {
+    try {
+      const result = await this.geocoding.reverse(lat, lng);
+      if (!result) return;
+
+      await this.supabase.client
+        .from('images')
+        .update({
+          address_label: result.addressLabel,
+          city: result.city,
+          district: result.district,
+          street: result.street,
+          country: result.country,
+          location_unresolved: false,
+        })
+        .eq('id', imageId);
+    } catch {
+      // Non-critical — address will show as "Unknown district" until resolved.
+    }
   }
 
   private mapStorageError(error: unknown): Error | string {

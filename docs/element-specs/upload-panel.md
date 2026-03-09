@@ -16,17 +16,18 @@ Slides down from Upload Button. Uses the shared `.ui-container` panel shell so o
 
 ## Actions
 
-| #   | User Action                  | System Response                                         | Triggers                          |
-| --- | ---------------------------- | ------------------------------------------------------- | --------------------------------- |
-| 1   | Drags files onto Drop Zone   | Files added to queue, EXIF parsing starts               | Status → `parsing`                |
-| 2   | Clicks Drop Zone             | Opens file picker dialog                                | Same as drag                      |
-| 3   | Files have EXIF GPS          | Upload starts automatically (up to 3 parallel)          | Status → `uploading` → `complete` |
-| 4   | File has no EXIF GPS         | Shows placement prompt, status = `awaiting_placement`   | Placement mode                    |
-| 5   | Upload fails                 | Shows error message + Retry button on that file         | Status → `error`                  |
-| 6   | Clicks Dismiss (×) on a file | Removes file from queue, revokes object URL             | File removed                      |
-| 7   | Clicks Retry on failed file  | Re-attempts upload                                      | Status → `uploading`              |
-| 8   | Upload succeeds              | Marker appears on map at EXIF/placed coordinates        | `imageUploaded` event             |
-| 9   | All uploads complete         | Panel stays open showing results (user closes manually) | —                                 |
+| #   | User Action                  | System Response                                                                       | Triggers                                     |
+| --- | ---------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 1   | Drags files onto Drop Zone   | Files added to queue, EXIF parsing starts                                             | Status → `parsing`                           |
+| 2   | Clicks Drop Zone             | Opens file picker dialog                                                              | Same as drag                                 |
+| 3   | Files have EXIF GPS          | Upload starts automatically (up to 3 parallel)                                        | Status → `uploading` → `complete`            |
+| 4   | File has no EXIF GPS         | Shows placement prompt, status = `awaiting_placement`                                 | Placement mode                               |
+| 5   | Upload fails                 | Shows error message + Retry button on that file                                       | Status → `error`                             |
+| 6   | Clicks Dismiss (×) on a file | Removes file from queue, revokes object URL                                           | File removed                                 |
+| 7   | Clicks Retry on failed file  | Re-attempts upload                                                                    | Status → `uploading`                         |
+| 8   | Upload succeeds              | Marker appears on map at EXIF/placed coordinates                                      | `imageUploaded` event                        |
+| 9   | Upload succeeds + GPS known  | Background reverse-geocode populates address fields (city, district, street, country) | `GeocodingService.reverse()` fire-and-forget |
+| 10  | All uploads complete         | Panel stays open showing results (user closes manually)                               | —                                            |
 
 ## Component Hierarchy
 
@@ -82,6 +83,7 @@ Types: `FileUploadState` and `FileUploadStatus` are defined in the component fil
 | `features/upload/upload-panel/upload-panel.component.html` | Template                                                   |
 | `features/upload/upload-panel/upload-panel.component.scss` | Styles                                                     |
 | `core/upload.service.ts`                                   | EXIF parsing, validation, Supabase upload (already exists) |
+| `core/geocoding.service.ts`                                | Nominatim reverse geocoding (address resolution on upload) |
 
 ## Wiring
 

@@ -282,6 +282,21 @@ If `address_label` is NULL (e.g., images imported before this feature shipped, o
 
 Reverse geocoding (`AddressResolverService.reverse()`) can be used to back-fill `address_label` for images where it is NULL — either on a background job or when the user opens the image detail view ("Address: Resolving…").
 
+### On-Load Background Resolution (Implemented)
+
+The `WorkspaceViewService` proactively resolves addresses when images are loaded into the workspace. After every `loadClusterImages()` or `setActiveSelectionImages()` call, it:
+
+1. Filters images where GPS coordinates exist but `city`/`district`/`street` are NULL.
+2. Groups by **exact** GPS coordinates (lat,lng) — only identical coordinates share a single geocode call.
+3. Calls `GeocodingService.reverse(lat, lng)` per unique coordinate.
+4. Updates the DB (`images` table) and patches the local signal so grouping headers reflect the resolved address immediately.
+
+This pattern incrementally back-fills address data for all existing images as users browse clusters, without requiring a one-time bulk migration.
+
+### Upload-Time Resolution (Implemented)
+
+The `UploadService` sets `location_unresolved: true` on insert when GPS coordinates are present. After the DB insert succeeds, it fires a background `GeocodingService.reverse()` call that populates `city`, `district`, `street`, `country`, `address_label` and sets `location_unresolved: false`.
+
 ---
 
 ## 8. Integration Points
@@ -303,6 +318,22 @@ flowchart TD
     ARS --> GEO["GeocodingAdapter\n(Nominatim default)"]
 
     ARS -->|"Cache: 5min TTL\nDebounce: 300ms\nAbort previous"| ARS
+```
+
+#### Implemented: GeocodingService Integration
+
+The lightweight `GeocodingService` (`core/geocoding.service.ts`) handles reverse-geocoding via Nominatim, independent of the full `AddressResolverService`. It is used by:
+
+```mermaid
+flowchart TD
+    GCS["GeocodingService\n(Nominatim reverse geocode)"]
+
+    UPS["UploadService\nFire-and-forget after insert"] -->|"reverse(lat, lng)"| GCS
+    WVS["WorkspaceViewService\nOn-load background resolution"] -->|"reverse(lat, lng)\nper unique coordinate"| GCS
+    PM["PlacementMode\nAfter pin placed"] -->|"reverse(lat, lng)"| GCS
+
+    GCS -->|"Rate-limited 1 req/1.1s\nCache: 5min TTL"| NOM["Nominatim API\n/reverse?format=jsonv2"]
+    GCS --> DB_UPD[("DB: UPDATE images\nSET city, district, street,\ncountry, address_label")]
 ```
 
 | Integration point                       | How `AddressResolverService` is used                                                                                                                                             |

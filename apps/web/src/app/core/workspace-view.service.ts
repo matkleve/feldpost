@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { FilterService } from './filter.service';
+import { GeocodingService } from './geocoding.service';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -14,6 +15,10 @@ const DEFAULT_SORT: SortConfig = { key: 'captured_at', direction: 'desc' };
 export class WorkspaceViewService {
   private readonly supabase = inject(SupabaseService);
   private readonly filterService = inject(FilterService);
+  private readonly geocoding = inject(GeocodingService);
+
+  /** Track image IDs already being geocoded to avoid duplicate work. */
+  private readonly pendingGeocode = new Set<string>();
 
   // ── Input signals ────────────────────────────────────────────────────────
 
@@ -96,7 +101,9 @@ export class WorkspaceViewService {
         this.rawImages.set([]);
         return;
       }
-      this.rawImages.set((data as RawClusterRow[]).map(mapClusterRow));
+      const images = (data as RawClusterRow[]).map(mapClusterRow);
+      this.rawImages.set(images);
+      this.resolveUnresolvedAddresses(images);
     } finally {
       // Only clear loading if this is still the active request.
       if (requestId === this.clusterLoadId) {
@@ -109,6 +116,7 @@ export class WorkspaceViewService {
   setActiveSelectionImages(images: WorkspaceImage[]): void {
     this.selectionActive.set(true);
     this.rawImages.set(images);
+    this.resolveUnresolvedAddresses(images);
   }
 
   /** Convenience: "select" state populated but holding zero rows (RPC returned nothing). */
@@ -175,6 +183,86 @@ export class WorkspaceViewService {
   }
 
   // ── Private helpers ──────────────────────────────────────────────────────
+
+  /**
+   * Background-resolve address fields for images that have coordinates
+   * but are missing address data. Updates both DB and the local signal.
+   * Rate-limited by GeocodingService (1 req/sec to Nominatim).
+   * Deduplicates by coordinate so co-located images share a single API call.
+   */
+  private async resolveUnresolvedAddresses(images: WorkspaceImage[]): Promise<void> {
+    const unresolved = images.filter(
+      (img) =>
+        img.latitude != null &&
+        img.longitude != null &&
+        (img.city == null || img.district == null || img.street == null) &&
+        !this.pendingGeocode.has(img.id),
+    );
+    if (unresolved.length === 0) return;
+
+    for (const img of unresolved) {
+      this.pendingGeocode.add(img.id);
+    }
+
+    // Group by exact GPS coordinates — only identical lat/lng share one geocode call.
+    const byLocation = new Map<string, WorkspaceImage[]>();
+    for (const img of unresolved) {
+      const key = `${img.latitude},${img.longitude}`;
+      const group = byLocation.get(key);
+      if (group) group.push(img);
+      else byLocation.set(key, [img]);
+    }
+
+    for (const [, group] of byLocation) {
+      const representative = group[0];
+      try {
+        const result = await this.geocoding.reverse(
+          representative.latitude,
+          representative.longitude,
+        );
+        if (!result) continue;
+
+        const ids = group.map((img) => img.id);
+
+        // Update DB for all images at this location.
+        this.supabase.client
+          .from('images')
+          .update({
+            address_label: result.addressLabel,
+            city: result.city,
+            district: result.district,
+            street: result.street,
+            country: result.country,
+            location_unresolved: false,
+          })
+          .in('id', ids)
+          .then();
+
+        // Patch local signal so UI updates immediately.
+        const idSet = new Set(ids);
+        this.rawImages.update((all) =>
+          all.map((existing) =>
+            idSet.has(existing.id)
+              ? {
+                  ...existing,
+                  addressLabel: result.addressLabel,
+                  city: result.city,
+                  district: result.district,
+                  street: result.street,
+                  country: result.country,
+                }
+              : existing,
+          ),
+        );
+      } catch {
+        // Non-critical — will retry next time images are loaded.
+      } finally {
+        for (const img of group) {
+          this.pendingGeocode.delete(img.id);
+        }
+      }
+    }
+  }
 
   private getSortValue(img: WorkspaceImage, key: string): string | number | null {
     switch (key) {
