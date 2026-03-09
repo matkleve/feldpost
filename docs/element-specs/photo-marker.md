@@ -38,7 +38,8 @@ The marker body geometry is derived from the shared media token system: `--photo
 PhotoMarker                                      ← Leaflet DivIcon, custom HTML, not an Angular component
 ├── MarkerHitZone                                ← 2.5rem × 2.5rem touch target, centered on GPS coordinate (no tail)
 │   ├── MarkerBody                               ← square body (32px) sized by `--photo-marker-body-size`, rounded with `--radius-md`
-│   │   ├── [single] ThumbnailImage              ← signed thumbnail URL, object-fit cover
+│   │   ├── [single + loaded] ThumbnailImage     ← signed thumbnail URL (80×80 transform), object-fit cover
+│   │   ├── [single + not loaded] Placeholder    ← CSS gradient + camera icon (SVG mask), no <img> tag
 │   │   └── [cluster] CountLabel                 ← count (max display: 999+) at 0.875rem bold; white body auto-widens, black text, orange when selected
 │   ├── [corrected] CorrectionDot                ← 8px circle, `--color-accent`, top-right corner
 │   ├── [uploading] PendingRing                  ← pulsing ring, `--color-warning`
@@ -46,13 +47,63 @@ PhotoMarker                                      ← Leaflet DivIcon, custom HTM
 └── [selected] SelectedRing                      ← accent outline + slight scale lift
 ```
 
+## Thumbnail Loading & Placeholders
+
+> **Full use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
+
+Single-image markers at near zoom (≥ 16) display a real photo thumbnail inside the marker body. Thumbnails are **lazy-loaded** — only fetched for visible markers in the current viewport — using Supabase Storage signed URLs with server-side image transformation (`80 × 80 px`, `cover` mode, auto-WebP). When no real file exists in storage (seed data, deleted files), the marker renders a **CSS placeholder** instead of a broken `<img>` icon.
+
+### Loading States
+
+| State      | Visual                                                              | CSS Class                                     |
+| ---------- | ------------------------------------------------------------------- | --------------------------------------------- |
+| Not loaded | Count badge (clusters) or CSS placeholder (single, no thumbnailUrl) | `.map-photo-marker--count` or `--placeholder` |
+| Loading    | CSS placeholder with subtle pulse animation                         | `.map-photo-marker--placeholder.is-loading`   |
+| Loaded     | Real photo `<img>` with `object-fit: cover`                         | `.map-photo-marker--single`                   |
+| Error      | CSS placeholder (permanent, no retry)                               | `.map-photo-marker--placeholder`              |
+| Optimistic | Local `ObjectURL` from fresh upload (no signed URL needed)          | `.map-photo-marker--single`                   |
+
+### Thumbnail Loading Flow
+
+```mermaid
+stateDiagram-v2
+    [*] --> CountBadge : zoom < 16 or count > 1
+    [*] --> Placeholder : zoom ≥ 16, count = 1, no thumbnailUrl
+    Placeholder --> Loading : maybeLoadThumbnails() fires
+    Loading --> Loaded : createSignedUrl succeeds
+    Loading --> Error : createSignedUrl fails (no file)
+    Error --> [*] : stays as placeholder
+    Loaded --> [*] : marker shows real photo
+    CountBadge --> Placeholder : zoom in to ≥ 16
+    Placeholder --> CountBadge : zoom out to < 16
+
+    note right of Loading
+        Signed URL params:
+        width: 80, height: 80
+        resize: cover
+        TTL: 3600s
+    end note
+```
+
+### Placeholder Design
+
+The placeholder is a pure-CSS element — no network request, no `<img>` tag. It shows a subtle camera icon (SVG mask) centered on a neutral gradient background (`--color-bg-subtle` to `--color-bg-muted`). The placeholder matches the marker body geometry exactly (same `border-radius`, same dimensions). See `map-shell.component.scss` for styles under `.map-photo-marker__body--placeholder`.
+
+### Signed URL Strategy
+
+- **Tier 1 (marker):** `createSignedUrl(thumbnailSourcePath, 3600, { transform: { width: 80, height: 80, resize: 'cover' } })`
+- URLs are cached in `PhotoMarkerState.thumbnailUrl` and survive zoom-out / zoom-in cycles
+- Proactive refresh: clear `thumbnailUrl` when URL age exceeds 50 minutes (before TTL expiry)
+- Batch signing: process visible markers in a single pass, do not issue one request per marker in rapid succession
+
 ## Data
 
 | Field           | Source                                         | Type                          |
 | --------------- | ---------------------------------------------- | ----------------------------- |
 | Image data      | Viewport query via `SupabaseService`           | `Image[]` from `images` table |
 | Cluster groups  | Server-side `ST_SnapToGrid` (zoom ≤ 14)        | `{ lat, lng, count }[]`       |
-| Thumbnails      | Supabase Storage signed URLs                   | `string` (URL)                |
+| Thumbnails      | Supabase Storage signed URLs (80×80 transform) | `string` (URL)                |
+| Placeholder     | CSS-only, no data source                       | —                             |
 | Selection state | Map/workspace selection service or shell state | `string[]` / marker key state |
 | Bearing data    | EXIF-derived `direction` column                | `number \| null`              |
 | Corrected flag  | `latitude`/`longitude` ≠ EXIF originals        | `boolean`                     |
@@ -229,6 +280,17 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 - [ ] DivIcon HTML is not regenerated when rendered state has not changed
 - [ ] `refreshAllPhotoMarkers()` on `zoomend` is replaced by viewport-query-driven reconciliation
 - [ ] Thumbnail signed-URL requests are batched, not issued per-marker
+
+### Thumbnail Loading & Placeholders
+
+- [ ] Single markers at near zoom show a CSS placeholder while thumbnail URL is loading
+- [ ] Placeholder uses gradient background + camera icon (SVG mask), no `<img>` tag
+- [ ] Placeholder matches marker body geometry exactly (same border-radius, dimensions)
+- [ ] `createSignedUrl` uses `transform: { width: 80, height: 80, resize: 'cover' }` for Tier 1 thumbnails
+- [ ] Error from `createSignedUrl` (file missing) leaves placeholder visible — no broken `<img>` icon
+- [ ] Freshly uploaded markers use local `ObjectURL` as thumbnail — no placeholder needed
+- [ ] Signed URLs cached in `PhotoMarkerState.thumbnailUrl` survive zoom-out / zoom-in cycles
+- [ ] URLs older than 50 minutes are proactively cleared and re-signed on next viewport query
 
 ### State Affordances
 

@@ -1,6 +1,7 @@
 # Image Detail View
 
 > **Blueprint:** [implementation-blueprints/image-detail-view.md](../implementation-blueprints/image-detail-view.md)
+> **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
 ## What It Is
 
@@ -39,7 +40,10 @@ ImageDetailView                            ← fills Workspace Pane content area
 ├── DetailHeader
 │   ├── BackButton (←)                     ← desktop: back to grid; mobile: close overlay
 │   └── ImageTitle                         ← filename or address label, truncated
-├── FullResImage                           ← full-width, loaded on demand (progressive loading tier 3)
+├── ImageContainer                         ← full-width, aspect-ratio preserved
+│   ├── [not loaded] Placeholder            ← CSS gradient + camera icon + "Loading…" text
+│   ├── [tier 2] ThumbnailPreview          ← 256×256 signed URL (blurred/scaled up as preview)
+│   └── [tier 3] FullResImage              ← original resolution, crossfades over thumbnail
 ├── MetadataSection
 │   ├── MetadataPropertyRow × N            ← key (left, secondary) | value (right, primary, click-to-edit)
 │   │   └── [editing] InlineInput          ← replaces value text
@@ -60,7 +64,9 @@ ImageDetailView                            ← fills Workspace Pane content area
 | Field              | Source                                                                                | Type                               |
 | ------------------ | ------------------------------------------------------------------------------------- | ---------------------------------- |
 | Image record       | `supabase.from('images').select('*')`                                                 | `Image`                            |
-| Full-res URL       | Supabase Storage signed URL (original)                                                | `string`                           |
+| Full-res URL       | Supabase Storage signed URL (original, no transform)                                  | `string`                           |
+| Thumbnail URL      | Supabase Storage signed URL (256×256 transform)                                       | `string`                           |
+| Placeholder        | CSS-only, no data source                                                              | —                                  |
 | Metadata           | `supabase.from('image_metadata').select('key, value')`                                | `{ key: string, value: string }[]` |
 | Correction history | `images.corrected_lat`, `images.corrected_lng`, `images.latitude`, `images.longitude` | Coordinate pairs                   |
 
@@ -71,6 +77,53 @@ ImageDetailView                            ← fills Workspace Pane content area
 | `image`         | `Image \| null`  | `null`  | The displayed image record                |
 | `editingKey`    | `string \| null` | `null`  | Which metadata key is being edited inline |
 | `fullResLoaded` | `boolean`        | `false` | Whether full-res image has loaded         |
+| `thumbLoaded`   | `boolean`        | `false` | Whether Tier 2 thumbnail has loaded       |
+
+## Progressive Image Loading
+
+The detail view uses a **three-tier progressive loading** strategy to show content as fast as possible:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Placeholder : View opens, no URL yet
+    Placeholder --> Tier2Thumb : Thumbnail signed URL ready
+    Tier2Thumb --> Tier3FullRes : Full-res <img> finishes loading
+    Tier2Thumb --> Tier2Thumb : Full-res fails → stay on thumbnail
+    Placeholder --> Placeholder : Both URLs fail → show "Image unavailable"
+
+    state Placeholder {
+        [*] --> GradientWithIcon
+        GradientWithIcon : CSS gradient + camera icon
+        GradientWithIcon : "Loading..." text
+    }
+
+    state Tier2Thumb {
+        [*] --> BlurredPreview
+        BlurredPreview : 256×256 signed URL
+        BlurredPreview : Slight blur applied (CSS filter)
+    }
+
+    state Tier3FullRes {
+        [*] --> FullImage
+        FullImage : Original resolution
+        FullImage : Crossfade from blurred thumbnail
+    }
+```
+
+### Loading Sequence
+
+1. View opens → CSS placeholder shown immediately (no network)
+2. Tier 2 thumbnail signed URL fires (`256×256, cover, quality: 60`)
+3. Thumbnail `<img>` loads → replaces placeholder with slight blur filter
+4. Tier 3 full-res signed URL fires (no transform, or max 2500px)
+5. Full-res `<img>` loads in hidden element → crossfade swaps it in
+6. If Tier 3 fails, Tier 2 remains visible (adequate quality for metadata editing)
+7. If both fail, CSS placeholder stays with "Image unavailable" text
+
+### Signed URL Strategy
+
+- **Tier 2:** `createSignedUrl(thumbnail_path ?? storage_path, 3600, { transform: { width: 256, height: 256, resize: 'cover', quality: 60 } })`
+- **Tier 3:** `createSignedUrl(storage_path, 3600)` (no transform — full resolution)
 
 ## File Map
 
@@ -93,7 +146,12 @@ ImageDetailView                            ← fills Workspace Pane content area
 
 - [ ] Desktop: replaces grid in workspace pane, back arrow returns
 - [ ] Mobile: full-screen overlay with close button
-- [ ] Full-res image loads on demand (shows thumbnail first)
+- [ ] CSS placeholder shown immediately when view opens (gradient + camera icon)
+- [ ] Tier 2 thumbnail (256×256 transform) loads and replaces placeholder with slight blur
+- [ ] Full-res image loads on demand and crossfades over blurred thumbnail
+- [ ] If full-res fails, Tier 2 thumbnail stays visible
+- [ ] If both tiers fail, CSS placeholder with "Image unavailable" text remains
+- [ ] No broken `<img>` icon ever shown
 - [ ] Metadata rows: click value → inline edit → save on Enter/blur
 - [ ] Coordinates displayed with correction indicator if corrected
 - [ ] Original EXIF coordinates shown when correction exists (Honesty principle)

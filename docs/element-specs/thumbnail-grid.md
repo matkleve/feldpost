@@ -1,6 +1,7 @@
 # Thumbnail Grid
 
 > **Blueprint:** [implementation-blueprints/thumbnail-grid.md](../implementation-blueprints/thumbnail-grid.md)
+> **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
 ## What It Is
 
@@ -42,7 +43,26 @@ ThumbnailGrid                              ← scrollable container, virtual scr
 | Field                   | Source                                                                              | Type      |
 | ----------------------- | ----------------------------------------------------------------------------------- | --------- |
 | Images for active group | `supabase.from('saved_group_images').select(...)` or in-memory for Active Selection | `Image[]` |
-| Thumbnails              | Supabase Storage signed URLs (`_thumb.jpg`)                                         | `string`  |
+| Thumbnails              | Supabase Storage signed URLs (256×256 transform, batch-signed)                      | `string`  |
+
+## Thumbnail Batch-Signing
+
+The grid signs thumbnail URLs in batches to minimize round-trips. When the virtual scroll window changes (initial render or scroll), the grid collects all newly-visible cards that don't yet have a `signedUrl`, then fires `createSignedUrls` (or parallel `createSignedUrl` calls) for the batch.
+
+```mermaid
+sequenceDiagram
+    participant VScroll as Virtual Scroll
+    participant Grid as ThumbnailGrid
+    participant Storage as Supabase Storage
+    participant Cards as ThumbnailCard × N
+
+    VScroll->>Grid: Viewport changed (scroll or init)
+    Grid->>Grid: Collect cards without signedUrl
+    Grid->>Storage: Batch createSignedUrl(paths[], 3600, { transform: 256×256 })
+    Storage-->>Grid: signedUrls[]
+    Grid->>Cards: Assign signedUrl to each card
+    Cards->>Cards: <img> loads → fade-in from placeholder
+```
 
 ## State
 
@@ -68,6 +88,9 @@ ThumbnailGrid                              ← scrollable container, virtual scr
 
 - [ ] 128×128 grid auto-fills available width
 - [ ] Virtual scrolling — smooth with 100+ images
+- [ ] Thumbnail URLs batch-signed for visible cards on scroll/init (no per-card waterfall)
+- [ ] Cards show CSS placeholder while thumbnails load
+- [ ] Cards show CSS placeholder permanently when storage file is missing
 - [ ] Sorting controls change order immediately
 - [ ] Click on card opens Image Detail View
 - [ ] Hover reveals card actions (Quiet Actions pattern)
