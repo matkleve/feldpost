@@ -60,10 +60,27 @@ GroupingDropdown                           ← floating dropdown, --color-bg-ele
 
 ## Data
 
-| Field               | Source                                                                               | Type            |
-| ------------------- | ------------------------------------------------------------------------------------ | --------------- |
-| Built-in properties | Hardcoded list: Address, City, Country, Date, Project, User                          | `PropertyDef[]` |
-| Custom properties   | `supabase.from('metadata_keys').select('id, key_name').eq('organization_id', orgId)` | `MetadataKey[]` |
+| Field               | Source                                                                                     | Type            |
+| ------------------- | ------------------------------------------------------------------------------------------ | --------------- |
+| Built-in properties | Hardcoded list: Date, Year, Month, Project, City, District, Street, Country, Address, User | `PropertyDef[]` |
+| Custom properties   | `supabase.from('metadata_keys').select('id, key_name').eq('organization_id', orgId)`       | `MetadataKey[]` |
+
+### Built-in Grouping Property Data Sources
+
+| Property | Image Field    | Derivation                                 | Fallback             |
+| -------- | -------------- | ------------------------------------------ | -------------------- |
+| Date     | `capturedAt`   | `toLocaleDateString(full)` on client       | `"Unknown date"`     |
+| Year     | `capturedAt`   | `getFullYear()` on client                  | `"Unknown year"`     |
+| Month    | `capturedAt`   | `toLocaleDateString(year+month)` on client | `"Unknown month"`    |
+| Project  | `projectName`  | JOIN via `cluster_images` RPC              | `"No project"`       |
+| City     | `city`         | Structured column from reverse geocoding   | `"Unknown city"`     |
+| District | `district`     | Structured column from reverse geocoding   | `"Unknown district"` |
+| Street   | `street`       | Structured column from reverse geocoding   | `"Unknown street"`   |
+| Country  | `country`      | Structured column from reverse geocoding   | `"Unknown country"`  |
+| Address  | `addressLabel` | Full human-readable address                | `"Unknown address"`  |
+| User     | `userName`     | JOIN profiles via `cluster_images` RPC     | `"Unknown user"`     |
+
+See also: [photo-grouping-data use case](../use-cases/photo-grouping-data.md) for full derivation flow.
 
 ## State
 

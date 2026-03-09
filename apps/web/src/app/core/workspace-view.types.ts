@@ -18,6 +18,11 @@ export interface WorkspaceImage {
   exifLatitude: number | null;
   exifLongitude: number | null;
   addressLabel: string | null;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  country: string | null;
+  userName: string | null;
   /** Signed thumbnail URL — populated lazily by batch signing. */
   signedThumbnailUrl?: string;
 }

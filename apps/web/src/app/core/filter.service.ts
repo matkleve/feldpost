@@ -95,8 +95,16 @@ export class FilterService {
         return image.projectName;
       case 'address':
         return image.addressLabel;
+      case 'city':
+        return image.city;
+      case 'district':
+        return image.district;
+      case 'street':
+        return image.street;
+      case 'country':
+        return image.country;
       case 'user':
-        return null; // user info not on WorkspaceImage
+        return image.userName;
       default:
         return null;
     }

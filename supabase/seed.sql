@@ -484,6 +484,159 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
+-- 7. Populate address fields for all images based on proximity to known sites
+-- ---------------------------------------------------------------------------
+-- Each construction site has a known address in Vienna. We assign address
+-- fields to images based on which site area their coordinates fall into.
+-- This simulates reverse geocoding having already run on all images.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+  -- Site definitions: lat_center, lng_center, radius (degrees), city, district, street, country, address_label
+  _sites record;
+BEGIN
+  -- Aspern Seestadt D12 — 22nd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Donaustadt', street = 'Seestadt-Straße',
+    country = 'Austria', address_label = 'Seestadt-Straße, 1220 Wien'
+  WHERE latitude BETWEEN 48.222 AND 48.230
+    AND longitude BETWEEN 16.502 AND 16.512
+    AND city IS NULL;
+
+  -- Nordbahnviertel Block 7 — 2nd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Leopoldstadt', street = 'Nordbahnstraße',
+    country = 'Austria', address_label = 'Nordbahnstraße 15, 1020 Wien'
+  WHERE latitude BETWEEN 48.224 AND 48.232
+    AND longitude BETWEEN 16.374 AND 16.383
+    AND city IS NULL;
+
+  -- Sonnwendviertel Süd — 10th district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Favoriten', street = 'Sonnwendgasse',
+    country = 'Austria', address_label = 'Sonnwendgasse 20, 1100 Wien'
+  WHERE latitude BETWEEN 48.175 AND 48.183
+    AND longitude BETWEEN 16.374 AND 16.383
+    AND city IS NULL;
+
+  -- Mariahilfer Straße 78 — 6th district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Mariahilf', street = 'Mariahilfer Straße',
+    country = 'Austria', address_label = 'Mariahilfer Straße 78, 1060 Wien'
+  WHERE latitude BETWEEN 48.193 AND 48.200
+    AND longitude BETWEEN 16.350 AND 16.358
+    AND city IS NULL;
+
+  -- Kagran Donauzentrum — 22nd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Donaustadt', street = 'Wagramer Straße',
+    country = 'Austria', address_label = 'Wagramer Straße 94, 1220 Wien'
+  WHERE latitude BETWEEN 48.238 AND 48.245
+    AND longitude BETWEEN 16.430 AND 16.440
+    AND city IS NULL;
+
+  -- Liesing Gewerbepark — 23rd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Liesing', street = 'Industriestraße',
+    country = 'Austria', address_label = 'Industriestraße 8, 1230 Wien'
+  WHERE latitude BETWEEN 48.131 AND 48.139
+    AND longitude BETWEEN 16.321 AND 16.331
+    AND city IS NULL;
+
+  -- Floridsdorf Bahnhofcity — 21st district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Floridsdorf', street = 'Franz-Jonas-Platz',
+    country = 'Austria', address_label = 'Franz-Jonas-Platz 1, 1210 Wien'
+  WHERE latitude BETWEEN 48.252 AND 48.260
+    AND longitude BETWEEN 16.395 AND 16.404
+    AND city IS NULL;
+
+  -- Gürtel U6 Burggasse — 7th/15th district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Neubau', street = 'Burggasse',
+    country = 'Austria', address_label = 'Burggasse / Gürtel, 1070 Wien'
+  WHERE latitude BETWEEN 48.199 AND 48.207
+    AND longitude BETWEEN 16.340 AND 16.349
+    AND city IS NULL;
+
+  -- Donauinsel Hochwasserschutz — 21st/22nd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Donaustadt', street = 'Donauinsel',
+    country = 'Austria', address_label = 'Donauinsel Abschnitt 4-7, 1220 Wien'
+  WHERE latitude BETWEEN 48.226 AND 48.238
+    AND longitude BETWEEN 16.396 AND 16.406
+    AND city IS NULL;
+
+  -- Favoriten Bildungscampus — 10th district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Favoriten', street = 'Quellenstraße',
+    country = 'Austria', address_label = 'Quellenstraße 52, 1100 Wien'
+  WHERE latitude BETWEEN 48.161 AND 48.169
+    AND longitude BETWEEN 16.376 AND 16.384
+    AND city IS NULL;
+
+  -- Ottakring Brunnenmarkt Passage — 16th district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Ottakring', street = 'Brunnengasse',
+    country = 'Austria', address_label = 'Brunnengasse / Yppenplatz, 1160 Wien'
+  WHERE latitude BETWEEN 48.209 AND 48.217
+    AND longitude BETWEEN 16.306 AND 16.314
+    AND city IS NULL;
+
+  -- DC Tower 3 Rohbau — 22nd district, Donaucity
+  UPDATE public.images SET
+    city = 'Wien', district = 'Donaustadt', street = 'Donau-City-Straße',
+    country = 'Austria', address_label = 'Donau-City-Straße 12, 1220 Wien'
+  WHERE latitude BETWEEN 48.230 AND 48.238
+    AND longitude BETWEEN 16.409 AND 16.418
+    AND city IS NULL;
+
+  -- Stephansplatz underground utility — 1st district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Innere Stadt', street = 'Stephansplatz',
+    country = 'Austria', address_label = 'Stephansplatz, 1010 Wien'
+  WHERE latitude BETWEEN 48.205 AND 48.212
+    AND longitude BETWEEN 16.369 AND 16.377
+    AND city IS NULL;
+
+  -- Prater park facilities — 2nd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Leopoldstadt', street = 'Prater Hauptallee',
+    country = 'Austria', address_label = 'Prater Hauptallee, 1020 Wien'
+  WHERE latitude BETWEEN 48.206 AND 48.214
+    AND longitude BETWEEN 16.401 AND 16.409
+    AND city IS NULL;
+
+  -- Alte Donau waterfront — 22nd district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Donaustadt', street = 'Alte Donau',
+    country = 'Austria', address_label = 'Obere Alte Donau, 1220 Wien'
+  WHERE latitude BETWEEN 48.234 AND 48.242
+    AND longitude BETWEEN 16.419 AND 16.427
+    AND city IS NULL;
+
+  -- Meidling Schönbrunner Straße — 12th district
+  UPDATE public.images SET
+    city = 'Wien', district = 'Meidling', street = 'Schönbrunner Straße',
+    country = 'Austria', address_label = 'Schönbrunner Straße 230, 1120 Wien'
+  WHERE latitude BETWEEN 48.170 AND 48.178
+    AND longitude BETWEEN 16.326 AND 16.334
+    AND city IS NULL;
+
+  -- Catch-all: remaining images without address (should not happen with correct ranges)
+  UPDATE public.images SET
+    city = 'Wien', country = 'Austria',
+    address_label = 'Wien, Austria'
+  WHERE city IS NULL;
+
+  -- Mark all as resolved
+  UPDATE public.images SET location_unresolved = false
+  WHERE city IS NOT NULL;
+
+  RAISE NOTICE 'Address fields populated for all images';
+END $$;
+
+-- ---------------------------------------------------------------------------
 -- Summary
 -- ---------------------------------------------------------------------------
 DO $$

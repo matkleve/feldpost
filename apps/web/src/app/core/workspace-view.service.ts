@@ -198,17 +198,36 @@ export class WorkspaceViewService {
       case 'project':
         return img.projectName ?? 'No project';
       case 'date': {
-        if (!img.capturedAt) return 'No date';
+        if (!img.capturedAt) return 'Unknown date';
         return new Date(img.capturedAt).toLocaleDateString(undefined, {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
         });
       }
+      case 'year': {
+        if (!img.capturedAt) return 'Unknown year';
+        return new Date(img.capturedAt).getFullYear().toString();
+      }
+      case 'month': {
+        if (!img.capturedAt) return 'Unknown month';
+        return new Date(img.capturedAt).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'long',
+        });
+      }
       case 'city':
-      case 'address':
+        return img.city ?? 'Unknown city';
+      case 'district':
+        return img.district ?? 'Unknown district';
+      case 'street':
+        return img.street ?? 'Unknown street';
       case 'country':
-        return 'Unknown';
+        return img.country ?? 'Unknown country';
+      case 'address':
+        return img.addressLabel ?? 'Unknown address';
+      case 'user':
+        return img.userName ?? 'Unknown user';
       default:
         return 'Unknown';
     }
@@ -271,6 +290,11 @@ interface RawClusterRow {
   exif_latitude: number | null;
   exif_longitude: number | null;
   address_label: string | null;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  country: string | null;
+  user_name: string | null;
 }
 
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {
@@ -288,5 +312,10 @@ function mapClusterRow(row: RawClusterRow): WorkspaceImage {
     exifLatitude: row.exif_latitude,
     exifLongitude: row.exif_longitude,
     addressLabel: row.address_label,
+    city: row.city,
+    district: row.district,
+    street: row.street,
+    country: row.country,
+    userName: row.user_name,
   };
 }

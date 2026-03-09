@@ -87,6 +87,10 @@ erDiagram
         timestamptz captured_at
         timestamptz created_at
         text address_label
+        text city
+        text district
+        text street
+        text country
         boolean location_unresolved
     }
     metadata_keys {
@@ -280,6 +284,10 @@ Columns:
 - `created_at` (timestamptz, not null, default `now()`) — upload/record creation time
 - `updated_at` (timestamptz, not null, default `now()`)
 - `address_label` (text, nullable) — human-readable address string for this image (e.g., "Burgstraße 7, 8001 Zürich"). Populated on upload from user input, filename resolution, or reverse geocoding. Used by `AddressResolverService` for DB-first autocomplete ranking. NULL for images imported before this column was introduced.
+- `city` (text, nullable) — structured city name from reverse geocoding (e.g., "Wien"). Used for grouping by city.
+- `district` (text, nullable) — structured district/suburb name from reverse geocoding (e.g., "Donaustadt"). Used for grouping by district.
+- `street` (text, nullable) — structured street name from reverse geocoding (e.g., "Seestadt-Straße"). Used for grouping by street.
+- `country` (text, nullable) — structured country name from reverse geocoding (e.g., "Austria"). Used for grouping by country.
 - `location_unresolved` (boolean, nullable, default FALSE) — TRUE for images imported via `FolderImportAdapter` that were skipped during the review phase without a resolved location. Images with `location_unresolved = TRUE` are excluded from all viewport queries and do not appear on the map. See `folder-import.md` §6.
 
 **CHECK Constraints**

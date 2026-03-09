@@ -11,8 +11,12 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
 
 const ALL_GROUPING_PROPERTIES: GroupingProperty[] = [
   { id: 'date', label: 'Date', icon: 'schedule' },
+  { id: 'year', label: 'Year', icon: 'calendar_today' },
+  { id: 'month', label: 'Month', icon: 'date_range' },
   { id: 'project', label: 'Project', icon: 'folder' },
   { id: 'city', label: 'City', icon: 'location_city' },
+  { id: 'district', label: 'District', icon: 'map' },
+  { id: 'street', label: 'Street', icon: 'signpost' },
   { id: 'country', label: 'Country', icon: 'flag' },
   { id: 'address', label: 'Address', icon: 'location_on' },
   { id: 'user', label: 'User', icon: 'person' },

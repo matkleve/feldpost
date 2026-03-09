@@ -123,7 +123,12 @@ RETURNS TABLE (
   direction      numeric,
   exif_latitude  numeric,
   exif_longitude numeric,
-  address_label  text
+  address_label  text,
+  city           text,
+  district       text,
+  street         text,
+  country        text,
+  user_name      text
 )
 LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public
@@ -161,11 +166,17 @@ AS $$
     i.direction,
     i.exif_latitude,
     i.exif_longitude,
-    i.address_label
+    i.address_label,
+    i.city,
+    i.district,
+    i.street,
+    i.country,
+    pr.full_name    AS user_name
   FROM public.images i
   CROSS JOIN grid g
   CROSS JOIN snapped_input si
   LEFT JOIN public.projects p ON p.id = i.project_id
+  LEFT JOIN public.profiles pr ON pr.id = i.user_id
   WHERE i.organization_id = public.user_org_id()
     AND i.latitude  IS NOT NULL
     AND i.longitude IS NOT NULL
