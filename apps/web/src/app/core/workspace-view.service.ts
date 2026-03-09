@@ -224,18 +224,18 @@ export class WorkspaceViewService {
 
         const ids = group.map((img) => img.id);
 
-        // Update DB for all images at this location.
-        const { error: updateError } = await this.supabase.client
-          .from('images')
-          .update({
-            address_label: result.addressLabel,
-            city: result.city,
-            district: result.district,
-            street: result.street,
-            country: result.country,
-            location_unresolved: false,
-          })
-          .in('id', ids);
+        // Update DB via RPC (SECURITY DEFINER — bypasses row-level owner check).
+        const { error: updateError } = await this.supabase.client.rpc(
+          'bulk_update_image_addresses',
+          {
+            p_image_ids: ids,
+            p_address_label: result.addressLabel,
+            p_city: result.city,
+            p_district: result.district,
+            p_street: result.street,
+            p_country: result.country,
+          },
+        );
 
         if (updateError) {
           console.error('Failed to persist address data:', updateError);

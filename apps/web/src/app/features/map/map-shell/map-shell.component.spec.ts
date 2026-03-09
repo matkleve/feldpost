@@ -69,6 +69,7 @@ function buildTestBed() {
                             onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
                         },
                         from: vi.fn().mockReturnValue(imageQueryMock),
+                        rpc: vi.fn().mockResolvedValue({ data: 0, error: null }),
                         storage: {
                             from: vi.fn().mockReturnValue({
                                 createSignedUrl: vi.fn().mockResolvedValue({

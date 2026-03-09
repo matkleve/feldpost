@@ -285,17 +285,17 @@ export class UploadService {
       const result = await this.geocoding.reverse(lat, lng);
       if (!result) return;
 
-      const { error } = await this.supabase.client
-        .from('images')
-        .update({
-          address_label: result.addressLabel,
-          city: result.city,
-          district: result.district,
-          street: result.street,
-          country: result.country,
-          location_unresolved: false,
-        })
-        .eq('id', imageId);
+      const { error } = await this.supabase.client.rpc(
+        'bulk_update_image_addresses',
+        {
+          p_image_ids: [imageId],
+          p_address_label: result.addressLabel,
+          p_city: result.city,
+          p_district: result.district,
+          p_street: result.street,
+          p_country: result.country,
+        },
+      );
 
       if (error) {
         console.error('Failed to persist address for image', imageId, error);

@@ -90,6 +90,7 @@ function buildFakeSupabase(
         if (table === 'images') return imagesInsertChain;
         return {};
       }),
+      rpc: vi.fn().mockResolvedValue({ data: 1, error: null }),
       storage: {
         from: vi.fn().mockReturnValue(storageFromChain),
       },
@@ -548,20 +549,23 @@ describe('UploadService', () => {
       expect(fakeGeocoding.reverse).toHaveBeenCalledWith(47.3769, 8.5417);
     });
 
-    it('updates the DB row with resolved address fields', async () => {
-      const { service, fakeSupabase, fakeGeocoding } = setup();
+it('updates the DB row with resolved address fields via RPC', async () => {
+            const { service, fakeSupabase, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile());
-      await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
+            await service.uploadFile(makeFile());
+            await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
-      const updateCall = fakeSupabase._imagesInsertChain.update.mock.calls[0]?.[0];
-      expect(updateCall).toMatchObject({
-        address_label: 'Burgstraße 7, 8001 Zürich, Switzerland',
-        city: 'Zürich',
-        district: 'Altstadt',
-        street: 'Burgstraße 7',
-        country: 'Switzerland',
-        location_unresolved: false,
+            const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
+                (c: string[]) => c[0] === 'bulk_update_image_addresses',
+            )!;
+            expect(rpcCall).toBeDefined();
+            expect(rpcCall[1]).toMatchObject({
+                p_image_ids: ['img-uuid'],
+                p_address_label: 'Burgstraße 7, 8001 Zürich, Switzerland',
+                p_city: 'Zürich',
+                p_district: 'Altstadt',
+                p_street: 'Burgstraße 7',
+                p_country: 'Switzerland',
       });
     });
 

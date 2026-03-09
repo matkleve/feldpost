@@ -50,17 +50,14 @@ const ZURICH_RESULT = {
 };
 
 function buildFakeSupabase() {
-  const updateChain = {
-    in: vi.fn().mockResolvedValue({ error: null }),
-  };
-
   return {
-    _updateChain: updateChain,
     client: {
       from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue(updateChain),
+        update: vi.fn().mockReturnValue({
+          in: vi.fn().mockResolvedValue({ error: null }),
+        }),
       }),
-      rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
+      rpc: vi.fn().mockResolvedValue({ data: 0, error: null }),
       storage: {
         from: vi.fn().mockReturnValue({
           createSignedUrls: vi.fn().mockResolvedValue({ data: [], error: null }),
@@ -174,7 +171,7 @@ describe('WorkspaceViewService — address resolution', () => {
     await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalledTimes(2));
   });
 
-  it('updates the DB for all images at the same coordinates', async () => {
+  it('updates the DB via RPC for all images at the same coordinates', async () => {
     const { service, fakeSupabase, fakeGeocoding } = setup();
 
     const images = [
@@ -184,12 +181,19 @@ describe('WorkspaceViewService — address resolution', () => {
     service.setActiveSelectionImages(images);
 
     await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
-    // Allow the DB update to fire.
-    await vi.waitFor(() => expect(fakeSupabase._updateChain.in).toHaveBeenCalled());
+    // Allow the RPC call to fire.
+    await vi.waitFor(() => {
+      const rpcCalls = fakeSupabase.client.rpc.mock.calls.filter(
+        (c: string[]) => c[0] === 'bulk_update_image_addresses',
+      );
+      expect(rpcCalls.length).toBeGreaterThan(0);
+    });
 
-    const inCall = fakeSupabase._updateChain.in.mock.calls[0];
-    expect(inCall[0]).toBe('id');
-    expect(inCall[1]).toEqual(expect.arrayContaining(['img-1', 'img-2']));
+    const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
+      (c: string[]) => c[0] === 'bulk_update_image_addresses',
+    )!;
+    expect(rpcCall[1].p_image_ids).toEqual(expect.arrayContaining(['img-1', 'img-2']));
+    expect(rpcCall[1].p_address_label).toBe('Burgstra\u00dfe 7, 8001 Z\u00fcrich, Switzerland');
   });
 
   it('patches the local rawImages signal with resolved address', async () => {
