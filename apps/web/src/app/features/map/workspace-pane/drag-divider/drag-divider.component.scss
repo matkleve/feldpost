@@ -72,9 +72,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  // Same width as ui-item-media (32px), taller to form a vertical band
-  width: var(--ui-item-media-size-default);
-  height: var(--spacing-7); // 48px — taller than wide
+  // Smaller than ui-item-media (24px wide), taller to form a vertical band
+  width: var(--spacing-5);
+  height: var(--spacing-6); // 32px — taller than wide
   border-radius: var(--container-radius-control); // same corners as .ui-item-media (8px)
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border);
