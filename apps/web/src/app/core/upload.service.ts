@@ -285,7 +285,7 @@ export class UploadService {
       const result = await this.geocoding.reverse(lat, lng);
       if (!result) return;
 
-      await this.supabase.client
+      const { error } = await this.supabase.client
         .from('images')
         .update({
           address_label: result.addressLabel,
@@ -296,6 +296,10 @@ export class UploadService {
           location_unresolved: false,
         })
         .eq('id', imageId);
+
+      if (error) {
+        console.error('Failed to persist address for image', imageId, error);
+      }
     } catch {
       // Non-critical — address will show as "Unknown district" until resolved.
     }

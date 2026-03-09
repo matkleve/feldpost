@@ -195,7 +195,7 @@ export class WorkspaceViewService {
       (img) =>
         img.latitude != null &&
         img.longitude != null &&
-        (img.city == null || img.district == null || img.street == null) &&
+        img.addressLabel == null &&
         !this.pendingGeocode.has(img.id),
     );
     if (unresolved.length === 0) return;
@@ -225,7 +225,7 @@ export class WorkspaceViewService {
         const ids = group.map((img) => img.id);
 
         // Update DB for all images at this location.
-        this.supabase.client
+        const { error: updateError } = await this.supabase.client
           .from('images')
           .update({
             address_label: result.addressLabel,
@@ -235,8 +235,12 @@ export class WorkspaceViewService {
             country: result.country,
             location_unresolved: false,
           })
-          .in('id', ids)
-          .then();
+          .in('id', ids);
+
+        if (updateError) {
+          console.error('Failed to persist address data:', updateError);
+          continue;
+        }
 
         // Patch local signal so UI updates immediately.
         const idSet = new Set(ids);

@@ -233,70 +233,70 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 
 ### Marker Rendering
 
-- [ ] Never shows default Leaflet blue pin — `marker-factory.ts` uses `L.divIcon()` with custom HTML
-- [ ] Marker geometry derives from `--ui-item-media-size-default` — `styles.scss` defines `--photo-marker-body-size: var(--ui-item-media-size-default)` (32px)
-- [ ] Single markers show thumbnail — `marker-factory.ts` renders `<img>` for `count === 1` with thumbnail URL
-- [ ] Cluster markers show count badge — white auto-width body, `0.875rem` bold black text; counts > 999 display as "999+"; text turns `--color-clay` (orange) when `--selected`
-- [ ] Cluster markers reuse the same base geometry as single markers — both share `.map-photo-marker__body` sizing
-- [ ] All markers have 2px white outline + drop shadow — `map-shell.component.scss` applies `border: 2px solid var(--color-bg-surface)` + `box-shadow`
-- [ ] Marker body center is the GPS coordinate — no tail; `iconAnchor: [20, 20]` centers the `[40, 40]` hit zone on the location point; cluster markers are anchored at grid cell centroid
-- [ ] Readable on both light and dark map tiles — full dark-mode token coverage in `styles.scss`
+- [x] Never shows default Leaflet blue pin — `marker-factory.ts` uses `L.divIcon()` with custom HTML
+- [x] Marker geometry derives from `--ui-item-media-size-default` — `styles.scss` defines `--photo-marker-body-size: var(--ui-item-media-size-default)` (32px)
+- [x] Single markers show thumbnail — `marker-factory.ts` renders `<img>` for `count === 1` with thumbnail URL
+- [x] Cluster markers show count badge — white auto-width body, `0.875rem` bold black text; counts > 999 display as "999+"; text turns `--color-clay` (orange) when `--selected`
+- [x] Cluster markers reuse the same base geometry as single markers — both share `.map-photo-marker__body` sizing
+- [x] All markers have 2px white outline + drop shadow — `map-shell.component.scss` applies `border: 2px solid var(--color-bg-surface)` + `box-shadow`
+- [x] Marker body center is the GPS coordinate — no tail; `iconAnchor: [20, 20]` centers the `[40, 40]` hit zone on the location point; cluster markers are anchored at grid cell centroid
+- [x] Readable on both light and dark map tiles — full dark-mode token coverage in `styles.scss`
 
 ### Selection & Interaction
 
-- [ ] Click selects image and opens workspace pane — `handlePhotoMarkerClick()` calls `setSelectedMarker()` + `photoPanelOpen.set(true)`
-- [ ] Selected markers have a clear visual state — `.map-photo-marker--selected` applies accent ring + `scale(1.05)`
-- [ ] Ctrl+click adds to Active Selection without clearing previous selection (multi-select not implemented)
-- [ ] Long-press + tap provides mobile equivalent of multi-select
-- [ ] Right-click opens context menu (view detail, edit location, add to project) — no contextmenu handler
-- [ ] Long-press opens context menu on mobile
-- [ ] Drag marker in correction mode to update coordinates — correction flow not implemented
+- [x] Click selects image and opens workspace pane — `handlePhotoMarkerClick()` calls `setSelectedMarker()` + `photoPanelOpen.set(true)`
+- [x] Selected markers have a clear visual state — `.map-photo-marker--selected` applies accent ring + `scale(1.05)`
+- [ ] Ctrl+click adds to Active Selection without clearing previous selection (blocked — requires `SelectionService`)
+- [ ] Long-press + tap provides mobile equivalent of multi-select (blocked — requires `SelectionService`)
+- [ ] Right-click opens context menu (view detail, edit location, add to project) (blocked — requires context menu component)
+- [ ] Long-press opens context menu on mobile (blocked — requires context menu component)
+- [ ] Drag marker in correction mode to update coordinates (blocked — requires correction mode handler)
 
 ### Viewport-Driven Loading
 
-- [ ] Markers load based on current viewport bounds, not once at init — `moveend` + 300 ms debounce triggers viewport query
-- [ ] Previous in-flight viewport query is aborted when a new one starts (`AbortController`)
-- [ ] Query bounds expand by 10% on each edge for pre-fetch buffer
-- [ ] Marker set is reconciled (add/remove/update) on each viewport response — existing markers are reused, not rebuilt
-- [ ] Markers that leave the viewport are removed from the map
-- [ ] Newly uploaded markers persist optimistically until the next viewport query reconciles them
-- [ ] Max 2000 markers on the map at any time; server returns clusters beyond this cap
+- [x] Markers load based on current viewport bounds, not once at init — `moveend` + 350 ms debounce triggers viewport query
+- [x] Previous in-flight viewport query is aborted when a new one starts (`AbortController`)
+- [x] Query bounds expand by 10% on each edge for pre-fetch buffer
+- [x] Marker set is reconciled (add/remove/update) on each viewport response — existing markers are reused, not rebuilt
+- [x] Markers that leave the viewport are removed from the map
+- [x] Newly uploaded markers persist optimistically until the next viewport query reconciles them
+- [ ] Max 2000 markers on the map at any time; server returns clusters beyond this cap (server-side enforcement)
 
 ### Clustering
 
-- [ ] Cluster click never zooms — `map.setView()` is NOT called on cluster click
-- [ ] Cluster click fetches all image IDs within the cluster cell and populates Active Selection
-- [ ] Cluster click opens the Workspace Pane with Active Selection tab active
-- [ ] Zoom modifier classes adjust prominence without changing marker structure — `.map-photo-marker--zoom-far/mid/near` CSS classes applied
-- [ ] Client-side clustering via coordinate rounding to 4 decimal places (`toMarkerKey()`) — interim implementation
-- [ ] Server-side clustering via `ST_SnapToGrid` with zoom-dependent grid cell size
-- [ ] Cluster grid cell size adapts to zoom level (large cells at low zoom, small cells at high zoom)
-- [ ] Clusters expand into individual markers when user zooms past the cluster's grid threshold
-- [ ] Collision offsets prevent overlapping marker bodies when nearby but not clustered
+- [x] Cluster click never zooms — `map.setView()` is NOT called on cluster click
+- [ ] Cluster click fetches all image IDs within the cluster cell and populates Active Selection (blocked — requires `SelectionService`)
+- [x] Cluster click opens the Workspace Pane with Active Selection tab active
+- [x] Zoom modifier classes adjust prominence without changing marker structure — `.map-photo-marker--zoom-far/mid/near` CSS classes applied
+- [x] Client-side clustering via coordinate rounding to 7 decimal places (`toMarkerKey()`) + pixel-distance overlap merge — interim implementation
+- [ ] Server-side clustering via `ST_SnapToGrid` with zoom-dependent grid cell size (server-side, not yet wired)
+- [ ] Cluster grid cell size adapts to zoom level (large cells at low zoom, small cells at high zoom) (server-side)
+- [ ] Clusters expand into individual markers when user zooms past the cluster's grid threshold (server-side)
+- [x] Collision offsets prevent overlapping marker bodies when nearby but not clustered — `mergeOverlappingClusters()` pixel-distance merge
 
 ### Performance
 
-- [ ] No marker DOM work during zoom animation — all updates fire on `moveend` only
-- [ ] DivIcon HTML is not regenerated when rendered state has not changed
-- [ ] `refreshAllPhotoMarkers()` on `zoomend` is replaced by viewport-query-driven reconciliation
-- [ ] Thumbnail signed-URL requests are batched, not issued per-marker
+- [x] No marker DOM work during zoom animation — all updates fire on `moveend` only (`zoomAnimating` flag)
+- [x] DivIcon HTML is not regenerated when rendered state has not changed (`refreshPhotoMarker` dirty-checks via `lastRendered` snapshot)
+- [x] `refreshAllPhotoMarkers()` on `zoomend` is replaced by viewport-query-driven reconciliation (`handleMoveEnd` debounce)
+- [ ] Thumbnail signed-URL requests are batched, not issued per-marker (blocked — requires batch signing utility)
 
 ### Thumbnail Loading & Placeholders
 
-- [ ] Single markers at near zoom show a CSS placeholder while thumbnail URL is loading
-- [ ] Placeholder uses gradient background + camera icon (SVG mask), no `<img>` tag
-- [ ] Placeholder matches marker body geometry exactly (same border-radius, dimensions)
-- [ ] `createSignedUrl` uses `transform: { width: 80, height: 80, resize: 'cover' }` for Tier 1 thumbnails
-- [ ] Error from `createSignedUrl` (file missing) leaves placeholder visible — no broken `<img>` icon
-- [ ] Freshly uploaded markers use local `ObjectURL` as thumbnail — no placeholder needed
-- [ ] Signed URLs cached in `PhotoMarkerState.thumbnailUrl` survive zoom-out / zoom-in cycles
-- [ ] URLs older than 50 minutes are proactively cleared and re-signed on next viewport query
+- [x] Single markers at near zoom show a CSS placeholder while thumbnail URL is loading
+- [x] Placeholder uses gradient background + camera icon (SVG mask), no `<img>` tag
+- [x] Placeholder matches marker body geometry exactly (same border-radius, dimensions)
+- [x] `createSignedUrl` uses `transform: { width: 80, height: 80, resize: 'cover' }` for Tier 1 thumbnails
+- [x] Error from `createSignedUrl` (file missing) leaves placeholder visible — no broken `<img>` icon
+- [x] Freshly uploaded markers use local `ObjectURL` as thumbnail — no placeholder needed
+- [x] Signed URLs cached in `PhotoMarkerState.thumbnailUrl` survive zoom-out / zoom-in cycles
+- [x] URLs older than 50 minutes are proactively cleared and re-signed on next viewport query
 
 ### State Affordances
 
-- [ ] Correction dot visible only for corrected markers — `corrected` flag passed from `map-shell.component.ts` to `buildPhotoMarkerHtml()`
+- [x] Correction dot visible only for corrected markers — `corrected` flag passed from `map-shell.component.ts` to `buildPhotoMarkerHtml()`
 - [ ] Pending upload ring pulses during upload — requires `uploadStarted` event from UploadPanel (blocked — UploadPanel only emits after success)
-- [ ] Direction cone appears on hover when bearing data exists — CSS `:hover` rule works; bearing flows from `ImageUploadedEvent`
-- [ ] Direction cone appears on long press when bearing data exists on touch devices — `pointerdown` 500 ms timer toggles `.map-photo-marker--long-pressed`; CSS shows cone for that class
-- [ ] Direction cone rendered for database-loaded markers — `direction` column included in initial load query
-- [ ] Direction cone rotates to reflect actual bearing — inline `transform:rotate(bearing-90deg)` set in `buildPhotoMarkerHtml()`
+- [x] Direction cone appears on hover when bearing data exists — CSS `:hover` rule works; bearing flows from `ImageUploadedEvent`
+- [x] Direction cone appears on long press when bearing data exists on touch devices — `pointerdown` 500 ms timer toggles `.map-photo-marker--long-pressed`; CSS shows cone for that class
+- [x] Direction cone rendered for database-loaded markers — `direction` column included in initial load query
+- [x] Direction cone rotates to reflect actual bearing — inline `transform:rotate(bearing-90deg)` set in `buildPhotoMarkerHtml()`
