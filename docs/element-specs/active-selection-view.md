@@ -20,6 +20,8 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 
 **Empty state** (no images match filters): centered message "No images match the current filters" with a ghost button "Clear filters".
 
+**No-photos state** (marker clicked but RPC returns 0 rows): centered 📷 icon, "No photos at this location", and a secondary hint "Images may not have been uploaded yet for this area."
+
 **Loading state** (cluster RPC in flight): skeleton placeholder cards pulse with `--color-bg-elevated` shimmer.
 
 ## Where It Lives
@@ -154,6 +156,12 @@ stateDiagram-v2
         [*]: Toolbar visible but disabled
     }
 
+    state NoPhotos {
+        [*]: RPC returned 0 rows
+        [*]: Marker exists but no images
+        [*]: "No photos at this location"
+    }
+
     state BrowsingFlat {
         [*]: Images loaded, no grouping
         [*]: Flat thumbnail grid
@@ -179,6 +187,9 @@ stateDiagram-v2
     Empty --> Loading: Cluster click / radius select
     Loading --> BrowsingFlat: Images received (no grouping)
     Loading --> BrowsingGrouped: Images received (grouping was active)
+    Loading --> NoPhotos: RPC returned 0 rows
+    NoPhotos --> Loading: New cluster/radius selection
+    NoPhotos --> Empty: Close pane
     BrowsingFlat --> BrowsingGrouped: Activate grouping
     BrowsingGrouped --> BrowsingFlat: Clear all groupings
     BrowsingFlat --> FilteredEmpty: Filters exclude all images
@@ -234,9 +245,9 @@ flowchart TD
 flowchart TD
     subgraph Populate["1. Populate"]
         direction TB
-        ClusterClick["Cluster click\n→ cluster_images RPC"]
+        ClusterClick["Cluster click (count > 1)\n→ cluster_images RPC\n→ grid shows all images"]
         RadiusSelect["Radius selection\n→ viewport query"]
-        SingleClick["Single marker click\n→ direct to detail view\n(bypasses Active Selection)"]
+        SingleClick["Single marker click (count = 1)\n→ cluster_images RPC + detail view\n(grid populated for back-nav)"]
     end
 
     subgraph Curate["2. Curate"]
@@ -268,6 +279,30 @@ flowchart TD
     style Persist fill:#e8f5e9
 ```
 
+## Marker Click → Grid Flow
+
+```mermaid
+flowchart TD
+    Click["User clicks a photo marker"] --> GetState["Read markerState\n(count, lat, lng, imageId)"]
+    GetState --> OpenPane["Open workspace pane\nsetSelectedMarker()"]
+    OpenPane --> LoadRPC["loadClusterImages(lat, lng, zoom)\nvia cluster_images RPC"]
+    LoadRPC --> Skeleton["Show skeleton loading cards"]
+
+    LoadRPC --> RPCResult{RPC result?}
+    RPCResult -->|"rows > 0"| SetImages["rawImages.set(images)\nGrid renders thumbnails"]
+    RPCResult -->|"rows = 0"| NoPhotos["Show 'No photos at this location'\nplaceholder with hint"]
+    RPCResult -->|"error"| NoPhotos
+
+    GetState --> IsSingle{count === 1\n& imageId?}
+    IsSingle -->|"yes"| DetailView["Also open detail view\n(grid populated in background\nfor back-navigation)"]
+    IsSingle -->|"no"| GridOnly["Grid view only"]
+
+    style Click fill:#e3f2fd
+    style NoPhotos fill:#fff3e0
+    style SetImages fill:#e8f5e9
+    style DetailView fill:#e8f5e9
+```
+
 ## File Map
 
 | File                                                                          | Purpose                               | Spec Reference                                    |
@@ -295,25 +330,27 @@ flowchart TD
 
 ## Acceptance Criteria
 
-- [ ] Cluster click loads images via `cluster_images` RPC and populates the grid
+- [x] Cluster click loads images via `cluster_images` RPC and populates the grid
+- [x] Single marker click loads images via `cluster_images` RPC and opens detail view
 - [ ] Radius selection loads images and populates the grid
-- [ ] Skeleton loading state shown during RPC call
-- [ ] Grid renders 128×128 thumbnail cards with virtual scrolling
-- [ ] Thumbnail URLs batch-signed on scroll (no per-card waterfall)
-- [ ] **Grouping**: activating a property creates section headers; deactivating returns to flat grid
-- [ ] **Multi-level grouping**: nested headers with indentation (1.5rem per level)
-- [ ] **Group collapse**: clicking a section header toggles its thumbnails
-- [ ] **Filter**: adding rules immediately removes non-matching images from the grid
-- [ ] **Filter AND/OR**: conjunction logic applied correctly across multiple rules
-- [ ] **Sort**: changing sort key or direction re-orders the grid instantly
-- [ ] **Projects**: checking/unchecking projects filters images by project membership
-- [ ] Toolbar buttons show active-indicator dots when features are engaged
-- [ ] Only one dropdown open at a time; click-outside and Escape close it
+- [x] Skeleton loading state shown during RPC call
+- [x] No-photos placeholder shown when RPC returns 0 rows ("No photos at this location")
+- [x] Grid renders 128×128 thumbnail cards with virtual scrolling
+- [x] Thumbnail URLs batch-signed on scroll (no per-card waterfall)
+- [x] **Grouping**: activating a property creates section headers; deactivating returns to flat grid
+- [x] **Multi-level grouping**: nested headers with indentation (1.5rem per level)
+- [x] **Group collapse**: clicking a section header toggles its thumbnails
+- [x] **Filter**: adding rules immediately removes non-matching images from the grid
+- [x] **Filter AND/OR**: conjunction logic applied correctly across multiple rules
+- [x] **Sort**: changing sort key or direction re-orders the grid instantly
+- [x] **Projects**: checking/unchecking projects filters images by project membership
+- [x] Toolbar buttons show active-indicator dots when features are engaged
+- [x] Only one dropdown open at a time; click-outside and Escape close it
 - [ ] Clicking a thumbnail opens Image Detail View (replaces grid)
 - [ ] Returning from detail view preserves scroll position and all toolbar state
-- [ ] Empty filter state: "No images match the current filters" + "Clear filters" button
-- [ ] New cluster/radius selection replaces current images and resets filters
-- [ ] Closing workspace pane clears Active Selection and resets all toolbar state
+- [x] Empty filter state: "No images match the current filters" + "Clear filters" button
+- [x] New cluster/radius selection replaces current images and resets filters
+- [x] Closing workspace pane clears Active Selection and resets all toolbar state
 - [ ] Save as named group via "+" in Group Tab Bar persists images to DB
-- [ ] Pipeline is 100% client-side (no server round-trips for filter/sort/group changes)
+- [x] Pipeline is 100% client-side (no server round-trips for filter/sort/group changes)
 - [ ] Performance: re-render completes in < 100ms for 500 images

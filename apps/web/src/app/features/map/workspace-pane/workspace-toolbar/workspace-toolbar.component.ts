@@ -1,8 +1,11 @@
-import { Component, signal, computed, ElementRef, HostListener } from '@angular/core';
+import { Component, signal, computed, ElementRef, HostListener, inject } from '@angular/core';
 import { GroupingDropdownComponent, type GroupingProperty } from './grouping-dropdown.component';
 import { FilterDropdownComponent } from './filter-dropdown.component';
 import { SortDropdownComponent } from './sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
+import { WorkspaceViewService } from '../../../../core/workspace-view.service';
+import { FilterService } from '../../../../core/filter.service';
+import type { PropertyRef, SortConfig } from '../../../../core/workspace-view.types';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -27,6 +30,9 @@ const ALL_GROUPING_PROPERTIES: GroupingProperty[] = [
   ],
 })
 export class WorkspaceToolbarComponent {
+  private readonly viewService = inject(WorkspaceViewService);
+  private readonly filterService = inject(FilterService);
+
   readonly activeDropdown = signal<ToolbarDropdown>(null);
 
   // Dropdown position (fixed, computed from button rect)
@@ -37,11 +43,14 @@ export class WorkspaceToolbarComponent {
   readonly activeGroupings = signal<GroupingProperty[]>([]);
   readonly availableGroupings = signal<GroupingProperty[]>([...ALL_GROUPING_PROPERTIES]);
 
-  // Active-state indicators
-  readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
-  readonly hasFilters = signal(false);
-  readonly hasCustomSort = signal(false);
-  readonly hasProject = signal(false);
+  // Active-state indicators — wired to services
+  readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
+  readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
+  readonly hasCustomSort = computed(() => {
+    const sort = this.viewService.activeSort();
+    return sort.key !== 'captured_at' || sort.direction !== 'desc';
+  });
+  readonly hasProject = computed(() => this.viewService.selectedProjectIds().size > 0);
 
   readonly buttons = [
     { id: 'grouping' as const, label: 'Grouping', active: this.hasGrouping },
@@ -69,6 +78,18 @@ export class WorkspaceToolbarComponent {
   onGroupingsChanged(active: GroupingProperty[], available: GroupingProperty[]): void {
     this.activeGroupings.set(active);
     this.availableGroupings.set(available);
+    // Push to WorkspaceViewService
+    this.viewService.activeGroupings.set(
+      active.map((g) => ({ id: g.id, label: g.label, icon: g.icon }) as PropertyRef),
+    );
+  }
+
+  onSortChanged(sortConfig: SortConfig): void {
+    this.viewService.activeSort.set(sortConfig);
+  }
+
+  onProjectsChanged(selectedIds: Set<string>): void {
+    this.viewService.selectedProjectIds.set(selectedIds);
   }
 
   toggleDropdown(id: ToolbarDropdown, event: MouseEvent): void {

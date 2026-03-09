@@ -26,11 +26,9 @@ export class WorkspacePaneComponent {
 
   // ── Internal state ───────────────────────────────────────────────────────
   readonly activeTabId = signal<string>('selection');
-  readonly activeClusterImageIds = signal<string[] | null>(null);
 
   // ── Methods ──────────────────────────────────────────────────────────────
   close(): void {
-    this.activeClusterImageIds.set(null);
     this.closed.emit();
   }
 

@@ -10,9 +10,6 @@
       (editLocationRequested)="onEditLocation($event)"
     />
   } @else {
-    <app-thumbnail-grid
-      [activeTabId]="activeTabId()"
-      [activeClusterImageIds]="activeClusterImageIds()"
-    />
+    <app-thumbnail-grid (thumbnailClicked)="onThumbnailClick($event)" />
   }
 </div>

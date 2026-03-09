@@ -1,24 +1,15 @@
-import { Component, signal } from '@angular/core';
-
-interface FilterRule {
-  id: string;
-  conjunction: 'where' | 'and' | 'or';
-  property: string;
-  operator: string;
-  value: string;
-}
-
-let nextRuleId = 0;
+import { Component, inject } from '@angular/core';
+import { FilterService } from '../../../../core/filter.service';
 
 @Component({
   selector: 'app-filter-dropdown',
   template: `
     <div class="filter-dropdown">
-      @if (rules().length === 0) {
+      @if (filterService.rules().length === 0) {
         <div class="filter-empty">No filters applied</div>
       } @else {
         <div class="filter-rules">
-          @for (rule of rules(); track rule.id; let i = $index) {
+          @for (rule of filterService.rules(); track rule.id; let i = $index) {
             <div class="filter-rule">
               <button class="filter-rule__conj" (click)="toggleConjunction(rule.id)">
                 {{ i === 0 ? 'Where' : rule.conjunction === 'and' ? 'And' : 'Or' }}
@@ -61,7 +52,7 @@ let nextRuleId = 0;
           }
         </div>
       }
-      <button class="filter-add" (click)="addRule()">
+      <button class="filter-add" (click)="filterService.addRule()">
         <span class="material-icons">add</span>
         Add a filter
       </button>
@@ -70,45 +61,34 @@ let nextRuleId = 0;
   styleUrl: './filter-dropdown.component.scss',
 })
 export class FilterDropdownComponent {
+  protected readonly filterService = inject(FilterService);
+
   readonly propertyOptions = ['Date', 'Project', 'City', 'Country', 'Address', 'User'];
   readonly operatorOptions = ['contains', 'equals', 'is', 'is not', 'before', 'after'];
 
-  readonly rules = signal<FilterRule[]>([]);
-
-  addRule(): void {
-    this.rules.update((list) => [
-      ...list,
-      {
-        id: `rule-${++nextRuleId}`,
-        conjunction: list.length === 0 ? 'where' : 'and',
-        property: '',
-        operator: '',
-        value: '',
-      },
-    ]);
-  }
-
   removeRule(id: string): void {
-    this.rules.update((list) => list.filter((r) => r.id !== id));
+    this.filterService.removeRule(id);
   }
 
   toggleConjunction(id: string): void {
-    this.rules.update((list) =>
-      list.map((r) =>
-        r.id === id ? { ...r, conjunction: r.conjunction === 'and' ? 'or' : 'and' } : r,
-      ),
-    );
+    const rules = this.filterService.rules();
+    const rule = rules.find((r) => r.id === id);
+    if (rule) {
+      this.filterService.updateRule(id, {
+        conjunction: rule.conjunction === 'and' ? 'or' : 'and',
+      });
+    }
   }
 
   updateProperty(id: string, value: string): void {
-    this.rules.update((list) => list.map((r) => (r.id === id ? { ...r, property: value } : r)));
+    this.filterService.updateRule(id, { property: value });
   }
 
   updateOperator(id: string, value: string): void {
-    this.rules.update((list) => list.map((r) => (r.id === id ? { ...r, operator: value } : r)));
+    this.filterService.updateRule(id, { operator: value });
   }
 
   updateValue(id: string, value: string): void {
-    this.rules.update((list) => list.map((r) => (r.id === id ? { ...r, value: value } : r)));
+    this.filterService.updateRule(id, { value });
   }
 }

@@ -38,10 +38,10 @@
         <app-filter-dropdown />
       }
       @case ('sort') {
-        <app-sort-dropdown />
+        <app-sort-dropdown (sortChanged)="onSortChanged($event)" />
       }
       @case ('projects') {
-        <app-projects-dropdown />
+        <app-projects-dropdown (projectsChanged)="onProjectsChanged($event)" />
       }
     }
   </div>

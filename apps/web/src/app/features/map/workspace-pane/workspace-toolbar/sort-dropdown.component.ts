@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, output, signal } from '@angular/core';
+import type { SortConfig } from '../../../../core/workspace-view.types';
 
 type SortOption = {
   id: string;
@@ -63,22 +64,24 @@ export class SortDropdownComponent {
   readonly searchTerm = signal('');
   readonly activeSortId = signal('date-captured');
   readonly sortDirection = signal<'asc' | 'desc'>('desc');
+  readonly sortChanged = output<SortConfig>();
 
-  readonly filteredOptions = signal<SortOption[]>(this.options);
-
-  constructor() {
-    // Reactively filter options when search term changes
-    // (using a simple approach — will upgrade to computed when wired to service)
-  }
+  readonly filteredOptions = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.options;
+    return this.options.filter((o) => o.label.toLowerCase().includes(term));
+  });
 
   setSort(id: string): void {
     const opt = this.options.find((o) => o.id === id);
     if (!opt) return;
     this.activeSortId.set(id);
     this.sortDirection.set(opt.defaultDirection);
+    this.sortChanged.emit({ key: id, direction: opt.defaultDirection });
   }
 
   flipDirection(): void {
     this.sortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+    this.sortChanged.emit({ key: this.activeSortId(), direction: this.sortDirection() });
   }
 }

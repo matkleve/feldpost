@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, output, signal } from '@angular/core';
+import { SupabaseService } from '../../../../core/supabase.service';
 
 interface Project {
   id: string;
@@ -52,20 +53,35 @@ interface Project {
   styleUrl: './projects-dropdown.component.scss',
 })
 export class ProjectsDropdownComponent {
-  // Placeholder data — will be wired to SupabaseService
-  readonly projects = signal<Project[]>([
-    { id: '1', name: 'Highway A1 Inspection', imageCount: 42 },
-    { id: '2', name: 'Bridge Renovation', imageCount: 18 },
-    { id: '3', name: 'Solar Panel Site', imageCount: 7 },
-  ]);
+  private readonly supabase = inject(SupabaseService);
 
+  readonly projects = signal<Project[]>([]);
   readonly searchTerm = signal('');
   readonly selectedIds = signal<Set<string>>(new Set());
   readonly isCreating = signal(false);
 
-  readonly filteredProjects = signal<Project[]>(this.projects());
-  readonly allSelected = signal(false);
-  readonly someSelected = signal(false);
+  readonly projectsChanged = output<Set<string>>();
+
+  readonly filteredProjects = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const all = this.projects();
+    if (!term) return all;
+    return all.filter((p) => p.name.toLowerCase().includes(term));
+  });
+
+  readonly allSelected = computed(() => {
+    const all = this.projects();
+    return all.length > 0 && this.selectedIds().size === all.length;
+  });
+
+  readonly someSelected = computed(() => {
+    const size = this.selectedIds().size;
+    return size > 0 && size < this.projects().length;
+  });
+
+  constructor() {
+    void this.loadProjects();
+  }
 
   toggleProject(id: string): void {
     this.selectedIds.update((set) => {
@@ -77,6 +93,7 @@ export class ProjectsDropdownComponent {
       }
       return next;
     });
+    this.projectsChanged.emit(this.selectedIds());
   }
 
   toggleAll(): void {
@@ -86,5 +103,18 @@ export class ProjectsDropdownComponent {
     } else {
       this.selectedIds.set(new Set(all.map((p) => p.id)));
     }
+    this.projectsChanged.emit(this.selectedIds());
+  }
+
+  private async loadProjects(): Promise<void> {
+    const { data, error } = await this.supabase.client.from('projects').select('id, name');
+    if (error || !data) return;
+    this.projects.set(
+      data.map((p: { id: string; name: string }) => ({
+        id: p.id,
+        name: p.name,
+        imageCount: 0,
+      })),
+    );
   }
 }

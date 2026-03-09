@@ -32,6 +32,7 @@ import {
 } from '../../upload/upload-panel/upload-panel.component';
 import { ExifCoords } from '../../../core/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
+import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
@@ -51,6 +52,7 @@ import {
 })
 export class MapShellComponent implements OnDestroy {
   private readonly supabaseService = inject(SupabaseService);
+  private readonly workspaceViewService = inject(WorkspaceViewService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -238,6 +240,7 @@ export class MapShellComponent implements OnDestroy {
     this.photoPanelOpen.set(false);
     this.detailImageId.set(null);
     this.setSelectedMarker(null);
+    this.workspaceViewService.clearActiveSelection();
     // Let Angular remove the pane from the DOM, then tell Leaflet to reclaim the space.
     setTimeout(() => this.map?.invalidateSize(), 0);
   }
@@ -701,12 +704,15 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    // Cluster click never zooms — always open the Workspace Pane with markers selected.
-    // (spec: photo-marker.md § Cluster Click Behaviour)
+    // Always open pane and mark marker selected.
     this.setSelectedMarker(markerKey);
     this.photoPanelOpen.set(true);
 
-    // Single-image marker: open the detail view directly.
+    // Load images at this marker's grid position into the workspace view.
+    const zoom = Math.round(this.map?.getZoom() ?? 13);
+    void this.workspaceViewService.loadClusterImages(markerState.lat, markerState.lng, zoom);
+
+    // Single-image marker: also jump directly to detail view.
     if (markerState.count === 1 && markerState.imageId) {
       this.openDetailView(markerState.imageId);
     }
