@@ -2,7 +2,7 @@
 
 > **Element spec:** [element-specs/map-shell.md](../element-specs/map-shell.md)
 > **Blueprint:** [implementation-blueprints/map-shell.md](../implementation-blueprints/map-shell.md)
-> **Product use cases:** [UC1](../use-cases.md#uc1--technician-on-site-view-history), [UC2](../use-cases.md#uc2--clerk-preparing-a-quote), [UC3](../use-cases.md#uc3--upload-and-correct-a-new-image)
+> **Product use cases:** [UC1](README.md#uc1--technician-on-site-view-history), [UC2](README.md#uc2--clerk-preparing-a-quote), [UC3](README.md#uc3--upload-and-correct-a-new-image)
 > **Related specs:** [workspace-pane](../element-specs/workspace-pane.md), [drag-divider](../element-specs/drag-divider.md), [search-bar](../element-specs/search-bar.md), [upload-button-zone](../element-specs/upload-button-zone.md), [photo-marker](../element-specs/photo-marker.md), [image-detail-view](../element-specs/image-detail-view.md)
 
 ---

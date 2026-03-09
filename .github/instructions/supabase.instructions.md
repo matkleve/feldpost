@@ -9,6 +9,7 @@ applyTo: "**/*.service.ts"
 - Never call Supabase directly from components — always use a service abstraction
 - RLS is the security boundary — frontend is untrusted (Invariant I5)
 - All TypeScript types come from Supabase-generated schema — no `any`
+- Services use `providedIn: 'root'`
 
 ## Data Access
 

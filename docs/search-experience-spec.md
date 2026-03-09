@@ -3,7 +3,7 @@
 **Who this is for:** product, design, and frontend/backend engineers implementing the GeoSite search UX end-to-end.  
 **What you'll get:** a unified, expanded specification for map search behavior, ranking, interaction states, use cases, requirements, and feature scope.
 
-See also: `design.md` (always-load design context), `design/layout.md` (layout system), `design/components/filter-panel.md` (filter behavior), `features.md` (feature inventory), `use-cases.md` (persona flows), `address-resolver.md` (DB-first address resolution), `decisions.md` (D6, D7, D17).
+See also: `design.md` (always-load design context), `design/layout.md` (layout system), `element-specs/filter-panel.md` (filter behavior), `features.md` (feature inventory), `use-cases/README.md` (persona flows), `address-resolver.md` (DB-first address resolution), `decisions.md` (D6, D7, D17).
 
 ---
 
@@ -13,9 +13,9 @@ Search behavior currently exists across multiple docs and implementation notes:
 
 - Layout expectations (search pinned at top, mobile behavior) in `design/layout.md`.
 - Product-level feature intent in `features.md`.
-- User intent and flow context in `use-cases.md`.
+- User intent and flow context in `use-cases/README.md`.
 - Detailed address ranking and dropdown behavior in `address-resolver.md`.
-- Additional interaction ideas (idle/focused/typing/committed, live marker feedback, command behavior) in `audits/audit-ui-design-interactions.md`.
+- Additional interaction ideas (idle/focused/typing/committed, live marker feedback, command behavior) in `archive/audit-ui-design-interactions.md`.
 
 This document consolidates those ideas and extends them into one implementation-ready contract.
 

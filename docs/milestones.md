@@ -90,7 +90,7 @@ Files
 
 - `docs/project-description.md`
 - `docs/features.md`
-- `docs/use-cases.md`
+- `docs/use-cases/README.md`
 
 TODOs
 
@@ -196,7 +196,7 @@ Files
 
 - `docs/architecture.md`
 - `docs/decisions.md`
-- `docs/use-cases.md`
+- `docs/use-cases/README.md`
 
 TODOs
 
@@ -221,7 +221,7 @@ Goal
 Files
 
 - `docs/features.md`
-- `docs/use-cases.md`
+- `docs/use-cases/README.md`
 - `docs/database-schema.md`
 
 TODOs
@@ -248,7 +248,7 @@ Goal
 Files
 
 - `docs/features.md`
-- `docs/use-cases.md`
+- `docs/use-cases/README.md`
 - `docs/database-schema.md`
 
 TODOs
@@ -277,7 +277,7 @@ Files
 - `docs/features.md` (§1.5, §1.7)
 - `docs/decisions.md` (D13, D14)
 - `docs/database-schema.md` (§10)
-- `docs/use-cases.md` (UC1, UC2)
+- `docs/use-cases/README.md` (UC1, UC2)
 
 TODOs
 
@@ -532,7 +532,7 @@ Acceptance criteria
 
 Goal
 
-- Fix the placement bug (no-GPS images can now be placed on the map), extract GPSImgDirection EXIF data, and add user feedback for placement mode. Full UX audit documented in `docs/audits/audit-upload-map-interaction.md`.
+- Fix the placement bug (no-GPS images can now be placed on the map), extract GPSImgDirection EXIF data, and add user feedback for placement mode. Full UX audit documented in `docs/archive/audit-upload-map-interaction.md`.
 
 Files
 
@@ -542,7 +542,7 @@ Files
 - `apps/web/src/app/core/upload.service.spec.ts`
 - `apps/web/src/app/features/upload/upload-panel/upload-panel.component.spec.ts`
 - `apps/web/src/app/features/map/map-shell/map-shell.component.spec.ts`
-- `docs/audits/audit-upload-map-interaction.md` (new — 100 UX ideas)
+- `docs/archive/audit-upload-map-interaction.md` (new — 100 UX ideas)
 - `docs/features.md` (updated direction spec)
 - `docs/decisions.md` (updated D7)
 
@@ -556,7 +556,7 @@ TODOs
 - [x] Write 12 new tests (direction EXIF, placement mode, placementRequested output). (AI, 2026-03-04)
 - [x] All 131 tests pass (`ng test --no-watch` exits 0). (AI, 2026-03-04)
 - [x] `ng build` exits 0. (AI, 2026-03-04)
-- [x] Create `docs/audits/audit-upload-map-interaction.md` — 100 UX ideas for upload/map/direction. (AI, 2026-03-04)
+- [x] Create `docs/archive/audit-upload-map-interaction.md` — 100 UX ideas for upload/map/direction. (AI, 2026-03-04)
 - [x] Update `features.md` and `decisions.md` to reflect direction is now persisted and will be exposed. (AI, 2026-03-04)
 
 Acceptance criteria
@@ -914,7 +914,7 @@ Files
 
 TODOs
 
-- [ ] Create `ImageDetailPanelComponent`: thumbnail, metadata rows (property-style from `docs/design/components/image-detail.md`), action buttons.
+- [ ] Create `ImageDetailPanelComponent`: thumbnail, metadata rows (property-style from `docs/element-specs/image-detail-view.md`), action buttons.
 - [ ] Pass selected marker data from `MapShellComponent` into the panel via `@Input` or signal.
 - [ ] Clicking a map marker: set selected marker signal → open panel.
 - [ ] Clicking the map background (not a marker): clear selected → close panel.
@@ -990,7 +990,7 @@ Layout
 └──────┴──────┴──────┴──────┴─────────────┘
 ```
 
-Card content (from `docs/design/components/workspace-pane.md`): thumbnail, timestamp, location name, one primary tag — no more.
+Card content (from `docs/element-specs/workspace-pane.md`): thumbnail, timestamp, location name, one primary tag — no more.
 
 Files
 
@@ -1030,7 +1030,7 @@ Files
 TODOs
 
 - [ ] Groups list view: card per group (cover thumbnail, name, image count, last updated).
-- [ ] Inline rename: clicking the group name activates an inline text input (Notion-style property edit, `docs/design/reference-products.md` §2.10).
+- [ ] Inline rename: clicking the group name activates an inline text input (Notion-style property edit, `docs/archive/reference-products.md` §2.10).
 - [ ] Create group: "+ New group" button at top of list.
 - [ ] Delete group: context menu (`⋯`) with confirmation.
 - [ ] Group detail view: same thumbnail grid as Photos page, filtered to the group.

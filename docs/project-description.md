@@ -33,7 +33,7 @@ All critical security and integrity enforcement must live in the backend (Supaba
 
 ## 3. Key Use Cases (At a Glance)
 
-Detailed flows are in `use-cases.md`.
+Detailed flows are in `use-cases/README.md`.
 
 - **UC1 - Technician on site (history view)**: find nearby images ordered by proximity and recency.
 - **UC2 - Clerk preparing a quote**: filter by address, time, project, metadata, and distance.
@@ -95,7 +95,7 @@ Geocoding behavior and boundary contract are defined in `architecture.md` and re
 
 MVP release is explicitly scoped to:
 
-- Use cases UC1-UC4 in `use-cases.md`.
+- Use cases UC1-UC4 in `use-cases/README.md`.
 - The MVP feature groups in `features.md` section 1.
 - Core invariants I1-I5 in this document.
 
@@ -106,7 +106,7 @@ MVP release explicitly excludes:
 
 Any change that adds scope beyond this contract must:
 
-- Be documented in `features.md` and `use-cases.md`.
+- Be documented in `features.md` and `use-cases/README.md`.
 - Be checked against invariants I1-I5.
 - Add or update a decision in `decisions.md` if invariants/data shape/dependencies are affected.
 

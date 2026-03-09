@@ -19,4 +19,4 @@
 - `design/motion.md` — animation timing
 - `design/map-system.md` — map hierarchy, markers, clustering
 - `design/components/` — component-specific design rules
-- Do **not** load `design/reference-products.md` in agentic sessions
+- Do **not** load `archive/reference-products.md` in agentic sessions

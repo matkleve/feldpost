@@ -1,4 +1,4 @@
-# GeoSite – Map System
+# SiteSnap – Map System
 
 Load this file for any task involving map hierarchy, marker prominence, clustering, or proximity behavior.
 
@@ -41,13 +41,4 @@ block-beta
 
 Quoting Eleken's Head of Design: _"The challenge is balancing information density with readability. You need to decide what information is essential and how to present it without overwhelming the user."_
 
-**Marker and cluster behavior rules:**
-
-| Situation                                      | What is shown                                                                                                   |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Single photo location                          | Square marker with small bottom pointer tail that anchors to the exact GPS/address coordinate                   |
-| Nearby markers overlap in screen space         | Markers separate with collision offsets so full square bodies remain visible; pointer tails still target origin |
-| Dense local area (proximity threshold reached) | Cluster marker with count badge                                                                                 |
-| Cluster selected                               | Open list/detail flow for contained photos (or zoom in), but clustering remains proximity-based                 |
-
-Clustering is proximity-based, not tied to fixed city/street/address zoom bands.
+**Marker and cluster details:** See [element-specs/photo-marker.md](../element-specs/photo-marker.md) for full marker anatomy, state diagram, clustering rules, and viewport lifecycle. Clustering is proximity-based, not tied to fixed city/street/address zoom bands.

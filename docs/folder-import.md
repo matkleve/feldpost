@@ -347,7 +347,7 @@ After the review phase, confirmed images enter the standard ingestion pipeline i
 - **Progress:** overall count ("87 / 108 uploaded"), per-file spinner for in-flight uploads, final summary ("108 uploaded, 0 failed").
 - **Partial failure:** A failed upload does not abort the batch. Failed files are listed with individual retry buttons.
 
-At the end of the import phase, a summary is shown on the map with newly imported markers highlighted (green pulse animation, same lifecycle as single-file uploads — see `audits/audit-upload-map-interaction.md` Pattern 3).
+At the end of the import phase, a summary is shown on the map with newly imported markers highlighted (green pulse animation, same lifecycle as single-file uploads — see `archive/audit-upload-map-interaction.md` Pattern 3).
 
 ---
 
@@ -363,14 +363,14 @@ At the end of the import phase, a summary is shown on the map with newly importe
 
 ## 10. Cross-References
 
-| Topic                                  | Document                                           |
-| -------------------------------------- | -------------------------------------------------- |
-| `ImageInputAdapter` interface contract | `architecture.md` §5                               |
-| `AddressResolverService`               | `address-resolver.md`                              |
-| EXIF parsing and ingestion pipeline    | `architecture.md` §5                               |
-| Single-file upload flow                | `use-cases.md` UC3                                 |
-| Batch metadata assignment              | `features.md` §1.4 feature 18                      |
-| Folder import use case                 | `use-cases.md` UC13                                |
-| ADR: Filename-first resolution         | `decisions.md` D16                                 |
-| ADR: Provider-agnostic image input     | `decisions.md` D10                                 |
-| Marker lifecycle after upload          | `audits/audit-upload-map-interaction.md` Pattern 3 |
+| Topic                                  | Document                                            |
+| -------------------------------------- | --------------------------------------------------- |
+| `ImageInputAdapter` interface contract | `architecture.md` §5                                |
+| `AddressResolverService`               | `address-resolver.md`                               |
+| EXIF parsing and ingestion pipeline    | `architecture.md` §5                                |
+| Single-file upload flow                | `use-cases/README.md` UC3                           |
+| Batch metadata assignment              | `features.md` §1.4 feature 18                       |
+| Folder import use case                 | `use-cases/README.md` UC13                          |
+| ADR: Filename-first resolution         | `decisions.md` D16                                  |
+| ADR: Provider-agnostic image input     | `decisions.md` D10                                  |
+| Marker lifecycle after upload          | `archive/audit-upload-map-interaction.md` Pattern 3 |

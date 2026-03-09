@@ -23,9 +23,10 @@ applyTo: "**/*.component.ts"
 - Core services: `src/app/core/`
 - Each component gets its own directory
 
-## Templates
+## Templates (applies to `.component.html`)
 
 - Match the component hierarchy from the element spec exactly
 - Implement ALL listed actions — do not skip any
 - Use `@if`, `@for`, `@switch` control flow (not `*ngIf`, `*ngFor`)
+
 - Always provide loading, error, and empty states

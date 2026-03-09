@@ -15,3 +15,10 @@ applyTo: "**/*.component.html"
 - Prefer `.ui-container`, `.ui-item`, `.ui-spacer` from `styles.scss` before custom layouts
 - Transitions: 120–250ms, debounce 300ms, avoid `transition-all`
 - Full token details: `docs/design/tokens.md`
+
+## Template Conventions
+
+- Match the component hierarchy from the element spec exactly
+- Implement ALL listed actions — do not skip any
+- Use `@if`, `@for`, `@switch` control flow (not `*ngIf`, `*ngFor`)
+- Always provide loading, error, and empty states

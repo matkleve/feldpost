@@ -3,7 +3,7 @@
 **Who this is for:** designers, frontend engineers, and anyone shaping how GeoSite looks and behaves.  
 **What you'll get:** the always-load design context — principles, dark mode, accessibility, responsive quick reference, design debt, and links to smaller task-specific design files.
 
-See `features.md` for capability scope, `use-cases.md` for user flows, `search-experience-spec.md` for the full search behavior contract, and `architecture.md` for technical constraints that affect layout decisions.
+See `features.md` for capability scope, `use-cases/README.md` for user flows, `search-experience-spec.md` for the full search behavior contract, and `architecture.md` for technical constraints that affect layout decisions.
 
 ---
 
@@ -14,14 +14,16 @@ See `features.md` for capability scope, `use-cases.md` for user flows, `search-e
 - `docs/design/map-system.md` — load for map hierarchy, marker prominence, clustering, and proximity behavior.
 - `docs/design/layout.md` — load for breakpoints, panel dimensions, and responsive behavior.
 - `docs/design/motion.md` — load for animation, timing, and transitions.
-- `docs/design/components/marker.md` — load for marker rendering and marker-state behavior.
-- `docs/design/components/filter-panel.md` — load for filter panel structure and interaction rules.
-- `docs/design/components/workspace-pane.md` — load for tabs, gallery behavior, and thumbnail card actions.
-- `docs/design/components/image-detail.md` — load for image detail layout and metadata editing rules.
-- `docs/design/components/upload-flow.md` — load for upload entry, review flow, and progress states.
-- `docs/design/components/radius-selection.md` — load for radius selection overlay behavior.
 - `docs/design/components/empty-states.md` — load for empty-state structure and messaging.
-- `docs/design/reference-products.md` — human reading only. Do not load in agentic coding sessions.
+
+Archived design/components/ files have been superseded by their element specs:
+
+- marker → `docs/element-specs/photo-marker.md`
+- filter-panel → `docs/element-specs/filter-panel.md`
+- workspace-pane → `docs/element-specs/workspace-pane.md`
+- image-detail → `docs/element-specs/image-detail-view.md`
+- upload-flow → `docs/element-specs/upload-panel.md` + `upload-button-zone.md`
+- radius-selection → `docs/element-specs/radius-selection.md`
 
 ---
 
