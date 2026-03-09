@@ -17,13 +17,10 @@ argument-hint: "Element spec name or path (e.g., search-bar)"
 
 ### Step 1: Read the Spec
 
-1. Open `docs/element-specs/{element}.md`
-2. Read ALL sections: What It Is, Actions, Hierarchy, State, File Map, Wiring
-3. Open `docs/implementation-blueprints/{element}.md` (if it exists) — it contains exact service method signatures, Mermaid data-flow diagrams, database queries, type definitions, and missing infrastructure lists
-4. Read `docs/glossary.md` for canonical component names
-5. Read `docs/design/constitution.md` and `docs/design.md`
-6. Load the relevant task-specific design files from `docs/design/` before implementation in this order: `tokens.md` → `layout.md` → shared primitives in `apps/web/src/styles.scss` → `motion.md` → task-specific component docs
-7. Check `apps/web/src/styles.scss` for reusable layout primitives before inventing a new panel or row shell
+1. Open `docs/element-specs/{element}.md` — read ALL sections
+2. Open `docs/implementation-blueprints/{element}.md` if it exists — it has exact service signatures, data flows, and queries
+3. Only read `docs/design/constitution.md` if this is a new visual component you haven't worked on before
+4. Only read specific design docs (`docs/design/tokens.md`, `docs/design/layout.md`, `docs/design/motion.md`, or `docs/design/components/`) if the spec doesn't answer your styling questions — do NOT load them all by default
 
 ### Step 2: Audit Current Implementation
 

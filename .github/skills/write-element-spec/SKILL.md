@@ -22,12 +22,11 @@ argument-hint: "Element name and brief description"
 
 ### Step 2: Research Context
 
-1. Read `docs/design/constitution.md` and `docs/design.md` for always-load design rules
-2. Load the relevant task-specific design files from `docs/design/` in this order: `tokens.md` → `layout.md` → `motion.md` → `map-system.md` / `components/*.md`
-3. Check `apps/web/src/styles.scss` for shared primitives (`.ui-container`, `.ui-item`, `.ui-spacer`) that the spec should reuse
-4. Read `docs/architecture.md` for layer constraints and adapter patterns
-5. Review related specs in `docs/element-specs/` for consistency
-6. Check `docs/database-schema.md` for available data sources
+1. Read `docs/design/constitution.md` for non-negotiable design rules
+2. Read related specs in `docs/element-specs/` for consistency
+3. Check `docs/database-schema.md` for available data sources
+4. Only load specific design docs (`docs/design/tokens.md`, `docs/design/layout.md`, `docs/design/motion.md`) if you need them for the spec's "What It Looks Like" section — do NOT load them all by default
+5. Check `apps/web/src/styles.scss` for shared primitives (`.ui-container`, `.ui-item`, `.ui-spacer`) the spec should reference
 
 ### Step 3: Write the Spec
 
