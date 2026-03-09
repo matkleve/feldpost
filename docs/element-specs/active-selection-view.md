@@ -325,7 +325,7 @@ flowchart TD
 - Inject `WorkspaceViewService` — the single source of truth for pipeline state
 - Inject `FilterService` — manages filter rules, exposes predicates to `WorkspaceViewService`
 - Toolbar dropdowns are standalone components rendered conditionally within `WorkspaceToolbar`
-- `MapShellComponent` calls `WorkspaceViewService.setActiveSelectionImages()` after cluster RPC completes
+- `MapShellComponent` calls `WorkspaceViewService.loadClusterImages(lat, lng, zoom)` on marker click (async, calls RPC internally)
 - Closing the pane calls `WorkspaceViewService.clearActiveSelection()`
 
 ## Acceptance Criteria

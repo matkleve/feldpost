@@ -84,8 +84,26 @@ export class WorkspaceViewService {
         p_cluster_lng: clusterLng,
         p_zoom: zoom,
       });
-      if (error || !data) {
-        this.rawImages.set([]);
+      if (error || !data || (data as RawClusterRow[]).length === 0) {
+        // Dev placeholder: markers always have photos in production.
+        // During development, show a placeholder image in the grid.
+        this.rawImages.set([
+          {
+            id: `placeholder-${clusterLat}-${clusterLng}`,
+            latitude: clusterLat,
+            longitude: clusterLng,
+            thumbnailPath: null,
+            storagePath: '',
+            capturedAt: null,
+            createdAt: new Date().toISOString(),
+            projectId: null,
+            projectName: null,
+            direction: null,
+            exifLatitude: null,
+            exifLongitude: null,
+            addressLabel: null,
+          },
+        ]);
         return;
       }
       this.rawImages.set((data as RawClusterRow[]).map(mapClusterRow));
@@ -105,8 +123,15 @@ export class WorkspaceViewService {
     () => this.selectionActive() && !this.isLoading() && this.rawImages().length === 0,
   );
 
-  /** Clear active selection and reset all toolbar state. */
+  /** Clear active selection data only — preserves toolbar settings (sort, filters, project, grouping). */
   clearActiveSelection(): void {
+    this.rawImages.set([]);
+    this.selectionActive.set(false);
+    this.collapsedGroups.set(new Set());
+  }
+
+  /** Clear active selection AND reset all toolbar settings to defaults. */
+  clearActiveSelectionAndSettings(): void {
     this.rawImages.set([]);
     this.selectionActive.set(false);
     this.selectedProjectIds.set(new Set());
@@ -252,6 +277,7 @@ interface RawClusterRow {
   direction: number | null;
   exif_latitude: number | null;
   exif_longitude: number | null;
+  address_label: string | null;
 }
 
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {
@@ -268,5 +294,6 @@ function mapClusterRow(row: RawClusterRow): WorkspaceImage {
     direction: row.direction,
     exifLatitude: row.exif_latitude,
     exifLongitude: row.exif_longitude,
+    addressLabel: row.address_label,
   };
 }

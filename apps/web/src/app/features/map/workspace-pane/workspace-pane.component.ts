@@ -21,6 +21,7 @@ export class WorkspacePaneComponent {
 
   // ── Outputs to MapShell ──────────────────────────────────────────────────
   readonly closed = output<void>();
+  readonly detailClosed = output<void>();
   readonly detailRequested = output<string>();
   readonly editLocationRequested = output<string>();
 
@@ -41,7 +42,7 @@ export class WorkspacePaneComponent {
   }
 
   onDetailClose(): void {
-    this.closed.emit();
+    this.detailClosed.emit();
   }
 
   onEditLocation(imageId: string): void {

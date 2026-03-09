@@ -17,6 +17,7 @@ export interface WorkspaceImage {
   direction: number | null;
   exifLatitude: number | null;
   exifLongitude: number | null;
+  addressLabel: string | null;
   /** Signed thumbnail URL — populated lazily by batch signing. */
   signedThumbnailUrl?: string;
 }

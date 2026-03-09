@@ -94,6 +94,7 @@
     [style.width.px]="workspacePaneWidth()"
     [detailImageId]="detailImageId()"
     (closed)="closeWorkspacePane()"
+    (detailClosed)="closeDetailView()"
     (detailRequested)="openDetailView($event)"
     (editLocationRequested)="onEditLocationRequested($event)"
   />

@@ -80,11 +80,10 @@ erDiagram
         text thumbnail_path
         numeric exif_latitude
         numeric exif_longitude
-        numeric corrected_latitude
-        numeric corrected_longitude
         numeric latitude
         numeric longitude
         geography geog
+        numeric direction
         timestamptz captured_at
         timestamptz created_at
         text address_label
@@ -271,17 +270,15 @@ Columns:
 - `project_id` (uuid, nullable, references `projects(id)` ON DELETE SET NULL)
 - `storage_path` (text, not null) — relative path in Supabase Storage (e.g., `{org_id}/{user_id}/{uuid}.jpg`). Not a full URL. URLs are generated at runtime (signed or public).
 - `thumbnail_path` (text, not null) — relative path to the 128×128 JPEG thumbnail in Supabase Storage.
-- `exif_latitude` (numeric(9,6), nullable)
-- `exif_longitude` (numeric(9,6), nullable)
-- `corrected_latitude` (numeric(9,6), nullable)
-- `corrected_longitude` (numeric(9,6), nullable)
-- `latitude` (numeric(9,6), not null) — effective display coordinate (corrected when present, otherwise EXIF)
-- `longitude` (numeric(9,6), not null) — effective display coordinate
+- `exif_latitude` (numeric(10,7), nullable)
+- `exif_longitude` (numeric(11,7), nullable)
+- `latitude` (numeric(10,7), not null) — effective display coordinate (updated on correction, initially set from EXIF)
+- `longitude` (numeric(11,7), not null) — effective display coordinate
 - `geog` (geography(Point, 4326), not null) — PostGIS geography column, computed from `latitude`/`longitude`. Used for all spatial queries and indexing.
+- `direction` (numeric(5,2), nullable) — camera bearing in degrees (0–360) from EXIF
 - `captured_at` (timestamptz, nullable) — capture time from EXIF when available
 - `created_at` (timestamptz, not null, default `now()`) — upload/record creation time
 - `updated_at` (timestamptz, not null, default `now()`)
-- `direction_degrees` (numeric(6,2), nullable) — stored for future use; not exposed in MVP UI
 - `address_label` (text, nullable) — human-readable address string for this image (e.g., "Burgstraße 7, 8001 Zürich"). Populated on upload from user input, filename resolution, or reverse geocoding. Used by `AddressResolverService` for DB-first autocomplete ranking. NULL for images imported before this column was introduced.
 - `location_unresolved` (boolean, nullable, default FALSE) — TRUE for images imported via `FolderImportAdapter` that were skipped during the review phase without a resolved location. Images with `location_unresolved = TRUE` are excluded from all viewport queries and do not appear on the map. See `folder-import.md` §6.
 
@@ -292,7 +289,7 @@ CHECK (latitude BETWEEN -90 AND 90)
 CHECK (longitude BETWEEN -180 AND 180)
 CHECK (exif_latitude IS NULL OR exif_latitude BETWEEN -90 AND 90)
 CHECK (exif_longitude IS NULL OR exif_longitude BETWEEN -180 AND 180)
-CHECK (direction_degrees IS NULL OR direction_degrees BETWEEN 0 AND 360)
+CHECK (direction IS NULL OR direction BETWEEN 0 AND 360)
 ```
 
 **Computed Column / Trigger**
@@ -468,7 +465,7 @@ Columns:
 - `new_longitude` (numeric(9,6), not null)
 - `corrected_at` (timestamptz, not null, default `now()`)
 
-This table is append-only. A trigger on `images` captures the previous effective coordinates before an update to `corrected_latitude`/`corrected_longitude`.
+This table is append-only. A trigger on `images` captures the previous effective coordinates before an update to `latitude`/`longitude`.
 
 ---
 

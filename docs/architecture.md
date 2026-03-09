@@ -465,7 +465,7 @@ When EXIF extraction produces no GPS coordinates:
 1. The upload UI shows: "No location found in this photo."
 2. The user **must** manually place a marker on the map to set coordinates. The upload cannot be saved without coordinates (enforces Invariant I2).
 3. Default map center for manual placement: the user's current GPS location (if available) or the current map viewport center.
-4. `exif_latitude` and `exif_longitude` remain `NULL`. `corrected_latitude` and `corrected_longitude` store the user-placed coordinates. `latitude` and `longitude` (effective display coordinates) are set to the user-placed values.
+4. `exif_latitude` and `exif_longitude` remain `NULL`. `latitude` and `longitude` (effective display coordinates) are set to the user-placed values. The `coordinate_corrections` table logs the change.
 
 ---
 

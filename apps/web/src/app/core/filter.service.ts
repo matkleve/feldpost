@@ -93,10 +93,8 @@ export class FilterService {
         return image.capturedAt;
       case 'project':
         return image.projectName;
-      case 'city':
-      case 'country':
       case 'address':
-        return null; // address columns not yet in DB schema
+        return image.addressLabel;
       case 'user':
         return null; // user info not on WorkspaceImage
       default:

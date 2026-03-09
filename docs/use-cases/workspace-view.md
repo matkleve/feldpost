@@ -46,12 +46,11 @@ sequenceDiagram
 
     User->>Map: Click cluster marker (count=12)
     Map->>MS: handlePhotoMarkerClick(markerKey)
-    MS->>MS: count > 1 → cluster path
     MS->>MS: photoPanelOpen.set(true)
-    MS->>Supa: rpc('cluster_images', {cluster_lat, cluster_lng, zoom})
-    Supa-->>MS: [{id, thumbnail_path, captured_at, project_id, ...} × 12]
-    MS->>WVS: setActiveSelectionImages(images)
-    WVS->>WVS: apply pipeline (project filter → filters → sort → group)
+    MS->>WVS: loadClusterImages(cluster_lat, cluster_lng, zoom)
+    WVS->>Supa: rpc('cluster_images', {cluster_lat, cluster_lng, zoom})
+    Supa-->>WVS: [{id, thumbnail_path, captured_at, project_id, ...} × 12]
+    WVS->>WVS: rawImages.set(images), apply pipeline
     WVS-->>WP: emit groupedSections
     WP->>WP: Activate "Selection" tab, show count "(12)"
     WP->>Grid: Render thumbnail grid
@@ -662,7 +661,7 @@ flowchart TD
     subgraph Populate["2. Populate Active Selection"]
         ClusterRPC["cluster_images RPC"]
         RadiusRPC["Viewport query\n(bounded radius)"]
-        SetImages["WorkspaceViewService\n.setActiveSelectionImages()"]
+        SetImages["WorkspaceViewService\n.loadClusterImages()"]
     end
 
     subgraph Curate["3. Curate (Workspace View)"]

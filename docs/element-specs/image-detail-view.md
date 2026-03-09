@@ -61,14 +61,14 @@ ImageDetailView                            ← fills Workspace Pane content area
 
 ## Data
 
-| Field              | Source                                                                                | Type                               |
-| ------------------ | ------------------------------------------------------------------------------------- | ---------------------------------- |
-| Image record       | `supabase.from('images').select('*')`                                                 | `Image`                            |
-| Full-res URL       | Supabase Storage signed URL (original, no transform)                                  | `string`                           |
-| Thumbnail URL      | Supabase Storage signed URL (256×256 transform)                                       | `string`                           |
-| Placeholder        | CSS-only, no data source                                                              | —                                  |
-| Metadata           | `supabase.from('image_metadata').select('key, value')`                                | `{ key: string, value: string }[]` |
-| Correction history | `images.corrected_lat`, `images.corrected_lng`, `images.latitude`, `images.longitude` | Coordinate pairs                   |
+| Field              | Source                                                                              | Type                               |
+| ------------------ | ----------------------------------------------------------------------------------- | ---------------------------------- |
+| Image record       | `supabase.from('images').select('*')`                                               | `Image`                            |
+| Full-res URL       | Supabase Storage signed URL (original, no transform)                                | `string`                           |
+| Thumbnail URL      | Supabase Storage signed URL (256×256 transform)                                     | `string`                           |
+| Placeholder        | CSS-only, no data source                                                            | —                                  |
+| Metadata           | `supabase.from('image_metadata').select('key, value')`                              | `{ key: string, value: string }[]` |
+| Correction history | `images.latitude` ≠ `images.exif_latitude` (corrected via `coordinate_corrections`) | Coordinate pairs                   |
 
 ## State
 

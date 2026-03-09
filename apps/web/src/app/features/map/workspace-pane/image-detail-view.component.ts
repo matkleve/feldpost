@@ -34,18 +34,14 @@ export interface ImageRecord {
   project_id: string | null;
   storage_path: string;
   thumbnail_path: string | null;
-  /** Active latitude (may be corrected value, or same as exif_latitude). */
+  /** Active latitude (may be corrected, or same as exif_latitude). */
   latitude: number | null;
-  /** Active longitude (may be corrected value, or same as exif_longitude). */
+  /** Active longitude (may be corrected, or same as exif_longitude). */
   longitude: number | null;
   /** Original EXIF latitude — never mutated after insert. */
   exif_latitude: number | null;
   /** Original EXIF longitude — never mutated after insert. */
   exif_longitude: number | null;
-  /** Overridden latitude after correction (null = not corrected). */
-  corrected_latitude: number | null;
-  /** Overridden longitude after correction (null = not corrected). */
-  corrected_longitude: number | null;
   captured_at: string | null;
   created_at: string;
   address_label: string | null;
@@ -113,9 +109,11 @@ export class ImageDetailViewComponent implements OnDestroy {
   // ── Derived ────────────────────────────────────────────────────────────────
 
   /** True when the image has been manually corrected. */
+  /** True when the image has been manually corrected (active coords differ from EXIF). */
   readonly isCorrected = computed(() => {
     const img = this.image();
-    return img?.corrected_latitude != null && img?.corrected_longitude != null;
+    if (!img || img.latitude == null || img.exif_latitude == null) return false;
+    return img.latitude !== img.exif_latitude || img.longitude !== img.exif_longitude;
   });
 
   /** Display title: address label or truncated filename. */

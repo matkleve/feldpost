@@ -19,10 +19,11 @@ flowchart TB
     MarkerClick["Marker Click\n(single or cluster)"]
     MapZone -->|"handlePhotoMarkerClick(key)"| MarkerClick
 
-    MarkerClick -->|"single (count=1)"| DetailView["Image Detail View\nopenDetailView(imageId)"]
+    MarkerClick -->|"single (count=1)"| SingleFlow["Load Cluster Images\n+ Open Detail View"]
     MarkerClick -->|"cluster (count>1)"| ClusterLoad["Load Cluster Images"]
 
-    ClusterLoad -->|"query images in grid cell"| Supa["Supabase RPC\ncluster_images(lat, lng, zoom)"]
+    SingleFlow -->|"query images in grid cell"| Supa["Supabase RPC\ncluster_images(lat, lng, zoom)"]
+    ClusterLoad -->|"query images in grid cell"| Supa
     Supa -->|"image list"| WVS["WorkspaceViewService"]
 
     subgraph WVS_Inner["WorkspaceViewService"]
@@ -78,16 +79,19 @@ sequenceDiagram
     participant WVS as WorkspaceViewService
     participant WP as Workspace Content
 
-    U->>Map: click cluster marker (count=5)
+    U->>Map: click marker (single or cluster)
     Map->>MS: handlePhotoMarkerClick(markerKey)
-    MS->>MS: markerState.count > 1 → cluster path
     MS->>MS: photoPanelOpen.set(true)
     MS->>Supa: rpc('cluster_images', {cluster_lat, cluster_lng, zoom})
     Supa-->>MS: [{id, thumbnail_path, captured_at, project_id, ...}, ...]
-    MS->>WVS: setActiveSelectionImages(images)
+    MS->>WVS: loadClusterImages() → rawImages.set(images)
     WVS->>WVS: apply filters → sort → group
     WVS->>WP: emit grouped image sections
     WP->>WP: render group headings + thumbnail grid
+    alt count === 1 && imageId
+        MS->>MS: openDetailView(imageId)
+        Note right of MS: Grid is populated in background<br/>for back-navigation
+    end
 ```
 
 ### New RPC: `cluster_images`
@@ -113,8 +117,6 @@ RETURNS TABLE (
   direction      numeric,
   exif_latitude  numeric,
   exif_longitude numeric,
-  corrected_latitude  numeric,
-  corrected_longitude numeric,
   address_label  text
 )
 LANGUAGE sql STABLE SECURITY DEFINER
@@ -137,11 +139,9 @@ AS $$
     i.created_at,
     i.project_id,
     p.name          AS project_name,
-    i.direction_degrees AS direction,
+    i.direction,
     i.exif_latitude,
     i.exif_longitude,
-    i.corrected_latitude,
-    i.corrected_longitude,
     i.address_label
   FROM public.images i
   CROSS JOIN grid g
@@ -261,11 +261,15 @@ GroupHeader                                ← sticky within scroll container
 classDiagram
     class WorkspaceViewService {
         +rawImages: WritableSignal~Image[]~
+        +selectedProjectIds: WritableSignal~Set~string~~
         +activeSort: WritableSignal~SortConfig~
         +activeGroupings: WritableSignal~PropertyRef[]~
         +groupedSections: Signal~GroupedSection[]~
         +totalImageCount: Signal~number~
-        +setActiveSelectionImages(images: Image[]): void
+        +selectionActive: WritableSignal~boolean~
+        +emptySelection: Signal~boolean~
+        +loadClusterImages(lat, lng, zoom): Promise~void~
+        +loadClusterImages(lat, lng, zoom): Promise~void~\n        +setActiveSelectionImages(images: Image[]): void
         +clearActiveSelection(): void
         -applyFilters(images: Image[]): Image[]
         -applySort(images: Image[]): Image[]
@@ -275,13 +279,11 @@ classDiagram
     class FilterService {
         +rules: WritableSignal~FilterRule[]~
         +activeCount: Signal~number~
-        +selectedProjectIds: WritableSignal~Set~string~~
         +addRule(): void
         +updateRule(id, patch): void
         +removeRule(id): void
         +clearAll(): void
-        +buildSupabasePredicate(query): query
-        +matchesClientSide(image: Image): boolean
+        +matchesClientSide(image, rules): boolean
     }
 
     class MetadataService {
@@ -323,9 +325,11 @@ flowchart TD
         OpenDetail["Open Detail View"]
     end
 
-    ClickMarker -->|"count=1"| OpenDetail
+    ClickMarker -->|"count=1"| LoadAndDetail["Load images + Open Detail"]
     ClickMarker -->|"count>1"| LoadImages
-    LoadImages --> ReFilter --> ReSort --> ReGroup --> ReRender
+    LoadAndDetail --> ReFilter --> ReSort --> ReGroup --> ReRender
+    LoadAndDetail --> OpenDetail
+    LoadImages --> ReFilter
 
     ClickGroup -->|"activate/deactivate/reorder"| ReGroup
     ClickSort -->|"change sort key/dir"| ReSort
