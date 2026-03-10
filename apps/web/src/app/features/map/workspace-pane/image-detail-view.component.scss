@@ -181,10 +181,29 @@
 .detail-image-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 100%;
+  // Golden ratio: ~1/3 of available pane height
+  width: calc(100% - var(--spacing-4) * 2);
+  max-height: 33vh;
+  margin: var(--spacing-3) auto 0;
   background: var(--color-bg-base);
-  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  aspect-ratio: 4 / 3;
+  cursor: pointer;
+  // Reset button styles
+  border: none;
+  padding: 0;
+  display: block;
+  transition: box-shadow 120ms ease-out;
+
+  &:hover {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 .detail-image {
@@ -303,12 +322,13 @@
 
 .detail-section {
   padding: 0 var(--spacing-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
 
-  // Global dd-section-label class handles typography.
-  // Add vertical rhythm between sections.
   .dd-section-label {
     padding-top: var(--spacing-3);
-    padding-bottom: var(--spacing-1);
+    padding-bottom: 0;
   }
 
   &--actions {
@@ -567,22 +587,174 @@
   height: 2rem;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: #ffffff;
+  background: transparent;
+  color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background 80ms ease-out;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
 
   .material-icons {
     font-size: 1rem;
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-primary) 85%, #000);
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    color: var(--color-text-primary);
   }
 }
 
 .detail-add-metadata-btn {
   margin: var(--spacing-1) 0;
+}
+
+// ── Lightbox overlay ──
+
+.detail-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+
+  &__close {
+    position: absolute;
+    top: var(--spacing-3);
+    right: var(--spacing-3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    z-index: 1;
+    transition: background 80ms ease-out;
+
+    .material-icons {
+      font-size: 1.25rem;
+    }
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  &__image {
+    max-width: 95vw;
+    max-height: 95vh;
+    object-fit: contain;
+    cursor: default;
+    border-radius: var(--radius-md);
+  }
+}
+
+// ── Address search ──
+
+.detail-address-search {
+  position: relative;
+
+  &__trigger {
+    width: 100%;
+  }
+
+  &__input-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-1) var(--spacing-2);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-surface);
+    box-shadow: var(--shadow-focus);
+  }
+
+  &__icon {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    padding: 0;
+
+    &::placeholder {
+      color: var(--color-text-disabled);
+    }
+  }
+
+  &__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0;
+
+    .material-icons {
+      font-size: 0.875rem;
+    }
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: var(--z-dropdown);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elevation-dropdown);
+    margin-top: var(--spacing-1);
+  }
+
+  &__loading {
+    padding: var(--spacing-2);
+    font-size: 0.75rem;
+    color: var(--color-text-disabled);
+    text-align: center;
+  }
+}
+
+// ── Metadata autocomplete ──
+
+.detail-add-metadata-key-wrap {
+  position: relative;
+}
+
+.detail-add-metadata-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: var(--z-dropdown);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-dropdown);
+  margin-top: var(--spacing-1);
 }
 
 // ── Delete dialog ──
