@@ -23,6 +23,7 @@ import {
   signal,
 } from '@angular/core';
 import { MetadataPropertyRowComponent } from './metadata-property-row.component';
+import { EditablePropertyRowComponent, SelectOption } from './editable-property-row.component';
 import { SupabaseService } from '../../../core/supabase.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -45,6 +46,11 @@ export interface ImageRecord {
   captured_at: string | null;
   created_at: string;
   address_label: string | null;
+  street: string | null;
+  city: string | null;
+  district: string | null;
+  country: string | null;
+  direction: number | null;
   location_unresolved: boolean | null;
 }
 
@@ -59,7 +65,7 @@ export interface MetadataEntry {
 @Component({
   selector: 'app-image-detail-view',
   standalone: true,
-  imports: [MetadataPropertyRowComponent],
+  imports: [MetadataPropertyRowComponent, EditablePropertyRowComponent],
   templateUrl: './image-detail-view.component.html',
   styleUrl: './image-detail-view.component.scss',
 })
@@ -100,6 +106,18 @@ export class ImageDetailViewComponent implements OnDestroy {
   /** Controls delete confirmation dialog visibility. */
   readonly showDeleteConfirm = signal(false);
 
+  /** Whether a save operation is in progress. */
+  readonly saving = signal(false);
+
+  /** Available projects for the project dropdown. */
+  readonly projectOptions = signal<SelectOption[]>([]);
+
+  /** Whether the add-metadata row is visible. */
+  readonly showAddMetadata = signal(false);
+
+  /** Which core field is currently being edited ('address_label', 'captured_at', 'project_id', etc.). */
+  readonly editingField = signal<string | null>(null);
+
   /** Signed URL for the full-resolution image (loaded on demand). */
   readonly fullResUrl = signal<string | null>(null);
 
@@ -137,6 +155,27 @@ export class ImageDetailViewComponent implements OnDestroy {
     });
   });
 
+  /** Formatted upload date (always created_at, read-only). */
+  readonly uploadDate = computed(() => {
+    const img = this.image();
+    if (!img) return null;
+    return new Date(img.created_at).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  });
+
+  /** Display name of the currently assigned project. */
+  readonly projectName = computed(() => {
+    const img = this.image();
+    if (!img?.project_id) return '';
+    const match = this.projectOptions().find((p) => p.id === img.project_id);
+    return match?.label ?? '';
+  });
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   private abortController: AbortController | null = null;
@@ -167,8 +206,11 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.thumbnailUrl.set(null);
     this.error.set(null);
     this.loading.set(false);
+    this.saving.set(false);
     this.showContextMenu.set(false);
     this.showDeleteConfirm.set(false);
+    this.showAddMetadata.set(false);
+    this.editingField.set(null);
   }
 
   private async loadImage(id: string): Promise<void> {
@@ -210,8 +252,11 @@ export class ImageDetailViewComponent implements OnDestroy {
     }));
     this.metadata.set(entries);
 
-    // Load signed URLs in parallel
+    // Load signed URLs and project list in parallel
     this.loadSignedUrls(imgData, signal);
+    if (imgData.organization_id) {
+      this.loadProjects(imgData.organization_id);
+    }
   }
 
   private async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
@@ -247,7 +292,33 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.closed.emit();
   }
 
-  /** Action #3 / #4 — metadata value edited inline; save to Supabase. */
+  /** Save an image field (address_label, captured_at, project_id, street, city, district, country). */
+  async saveImageField(field: string, newValue: string): Promise<void> {
+    const img = this.image();
+    if (!img) return;
+
+    const oldValue = (img as unknown as Record<string, unknown>)[field] as string | null;
+    if (newValue === (oldValue ?? '')) return;
+
+    // Optimistic update
+    const updateValue = newValue || null;
+    this.image.update((prev) => (prev ? { ...prev, [field]: updateValue } : prev));
+    this.editingField.set(null);
+    this.saving.set(true);
+
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({ [field]: updateValue })
+      .eq('id', img.id);
+
+    if (error) {
+      // Roll back
+      this.image.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
+    }
+    this.saving.set(false);
+  }
+
+  /** Save custom metadata value (Actions #11 / #12). */
   async saveMetadata(entry: MetadataEntry, newValue: string): Promise<void> {
     if (newValue === entry.value) return;
     const id = this.imageId();
@@ -277,19 +348,92 @@ export class ImageDetailViewComponent implements OnDestroy {
     }
   }
 
-  /** Action #5 — opens location correction mode in the parent. */
+  /** Action #13/#14 — add a new metadata entry (creates key if needed). */
+  async addMetadata(keyName: string, value: string): Promise<void> {
+    const img = this.image();
+    if (!img || !keyName.trim() || !value.trim()) return;
+
+    this.saving.set(true);
+
+    // Find or create metadata key
+    let keyId: string;
+    const { data: existing } = await this.supabaseService.client
+      .from('metadata_keys')
+      .select('id')
+      .eq('key_name', keyName.trim())
+      .eq('organization_id', img.organization_id!)
+      .maybeSingle();
+
+    if (existing) {
+      keyId = existing.id;
+    } else {
+      const { data: created, error: createError } = await this.supabaseService.client
+        .from('metadata_keys')
+        .insert({ key_name: keyName.trim(), organization_id: img.organization_id! })
+        .select('id')
+        .single();
+
+      if (createError || !created) {
+        this.saving.set(false);
+        return;
+      }
+      keyId = created.id;
+    }
+
+    // Upsert the metadata value
+    const { error } = await this.supabaseService.client.from('image_metadata').upsert(
+      {
+        image_id: img.id,
+        metadata_key_id: keyId,
+        value_text: value.trim(),
+      },
+      { onConflict: 'image_id,metadata_key_id' },
+    );
+
+    if (!error) {
+      this.metadata.update((list) => [
+        ...list,
+        { metadataKeyId: keyId, key: keyName.trim(), value: value.trim() },
+      ]);
+    }
+
+    this.showAddMetadata.set(false);
+    this.saving.set(false);
+  }
+
+  /** Action #16 — remove a metadata entry. */
+  async removeMetadata(entry: MetadataEntry): Promise<void> {
+    const id = this.imageId();
+    if (!id) return;
+
+    // Optimistic removal
+    const previousList = this.metadata();
+    this.metadata.update((list) => list.filter((m) => m.metadataKeyId !== entry.metadataKeyId));
+
+    const { error } = await this.supabaseService.client
+      .from('image_metadata')
+      .delete()
+      .eq('image_id', id)
+      .eq('metadata_key_id', entry.metadataKeyId);
+
+    if (error) {
+      this.metadata.set(previousList);
+    }
+  }
+
+  /** Action #18 — opens location correction mode in the parent. */
   requestEditLocation(): void {
     const id = this.imageId();
     if (id) this.editLocationRequested.emit(id);
   }
 
-  /** Action #6 — "Add to project" (placeholder — project picker integration pending). */
+  /** Action #19 — "Add to project" (placeholder — project picker integration pending). */
   openProjectPicker(): void {
     // Project picker will be integrated when ProjectPickerComponent is implemented.
     // This action slot is wired here per the spec.
   }
 
-  /** Action #7 — triggers delete confirmation dialog. */
+  /** Action #20 — triggers delete confirmation dialog. */
   confirmDelete(): void {
     this.showDeleteConfirm.set(true);
     this.showContextMenu.set(false);
@@ -338,5 +482,19 @@ export class ImageDetailViewComponent implements OnDestroy {
   protected formatCoord(value: number | null): string {
     if (value == null) return '—';
     return value.toFixed(6);
+  }
+
+  // ── Private helpers ────────────────────────────────────────────────────────
+
+  private async loadProjects(organizationId: string): Promise<void> {
+    const { data } = await this.supabaseService.client
+      .from('projects')
+      .select('id, name')
+      .eq('organization_id', organizationId)
+      .order('name');
+
+    if (data) {
+      this.projectOptions.set(data.map((p: any) => ({ id: p.id, label: p.name })));
+    }
   }
 }

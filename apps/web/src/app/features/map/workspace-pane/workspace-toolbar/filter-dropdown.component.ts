@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { FilterService } from '../../../../core/filter.service';
+import { PropertyRegistryService } from '../../../../core/property-registry.service';
 
 @Component({
   selector: 'app-filter-dropdown',
@@ -20,8 +21,8 @@ import { FilterService } from '../../../../core/filter.service';
                 (change)="updateProperty(rule.id, $any($event.target).value)"
               >
                 <option value="" disabled>Property</option>
-                @for (prop of propertyOptions; track prop) {
-                  <option [value]="prop">{{ prop }}</option>
+                @for (prop of propertyOptions(); track prop.id) {
+                  <option [value]="prop.id">{{ prop.label }}</option>
                 }
               </select>
               <select
@@ -62,8 +63,11 @@ import { FilterService } from '../../../../core/filter.service';
 })
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);
+  private readonly registry = inject(PropertyRegistryService);
 
-  readonly propertyOptions = ['Date', 'Project', 'City', 'Country', 'Address', 'User'];
+  readonly propertyOptions = computed(() =>
+    this.registry.filterableProperties().map((p) => ({ id: p.id, label: p.label })),
+  );
   readonly operatorOptions = ['contains', 'equals', 'is', 'is not', 'before', 'after'];
 
   removeRule(id: string): void {
