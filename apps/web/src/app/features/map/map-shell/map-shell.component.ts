@@ -100,20 +100,28 @@ export class MapShellComponent implements OnDestroy {
   /** Whether the workspace pane (photo panel) is open. */
   readonly photoPanelOpen = signal(false);
 
-  /** Current workspace pane width in px. */
+  /** Current workspace pane width in px. Initialised lazily to golden-ratio default on first open. */
   readonly workspacePaneWidth = signal(360);
 
   /** Minimum workspace pane width in px (17.5rem). */
   readonly workspacePaneMinWidth = 280;
-
-  /** Default workspace pane width in px (22.5rem). */
-  readonly workspacePaneDefaultWidth = 360;
 
   /** Maximum workspace pane width: viewport minus map minimum (~320px) minus divider. */
   readonly workspacePaneMaxWidth = computed(() => {
     // Fallback to a reasonable default before DOM is available.
     const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
     return Math.max(this.workspacePaneMinWidth, viewportWidth - 320);
+  });
+
+  /**
+   * Default workspace pane width when opening — golden ratio of the viewport
+   * (viewport × 0.382, i.e. the minor segment of the golden cut), clamped to
+   * [workspacePaneMinWidth, workspacePaneMaxWidth].
+   */
+  readonly workspacePaneDefaultWidth = computed(() => {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    const golden = Math.round(viewportWidth * (1 - 1 / 1.618));
+    return Math.min(Math.max(golden, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
   });
   readonly selectedMarkerKey = signal<string | null>(null);
 
@@ -252,6 +260,9 @@ export class MapShellComponent implements OnDestroy {
    * Also ensures the photo panel is open.
    */
   openDetailView(imageId: string): void {
+    if (!this.photoPanelOpen()) {
+      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+    }
     this.detailImageId.set(imageId);
     this.photoPanelOpen.set(true);
   }
@@ -715,6 +726,9 @@ export class MapShellComponent implements OnDestroy {
 
     // Always open pane and mark marker selected.
     this.setSelectedMarker(markerKey);
+    if (!this.photoPanelOpen()) {
+      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+    }
     this.photoPanelOpen.set(true);
 
     // Load images at this marker's grid position(s) into the workspace view.
