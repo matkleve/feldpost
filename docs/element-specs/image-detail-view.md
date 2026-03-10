@@ -31,12 +31,15 @@ The metadata content area (both in single-column and as the right panel in two-c
 The design follows a strict information hierarchy. Each data field is placed according to its importance to the field technician's workflow:
 
 #### 1. Header Bar (CRITICAL — navigation + identity)
+
 Back arrow + editable title (address label) + context menu trigger. Follows current pattern. The title is the most prominent text element — `--text-h2` weight 600. Uses `dd-item` style context menu.
 
 #### 2. Hero Photo (HIGHEST — the content itself)
+
 Full-resolution image with progressive loading (placeholder → thumbnail → full-res). The photo is the reason the user is here. It gets maximum visual real estate.
 
 #### 3. Quick Info Bar (HIGH — at-a-glance context)
+
 Immediately below the photo, a horizontal row of **info chips** provides the most important metadata at a glance without scrolling:
 
 - **Project chip**: folder icon + project name. Filled `--color-primary` if assigned, outlined `--color-border` if none. Click opens project picker.
@@ -46,6 +49,7 @@ Immediately below the photo, a horizontal row of **info chips** provides the mos
 Chips use `rounded-full` radius, `--text-caption` size (12px), compact padding (`--spacing-1` block, `--spacing-2` inline). They sit in a horizontal flex row that wraps on narrow panes.
 
 #### 4. Details Section (MEDIUM-HIGH — editable properties)
+
 Section heading uses the **`dd-section-label`** style: `0.6875rem`, uppercase, `600` weight, `--color-text-disabled`, `letter-spacing: 0.06em`.
 
 Each property row is redesigned with **leading icons**:
@@ -65,29 +69,33 @@ Each property row is redesigned with **leading icons**:
 
 Property row icon mapping:
 
-| Field        | Icon              | Importance | Notes                          |
-| ------------ | ----------------- | ---------- | ------------------------------ |
-| Captured     | `schedule`        | High       | When the photo was taken       |
-| Project      | `folder`          | High       | Organizational grouping        |
-| Street       | `signpost`        | Medium     | Part of address group          |
-| City         | `location_city`   | Medium     | Part of address group          |
-| District     | `map`             | Low-Medium | Part of address group          |
-| Country      | `public`          | Low        | Part of address group          |
-| Location     | `my_location`     | Medium     | GPS coords, read-only          |
-| Uploaded     | `cloud_upload`    | Low        | Informational, read-only, muted|
+| Field    | Icon            | Importance | Notes                           |
+| -------- | --------------- | ---------- | ------------------------------- |
+| Captured | `schedule`      | High       | When the photo was taken        |
+| Project  | `folder`        | High       | Organizational grouping         |
+| Street   | `signpost`      | Medium     | Part of address group           |
+| City     | `location_city` | Medium     | Part of address group           |
+| District | `map`           | Low-Medium | Part of address group           |
+| Country  | `public`        | Low        | Part of address group           |
+| Location | `my_location`   | Medium     | GPS coords, read-only           |
+| Uploaded | `cloud_upload`  | Low        | Informational, read-only, muted |
 
 Read-only rows (Location, Uploaded) display with `--color-text-secondary` value text and no edit icon on hover.
 
 #### 5. Address Group
+
 Street, City, District, Country are visually grouped under a **"Location"** section heading (dd-section-label). They share the same edit pattern. The GPS coordinates row appears at the bottom of this group with the correction badge if applicable.
 
 #### 6. Custom Metadata Section (VARIABLE)
+
 Section heading: "Metadata" (dd-section-label style). Same icon + label + value row pattern. Chip-type metadata renders inline chip groups. Delete icon appears on hover (right side).
 
 **Chip-type metadata** renders inline as a horizontal chip group. The selected chip gets a filled style (`--color-primary` bg), unselected chips are outlined. Clicking a chip saves immediately — no confirm step needed (it's a single-select categorical value). On narrow layouts, chips wrap.
 
 #### 7. Actions Section (LOW priority but accessible)
+
 Actions use **`dd-item`** button styling — not bordered outline buttons. Each action is a full-width row with:
+
 - Leading Material icon (`1rem`, `--color-text-secondary`)
 - Label text (`0.8125rem`)
 - `dd-item` hover (warm clay tint)
@@ -102,6 +110,7 @@ Actions use **`dd-item`** button styling — not bordered outline buttons. Each 
 ```
 
 ### Correction History
+
 When the image has a corrected location, a subtle callout appears below the GPS row using `--color-accent` tinting (already implemented). Shows original EXIF vs corrected coordinates.
 
 ### Interaction Pseudo Code
@@ -120,7 +129,7 @@ WHEN detail view closes:
 ON property row hover:
   show warm clay background tint
   show edit icon (pencil) on right side
-  
+
 ON property row click (editable):
   replace value text with inline input (text / datetime-local / select)
   focus input
@@ -129,7 +138,7 @@ ON property row click (editable):
 
 ON quick-info chip click:
   project chip → open project select dropdown
-  date chip → enter date edit mode  
+  date chip → enter date edit mode
   gps chip → copy coordinates to clipboard (toast confirmation)
 
 ON action row click:
@@ -589,7 +598,7 @@ sequenceDiagram
 - [ ] Chips use `rounded-full`, `--text-caption` size, compact padding
 - [ ] Chips wrap on narrow panes
 
-### Visual Design — Property Rows  
+### Visual Design — Property Rows
 
 - [ ] All property rows have **leading Material icon** (1rem, `--color-text-secondary`)
 - [ ] Row hover uses **warm clay tint** (`color-mix(in srgb, var(--color-clay) 8%, transparent)`)
