@@ -61,6 +61,9 @@ function buildFakeSupabase() {
       storage: {
         from: vi.fn().mockReturnValue({
           createSignedUrls: vi.fn().mockResolvedValue({ data: [], error: null }),
+          createSignedUrl: vi
+            .fn()
+            .mockResolvedValue({ data: { signedUrl: 'https://fake.url' }, error: null }),
         }),
       },
     },
@@ -300,5 +303,207 @@ describe('WorkspaceViewService — grouping with addresses', () => {
     expect(sections.length).toBe(2);
     expect(sections.map((s) => s.heading)).toContain('Zürich');
     expect(sections.map((s) => s.heading)).toContain('Bern');
+  });
+});
+
+// ── Sort + Grouping Sync (WV-3b) ──────────────────────────────────────────────
+
+describe('WorkspaceViewService — sort + grouping sync', () => {
+  function setupSortGrouping() {
+    const { service } = setup();
+
+    // Seed images with diverse cities, projects, and dates for meaningful sorting.
+    const images = [
+      makeImage({
+        id: 'z1',
+        city: 'Zürich',
+        projectName: 'Alpha',
+        capturedAt: '2026-01-01T00:00:00Z',
+      }),
+      makeImage({
+        id: 'b1',
+        city: 'Berlin',
+        projectName: 'Beta',
+        capturedAt: '2026-03-01T00:00:00Z',
+      }),
+      makeImage({
+        id: 'w1',
+        city: 'Wien',
+        projectName: 'Alpha',
+        capturedAt: '2026-02-01T00:00:00Z',
+      }),
+      makeImage({
+        id: 'b2',
+        city: 'Berlin',
+        projectName: 'Alpha',
+        capturedAt: '2026-01-15T00:00:00Z',
+      }),
+      makeImage({
+        id: 'z2',
+        city: 'Zürich',
+        projectName: 'Beta',
+        capturedAt: '2026-02-15T00:00:00Z',
+      }),
+    ];
+    service.setActiveSelectionImages(images);
+    return service;
+  }
+
+  it('auto-prepends grouping keys to effectiveSorts', () => {
+    const service = setupSortGrouping();
+
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+
+    const effective = service.effectiveSorts();
+    expect(effective[0]).toEqual({ key: 'city', direction: 'asc' });
+    // Default user sort should follow
+    expect(effective[1]).toEqual({ key: 'date-captured', direction: 'desc' });
+  });
+
+  it('groups are sorted alphabetically when grouping direction is asc', () => {
+    const service = setupSortGrouping();
+
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+
+    const sections = service.groupedSections();
+    const headings = sections.map((s) => s.heading);
+    expect(headings).toEqual(['Berlin', 'Wien', 'Zürich']);
+  });
+
+  it('groups are sorted reverse-alphabetically when grouping direction is desc', () => {
+    const service = setupSortGrouping();
+
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    // Change city sort direction to descending
+    service.activeSorts.set([
+      { key: 'city', direction: 'desc' },
+      { key: 'date-captured', direction: 'desc' },
+    ]);
+
+    const sections = service.groupedSections();
+    const headings = sections.map((s) => s.heading);
+    expect(headings).toEqual(['Zürich', 'Wien', 'Berlin']);
+  });
+
+  it('multi-level grouping respects sort directions for both levels', () => {
+    const service = setupSortGrouping();
+
+    service.activeGroupings.set([
+      { id: 'city', label: 'City', icon: 'location_city' },
+      { id: 'project', label: 'Project', icon: 'folder' },
+    ]);
+
+    const sections = service.groupedSections();
+    // Top level should be city A→Z (default asc)
+    expect(sections.map((s) => s.heading)).toEqual(['Berlin', 'Wien', 'Zürich']);
+
+    // Berlin subgroups: Alpha, Beta (A→Z)
+    const berlinSubs = sections[0].subGroups!;
+    expect(berlinSubs.map((s) => s.heading)).toEqual(['Alpha', 'Beta']);
+  });
+
+  it('retains user sort direction when a property is added as grouping', () => {
+    const service = setupSortGrouping();
+
+    // User first activates city sort as descending
+    service.activeSorts.set([
+      { key: 'date-captured', direction: 'desc' },
+      { key: 'city', direction: 'desc' },
+    ]);
+
+    // Then city is added as a grouping
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+
+    const effective = service.effectiveSorts();
+    // City should be first (grouping position) and retain desc direction
+    expect(effective[0]).toEqual({ key: 'city', direction: 'desc' });
+  });
+
+  it('removes grouping-only sort key when grouping is removed', () => {
+    const service = setupSortGrouping();
+
+    // Activate grouping — city gets auto-added to sorts
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    expect(service.effectiveSorts().some((s) => s.key === 'city')).toBe(true);
+
+    // Remove the grouping
+    service.activeGroupings.set([]);
+
+    const effective = service.effectiveSorts();
+    // City was grouping-only — should be gone
+    expect(effective.some((s) => s.key === 'city')).toBe(false);
+    // Default sort remains
+    expect(effective).toEqual([{ key: 'date-captured', direction: 'desc' }]);
+  });
+
+  it('keeps user-defined sort when grouping of same key is removed', () => {
+    const service = setupSortGrouping();
+
+    // User explicitly adds city sort first
+    service.activeSorts.set([
+      { key: 'date-captured', direction: 'desc' },
+      { key: 'city', direction: 'asc' },
+    ]);
+
+    // Then grouping is added for city
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+
+    // Then grouping is removed
+    service.activeGroupings.set([]);
+
+    const effective = service.effectiveSorts();
+    // City was in user sorts before grouping — should remain
+    expect(effective.some((s) => s.key === 'city')).toBe(true);
+  });
+
+  it('effectiveSorts deduplicates grouping keys already in user sorts', () => {
+    const service = setupSortGrouping();
+
+    // User has city in their sorts
+    service.activeSorts.set([
+      { key: 'date-captured', direction: 'desc' },
+      { key: 'city', direction: 'desc' },
+    ]);
+
+    // Add city as grouping
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+
+    const effective = service.effectiveSorts();
+    // City should appear exactly once (at grouping position)
+    const cityEntries = effective.filter((s) => s.key === 'city');
+    expect(cityEntries.length).toBe(1);
+    expect(effective[0].key).toBe('city');
+  });
+
+  it('images within a group are sorted by remaining sort keys', () => {
+    const service = setupSortGrouping();
+
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+    // Default: date-captured desc — within Berlin group, b1 (March) should come before b2 (Jan)
+
+    const sections = service.groupedSections();
+    const berlin = sections.find((s) => s.heading === 'Berlin')!;
+    expect(berlin.images[0].id).toBe('b1'); // March — newest first
+    expect(berlin.images[1].id).toBe('b2'); // January
+  });
+
+  it('changing sort direction on grouped property reorders groups', () => {
+    const service = setupSortGrouping();
+
+    service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
+
+    // Verify initial A→Z order
+    let sections = service.groupedSections();
+    expect(sections[0].heading).toBe('Berlin');
+
+    // Change city to descending
+    service.activeSorts.set([
+      { key: 'city', direction: 'desc' },
+      { key: 'date-captured', direction: 'desc' },
+    ]);
+
+    sections = service.groupedSections();
+    expect(sections[0].heading).toBe('Zürich');
+    expect(sections[2].heading).toBe('Berlin');
   });
 });

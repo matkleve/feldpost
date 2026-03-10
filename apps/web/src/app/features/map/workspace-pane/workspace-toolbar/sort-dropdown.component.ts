@@ -7,8 +7,6 @@ type SortOption = {
   label: string;
   icon: string;
   defaultDirection: 'asc' | 'desc';
-  /** When false, only the default direction is available (bi-state: active ↔ inactive). */
-  bidirectional: boolean;
 };
 
 @Component({
@@ -84,6 +82,9 @@ type SortOption = {
             </span>
           </button>
         }
+        @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
+          <div class="sort-empty-hint">No matching properties</div>
+        }
       </div>
     </div>
   `,
@@ -98,55 +99,48 @@ export class SortDropdownComponent {
       label: 'Date captured',
       icon: 'schedule',
       defaultDirection: 'desc',
-      bidirectional: false,
     },
     {
       id: 'date-uploaded',
       label: 'Date uploaded',
       icon: 'cloud_upload',
       defaultDirection: 'desc',
-      bidirectional: false,
     },
     {
       id: 'name',
       label: 'Name',
       icon: 'sort_by_alpha',
       defaultDirection: 'asc',
-      bidirectional: true,
     },
     {
       id: 'distance',
       label: 'Distance',
       icon: 'straighten',
       defaultDirection: 'asc',
-      bidirectional: false,
     },
     {
       id: 'address',
       label: 'Address',
       icon: 'location_on',
       defaultDirection: 'asc',
-      bidirectional: true,
     },
     {
       id: 'city',
       label: 'City',
       icon: 'location_city',
       defaultDirection: 'asc',
-      bidirectional: true,
     },
-    { id: 'country', label: 'Country', icon: 'flag', defaultDirection: 'asc', bidirectional: true },
+    { id: 'country', label: 'Country', icon: 'flag', defaultDirection: 'asc' },
     {
       id: 'project',
       label: 'Project',
       icon: 'folder',
       defaultDirection: 'asc',
-      bidirectional: true,
     },
   ];
 
   readonly searchTerm = signal('');
-  readonly activeSorts = signal<SortConfig[]>([...this.viewService.activeSorts()]);
+  readonly activeSorts = signal<SortConfig[]>([...this.viewService.effectiveSorts()]);
   readonly sortChanged = output<SortConfig[]>();
 
   /** IDs of properties currently used as groupings. */
@@ -191,23 +185,9 @@ export class SortDropdownComponent {
   /** Returns the symbol for the state that will result from the next click. */
   getNextDirectionSymbol(id: string): string {
     const sort = this.activeSorts().find((s) => s.key === id);
-    const opt = this.options.find((o) => o.id === id);
-    if (!opt) return '–';
-
-    if (!sort) {
-      // Inactive → will activate with default direction
-      return opt.defaultDirection === 'asc' ? '↑' : '↓';
-    }
-    if (!opt.bidirectional) {
-      // Unidirectional: active → will deactivate
-      return '–';
-    }
-    if (sort.direction === opt.defaultDirection) {
-      // Bidirectional at default dir → will flip to opposite
-      return opt.defaultDirection === 'asc' ? '↓' : '↑';
-    }
-    // Bidirectional at opposite dir → will deactivate
-    return '–';
+    if (!sort) return '↑'; // Deactivated → Ascending
+    if (sort.direction === 'asc') return '↓'; // Ascending → Descending
+    return '–'; // Descending → Deactivated
   }
 
   getDirectionLabel(id: string): string {
@@ -216,25 +196,20 @@ export class SortDropdownComponent {
     return sort.direction === 'asc' ? 'ascending' : 'descending';
   }
 
-  /** Toggle sort: bidirectional items cycle inactive → default → opposite → inactive; unidirectional items toggle inactive ↔ default. */
+  /** Toggle sort: all items cycle deactivated → ascending → descending → deactivated. */
   toggleSort(id: string): void {
     const current = this.activeSorts();
     const existing = current.find((s) => s.key === id);
-    const opt = this.options.find((o) => o.id === id);
-    if (!opt) return;
 
-    const opposite = (d: 'asc' | 'desc'): 'asc' | 'desc' => (d === 'asc' ? 'desc' : 'asc');
     let next: SortConfig[];
     if (!existing) {
-      // Inactive → activate with default direction
-      next = [...current, { key: id, direction: opt.defaultDirection }];
-    } else if (opt.bidirectional && existing.direction === opt.defaultDirection) {
-      // Default dir → opposite dir (bidirectional only)
-      next = current.map((s) =>
-        s.key === id ? { ...s, direction: opposite(opt.defaultDirection) } : s,
-      );
+      // Deactivated → Ascending
+      next = [...current, { key: id, direction: 'asc' }];
+    } else if (existing.direction === 'asc') {
+      // Ascending → Descending
+      next = current.map((s) => (s.key === id ? { ...s, direction: 'desc' as const } : s));
     } else {
-      // Deactivate (remove)
+      // Descending → Deactivated
       next = current.filter((s) => s.key !== id);
     }
 

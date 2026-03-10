@@ -107,19 +107,65 @@ SortDropdown                               ← floating dropdown, --color-bg-ele
 - When groupings are active, group ordering uses the same sort directions
 - `WorkspaceViewService.activeGroupings()` is read to determine which properties appear in the grouping section
 
+### Grouping ↔ Sort Sync Contract
+
+The `WorkspaceViewService` owns the canonical `activeSorts` signal. The sync logic is:
+
+1. **Grouping activated** — all active grouping IDs are prepended to the sort pipeline (in grouping order) before any user-defined sorts. If a grouping key already exists in user sorts, it is moved to the grouping position (retaining its direction). New grouping keys are inserted with ascending (`asc`) as the default direction.
+2. **Grouping removed** — the removed property is deleted from the effective sort list unless the user explicitly activated it before the grouping was added (tracked via a `userSortKeys` set).
+3. **Sort direction changed on a grouped property** — the direction is recorded and applied to the sort pipeline. Group headings in `groupedSections` are ordered by this direction.
+4. **Sort options list in the dropdown** is derived from `effectiveSorts` (= grouping sorts + user sorts merged), not from `activeSorts` directly.
+5. **"Reset to default"** clears user sorts to `[date-captured ↓]` but leaves grouping-derived sorts intact.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant GDD as GroupingDropdown
+    participant Toolbar as WorkspaceToolbar
+    participant WVS as WorkspaceViewService
+    participant SDD as SortDropdown
+
+    Note over WVS: activeSorts = [date-captured ↓]<br/>activeGroupings = []
+
+    User->>GDD: Activate grouping: City
+    GDD->>Toolbar: groupingsChanged([City])
+    Toolbar->>WVS: activeGroupings.set([City])
+    WVS->>WVS: effectiveSorts = [city ↑, date-captured ↓]
+    WVS->>WVS: sorted → groupedSections recalculate
+    Note over WVS: Groups ordered A→Z by city
+
+    User->>GDD: Also activate: Project
+    GDD->>Toolbar: groupingsChanged([City, Project])
+    Toolbar->>WVS: activeGroupings.set([City, Project])
+    WVS->>WVS: effectiveSorts = [city ↑, project ↑, date-captured ↓]
+    Note over WVS: Groups: City A→Z → Project A→Z within each city
+
+    User->>SDD: Change City direction (↑ → ↓)
+    SDD->>Toolbar: sortChanged([city ↓, project ↑, date-captured ↓])
+    Toolbar->>WVS: activeSorts.set([city ↓, project ↑, date-captured ↓])
+    WVS->>WVS: effectiveSorts = [city ↓, project ↑, date-captured ↓]
+    Note over WVS: City groups now Z→A
+
+    User->>GDD: Remove grouping: City
+    GDD->>Toolbar: groupingsChanged([Project])
+    Toolbar->>WVS: activeGroupings.set([Project])
+    WVS->>WVS: effectiveSorts = [project ↑, date-captured ↓]
+    Note over WVS: City sort removed (was grouping-only)
+```
+
 ## Acceptance Criteria
 
-- [ ] Multi-sort: multiple properties can be active simultaneously
-- [ ] Tri-state direction toggle per row: ascending → descending → deactivated
-- [ ] Active groupings auto-promoted to "Sorted by grouping" section at top
-- [ ] Grouping section mirrors grouping order and applies sort direction to group ordering
-- [ ] "Reset to default" row when any custom sort is active
-- [ ] Search input with clear (×) button
+- [x] Multi-sort: multiple properties can be active simultaneously
+- [x] Tri-state direction toggle per row: ascending → descending → deactivated
+- [x] Active groupings auto-promoted to "Sorted by grouping" section at top
+- [x] Grouping section mirrors grouping order and applies sort direction to group ordering
+- [x] "Reset to default" row when any custom sort is active
+- [x] Search input with clear (×) button
 - [x] Dropdown uses `position: fixed` to escape overflow
 - [x] Row hover: clay 8% background tint
-- [ ] Direction toggle always visible on active rows, on-hover for inactive
-- [ ] Empty state "No matching properties" when search has no results
-- [ ] Sort state persists across dropdown open/close (reads from WorkspaceViewService)
+- [x] Direction toggle always visible on active rows, on-hover for inactive
+- [x] Empty state "No matching properties" when search has no results
+- [x] Sort state persists across dropdown open/close (reads from WorkspaceViewService)
 
 ---
 

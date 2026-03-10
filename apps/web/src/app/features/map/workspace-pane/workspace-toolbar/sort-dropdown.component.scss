@@ -178,3 +178,10 @@
   margin: var(--spacing-1) var(--spacing-2);
   background: var(--color-border);
 }
+
+.sort-empty-hint {
+  padding: var(--spacing-3) var(--spacing-2);
+  font-size: 0.8125rem;
+  color: var(--color-text-disabled);
+  text-align: center;
+}
