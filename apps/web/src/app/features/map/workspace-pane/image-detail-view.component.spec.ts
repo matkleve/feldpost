@@ -16,6 +16,7 @@ import {
   MetadataEntry,
 } from './image-detail-view.component';
 import { SupabaseService } from '../../../core/supabase.service';
+import { GeocodingService } from '../../../core/geocoding.service';
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 
@@ -93,6 +94,12 @@ function buildFakeClient() {
     error: null,
   });
 
+  // For metadata_keys.select('key_name').eq('organization_id', ...).order('key_name')
+  const metaKeysOrderFn = vi.fn().mockResolvedValue({
+    data: [{ key_name: 'Building type' }, { key_name: 'Floor' }, { key_name: 'Phase' }],
+    error: null,
+  });
+
   const client = {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === 'images') {
@@ -113,10 +120,19 @@ function buildFakeClient() {
       }
       if (table === 'metadata_keys') {
         return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({ maybeSingle: maybeSingleFn }),
-            }),
+          select: vi.fn().mockImplementation((cols: string) => {
+            if (cols === 'key_name') {
+              // loadMetadataKeys: .select('key_name').eq(...).order(...)
+              return {
+                eq: vi.fn().mockReturnValue({ order: metaKeysOrderFn }),
+              };
+            }
+            // addMetadata lookup: .select('id').eq(...).eq(...).maybeSingle()
+            return {
+              eq: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({ maybeSingle: maybeSingleFn }),
+              }),
+            };
           }),
           insert: insertFn,
         };
@@ -158,6 +174,7 @@ function buildFakeClient() {
     imageSingleFn,
     metaSelectEqFn,
     projectOrderFn,
+    metaKeysOrderFn,
   };
 }
 
@@ -165,10 +182,17 @@ function buildFakeClient() {
 
 function setup() {
   const fake = buildFakeClient();
+  const fakeGeocoding = {
+    forward: vi.fn().mockResolvedValue(null),
+    reverse: vi.fn().mockResolvedValue(null),
+  };
 
   TestBed.configureTestingModule({
     imports: [ImageDetailViewComponent],
-    providers: [{ provide: SupabaseService, useValue: { client: fake.client } }],
+    providers: [
+      { provide: SupabaseService, useValue: { client: fake.client } },
+      { provide: GeocodingService, useValue: fakeGeocoding },
+    ],
   });
 
   const fixture = TestBed.createComponent(ImageDetailViewComponent);
@@ -178,7 +202,7 @@ function setup() {
   // Trigger initial change detection without setting imageId (stays null).
   fixture.detectChanges();
 
-  return { component, fixture, ref, fake };
+  return { component, fixture, ref, fake, fakeGeocoding };
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -657,6 +681,329 @@ describe('ImageDetailViewComponent', () => {
       component.editLocationRequested.subscribe(() => (emitted = true));
 
       component.requestEditLocation();
+
+      expect(emitted).toBe(false);
+    });
+  });
+
+  // ── Address search ─────────────────────────────────────────────────────
+
+  describe('address search', () => {
+    it('openAddressSearch pre-fills with current full address', () => {
+      const { component } = setup();
+      component.image.set({
+        ...MOCK_IMAGE,
+        street: 'Stephansplatz',
+        city: 'Wien',
+        district: 'Innere Stadt',
+        country: 'Austria',
+      });
+
+      component.openAddressSearch();
+
+      expect(component.addressSearchQuery()).toBe(
+        'Stephansplatz, Wien, Innere Stadt, Austria',
+      );
+      expect(component.editingField()).toBe('address_search');
+    });
+
+    it('openAddressSearch sets empty query when no address', () => {
+      const { component } = setup();
+      component.image.set({
+        ...MOCK_IMAGE,
+        street: null,
+        city: null,
+        district: null,
+        country: null,
+      });
+
+      component.openAddressSearch();
+
+      expect(component.addressSearchQuery()).toBe('');
+    });
+
+    it('cancelAddressSearch clears state', () => {
+      const { component } = setup();
+      component.editingField.set('address_search');
+      component.addressSearchQuery.set('test query');
+      component.addressSuggestions.set([
+        {
+          lat: 48.2,
+          lng: 16.3,
+          addressLabel: 'Test',
+          city: 'Wien',
+          district: null,
+          street: null,
+          country: 'Austria',
+        },
+      ]);
+
+      component.cancelAddressSearch();
+
+      expect(component.editingField()).toBeNull();
+      expect(component.addressSearchQuery()).toBe('');
+      expect(component.addressSuggestions()).toEqual([]);
+    });
+
+    it('applyAddressSuggestion updates image address fields', async () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+
+      await component.applyAddressSuggestion({
+        lat: 47.07,
+        lng: 15.44,
+        addressLabel: 'Hauptplatz 1, Graz',
+        street: 'Hauptplatz',
+        city: 'Graz',
+        district: 'Innere Stadt',
+        country: 'Austria',
+      });
+
+      expect(component.image()!.street).toBe('Hauptplatz');
+      expect(component.image()!.city).toBe('Graz');
+      expect(component.image()!.address_label).toBe('Hauptplatz 1, Graz');
+      expect(component.editingField()).toBeNull();
+    });
+
+    it('applyAddressSuggestion calls Supabase update', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+
+      await component.applyAddressSuggestion({
+        lat: 47.07,
+        lng: 15.44,
+        addressLabel: 'Hauptplatz 1, Graz',
+        street: 'Hauptplatz',
+        city: 'Graz',
+        district: 'Innere Stadt',
+        country: 'Austria',
+      });
+
+      expect(fake.client.from).toHaveBeenCalledWith('images');
+      expect(fake.updateFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          street: 'Hauptplatz',
+          city: 'Graz',
+          country: 'Austria',
+          address_label: 'Hauptplatz 1, Graz',
+        }),
+      );
+    });
+
+    it('onAddressSearchInput debounces geocoding call', () => {
+      vi.useFakeTimers();
+      const { component, fakeGeocoding } = setup();
+
+      component.onAddressSearchInput('Wien');
+
+      expect(fakeGeocoding.forward).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(400);
+
+      expect(fakeGeocoding.forward).toHaveBeenCalledWith('Wien');
+      vi.useRealTimers();
+    });
+
+    it('onAddressSearchInput clears suggestions on empty input', () => {
+      const { component } = setup();
+      component.addressSuggestions.set([
+        {
+          lat: 48.2,
+          lng: 16.3,
+          addressLabel: 'Test',
+          city: 'Wien',
+          district: null,
+          street: null,
+          country: 'Austria',
+        },
+      ]);
+
+      component.onAddressSearchInput('');
+
+      expect(component.addressSuggestions()).toEqual([]);
+    });
+
+    it('selectFirstAddressResult applies first suggestion', async () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.addressSuggestions.set([
+        {
+          lat: 47.07,
+          lng: 15.44,
+          addressLabel: 'Graz',
+          street: 'Main St',
+          city: 'Graz',
+          district: null,
+          country: 'Austria',
+        },
+      ]);
+
+      await component.selectFirstAddressResult();
+
+      expect(component.image()!.city).toBe('Graz');
+    });
+
+    it('selectFirstAddressResult does nothing when no suggestions', () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.addressSuggestions.set([]);
+
+      component.selectFirstAddressResult();
+
+      // No change
+      expect(component.image()!.city).toBe('Wien');
+    });
+  });
+
+  // ── Metadata key autocomplete ──────────────────────────────────────────
+
+  describe('metadata key autocomplete', () => {
+    it('filters matching keys from allMetadataKeyNames', () => {
+      const { component } = setup();
+      component.allMetadataKeyNames.set(['Building type', 'Floor', 'Phase', 'Builder']);
+      component.metadata.set([]);
+
+      component.onMetadataKeyInput('build');
+
+      expect(component.metadataKeySuggestions()).toEqual(['Building type', 'Builder']);
+    });
+
+    it('excludes keys already assigned to the image', () => {
+      const { component } = setup();
+      component.allMetadataKeyNames.set(['Building type', 'Floor', 'Phase']);
+      component.metadata.set([...MOCK_METADATA]); // has 'Building type' and 'Floor'
+
+      component.onMetadataKeyInput('f');
+
+      // 'Floor' is excluded because it's already assigned
+      expect(component.metadataKeySuggestions()).toEqual([]);
+    });
+
+    it('clears suggestions on empty input', () => {
+      const { component } = setup();
+      component.metadataKeySuggestions.set(['Building type']);
+
+      component.onMetadataKeyInput('');
+
+      expect(component.metadataKeySuggestions()).toEqual([]);
+    });
+
+    it('limits results to 5 suggestions', () => {
+      const { component } = setup();
+      component.allMetadataKeyNames.set([
+        'A1',
+        'A2',
+        'A3',
+        'A4',
+        'A5',
+        'A6',
+        'A7',
+      ]);
+      component.metadata.set([]);
+
+      component.onMetadataKeyInput('A');
+
+      expect(component.metadataKeySuggestions().length).toBe(5);
+    });
+  });
+
+  // ── Captured date editor ───────────────────────────────────────────────
+
+  describe('captured date editor', () => {
+    it('openCapturedAtEditor parses existing captured_at into date and time', () => {
+      const { component } = setup();
+      component.image.set({
+        ...MOCK_IMAGE,
+        captured_at: '2025-06-15T10:30:00Z',
+      });
+
+      component.openCapturedAtEditor();
+
+      expect(component.editingField()).toBe('captured_at');
+      expect(component.editDate()).toBe('2025-06-15');
+      // Time depends on local timezone, but should contain digits
+      expect(component.editTime()).toMatch(/^\d{2}:\d{2}$/);
+    });
+
+    it('openCapturedAtEditor defaults to today when no captured_at', () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE, captured_at: null });
+
+      component.openCapturedAtEditor();
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      expect(component.editDate()).toBe(`${yyyy}-${mm}-${dd}`);
+      expect(component.editTime()).toBe('');
+      expect(component.editingField()).toBe('captured_at');
+    });
+
+    it('saveCapturedAt combines date and time and saves', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.editDate.set('2025-07-20');
+      component.editTime.set('14:30');
+
+      await component.saveCapturedAt();
+
+      expect(component.image()!.captured_at).toBe('2025-07-20T14:30:00');
+      expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: '2025-07-20T14:30:00' });
+    });
+
+    it('saveCapturedAt defaults time to midnight when time is empty', async () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.editDate.set('2025-07-20');
+      component.editTime.set('');
+
+      await component.saveCapturedAt();
+
+      expect(component.image()!.captured_at).toBe('2025-07-20T00:00:00');
+    });
+
+    it('saveCapturedAt does nothing when date is empty', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.editDate.set('');
+      fake.updateFn.mockClear();
+
+      await component.saveCapturedAt();
+
+      expect(fake.updateFn).not.toHaveBeenCalled();
+    });
+
+    it('clearCapturedAt sets captured_at to null', async () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+
+      await component.clearCapturedAt();
+
+      expect(component.image()!.captured_at).toBeNull();
+      expect(component.editingField()).toBeNull();
+    });
+
+    it('clearCapturedAt calls Supabase with null', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+
+      await component.clearCapturedAt();
+
+      expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: null });
+    });
+
+    it('clearCapturedAt rolls back on error', async () => {
+      const { component, fake } = setup();
+      const original = '2025-06-15T10:30:00Z';
+      component.image.set({ ...MOCK_IMAGE, captured_at: original });
+      fake.updateEqFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
+
+      await component.clearCapturedAt();
+
+      expect(component.image()!.captured_at).toBe(original);
+    });
+  });
 
       expect(emitted).toBe(false);
     });
