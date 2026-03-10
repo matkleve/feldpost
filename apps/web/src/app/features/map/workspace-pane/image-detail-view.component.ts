@@ -154,6 +154,12 @@ export class ImageDetailViewComponent implements OnDestroy {
   /** All known metadata key names for the org (loaded once). */
   readonly allMetadataKeyNames = signal<string[]>([]);
 
+  /** Date portion being edited (YYYY-MM-DD). */
+  readonly editDate = signal('');
+
+  /** Time portion being edited (HH:MM). */
+  readonly editTime = signal('');
+
   // ── Derived ────────────────────────────────────────────────────────────────
 
   /** True when the image has been manually corrected. */
@@ -550,6 +556,57 @@ export class ImageDetailViewComponent implements OnDestroy {
       /* silent — clipboard may be unavailable */
     });
     this.showContextMenu.set(false);
+  }
+
+  /** Opens the captured_at editor, pre-filling date and time from current value. */
+  openCapturedAtEditor(): void {
+    const img = this.image();
+    if (img?.captured_at) {
+      const d = new Date(img.captured_at);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      this.editDate.set(`${yyyy}-${mm}-${dd}`);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      this.editTime.set(`${hh}:${min}`);
+    } else {
+      // Default to today, no time
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      this.editDate.set(`${yyyy}-${mm}-${dd}`);
+      this.editTime.set('');
+    }
+    this.editingField.set('captured_at');
+  }
+
+  /** Saves the combined date+time from the split editor. */
+  async saveCapturedAt(): Promise<void> {
+    const dateVal = this.editDate();
+    if (!dateVal) return;
+    const timeVal = this.editTime() || '00:00';
+    const combined = `${dateVal}T${timeVal}:00`;
+    await this.saveImageField('captured_at', combined);
+  }
+
+  /** Clears captured_at (sets to null). */
+  async clearCapturedAt(): Promise<void> {
+    const img = this.image();
+    if (!img) return;
+    const oldValue = img.captured_at;
+    this.image.update((prev) => (prev ? { ...prev, captured_at: null } : prev));
+    this.editingField.set(null);
+    this.saving.set(true);
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({ captured_at: null })
+      .eq('id', img.id);
+    if (error) {
+      this.image.update((prev) => (prev ? { ...prev, captured_at: oldValue } : prev));
+    }
+    this.saving.set(false);
   }
 
   protected formatCoord(value: number | null): string {
