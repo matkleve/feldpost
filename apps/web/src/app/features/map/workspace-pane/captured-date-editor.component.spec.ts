@@ -8,10 +8,7 @@
 
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import {
-  CapturedDateEditorComponent,
-  CalendarDay,
-} from './captured-date-editor.component';
+import { CapturedDateEditorComponent, CalendarDay } from './captured-date-editor.component';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -20,8 +17,9 @@ function setup(overrides: { initialDate?: string; initialTime?: string } = {}) {
     imports: [CapturedDateEditorComponent],
   });
 
-  const fixture: ComponentFixture<CapturedDateEditorComponent> =
-    TestBed.createComponent(CapturedDateEditorComponent);
+  const fixture: ComponentFixture<CapturedDateEditorComponent> = TestBed.createComponent(
+    CapturedDateEditorComponent,
+  );
   const component = fixture.componentInstance;
   const ref = fixture.componentRef as ComponentRef<CapturedDateEditorComponent>;
 

@@ -244,7 +244,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     return result.data?.signedUrl ?? null;
   }
 
-
   close(): void {
     this.closed.emit();
   }
@@ -476,7 +475,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     return value.toFixed(6);
   }
 
-
   private async loadProjects(organizationId: string): Promise<void> {
     const { data } = await this.supabaseService.client
       .from('projects')
@@ -500,7 +498,6 @@ export class ImageDetailViewComponent implements OnDestroy {
       this.allMetadataKeyNames.set(data.map((k: any) => k.key_name as string));
     }
   }
-
 
   openAddressSearch(): void {
     this.addressHelper.open();
