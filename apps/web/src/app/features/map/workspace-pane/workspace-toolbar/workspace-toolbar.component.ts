@@ -51,8 +51,8 @@ export class WorkspaceToolbarComponent {
   readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
   readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
   readonly hasCustomSort = computed(() => {
-    const sort = this.viewService.activeSort();
-    return sort.key !== 'captured_at' || sort.direction !== 'desc';
+    const sorts = this.viewService.activeSorts();
+    return sorts.length !== 1 || sorts[0].key !== 'captured_at' || sorts[0].direction !== 'desc';
   });
   readonly hasProject = computed(() => this.viewService.selectedProjectIds().size > 0);
 
@@ -88,8 +88,8 @@ export class WorkspaceToolbarComponent {
     );
   }
 
-  onSortChanged(sortConfig: SortConfig): void {
-    this.viewService.activeSort.set(sortConfig);
+  onSortChanged(sortConfigs: SortConfig[]): void {
+    this.viewService.activeSorts.set(sortConfigs);
   }
 
   onProjectsChanged(selectedIds: Set<string>): void {
@@ -106,7 +106,7 @@ export class WorkspaceToolbarComponent {
     const rect = btn.getBoundingClientRect();
     const dropdownWidth = id === 'filter' ? 352 : 240; // min-width per spec
     const viewportWidth = window.innerWidth;
-    const padding = 8; // keep 8px from viewport edge
+    const padding = 16; // keep 16px from viewport edge
 
     let left = rect.left;
     if (left + dropdownWidth > viewportWidth - padding) {

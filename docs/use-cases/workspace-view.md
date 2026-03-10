@@ -16,7 +16,10 @@ These scenarios describe what happens **inside the Active Selection view** after
 | ----- | ---------------------------------------- | ---------- |
 | WV-1  | Cluster click populates Active Selection | Technician |
 | WV-2  | Browse and scroll thumbnails             | Clerk      |
-| WV-3  | Sort images by property                  | Clerk      |
+| WV-3  | Sort images by property (multi-sort)     | Clerk      |
+| WV-3a | Tri-state direction toggle               | Clerk      |
+| WV-3b | Sort + grouping sync                     | Clerk      |
+| WV-3c | Reorder sort priority                    | Clerk      |
 | WV-4  | Group images by property                 | Clerk      |
 | WV-5  | Multi-level grouping                     | Clerk      |
 | WV-6  | Filter images with rules                 | Clerk      |
@@ -105,9 +108,9 @@ sequenceDiagram
 
 ---
 
-## WV-3: Sort Images by Property
+## WV-3: Sort Images by Property (Multi-Sort)
 
-**Product context:** UC2 §6 — clerk wants newest images first, then switches to sort by address for geographic grouping.
+**Product context:** UC2 §6 — clerk wants newest images first, then adds a secondary sort by address to break ties.
 
 ```mermaid
 sequenceDiagram
@@ -119,41 +122,226 @@ sequenceDiagram
 
     User->>Toolbar: Click "Sort" button
     Toolbar->>SortDD: Open sort dropdown
+    Note over SortDD: Default: Date captured ↓ active
 
-    User->>SortDD: Click "Address" option
-    SortDD->>WVS: sortChanged({key: 'address', direction: 'asc'})
-    WVS->>WVS: Re-sort images alphabetically by address
+    User->>SortDD: Click toggle on "City" row (— → ↑)
+    SortDD->>SortDD: activeSorts = [date-captured ↓, city ↑]
+    SortDD->>WVS: sortChanged([{key:'date-captured',dir:'desc'}, {key:'city',dir:'asc'}])
+    WVS->>WVS: Multi-key sort: date desc, then city asc for ties
     WVS-->>Grid: Emit re-sorted images
-    Grid->>Grid: Re-render grid in new order
     Note over Toolbar: Sort button shows active dot (clay)
 
-    User->>SortDD: Click direction toggle (↑→↓)
-    SortDD->>WVS: sortChanged({key: 'address', direction: 'desc'})
-    WVS-->>Grid: Emit re-sorted images (Z→A)
+    User->>SortDD: Click toggle on "Name" row (— → ↑)
+    SortDD->>SortDD: activeSorts = [date-captured ↓, city ↑, name ↑]
+    SortDD->>WVS: sortChanged([...3 sort keys])
+    WVS->>WVS: Multi-key sort: date → city → name
+    WVS-->>Grid: Emit re-sorted images
 
-    User->>SortDD: Click outside dropdown
-    SortDD->>Toolbar: Close dropdown
-    Note over Toolbar: Sort button retains active dot
+    User->>SortDD: Click toggle on "City" (↑ → ↓ → —)
+    SortDD->>SortDD: Cycle: city flips desc, then deactivates
+    SortDD->>WVS: sortChanged([{key:'date-captured',dir:'desc'}, {key:'name',dir:'asc'}])
+    WVS-->>Grid: Emit re-sorted images (city removed)
+
+    User->>SortDD: Click "Reset to default"
+    SortDD->>WVS: sortChanged([{key:'date-captured',dir:'desc'}])
+    WVS-->>Grid: Emit default-sorted images
+    Note over Toolbar: Sort dot disappears
 ```
 
 ```mermaid
 stateDiagram-v2
     [*] --> DefaultSort
-    DefaultSort --> CustomSort: User selects a sort option
-    CustomSort --> CustomSort: User changes direction (↑/↓)
-    CustomSort --> CustomSort: User picks different property
-    CustomSort --> DefaultSort: User selects "Date captured ↓" (the default)
 
     state DefaultSort {
-        [*]: Date captured descending
-        [*]: Sort button: no active dot
+        [*]: activeSorts = [date_captured DESC]
+        [*]: Sort button — no active dot
+        [*]: Reset row hidden
     }
-    state CustomSort {
-        [*]: Non-default sort applied
-        [*]: Sort button: active dot visible
-        [*]: Grid re-renders on every change
+
+    state MultiSort {
+        [*]: 1+ non-default sorts active
+        [*]: Sort button — clay dot visible
+        [*]: Reset row shown
+        [*]: Active rows highlighted, direction visible
+    }
+
+    DefaultSort --> MultiSort: Activate any sort property
+    MultiSort --> MultiSort: Toggle direction / add / remove sort
+    MultiSort --> DefaultSort: "Reset to default"
+    MultiSort --> DefaultSort: Deactivate all until only date_captured ↓ remains
+```
+
+**Expected state after multi-sort:**
+
+- `activeSorts` contains ordered array of `{key, direction}` entries
+- Images are sorted by first key, ties broken by second key, then third, etc.
+- Toolbar sort dot appears when any sort differs from the default `[date-captured ↓]`
+- Each active row shows its direction toggle (↑/↓) prominently
+- Inactive rows show `—` on hover only
+
+---
+
+## WV-3a: Tri-State Direction Toggle
+
+**Product context:** Clerk fine-tunes sort direction per property, or deactivates a sort without re-sorting by another property.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant SortDD as SortDropdown
+    participant WVS as WorkspaceViewService
+
+    Note over SortDD: "City" row currently —  (inactive)
+
+    User->>SortDD: Click toggle on "City"
+    SortDD->>SortDD: — → ↑ (ascending, default direction)
+    SortDD->>WVS: sortChanged([..., {key: 'city', dir: 'asc'}])
+
+    User->>SortDD: Click toggle on "City" again
+    SortDD->>SortDD: ↑ → ↓ (descending)
+    SortDD->>WVS: sortChanged([..., {key: 'city', dir: 'desc'}])
+
+    User->>SortDD: Click toggle on "City" again
+    SortDD->>SortDD: ↓ → — (deactivated, removed from activeSorts)
+    SortDD->>WVS: sortChanged([... without city])
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> Inactive
+    Inactive --> Ascending: click (activates with default dir)
+    Ascending --> Descending: click
+    Descending --> Inactive: click (deactivates)
+
+    state Inactive {
+        [*]: Display — (dash)
+        [*]: Row text-secondary
+        [*]: Toggle visible on hover only
+    }
+    state Ascending {
+        [*]: Display ↑ (arrow up)
+        [*]: Row text-primary
+        [*]: Toggle always visible
+    }
+    state Descending {
+        [*]: Display ↓ (arrow down)
+        [*]: Row text-primary
+        [*]: Toggle always visible
     }
 ```
+
+---
+
+## WV-3b: Sort + Grouping Sync
+
+**Product context:** Clerk groups images by City and Project. The sort dropdown auto-promotes City and Project to the "Sorted by grouping" section, and the sort directions control group ordering.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant GroupDD as GroupingDropdown
+    participant SortDD as SortDropdown
+    participant WVS as WorkspaceViewService
+    participant Content as WorkspaceContent
+
+    Note over SortDD: Default: [date-captured ↓]
+
+    User->>GroupDD: Activate grouping: City
+    GroupDD->>WVS: groupingsChanged([{key:'city'}])
+    WVS->>WVS: Sync: City auto-added to activeSorts at top if not present
+    Note over SortDD: activeSorts = [{key:'city', dir:'asc'}, {key:'date-captured', dir:'desc'}]
+    WVS->>Content: Groups sorted A→Z by city name, images sorted newest-first within groups
+
+    User->>GroupDD: Also activate grouping: Project
+    GroupDD->>WVS: groupingsChanged([{key:'city'}, {key:'project'}])
+    WVS->>WVS: Sync: Project auto-added after City
+    Note over SortDD: activeSorts = [city ↑, project ↑, date-captured ↓]
+    WVS->>Content: Groups: City → Project, sorted alphabetically
+
+    User->>SortDD: Open sort dropdown
+    Note over SortDD: Layout shows:<br/>── Sorted by grouping ──<br/>🏙 City ↑<br/>📁 Project ↑<br/>─────────────<br/>🕐 Date captured ↓<br/>☁️ Date uploaded —<br/>🔤 Name —<br/>...
+
+    User->>SortDD: Click toggle on "City" (↑ → ↓)
+    SortDD->>WVS: sortChanged([city ↓, project ↑, date-captured ↓])
+    WVS->>Content: City groups now sorted Z→A, project groups still A→Z
+    Content->>Content: Re-render: Zürich before Wien before Berlin
+```
+
+```mermaid
+flowchart TD
+    subgraph GroupingDD["Grouping Dropdown"]
+        GA["Active: City, Project"]
+    end
+
+    subgraph SortDD["Sort Dropdown"]
+        direction TB
+        Label1["── Sorted by grouping ──"]
+        SC["🏙 City           ↑"]
+        SP["📁 Project        ↑"]
+        Div["─────────────────────"]
+        S1["🕐 Date captured  ↓  (user-added)"]
+        S2["☁️ Date uploaded  —"]
+        S3["🔤 Name           —"]
+        S4["📏 Distance       —"]
+        S5["📍 Address        —"]
+        S6["🏙 Country        —"]
+
+        Label1 --- SC --- SP --- Div --- S1 --- S2 --- S3 --- S4 --- S5 --- S6
+    end
+
+    GroupingDD -->|"sync: grouped properties<br/>promoted to top"| SortDD
+
+    subgraph Pipeline["Image Pipeline"]
+        direction LR
+        Raw["All images"]
+        Sorted["Multi-sort:<br/>1. City ↑<br/>2. Project ↑<br/>3. Date captured ↓"]
+        Grouped["Group by City → Project<br/>(groups ordered by sort dirs)"]
+        Raw --> Sorted --> Grouped
+    end
+
+    SortDD -->|activeSorts| Pipeline
+```
+
+**Edge cases:**
+
+- User removes a grouping → that property moves back from the grouping section to the normal sort list. If it was only active because of grouping sync, it becomes deactivated.
+- User manually activates a sort property, then later adds it as a grouping → it moves to the grouping section but retains its direction from before.
+- User changes direction of a grouped property in sort → group ordering updates immediately.
+
+---
+
+## WV-3c: Reorder Sort Priority
+
+**Product context:** Clerk has multiple active sorts and wants to change which property takes priority.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant SortDD as SortDropdown
+    participant WVS as WorkspaceViewService
+    participant Grid as ThumbnailGrid
+
+    Note over SortDD: activeSorts = [date-captured ↓, city ↑, name ↑]
+    Note over SortDD: Sort priority: 1st Date captured, 2nd City, 3rd Name
+
+    User->>SortDD: Deactivate "Date captured" (↓ → —)
+    SortDD->>SortDD: activeSorts = [city ↑, name ↑]
+    SortDD->>WVS: sortChanged([city ↑, name ↑])
+    WVS-->>Grid: Sort by city, then name
+
+    User->>SortDD: Reactivate "Date captured" (— → ↑)
+    SortDD->>SortDD: activeSorts = [city ↑, name ↑, date-captured ↑]
+    Note over SortDD: Date captured is now LAST priority (appended)
+    SortDD->>WVS: sortChanged([city ↑, name ↑, date-captured ↑])
+    WVS-->>Grid: Sort by city, then name, then date
+```
+
+**Key rules for sort priority:**
+
+- New sorts are appended to the end of `activeSorts` (lowest priority)
+- Grouped properties always occupy first positions (in grouping order)
+- Deactivating and reactivating a sort moves it to the end
+- "Reset to default" returns to `[date-captured ↓]` only
 
 ---
 
@@ -419,11 +607,14 @@ sequenceDiagram
     User->>WVS: Filter → "Date captured is after 2025-06-01"
     WVS->>WVS: 18 → 9 images (date filter)
 
-    User->>WVS: Sort → "Address ascending"
-    WVS->>WVS: 9 images reordered A→Z by address
+    User->>WVS: Sort → activate "Address ↑" + keep "Date captured ↓"
+    WVS->>WVS: activeSorts = [date-captured ↓, address ↑]
+    WVS->>WVS: 9 images: primary by date desc, ties by address asc
 
     User->>WVS: Group → activate "City"
-    WVS->>WVS: 9 images grouped into sections by city
+    WVS->>WVS: Sync: City auto-promoted to top of activeSorts
+    WVS->>WVS: activeSorts = [city ↑, date-captured ↓, address ↑]
+    WVS->>WVS: 9 images grouped into sections by city, groups sorted A→Z
 
     WVS-->>Grid: Emit GroupedSection[] with sorted, filtered images
     Grid->>Grid: Render group headers + thumbnail grids
@@ -444,12 +635,12 @@ flowchart LR
         C["9 images\n(after 2025-06-01)"]
     end
 
-    subgraph P3["Step 3: Sort"]
-        D["9 images\n(address A→Z)"]
+    subgraph P3["Step 3: Multi-Sort"]
+        D["9 images\n1. City ↑ (from grouping)\n2. Date captured ↓\n3. Address ↑"]
     end
 
-    subgraph P4["Step 4: Group"]
-        E["GroupedSection[]\nBerlin (2) · Wien (3) · Zürich (4)"]
+    subgraph P4["Step 4: Group by City"]
+        E["GroupedSection[]\nBerlin (2) · Wien (3) · Zürich (4)\n(groups A→Z by city sort dir)"]
     end
 
     A --> B --> C --> D --> E
@@ -623,8 +814,8 @@ sequenceDiagram
     WVS->>WVS: projectFilterChanged(empty = all)
     Note over Toolbar: Projects dot disappears
 
-    User->>Toolbar: Click "Sort" → select "Date captured ↓" (default)
-    WVS->>WVS: sortChanged({key: 'captured_at', direction: 'desc'})
+    User->>Toolbar: Click "Sort" → click "Reset to default"
+    WVS->>WVS: sortChanged([{key: 'captured_at', direction: 'desc'}])
     Note over Toolbar: Sort dot disappears
 
     WVS->>WVS: Pipeline runs with no filters, default sort, no grouping
