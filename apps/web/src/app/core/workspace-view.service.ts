@@ -9,7 +9,7 @@ import type {
   PropertyRef,
 } from './workspace-view.types';
 
-const DEFAULT_SORT: SortConfig = { key: 'captured_at', direction: 'desc' };
+const DEFAULT_SORTS: SortConfig[] = [{ key: 'captured_at', direction: 'desc' }];
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceViewService {
@@ -21,7 +21,7 @@ export class WorkspaceViewService {
 
   readonly rawImages = signal<WorkspaceImage[]>([]);
   readonly selectedProjectIds = signal<Set<string>>(new Set());
-  readonly activeSort = signal<SortConfig>(DEFAULT_SORT);
+  readonly activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
   readonly activeGroupings = signal<PropertyRef[]>([]);
   readonly collapsedGroups = signal<Set<string>>(new Set());
   readonly isLoading = signal(false);
@@ -46,18 +46,23 @@ export class WorkspaceViewService {
     return images.filter((img) => this.filterService.matchesClientSide(img, rules));
   });
 
-  /** Step 3: Sort. */
+  /** Step 3: Sort (multi-key). */
   private readonly sorted = computed(() => {
     const images = [...this.ruleFiltered()];
-    const sort = this.activeSort();
+    const sorts = this.activeSorts();
+    if (sorts.length === 0) return images;
+
     return images.sort((a, b) => {
-      const valA = this.getSortValue(a, sort.key);
-      const valB = this.getSortValue(b, sort.key);
-      if (valA == null && valB == null) return 0;
-      if (valA == null) return 1;
-      if (valB == null) return -1;
-      const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
-      return sort.direction === 'asc' ? cmp : -cmp;
+      for (const sort of sorts) {
+        const valA = this.getSortValue(a, sort.key);
+        const valB = this.getSortValue(b, sort.key);
+        if (valA == null && valB == null) continue;
+        if (valA == null) return 1;
+        if (valB == null) return -1;
+        const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
+        if (cmp !== 0) return sort.direction === 'asc' ? cmp : -cmp;
+      }
+      return 0;
     });
   });
 
@@ -158,7 +163,7 @@ export class WorkspaceViewService {
     this.selectionActive.set(false);
     this.selectedProjectIds.set(new Set());
     this.filterService.clearAll();
-    this.activeSort.set(DEFAULT_SORT);
+    this.activeSorts.set(DEFAULT_SORTS);
     this.activeGroupings.set([]);
     this.collapsedGroups.set(new Set());
   }
@@ -271,6 +276,16 @@ export class WorkspaceViewService {
         return img.storagePath;
       case 'project':
         return img.projectName;
+      case 'address':
+        return img.addressLabel;
+      case 'city':
+        return img.city;
+      case 'country':
+        return img.country;
+      case 'district':
+        return img.district;
+      case 'street':
+        return img.street;
       default:
         return img.capturedAt;
     }
