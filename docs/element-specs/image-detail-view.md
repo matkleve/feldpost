@@ -36,7 +36,11 @@ Back arrow + editable title (address label) + context menu trigger. Follows curr
 
 #### 2. Hero Photo (HIGHEST — the content itself)
 
-Full-resolution image with progressive loading (placeholder → thumbnail → full-res). The photo is the reason the user is here. It gets maximum visual real estate.
+Full-resolution image with progressive loading (placeholder → thumbnail → full-res). The photo is the reason the user is here.
+
+- **Size**: Fixed to approximately **1/3 of the viewport height** (`max-height: 33vh`), maintaining a 4:3 aspect ratio. The photo does not grow with pane width — it stays compact to leave room for metadata below.
+- **Shape**: Rounded corners (`--radius-lg`), horizontally centered with side margins (`--spacing-4`). On hover, a subtle `--color-primary` ring appears.
+- **Click to enlarge**: Clicking the photo opens a **full-screen lightbox overlay** (dark backdrop, `rgba(0,0,0,0.9)`). The lightbox shows the image at `95vw / 95vh` max with `object-fit: contain`. Close button (X) top-right. Click backdrop or press Escape to close.
 
 #### 3. Quick Info Bar (HIGH — at-a-glance context)
 
@@ -84,13 +88,29 @@ Read-only rows (Location, Uploaded) display with `--color-text-secondary` value 
 
 #### 5. Address Group
 
-Street, City, District, Country are visually grouped under a **"Location"** section heading (dd-section-label). They share the same edit pattern. The GPS coordinates row appears at the bottom of this group with the correction badge if applicable.
+Street, City, District, Country are visually grouped under a **“Location”** section heading (dd-section-label).
+
+At the top of this group sits an **Address Search Bar** — a full-width dd-item styled trigger that shows the assembled address (`street, city, district, country`) or “Search address…” as placeholder. Clicking it activates search mode:
+
+- An input field appears with a search icon (left) and clear button (right).
+- As the user types, `GeocodingService.forward()` is called (debounced 400ms) to get Nominatim results.
+- Results appear in a dropdown panel using `dd-items` / `dd-item` styling.
+- Selecting a result auto-fills **all** address fields (street, city, district, country, address_label) in one action, with optimistic Supabase update.
+- Press Enter to select the first result. Press Escape to cancel.
+
+Below the search bar, individual Street / City / District / Country rows remain for manual editing. The GPS coordinates row appears at the bottom of this group with the correction badge if applicable.
 
 #### 6. Custom Metadata Section (VARIABLE)
 
 Section heading: "Metadata" (dd-section-label style). Same icon + label + value row pattern. Chip-type metadata renders inline chip groups. Delete icon appears on hover (right side).
+**Adding metadata** uses a Notion-style autocomplete flow:
 
-**Chip-type metadata** renders inline as a horizontal chip group. The selected chip gets a filled style (`--color-primary` bg), unselected chips are outlined. Clicking a chip saves immediately — no confirm step needed (it's a single-select categorical value). On narrow layouts, chips wrap.
+- Click “Add metadata” to reveal key + value inputs.
+- As the user types in the key field, existing metadata key names (from `metadata_keys` table) are filtered and shown as suggestions in a dropdown.
+- Clicking a suggestion fills the key input and focuses the value field.
+- Press **Enter** on the key field to move to value. Press **Enter** on the value field to save.
+- The save button uses `dd-item` styling (not a filled blue button) — it’s a neutral icon button that darkens on hover.
+  **Chip-type metadata** renders inline as a horizontal chip group. The selected chip gets a filled style (`--color-primary` bg), unselected chips are outlined. Clicking a chip saves immediately — no confirm step needed (it's a single-select categorical value). On narrow layouts, chips wrap.
 
 #### 7. Actions Section (LOW priority but accessible)
 
@@ -140,6 +160,30 @@ ON quick-info chip click:
   project chip → open project select dropdown
   date chip → enter date edit mode
   gps chip → copy coordinates to clipboard (toast confirmation)
+
+ON photo click:
+  open lightbox overlay (fixed, dark backdrop, z-modal)
+  show full-res image at 95vw / 95vh, object-fit: contain
+  ON click backdrop or X button or Escape → close lightbox
+
+ON address search trigger click:
+  show address search input (focused)
+  ON input (debounced 400ms) → GeocodingService.forward(query)
+  show results in dd-item dropdown
+  ON Enter → apply first result
+  ON result click → apply selected result
+  ON Escape → cancel search, restore trigger
+  applyAddressSuggestion:
+    update street, city, district, country, address_label
+    optimistic Supabase update
+
+ON metadata key input:
+  filter allMetadataKeyNames (loaded from metadata_keys table)
+  exclude keys already assigned to this image
+  show suggestions in dropdown
+  ON suggestion click → fill key, focus value input
+  ON Enter in key input → focus value input
+  ON Enter in value input → save metadata entry
 
 ON action row click:
   "Edit location" → emit editLocationRequested

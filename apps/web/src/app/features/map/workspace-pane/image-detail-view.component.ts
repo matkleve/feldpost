@@ -24,6 +24,7 @@ import {
 } from '@angular/core';
 import { MetadataPropertyRowComponent } from './metadata-property-row.component';
 import { SupabaseService } from '../../../core/supabase.service';
+import { ForwardGeocodeResult, GeocodingService } from '../../../core/geocoding.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -75,6 +76,7 @@ interface SelectOption {
 })
 export class ImageDetailViewComponent implements OnDestroy {
   private readonly supabaseService = inject(SupabaseService);
+  private readonly geocodingService = inject(GeocodingService);
 
   // ── Inputs / outputs ───────────────────────────────────────────────────────
 
@@ -128,6 +130,24 @@ export class ImageDetailViewComponent implements OnDestroy {
   /** Signed URL for the thumbnail (shown until full-res loads). */
   readonly thumbnailUrl = signal<string | null>(null);
 
+  /** Controls lightbox overlay visibility. */
+  readonly showLightbox = signal(false);
+
+  /** Address search query string. */
+  readonly addressSearchQuery = signal('');
+
+  /** Address search results from geocoder. */
+  readonly addressSuggestions = signal<ForwardGeocodeResult[]>([]);
+
+  /** Whether address search is in progress. */
+  readonly addressSearchLoading = signal(false);
+
+  /** Metadata key suggestions for autocomplete. */
+  readonly metadataKeySuggestions = signal<string[]>([]);
+
+  /** All known metadata key names for the org (loaded once). */
+  readonly allMetadataKeyNames = signal<string[]>([]);
+
   // ── Derived ────────────────────────────────────────────────────────────────
 
   /** True when the image has been manually corrected. */
@@ -180,6 +200,13 @@ export class ImageDetailViewComponent implements OnDestroy {
     return match?.label ?? '';
   });
 
+  /** Assembled full address string for the search trigger. */
+  readonly fullAddress = computed(() => {
+    const img = this.image();
+    if (!img) return '';
+    return [img.street, img.city, img.district, img.country].filter(Boolean).join(', ');
+  });
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   private abortController: AbortController | null = null;
@@ -215,6 +242,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.showDeleteConfirm.set(false);
     this.showAddMetadata.set(false);
     this.editingField.set(null);
+    this.showLightbox.set(false);
+    this.addressSearchQuery.set('');
+    this.addressSuggestions.set([]);
+    this.metadataKeySuggestions.set([]);
   }
 
   private async loadImage(id: string): Promise<void> {
@@ -260,6 +291,7 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.loadSignedUrls(imgData, signal);
     if (imgData.organization_id) {
       this.loadProjects(imgData.organization_id);
+      this.loadMetadataKeys(imgData.organization_id);
     }
   }
 
@@ -500,5 +532,121 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (data) {
       this.projectOptions.set(data.map((p: any) => ({ id: p.id, label: p.name })));
     }
+  }
+
+  private async loadMetadataKeys(organizationId: string): Promise<void> {
+    const { data } = await this.supabaseService.client
+      .from('metadata_keys')
+      .select('key_name')
+      .eq('organization_id', organizationId)
+      .order('key_name');
+
+    if (data) {
+      this.allMetadataKeyNames.set(data.map((k: any) => k.key_name as string));
+    }
+  }
+
+  // ── Address search ─────────────────────────────────────────────────────────
+
+  private addressSearchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  onAddressSearchInput(query: string): void {
+    this.addressSearchQuery.set(query);
+    if (this.addressSearchTimeout) clearTimeout(this.addressSearchTimeout);
+
+    if (!query.trim()) {
+      this.addressSuggestions.set([]);
+      return;
+    }
+
+    // Debounce 400ms to respect Nominatim rate limits
+    this.addressSearchTimeout = setTimeout(() => this.searchAddress(query), 400);
+  }
+
+  private async searchAddress(query: string): Promise<void> {
+    this.addressSearchLoading.set(true);
+    const result = await this.geocodingService.forward(query);
+    this.addressSearchLoading.set(false);
+
+    if (result) {
+      this.addressSuggestions.set([result]);
+    } else {
+      this.addressSuggestions.set([]);
+    }
+  }
+
+  selectFirstAddressResult(): void {
+    const results = this.addressSuggestions();
+    if (results.length > 0) {
+      this.applyAddressSuggestion(results[0]);
+    }
+  }
+
+  async applyAddressSuggestion(suggestion: ForwardGeocodeResult): Promise<void> {
+    const img = this.image();
+    if (!img) return;
+
+    // Optimistic update all address fields
+    this.image.update((prev) =>
+      prev
+        ? {
+            ...prev,
+            street: suggestion.street,
+            city: suggestion.city,
+            district: suggestion.district,
+            country: suggestion.country,
+            address_label: suggestion.addressLabel,
+          }
+        : prev,
+    );
+
+    this.editingField.set(null);
+    this.addressSearchQuery.set('');
+    this.addressSuggestions.set([]);
+
+    // Persist to DB
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({
+        street: suggestion.street,
+        city: suggestion.city,
+        district: suggestion.district,
+        country: suggestion.country,
+        address_label: suggestion.addressLabel,
+      })
+      .eq('id', img.id);
+
+    if (error) {
+      // Roll back on failure
+      this.image.update((prev) =>
+        prev
+          ? {
+              ...prev,
+              street: img.street,
+              city: img.city,
+              district: img.district,
+              country: img.country,
+              address_label: img.address_label,
+            }
+          : prev,
+      );
+    }
+  }
+
+  // ── Metadata key autocomplete ──────────────────────────────────────────────
+
+  onMetadataKeyInput(query: string): void {
+    if (!query.trim()) {
+      this.metadataKeySuggestions.set([]);
+      return;
+    }
+
+    const lower = query.toLowerCase();
+    const existing = new Set(this.metadata().map((m) => m.key.toLowerCase()));
+    const matches = this.allMetadataKeyNames()
+      .filter((k) => k.toLowerCase().includes(lower) && !existing.has(k.toLowerCase()))
+      .slice(0, 5);
+
+    this.metadataKeySuggestions.set(matches);
   }
 }
