@@ -135,11 +135,14 @@ export class GroupingDropdownComponent {
       return;
     }
 
-    // Plain click: clear selection, activate if available
+    // Plain click: clear selection, toggle between sections
     this.selectedRows.set(new Set());
     const isAvailable = this.availableProperties().some((p) => p.id === propertyId);
+    const isActive = this.activeGroupings().some((p) => p.id === propertyId);
     if (isAvailable) {
       this.activate(propertyId);
+    } else if (isActive) {
+      this.deactivate(propertyId);
     }
   }
 
@@ -214,6 +217,16 @@ export class GroupingDropdownComponent {
     if (idx === -1) return;
     const [prop] = available.splice(idx, 1);
     active.push(prop);
+    this.groupingsChanged.emit({ active, available });
+  }
+
+  private deactivate(propertyId: string): void {
+    const active = [...this.activeGroupings()];
+    const available = [...this.availableProperties()];
+    const idx = active.findIndex((p) => p.id === propertyId);
+    if (idx === -1) return;
+    const [prop] = active.splice(idx, 1);
+    available.push(prop);
     this.groupingsChanged.emit({ active, available });
   }
 

@@ -8,10 +8,10 @@ A dropdown that lets the user choose which image property to group by. Groups or
 
 A floating dropdown anchored below the "Grouping" toolbar button. Width: 15rem (240px). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners. Two sections separated by a `--color-border` line:
 
-- **Upper section (Active)**: properties currently used for grouping. Text in `--color-text-primary`. Header row: **"Grouped by" label (left) + "Empty" button (right)**. The "Empty" button is a small text button (`.dd-clear-btn`) that clears all active groupings, moving every property back to Available. Only visible when there is at least one active grouping. Each property row layout: **Media icon → Label → Drag handle (≡)**. Drag handle visible on hover only (Quiet Actions pattern). Rows are drag-reorderable within the section and can be dragged downward past the divider into Available to deactivate.
+- **Upper section (Active)**: properties currently used for grouping. Text in `--color-text-primary`. Header row: **"Grouped by" label (left) + "Empty" button (right)**. The "Empty" button is a small text button (`.dd-clear-btn`) that clears all active groupings, moving every property back to Available. Only visible when there is at least one active grouping. Each property row layout: **Media icon → Label → Drag handle (≡)**. Drag handle visible on hover only (Quiet Actions pattern). Rows are drag-reorderable within the section. **Click** an active row to deactivate it (moves to Available); rows can also be **dragged** downward past the divider into Available to deactivate.
 - **Lower section (Available)**: properties not currently grouping. Text in `--color-text-secondary`. Click to activate (moves to upper section). Rows can also be dragged upward past the divider into Active to activate.
 
-Each row is a `.ui-item` with a leading media area, a label, and a trailing drag handle (≡, `drag_indicator` Material Icon) on the right. There is **no × remove button** — deactivation is done purely by dragging an active item down into the Available section.
+Each row is a `.ui-item` with a leading media area, a label, and a trailing drag handle (≡, `drag_indicator` Material Icon) on the right. There is **no × remove button** — deactivation is done by **clicking an active row** (moves it back to Available) or by **dragging it down past the divider** into the Available section.
 
 **Multi-select**: Ctrl+Click selects multiple rows (applied `selected` visual). Dragging any selected row moves the entire selection as a group. Clicking without Ctrl clears the selection.
 
@@ -23,18 +23,19 @@ Each row is a `.ui-item` with a leading media area, a label, and a trailing drag
 
 ## Actions
 
-| #   | User Action                                            | System Response                                                                              | Triggers                      |
-| --- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------- | ----------------------------- |
-| 1   | Clicks an available (inactive) property                | Moves property from Available to Active section (activates grouping); workspace regroups     | `activeGroupings` updated     |
-| 2   | Drags an active row down past the divider              | Moves property from Active to Available (deactivates grouping); workspace regroups           | `activeGroupings` updated     |
-| 3   | Drags an available row up past the divider             | Moves property from Available to Active (activates grouping); workspace regroups             | `activeGroupings` updated     |
-| 4   | Drags an active property up/down within Active section | Reorders grouping priority; workspace regroups live                                          | `activeGroupings` reorder     |
-| 5   | Ctrl+Click on a row                                    | Toggles selection on the row (adds/removes from multi-select). Does not activate/deactivate. | `selectedRows` updated        |
-| 6   | Drags any selected row (with multi-select active)      | Moves the entire selection group to the drop target section/position                         | `activeGroupings` bulk update |
-| 7   | Clicks a row without Ctrl                              | Clears multi-selection; performs single-click action (activate if available)                 | `selectedRows` cleared        |
-| 8   | Clicks outside or Escape                               | Closes dropdown, clears selection                                                            | Dropdown closes               |
-| 9   | Hovers a row                                           | Reveals drag handle (≡) on the right side                                                    | Opacity 0→1, 80ms             |
-| 10  | Clicks "Empty" button next to "Grouped by" header      | Moves all active groupings back to Available; workspace ungroups                             | `activeGroupings` cleared     |
+| #   | User Action                                            | System Response                                                                                    | Triggers                      |
+| --- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 1   | Clicks an available (inactive) property                | Moves property from Available to Active section (activates grouping); workspace regroups           | `activeGroupings` updated     |
+| 2   | Clicks an active property                              | Moves property from Active to Available section (deactivates grouping); workspace regroups         | `activeGroupings` updated     |
+| 3   | Drags an active row down past the divider              | Moves property from Active to Available (deactivates grouping); workspace regroups                 | `activeGroupings` updated     |
+| 4   | Drags an available row up past the divider             | Moves property from Available to Active (activates grouping); workspace regroups                   | `activeGroupings` updated     |
+| 5   | Drags an active property up/down within Active section | Reorders grouping priority; workspace regroups live                                                | `activeGroupings` reorder     |
+| 6   | Ctrl+Click on a row                                    | Toggles selection on the row (adds/removes from multi-select). Does not activate/deactivate.       | `selectedRows` updated        |
+| 7   | Drags any selected row (with multi-select active)      | Moves the entire selection group to the drop target section/position                               | `activeGroupings` bulk update |
+| 8   | Clicks a row without Ctrl                              | Clears multi-selection; performs single-click action (activate if available, deactivate if active) | `selectedRows` cleared        |
+| 9   | Clicks outside or Escape                               | Closes dropdown, clears selection                                                                  | Dropdown closes               |
+| 10  | Hovers a row                                           | Reveals drag handle (≡) on the right side                                                          | Opacity 0→1, 80ms             |
+| 11  | Clicks "Empty" button next to "Grouped by" header      | Moves all active groupings back to Available; workspace ungroups                                   | `activeGroupings` cleared     |
 
 ## Component Hierarchy
 
@@ -111,7 +112,8 @@ Where `PropertyRef` = `{ type: 'builtin' | 'custom'; key: string; id?: string }`
 - [x] Two sections: active (dark text) and available (light text)
 - [x] Divider line between sections (visual only — drag crosses it freely)
 - [x] Click on available property activates it (moves to upper section)
-- [x] No × button — deactivation is done by dragging an active row past the divider into Available
+- [x] Click on active property deactivates it (moves to lower section)
+- [x] No × button — deactivation is done by clicking an active row or dragging it past the divider into Available
 - [x] Drag handle on the **right** (trailing) side of each row, visible on hover only (Quiet Actions)
 - [x] Row layout: Media icon → Label → Drag handle (≡)
 - [x] Single CDK DragDrop context spanning both sections (cross-section dragging)
@@ -159,6 +161,10 @@ flowchart TD
     Available -->|click| ClickActivate
     ClickActivate -->|"property moves up"| Active
 
+    ClickDeactivate["User clicks active property"]
+    Active -->|click| ClickDeactivate
+    ClickDeactivate -->|"property moves down"| Available
+
     DragActivate["User drags available row up past divider"]
     Available -->|"drag ≡ ↑"| DragActivate
     DragActivate -->|"property moves up"| Active
@@ -178,6 +184,7 @@ flowchart TD
     MultiDrag -->|"group move"| Available
 
     ClickActivate --> Emit["Emit groupingsChanged"]
+    ClickDeactivate --> Emit
     DragActivate --> Emit
     DragDeactivate --> Emit
     Reorder --> Emit

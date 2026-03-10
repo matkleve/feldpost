@@ -185,7 +185,7 @@ export class ThumbnailGridComponent implements OnDestroy {
         this.flatImages().length > 0
           ? this.flatImages()
           : this.sections().flatMap((s) => this.collectImages(s));
-      const unsigned = images.filter((img) => !img.signedThumbnailUrl && img.thumbnailPath);
+      const unsigned = images.filter((img) => !img.signedThumbnailUrl && !img.thumbnailUnavailable);
       if (unsigned.length > 0) {
         void this.viewService.batchSignThumbnails(unsigned.slice(0, 50));
       }

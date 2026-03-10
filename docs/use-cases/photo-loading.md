@@ -60,36 +60,52 @@ sequenceDiagram
 
 ## PL-2: Thumbnail Grid Loads for Active Selection
 
-**Context:** User clicks a marker or cluster → Workspace Pane opens → Thumbnail Grid renders. Each card needs a 256×256 thumbnail.
+**Context:** User clicks a marker or cluster → Workspace Pane opens → Thumbnail Grid renders. Each card needs a 256×256 thumbnail. Signing is triggered immediately by `WorkspaceViewService.loadMultiClusterImages()` after setting `rawImages`.
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant WorkspacePane
-    participant ThumbnailGrid
-    participant ThumbnailCard
-    participant SupabaseStorage as Supabase Storage
+    participant MapShell
+    participant ViewService as WorkspaceViewService
+    participant Storage as Supabase Storage
+    participant Card as ThumbnailCard
 
-    User->>WorkspacePane: Open (marker click or cluster click)
-    WorkspacePane->>ThumbnailGrid: Render with image list
-    ThumbnailGrid->>ThumbnailGrid: Batch sign URLs for visible cards
-    loop For each visible card (virtual scroll window)
-        ThumbnailGrid->>SupabaseStorage: createSignedUrl(path, 3600, { transform: 256×256 })
-        alt File exists
-            SupabaseStorage-->>ThumbnailCard: signedUrl
-            ThumbnailCard->>ThumbnailCard: Show <img> with fade-in
-        else File missing
-            SupabaseStorage-->>ThumbnailCard: error
-            ThumbnailCard->>ThumbnailCard: Show CSS placeholder
-        end
+    User->>MapShell: Click marker / cluster
+    MapShell->>ViewService: loadMultiClusterImages(cells, zoom)
+    ViewService->>ViewService: rawImages.set(images)
+    Note over Card: Cards render with pulsing placeholder (gradient + camera icon)
+    ViewService->>ViewService: batchSignThumbnails(images)
+
+    par Images with thumbnailPath (batch)
+        ViewService->>Storage: createSignedUrls(paths[], 3600)
+        Storage-->>ViewService: signedUrls[]
+    and Images without thumbnailPath (individual + transform)
+        ViewService->>Storage: createSignedUrl(storagePath, 3600, { transform: 256×256 }) × N
+        Storage-->>ViewService: signedUrl per image
     end
-    Note over ThumbnailGrid: As user scrolls, new cards enter viewport and repeat the loop
+
+    ViewService->>ViewService: rawImages.update(apply URLs or set thumbnailUnavailable)
+
+    alt signedUrl received
+        Card->>Card: <img> starts loading
+        alt img onload
+            Card->>Card: Pulse stops → photo fades in (200ms)
+        else img onerror (file 404)
+            Card->>Card: Pulse stops → no-photo icon (crossed-out image, 0.55 opacity)
+        end
+    else thumbnailUnavailable (no URL produced)
+        Card->>Card: Immediate no-photo icon, no pulse
+    end
+
+    Note over ViewService: On scroll, grid's scheduleThumbnailSigning() signs additional cards
 ```
 
 **Expected state after:**
 
-- Visible thumbnail cards show real photos or styled placeholders
-- Cards outside the virtual scroll window have not signed URLs yet (lazy)
+- Cards pulse while signed URLs are being fetched and images are downloading
+- Cards with real storage files show photo thumbnails (fade-in)
+- Cards where the file is missing show a static no-photo icon (crossed-out image)
+- `thumbnailUnavailable` flag prevents re-signing on scroll
 - No broken `<img>` icons anywhere
 
 ---

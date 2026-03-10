@@ -47,21 +47,45 @@ ThumbnailGrid                              ← scrollable container, virtual scr
 
 ## Thumbnail Batch-Signing
 
-The grid signs thumbnail URLs in batches to minimize round-trips. When the virtual scroll window changes (initial render or scroll), the grid collects all newly-visible cards that don't yet have a `signedUrl`, then fires `createSignedUrls` (or parallel `createSignedUrl` calls) for the batch.
+The grid signs thumbnail URLs in batches to minimize round-trips. On cluster click or scroll, the service collects all images that don't yet have a `signedUrl` or `thumbnailUnavailable` flag:
+
+1. **With `thumbnailPath`:** batch-signed via `createSignedUrls(paths[], 3600)` — fast, small files.
+2. **Without `thumbnailPath`:** individual `createSignedUrl(storagePath, 3600, { transform: 256×256 })` in parallel — uses server-side image transforms.
+
+After signing, images that received no valid URL are flagged `thumbnailUnavailable: true` so they are not re-attempted.
 
 ```mermaid
 sequenceDiagram
-    participant VScroll as Virtual Scroll
-    participant Grid as ThumbnailGrid
+    actor User
+    participant MapShell
+    participant ViewService as WorkspaceViewService
     participant Storage as Supabase Storage
-    participant Cards as ThumbnailCard × N
+    participant Grid as ThumbnailGrid
+    participant Card as ThumbnailCard
 
-    VScroll->>Grid: Viewport changed (scroll or init)
-    Grid->>Grid: Collect cards without signedUrl
-    Grid->>Storage: Batch createSignedUrl(paths[], 3600, { transform: 256×256 })
-    Storage-->>Grid: signedUrls[]
-    Grid->>Cards: Assign signedUrl to each card
-    Cards->>Cards: <img> loads → fade-in from placeholder
+    User->>MapShell: Click marker / cluster
+    MapShell->>ViewService: loadMultiClusterImages(cells, zoom)
+    ViewService->>ViewService: rawImages.set(images)
+    ViewService->>Storage: batchSignThumbnails(images)
+
+    par Images with thumbnailPath
+        Storage-->>ViewService: createSignedUrls(paths[]) → signedUrls[]
+    and Images without thumbnailPath
+        Storage-->>ViewService: createSignedUrl(storagePath, transform) × N
+    end
+
+    ViewService->>ViewService: rawImages.update(apply URLs or set thumbnailUnavailable)
+    Grid->>Card: Signal change → cards re-render
+
+    alt signedUrl received
+        Card->>Card: <img> loads → pulse stops → fade-in
+    else img onerror (file missing)
+        Card->>Card: Pulse stops → no-photo icon (crossed-out image)
+    else thumbnailUnavailable
+        Card->>Card: Immediate no-photo icon (no pulse)
+    end
+
+    Note over Grid: On scroll, scheduleThumbnailSigning() signs new cards
 ```
 
 ## State
@@ -88,9 +112,12 @@ sequenceDiagram
 
 - [ ] 128×128 grid auto-fills available width
 - [ ] Virtual scrolling — smooth with 100+ images
-- [ ] Thumbnail URLs batch-signed for visible cards on scroll/init (no per-card waterfall)
-- [ ] Cards show CSS placeholder while thumbnails load
-- [ ] Cards show CSS placeholder permanently when storage file is missing
+- [ ] Thumbnail URLs batch-signed via service on cluster click (no per-card waterfall)
+- [ ] Additional signing on scroll for newly-visible cards
+- [ ] Cards with `thumbnailPath` use batch `createSignedUrls`; others use individual `createSignedUrl` with transform
+- [ ] Cards pulse while loading, stop pulsing once loaded or failed
+- [ ] Cards show crossed-out image icon (no-photo) when file is missing
+- [ ] `thumbnailUnavailable` flag prevents re-signing attempts
 - [ ] Sorting controls change order immediately
 - [ ] Click on card opens Image Detail View
 - [ ] Hover reveals card actions (Quiet Actions pattern)

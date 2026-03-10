@@ -121,7 +121,10 @@ export class WorkspaceViewService {
       }
 
       this.rawImages.set(images);
-      if (images.length > 0) this.resolveUnresolvedAddresses(images);
+      if (images.length > 0) {
+        this.resolveUnresolvedAddresses(images);
+        void this.batchSignThumbnails(images);
+      }
     } finally {
       if (requestId === this.clusterLoadId) {
         this.isLoading.set(false);
@@ -134,6 +137,7 @@ export class WorkspaceViewService {
     this.selectionActive.set(true);
     this.rawImages.set(images);
     this.resolveUnresolvedAddresses(images);
+    void this.batchSignThumbnails(images);
   }
 
   /** Convenience: "select" state populated but holding zero rows (RPC returned nothing). */
@@ -173,28 +177,57 @@ export class WorkspaceViewService {
 
   /** Batch-sign thumbnail URLs for a set of images. */
   async batchSignThumbnails(images: WorkspaceImage[]): Promise<void> {
-    const unsigned = images.filter((img) => !img.signedThumbnailUrl && img.thumbnailPath);
+    const unsigned = images.filter((img) => !img.signedThumbnailUrl && !img.thumbnailUnavailable);
     if (unsigned.length === 0) return;
 
-    const paths = unsigned.map((img) => img.thumbnailPath!);
-    const { data, error } = await this.supabase.client.storage
-      .from('images')
-      .createSignedUrls(paths, 3600);
+    // Split: images with a pre-generated thumbnail vs those needing a transform.
+    const withThumb = unsigned.filter((img) => img.thumbnailPath);
+    const withoutThumb = unsigned.filter((img) => !img.thumbnailPath && img.storagePath);
 
-    if (error || !data) return;
-
-    // Update images in-place and re-emit the signal.
     const urlMap = new Map<string, string>();
-    for (const item of data) {
-      if (item.signedUrl) {
-        urlMap.set(item.path!, item.signedUrl);
+    const attemptedIds = new Set(unsigned.map((img) => img.id));
+
+    // 1) Batch-sign pre-generated thumbnails (fast, small files).
+    if (withThumb.length > 0) {
+      const paths = withThumb.map((img) => img.thumbnailPath!);
+      const { data } = await this.supabase.client.storage
+        .from('images')
+        .createSignedUrls(paths, 3600);
+      if (data) {
+        for (const item of data) {
+          if (item.signedUrl) urlMap.set(item.path!, item.signedUrl);
+        }
       }
     }
 
+    // 2) Sign originals with server-side transform (no pre-generated thumbnail).
+    if (withoutThumb.length > 0) {
+      const results = await Promise.all(
+        withoutThumb.map(async (img) => {
+          const { data } = await this.supabase.client.storage
+            .from('images')
+            .createSignedUrl(img.storagePath, 3600, {
+              transform: { width: 256, height: 256, resize: 'cover' },
+            });
+          return { id: img.id, url: data?.signedUrl };
+        }),
+      );
+      for (const r of results) {
+        if (r.url) urlMap.set(r.id, r.url);
+      }
+    }
+
+    // Update signal: apply URLs or mark unavailable.
     this.rawImages.update((all) =>
       all.map((img) => {
-        const url = img.thumbnailPath ? urlMap.get(img.thumbnailPath) : undefined;
-        return url ? { ...img, signedThumbnailUrl: url } : img;
+        // Check by thumbnailPath for batch-signed, by id for individually-signed.
+        const url =
+          (img.thumbnailPath ? urlMap.get(img.thumbnailPath) : undefined) ?? urlMap.get(img.id);
+        if (url) return { ...img, signedThumbnailUrl: url };
+        if (attemptedIds.has(img.id) && !img.signedThumbnailUrl) {
+          return { ...img, thumbnailUnavailable: true };
+        }
+        return img;
       }),
     );
   }

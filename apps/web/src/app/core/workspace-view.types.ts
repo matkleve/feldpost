@@ -25,6 +25,8 @@ export interface WorkspaceImage {
   userName: string | null;
   /** Signed thumbnail URL — populated lazily by batch signing. */
   signedThumbnailUrl?: string;
+  /** True when batch signing was attempted but no URL could be produced. */
+  thumbnailUnavailable?: boolean;
 }
 
 /** A grouped section of images, produced by the WorkspaceViewService pipeline. */
