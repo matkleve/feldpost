@@ -14,75 +14,73 @@ type SortOption = {
   selector: 'app-sort-dropdown',
   template: `
     <div class="sort-dropdown">
-      <div class="sort-search">
+      <div class="dd-search">
         <input
-          class="sort-search__input"
+          class="dd-search__input"
           type="text"
           placeholder="Search properties…"
           [value]="searchTerm()"
           (input)="searchTerm.set($any($event.target).value)"
         />
         @if (searchTerm()) {
-          <button class="sort-search__clear" (click)="searchTerm.set('')" aria-label="Clear search">
+          <button class="dd-search__action" (click)="searchTerm.set('')" aria-label="Clear search">
             <span class="material-icons">close</span>
           </button>
         } @else if (hasCustomSort()) {
-          <button class="sort-search__clear" (click)="resetSort()" aria-label="Reset to default">
+          <button class="dd-search__action" (click)="resetSort()" aria-label="Reset to default">
             <span class="material-icons">restart_alt</span>
           </button>
         }
       </div>
-      <div class="sort-options">
+      <div class="dd-items">
         @if (groupedOptions().length > 0) {
-          <div class="sort-section-label">Sorted by grouping</div>
+          <div class="dd-section-label">Sorted by grouping</div>
           @for (opt of groupedOptions(); track opt.id) {
             <button
-              class="sort-option sort-option--active"
+              class="dd-item dd-item--active"
               (click)="toggleSort(opt.id); $event.stopPropagation()"
             >
-              <span class="material-icons sort-option__icon" aria-hidden="true">{{
-                opt.icon
-              }}</span>
-              <span class="sort-option__label">{{ opt.label }}</span>
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
+              <span class="dd-item__label">{{ opt.label }}</span>
               <span
-                class="sort-option__direction sort-option__direction--visible"
+                class="sort-direction sort-direction--visible"
                 role="button"
                 tabindex="0"
                 (click)="toggleSort(opt.id); $event.stopPropagation()"
                 (keydown.enter)="toggleSort(opt.id); $event.stopPropagation()"
                 [attr.aria-label]="'Sort ' + getDirectionLabel(opt.id)"
               >
-                <span class="sort-option__state-current">{{ getDirectionSymbol(opt.id) }}</span>
-                <span class="sort-option__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
+                <span class="sort-direction__state-current">{{ getDirectionSymbol(opt.id) }}</span>
+                <span class="sort-direction__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
               </span>
             </button>
           }
-          <div class="sort-divider"></div>
+          <div class="dd-divider"></div>
         }
         @for (opt of filteredOptions(); track opt.id) {
           <button
-            class="sort-option"
-            [class.sort-option--active]="isSortActive(opt.id)"
+            class="dd-item"
+            [class.dd-item--active]="isSortActive(opt.id)"
             (click)="toggleSort(opt.id); $event.stopPropagation()"
           >
-            <span class="material-icons sort-option__icon" aria-hidden="true">{{ opt.icon }}</span>
-            <span class="sort-option__label">{{ opt.label }}</span>
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
+            <span class="dd-item__label">{{ opt.label }}</span>
             <span
-              class="sort-option__direction"
-              [class.sort-option__direction--visible]="isSortActive(opt.id)"
+              class="sort-direction"
+              [class.sort-direction--visible]="isSortActive(opt.id)"
               role="button"
               tabindex="0"
               (click)="toggleSort(opt.id); $event.stopPropagation()"
               (keydown.enter)="toggleSort(opt.id); $event.stopPropagation()"
               [attr.aria-label]="'Sort ' + getDirectionLabel(opt.id)"
             >
-              <span class="sort-option__state-current">{{ getDirectionSymbol(opt.id) }}</span>
-              <span class="sort-option__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
+              <span class="sort-direction__state-current">{{ getDirectionSymbol(opt.id) }}</span>
+              <span class="sort-direction__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
             </span>
           </button>
         }
         @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
-          <div class="sort-empty-hint">No matching properties</div>
+          <div class="dd-empty">No matching properties</div>
         }
       </div>
     </div>

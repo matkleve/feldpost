@@ -12,49 +12,45 @@ interface Project {
   selector: 'app-projects-dropdown',
   template: `
     <div class="projects-dropdown">
-      <div class="projects-search">
+      <div class="dd-search">
         <input
-          class="projects-search__input"
+          class="dd-search__input"
           type="text"
           placeholder="Search projects…"
           [value]="searchTerm()"
           (input)="searchTerm.set($any($event.target).value)"
         />
         @if (searchTerm()) {
-          <button
-            class="projects-search__clear"
-            (click)="searchTerm.set('')"
-            aria-label="Clear search"
-          >
+          <button class="dd-search__action" (click)="searchTerm.set('')" aria-label="Clear search">
             <span class="material-icons">close</span>
           </button>
         }
       </div>
-      <div class="projects-list">
-        <label class="projects-row projects-row--all">
+      <div class="dd-items projects-list">
+        <label class="dd-item projects-row--all">
           <input
             type="checkbox"
-            class="projects-row__checkbox"
+            class="projects-checkbox"
             [checked]="allSelected()"
             [indeterminate]="someSelected()"
             (change)="toggleAll()"
           />
-          <span class="projects-row__label">All projects</span>
+          <span class="dd-item__label">All projects</span>
         </label>
         @for (project of filteredProjects(); track project.id) {
-          <label class="projects-row">
+          <label class="dd-item">
             <input
               type="checkbox"
-              class="projects-row__checkbox"
+              class="projects-checkbox"
               [checked]="selectedIds().has(project.id)"
               (change)="toggleProject(project.id)"
             />
-            <span class="projects-row__label">{{ project.name }}</span>
-            <span class="projects-row__count">{{ project.imageCount }}</span>
+            <span class="dd-item__label">{{ project.name }}</span>
+            <span class="dd-item__trailing projects-count">{{ project.imageCount }}</span>
           </label>
         }
       </div>
-      <button class="projects-new" (click)="isCreating.set(true)">
+      <button class="dd-action-row" (click)="isCreating.set(true)">
         <span class="material-icons">add</span>
         New project
       </button>

@@ -12,7 +12,7 @@ The core insight from Notion's property system:
 
 1. **Properties are defined at the organization level** — like database columns in Notion. Any user in the org can create a new property.
 2. **Values are assigned per image** — like cell values in Notion. An image may have values for 3 of 20 available properties.
-3. **Properties have types** — text (free-form), select (choose from predefined options), multi-select, number, date, checkbox. Type determines input UI and valid filter operators.
+3. **Properties have types** — text (free-form), chip (single-select from fixed options, 2–6 items), number, date, checkbox. Type determines input UI and valid filter operators.
 4. **Property values are searchable, filterable, groupable, and sortable** across the entire image library.
 
 ### Schema Alignment
@@ -22,12 +22,13 @@ The existing database already supports this pattern:
 - `metadata_keys` table = property definitions (org-scoped, unique key_name per org)
 - `image_metadata` table = property values (image_id + metadata_key_id + value_text)
 
-**Enhancement needed**: The current schema stores all values as `value_text`. For typed properties (select, number, date), we need either:
+**Enhancement needed**: The current schema stores all values as `value_text`. For typed properties (chip, number, date), we need:
 
-- **(A) Type column on `metadata_keys`**: add `key_type` enum (`text`, `select`, `number`, `date`, `checkbox`) — preferred, simpler
-- **(B) Multiple value columns**: `value_text`, `value_number`, `value_date` — more normalized but complex
+- **Type column + chip options on `metadata_keys`**: add `value_type` enum (`text`, `chip`, `number`, `date`, `checkbox`) and `chip_options` (JSONB array of strings for chip-type options) — simple, no extra joins, keeps all key metadata in one row
 
-**Recommendation**: Option (A) — add `key_type` to `metadata_keys`. Keep `value_text` as the universal storage format and parse on read. This matches Notion's approach where the property type defines the UI, not the storage format.
+> **Previous consideration**: A normalized `metadata_key_options` table was considered for select-type options. Rejected: for 2–6 categorical options (the chip sweet spot), a JSONB array is simpler and sufficient. A separate table adds join overhead for minimal benefit.
+
+**Chosen approach**: `value_type` + `chip_options` on `metadata_keys`. Keep `value_text` as the universal storage format in `image_metadata` and parse on read. This matches Notion's approach where the property type defines the UI, not the storage format.
 
 ## Where Properties Are Managed
 
@@ -51,15 +52,15 @@ When a grouping, sort, or filter dropdown shows "Available" properties, each als
 
 A full-width list inside the Settings page. Each row is a `.ui-item`:
 
-- **Leading icon**: type indicator (Aa for text, ▾ for select, # for number, 📅 for date, ☑ for checkbox)
+- **Leading icon**: type indicator (Aa for text, ◆ for chip, # for number, 📅 for date, ☑ for checkbox)
 - **Label**: property name (e.g., "Material")
 - **Trailing**: type badge + delete button (×, hover-only)
 
 At the bottom: "+ New property" row. Clicking opens an inline creation form:
 
 - Name input (text)
-- Type selector (dropdown: Text, Select, Number, Date, Checkbox)
-- For Select type: option chips input (add/remove predefined values)
+- Type selector (dropdown: Text, Chip, Number, Date, Checkbox)
+- For Chip type: option chips input (add/remove predefined values, 2–6 items)
 
 ### Property Picker (Image Detail View → "+ Add a property")
 
@@ -114,29 +115,36 @@ PropertyPicker                             ← floating dropdown, 12rem, --color
 
 ## Data
 
-| Field                 | Source                                                                                         | Type              |
-| --------------------- | ---------------------------------------------------------------------------------------------- | ----------------- |
-| Org properties        | `supabase.from('metadata_keys').select('id, key_name, key_type').eq('org_id', org)`            | `MetadataKey[]`   |
-| Image property values | `supabase.from('image_metadata').select('metadata_key_id, value_text').eq('image_id', id)`     | `ImageMetadata[]` |
-| Select options        | `supabase.from('metadata_key_options').select('id, value').eq('key_id', keyId)` (future table) | `KeyOption[]`     |
+| Field                 | Source                                                                                              | Type              |
+| --------------------- | --------------------------------------------------------------------------------------------------- | ----------------- |
+| Org properties        | `supabase.from('metadata_keys').select('id, key_name, value_type, chip_options').eq('org_id', org)` | `MetadataKey[]`   |
+| Image property values | `supabase.from('image_metadata').select('metadata_key_id, value_text').eq('image_id', id)`          | `ImageMetadata[]` |
+| Chip options          | Stored on `metadata_keys.chip_options` (JSONB array of strings)                                     | `string[]`        |
 
 ### Database Enhancement: Property Types
 
 ```sql
--- Migration: Add key_type to metadata_keys
+-- Migration: Add value_type and chip_options to metadata_keys
 ALTER TABLE metadata_keys
-  ADD COLUMN key_type text NOT NULL DEFAULT 'text'
-  CHECK (key_type IN ('text', 'select', 'number', 'date', 'checkbox'));
+  ADD COLUMN value_type text NOT NULL DEFAULT 'text'
+  CHECK (value_type IN ('text', 'chip', 'number', 'date', 'checkbox'));
 
--- Optional: predefined select options (for Select-type properties)
-CREATE TABLE metadata_key_options (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  metadata_key_id uuid NOT NULL REFERENCES metadata_keys(id) ON DELETE CASCADE,
-  value text NOT NULL,
-  sort_order int NOT NULL DEFAULT 0,
-  UNIQUE (metadata_key_id, value)
-);
+ALTER TABLE metadata_keys
+  ADD COLUMN chip_options jsonb DEFAULT NULL
+  CHECK (
+    chip_options IS NULL
+    OR (
+      value_type = 'chip'
+      AND jsonb_typeof(chip_options) = 'array'
+      AND jsonb_array_length(chip_options) BETWEEN 2 AND 6
+    )
+  );
+
+-- chip_options stores a JSON array of strings, e.g. ["Good", "Fair", "Poor"]
+-- Enforced: only present when value_type = 'chip', 2–6 options
 ```
+
+> **Note:** The previous spec considered a normalized `metadata_key_options` table. This was replaced with a `chip_options` JSONB column for simplicity — chip options are small fixed sets (2–6 items) where ordering, individual CRUD, and relational integrity are not needed. If requirements evolve beyond 6 options or need complex option management, revisit the table approach.
 
 ## State
 
@@ -148,18 +156,30 @@ CREATE TABLE metadata_key_options (
 | `newPropertyName` | `string`                | `''`     | New property name                    |
 | `newPropertyType` | `PropertyType`          | `'text'` | New property type                    |
 
-Where `PropertyType` = `'text' | 'select' | 'number' | 'date' | 'checkbox'`.
+Where `PropertyType` = `'text' | 'chip' | 'number' | 'date' | 'checkbox'`.
+
+### When to Use Each Type
+
+| Type         | When to use                                             | Examples                                                                   |
+| ------------ | ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **chip**     | Known fixed set, 2–6 categorical options, single-select | Condition (Good/Fair/Poor), Access (Public/Private), Orientation (N/S/E/W) |
+| **text**     | Freeform, unbounded, or unknown upfront                 | Notes, descriptions, street names                                          |
+| **number**   | Numeric without fixed range                             | Floor area, year, quantity                                                 |
+| **date**     | Obviously temporal values                               | Inspection date, renovation year                                           |
+| **checkbox** | Boolean yes/no                                          | Accessible, completed                                                      |
+
+> **Chip sweet spot:** 2–6 options. Fewer than 2 is just a toggle (use checkbox). More than 6 gets cramped — consider text with validation or a dropdown.
 
 ## File Map
 
-| File                                                                 | Purpose                          |
-| -------------------------------------------------------------------- | -------------------------------- |
-| `features/settings/property-manager/property-manager.component.ts`   | Settings page property CRUD      |
-| `features/settings/property-manager/property-manager.component.html` | Template                         |
-| `features/settings/property-manager/property-manager.component.scss` | Styles                           |
-| `features/map/workspace-pane/property-picker.component.ts`           | Floating property picker         |
-| `core/metadata.service.ts`                                           | Property CRUD + value management |
-| `supabase/migrations/XXXXXXX_metadata_key_types.sql`                 | key_type column + options table  |
+| File                                                                 | Purpose                           |
+| -------------------------------------------------------------------- | --------------------------------- |
+| `features/settings/property-manager/property-manager.component.ts`   | Settings page property CRUD       |
+| `features/settings/property-manager/property-manager.component.html` | Template                          |
+| `features/settings/property-manager/property-manager.component.scss` | Styles                            |
+| `features/map/workspace-pane/property-picker.component.ts`           | Floating property picker          |
+| `core/metadata.service.ts`                                           | Property CRUD + value management  |
+| `supabase/migrations/XXXXXXX_metadata_key_types.sql`                 | value_type + chip_options columns |
 
 ## Wiring
 
@@ -171,7 +191,7 @@ Where `PropertyType` = `'text' | 'select' | 'number' | 'date' | 'checkbox'`.
 ## Acceptance Criteria
 
 - [ ] Properties can be created with a name and type
-- [ ] Property types: text, select, number, date, checkbox
+- [ ] Property types: text, chip, number, date, checkbox
 - [ ] Properties are org-scoped (all users in org see them)
 - [ ] Not every image needs every property (sparse)
 - [ ] Image Detail View shows "+ Add a property" at the bottom of metadata section
@@ -182,7 +202,9 @@ Where `PropertyType` = `'text' | 'select' | 'number' | 'date' | 'checkbox'`.
 - [ ] Property Manager in Settings allows full CRUD
 - [ ] Delete property shows confirmation ("removes from all images")
 - [ ] Custom properties appear in Grouping, Sort, and Filter dropdowns
-- [ ] Select-type properties support predefined option values
+- [ ] Chip-type properties store options in `chip_options` JSONB column (2–6 items)
+- [ ] Chip-type properties render as inline chip groups in Image Detail View
+- [ ] Creating a chip-type property requires specifying 2–6 option values
 
 ---
 
@@ -192,23 +214,16 @@ Where `PropertyType` = `'text' | 'select' | 'number' | 'date' | 'checkbox'`.
 erDiagram
     organizations ||--o{ metadata_keys : "defines"
     metadata_keys ||--o{ image_metadata : "assigned to images"
-    metadata_keys ||--o{ metadata_key_options : "has options (select type)"
     images ||--o{ image_metadata : "has property values"
 
     metadata_keys {
         uuid id PK
         text key_name
-        text key_type "text|select|number|date|checkbox"
+        text value_type "text|chip|number|date|checkbox"
+        jsonb chip_options "string[] (chip type only, 2-6 items)"
         uuid organization_id FK
         uuid created_by FK
         timestamptz created_at
-    }
-
-    metadata_key_options {
-        uuid id PK
-        uuid metadata_key_id FK
-        text value
-        int sort_order
     }
 
     image_metadata {
@@ -224,7 +239,7 @@ erDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Created: Admin creates property\n(name + type)
-    Created --> HasOptions: [select type]\nAdd option values
+    Created --> HasOptions: [chip type]\nDefine chip_options
     Created --> InUse: Users assign to images
 
     HasOptions --> InUse: Users assign to images
@@ -257,7 +272,7 @@ sequenceDiagram
     IDV->>PP: open Property Picker
     PP->>MS: getOrgProperties()
     MS->>DB: select from metadata_keys
-    DB-->>MS: [{id, key_name, key_type}, ...]
+    DB-->>MS: [{id, key_name, value_type, chip_options}, ...]
     MS-->>PP: properties list
 
     PP->>PP: gray out already-assigned properties

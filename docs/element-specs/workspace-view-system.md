@@ -399,7 +399,7 @@ flowchart TD
 | `core/filter.service.ts`                                               | Filter rule state + query building  | filter-dropdown.md   |
 | `core/metadata.service.ts`                                             | Property CRUD + value management    | custom-properties.md |
 | `supabase/migrations/XXXXX_cluster_images_rpc.sql`                     | New RPC for cluster image loading   | (this doc)           |
-| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | key_type column + options table     | custom-properties.md |
+| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | custom-properties.md |
 
 ---
 
@@ -430,7 +430,7 @@ gantt
     Filter Dropdown (Notion-style)    :c4, 5, 6
 
     section Properties
-    DB migration (key_type + options)  :d1, 5, 6
+    DB migration (value_type + chip_options)  :d1, 5, 6
     Property Manager (Settings)        :d2, 6, 7
     Property Picker (Detail View)      :d3, 6, 7
 ```
@@ -456,6 +456,6 @@ gantt
 
 ### Phase 4 — Custom Properties
 
-11. DB migration for `key_type` + `metadata_key_options`
+11. DB migration for `value_type` + `chip_options`
 12. `PropertyManager` in Settings page
 13. `PropertyPicker` in Image Detail View
