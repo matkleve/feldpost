@@ -9,7 +9,7 @@ import type {
   PropertyRef,
 } from './workspace-view.types';
 
-const DEFAULT_SORTS: SortConfig[] = [{ key: 'captured_at', direction: 'desc' }];
+const DEFAULT_SORTS: SortConfig[] = [{ key: 'date-captured', direction: 'desc' }];
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceViewService {
@@ -30,6 +30,32 @@ export class WorkspaceViewService {
 
   // ── Pipeline: computed signal chain ──────────────────────────────────────
 
+  /**
+   * Effective sort order: grouping keys prepended (in grouping order) before user sorts.
+   * If a grouping key already exists in activeSorts, its direction is preserved and it is
+   * moved to the grouping position. New grouping keys default to ascending.
+   */
+  readonly effectiveSorts = computed<SortConfig[]>(() => {
+    const groupings = this.activeGroupings();
+    const userSorts = this.activeSorts();
+
+    if (groupings.length === 0) return userSorts;
+
+    const userSortMap = new Map(userSorts.map((s) => [s.key, s]));
+    const groupingIds = new Set(groupings.map((g) => g.id));
+
+    // Grouping keys first, in grouping order, using existing direction if available
+    const groupingSorts: SortConfig[] = groupings.map((g) => {
+      const existing = userSortMap.get(g.id);
+      return { key: g.id, direction: existing?.direction ?? 'asc' };
+    });
+
+    // Remaining user sorts that aren't grouping keys
+    const remainingUserSorts = userSorts.filter((s) => !groupingIds.has(s.key));
+
+    return [...groupingSorts, ...remainingUserSorts];
+  });
+
   /** Step 1: Filter by project. Empty set = no filter (all projects). */
   private readonly projectFiltered = computed(() => {
     const images = this.rawImages();
@@ -46,10 +72,10 @@ export class WorkspaceViewService {
     return images.filter((img) => this.filterService.matchesClientSide(img, rules));
   });
 
-  /** Step 3: Sort (multi-key). */
+  /** Step 3: Sort (multi-key, using effectiveSorts which includes grouping keys). */
   private readonly sorted = computed(() => {
     const images = [...this.ruleFiltered()];
-    const sorts = this.activeSorts();
+    const sorts = this.effectiveSorts();
     if (sorts.length === 0) return images;
 
     return images.sort((a, b) => {

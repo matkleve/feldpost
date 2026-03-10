@@ -52,7 +52,7 @@ export class WorkspaceToolbarComponent {
   readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
   readonly hasCustomSort = computed(() => {
     const sorts = this.viewService.activeSorts();
-    return sorts.length !== 1 || sorts[0].key !== 'captured_at' || sorts[0].direction !== 'desc';
+    return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
   });
   readonly hasProject = computed(() => this.viewService.selectedProjectIds().size > 0);
 
