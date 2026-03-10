@@ -178,7 +178,11 @@
               (blur)="saveImageField('captured_at', capturedInput.value)"
             />
           } @else {
-            <button class="detail-row__value" type="button" (click)="editingField.set('captured_at')">
+            <button
+              class="detail-row__value"
+              type="button"
+              (click)="editingField.set('captured_at')"
+            >
               {{ captureDate() ?? '—' }}
             </button>
             <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
@@ -200,11 +204,17 @@
             >
               <option value="">— None —</option>
               @for (opt of projectOptions(); track opt.id) {
-                <option [value]="opt.id" [selected]="opt.id === image()!.project_id">{{ opt.label }}</option>
+                <option [value]="opt.id" [selected]="opt.id === image()!.project_id">
+                  {{ opt.label }}
+                </option>
               }
             </select>
           } @else {
-            <button class="detail-row__value" type="button" (click)="editingField.set('project_id')">
+            <button
+              class="detail-row__value"
+              type="button"
+              (click)="editingField.set('project_id')"
+            >
               {{ projectName() || '—' }}
             </button>
             <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
@@ -337,7 +347,8 @@
             <div class="detail-correction-history__row">
               <span class="detail-correction-history__key">Original EXIF</span>
               <span class="detail-correction-history__value">
-                {{ formatCoord(image()!.exif_latitude) }}°, {{ formatCoord(image()!.exif_longitude) }}°
+                {{ formatCoord(image()!.exif_latitude) }}°,
+                {{ formatCoord(image()!.exif_longitude) }}°
               </span>
             </div>
             <div class="detail-correction-history__row">
@@ -404,7 +415,11 @@
         }
 
         @if (!showAddMetadata()) {
-          <button class="detail-add-metadata-btn dd-action-row" type="button" (click)="showAddMetadata.set(true)">
+          <button
+            class="detail-add-metadata-btn dd-action-row"
+            type="button"
+            (click)="showAddMetadata.set(true)"
+          >
             <span class="material-icons" aria-hidden="true">add</span>
             Add metadata
           </button>
