@@ -7,7 +7,7 @@ import { PropertyRegistryService } from '../../../../core/property-registry.serv
   template: `
     <div class="filter-dropdown">
       @if (filterService.rules().length === 0) {
-        <div class="filter-empty">No filters applied</div>
+        <div class="dd-empty">No filters applied</div>
       } @else {
         <div class="filter-rules">
           @for (rule of filterService.rules(); track rule.id; let i = $index) {
@@ -53,7 +53,7 @@ import { PropertyRegistryService } from '../../../../core/property-registry.serv
           }
         </div>
       }
-      <button class="filter-add" (click)="filterService.addRule()">
+      <button class="dd-action-row" (click)="filterService.addRule()">
         <span class="material-icons">add</span>
         Add a filter
       </button>

@@ -290,3 +290,188 @@ router-outlet + * {
   flex: 1 1 auto;
   min-block-size: var(--spacing-2);
 }
+
+// ── Shared dropdown primitives (dd-*) ───────────────────────────────────────
+// Composable classes for all floating dropdowns / context menus.
+// See docs/element-specs/dropdown-system.md for the full spec.
+//
+// Available pieces — pick what you need:
+//   .dd-search          search input row (border-bottom separator)
+//   .dd-search__input   the actual <input> inside .dd-search
+//   .dd-search__action  trailing icon button (clear, reset)
+//   .dd-items           scrollable items area wrapper
+//   .dd-item            base actionable row (icon + label + optional trailing)
+//   .dd-item--active    highlighted/enabled state (clay text)
+//   .dd-item--muted     secondary/available state (secondary text, clay on hover)
+//   .dd-item--danger    destructive action (danger color)
+//   .dd-item__icon      leading Material Icon
+//   .dd-item__label     flexible label text
+//   .dd-item__trailing  trailing slot (direction toggle, count, drag handle…)
+//   .dd-section-label   uppercase group heading
+//   .dd-divider         horizontal 1px separator
+//   .dd-empty           centered empty-state / hint text
+//   .dd-action-row      ghost "add" / "new" action at bottom
+//   .dd-drag-handle     trailing drag indicator (quiet-actions pattern)
+
+.dd-search {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dd-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--color-text-primary);
+  padding: var(--spacing-1) 0;
+
+  &::placeholder {
+    color: var(--color-text-disabled);
+  }
+}
+
+.dd-search__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+
+  .material-icons {
+    font-size: 0.875rem;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+    color: var(--color-text-primary);
+  }
+}
+
+.dd-items {
+  padding: var(--spacing-2);
+}
+
+.dd-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-1) var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 80ms ease-out;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+  }
+}
+
+.dd-item--active {
+  color: var(--color-clay);
+}
+
+.dd-item--muted {
+  color: var(--color-text-secondary);
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.dd-item--danger {
+  color: var(--color-danger);
+
+  .dd-item__icon {
+    color: var(--color-danger);
+  }
+}
+
+.dd-item__icon {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.dd-item__label {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.dd-item__trailing {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.dd-section-label {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-disabled);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dd-divider {
+  height: 1px;
+  margin: var(--spacing-1) var(--spacing-2);
+  background: var(--color-border);
+}
+
+.dd-empty {
+  padding: var(--spacing-3) var(--spacing-2);
+  font-size: 0.8125rem;
+  color: var(--color-text-disabled);
+  text-align: center;
+}
+
+.dd-action-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin: var(--spacing-1) var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  .material-icons {
+    font-size: 1rem;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    color: var(--color-text-primary);
+  }
+}
+
+.dd-drag-handle {
+  opacity: 0;
+  margin-left: auto;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  cursor: grab;
+  transition: opacity 80ms ease-out;
+
+  .dd-item:hover & {
+    opacity: 1;
+  }
+}

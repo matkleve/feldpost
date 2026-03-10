@@ -149,7 +149,8 @@
   box-shadow: var(--shadow-focus);
 }
 
-// ── Context menu ──────────────────────────────────────────────────────────────
+// ── Context menu (unified dropdown system — see docs/element-specs/dropdown-system.md) ──
+// Item styles come from global dd-* classes. Only positioning stays here.
 
 .detail-context-menu {
   position: absolute;
@@ -159,41 +160,8 @@
   min-width: 11rem;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--elevation-dropdown);
-  overflow: hidden;
-
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    width: 100%;
-    padding: var(--spacing-3) var(--spacing-3);
-    border: none;
-    background: none;
-    color: var(--color-text-primary);
-    font-size: 0.875rem;
-    text-align: left;
-    cursor: pointer;
-    transition: background 80ms ease-out;
-
-    .material-icons {
-      font-size: 1rem;
-      color: var(--color-text-secondary);
-    }
-
-    &:hover {
-      background: var(--color-bg-base);
-    }
-
-    &--danger {
-      color: var(--color-danger);
-
-      .material-icons {
-        color: var(--color-danger);
-      }
-    }
-  }
 }
 
 // Transparent click-outside target for context menu dismissal

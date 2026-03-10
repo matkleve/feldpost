@@ -65,7 +65,7 @@ Custom properties are fetched from `MetadataService.getOrgProperties()`. They ma
 - `id` = `metadata_key.id` (UUID)
 - `label` = `metadata_key.key_name`
 - `icon` = type-based icon (`tag` for text, `arrow_drop_down_circle` for select, `numbers` for number, `event` for date, `check_box` for checkbox)
-- `type` = `metadata_key.key_type`
+- `type` = `metadata_key.value_type`
 - All capabilities set to `true` (custom properties are usable everywhere)
 - `defaultSortDirection` = `'asc'`
 - `builtIn` = `false`

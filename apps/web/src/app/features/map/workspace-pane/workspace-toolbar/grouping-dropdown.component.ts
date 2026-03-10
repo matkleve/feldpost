@@ -18,11 +18,11 @@ export interface GroupingProperty {
   selector: 'app-grouping-dropdown',
   template: `
     <div class="grouping-dropdown" cdkDropListGroup>
-      <div class="dd-section">
-        <div class="dd-section__header">
-          <span class="dd-section__label">Grouped by</span>
+      <div class="grouping-section">
+        <div class="grouping-section__header">
+          <span class="dd-section-label">Grouped by</span>
           @if (activeGroupings().length > 0) {
-            <button class="dd-clear-btn" (click)="clearGroupings()">Empty</button>
+            <button class="grouping-clear-btn" (click)="clearGroupings()">Empty</button>
           }
         </div>
         <div
@@ -31,12 +31,12 @@ export interface GroupingProperty {
           [cdkDropListData]="activeGroupings()"
           [cdkDropListConnectedTo]="[availableList]"
           (cdkDropListDropped)="onDrop($event)"
-          class="dd-drop-zone"
-          [class.dd-drop-zone--empty]="activeGroupings().length === 0"
-          [class.dd-drop-zone--dragging]="isDragging()"
+          class="grouping-drop-zone"
+          [class.grouping-drop-zone--empty]="activeGroupings().length === 0"
+          [class.grouping-drop-zone--dragging]="isDragging()"
         >
           @if (activeGroupings().length === 0) {
-            <div class="dd-empty">
+            <div class="grouping-empty-slot">
               {{ isDragging() ? 'Drop here to group' : 'No grouping applied' }}
             </div>
           }
@@ -46,13 +46,13 @@ export interface GroupingProperty {
               [cdkDragData]="prop"
               (cdkDragStarted)="onDragStart()"
               (cdkDragEnded)="onDragEnd()"
-              class="dd-row dd-row--active"
-              [class.dd-row--selected]="selectedRows().has(prop.id)"
+              class="dd-item dd-item--active"
+              [class.grouping-row--selected]="selectedRows().has(prop.id)"
               (click)="onRowClick(prop.id, $event)"
             >
-              <span class="material-icons dd-row__icon" aria-hidden="true">{{ prop.icon }}</span>
-              <span class="dd-row__label">{{ prop.label }}</span>
-              <span class="material-icons dd-row__drag" cdkDragHandle aria-hidden="true"
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
+              <span class="dd-item__label">{{ prop.label }}</span>
+              <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
                 >drag_indicator</span
               >
             </div>
@@ -60,15 +60,15 @@ export interface GroupingProperty {
         </div>
       </div>
       <div class="dd-divider"></div>
-      <div class="dd-section">
-        <span class="dd-section__label">Available</span>
+      <div class="grouping-section">
+        <span class="dd-section-label">Available</span>
         <div
           cdkDropList
           #availableList="cdkDropList"
           [cdkDropListData]="availableProperties()"
           [cdkDropListConnectedTo]="[activeList]"
           (cdkDropListDropped)="onDrop($event)"
-          class="dd-drop-zone"
+          class="grouping-drop-zone"
         >
           @for (prop of availableProperties(); track prop.id) {
             <div
@@ -76,13 +76,13 @@ export interface GroupingProperty {
               [cdkDragData]="prop"
               (cdkDragStarted)="onDragStart()"
               (cdkDragEnded)="onDragEnd()"
-              class="dd-row dd-row--available"
-              [class.dd-row--selected]="selectedRows().has(prop.id)"
+              class="dd-item dd-item--muted"
+              [class.grouping-row--selected]="selectedRows().has(prop.id)"
               (click)="onRowClick(prop.id, $event)"
             >
-              <span class="material-icons dd-row__icon" aria-hidden="true">{{ prop.icon }}</span>
-              <span class="dd-row__label">{{ prop.label }}</span>
-              <span class="material-icons dd-row__drag" cdkDragHandle aria-hidden="true"
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
+              <span class="dd-item__label">{{ prop.label }}</span>
+              <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
                 >drag_indicator</span
               >
             </div>
