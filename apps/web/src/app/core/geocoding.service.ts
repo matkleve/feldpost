@@ -43,9 +43,29 @@ interface NominatimReverseResponse {
   };
 }
 
+/** Structured result from forward geocoding (address string → coordinates). */
+export interface ForwardGeocodeResult {
+  lat: number;
+  lng: number;
+  addressLabel: string;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  country: string | null;
+}
+
+/** Raw Nominatim forward-search JSON shape (subset we use). */
+interface NominatimSearchResponse {
+  lat?: string;
+  lon?: string;
+  display_name?: string;
+  address?: NominatimReverseResponse['address'];
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const NOMINATIM_REVERSE_URL = 'https://nominatim.openstreetmap.org/reverse';
+const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MIN_REQUEST_INTERVAL_MS = 1100; // slightly above 1s to respect Nominatim rate limit
 
@@ -53,7 +73,14 @@ const MIN_REQUEST_INTERVAL_MS = 1100; // slightly above 1s to respect Nominatim 
 
 @Injectable({ providedIn: 'root' })
 export class GeocodingService {
-  private readonly cache = new Map<string, { data: ReverseGeocodeResult; expires: number }>();
+  private readonly reverseCache = new Map<
+    string,
+    { data: ReverseGeocodeResult; expires: number }
+  >();
+  private readonly forwardCache = new Map<
+    string,
+    { data: ForwardGeocodeResult; expires: number }
+  >();
   private lastRequestTime = 0;
 
   /**
@@ -62,17 +89,12 @@ export class GeocodingService {
    */
   async reverse(lat: number, lng: number): Promise<ReverseGeocodeResult | null> {
     const cacheKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
-    const cached = this.cache.get(cacheKey);
+    const cached = this.reverseCache.get(cacheKey);
     if (cached && cached.expires > Date.now()) {
       return cached.data;
     }
 
-    // Rate-limit: wait if needed so we don't exceed 1 req/sec.
-    const now = Date.now();
-    const elapsed = now - this.lastRequestTime;
-    if (elapsed < MIN_REQUEST_INTERVAL_MS) {
-      await new Promise((resolve) => setTimeout(resolve, MIN_REQUEST_INTERVAL_MS - elapsed));
-    }
+    await this.rateLimit();
 
     try {
       this.lastRequestTime = Date.now();
@@ -87,16 +109,88 @@ export class GeocodingService {
       const data = (await response.json()) as NominatimReverseResponse;
       if (!data?.address) return null;
 
-      const result = this.parseResponse(data);
+      const result = this.parseReverseResponse(data);
 
-      this.cache.set(cacheKey, { data: result, expires: Date.now() + CACHE_TTL_MS });
+      this.reverseCache.set(cacheKey, { data: result, expires: Date.now() + CACHE_TTL_MS });
       return result;
     } catch {
       return null;
     }
   }
 
-  private parseResponse(data: NominatimReverseResponse): ReverseGeocodeResult {
+  /**
+   * Forward-geocode an address string to coordinates + structured address fields.
+   * Returns null when the geocoder cannot resolve the address or on network error.
+   */
+  async forward(address: string): Promise<ForwardGeocodeResult | null> {
+    const trimmed = address.trim();
+    if (!trimmed) return null;
+
+    const cacheKey = trimmed.toLowerCase();
+    const cached = this.forwardCache.get(cacheKey);
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+
+    await this.rateLimit();
+
+    try {
+      this.lastRequestTime = Date.now();
+
+      const url = `${NOMINATIM_SEARCH_URL}?q=${encodeURIComponent(trimmed)}&format=json&limit=1&addressdetails=1`;
+      const response = await fetch(url, {
+        headers: { 'Accept-Language': 'en' },
+      });
+
+      if (!response.ok) return null;
+
+      const results = (await response.json()) as NominatimSearchResponse[];
+      if (!results?.length || !results[0].lat || !results[0].lon) return null;
+
+      const hit = results[0];
+      const lat = parseFloat(hit.lat!);
+      const lng = parseFloat(hit.lon!);
+      if (isNaN(lat) || isNaN(lng)) return null;
+
+      const addr = hit.address;
+      const city = this.firstOf(addr?.city, addr?.town, addr?.village, addr?.municipality);
+      const district = this.firstOf(
+        addr?.city_district,
+        addr?.suburb,
+        addr?.borough,
+        addr?.quarter,
+      );
+      const streetParts = [addr?.road, addr?.house_number].filter(Boolean);
+      const street = streetParts.length > 0 ? streetParts.join(' ') : null;
+      const country = addr?.country ?? null;
+      const addressLabel = hit.display_name ?? [street, city, country].filter(Boolean).join(', ');
+
+      const result: ForwardGeocodeResult = {
+        lat,
+        lng,
+        addressLabel,
+        city,
+        district,
+        street,
+        country,
+      };
+      this.forwardCache.set(cacheKey, { data: result, expires: Date.now() + CACHE_TTL_MS });
+      return result;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Wait to respect Nominatim 1-request-per-second rate limit. */
+  private async rateLimit(): Promise<void> {
+    const now = Date.now();
+    const elapsed = now - this.lastRequestTime;
+    if (elapsed < MIN_REQUEST_INTERVAL_MS) {
+      await new Promise((resolve) => setTimeout(resolve, MIN_REQUEST_INTERVAL_MS - elapsed));
+    }
+  }
+
+  private parseReverseResponse(data: NominatimReverseResponse): ReverseGeocodeResult {
     const addr = data.address!;
 
     const city = this.firstOf(addr.city, addr.town, addr.village, addr.municipality);

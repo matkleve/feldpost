@@ -1,4 +1,4 @@
-# GeoSite – Component: Map Marker
+﻿# Sitesnap – Component: Map Marker
 
 ## Marker State Diagram
 

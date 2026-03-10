@@ -1,4 +1,4 @@
-# GeoSite – Component: Workspace Pane
+﻿# Sitesnap – Component: Workspace Pane
 
 ## 5.3 Workspace Pane — Group Tabs
 

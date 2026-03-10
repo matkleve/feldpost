@@ -1,4 +1,4 @@
-# GeoSite – Motion & Transitions
+﻿# Sitesnap – Motion & Transitions
 
 Load this file for any task involving animation, timing, or transitions.
 

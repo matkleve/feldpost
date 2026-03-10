@@ -1,4 +1,4 @@
-# GeoSite – Layout System
+﻿# Sitesnap – Layout System
 
 Load this file for any task involving breakpoints, panel dimensions, or responsive behavior.
 

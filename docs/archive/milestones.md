@@ -1,6 +1,6 @@
-# GeoSite Project Milestones
+﻿# Sitesnap Project Milestones
 
-Purpose: project milestone plan for GeoSite that is human-friendly and AI-readable.
+Purpose: project milestone plan for Sitesnap that is human-friendly and AI-readable.
 
 ---
 

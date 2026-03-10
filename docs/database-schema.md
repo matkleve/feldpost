@@ -1,7 +1,7 @@
-# Database Schema Documentation
+﻿# Database Schema Documentation
 
 **Who this is for:** engineers and DBAs working on data modeling, queries, and RLS policies.  
-**What you'll get:** the core tables, relationships, and constraints that support GeoSite invariants.
+**What you'll get:** the core tables, relationships, and constraints that support Sitesnap invariants.
 
 See also: `architecture.md`, `security-boundaries.md`, `glossary.md`.
 
@@ -372,7 +372,7 @@ Primary Key:
 
 ## 9. Indexing Strategy (MVP)
 
-GeoSite uses **PostGIS** with GiST indexes as the MVP default for spatial queries.
+Sitesnap uses **PostGIS** with GiST indexes as the MVP default for spatial queries.
 
 ### Required Indexes
 

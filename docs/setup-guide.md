@@ -1,6 +1,6 @@
-# Setup Guide
+﻿# Setup Guide
 
-**Who this is for:** engineers setting up GeoSite locally for development.  
+**Who this is for:** engineers setting up Sitesnap locally for development.  
 **What you'll get:** a practical checklist to run the app with Supabase-backed services.
 
 ---

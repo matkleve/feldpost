@@ -1,6 +1,6 @@
-# Element Specs
+﻿# Element Specs
 
-Structured implementation contracts for every UI element in GeoSite.
+Structured implementation contracts for every UI element in Sitesnap.
 These are the **source of truth** that agents implement from.
 
 See [agent-workflows/element-spec-format.md](../agent-workflows/element-spec-format.md) for the template.

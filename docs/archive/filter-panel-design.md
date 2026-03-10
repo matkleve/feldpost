@@ -1,4 +1,4 @@
-# GeoSite – Component: Filter Panel
+﻿# Sitesnap – Component: Filter Panel
 
 ## 5.2 Filter Panel
 

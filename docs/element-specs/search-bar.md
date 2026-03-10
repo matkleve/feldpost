@@ -1,4 +1,4 @@
-# Search Bar
+﻿# Search Bar
 
 > **Blueprint:** [implementation-blueprints/search-bar.md](../implementation-blueprints/search-bar.md)
 
@@ -94,7 +94,7 @@ Highlighted state via `activeIndex`. Icons by family:
 | DB address candidates | `SearchOrchestratorService` → `dbAddressResolver` | `SearchAddressCandidate[]`    |
 | DB content candidates | `SearchOrchestratorService` → `dbContentResolver` | `SearchContentCandidate[]`    |
 | Geocoder candidates   | `SearchOrchestratorService` → `geocoderResolver`  | `SearchAddressCandidate[]`    |
-| Recent searches       | `localStorage` key `geosite-recent-searches`      | `SearchRecentCandidate[]`     |
+| Recent searches       | `localStorage` key `sitesnap-recent-searches`     | `SearchRecentCandidate[]`     |
 | Search result set     | `SearchOrchestratorService.searchInput()`         | `Observable<SearchResultSet>` |
 
 The `SearchOrchestratorService` already exists at `core/search/search-orchestrator.service.ts`. It handles debouncing, caching, deduplication, and ranking. The component drives it with a query observable + context observable.

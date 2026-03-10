@@ -1,4 +1,4 @@
-# GeoSite – Component: Radius Selection
+﻿# Sitesnap – Component: Radius Selection
 
 ## 5.6 Radius Selection Circle
 

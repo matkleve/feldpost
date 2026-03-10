@@ -1,7 +1,7 @@
-# Architecture Documentation
+﻿# Architecture Documentation
 
 **Who this is for:** engineers working on system design, data flows, and performance.  
-**What you’ll get:** a high‑level view of how GeoSite is put together and where responsibilities and invariants sit.
+**What you’ll get:** a high‑level view of how Sitesnap is put together and where responsibilities and invariants sit.
 
 See also: `database-schema.md`, `security-boundaries.md`.
 
@@ -9,7 +9,7 @@ See also: `database-schema.md`, `security-boundaries.md`.
 
 ## 1. System Overview
 
-GeoSite is a map‑first, geo‑based image management system.
+Sitesnap is a map‑first, geo‑based image management system.
 
 Users can:
 
@@ -226,7 +226,7 @@ All domain data is protected via RLS policies.
 
 ## 3. Geocoding Boundary
 
-GeoSite uses a **geocoding service** to translate addresses into coordinates for the main map search bar.
+Sitesnap uses a **geocoding service** to translate addresses into coordinates for the main map search bar.
 
 - At the architecture level, geocoding is treated as a **provider‑agnostic service**:
   - Exposed via an internal API or adapter.
@@ -285,7 +285,7 @@ interface GeocodingResult {
 
 **Ranking model:**
 
-1. Query the GeoSite `images` database (org-scoped) for known address labels using fuzzy trigram similarity (`pg_trgm`). Matches are weighted by image count at each address — confirmed project locations appear first.
+1. Query the Sitesnap `images` database (org-scoped) for known address labels using fuzzy trigram similarity (`pg_trgm`). Matches are weighted by image count at each address — confirmed project locations appear first.
 2. In parallel, call `GeocodingAdapter.search()` for external candidates.
 3. Merge results: DB candidates first (up to 3), followed by a visual separator, then geocoder candidates (up to 5). Geocoder results within 30m of a DB candidate are deduplicated.
 
@@ -346,7 +346,7 @@ See `address-resolver.md` for the full interface contract, UI presentation spec,
 
 ## 5. Image Input Layer
 
-GeoSite treats image ingestion as a **provider-agnostic pipeline**. The core ingestion flow — EXIF parsing, Supabase Storage upload, and database record write — never imports a concrete input source directly. All input sources implement a common `ImageInputAdapter` interface.
+Sitesnap treats image ingestion as a **provider-agnostic pipeline**. The core ingestion flow — EXIF parsing, Supabase Storage upload, and database record write — never imports a concrete input source directly. All input sources implement a common `ImageInputAdapter` interface.
 
 This mirrors the same adapter-boundary pattern used for geocoding (section 3) and map rendering (section 6).
 
@@ -614,7 +614,7 @@ interface RadiusSelectionOptions {
 
 ## 7. UI Theming Layer
 
-GeoSite uses **Tailwind CSS** as its styling foundation. Dark mode and theming are **first-class build targets**, not post-MVP toggles. Any component that only supports light mode is considered incomplete.
+Sitesnap uses **Tailwind CSS** as its styling foundation. Dark mode and theming are **first-class build targets**, not post-MVP toggles. Any component that only supports light mode is considered incomplete.
 
 ### Configuration
 
@@ -782,7 +782,7 @@ Thumbnails and full-res images use `<img loading="lazy">` and are fetched with l
 
 ## 10. Responsive Layout
 
-GeoSite must function across desktop (Clerk) and mobile (Technician) form factors. Responsive behaviour is a first-class requirement, not a post-MVP polish item.
+Sitesnap must function across desktop (Clerk) and mobile (Technician) form factors. Responsive behaviour is a first-class requirement, not a post-MVP polish item.
 
 ### Breakpoints
 
@@ -971,7 +971,7 @@ Active filters (time range, project, metadata) are AND-combined with the spatial
 
 ## 13. UI State Contract
 
-Every asynchronous operation in GeoSite must handle four states. Components that skip any state are considered defects.
+Every asynchronous operation in Sitesnap must handle four states. Components that skip any state are considered defects.
 
 | State       | Visual Treatment                                                 | Example                                                                                                                                    |
 | ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -996,7 +996,7 @@ Every asynchronous operation in GeoSite must handle four states. Components that
 
 ## 14. Angular State Management
 
-GeoSite uses **Angular Signals** as the primary state management approach. No external state library (NgRx, Akita) is used for MVP.
+Sitesnap uses **Angular Signals** as the primary state management approach. No external state library (NgRx, Akita) is used for MVP.
 
 ### Service Dependency Graph
 
@@ -1081,8 +1081,8 @@ stateDiagram-v2
 | `SelectionService`       | Active selection circle (center, radius), selected image IDs           | In-memory (ephemeral)                                |
 | `GroupService`           | Saved groups, group membership, active tab                             | Server (`saved_groups`) + `localStorage` (tab order) |
 | `ImageCacheService`      | Fetched image metadata, thumbnail URLs                                 | In-memory `Map` with LRU eviction (max 5000 entries) |
-| `ThemeService`           | Light/dark mode                                                        | `localStorage` key: `geosite-theme`                  |
-| `MapStateService`        | Last viewport center + zoom                                            | `localStorage` key: `geosite-map-state`              |
+| `ThemeService`           | Light/dark mode                                                        | `localStorage` key: `sitesnap-theme`                 |
+| `MapStateService`        | Last viewport center + zoom                                            | `localStorage` key: `sitesnap-map-state`             |
 | `AddressResolverService` | Result cache (query → `AddressCandidateGroup`, 5-min TTL, LRU max 200) | In-memory only; stateless across sessions            |
 
 ### Signal Pattern

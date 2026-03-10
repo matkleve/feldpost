@@ -1,4 +1,4 @@
-# GeoSite Documentation Audit
+﻿# Sitesnap Documentation Audit
 
 **Date:** 2026-03-04  
 **Scope:** Cross-document consistency and implementation-impact gaps across `docs/`  

@@ -1,4 +1,4 @@
-# GeoSite – Component: Image Detail View
+﻿# Sitesnap – Component: Image Detail View
 
 ## 5.4 Image Detail View
 

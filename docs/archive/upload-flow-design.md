@@ -1,4 +1,4 @@
-# GeoSite – Component: Upload Flow
+﻿# Sitesnap – Component: Upload Flow
 
 ## 5.5 Upload Flow
 

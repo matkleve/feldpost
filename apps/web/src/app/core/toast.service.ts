@@ -1,4 +1,4 @@
-// Minimal ToastService for showing error messages (GeoSite)
+// Minimal ToastService for showing error messages (Sitesnap)
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
