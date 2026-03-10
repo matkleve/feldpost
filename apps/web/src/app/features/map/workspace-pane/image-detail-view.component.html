@@ -18,7 +18,7 @@
 
 <!-- Content (visible when image is loaded) -->
 @if (image() && !loading()) {
-  <!-- DetailHeader: back button + title + context menu -->
+  <!-- DetailHeader: back button + editable title + context menu -->
   <div class="detail-header">
     <!-- BackButton / CloseButton (closes detail, returns to grid) -->
     <button
@@ -31,8 +31,28 @@
       <span class="material-icons" aria-hidden="true">arrow_back</span>
     </button>
 
-    <!-- ImageTitle -->
-    <span class="detail-title" [title]="displayTitle()">{{ displayTitle() }}</span>
+    <!-- ImageTitle — click to edit address_label inline -->
+    @if (editingField() === 'address_label') {
+      <input
+        #titleInput
+        class="detail-title-input"
+        type="text"
+        [value]="image()!.address_label ?? ''"
+        aria-label="Edit image title"
+        (keydown.enter)="saveImageField('address_label', titleInput.value)"
+        (keydown.escape)="editingField.set(null)"
+        (blur)="saveImageField('address_label', titleInput.value)"
+      />
+    } @else {
+      <button
+        class="detail-title detail-title--editable"
+        type="button"
+        title="Click to edit title"
+        (click)="editingField.set('address_label')"
+      >
+        {{ displayTitle() }}
+      </button>
+    }
 
     <!-- Context menu trigger -->
     <button
@@ -101,23 +121,67 @@
     }
   </div>
 
-  <!-- MetadataSection -->
+  <!-- DetailsSection: core image properties (editable) -->
   <div class="detail-metadata">
-    <!-- TimestampRow -->
-    @if (captureDate()) {
-      <div class="detail-metadata__row detail-metadata__row--static">
-        <span class="detail-metadata__key">Captured</span>
-        <span class="detail-metadata__value">{{ captureDate() }}</span>
-      </div>
-    }
+    <div class="detail-section-heading">Details</div>
 
-    <!-- CoordinatesRow -->
+    <!-- Captured date (editable) -->
+    <app-editable-property-row
+      label="Captured"
+      [value]="image()!.captured_at ?? ''"
+      [displayValue]="captureDate() ?? '—'"
+      inputType="date"
+      (valueChanged)="saveImageField('captured_at', $event)"
+    />
+
+    <!-- Project (editable via dropdown) -->
+    <app-editable-property-row
+      label="Project"
+      [value]="image()!.project_id ?? ''"
+      [displayValue]="projectName() || '—'"
+      inputType="select"
+      [options]="projectOptions()"
+      (valueChanged)="saveImageField('project_id', $event)"
+    />
+
+    <!-- Street (editable) -->
+    <app-editable-property-row
+      label="Street"
+      [value]="image()!.street ?? ''"
+      [displayValue]="image()!.street ?? '—'"
+      (valueChanged)="saveImageField('street', $event)"
+    />
+
+    <!-- City (editable) -->
+    <app-editable-property-row
+      label="City"
+      [value]="image()!.city ?? ''"
+      [displayValue]="image()!.city ?? '—'"
+      (valueChanged)="saveImageField('city', $event)"
+    />
+
+    <!-- District (editable) -->
+    <app-editable-property-row
+      label="District"
+      [value]="image()!.district ?? ''"
+      [displayValue]="image()!.district ?? '—'"
+      (valueChanged)="saveImageField('district', $event)"
+    />
+
+    <!-- Country (editable) -->
+    <app-editable-property-row
+      label="Country"
+      [value]="image()!.country ?? ''"
+      [displayValue]="image()!.country ?? '—'"
+      (valueChanged)="saveImageField('country', $event)"
+    />
+
+    <!-- CoordinatesRow (read-only — edited via map correction) -->
     @if (image()!.latitude != null) {
       <div class="detail-metadata__row detail-metadata__row--static">
         <span class="detail-metadata__key">
           Location
           @if (isCorrected()) {
-            <!-- CorrectionBadge -->
             <span class="detail-correction-badge">Corrected</span>
           }
         </span>
@@ -127,34 +191,96 @@
       </div>
     }
 
-    <!-- MetadataPropertyRow × N (editable) -->
-    @for (entry of metadata(); track entry.metadataKeyId) {
-      <app-metadata-property-row
-        [key]="entry.key"
-        [value]="entry.value"
-        (valueChanged)="saveMetadata(entry, $event)"
-      />
-    }
+    <!-- Uploaded (read-only) -->
+    <app-editable-property-row
+      label="Uploaded"
+      [value]="image()!.created_at"
+      [displayValue]="uploadDate() ?? '—'"
+      [readonly]="true"
+    />
+  </div>
 
-    <!-- CorrectionHistory (shown only when corrected — Honesty principle) -->
-    @if (isCorrected()) {
-      <div class="detail-correction-history">
-        <p class="detail-correction-history__label">Location history</p>
-        <div class="detail-correction-history__row">
-          <span class="detail-correction-history__key">Original EXIF</span>
-          <span class="detail-correction-history__value detail-metadata__value--mono">
-            {{ formatCoord(image()!.exif_latitude) }}°, {{ formatCoord(image()!.exif_longitude) }}°
-          </span>
-        </div>
-        <div class="detail-correction-history__row">
-          <span class="detail-correction-history__key">Corrected</span>
-          <span class="detail-correction-history__value detail-metadata__value--mono">
-            {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
-          </span>
-        </div>
+  <!-- MetadataSection: custom key/value pairs -->
+  <div class="detail-metadata">
+    <div class="detail-section-heading">Custom metadata</div>
+
+    @for (entry of metadata(); track entry.metadataKeyId) {
+      <div class="detail-metadata-row-wrap">
+        <app-metadata-property-row
+          [key]="entry.key"
+          [value]="entry.value"
+          (valueChanged)="saveMetadata(entry, $event)"
+        />
+        <button
+          class="detail-metadata-delete"
+          type="button"
+          [attr.aria-label]="'Remove ' + entry.key"
+          title="Remove metadata"
+          (click)="removeMetadata(entry)"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
       </div>
     }
+
+    <!-- Add metadata row -->
+    @if (showAddMetadata()) {
+      <div class="detail-add-metadata-row">
+        <input
+          #newKeyInput
+          class="detail-add-metadata-input"
+          type="text"
+          placeholder="Key"
+          aria-label="New metadata key"
+          (keydown.escape)="showAddMetadata.set(false)"
+        />
+        <input
+          #newValueInput
+          class="detail-add-metadata-input"
+          type="text"
+          placeholder="Value"
+          aria-label="New metadata value"
+          (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
+          (keydown.escape)="showAddMetadata.set(false)"
+        />
+        <button
+          class="detail-add-metadata-confirm"
+          type="button"
+          aria-label="Save new metadata"
+          (click)="addMetadata(newKeyInput.value, newValueInput.value)"
+        >
+          <span class="material-icons" aria-hidden="true">check</span>
+        </button>
+      </div>
+    }
+
+    <!-- Add metadata button -->
+    @if (!showAddMetadata()) {
+      <button class="detail-add-metadata-btn" type="button" (click)="showAddMetadata.set(true)">
+        <span class="material-icons" aria-hidden="true">add</span>
+        Add metadata
+      </button>
+    }
   </div>
+
+  <!-- CorrectionHistory (shown only when corrected — Honesty principle) -->
+  @if (isCorrected()) {
+    <div class="detail-correction-history">
+      <p class="detail-correction-history__label">Location history</p>
+      <div class="detail-correction-history__row">
+        <span class="detail-correction-history__key">Original EXIF</span>
+        <span class="detail-correction-history__value detail-metadata__value--mono">
+          {{ formatCoord(image()!.exif_latitude) }}°, {{ formatCoord(image()!.exif_longitude) }}°
+        </span>
+      </div>
+      <div class="detail-correction-history__row">
+        <span class="detail-correction-history__key">Corrected</span>
+        <span class="detail-correction-history__value detail-metadata__value--mono">
+          {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
+        </span>
+      </div>
+    </div>
+  }
 
   <!-- DetailActions: ghost buttons at the bottom -->
   <div class="ui-spacer"></div>

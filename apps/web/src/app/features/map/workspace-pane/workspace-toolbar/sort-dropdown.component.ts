@@ -1,5 +1,6 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
+import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { SortConfig } from '../../../../core/workspace-view.types';
 
 type SortOption = {
@@ -25,15 +26,13 @@ type SortOption = {
           <button class="sort-search__clear" (click)="searchTerm.set('')" aria-label="Clear search">
             <span class="material-icons">close</span>
           </button>
+        } @else if (hasCustomSort()) {
+          <button class="sort-search__clear" (click)="resetSort()" aria-label="Reset to default">
+            <span class="material-icons">restart_alt</span>
+          </button>
         }
       </div>
       <div class="sort-options">
-        @if (hasCustomSort()) {
-          <button class="sort-reset" (click)="resetSort()">
-            <span class="material-icons sort-reset__icon" aria-hidden="true">restart_alt</span>
-            <span>Reset to default</span>
-          </button>
-        }
         @if (groupedOptions().length > 0) {
           <div class="sort-section-label">Sorted by grouping</div>
           @for (opt of groupedOptions(); track opt.id) {
@@ -92,52 +91,17 @@ type SortOption = {
 })
 export class SortDropdownComponent {
   private readonly viewService = inject(WorkspaceViewService);
+  private readonly registry = inject(PropertyRegistryService);
 
-  private readonly options: SortOption[] = [
-    {
-      id: 'date-captured',
-      label: 'Date captured',
-      icon: 'schedule',
-      defaultDirection: 'desc',
-    },
-    {
-      id: 'date-uploaded',
-      label: 'Date uploaded',
-      icon: 'cloud_upload',
-      defaultDirection: 'desc',
-    },
-    {
-      id: 'name',
-      label: 'Name',
-      icon: 'sort_by_alpha',
-      defaultDirection: 'asc',
-    },
-    {
-      id: 'distance',
-      label: 'Distance',
-      icon: 'straighten',
-      defaultDirection: 'asc',
-    },
-    {
-      id: 'address',
-      label: 'Address',
-      icon: 'location_on',
-      defaultDirection: 'asc',
-    },
-    {
-      id: 'city',
-      label: 'City',
-      icon: 'location_city',
-      defaultDirection: 'asc',
-    },
-    { id: 'country', label: 'Country', icon: 'flag', defaultDirection: 'asc' },
-    {
-      id: 'project',
-      label: 'Project',
-      icon: 'folder',
-      defaultDirection: 'asc',
-    },
-  ];
+  /** Sort options derived from the property registry (only sortable properties). */
+  private readonly options = computed<SortOption[]>(() =>
+    this.registry.sortableProperties().map((p) => ({
+      id: p.id,
+      label: p.label,
+      icon: p.icon,
+      defaultDirection: p.defaultSortDirection,
+    })),
+  );
 
   readonly searchTerm = signal('');
   readonly activeSorts = signal<SortConfig[]>([...this.viewService.effectiveSorts()]);
@@ -152,8 +116,9 @@ export class SortDropdownComponent {
   readonly groupedOptions = computed(() => {
     const ids = this.groupingIds();
     const term = this.searchTerm().toLowerCase();
+    const opts = this.options();
     return ids
-      .map((id) => this.options.find((o) => o.id === id))
+      .map((id) => opts.find((o) => o.id === id))
       .filter((o): o is SortOption => !!o)
       .filter((o) => !term || o.label.toLowerCase().includes(term));
   });
@@ -162,7 +127,7 @@ export class SortDropdownComponent {
   readonly filteredOptions = computed(() => {
     const groupedIds = new Set(this.groupingIds());
     const term = this.searchTerm().toLowerCase();
-    return this.options
+    return this.options()
       .filter((o) => !groupedIds.has(o.id))
       .filter((o) => !term || o.label.toLowerCase().includes(term));
   });

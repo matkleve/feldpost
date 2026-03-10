@@ -6,7 +6,13 @@ A dropdown for managing the sort order of images in the workspace pane. Supports
 
 ## What It Looks Like
 
-Floating dropdown anchored below the "Sort" toolbar button. Width: 15rem (240px). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners. Top: a compact search input (`--text-small`, `--color-border-strong` bottom border, no box outline — Notion-style inline search) with a clear (×) button when non-empty. Below: a list of sort options as `.ui-item` rows.
+Floating dropdown anchored below the "Sort" toolbar button. Width: 15rem (240px). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners. Top: a compact search input (`--text-small`, `--color-border-strong` bottom border, no box outline — Notion-style inline search) with a contextual trailing icon:
+
+- **Search has text** → × clear button (clears search text only)
+- **Search empty + custom sort active** → ⟲ reset button (resets sorts to default)
+- **Search empty + default sort** → no trailing icon
+
+Below: a list of sort options as `.ui-item` rows.
 
 **Sort option rows** — each row contains:
 
@@ -26,11 +32,11 @@ Active sort options have `--color-primary` text. The direction button is always 
 
 | #   | User Action                             | System Response                                               | Triggers               |
 | --- | --------------------------------------- | ------------------------------------------------------------- | ---------------------- |
-| 1   | Types in search input                   | Filters visible sort options                                  | `searchTerm` changes   |
-| 2   | Clears search (× button)                | Shows all options again                                       | `searchTerm` cleared   |
-| 3   | Clicks direction toggle on inactive row | Activates sort with default direction; adds to active sorts   | `activeSorts` updated  |
-| 4   | Clicks direction toggle on active row   | Cycles: asc → desc → deactivated                              | `activeSorts` updated  |
-| 5   | Clicks "Reset to default"               | Removes all custom sorts; returns to Date captured ↓          | `activeSorts` reset    |
+| 1   | Types in search input                   | Filters visible sort options; trailing icon switches to ×     | `searchTerm` changes   |
+| 2   | Clicks × (clear search)                 | Clears search text; trailing icon becomes ⟲ if sorts active   | `searchTerm` cleared   |
+| 3   | Clicks ⟲ (reset sort)                   | Resets sorts to default [date-captured ↓]; icon disappears    | `activeSorts` reset    |
+| 4   | Clicks direction toggle on inactive row | Activates sort with default direction; adds to active sorts   | `activeSorts` updated  |
+| 5   | Clicks direction toggle on active row   | Cycles: asc → desc → deactivated                              | `activeSorts` updated  |
 | 6   | Clicks outside or Escape                | Closes dropdown                                               | Dropdown closes        |
 | 7   | Activates a grouping (in GroupingDD)    | Grouped property auto-appears in "Sorted by grouping" section | Grouping syncs to sort |
 | 8   | Removes a grouping                      | Property returns to normal sort list position                 | Grouping syncs to sort |
@@ -40,8 +46,9 @@ Active sort options have `--color-primary` text. The direction button is always 
 ```
 SortDropdown                               ← floating dropdown, --color-bg-elevated, shadow-xl, rounded-lg
 ├── SearchInput                            ← compact, placeholder "Search properties…", --text-small
-│   └── [non-empty] ClearButton (×)        ← trailing, clears search term
-├── [has custom sort] ResetRow             ← "Reset to default", restart_alt icon
+│   ├── [search has text] ClearButton (×)  ← trailing, clears search term only
+│   ├── [empty + custom sort] ResetButton (⟲) ← trailing, resets to default sort
+│   └── [empty + default sort] (no icon)   ← clean state
 ├── [has groupings] GroupingSortSection     ← "Sorted by grouping" label
 │   └── SortOptionRow × N (grouped)        ← mirror grouping order, direction toggle only
 │       ├── PropertyIcon                   ← Material Icon

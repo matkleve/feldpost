@@ -10,6 +10,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SortDropdownComponent } from './sort-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
+import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import { signal } from '@angular/core';
 import type { SortConfig, PropertyRef } from '../../../../core/workspace-view.types';
 
@@ -25,7 +26,10 @@ function setup(overrides?: Partial<ReturnType<typeof buildFakeViewService>>) {
   const fakeViewService = { ...buildFakeViewService(), ...overrides };
 
   TestBed.configureTestingModule({
-    providers: [{ provide: WorkspaceViewService, useValue: fakeViewService }],
+    providers: [
+      PropertyRegistryService,
+      { provide: WorkspaceViewService, useValue: fakeViewService },
+    ],
   });
 
   const component = TestBed.createComponent(SortDropdownComponent).componentInstance;

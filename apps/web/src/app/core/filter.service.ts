@@ -1,10 +1,12 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import type { FilterRule, WorkspaceImage } from './workspace-view.types';
+import { PropertyRegistryService } from './property-registry.service';
 
 let nextRuleId = 0;
 
 @Injectable({ providedIn: 'root' })
 export class FilterService {
+  private readonly registry = inject(PropertyRegistryService);
   readonly rules = signal<FilterRule[]>([]);
 
   readonly activeCount = computed(() => this.rules().length);
@@ -88,25 +90,7 @@ export class FilterService {
   }
 
   private getFieldValue(image: WorkspaceImage, property: string): string | null {
-    switch (property.toLowerCase()) {
-      case 'date':
-        return image.capturedAt;
-      case 'project':
-        return image.projectName;
-      case 'address':
-        return image.addressLabel;
-      case 'city':
-        return image.city;
-      case 'district':
-        return image.district;
-      case 'street':
-        return image.street;
-      case 'country':
-        return image.country;
-      case 'user':
-        return image.userName;
-      default:
-        return null;
-    }
+    const val = this.registry.getFieldValue(image, property);
+    return val != null ? String(val) : null;
   }
 }

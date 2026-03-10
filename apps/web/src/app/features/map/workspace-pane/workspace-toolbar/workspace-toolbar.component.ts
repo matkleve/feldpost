@@ -5,22 +5,10 @@ import { SortDropdownComponent } from './sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { FilterService } from '../../../../core/filter.service';
+import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyRef, SortConfig } from '../../../../core/workspace-view.types';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
-
-const ALL_GROUPING_PROPERTIES: GroupingProperty[] = [
-  { id: 'date', label: 'Date', icon: 'schedule' },
-  { id: 'year', label: 'Year', icon: 'calendar_today' },
-  { id: 'month', label: 'Month', icon: 'date_range' },
-  { id: 'project', label: 'Project', icon: 'folder' },
-  { id: 'city', label: 'City', icon: 'location_city' },
-  { id: 'district', label: 'District', icon: 'map' },
-  { id: 'street', label: 'Street', icon: 'signpost' },
-  { id: 'country', label: 'Country', icon: 'flag' },
-  { id: 'address', label: 'Address', icon: 'location_on' },
-  { id: 'user', label: 'User', icon: 'person' },
-];
 
 @Component({
   selector: 'app-workspace-toolbar',
@@ -36,6 +24,7 @@ const ALL_GROUPING_PROPERTIES: GroupingProperty[] = [
 export class WorkspaceToolbarComponent {
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
+  private readonly registry = inject(PropertyRegistryService);
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
 
@@ -45,7 +34,13 @@ export class WorkspaceToolbarComponent {
 
   // --- Grouping state (persists across dropdown open/close) ---
   readonly activeGroupings = signal<GroupingProperty[]>([]);
-  readonly availableGroupings = signal<GroupingProperty[]>([...ALL_GROUPING_PROPERTIES]);
+  readonly availableGroupings = computed<GroupingProperty[]>(() => {
+    const activeIds = new Set(this.activeGroupings().map((g) => g.id));
+    return this.registry
+      .groupableProperties()
+      .filter((p) => !activeIds.has(p.id))
+      .map((p) => ({ id: p.id, label: p.label, icon: p.icon }));
+  });
 
   // Active-state indicators — wired to services
   readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
@@ -79,9 +74,8 @@ export class WorkspaceToolbarComponent {
     setTimeout(() => (this._isDragging = false));
   }
 
-  onGroupingsChanged(active: GroupingProperty[], available: GroupingProperty[]): void {
+  onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
     this.activeGroupings.set(active);
-    this.availableGroupings.set(available);
     // Push to WorkspaceViewService
     this.viewService.activeGroupings.set(
       active.map((g) => ({ id: g.id, label: g.label, icon: g.icon }) as PropertyRef),

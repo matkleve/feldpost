@@ -13,6 +13,7 @@ import { WorkspaceViewService } from './workspace-view.service';
 import { SupabaseService } from './supabase.service';
 import { FilterService } from './filter.service';
 import { GeocodingService } from './geocoding.service';
+import { PropertyRegistryService } from './property-registry.service';
 import type { WorkspaceImage } from './workspace-view.types';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ function setup(geocodingResult = ZURICH_RESULT) {
   TestBed.configureTestingModule({
     providers: [
       WorkspaceViewService,
+      PropertyRegistryService,
       { provide: SupabaseService, useValue: fakeSupabase },
       { provide: GeocodingService, useValue: fakeGeocoding },
       { provide: FilterService, useValue: fakeFilter },

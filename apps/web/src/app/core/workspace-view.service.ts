@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { FilterService } from './filter.service';
 import { LocationResolverService } from './location-resolver.service';
+import { PropertyRegistryService } from './property-registry.service';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -16,6 +17,7 @@ export class WorkspaceViewService {
   private readonly supabase = inject(SupabaseService);
   private readonly filterService = inject(FilterService);
   private readonly locationResolver = inject(LocationResolverService);
+  private readonly registry = inject(PropertyRegistryService);
 
   // ── Input signals ────────────────────────────────────────────────────────
 
@@ -291,70 +293,11 @@ export class WorkspaceViewService {
   }
 
   private getSortValue(img: WorkspaceImage, key: string): string | number | null {
-    switch (key) {
-      case 'captured_at':
-      case 'date-captured':
-        return img.capturedAt;
-      case 'created_at':
-      case 'date-uploaded':
-        return img.createdAt;
-      case 'name':
-        return img.storagePath;
-      case 'project':
-        return img.projectName;
-      case 'address':
-        return img.addressLabel;
-      case 'city':
-        return img.city;
-      case 'country':
-        return img.country;
-      case 'district':
-        return img.district;
-      case 'street':
-        return img.street;
-      default:
-        return img.capturedAt;
-    }
+    return this.registry.getSortValue(img, key);
   }
 
   private getGroupValue(img: WorkspaceImage, propertyId: string): string {
-    switch (propertyId) {
-      case 'project':
-        return img.projectName ?? 'No project';
-      case 'date': {
-        if (!img.capturedAt) return 'Unknown date';
-        return new Date(img.capturedAt).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-      }
-      case 'year': {
-        if (!img.capturedAt) return 'Unknown year';
-        return new Date(img.capturedAt).getFullYear().toString();
-      }
-      case 'month': {
-        if (!img.capturedAt) return 'Unknown month';
-        return new Date(img.capturedAt).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'long',
-        });
-      }
-      case 'city':
-        return img.city ?? 'Unknown city';
-      case 'district':
-        return img.district ?? 'Unknown district';
-      case 'street':
-        return img.street ?? 'Unknown street';
-      case 'country':
-        return img.country ?? 'Unknown country';
-      case 'address':
-        return img.addressLabel ?? 'Unknown address';
-      case 'user':
-        return img.userName ?? 'Unknown user';
-      default:
-        return 'Unknown';
-    }
+    return this.registry.getGroupValue(img, propertyId);
   }
 
   private buildGroups(
