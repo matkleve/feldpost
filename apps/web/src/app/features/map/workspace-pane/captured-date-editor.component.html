@@ -20,11 +20,7 @@
   <!-- Month navigation -->
   <div class="captured-date-editor__month-nav">
     <span class="captured-date-editor__month-label">{{ monthLabel() }}</span>
-    <button
-      class="captured-date-editor__now-btn"
-      type="button"
-      (click)="setNow()"
-    >Now</button>
+    <button class="captured-date-editor__now-btn" type="button" (click)="setNow()">Now</button>
     <button
       class="captured-date-editor__nav-btn"
       type="button"
@@ -60,21 +56,17 @@
         [attr.aria-label]="day.date"
         [attr.aria-current]="day.isToday ? 'date' : null"
         (click)="selectDay(day)"
-      >{{ day.day }}</button>
+      >
+        {{ day.day }}
+      </button>
     }
   </div>
 
   <!-- Action row -->
   <div class="captured-date-editor__actions">
-    <button
-      class="captured-date-editor__clear-btn"
-      type="button"
-      (click)="emitClear()"
-    >Clear</button>
-    <button
-      class="captured-date-editor__done-btn"
-      type="button"
-      (click)="emitSave()"
-    >Done</button>
+    <button class="captured-date-editor__clear-btn" type="button" (click)="emitClear()">
+      Clear
+    </button>
+    <button class="captured-date-editor__done-btn" type="button" (click)="emitSave()">Done</button>
   </div>
 </div>
