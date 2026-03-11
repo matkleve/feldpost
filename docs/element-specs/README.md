@@ -14,6 +14,25 @@ See [agent-workflows/element-spec-format.md](../agent-workflows/element-spec-for
 5. Use `#implement-element` prompt to build it
 6. Use `#review-against-spec` prompt to verify
 
+## Lint
+
+Run `node scripts/lint-specs.mjs` from the project root to validate all specs. Rules:
+
+| Rule                      | Severity   | Threshold | Description                                                                                                             |
+| ------------------------- | ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `spec-max-lines`          | error/warn | 250 / 200 | Max lines per spec. Split oversized specs into parent + child specs with cross-references.                              |
+| `spec-required-sections`  | error      | —         | Every spec must have: What It Is, What It Looks Like, Where It Lives, Actions, Component Hierarchy, Acceptance Criteria |
+| `spec-section-order`      | warning    | —         | Sections should follow the canonical order from the template                                                            |
+| `what-it-is-length`       | warning    | 5 lines   | Keep "What It Is" to 1–2 sentences                                                                                      |
+| `what-it-looks-like-len`  | warning    | 40 lines  | Move visual detail to Actions or child specs                                                                            |
+| `has-acceptance-criteria` | error      | —         | At least one `- [ ]` checkbox in Acceptance Criteria                                                                    |
+
+Override thresholds: `node scripts/lint-specs.mjs --max-lines=300 --warn-lines=250`
+
+### Splitting Large Specs
+
+When a spec exceeds the line limit, split it into a **parent spec** (layout, navigation, cross-references) and **child specs** (focused feature areas). The parent keeps the original filename and adds a "Child Specs" section with links. See `image-detail-view.md` for an example.
+
 ## Elements (from Glossary)
 
 Status: ✅ spec written | 🔲 needs spec
@@ -56,7 +75,10 @@ Status: ✅ spec written | 🔲 needs spec
 - ✅ `filter-dropdown.md` — Filter Dropdown (shared dropdown primitive)
 - ✅ `projects-dropdown.md` — Projects Dropdown (project selection filter)
 - ✅ `active-filter-chips.md` — Active Filter Chips Strip
-- ✅ `image-detail-view.md` — Image Detail View
+- ✅ `image-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
+  - ✅ `image-detail-photo-viewer.md` — Photo Viewer (progressive loading, lightbox, replace/upload)
+  - ✅ `image-detail-inline-editing.md` — Inline Editing (property rows, address search)
+  - ✅ `image-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
 - ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)
 - ✅ `grouping-dropdown.md` — Grouping Dropdown (thumbnail group-by)
 
