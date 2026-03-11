@@ -109,42 +109,38 @@
           aria-label="View full-size photo"
           (click)="showLightbox.set(true)"
         >
-          <!-- Hero blob (instant preview after replace/attach — Tier 0) -->
-          @if (heroSrc() && !fullResLoaded()) {
-            <img
-              class="detail-image"
-              [src]="heroSrc()"
-              alt="Photo preview"
-            />
+          <!-- Placeholder: pulsing gradient while loading (behind images via grid stacking) -->
+          @if (!fullResPreloaded()) {
+            @if (thumbState() === 'error' && fullState() === 'error') {
+              <div class="detail-image-placeholder detail-image-placeholder--no-photo">
+                <span class="detail-image-placeholder__icon detail-image-placeholder__icon--no-photo" aria-hidden="true"></span>
+                <span class="visually-hidden">Image unavailable</span>
+              </div>
+            } @else {
+              <div
+                class="detail-image-placeholder"
+                [class.detail-image-placeholder--loading]="isImageLoading()"
+              >
+                <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
+              </div>
+            }
           }
-          <!-- Placeholder: pulsing gradient while loading -->
-          @if (!imageReady()) {
-            <div
-              class="detail-image-placeholder"
-              [class.detail-image-placeholder--loading]="isImageLoading()"
-              [class.detail-image-placeholder--no-photo]="!isImageLoading()"
-            >
-              <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
-            </div>
-          }
-          @if (thumbnailUrl() && !fullResLoaded()) {
+          <!-- Tier 2: blurred thumbnail (covers placeholder via grid stacking) -->
+          @if (thumbnailUrl() && thumbState() === 'loaded' && !fullResPreloaded()) {
             <img
               class="detail-image detail-image--thumb"
               [src]="thumbnailUrl()"
               alt="Photo preview"
               aria-hidden="true"
-              (load)="onThumbnailLoaded()"
-              (error)="onThumbnailError()"
             />
           }
+          <!-- Tier 3: full-res with crossfade (preloaded before showing) -->
           @if (fullResUrl()) {
             <img
               class="detail-image detail-image--full"
-              [class.detail-image--loaded]="fullResLoaded()"
+              [class.detail-image--loaded]="fullResPreloaded()"
               [src]="fullResUrl()"
               [alt]="displayTitle()"
-              (load)="onFullResLoaded()"
-              (error)="onImageError()"
             />
           }
         </button>
@@ -173,9 +169,7 @@
       <!-- Upload prompt for photoless items (no-photo fast path) -->
       <div class="detail-upload-prompt">
         <div class="detail-upload-prompt__placeholder">
-          <span class="material-icons detail-upload-prompt__icon" aria-hidden="true"
-            >add_a_photo</span
-          >
+          <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
           <span class="detail-upload-prompt__text">No photo attached</span>
         </div>
         <button
@@ -425,9 +419,9 @@
 }
 
 <!-- Photo lightbox overlay -->
-@if (showLightbox() && (fullResUrl() || heroSrc())) {
+@if (showLightbox() && (fullResUrl() || thumbnailUrl())) {
   <app-photo-lightbox
-    [imageUrl]="(fullResUrl() ?? heroSrc())!"
+    [imageUrl]="(fullResUrl() ?? thumbnailUrl())!"
     [alt]="displayTitle()"
     (closed)="showLightbox.set(false)"
   />

@@ -338,14 +338,14 @@ stateDiagram-v2
 
 ### PhotoLoadService Integration
 
-- [ ] All signed-URL generation delegated to `PhotoLoadService` — component never calls `supabase.client.storage.from('images').createSignedUrl` directly
-- [ ] Tier 2 thumbnail obtained via `photoLoad.getSignedUrl(thumbPath, 'thumb')` with `{ width: 256, height: 256, resize: 'cover' }` transform
-- [ ] Tier 3 full-res obtained via `photoLoad.getSignedUrl(storagePath, 'full')` with no transform
-- [ ] Full-res preloaded via `photoLoad.preload(fullUrl)` before crossfade
-- [ ] Component reads `photoLoad.getLoadState(imageId, 'thumb')` and `photoLoad.getLoadState(imageId, 'full')` signals — no local `thumbLoaded` / `fullResLoaded` booleans
-- [ ] When `storage_path IS NULL`: `photoLoad.getLoadState()` returns `'no-photo'` → upload prompt shown immediately, no signed URL requests
-- [ ] Uses `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` for loading/idle placeholder (gradient + camera icon)
-- [ ] Uses `PHOTO_NO_PHOTO_ICON` from `PhotoLoadService` for error/no-photo state (crossed-out image, 0.55 opacity)
+- [x] All signed-URL generation delegated to `PhotoLoadService` — component never calls `supabase.client.storage.from('images').createSignedUrl` directly
+- [x] Tier 2 thumbnail obtained via `photoLoad.getSignedUrl(thumbPath, 'thumb')` with `{ width: 256, height: 256, resize: 'cover' }` transform
+- [x] Tier 3 full-res obtained via `photoLoad.getSignedUrl(storagePath, 'full')` with no transform
+- [x] Full-res preloaded via `photoLoad.preload(fullUrl)` before crossfade
+- [x] Component reads `photoLoad.getLoadState(imageId, 'thumb')` and `photoLoad.getLoadState(imageId, 'full')` signals — no local `thumbLoaded` / `fullResLoaded` booleans
+- [x] When `storage_path IS NULL`: `photoLoad.getLoadState()` returns `'no-photo'` → upload prompt shown immediately, no signed URL requests
+- [x] Uses `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` for loading/idle placeholder (gradient + camera icon)
+- [x] Uses `PHOTO_NO_PHOTO_ICON` from `PhotoLoadService` for error/no-photo state (crossed-out image, 0.55 opacity)
 - [ ] Placeholder visuals are identical across photo viewer, thumbnail cards, and map markers
 
 ### Progressive Loading
@@ -363,9 +363,9 @@ stateDiagram-v2
 - [x] File validated before upload (size + MIME type via `UploadService.validateFile()`)
 - [x] Delegates to `UploadManagerService.replaceFile(imageId, file)` — does not manage upload lifecycle directly
 - [x] Spinner/progress shown by reading job state from `uploadManager.jobs()` signal
-- [ ] On `imageReplaced$`: `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → all surfaces update instantly
-- [ ] On `imageAttached$`: `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → component transitions from upload prompt to photo
-- [ ] `localObjectUrl` freed via `photoLoad.revokeLocalUrl()` after signed URL takes over — no memory leaks
+- [x] On `imageReplaced$`: `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → all surfaces update instantly
+- [x] On `imageAttached$`: `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → component transitions from upload prompt to photo
+- [x] `localObjectUrl` freed via `photoLoad.revokeLocalUrl()` after signed URL takes over — no memory leaks
 - [x] Upload survives component destruction (user can navigate away mid-replace)
 
 ### General
