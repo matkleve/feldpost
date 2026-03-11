@@ -44,6 +44,47 @@ PhotoViewer                                ← object-fit: contain, background: 
     └── CloseButton (X)                    ← top-right
 ```
 
+## State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> CheckStoragePath : Component init
+
+    state check <<choice>>
+    CheckStoragePath --> check
+    check --> UploadPromptState : storage_path IS NULL
+    check --> LoadingState : storage_path exists
+
+    state UploadPromptState {
+        [*] --> ShowPlaceholder
+        ShowPlaceholder : File picker button + placeholder UI
+        ShowPlaceholder --> Attaching : User selects file
+        Attaching : Delegated to UploadManagerService
+        Attaching --> ShowPlaceholder : Attach fails
+    }
+
+    UploadPromptState --> LoadingState : imageAttached$ fires
+
+    state LoadingState {
+        [*] --> CSSPlaceholder
+        CSSPlaceholder : Gradient + camera icon
+        CSSPlaceholder --> ThumbnailLoaded : Tier 2 loads
+        ThumbnailLoaded : Blurred 256×256
+        ThumbnailLoaded --> FullResLoaded : Tier 3 loads
+        FullResLoaded : Sharp full-res image
+        CSSPlaceholder --> BrokenImageIcon : Both tiers fail
+        ThumbnailLoaded --> ThumbnailFallback : Tier 3 fails
+    }
+
+    LoadingState --> Replacing : User clicks Replace Photo
+    state Replacing {
+        [*] --> Uploading
+        Uploading : Progress from uploadManager.jobs()
+    }
+    Replacing --> LoadingState : imageReplaced$ fires (restarts pipeline)
+    Replacing --> LoadingState : Replace fails (original photo stays)
+```
+
 ## Progressive Image Loading
 
 Three-tier strategy to show content as fast as possible:
@@ -54,7 +95,45 @@ Three-tier strategy to show content as fast as possible:
 4. **Tier 3** full-res signed URL fires (no transform, or max 2500px)
 5. Full-res `<img>` loads in hidden element → crossfade swaps it in
 6. If Tier 3 fails, Tier 2 remains visible (adequate quality for metadata editing)
-7. If both fail, CSS placeholder stays with "Image unavailable" text
+7. If both fail, broken `<img>` icon shown with `alt="Image unavailable"`
+
+```mermaid
+stateDiagram-v2
+    [*] --> Placeholder : View opens
+    state Placeholder {
+        [*] --> CSSGradient
+        CSSGradient : Gradient + camera icon + "Loading…"
+        CSSGradient : No network request
+    }
+
+    Placeholder --> Tier2 : Thumbnail signed URL loads
+    state Tier2 {
+        [*] --> BlurredThumb
+        BlurredThumb : 256×256 signed URL
+        BlurredThumb : CSS blur filter applied
+    }
+
+    Tier2 --> Tier3 : Full-res signed URL loads
+    state Tier3 {
+        [*] --> Crossfade
+        Crossfade : Full resolution (no transform)
+        Crossfade --> FullRes
+        FullRes : Sharp image displayed
+    }
+
+    Tier2 --> Tier2Fallback : Tier 3 fails
+    state Tier2Fallback {
+        [*] --> ThumbStays
+        ThumbStays : Blurred thumbnail remains
+        ThumbStays : Adequate for metadata editing
+    }
+
+    Placeholder --> Unavailable : Both tiers fail
+    state Unavailable {
+        [*] --> ErrorPlaceholder
+        ErrorPlaceholder : Broken img with alt="Image unavailable"
+    }
+```
 
 ### Signed URL Strategy
 
@@ -71,6 +150,48 @@ When `imageReplaced$` fires with `localObjectUrl`:
 4. Re-sign Tier 3 (`newStoragePath`, full-res) → on load, crossfade to full resolution
 5. Revoke `localObjectUrl` after Tier 3 loads
 
+```mermaid
+sequenceDiagram
+    actor User
+    participant Viewer as PhotoViewerComponent
+    participant Picker as File Picker
+    participant Upload as UploadService
+    participant Manager as UploadManagerService
+    participant Storage as Supabase Storage
+
+    User->>Viewer: Click Replace Photo button
+    Viewer->>Upload: validateFile(file)
+    alt Invalid file
+        Upload-->>Viewer: Validation error
+        Viewer->>Viewer: Show inline error below photo
+    else Valid file
+        Viewer->>Picker: Open native file picker
+        User->>Picker: Select file
+        Picker-->>Viewer: File selected
+        Viewer->>Manager: replaceFile(imageId, file)
+        Note over Viewer: replacing = true
+        Manager->>Storage: Upload new file
+        alt Upload succeeds
+            Manager-->>Viewer: imageReplaced$ {imageId, newStoragePath, localObjectUrl}
+            Viewer->>Viewer: heroSrc = localObjectUrl (instant swap)
+            Viewer->>Viewer: fullResLoaded = false, thumbLoaded = false
+            Note over Viewer: User sees new photo immediately from blob
+            Viewer->>Storage: createSignedUrl(newStoragePath, 3600, {transform: 256×256})
+            Storage-->>Viewer: tier2Url
+            Viewer->>Viewer: Thumbnail loads → blur replaces blob
+            Viewer->>Storage: createSignedUrl(newStoragePath, 3600)
+            Storage-->>Viewer: tier3Url (full-res)
+            Viewer->>Viewer: Preload in hidden img → crossfade to full-res
+            Viewer->>Viewer: URL.revokeObjectURL(localObjectUrl)
+            Note over Viewer: replacing = false
+        else Upload fails
+            Manager-->>Viewer: Error
+            Viewer->>Viewer: replaceError = message
+            Note over Viewer: replacing = false, original photo unchanged
+        end
+    end
+```
+
 ### Attach Photo — Placeholder to Photo
 
 When `imageAttached$` fires with `localObjectUrl`:
@@ -80,6 +201,36 @@ When `imageAttached$` fires with `localObjectUrl`:
 3. Progressive loading restarts from Tier 2 → Tier 3 as above
 4. Revoke `localObjectUrl` after Tier 3 loads
 
+```mermaid
+sequenceDiagram
+    actor User
+    participant Viewer as PhotoViewerComponent
+    participant Upload as UploadService
+    participant Manager as UploadManagerService
+    participant Storage as Supabase Storage
+
+    Note over Viewer: storage_path IS NULL → showing UploadPrompt
+    User->>Viewer: Click upload button on placeholder
+    Viewer->>Upload: validateFile(file)
+    Viewer->>Manager: attachFile(imageId, file)
+    Manager->>Storage: Upload file + update row
+    alt Attach succeeds
+        Manager-->>Viewer: imageAttached$ {imageId, newStoragePath, localObjectUrl}
+        Viewer->>Viewer: Switch from UploadPrompt → photo display
+        Viewer->>Viewer: heroSrc = localObjectUrl (instant)
+        Note over Viewer: Upload placeholder vanishes, real photo appears
+        Viewer->>Storage: createSignedUrl(newStoragePath, 3600, {transform: 256×256})
+        Storage-->>Viewer: tier2Url
+        Viewer->>Storage: createSignedUrl(newStoragePath, 3600)
+        Storage-->>Viewer: tier3Url (full-res)
+        Viewer->>Viewer: Crossfade blob → full-res
+        Viewer->>Viewer: URL.revokeObjectURL(localObjectUrl)
+    else Attach fails
+        Manager-->>Viewer: Error
+        Viewer->>Viewer: Show inline error, stay on UploadPrompt
+    end
+```
+
 > See [PL-7 / PL-8](../use-cases/photo-loading.md#pl-7-replace-photo--loading-state-reset) for detailed sequence diagrams.
 
 ## PhotoViewer Sizing
@@ -88,6 +239,33 @@ When `imageAttached$` fires with `localObjectUrl`:
 | ------ | ------------------------------------------------------------------------------------------------------- |
 | Wide   | `height: 100%`, `max-height: calc(100vh - 60px)`, `object-fit: contain`, `background: #111` (letterbox) |
 | Narrow | `width: 100%`, `max-height: 55vw`, `object-fit: contain`                                                |
+
+## Lightbox
+
+```mermaid
+stateDiagram-v2
+    [*] --> PhotoDisplay : Component init
+
+    state PhotoDisplay {
+        [*] --> HeroVisible
+        HeroVisible : Photo shown with hover overlay
+        HeroVisible : ReplacePhotoButton visible on hover/touch
+    }
+
+    PhotoDisplay --> LightboxOpen : User clicks photo
+
+    state LightboxOpen {
+        [*] --> FullScreen
+        FullScreen : Fixed overlay, z-modal
+        FullScreen : Dark backdrop rgba(0,0,0,0.9)
+        FullScreen : Image at 95vw / 95vh, object-fit contain
+        FullScreen : Close button (X) top-right
+    }
+
+    LightboxOpen --> PhotoDisplay : Click backdrop
+    LightboxOpen --> PhotoDisplay : Click X button
+    LightboxOpen --> PhotoDisplay : Press Escape
+```
 
 ## State
 
@@ -113,8 +291,7 @@ When `imageAttached$` fires with `localObjectUrl`:
 - [ ] Tier 2 thumbnail (256×256 transform) loads and replaces placeholder with slight blur
 - [ ] Full-res image loads on demand and crossfades over blurred thumbnail
 - [ ] If full-res fails, Tier 2 thumbnail stays visible
-- [ ] If both tiers fail, CSS placeholder with "Image unavailable" text remains
-- [ ] No broken `<img>` icon ever shown
+- [ ] If both tiers fail, broken `<img>` icon shown with `alt="Image unavailable"`
 - [ ] Edit icon overlay on hero photo opens file picker
 - [ ] File validated before upload (size + MIME type via `UploadService.validateFile()`)
 - [ ] Delegates to `UploadManagerService.replaceFile(imageId, file)` — does not manage upload lifecycle directly
