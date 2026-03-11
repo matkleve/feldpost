@@ -324,6 +324,11 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     this.thumbnailUrl.set(thumbResult.url);
     this.fullResUrl.set(fullResult.url);
+
+    // If both signing attempts failed, surface the error so the loading state resolves
+    if (!thumbResult.url && !fullResult.url) {
+      this.imageErrored.set(true);
+    }
   }
 
   close(): void {
