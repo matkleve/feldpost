@@ -17,29 +17,38 @@ The upload trigger and its container. A round button fixed in the top-right of t
 
 ## Actions
 
-| #   | User Action                       | System Response                  | Triggers                  |
-| --- | --------------------------------- | -------------------------------- | ------------------------- |
-| 1   | Clicks upload button              | Toggles Upload Panel open/closed | `uploadPanelOpen` signal  |
-| 2   | Clicks button while panel is open | Closes panel                     | `uploadPanelOpen` → false |
+| #   | User Action                       | System Response                                     | Triggers                      |
+| --- | --------------------------------- | --------------------------------------------------- | ----------------------------- |
+| 1   | Clicks upload button              | Toggles Upload Panel open/closed                    | `uploadPanelOpen` signal      |
+| 2   | Clicks button while panel is open | Closes panel                                        | `uploadPanelOpen` → false     |
+| 3   | Upload batch is active            | Button shows progress ring / badge overlay (0–100%) | `batchProgress$` subscription |
+| 4   | All uploads complete              | Progress ring disappears, optional success flash    | `batchComplete$` event        |
 
 ## Component Hierarchy
 
 ```
 UploadButtonZone                           ← fixed position container, z-20
 ├── UploadButton                           ← 44px circle (desktop) / 56px FAB (mobile)
-│   └── Icon "add_photo_alternate"         ← Material Icon, white
+│   ├── Icon "add_photo_alternate"         ← Material Icon, white
+│   └── [uploading] ProgressRing           ← SVG circular progress (0–100%), --color-primary stroke
 └── [open] UploadPanel                     ← slides down from button (see upload-panel spec)
 ```
 
+The `ProgressRing` is a thin (2px) SVG circle overlaying the button border. It fills clockwise from 0–100% as the active batch progresses. When no batch is active, it is hidden. When the batch completes, it flashes `--color-success` briefly (200ms) before fading out.
+
 ## Data
 
-No external data — Upload Button Zone is a UI toggle. File data is handled by Upload Panel.
+| Field        | Source                               | Type                          |
+| ------------ | ------------------------------------ | ----------------------------- |
+| Active batch | `UploadManagerService.activeBatch()` | `Signal<UploadBatch \| null>` |
+| Is busy      | `UploadManagerService.isBusy()`      | `Signal<boolean>`             |
 
 ## State
 
 | Name              | Type      | Default | Controls                              |
 | ----------------- | --------- | ------- | ------------------------------------- |
 | `uploadPanelOpen` | `boolean` | `false` | Panel visibility, button active state |
+| `batchProgress`   | `number`  | `0`     | Progress ring fill (0–100)            |
 
 ## File Map
 
@@ -50,6 +59,8 @@ Part of `MapShellComponent` template (button + zone container are in `map-shell.
 - Button and zone container live in `map-shell.component.html`
 - `uploadPanelOpen` signal in `MapShellComponent` controls panel visibility
 - Click handler toggles `uploadPanelOpen` signal
+- Subscribes to `UploadManagerService.batchProgress$` for the progress ring
+- Subscribes to `UploadManagerService.batchComplete$` for the success flash
 
 ## Acceptance Criteria
 
@@ -59,3 +70,7 @@ Part of `MapShellComponent` template (button + zone container are in `map-shell.
 - [ ] Click toggles Upload Panel
 - [ ] Button shows active state when panel is open
 - [ ] `--color-clay` background, white icon
+- [ ] Progress ring (SVG circle) appears on button when a batch is active
+- [ ] Progress ring fills 0–100% as batch progresses
+- [ ] Progress ring flashes `--color-success` on batch completion
+- [ ] Progress ring hidden when no batch is active
