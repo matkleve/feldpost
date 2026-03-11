@@ -356,9 +356,9 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 - [x] Freshly uploaded markers use local `ObjectURL` as thumbnail — no placeholder needed
 - [x] Signed URLs cached in `PhotoMarkerState.thumbnailUrl` survive zoom-out / zoom-in cycles
 - [x] URLs older than 50 minutes are proactively cleared and re-signed on next viewport query
-- [ ] On `imageReplaced$`: marker thumbnail swapped instantly via `localObjectUrl` — DivIcon rebuilt with `<img>`, no placeholder flash
-- [ ] On `imageAttached$`: marker transitions from CSS placeholder to real thumbnail via `localObjectUrl` — DivIcon rebuilt with `<img>`
-- [ ] `localObjectUrl` revoked after signed URL takes over on next viewport query
+- [x] On `imageReplaced$`: marker thumbnail swapped instantly via `localObjectUrl` — DivIcon rebuilt with `<img>`, no placeholder flash
+- [x] On `imageAttached$`: marker transitions from CSS placeholder to real thumbnail via `localObjectUrl` — DivIcon rebuilt with `<img>`
+- [x] `localObjectUrl` revoked after signed URL takes over on next viewport query
 
 ### State Affordances
 
@@ -371,10 +371,10 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 
 ### Reactive Updates from Upload Manager
 
-- [ ] `markersByImageId` secondary index maintained for O(1) marker lookups by image UUID
-- [ ] `MapShellComponent` subscribes to `UploadManagerService.imageReplaced$` — rebuilds marker DivIcon with new thumbnail (local ObjectURL) on photo replace
-- [ ] `MapShellComponent` subscribes to `UploadManagerService.imageAttached$` — updates marker from placeholder to real thumbnail on photo attach
-- [ ] Marker thumbnail uses local `ObjectURL` for instant display (no signed-URL delay); replaced by signed URL on next viewport query
+- [x] `markersByImageId` secondary index maintained for O(1) marker lookups by image UUID
+- [x] `MapShellComponent` subscribes to `UploadManagerService.imageReplaced$` — rebuilds marker DivIcon with new thumbnail (local ObjectURL) on photo replace
+- [x] `MapShellComponent` subscribes to `UploadManagerService.imageAttached$` — updates marker from placeholder to real thumbnail on photo attach
+- [x] Marker thumbnail uses local `ObjectURL` for instant display (no signed-URL delay); replaced by signed URL on next viewport query
 - [ ] Correction mode drag updates `corrected` flag, shows correction dot, and updates `markerKey` mapping — handled by MapShell directly, not through Upload Manager
 - [ ] Coordinate change from correction mode updates the `markerKey` mapping (remove old key, insert new key)
-- [ ] Upload Manager events and correction mode edits do not trigger a viewport query — changes are applied locally and reconciled on the next natural `moveend`
+- [x] Upload Manager events and correction mode edits do not trigger a viewport query — changes are applied locally and reconciled on the next natural `moveend`

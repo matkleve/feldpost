@@ -1239,43 +1239,43 @@ graph LR
 
 ### Replace Photo (`replaceFile`)
 
-- [ ] `replaceFile(imageId, file)` creates an `UploadJob` with `mode: 'replace'` and `targetImageId`
-- [ ] Replace pipeline: `validating → hashing → dedup_check → uploading → replacing_record → complete`
-- [ ] `replacing_record` phase UPDATEs the existing row: `storage_path`, `thumbnail_path = null`, plus EXIF fields if present
-- [ ] Old original AND old thumbnail deleted from storage after confirmed DB update (best-effort)
+- [x] `replaceFile(imageId, file)` creates an `UploadJob` with `mode: 'replace'` and `targetImageId`
+- [x] Replace pipeline: `validating → hashing → dedup_check → uploading → replacing_record → complete`
+- [x] `replacing_record` phase UPDATEs the existing row: `storage_path`, `thumbnail_path = null`, plus EXIF fields if present
+- [x] Old original AND old thumbnail deleted from storage after confirmed DB update (best-effort)
 - [ ] `WorkspaceViewService.rawImages` grid cache updated: `storagePath` set, `thumbnailPath`/`signedThumbnailUrl`/`thumbnailUnavailable` cleared
-- [ ] `imageReplaced$` emits with `imageId`, `newStoragePath`, and `localObjectUrl` on success
+- [x] `imageReplaced$` emits with `imageId`, `newStoragePath`, and `localObjectUrl` on success
 - [ ] `MapShellComponent` subscribes to `imageReplaced$` and rebuilds the marker's DivIcon with the new thumbnail
 - [ ] Detail view subscribes to `imageReplaced$` and refreshes signed URLs to show the new photo immediately
-- [ ] Dedup check prevents re-uploading the same file as a "replacement"
-- [ ] Replace job tracks progress as a normal `UploadJob` — UI can show spinner/progress
-- [ ] Replace jobs survive component destruction (detail view navigated away mid-upload)
+- [x] Dedup check prevents re-uploading the same file as a "replacement"
+- [x] Replace job tracks progress as a normal `UploadJob` — UI can show spinner/progress
+- [x] Replace jobs survive component destruction (detail view navigated away mid-upload)
 
 ### Attach Photo (`attachFile`)
 
-- [ ] `attachFile(imageId, file)` creates an `UploadJob` with `mode: 'attach'` and `targetImageId`
-- [ ] Attach pipeline: `validating → parsing_exif → hashing → dedup_check → uploading → replacing_record → enrichment → complete`
-- [ ] `replacing_record` phase UPDATEs the existing row: `storage_path`, `exif_latitude`, `exif_longitude`, `captured_at`, `direction`
-- [ ] If row already has `latitude`/`longitude`, those are preserved (EXIF written to `exif_*` fields only)
-- [ ] If row has NO coordinates, EXIF coords written to both `latitude`/`longitude` and `exif_*` fields
-- [ ] Enrichment runs after attach: reverse-geocode if only GPS, forward-geocode if only address
-- [ ] `imageAttached$` emits with `imageId`, `newStoragePath`, `localObjectUrl`, and `coords` on success
+- [x] `attachFile(imageId, file)` creates an `UploadJob` with `mode: 'attach'` and `targetImageId`
+- [x] Attach pipeline: `validating → parsing_exif → hashing → dedup_check → uploading → replacing_record → enrichment → complete`
+- [x] `replacing_record` phase UPDATEs the existing row: `storage_path`, `exif_latitude`, `exif_longitude`, `captured_at`, `direction`
+- [x] If row already has `latitude`/`longitude`, those are preserved (EXIF written to `exif_*` fields only)
+- [x] If row has NO coordinates, EXIF coords written to both `latitude`/`longitude` and `exif_*` fields
+- [x] Enrichment runs after attach: reverse-geocode if only GPS, forward-geocode if only address
+- [x] `imageAttached$` emits with `imageId`, `newStoragePath`, `localObjectUrl`, and `coords` on success
 - [ ] `MapShellComponent` subscribes to `imageAttached$` and updates the marker's DivIcon (adds thumbnail to formerly photoless marker)
-- [ ] No old file cleanup needed (row had `storage_path IS NULL`)
-- [ ] Attach jobs survive component destruction
+- [x] No old file cleanup needed (row had `storage_path IS NULL`)
+- [x] Attach jobs survive component destruction
 
 ### Location Conflict Detection
 
-- [ ] After dedup passes, pipeline checks for photoless rows matching the upload's GPS (within 50m) or address
-- [ ] `conflict_check` query uses PostGIS `ST_DWithin` for GPS proximity and case-insensitive `address_label` match
-- [ ] Only rows with `storage_path IS NULL` are considered candidates
-- [ ] If a candidate is found, job transitions to `awaiting_conflict_resolution` and emits `locationConflict$`
-- [ ] `awaiting_conflict_resolution` releases the concurrency slot (does not block other uploads)
+- [x] After dedup passes, pipeline checks for photoless rows matching the upload's GPS (within 50m) or address
+- [x] `conflict_check` query uses PostGIS `ST_DWithin` for GPS proximity and case-insensitive `address_label` match
+- [x] Only rows with `storage_path IS NULL` are considered candidates
+- [x] If a candidate is found, job transitions to `awaiting_conflict_resolution` and emits `locationConflict$`
+- [x] `awaiting_conflict_resolution` releases the concurrency slot (does not block other uploads)
 - [ ] Conflict popup shows existing address/coords vs upload's EXIF data
-- [ ] Three resolution options: "Replace location" (`attach_replace`), "Keep existing" (`attach_keep`), "Create new" (`create_new`)
+- [x] Three resolution options: "Replace location" (`attach_replace`), "Keep existing" (`attach_keep`), "Create new" (`create_new`)
 - [ ] Dismissing the popup defaults to `create_new` (safe default)
-- [ ] `resolveConflict()` re-queues the job at the front of the concurrency queue
-- [ ] `attach_replace` UPDATEs existing row: `storage_path` + EXIF coords + `captured_at` + `direction`, then runs reverse-geocode enrichment
-- [ ] `attach_keep` UPDATEs existing row: `storage_path` + EXIF-only fields (`exif_latitude`, `exif_longitude`, `captured_at`, `direction`) — preserves existing `latitude`, `longitude`, and address
-- [ ] `create_new` INSERTs a new row as normal (same as no-conflict flow)
-- [ ] If no photoless rows match, pipeline continues to `uploading` automatically (no popup)
+- [x] `resolveConflict()` re-queues the job at the front of the concurrency queue
+- [x] `attach_replace` UPDATEs existing row: `storage_path` + EXIF coords + `captured_at` + `direction`, then runs reverse-geocode enrichment
+- [x] `attach_keep` UPDATEs existing row: `storage_path` + EXIF-only fields (`exif_latitude`, `exif_longitude`, `captured_at`, `direction`) — preserves existing `latitude`, `longitude`, and address
+- [x] `create_new` INSERTs a new row as normal (same as no-conflict flow)
+- [x] If no photoless rows match, pipeline continues to `uploading` automatically (no popup)

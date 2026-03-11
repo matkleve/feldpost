@@ -63,18 +63,34 @@ function buildFakeAuthService() {
 }
 
 function buildFakeSupabaseService() {
+  /** Build a chainable Supabase query builder mock that resolves to { data, error }. */
+  function buildQueryChain(
+    resolvedValue: { data: unknown; error: unknown } = { data: null, error: null },
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chain: any = {};
+    chain.select = vi.fn().mockReturnValue(chain);
+    chain.insert = vi.fn().mockReturnValue(chain);
+    chain.update = vi.fn().mockReturnValue(chain);
+    chain.delete = vi.fn().mockReturnValue(chain);
+    chain.upsert = vi.fn().mockReturnValue(chain);
+    chain.eq = vi.fn().mockReturnValue(chain);
+    chain.single = vi.fn().mockResolvedValue(resolvedValue);
+    // Make the chain itself thenable (for fire-and-forget .then() calls)
+    chain.then = (onFulfilled?: (v: unknown) => unknown, onRejected?: (e: unknown) => unknown) =>
+      Promise.resolve(resolvedValue).then(onFulfilled, onRejected);
+    return chain;
+  }
+
   return {
     client: {
       storage: {
         from: vi.fn().mockReturnValue({
           remove: vi.fn().mockResolvedValue({ data: null, error: null }),
+          upload: vi.fn().mockResolvedValue({ data: { path: 'test.jpg' }, error: null }),
         }),
       },
-      from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      }),
+      from: vi.fn().mockImplementation(() => buildQueryChain()),
       rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
     },
   };
@@ -132,12 +148,14 @@ describe('UploadManagerService', () => {
   });
 
   describe('submit()', () => {
-    it('returns an array of job IDs', async () => {
+    it('returns a batch ID and creates job IDs', async () => {
       const { service } = await setup();
-      const ids = service.submit([makeFile(), makeFile()]);
-      expect(ids).toHaveLength(2);
-      expect(typeof ids[0]).toBe('string');
-      expect(typeof ids[1]).toBe('string');
+      const batchId = service.submit([makeFile(), makeFile()]);
+      expect(typeof batchId).toBe('string');
+      const jobIds = service.jobs().map((j) => j.id);
+      expect(jobIds).toHaveLength(2);
+      expect(typeof jobIds[0]).toBe('string');
+      expect(typeof jobIds[1]).toBe('string');
     });
 
     it('adds jobs to the queue', async () => {
@@ -264,7 +282,8 @@ describe('UploadManagerService', () => {
       const failEvents: string[] = [];
       service.uploadFailed$.subscribe((e) => failEvents.push(e.jobId));
 
-      const [jobId] = service.submit([makeFile()]);
+      service.submit([makeFile()]);
+      const jobId = service.jobs()[0].id;
 
       await vi.waitFor(() => {
         expect(failEvents.length).toBe(1);
@@ -288,7 +307,8 @@ describe('UploadManagerService', () => {
       const events: string[] = [];
       service.imageUploaded$.subscribe((e) => events.push(e.jobId));
 
-      const [jobId] = service.submit([makeFile()]);
+      service.submit([makeFile()]);
+      const jobId = service.jobs()[0].id;
 
       await vi.waitFor(() => {
         expect(events.length).toBe(1);
@@ -323,16 +343,17 @@ describe('UploadManagerService', () => {
       // Make all uploads hang
       fakeUpload.parseExif.mockImplementation(() => new Promise(() => {}));
 
-      const ids = service.submit([makeFile(), makeFile(), makeFile(), makeFile()]);
+      service.submit([makeFile(), makeFile(), makeFile(), makeFile()]);
       await new Promise((r) => setTimeout(r, 10));
 
       // The 4th job should still be queued
-      const fourthJob = service.jobs().find((j) => j.id === ids[3]);
+      const allIds = service.jobs().map((j) => j.id);
+      const fourthJob = service.jobs().find((j) => j.id === allIds[3]);
       expect(fourthJob?.phase).toBe('queued');
 
-      service.cancelJob(ids[3]);
+      service.cancelJob(allIds[3]);
 
-      const cancelled = service.jobs().find((j) => j.id === ids[3]);
+      const cancelled = service.jobs().find((j) => j.id === allIds[3]);
       expect(cancelled?.phase).toBe('error');
       expect(cancelled?.error).toContain('cancelled');
     });
@@ -349,7 +370,8 @@ describe('UploadManagerService', () => {
       service.missingData$.subscribe((e) => missingEvents.push(e.jobId));
 
       // Camera filename — no address
-      const [jobId] = service.submit([makeFile('DSC_0001.jpg')]);
+      service.submit([makeFile('DSC_0001.jpg')]);
+      const jobId = service.jobs()[0].id;
 
       await vi.waitFor(() => {
         expect(missingEvents.length).toBe(1);

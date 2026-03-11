@@ -32,6 +32,11 @@ import {
 } from '../../upload/upload-panel/upload-panel.component';
 import { ExifCoords } from '../../../core/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
+import {
+  UploadManagerService,
+  ImageReplacedEvent,
+  ImageAttachedEvent,
+} from '../../../core/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
@@ -52,6 +57,7 @@ import {
 })
 export class MapShellComponent implements OnDestroy {
   private readonly supabaseService = inject(SupabaseService);
+  private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
 
   /** Reference to the Leaflet map container div. */
@@ -208,9 +214,19 @@ export class MapShellComponent implements OnDestroy {
   /** True while a zoom animation is in progress — suppresses moveend queries. */
   private zoomAnimating = false;
 
+  /**
+   * Secondary index: imageId → markerKey for O(1) lookups when
+   * handling upload manager events (replace, attach).
+   */
+  private readonly markersByImageId = new Map<string, string>();
+
+  /** Subscriptions for upload manager events — cleaned up in ngOnDestroy. */
+  private uploadManagerSubs: { unsubscribe(): void }[] = [];
+
   constructor() {
     afterNextRender(() => {
       this.initMap();
+      this.subscribeToUploadManagerEvents();
       void this.workspaceViewService.loadCustomProperties();
     });
   }
@@ -227,6 +243,9 @@ export class MapShellComponent implements OnDestroy {
     this.viewportQueryController = null;
     this.photoMarkerLayer?.clearLayers();
     this.uploadedPhotoMarkers.clear();
+    this.markersByImageId.clear();
+    for (const sub of this.uploadManagerSubs) sub.unsubscribe();
+    this.uploadManagerSubs = [];
     this.userLocationMarker?.remove();
     this.userLocationMarker = null;
     this.clearSearchLocationMarker();
@@ -493,6 +512,64 @@ export class MapShellComponent implements OnDestroy {
     this.searchLocationMarker = null;
   }
 
+  /**
+   * Subscribe to UploadManagerService events for replace/attach photo flows.
+   * Updates marker thumbnails without a full viewport refresh.
+   */
+  private subscribeToUploadManagerEvents(): void {
+    this.uploadManagerSubs.push(
+      this.uploadManagerService.imageReplaced$.subscribe((event: ImageReplacedEvent) => {
+        this.handleImageReplaced(event);
+      }),
+      this.uploadManagerService.imageAttached$.subscribe((event: ImageAttachedEvent) => {
+        this.handleImageAttached(event);
+      }),
+    );
+  }
+
+  /**
+   * Handles imageReplaced$ — rebuilds the marker DivIcon with the new
+   * localObjectUrl so the thumbnail swaps instantly (no placeholder flash).
+   */
+  private handleImageReplaced(event: ImageReplacedEvent): void {
+    const markerKey = this.markersByImageId.get(event.imageId);
+    if (!markerKey) return;
+    const state = this.uploadedPhotoMarkers.get(markerKey);
+    if (!state) return;
+
+    // Revoke the old ObjectURL if it was a blob.
+    if (state.thumbnailUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(state.thumbnailUrl);
+    }
+
+    state.thumbnailUrl = event.localObjectUrl;
+    state.signedAt = undefined; // Will be re-signed on next viewport query.
+    state.direction = event.direction ?? state.direction;
+    this.refreshPhotoMarker(markerKey);
+  }
+
+  /**
+   * Handles imageAttached$ — transitions the marker from CSS placeholder
+   * to real thumbnail using the localObjectUrl from the upload.
+   */
+  private handleImageAttached(event: ImageAttachedEvent): void {
+    const markerKey = this.markersByImageId.get(event.imageId);
+    if (!markerKey) return;
+    const state = this.uploadedPhotoMarkers.get(markerKey);
+    if (!state) return;
+
+    // Revoke the old ObjectURL if it was a blob.
+    if (state.thumbnailUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(state.thumbnailUrl);
+    }
+
+    state.thumbnailUrl = event.localObjectUrl;
+    state.signedAt = undefined;
+    state.direction = event.direction ?? state.direction;
+    state.thumbnailSourcePath = event.newStoragePath;
+    this.refreshPhotoMarker(markerKey);
+  }
+
   private upsertUploadedPhotoMarker(event: ImageUploadedEvent): void {
     if (!this.map) return;
 
@@ -536,6 +613,11 @@ export class MapShellComponent implements OnDestroy {
       imageId: event.id,
       optimistic: true,
     });
+
+    // Maintain secondary index for upload manager event lookups.
+    if (event.id) {
+      this.markersByImageId.set(event.id, markerKey);
+    }
   }
 
   /**
@@ -615,6 +697,10 @@ export class MapShellComponent implements OnDestroy {
       if (state.optimistic) continue; // keep until next reconciliation
       if (!incoming.has(key)) {
         this.photoMarkerLayer!.removeLayer(state.marker);
+        // Clean up secondary index for removed markers.
+        if (state.imageId) {
+          this.markersByImageId.delete(state.imageId);
+        }
         this.uploadedPhotoMarkers.delete(key);
       }
     }
@@ -633,6 +719,23 @@ export class MapShellComponent implements OnDestroy {
         count === 1 ? (row.thumbnail_path ?? row.storage_path ?? undefined) : undefined;
 
       if (existing) {
+        // Revoke stale ObjectURL when signed URL takes over from optimistic blob.
+        if (
+          existing.thumbnailUrl &&
+          existing.thumbnailUrl.startsWith('blob:') &&
+          thumbnailSourcePath
+        ) {
+          URL.revokeObjectURL(existing.thumbnailUrl);
+          existing.thumbnailUrl = undefined;
+          existing.signedAt = undefined;
+        }
+        // Update imageId index if it changed (e.g. cluster split to single).
+        const newImageId = count === 1 ? (row.image_id ?? undefined) : undefined;
+        if (existing.imageId !== newImageId) {
+          if (existing.imageId) this.markersByImageId.delete(existing.imageId);
+          if (newImageId) this.markersByImageId.set(newImageId, key);
+          existing.imageId = newImageId;
+        }
         // Update if data changed.
         if (
           existing.count !== count ||
@@ -672,6 +775,11 @@ export class MapShellComponent implements OnDestroy {
         thumbnailSourcePath,
         imageId: count === 1 ? (row.image_id ?? undefined) : undefined,
       });
+
+      // Maintain secondary index for single-image markers.
+      if (count === 1 && row.image_id) {
+        this.markersByImageId.set(row.image_id, key);
+      }
     }
 
     // Clear optimistic flag from surviving markers.
