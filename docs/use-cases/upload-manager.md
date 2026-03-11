@@ -93,6 +93,7 @@ sequenceDiagram
 ```
 
 **Expected state after:**
+
 - Job phase = `complete`
 - New marker visible on map
 - Address fields populated in DB
@@ -210,6 +211,7 @@ sequenceDiagram
 ```
 
 **Expected state after:**
+
 - Job phase = `complete`
 - DB record has `address_label` = "Burgstraße 7" (from filename)
 - DB record has `latitude` / `longitude` from forward geocoding
@@ -259,6 +261,7 @@ sequenceDiagram
 ```
 
 **Expected state after:**
+
 - Job phase = `missing_data`
 - File is NOT uploaded yet (no storage or DB write)
 - MissingDataManager (future) will handle resolution (manual coords, manual address, etc.)
@@ -458,6 +461,7 @@ sequenceDiagram
 ```
 
 **Expected state after:**
+
 - Job phase = `complete`
 - DB record has `address_label` = "Burgstraße 7"
 - DB record has `latitude` / `longitude` = null
@@ -494,6 +498,7 @@ sequenceDiagram
 ```
 
 **Design decision:** Upload state is NOT persisted to localStorage or IndexedDB. Rationale:
+
 - Partial uploads in Supabase Storage cannot be resumed (no resumable upload API)
 - The File object is not serializable
 - Simplicity: restarting uploads is cheap; partial-resume logic is complex and fragile

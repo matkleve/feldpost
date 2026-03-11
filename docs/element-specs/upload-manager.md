@@ -8,13 +8,13 @@ Today, queue management and concurrency live inside `UploadPanelComponent`. When
 
 ## Why It Exists
 
-| Problem                                   | Solution                                                       |
-| ----------------------------------------- | -------------------------------------------------------------- |
-| Upload state lives in a component         | Move queue + concurrency to a root-provided service            |
-| Navigating away kills active uploads      | Service persists for the app's lifetime                        |
-| Multiple entry points (panel, detail, …)  | Single `submit()` method callable from anywhere                |
-| No global progress visibility             | Service exposes signal-based state; any UI can read it         |
-| Address resolution is fire-and-forget     | Manager tracks it as an explicit async phase per upload        |
+| Problem                                  | Solution                                                |
+| ---------------------------------------- | ------------------------------------------------------- |
+| Upload state lives in a component        | Move queue + concurrency to a root-provided service     |
+| Navigating away kills active uploads     | Service persists for the app's lifetime                 |
+| Multiple entry points (panel, detail, …) | Single `submit()` method callable from anywhere         |
+| No global progress visibility            | Service exposes signal-based state; any UI can read it  |
+| Address resolution is fire-and-forget    | Manager tracks it as an explicit async phase per upload |
 
 ## Architecture Overview
 
@@ -70,9 +70,8 @@ graph TB
 ## Interface Contract
 
 ```typescript
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class UploadManagerService {
-
   /** All jobs (active + completed + failed). Read-only signal for UI binding. */
   readonly jobs: Signal<ReadonlyArray<UploadJob>>;
 
@@ -118,17 +117,17 @@ interface SubmitOptions {
 }
 
 type UploadPhase =
-  | 'queued'                // Waiting for a concurrency slot
-  | 'validating'            // Client-side file checks
-  | 'parsing_exif'          // Reading EXIF GPS + timestamp
-  | 'extracting_title'      // Parsing filename for address hint
-  | 'uploading'             // Sending bytes to Supabase Storage
-  | 'saving_record'         // Inserting the images row
-  | 'resolving_address'     // Reverse geocoding: GPS → address (non-blocking)
-  | 'resolving_coordinates' // Forward geocoding: address → GPS (non-blocking)
-  | 'missing_data'          // No GPS + no address → handed to MissingDataManager
-  | 'complete'              // All phases done
-  | 'error';                // A critical phase failed
+  | "queued" // Waiting for a concurrency slot
+  | "validating" // Client-side file checks
+  | "parsing_exif" // Reading EXIF GPS + timestamp
+  | "extracting_title" // Parsing filename for address hint
+  | "uploading" // Sending bytes to Supabase Storage
+  | "saving_record" // Inserting the images row
+  | "resolving_address" // Reverse geocoding: GPS → address (non-blocking)
+  | "resolving_coordinates" // Forward geocoding: address → GPS (non-blocking)
+  | "missing_data" // No GPS + no address → handed to MissingDataManager
+  | "complete" // All phases done
+  | "error"; // A critical phase failed
 
 interface UploadJob {
   /** Stable unique ID for tracking. */
@@ -165,6 +164,7 @@ interface UploadJob {
 ## Pipeline Phases
 
 Each upload job progresses through a deterministic pipeline. The path depends on what data the file carries:
+
 - **Path A (GPS found)**: upload → save → reverse-geocode address (enrichment).
 - **Path B (no GPS, address in title)**: upload → save with address → forward-geocode coordinates (enrichment).
 - **Path C (no GPS, no address)**: hand to MissingDataManager (not yet implemented).
@@ -205,17 +205,17 @@ stateDiagram-v2
 
 ### Phase Detail
 
-| #   | Phase                    | Critical? | Blocks UI? | Failure Behaviour                                                  |
-| --- | ------------------------ | --------- | ---------- | ------------------------------------------------------------------ |
-| 1   | `queued`                 | —         | No         | Waits for a concurrency slot (max 3 parallel)                      |
-| 2   | `validating`             | Yes       | Instant    | Rejects immediately with reason (size, MIME type)                  |
-| 3   | `parsing_exif`           | Yes       | Brief      | No GPS → continue to title extraction; parse error → treat as no-EXIF |
-| 4   | `extracting_title`       | Yes       | Brief      | Address found → continue; no address → `missing_data`             |
-| 5   | `uploading`              | Yes       | Yes        | Hard stop, error shown, job can be retried                         |
-| 6   | `saving_record`          | Yes       | Yes        | Hard stop, attempt to delete orphaned storage file                 |
-| 7a  | `resolving_address`      | No        | No         | Path A: reverse geocode. Silent — address stays null               |
-| 7b  | `resolving_coordinates`  | No        | No         | Path B: forward geocode. Silent — coords stay null                 |
-| —   | `missing_data`           | No        | No         | Parked. Handed to MissingDataManager (not yet implemented)         |
+| #   | Phase                   | Critical? | Blocks UI? | Failure Behaviour                                                     |
+| --- | ----------------------- | --------- | ---------- | --------------------------------------------------------------------- |
+| 1   | `queued`                | —         | No         | Waits for a concurrency slot (max 3 parallel)                         |
+| 2   | `validating`            | Yes       | Instant    | Rejects immediately with reason (size, MIME type)                     |
+| 3   | `parsing_exif`          | Yes       | Brief      | No GPS → continue to title extraction; parse error → treat as no-EXIF |
+| 4   | `extracting_title`      | Yes       | Brief      | Address found → continue; no address → `missing_data`                 |
+| 5   | `uploading`             | Yes       | Yes        | Hard stop, error shown, job can be retried                            |
+| 6   | `saving_record`         | Yes       | Yes        | Hard stop, attempt to delete orphaned storage file                    |
+| 7a  | `resolving_address`     | No        | No         | Path A: reverse geocode. Silent — address stays null                  |
+| 7b  | `resolving_coordinates` | No        | No         | Path B: forward geocode. Silent — coords stay null                    |
+| —   | `missing_data`          | No        | No         | Parked. Handed to MissingDataManager (not yet implemented)            |
 
 ## Concurrency Model
 
@@ -264,12 +264,12 @@ sequenceDiagram
 
 ### What Stops Uploads
 
-| Event                | Effect                                                                                    |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| Page reload / close  | All in-flight uploads are lost (browser constraint)                                       |
-| Network loss         | Current upload fails → `error` phase; user can retry when reconnected                     |
-| User cancels job     | If storage upload started, attempt to delete partial file; job moves to `error`           |
-| Logout               | Manager detects auth change, cancels all active jobs (data belongs to authenticated user) |
+| Event               | Effect                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| Page reload / close | All in-flight uploads are lost (browser constraint)                                       |
+| Network loss        | Current upload fails → `error` phase; user can retry when reconnected                     |
+| User cancels job    | If storage upload started, attempt to delete partial file; job moves to `error`           |
+| Logout              | Manager detects auth change, cancels all active jobs (data belongs to authenticated user) |
 
 ## Events
 
@@ -305,7 +305,7 @@ interface MissingDataEvent {
   jobId: string;
   fileName: string;
   /** The image has no GPS EXIF and no address could be extracted from the filename. */
-  reason: 'no_gps_no_address';
+  reason: "no_gps_no_address";
 }
 ```
 
@@ -336,31 +336,31 @@ graph LR
 
 ## Data
 
-| Field        | Source                                 | Type                        |
-| ------------ | -------------------------------------- | --------------------------- |
-| Jobs         | `UploadManagerService.jobs()`          | `Signal<UploadJob[]>`       |
-| Active count | `UploadManagerService.activeCount()`   | `Signal<number>`            |
-| Is busy      | `UploadManagerService.isBusy()`        | `Signal<boolean>`           |
-| Events       | `UploadManagerService.imageUploaded$`  | `Observable<...>`           |
+| Field        | Source                                | Type                  |
+| ------------ | ------------------------------------- | --------------------- |
+| Jobs         | `UploadManagerService.jobs()`         | `Signal<UploadJob[]>` |
+| Active count | `UploadManagerService.activeCount()`  | `Signal<number>`      |
+| Is busy      | `UploadManagerService.isBusy()`       | `Signal<boolean>`     |
+| Events       | `UploadManagerService.imageUploaded$` | `Observable<...>`     |
 
 ## State
 
-| Name          | Type                            | Default | Controls                                    |
-| ------------- | ------------------------------- | ------- | ------------------------------------------- |
-| `jobs`        | `WritableSignal<UploadJob[]>`   | `[]`    | Full upload queue + history                  |
-| `activeJobs`  | `Signal<UploadJob[]>`           | `[]`    | Computed: non-terminal jobs                  |
-| `isBusy`      | `Signal<boolean>`               | `false` | Computed: any non-terminal job exists        |
-| `activeCount` | `Signal<number>`                | `0`     | Computed: jobs in uploading/saving/resolving |
+| Name          | Type                          | Default | Controls                                     |
+| ------------- | ----------------------------- | ------- | -------------------------------------------- |
+| `jobs`        | `WritableSignal<UploadJob[]>` | `[]`    | Full upload queue + history                  |
+| `activeJobs`  | `Signal<UploadJob[]>`         | `[]`    | Computed: non-terminal jobs                  |
+| `isBusy`      | `Signal<boolean>`             | `false` | Computed: any non-terminal job exists        |
+| `activeCount` | `Signal<number>`              | `0`     | Computed: jobs in uploading/saving/resolving |
 
 ## File Map
 
-| File                                                        | Purpose                                                       |
-| ----------------------------------------------------------- | ------------------------------------------------------------- |
-| `core/upload-manager.service.ts`                            | Queue management, concurrency, pipeline orchestration         |
-| `core/upload-manager.service.spec.ts`                       | Unit tests                                                    |
-| `core/upload.service.ts`                                    | Existing — per-file logic (validation, EXIF, storage, DB)     |
-| `core/geocoding.service.ts`                                 | Existing — reverse geocoding                                  |
-| `features/upload/upload-panel/upload-panel.component.ts`    | Refactor — delegate to UploadManagerService                   |
+| File                                                     | Purpose                                                   |
+| -------------------------------------------------------- | --------------------------------------------------------- |
+| `core/upload-manager.service.ts`                         | Queue management, concurrency, pipeline orchestration     |
+| `core/upload-manager.service.spec.ts`                    | Unit tests                                                |
+| `core/upload.service.ts`                                 | Existing — per-file logic (validation, EXIF, storage, DB) |
+| `core/geocoding.service.ts`                              | Existing — reverse geocoding                              |
+| `features/upload/upload-panel/upload-panel.component.ts` | Refactor — delegate to UploadManagerService               |
 
 ## Wiring
 
