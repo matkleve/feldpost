@@ -43,11 +43,14 @@ ThumbnailCard                              ← 128×128, rounded, overflow-hidde
 ├── [not loaded] Placeholder               ← CSS gradient + camera icon (SVG mask), matches card geometry
 ├── DateOverlay                            ← bottom-left, text-xs, semi-transparent bg
 ├── [corrected] CorrectionDot             ← top-right, 6px, --color-accent
+├── [uploading] UploadingOverlay           ← semi-transparent overlay with animated upload icon, --color-primary
 └── [hover] ActionOverlay                  ← opacity 0→1, 80ms, no layout shift
     ├── SelectionCheckbox                  ← top-left
 │   ├── AddToProjectButton                 ← top-right
     └── ContextMenuButton (⋯)             ← bottom-right
 ```
+
+The `UploadingOverlay` is shown when a file targeting this image's coordinates is currently being uploaded (`jobPhaseChanged$` from `UploadManagerService`, phase === `'uploading'`). It renders a semi-transparent `--color-bg-base` overlay (0.6 opacity) with a small animated upload arrow icon in the center. The overlay does not block hover actions but sits behind them in z-order.
 
 ## Data
 
@@ -64,6 +67,7 @@ ThumbnailCard                              ← 128×128, rounded, overflow-hidde
 | ---------------------- | --------- | ------- | ----------------------------------------------------------- |
 | `isSelected`           | `boolean` | `false` | Checkbox state                                              |
 | `isHovered`            | `boolean` | `false` | Action overlay visibility (desktop)                         |
+| `isUploading`          | `boolean` | `false` | Upload overlay visibility (driven by `jobPhaseChanged$`)    |
 | `imgLoading`           | `boolean` | `true`  | Whether `<img>` is still loading from network               |
 | `imgErrored`           | `boolean` | `false` | Whether `<img>` returned an error (broken URL / 404)        |
 | `isLoading`            | computed  | -       | Pulsing placeholder; true while URL is pending or img loads |
@@ -146,5 +150,8 @@ stateDiagram-v2
 
 - [ ] Correction dot top-right (when corrected)
 - [ ] Hover reveals checkbox, add-to-project, context menu (80ms, no layout shift)
+- [ ] Upload overlay shown when a file for this image's coords is in `uploading` phase
+- [ ] Upload overlay has animated upload icon + semi-transparent background
+- [ ] Upload overlay disappears when upload completes or errors
 - [ ] Mobile: checkboxes visible in bulk-select mode, hidden otherwise
 - [ ] Click opens detail view

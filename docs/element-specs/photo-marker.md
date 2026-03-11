@@ -112,13 +112,13 @@ The placeholder is a pure-CSS element — no network request, no `<img>` tag. It
 
 Markers are stateless DOM elements. State is held in services or the map shell and reflected through CSS classes on the marker HTML.
 
-| Name                | Type                       | Default | Controls                                      |
-| ------------------- | -------------------------- | ------- | --------------------------------------------- |
-| `selectedMarkerKey` | `string \| null`           | `null`  | Which single marker renders the selected ring |
-| `markerZoomLevel`   | `'far' \| 'mid' \| 'near'` | `'mid'` | Which zoom modifier class is applied          |
-| `isCorrected`       | `boolean`                  | `false` | Whether the correction dot renders            |
-| `isUploading`       | `boolean`                  | `false` | Whether the pending ring renders              |
-| `bearing`           | `number \| null`           | `null`  | Whether the Direction Cone can render         |
+| Name                | Type                       | Default | Controls                                                                                                                                                                                                                                                                                                                  |
+| ------------------- | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `selectedMarkerKey` | `string \| null`           | `null`  | Which single marker renders the selected ring                                                                                                                                                                                                                                                                             |
+| `markerZoomLevel`   | `'far' \| 'mid' \| 'near'` | `'mid'` | Which zoom modifier class is applied                                                                                                                                                                                                                                                                                      |
+| `isCorrected`       | `boolean`                  | `false` | Whether the correction dot renders                                                                                                                                                                                                                                                                                        |
+| `isUploading`       | `boolean`                  | `false` | Whether the pending ring renders. Driven by `UploadManagerService.jobPhaseChanged$`: set to `true` when a job targeting this marker's coordinates enters `uploading` phase; reset to `false` when the job reaches `complete` or `error`. During batch uploads, multiple markers may show the pending ring simultaneously. |
+| `bearing`           | `number \| null`           | `null`  | Whether the Direction Cone can render                                                                                                                                                                                                                                                                                     |
 
 ## Viewport-Driven Marker Lifecycle
 
