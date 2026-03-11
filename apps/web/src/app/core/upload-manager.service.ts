@@ -1,0 +1,586 @@
+/**
+ * UploadManagerService — singleton, application-wide upload pipeline.
+ *
+ * Owns the full lifecycle: validation, EXIF parsing, title extraction,
+ * storage upload, DB insert, and address/coordinate resolution.
+ * Any component can call submit() and navigate away — uploads continue
+ * as long as the browser tab stays open.
+ *
+ * Ground rules:
+ *  - providedIn: 'root' — survives component lifecycle.
+ *  - Maximum 3 concurrent uploads (FIFO queue).
+ *  - Signals for reactive state; Observables for domain events.
+ *  - Delegates per-file work to UploadService; never touches Leaflet.
+ *  - Auth change (logout) cancels all active jobs.
+ *  - beforeunload warning when uploads are in progress.
+ */
+
+import { Injectable, Signal, computed, effect, inject, signal } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+import { AuthService } from './auth.service';
+import { GeocodingService } from './geocoding.service';
+import { SupabaseService } from './supabase.service';
+import { ExifCoords, ParsedExif, UploadService } from './upload.service';
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+
+const MAX_CONCURRENT = 3;
+
+/**
+ * Camera-generated filename prefixes that carry no address information.
+ * Used by extractAddressFromFilename to short-circuit obvious non-addresses.
+ */
+const CAMERA_PREFIXES = /^(IMG|DSC|DCIM|P|PXL|MVIMG|PANO|VID|MOV|Screenshot)[\s_-]/i;
+
+/** Timestamps like 20260311, 2026-03-11, 20260311_143022, etc. */
+const TIMESTAMP_PATTERN = /^\d{4}[-_]?\d{2}[-_]?\d{2}([-_T]\d{2}[-_]?\d{2}[-_]?\d{2})?$/;
+
+/**
+ * European street type suffixes recognised for address extraction.
+ * Matches in the middle or end of a token sequence.
+ */
+const STREET_SUFFIXES =
+  /(?:stra(?:ß|ss)e|strasse|str\.?|gasse|weg|allee|platz|gässli|ring|damm|ufer|road|street|st\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|court|ct\.?|way)\b/i;
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+export type UploadPhase =
+  | 'queued'
+  | 'validating'
+  | 'parsing_exif'
+  | 'extracting_title'
+  | 'uploading'
+  | 'saving_record'
+  | 'resolving_address'
+  | 'resolving_coordinates'
+  | 'missing_data'
+  | 'complete'
+  | 'error';
+
+export interface UploadJob {
+  id: string;
+  file: File;
+  phase: UploadPhase;
+  progress: number;
+  statusLabel: string;
+  error?: string;
+  failedAt?: UploadPhase;
+  coords?: ExifCoords;
+  titleAddress?: string;
+  direction?: number;
+  imageId?: string;
+  storagePath?: string;
+  thumbnailUrl?: string;
+  submittedAt: Date;
+  /** Cached EXIF parse to avoid re-parsing on retry. */
+  parsedExif?: ParsedExif;
+}
+
+export interface SubmitOptions {
+  projectId?: string;
+}
+
+export interface ImageUploadedEvent {
+  jobId: string;
+  imageId: string;
+  coords?: ExifCoords;
+  direction?: number;
+  thumbnailUrl?: string;
+}
+
+export interface UploadFailedEvent {
+  jobId: string;
+  phase: UploadPhase;
+  error: string;
+}
+
+export interface MissingDataEvent {
+  jobId: string;
+  fileName: string;
+  reason: 'no_gps_no_address';
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set(['complete', 'error', 'missing_data']);
+
+const ACTIVE_PHASES: ReadonlySet<UploadPhase> = new Set([
+  'validating',
+  'parsing_exif',
+  'extracting_title',
+  'uploading',
+  'saving_record',
+  'resolving_address',
+  'resolving_coordinates',
+]);
+
+function phaseLabel(phase: UploadPhase): string {
+  switch (phase) {
+    case 'queued':
+      return 'Queued';
+    case 'validating':
+      return 'Validating…';
+    case 'parsing_exif':
+      return 'Reading EXIF…';
+    case 'extracting_title':
+      return 'Checking filename…';
+    case 'uploading':
+      return 'Uploading…';
+    case 'saving_record':
+      return 'Saving…';
+    case 'resolving_address':
+      return 'Resolving address…';
+    case 'resolving_coordinates':
+      return 'Resolving location…';
+    case 'missing_data':
+      return 'Missing location';
+    case 'complete':
+      return 'Uploaded';
+    case 'error':
+      return 'Failed';
+  }
+}
+
+// ── Service ────────────────────────────────────────────────────────────────────
+
+@Injectable({ providedIn: 'root' })
+export class UploadManagerService {
+  private readonly uploadService = inject(UploadService);
+  private readonly geocoding = inject(GeocodingService);
+  private readonly auth = inject(AuthService);
+  private readonly supabase = inject(SupabaseService);
+
+  // ── State ──────────────────────────────────────────────────────────────────
+
+  private readonly _jobs = signal<UploadJob[]>([]);
+
+  readonly jobs: Signal<ReadonlyArray<UploadJob>> = this._jobs.asReadonly();
+
+  readonly activeJobs: Signal<ReadonlyArray<UploadJob>> = computed(() =>
+    this._jobs().filter((j) => !TERMINAL_PHASES.has(j.phase)),
+  );
+
+  readonly isBusy: Signal<boolean> = computed(() => this.activeJobs().length > 0);
+
+  readonly activeCount: Signal<number> = computed(
+    () => this._jobs().filter((j) => ACTIVE_PHASES.has(j.phase)).length,
+  );
+
+  // ── Events ─────────────────────────────────────────────────────────────────
+
+  private readonly _imageUploaded$ = new Subject<ImageUploadedEvent>();
+  private readonly _uploadFailed$ = new Subject<UploadFailedEvent>();
+  private readonly _missingData$ = new Subject<MissingDataEvent>();
+
+  readonly imageUploaded$: Observable<ImageUploadedEvent> = this._imageUploaded$.asObservable();
+  readonly uploadFailed$: Observable<UploadFailedEvent> = this._uploadFailed$.asObservable();
+  readonly missingData$: Observable<MissingDataEvent> = this._missingData$.asObservable();
+
+  // ── Concurrency tracking ───────────────────────────────────────────────────
+
+  /** IDs of jobs currently running through the pipeline (not queued, not terminal). */
+  private readonly runningIds = new Set<string>();
+
+  // ── beforeunload ───────────────────────────────────────────────────────────
+
+  private readonly beforeUnloadHandler = (e: BeforeUnloadEvent): void => {
+    e.preventDefault();
+  };
+
+  constructor() {
+    // Cancel all active jobs when the user logs out.
+    effect(() => {
+      const user = this.auth.user();
+      if (!user && this.runningIds.size > 0) {
+        this.cancelAllActive();
+      }
+    });
+
+    // Manage beforeunload listener based on busy state.
+    effect(() => {
+      if (this.isBusy()) {
+        window.addEventListener('beforeunload', this.beforeUnloadHandler);
+      } else {
+        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      }
+    });
+  }
+
+  // ── Public API ─────────────────────────────────────────────────────────────
+
+  /**
+   * Submit one or more files for upload. Returns immediately.
+   * Each file becomes an UploadJob tracked in `jobs`.
+   */
+  submit(files: File[], _options?: SubmitOptions): string[] {
+    const ids: string[] = [];
+
+    const newJobs: UploadJob[] = files.map((file) => {
+      const id = crypto.randomUUID();
+      ids.push(id);
+      return {
+        id,
+        file,
+        phase: 'queued' as UploadPhase,
+        progress: 0,
+        statusLabel: phaseLabel('queued'),
+        thumbnailUrl: URL.createObjectURL(file),
+        submittedAt: new Date(),
+      };
+    });
+
+    this._jobs.update((prev) => [...prev, ...newJobs]);
+    this.drainQueue();
+
+    return ids;
+  }
+
+  /** Retry a failed job from the beginning. */
+  retryJob(jobId: string): void {
+    const job = this.findJob(jobId);
+    if (!job || job.phase !== 'error') return;
+
+    this.updateJob(jobId, {
+      phase: 'queued',
+      statusLabel: phaseLabel('queued'),
+      progress: 0,
+      error: undefined,
+      failedAt: undefined,
+    });
+    this.drainQueue();
+  }
+
+  /** Remove a terminal job (complete / error / missing_data) from the list. */
+  dismissJob(jobId: string): void {
+    const job = this.findJob(jobId);
+    if (!job || !TERMINAL_PHASES.has(job.phase)) return;
+
+    if (job.thumbnailUrl && job.phase !== 'complete') {
+      URL.revokeObjectURL(job.thumbnailUrl);
+    }
+    this._jobs.update((prev) => prev.filter((j) => j.id !== jobId));
+  }
+
+  /** Remove all terminal jobs from the list. */
+  dismissAllCompleted(): void {
+    const terminal = this._jobs().filter((j) => TERMINAL_PHASES.has(j.phase));
+    for (const j of terminal) {
+      if (j.thumbnailUrl && j.phase !== 'complete') {
+        URL.revokeObjectURL(j.thumbnailUrl);
+      }
+    }
+    this._jobs.update((prev) => prev.filter((j) => !TERMINAL_PHASES.has(j.phase)));
+  }
+
+  /** Cancel a pending or active job. Cleans up partial storage if needed. */
+  cancelJob(jobId: string): void {
+    const job = this.findJob(jobId);
+    if (!job || TERMINAL_PHASES.has(job.phase)) return;
+
+    this.runningIds.delete(jobId);
+
+    // Attempt to clean up orphaned storage file if upload was already started.
+    if (job.storagePath) {
+      this.supabase.client.storage.from('images').remove([job.storagePath]);
+    }
+
+    this.updateJob(jobId, {
+      phase: 'error',
+      statusLabel: 'Cancelled',
+      error: 'Upload cancelled by user.',
+      failedAt: job.phase,
+    });
+
+    this.drainQueue();
+  }
+
+  /**
+   * Resolve a `missing_data` job by providing manual coordinates.
+   * Moves the job back into the upload pipeline (Path A with manual coords).
+   * This bridges the gap until MissingDataManager is implemented.
+   */
+  placeJob(jobId: string, coords: ExifCoords): void {
+    const job = this.findJob(jobId);
+    if (!job || job.phase !== 'missing_data') return;
+
+    this.updateJob(jobId, {
+      phase: 'queued',
+      statusLabel: phaseLabel('queued'),
+      coords,
+    });
+    this.drainQueue();
+  }
+
+  // ── Pipeline ───────────────────────────────────────────────────────────────
+
+  /**
+   * Start uploads for queued jobs, respecting the MAX_CONCURRENT cap.
+   * Called after enqueuing and after each pipeline completion.
+   */
+  private drainQueue(): void {
+    const jobs = this._jobs();
+    const slotsAvailable = MAX_CONCURRENT - this.runningIds.size;
+    if (slotsAvailable <= 0) return;
+
+    const queued = jobs.filter((j) => j.phase === 'queued');
+    const toStart = queued.slice(0, slotsAvailable);
+
+    for (const job of toStart) {
+      this.runningIds.add(job.id);
+      this.runPipeline(job.id);
+    }
+  }
+
+  /** Runs the full pipeline for one job. */
+  private async runPipeline(jobId: string): Promise<void> {
+    try {
+      const job = this.findJob(jobId);
+      if (!job) return;
+
+      // If the job already has manually-placed coords (from placeJob),
+      // skip validation/EXIF/title phases and go straight to upload.
+      if (job.coords) {
+        await this.runUploadPhase(jobId, job.coords, job.parsedExif);
+        return;
+      }
+
+      // ── Phase: validating ──────────────────────────────────────────────
+      this.setPhase(jobId, 'validating');
+      const validation = this.uploadService.validateFile(job.file);
+      if (!validation.valid) {
+        this.failJob(jobId, 'validating', validation.error!);
+        return;
+      }
+
+      // ── Phase: parsing_exif ────────────────────────────────────────────
+      this.setPhase(jobId, 'parsing_exif');
+      const parsedExif = job.parsedExif ?? (await this.uploadService.parseExif(job.file));
+      this.updateJob(jobId, { parsedExif });
+
+      if (parsedExif.coords) {
+        // Path A: GPS found → upload → save → reverse-geocode (enrichment)
+        this.updateJob(jobId, { coords: parsedExif.coords, direction: parsedExif.direction });
+        await this.runUploadPhase(jobId, parsedExif.coords, parsedExif);
+        return;
+      }
+
+      // ── Phase: extracting_title ────────────────────────────────────────
+      this.setPhase(jobId, 'extracting_title');
+      const titleAddress = this.extractAddressFromFilename(job.file.name);
+
+      if (titleAddress) {
+        // Path B: address in title → upload → save → forward-geocode (enrichment)
+        this.updateJob(jobId, { titleAddress });
+        await this.runUploadPhase(jobId, undefined, parsedExif);
+        return;
+      }
+
+      // Path C: no GPS + no address → missing_data
+      this.setPhase(jobId, 'missing_data');
+      this.runningIds.delete(jobId);
+      this._missingData$.next({
+        jobId,
+        fileName: job.file.name,
+        reason: 'no_gps_no_address',
+      });
+      this.drainQueue();
+    } catch (err) {
+      const current = this.findJob(jobId);
+      this.failJob(
+        jobId,
+        current?.phase ?? 'queued',
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
+
+  /**
+   * Upload phase: delegates to UploadService, then runs post-upload enrichment.
+   * Handles both Path A (has coords) and Path B (has titleAddress, no coords).
+   */
+  private async runUploadPhase(
+    jobId: string,
+    coords: ExifCoords | undefined,
+    parsedExif: ParsedExif | undefined,
+  ): Promise<void> {
+    const job = this.findJob(jobId);
+    if (!job) return;
+
+    // ── Phase: uploading ───────────────────────────────────────────────
+    this.setPhase(jobId, 'uploading');
+    this.updateJob(jobId, { progress: 0 });
+
+    // ── Phase: saving_record (UploadService does upload + insert as one call)
+    const result = await this.uploadService.uploadFile(job.file, coords, parsedExif);
+
+    if (result.error !== null) {
+      const msg =
+        result.error instanceof Error
+          ? result.error.message
+          : typeof result.error === 'object'
+            ? ((result.error as { message?: string }).message ?? String(result.error))
+            : String(result.error);
+
+      // If we have a storage path from partial upload, try cleanup
+      this.failJob(jobId, 'saving_record', msg);
+      return;
+    }
+
+    this.setPhase(jobId, 'saving_record');
+    this.updateJob(jobId, {
+      progress: 100,
+      imageId: result.id,
+      storagePath: result.storagePath,
+      coords: result.coords,
+      direction: result.direction,
+    });
+
+    // ── Post-upload enrichment ─────────────────────────────────────────
+    const updatedJob = this.findJob(jobId)!;
+
+    if (updatedJob.coords && !updatedJob.titleAddress) {
+      // Path A: has GPS → reverse-geocode to get address (non-blocking enrichment)
+      await this.enrichWithReverseGeocode(jobId);
+    } else if (updatedJob.titleAddress && !updatedJob.coords) {
+      // Path B: has title address → forward-geocode to get coords (non-blocking enrichment)
+      await this.enrichWithForwardGeocode(jobId);
+    }
+
+    // ── Complete ───────────────────────────────────────────────────────
+    this.setPhase(jobId, 'complete');
+    this.runningIds.delete(jobId);
+
+    const finalJob = this.findJob(jobId)!;
+    this._imageUploaded$.next({
+      jobId,
+      imageId: finalJob.imageId!,
+      coords: finalJob.coords,
+      direction: finalJob.direction,
+      thumbnailUrl: finalJob.thumbnailUrl,
+    });
+
+    this.drainQueue();
+  }
+
+  /**
+   * Path A enrichment: reverse-geocode GPS coordinates to populate address fields.
+   * Non-blocking — failure is silent. UploadService already fires its own
+   * reverse-geocode as fire-and-forget, so this phase just tracks the state.
+   */
+  private async enrichWithReverseGeocode(jobId: string): Promise<void> {
+    this.setPhase(jobId, 'resolving_address');
+    // UploadService.uploadFile already calls resolveAddress() internally,
+    // so we don't need to call it again. This phase is for state tracking only.
+  }
+
+  /**
+   * Path B enrichment: forward-geocode title address to get coordinates.
+   * Non-blocking — failure is silent, coords stay null.
+   */
+  private async enrichWithForwardGeocode(jobId: string): Promise<void> {
+    this.setPhase(jobId, 'resolving_coordinates');
+    const job = this.findJob(jobId);
+    if (!job?.titleAddress || !job.imageId) return;
+
+    try {
+      const result = await this.geocoding.forward(job.titleAddress);
+      if (!result) return;
+
+      // Update the DB row with the resolved coordinates.
+      const { error } = await this.supabase.client
+        .from('images')
+        .update({
+          latitude: result.lat,
+          longitude: result.lng,
+        })
+        .eq('id', job.imageId);
+
+      if (error) return;
+
+      // Update the DB row with address fields from forward geocoding.
+      await this.supabase.client.rpc('bulk_update_image_addresses', {
+        p_image_ids: [job.imageId],
+        p_address_label: result.addressLabel,
+        p_city: result.city,
+        p_district: result.district,
+        p_street: result.street,
+        p_country: result.country,
+      });
+
+      this.updateJob(jobId, { coords: { lat: result.lat, lng: result.lng } });
+    } catch {
+      // Enrichment failure is silent — coords remain null.
+    }
+  }
+
+  // ── Title extraction ───────────────────────────────────────────────────────
+
+  /**
+   * Attempts to extract an address hint from a filename.
+   * This is a simplified version of the planned FilenameLocationParser
+   * (see folder-import.md §4.1). Returns undefined for camera-generated
+   * filenames and timestamps.
+   */
+  private extractAddressFromFilename(filename: string): string | undefined {
+    // Strip extension
+    const base = filename.replace(/\.[^.]+$/, '');
+
+    // Reject obvious camera-generated filenames
+    if (CAMERA_PREFIXES.test(base)) return undefined;
+
+    // Reject pure timestamps
+    if (TIMESTAMP_PATTERN.test(base)) return undefined;
+
+    // Normalise separators to spaces
+    const normalised = base.replace(/[_-]+/g, ' ').trim();
+
+    // Look for a street suffix pattern
+    if (!STREET_SUFFIXES.test(normalised)) return undefined;
+
+    // Clean up: collapse multiple spaces, trim
+    const cleaned = normalised.replace(/\s+/g, ' ').trim();
+    return cleaned || undefined;
+  }
+
+  // ── Job state helpers ──────────────────────────────────────────────────────
+
+  private findJob(jobId: string): UploadJob | undefined {
+    return this._jobs().find((j) => j.id === jobId);
+  }
+
+  private updateJob(jobId: string, patch: Partial<UploadJob>): void {
+    this._jobs.update((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...patch } : j)));
+  }
+
+  private setPhase(jobId: string, phase: UploadPhase): void {
+    this.updateJob(jobId, { phase, statusLabel: phaseLabel(phase) });
+  }
+
+  private failJob(jobId: string, failedAt: UploadPhase, error: string): void {
+    this.runningIds.delete(jobId);
+    this.updateJob(jobId, {
+      phase: 'error',
+      statusLabel: phaseLabel('error'),
+      error,
+      failedAt,
+    });
+    this._uploadFailed$.next({ jobId, phase: failedAt, error });
+    this.drainQueue();
+  }
+
+  private cancelAllActive(): void {
+    const active = this._jobs().filter((j) => !TERMINAL_PHASES.has(j.phase));
+    for (const job of active) {
+      this.runningIds.delete(job.id);
+      if (job.storagePath) {
+        this.supabase.client.storage.from('images').remove([job.storagePath]);
+      }
+      this.updateJob(job.id, {
+        phase: 'error',
+        statusLabel: 'Cancelled',
+        error: 'Upload cancelled — user signed out.',
+        failedAt: job.phase,
+      });
+    }
+  }
+}

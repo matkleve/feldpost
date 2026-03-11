@@ -372,20 +372,20 @@ graph LR
 
 ## Acceptance Criteria
 
-- [ ] Uploads continue when the originating component is destroyed (navigate away)
-- [ ] Maximum 3 concurrent uploads enforced globally across all entry points
-- [ ] FIFO queue: first file submitted is first to upload
-- [ ] `missing_data` jobs do not consume concurrency slots
-- [ ] Job state is reactive (Angular signals) — any component can bind to `jobs()`
-- [ ] `imageUploaded$` fires with coords + imageId when a job completes
-- [ ] `uploadFailed$` fires when a critical phase fails
-- [ ] Failed jobs can be retried via `retryJob()`
-- [ ] Completed/failed jobs can be dismissed individually or in bulk
-- [ ] **Path A**: GPS in EXIF → upload → save → reverse-geocode address (non-blocking)
-- [ ] **Path B**: No GPS + address in title → upload → save with address → forward-geocode coords (non-blocking)
-- [ ] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for MissingDataManager
-- [ ] Address resolution and coordinate resolution are enrichment — failure is silent
-- [ ] Orphaned storage files are cleaned up when DB insert fails
-- [ ] Auth change (logout) cancels all active jobs
+- [x] Uploads continue when the originating component is destroyed (navigate away)
+- [x] Maximum 3 concurrent uploads enforced globally across all entry points
+- [x] FIFO queue: first file submitted is first to upload
+- [x] `missing_data` jobs do not consume concurrency slots
+- [x] Job state is reactive (Angular signals) — any component can bind to `jobs()`
+- [x] `imageUploaded$` fires with coords + imageId when a job completes
+- [x] `uploadFailed$` fires when a critical phase fails
+- [x] Failed jobs can be retried via `retryJob()`
+- [x] Completed/failed jobs can be dismissed individually or in bulk
+- [x] **Path A**: GPS in EXIF → upload → save → reverse-geocode address (non-blocking)
+- [x] **Path B**: No GPS + address in title → upload → save with address → forward-geocode coords (non-blocking)
+- [x] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for MissingDataManager
+- [x] Address resolution and coordinate resolution are enrichment — failure is silent
+- [x] Orphaned storage files are cleaned up when DB insert fails
+- [x] Auth change (logout) cancels all active jobs
 - [ ] Global progress indicator visible from any page when uploads are active
-- [ ] `beforeunload` warning shown when `isBusy()` is true
+- [x] `beforeunload` warning shown when `isBusy()` is true
