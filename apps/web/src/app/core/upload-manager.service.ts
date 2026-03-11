@@ -20,6 +20,7 @@ import { Observable, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { computeContentHash, readFileHead } from './content-hash.util';
 import { GeocodingService } from './geocoding.service';
+import { PhotoLoadService } from './photo-load.service';
 import { SupabaseService } from './supabase.service';
 import { ExifCoords, ParsedExif, UploadService } from './upload.service';
 
@@ -301,6 +302,7 @@ export class UploadManagerService {
   private readonly geocoding = inject(GeocodingService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
+  private readonly photoLoad = inject(PhotoLoadService);
 
   // ── State ──────────────────────────────────────────────────────────────────
 
@@ -982,6 +984,12 @@ export class UploadManagerService {
     this.runningIds.delete(jobId);
 
     const finalJob = this.findJob(jobId)!;
+
+    // Inject blob URL into PhotoLoadService cache for instant display across all surfaces
+    if (finalJob.thumbnailUrl) {
+      this.photoLoad.setLocalUrl(finalJob.targetImageId!, finalJob.thumbnailUrl);
+    }
+
     this._imageReplaced$.next({
       jobId,
       imageId: finalJob.targetImageId!,
@@ -1162,6 +1170,12 @@ export class UploadManagerService {
     this.runningIds.delete(jobId);
 
     const finalJob = this.findJob(jobId)!;
+
+    // Inject blob URL into PhotoLoadService cache for instant display across all surfaces
+    if (finalJob.thumbnailUrl) {
+      this.photoLoad.setLocalUrl(finalJob.targetImageId!, finalJob.thumbnailUrl);
+    }
+
     this._imageAttached$.next({
       jobId,
       imageId: finalJob.targetImageId!,

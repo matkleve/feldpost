@@ -19,7 +19,12 @@ import {
   ImageAttachedEvent,
 } from '../../../core/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
+import {
+  PhotoLoadService,
+  PHOTO_PLACEHOLDER_ICON,
+  PHOTO_NO_PHOTO_ICON,
+} from '../../../core/photo-load.service';
+import type { PhotoLoadState } from '../../../core/photo-load.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { ForwardGeocodeResult } from '../../../core/geocoding.service';
@@ -51,10 +56,12 @@ export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
   styleUrl: './image-detail-view.component.scss',
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
+    '[style.--no-photo-icon]': 'noPhotoIconUrl',
   },
 })
 export class ImageDetailViewComponent implements OnDestroy {
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
+  readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
   private readonly uploadService = inject(UploadService);
   private readonly uploadManager = inject(UploadManagerService);
@@ -67,9 +74,6 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   readonly image = signal<ImageRecord | null>(null);
   readonly metadata = signal<MetadataEntry[]>([]);
-  readonly fullResLoaded = signal(false);
-  readonly thumbnailLoaded = signal(false);
-  readonly imageErrored = signal(false);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly showContextMenu = signal(false);
@@ -82,9 +86,25 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly showLightbox = signal(false);
   readonly allMetadataKeyNames = signal<string[]>([]);
   private readonly activeJobId = signal<string | null>(null);
-  private readonly pendingBlobUrl = signal<string | null>(null);
-  readonly heroSrc = signal<string | null>(null);
-  readonly hasPhoto = computed(() => !!this.image()?.storage_path || !!this.heroSrc());
+
+  /** Tracks whether full-res image has been preloaded via PhotoLoadService.preload() */
+  readonly fullResPreloaded = signal(false);
+
+  /** PhotoLoadService load state for thumbnail tier */
+  readonly thumbState = computed<PhotoLoadState>(() => {
+    const id = this.imageId();
+    if (!id) return 'idle';
+    return this.photoLoad.getLoadState(id, 'thumb')();
+  });
+
+  /** PhotoLoadService load state for full-res tier */
+  readonly fullState = computed<PhotoLoadState>(() => {
+    const id = this.imageId();
+    if (!id) return 'idle';
+    return this.photoLoad.getLoadState(id, 'full')();
+  });
+
+  readonly hasPhoto = computed(() => !!this.image()?.storage_path);
   readonly replacing = computed(() => {
     const jobId = this.activeJobId();
     if (!jobId) return false;
@@ -165,19 +185,17 @@ export class ImageDetailViewComponent implements OnDestroy {
   });
 
   readonly isImageLoading = computed(() => {
-    if (this.heroSrc()) return false;
-    const hasThumbUrl = !!this.thumbnailUrl();
-    if (this.imageErrored()) return false;
-    if (!hasThumbUrl && !this.fullResUrl()) return true;
-    if (hasThumbUrl && !this.thumbnailLoaded() && !this.fullResLoaded()) return true;
-    return false;
+    const thumb = this.thumbState();
+    const full = this.fullState();
+    if (thumb === 'no-photo') return false;
+    if (thumb === 'error' && full === 'error') return false;
+    if (thumb === 'loaded' || this.fullResPreloaded()) return false;
+    return true;
   });
 
   readonly imageReady = computed(() => {
-    if (this.heroSrc()) return true;
-    if (this.fullResLoaded()) return true;
-    if (this.thumbnailLoaded()) return true;
-    // Only treat as "no image" if the full-res also errored (not just thumbnail)
+    if (this.fullResPreloaded()) return true;
+    if (this.thumbState() === 'loaded' && this.thumbnailUrl()) return true;
     return false;
   });
 
@@ -238,16 +256,12 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.abortController?.abort();
-    this.revokePendingBlobUrl();
   }
 
   private reset(): void {
-    this.revokePendingBlobUrl();
     this.image.set(null);
     this.metadata.set([]);
-    this.fullResLoaded.set(false);
-    this.thumbnailLoaded.set(false);
-    this.imageErrored.set(false);
+    this.fullResPreloaded.set(false);
     this.fullResUrl.set(null);
     this.thumbnailUrl.set(null);
     this.error.set(null);
@@ -257,7 +271,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.showDeleteConfirm.set(false);
     this.editingField.set(null);
     this.showLightbox.set(false);
-    this.heroSrc.set(null);
     this.activeJobId.set(null);
     this.replaceError.set(null);
   }
@@ -269,9 +282,7 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     this.loading.set(true);
     this.error.set(null);
-    this.fullResLoaded.set(false);
-    this.thumbnailLoaded.set(false);
-    this.imageErrored.set(false);
+    this.fullResPreloaded.set(false);
     this.fullResUrl.set(null);
     this.thumbnailUrl.set(null);
 
@@ -329,9 +340,12 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.thumbnailUrl.set(thumbResult.url);
     this.fullResUrl.set(fullResult.url);
 
-    // If both signing attempts failed, surface the error so the loading state resolves
-    if (!thumbResult.url && !fullResult.url) {
-      this.imageErrored.set(true);
+    // Preload full-res for crossfade (spec: photoLoad.preload before showing)
+    if (fullResult.url) {
+      const preloaded = await this.photoLoad.preload(fullResult.url);
+      if (!abortSignal.aborted) {
+        this.fullResPreloaded.set(preloaded);
+      }
     }
   }
 
@@ -496,27 +510,6 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   closeContextMenu(): void {
     this.showContextMenu.set(false);
-  }
-
-  onFullResLoaded(): void {
-    this.fullResLoaded.set(true);
-    // Revoke blob URL to prevent memory leaks (spec: revoke after Tier 3 loads)
-    this.revokePendingBlobUrl();
-    this.heroSrc.set(null);
-  }
-
-  onThumbnailLoaded(): void {
-    this.thumbnailLoaded.set(true);
-  }
-
-  onThumbnailError(): void {
-    // Thumbnail failed (e.g. deleted/missing) — don't poison imageErrored,
-    // let the full-res image attempt to load independently.
-    this.thumbnailLoaded.set(false);
-  }
-
-  onImageError(): void {
-    this.imageErrored.set(true);
   }
 
   copyCoordinates(): void {
@@ -730,63 +723,61 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   // ── Upload event handlers ──────────────────────────────────────────────────
 
-  private handleImageReplaced(event: ImageReplacedEvent): void {
-    this.revokePendingBlobUrl();
+  private async handleImageReplaced(event: ImageReplacedEvent): Promise<void> {
+    // UploadManagerService already called photoLoad.setLocalUrl → blob in cache, all surfaces updated
 
     // Update local record with new storage path
     this.image.update((prev) =>
       prev ? { ...prev, storage_path: event.newStoragePath, thumbnail_path: null } : prev,
     );
 
-    // Show blob instantly (Tier 0 — loads in ~0ms)
-    if (event.localObjectUrl) {
-      this.heroSrc.set(event.localObjectUrl);
-      this.pendingBlobUrl.set(event.localObjectUrl);
-    }
-
-    // Reset loading state for progressive reload restart
-    this.fullResLoaded.set(false);
-    this.thumbnailLoaded.set(false);
-    this.imageErrored.set(false);
-    this.fullResUrl.set(null);
-    this.thumbnailUrl.set(null);
+    this.fullResPreloaded.set(false);
     this.activeJobId.set(null);
 
-    // Re-sign URLs for new storage path (Tier 2 → Tier 3)
+    // Invalidate blob cache → re-sign from new storage path
+    this.photoLoad.invalidate(event.imageId);
+
     const img = this.image();
     if (img?.storage_path) {
-      this.loadSignedUrls(img, this.abortController?.signal ?? new AbortController().signal);
+      await this.loadSignedUrls(
+        img,
+        this.abortController?.signal ?? new AbortController().signal,
+      );
+    }
+
+    // Free blob URL memory (no-op if no blob was provided)
+    if (event.localObjectUrl) {
+      URL.revokeObjectURL(event.localObjectUrl);
     }
 
     this.updateGridCache(event.imageId, event.newStoragePath);
   }
 
-  private handleImageAttached(event: ImageAttachedEvent): void {
-    this.revokePendingBlobUrl();
+  private async handleImageAttached(event: ImageAttachedEvent): Promise<void> {
+    // UploadManagerService already called photoLoad.setLocalUrl → blob in cache, all surfaces updated
 
     // Update local record — now has a photo (switches from upload prompt to photo display)
     this.image.update((prev) =>
       prev ? { ...prev, storage_path: event.newStoragePath, thumbnail_path: null } : prev,
     );
 
-    // Show blob instantly
-    if (event.localObjectUrl) {
-      this.heroSrc.set(event.localObjectUrl);
-      this.pendingBlobUrl.set(event.localObjectUrl);
-    }
-
-    // Reset and start progressive loading
-    this.fullResLoaded.set(false);
-    this.thumbnailLoaded.set(false);
-    this.imageErrored.set(false);
-    this.fullResUrl.set(null);
-    this.thumbnailUrl.set(null);
+    this.fullResPreloaded.set(false);
     this.activeJobId.set(null);
 
-    // Re-sign URLs for new storage path
+    // Invalidate blob cache → re-sign from new storage path
+    this.photoLoad.invalidate(event.imageId);
+
     const img = this.image();
     if (img?.storage_path) {
-      this.loadSignedUrls(img, this.abortController?.signal ?? new AbortController().signal);
+      await this.loadSignedUrls(
+        img,
+        this.abortController?.signal ?? new AbortController().signal,
+      );
+    }
+
+    // Free blob URL memory
+    if (event.localObjectUrl) {
+      URL.revokeObjectURL(event.localObjectUrl);
     }
 
     this.updateGridCache(event.imageId, event.newStoragePath);
@@ -809,14 +800,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     const updated = this.workspaceView.rawImages().filter((wi) => wi.id === imageId);
     if (updated.length > 0) {
       void this.workspaceView.batchSignThumbnails(updated);
-    }
-  }
-
-  private revokePendingBlobUrl(): void {
-    const url = this.pendingBlobUrl();
-    if (url) {
-      URL.revokeObjectURL(url);
-      this.pendingBlobUrl.set(null);
     }
   }
 }
