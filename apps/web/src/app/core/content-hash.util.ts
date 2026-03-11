@@ -26,16 +26,23 @@ export interface ContentHashInput {
 
 /**
  * Read the first 64 KB of a File as an ArrayBuffer.
+ * Uses FileReader for broad environment compatibility (jsdom, browsers).
  */
 export async function readFileHead(file: File): Promise<ArrayBuffer> {
   const slice = file.slice(0, FILE_HEAD_SIZE);
-  return slice.arrayBuffer();
+  return new Promise<ArrayBuffer>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(slice);
+  });
 }
 
 /**
- * Concatenate multiple Uint8Arrays into a single ArrayBuffer.
+ * Concatenate multiple Uint8Arrays into a single Uint8Array.
+ * Returns Uint8Array (a valid BufferSource for crypto.subtle.digest).
  */
-function concatBuffers(parts: Uint8Array[]): ArrayBuffer {
+function concatBuffers(parts: Uint8Array[]): Uint8Array {
   let totalLength = 0;
   for (const part of parts) {
     totalLength += part.byteLength;
@@ -46,7 +53,7 @@ function concatBuffers(parts: Uint8Array[]): ArrayBuffer {
     result.set(part, offset);
     offset += part.byteLength;
   }
-  return result.buffer;
+  return result;
 }
 
 /**
@@ -70,7 +77,7 @@ export async function computeContentHash(input: ContentHashInput): Promise<strin
     encoder.encode(`|dir=${input.direction ?? ''}`),
   ];
   const combined = concatBuffers(parts);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', combined);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', combined as BufferSource);
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
