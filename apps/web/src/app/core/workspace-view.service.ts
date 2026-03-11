@@ -3,6 +3,7 @@ import { SupabaseService } from './supabase.service';
 import { FilterService } from './filter.service';
 import { LocationResolverService } from './location-resolver.service';
 import { PropertyRegistryService } from './property-registry.service';
+import { PhotoLoadService } from './photo-load.service';
 import type {
   WorkspaceImage,
   GroupedSection,
@@ -18,6 +19,7 @@ export class WorkspaceViewService {
   private readonly filterService = inject(FilterService);
   private readonly locationResolver = inject(LocationResolverService);
   private readonly registry = inject(PropertyRegistryService);
+  private readonly photoLoad = inject(PhotoLoadService);
 
   // ── Input signals ────────────────────────────────────────────────────────
 
@@ -224,50 +226,28 @@ export class WorkspaceViewService {
     const unsigned = images.filter((img) => !img.signedThumbnailUrl && !img.thumbnailUnavailable);
     if (unsigned.length === 0) return;
 
-    // Split: images with a pre-generated thumbnail vs those needing a transform.
-    const withThumb = unsigned.filter((img) => img.thumbnailPath);
-    const withoutThumb = unsigned.filter((img) => !img.thumbnailPath && img.storagePath);
+    // Mark images with no storage path and no thumbnail as 'no-photo'
+    const noPhoto = unsigned.filter((img) => !img.storagePath && !img.thumbnailPath);
+    for (const img of noPhoto) {
+      this.photoLoad.markNoPhoto(img.id);
+    }
 
-    const urlMap = new Map<string, string>();
+    const items = unsigned
+      .filter((img) => img.storagePath || img.thumbnailPath)
+      .map((img) => ({
+        id: img.id,
+        storagePath: img.storagePath,
+        thumbnailPath: img.thumbnailPath,
+      }));
+
+    const results = await this.photoLoad.batchSign(items, 'thumb');
     const attemptedIds = new Set(unsigned.map((img) => img.id));
-
-    // 1) Batch-sign pre-generated thumbnails (fast, small files).
-    if (withThumb.length > 0) {
-      const paths = withThumb.map((img) => img.thumbnailPath!);
-      const { data } = await this.supabase.client.storage
-        .from('images')
-        .createSignedUrls(paths, 3600);
-      if (data) {
-        for (const item of data) {
-          if (item.signedUrl) urlMap.set(item.path!, item.signedUrl);
-        }
-      }
-    }
-
-    // 2) Sign originals with server-side transform (no pre-generated thumbnail).
-    if (withoutThumb.length > 0) {
-      const results = await Promise.all(
-        withoutThumb.map(async (img) => {
-          const { data } = await this.supabase.client.storage
-            .from('images')
-            .createSignedUrl(img.storagePath, 3600, {
-              transform: { width: 256, height: 256, resize: 'cover' },
-            });
-          return { id: img.id, url: data?.signedUrl };
-        }),
-      );
-      for (const r of results) {
-        if (r.url) urlMap.set(r.id, r.url);
-      }
-    }
 
     // Update signal: apply URLs or mark unavailable.
     this.rawImages.update((all) =>
       all.map((img) => {
-        // Check by thumbnailPath for batch-signed, by id for individually-signed.
-        const url =
-          (img.thumbnailPath ? urlMap.get(img.thumbnailPath) : undefined) ?? urlMap.get(img.id);
-        if (url) return { ...img, signedThumbnailUrl: url };
+        const result = results.get(img.id);
+        if (result?.url) return { ...img, signedThumbnailUrl: result.url };
         if (attemptedIds.has(img.id) && !img.signedThumbnailUrl) {
           return { ...img, thumbnailUnavailable: true };
         }

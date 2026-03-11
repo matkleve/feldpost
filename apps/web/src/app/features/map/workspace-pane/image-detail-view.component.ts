@@ -19,6 +19,7 @@ import {
   ImageAttachedEvent,
 } from '../../../core/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { PhotoLoadService } from '../../../core/photo-load.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { ForwardGeocodeResult } from '../../../core/geocoding.service';
@@ -54,6 +55,7 @@ export class ImageDetailViewComponent implements OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
+  private readonly photoLoad = inject(PhotoLoadService);
 
   readonly imageId = input<string | null>(null);
   readonly closed = output<void>();
@@ -300,6 +302,8 @@ export class ImageDetailViewComponent implements OnDestroy {
     // Load signed URLs and project list in parallel
     if (imgData.storage_path) {
       this.loadSignedUrls(imgData, signal);
+    } else {
+      this.photoLoad.markNoPhoto(imgData.id);
     }
     if (imgData.organization_id) {
       this.loadProjects(imgData.organization_id);
@@ -310,29 +314,16 @@ export class ImageDetailViewComponent implements OnDestroy {
   private async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
     if (!img.storage_path) return;
 
-    const thumbPromise = img.thumbnail_path
-      ? this.supabaseService.client.storage.from('images').createSignedUrl(img.thumbnail_path, 3600)
-      : Promise.resolve(null);
-
-    const fullPromise = this.supabaseService.client.storage
-      .from('images')
-      .createSignedUrl(img.storage_path, 3600);
-
-    const [thumbResult, fullResult] = await Promise.allSettled([thumbPromise, fullPromise]);
+    const thumbPath = img.thumbnail_path ?? img.storage_path;
+    const [thumbResult, fullResult] = await Promise.all([
+      this.photoLoad.getSignedUrl(thumbPath, 'thumb', img.id),
+      this.photoLoad.getSignedUrl(img.storage_path, 'full', img.id),
+    ]);
 
     if (abortSignal.aborted) return;
 
-    this.thumbnailUrl.set(this.extractSignedUrl(thumbResult));
-    this.fullResUrl.set(this.extractSignedUrl(fullResult));
-  }
-
-  private extractSignedUrl(
-    settled: PromiseSettledResult<{ data: { signedUrl: string } | null; error: any } | null>,
-  ): string | null {
-    if (settled.status !== 'fulfilled') return null;
-    const result = settled.value;
-    if (!result || result.error) return null;
-    return result.data?.signedUrl ?? null;
+    this.thumbnailUrl.set(thumbResult.url);
+    this.fullResUrl.set(fullResult.url);
   }
 
   close(): void {

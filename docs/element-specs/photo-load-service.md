@@ -461,22 +461,22 @@ flowchart TB
 
 ## Acceptance Criteria
 
-- [ ] `getSignedUrl('path', 'marker')` returns a signed URL with `{ width: 80, height: 80, resize: 'cover' }` transform
-- [ ] `getSignedUrl('path', 'thumb')` returns a signed URL with `{ width: 256, height: 256, resize: 'cover' }` transform
-- [ ] `getSignedUrl('path', 'full')` returns a signed URL with no transform
-- [ ] Repeated calls for the same path+size within the staleness window return the cached URL without a new Supabase request
-- [ ] `batchSign()` uses `createSignedUrls` (batch) for items with `thumbnailPath`, individual `createSignedUrl` with transform for others
-- [ ] `getLoadState(imageId, size)` returns a signal that transitions: `idle` → `loading` → `loaded` or `error`
-- [ ] When `storage_path` is null, `getLoadState` returns a signal with value `no-photo` immediately — no network request
-- [ ] `preload(url)` resolves `true` when the image loads, `false` on error
-- [ ] `invalidate(imageId)` clears all size variants; next call re-signs
-- [ ] `invalidateStale(ms)` only clears entries older than the threshold
-- [ ] `setLocalUrl(imageId, blobUrl)` makes all sizes return the blob URL immediately
-- [ ] `revokeLocalUrl(imageId)` calls `URL.revokeObjectURL` and clears the cache entry
-- [ ] `PHOTO_PLACEHOLDER_ICON` and `PHOTO_NO_PHOTO_ICON` are valid SVG data-URIs identical to current placeholder icons
-- [ ] After integration, no component calls `supabase.client.storage.from('images').createSignedUrl` directly — all go through `PhotoLoadService`
-- [ ] `urlChanged$` emits `{ imageId, size, url }` whenever a signed URL or local blob is cached
-- [ ] `stateChanged$` emits on every `PhotoLoadState` transition (idle→loading, loading→loaded, etc.)
-- [ ] `batchComplete$` emits `{ imageIds[], size }` when `batchSign()` finishes
-- [ ] Signals are updated before events fire — both mechanisms stay in sync
+- [x] `getSignedUrl('path', 'marker')` returns a signed URL with `{ width: 80, height: 80, resize: 'cover' }` transform
+- [x] `getSignedUrl('path', 'thumb')` returns a signed URL with `{ width: 256, height: 256, resize: 'cover' }` transform
+- [x] `getSignedUrl('path', 'full')` returns a signed URL with no transform
+- [x] Repeated calls for the same path+size within the staleness window return the cached URL without a new Supabase request
+- [x] `batchSign()` uses `createSignedUrls` (batch) for items with `thumbnailPath`, individual `createSignedUrl` with transform for others
+- [x] `getLoadState(imageId, size)` returns a signal that transitions: `idle` → `loading` → `loaded` or `error`
+- [x] When `storage_path` is null, `getLoadState` returns a signal with value `no-photo` immediately — no network request
+- [x] `preload(url)` resolves `true` when the image loads, `false` on error
+- [x] `invalidate(imageId)` clears all size variants; next call re-signs
+- [x] `invalidateStale(ms)` only clears entries older than the threshold
+- [x] `setLocalUrl(imageId, blobUrl)` makes all sizes return the blob URL immediately
+- [x] `revokeLocalUrl(imageId)` calls `URL.revokeObjectURL` and clears the cache entry
+- [x] `PHOTO_PLACEHOLDER_ICON` and `PHOTO_NO_PHOTO_ICON` are valid SVG data-URIs identical to current placeholder icons
+- [x] After integration, no component calls `supabase.client.storage.from('images').createSignedUrl` directly — all go through `PhotoLoadService`
+- [x] `urlChanged$` emits `{ imageId, size, url }` whenever a signed URL or local blob is cached
+- [x] `stateChanged$` emits on every `PhotoLoadState` transition (idle→loading, loading→loaded, etc.)
+- [x] `batchComplete$` emits `{ imageIds[], size }` when `batchSign()` finishes
+- [x] Signals are updated before events fire — both mechanisms stay in sync
 - [ ] All 4 surfaces (marker, thumbnail card, detail view, lightbox) render identical placeholder/error visuals

@@ -38,6 +38,7 @@ import {
   ImageAttachedEvent,
 } from '../../../core/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { PhotoLoadService } from '../../../core/photo-load.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
@@ -59,6 +60,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly supabaseService = inject(SupabaseService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
+  private readonly photoLoadService = inject(PhotoLoadService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -984,6 +986,8 @@ export class MapShellComponent implements OnDestroy {
     const now = Date.now();
     const staleThreshold = 50 * 60 * 1000; // 50 minutes
 
+    this.photoLoadService.invalidateStale(staleThreshold);
+
     for (const [key, state] of this.uploadedPhotoMarkers) {
       if (state.count !== 1 || !bounds.contains([state.lat, state.lng])) continue;
 
@@ -1018,19 +1022,13 @@ export class MapShellComponent implements OnDestroy {
     state.thumbnailLoading = true;
     this.refreshPhotoMarker(key);
 
-    const { data, error } = await this.supabaseService.client.storage
-      .from('images')
-      .createSignedUrl(state.thumbnailSourcePath, 3600, {
-        transform: { width: 80, height: 80, resize: 'cover' },
-      });
+    const result = await this.photoLoadService.getSignedUrl(state.thumbnailSourcePath, 'marker');
 
-    if (!error && data?.signedUrl) {
-      // Preload the image so the browser caches it before we swap the DOM.
-      // The pulse animation continues on the placeholder until the image is ready.
-      const loaded = await this.preloadImage(data.signedUrl);
+    if (result.url) {
+      const loaded = await this.photoLoadService.preload(result.url);
       state.thumbnailLoading = false;
       if (loaded) {
-        state.thumbnailUrl = data.signedUrl;
+        state.thumbnailUrl = result.url;
         state.signedAt = Date.now();
       }
     } else {
@@ -1038,15 +1036,6 @@ export class MapShellComponent implements OnDestroy {
     }
     // On error or preload failure: thumbnailUrl stays undefined → placeholder remains visible.
     this.refreshPhotoMarker(key);
-  }
-
-  private preloadImage(url: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
-    });
   }
 
   private refreshPhotoMarker(markerKey: string): void {

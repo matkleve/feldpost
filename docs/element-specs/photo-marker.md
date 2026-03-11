@@ -1,6 +1,7 @@
 # Photo Marker
 
 > **Blueprint:** [implementation-blueprints/photo-marker.md](../implementation-blueprints/photo-marker.md)
+> **Photo loading service:** [photo-load-service](photo-load-service.md)
 
 ## What It Is
 
@@ -51,17 +52,17 @@ PhotoMarker                                      ← Leaflet DivIcon, custom HTM
 
 > **Full use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
-Single-image markers at near zoom (≥ 16) display a real photo thumbnail inside the marker body. Thumbnails are **lazy-loaded** — only fetched for visible markers in the current viewport — using Supabase Storage signed URLs with server-side image transformation (`80 × 80 px`, `cover` mode, auto-WebP). When no real file exists in storage (seed data, deleted files), the marker renders a **CSS placeholder** instead of a broken `<img>` icon.
+Single-image markers at near zoom (≥ 16) display a real photo thumbnail inside the marker body. Thumbnails are **lazy-loaded** via `PhotoLoadService` — only fetched for visible markers in the current viewport. The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` which returns a Supabase Storage signed URL with server-side image transformation (`80 × 80 px`, `cover` mode, auto-WebP). The service handles caching, staleness (50 min threshold), and re-signing automatically. When no real file exists in storage (seed data, deleted files), `photoLoad.getLoadState()` returns `'error'` and the marker renders the canonical `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` — no broken `<img>` icon ever appears.
 
 ### Loading States
 
-| State      | Visual                                                              | CSS Class                                     | Trigger                                                |
-| ---------- | ------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------ |
-| Not loaded | Count badge (clusters) or CSS placeholder (single, no thumbnailUrl) | `.map-photo-marker--count` or `--placeholder` | Initial render                                         |
-| Loading    | CSS placeholder with subtle pulse animation                         | `.map-photo-marker--placeholder.is-loading`   | `maybeLoadThumbnails()` fires                          |
-| Loaded     | Real photo `<img>` with `object-fit: cover`                         | `.map-photo-marker--single`                   | `createSignedUrl` succeeds + img loaded                |
-| Error      | CSS placeholder (permanent, no retry)                               | `.map-photo-marker--placeholder`              | `createSignedUrl` fails (no file)                      |
-| Optimistic | Local `ObjectURL` from fresh upload (no signed URL needed)          | `.map-photo-marker--single`                   | `imageUploaded$` / `imageReplaced$` / `imageAttached$` |
+| State      | Visual                                                              | CSS Class                                     | Trigger                                                                              |
+| ---------- | ------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Not loaded | Count badge (clusters) or CSS placeholder (single, no thumbnailUrl) | `.map-photo-marker--count` or `--placeholder` | Initial render                                                                       |
+| Loading    | CSS placeholder with subtle pulse animation                         | `.map-photo-marker--placeholder.is-loading`   | `photoLoad.getSignedUrl(path, 'marker')` called, `loadState = 'loading'`             |
+| Loaded     | Real photo `<img>` with `object-fit: cover`                         | `.map-photo-marker--single`                   | `loadState = 'loaded'` + `photoLoad.preload(url)` succeeds                           |
+| Error      | CSS placeholder (permanent, no retry)                               | `.map-photo-marker--placeholder`              | `loadState = 'error'` (signing failed, file missing)                                 |
+| Optimistic | Local `ObjectURL` from fresh upload (no signed URL needed)          | `.map-photo-marker--single`                   | `photoLoad.setLocalUrl()` via `imageUploaded$` / `imageReplaced$` / `imageAttached$` |
 
 ### Thumbnail Loading Flow
 
@@ -69,49 +70,54 @@ Single-image markers at near zoom (≥ 16) display a real photo thumbnail inside
 stateDiagram-v2
     [*] --> CountBadge : zoom < 16 or count > 1
     [*] --> Placeholder : zoom ≥ 16, count = 1, no thumbnailUrl
-    Placeholder --> Loading : maybeLoadThumbnails() fires
-    Loading --> Loaded : createSignedUrl succeeds
-    Loading --> Error : createSignedUrl fails (no file)
-    Error --> [*] : stays as placeholder
+    Placeholder --> Loading : photoLoad.getSignedUrl(path, 'marker') called
+    Loading --> Loaded : loadState = 'loaded' + preload() succeeds
+    Loading --> Error : loadState = 'error' (signing failed, file missing)
+    Error --> [*] : stays as PHOTO_PLACEHOLDER_ICON
     Loaded --> [*] : marker shows real photo
     CountBadge --> Placeholder : zoom in to ≥ 16
     Placeholder --> CountBadge : zoom out to < 16
-    Loaded --> Loaded : imageReplaced$ — DivIcon rebuilt with new localObjectUrl
-    Placeholder --> Loaded : imageAttached$ — DivIcon rebuilt with localObjectUrl
-    Error --> Loaded : imageAttached$ — DivIcon rebuilt with localObjectUrl
+    Loaded --> Loaded : photoLoad.setLocalUrl() via imageReplaced$ — DivIcon rebuilt with blob URL
+    Placeholder --> Loaded : photoLoad.setLocalUrl() via imageAttached$ — DivIcon rebuilt with blob URL
+    Error --> Loaded : photoLoad.setLocalUrl() via imageAttached$ — DivIcon rebuilt with blob URL
 
     note right of Loading
-        Signed URL params:
+        Via PhotoLoadService:
         width: 80, height: 80
         resize: cover
-        TTL: 3600s
+        TTL: 3600s (service-managed)
     end note
 ```
 
-> **Replace / Attach shortcut:** When `imageReplaced$` or `imageAttached$` fires, the Map Shell sets `PhotoMarkerState.thumbnailUrl` to the `localObjectUrl` from the event and rebuilds the DivIcon immediately. The marker skips the loading/placeholder cycle because the blob URL is available at build time — `buildPhotoMarkerHtml()` emits an `<img>` tag directly. This is the same optimistic pattern as PL-4 (Fresh Upload). On the next viewport query, the signed URL replaces the blob URL and the `ObjectURL` is revoked. See [PL-7 / PL-8](../use-cases/photo-loading.md#pl-7-replace-photo--loading-state-reset) for full interaction diagrams.
+> **Replace / Attach shortcut:** When `imageReplaced$` or `imageAttached$` fires, `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)`, which injects the blob URL into the service cache at all sizes (including `'marker'`). The Map Shell reads the URL from the service cache and rebuilds the DivIcon immediately. The marker skips the loading/placeholder cycle because the blob URL is available at build time — `buildPhotoMarkerHtml()` emits an `<img>` tag directly. On the next viewport query, normal `photoLoad.getSignedUrl()` re-signs from storage, `photoLoad.revokeLocalUrl()` frees the blob, and the signed URL takes over. See [PL-7 / PL-8](../use-cases/photo-loading.md#pl-7-replace-photo--loading-state-reset) for full interaction diagrams.
 
 ### Placeholder Design
 
-The placeholder is a pure-CSS element — no network request, no `<img>` tag. It shows a subtle camera icon (SVG mask) centered on a neutral gradient background (`--color-bg-subtle` to `--color-bg-muted`). The placeholder matches the marker body geometry exactly (same `border-radius`, same dimensions). See `map-shell.component.scss` for styles under `.map-photo-marker__body--placeholder`.
+The placeholder is a pure-CSS element — no network request, no `<img>` tag. It uses the canonical `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` (camera icon SVG data-URI) centered on a neutral gradient background (`--color-bg-subtle` to `--color-bg-muted`). The placeholder matches the marker body geometry exactly (same `border-radius`, same dimensions). This ensures identical placeholder visuals across markers, thumbnail cards, and the detail view.
 
-### Signed URL Strategy
+### Signed URL Strategy (via PhotoLoadService)
 
-- **Tier 1 (marker):** `createSignedUrl(thumbnailSourcePath, 3600, { transform: { width: 80, height: 80, resize: 'cover' } })`
-- URLs are cached in `PhotoMarkerState.thumbnailUrl` and survive zoom-out / zoom-in cycles
-- Proactive refresh: clear `thumbnailUrl` when URL age exceeds 50 minutes (before TTL expiry)
-- Batch signing: process visible markers in a single pass, do not issue one request per marker in rapid succession
+The Map Shell never calls Supabase Storage directly for marker thumbnails. All signing is delegated to `PhotoLoadService`:
+
+- **Tier 1 (marker):** `photoLoad.getSignedUrl(thumbnailSourcePath, 'marker')` → service applies `{ width: 80, height: 80, resize: 'cover' }` transform
+- **Caching:** Service handles cache lookup, staleness (50 min threshold), and re-signing — the Map Shell does not manage URL expiry or `thumbnailUrl` age
+- **Preload:** `photoLoad.preload(signedUrl)` confirms the image downloads before DivIcon rebuild
+- **Batch signing:** For visible markers, the Map Shell calls `photoLoad.batchSign(items, 'marker')` to process all markers in a single pass
+- **Staleness cleanup:** `photoLoad.invalidateStale(STALE_THRESHOLD_MS)` called before re-signing on `moveend` — replaces the manual 50-minute age check
+
+> **Removed from Map Shell:** Direct `createSignedUrl` calls, per-marker URL caching in `PhotoMarkerState.thumbnailUrl`, manual 50-minute staleness checks, and `lazyLoadThumbnail()` — all replaced by service delegation.
 
 ## Data
 
-| Field           | Source                                         | Type                          |
-| --------------- | ---------------------------------------------- | ----------------------------- |
-| Image data      | Viewport query via `SupabaseService`           | `Image[]` from `images` table |
-| Cluster groups  | Server-side `ST_SnapToGrid` (zoom ≤ 14)        | `{ lat, lng, count }[]`       |
-| Thumbnails      | Supabase Storage signed URLs (80×80 transform) | `string` (URL)                |
-| Placeholder     | CSS-only, no data source                       | —                             |
-| Selection state | Map/workspace selection service or shell state | `string[]` / marker key state |
-| Bearing data    | EXIF-derived `direction` column                | `number \| null`              |
-| Corrected flag  | `latitude`/`longitude` ≠ EXIF originals        | `boolean`                     |
+| Field           | Source                                           | Type                          |
+| --------------- | ------------------------------------------------ | ----------------------------- |
+| Image data      | Viewport query via `SupabaseService`             | `Image[]` from `images` table |
+| Cluster groups  | Server-side `ST_SnapToGrid` (zoom ≤ 14)          | `{ lat, lng, count }[]`       |
+| Thumbnails      | `PhotoLoadService` signed URLs (80×80 transform) | `string` (URL)                |
+| Placeholder     | CSS-only, no data source                         | —                             |
+| Selection state | Map/workspace selection service or shell state   | `string[]` / marker key state |
+| Bearing data    | EXIF-derived `direction` column                  | `number \| null`              |
+| Corrected flag  | `latitude`/`longitude` ≠ EXIF originals          | `boolean`                     |
 
 ## State
 
@@ -221,16 +227,19 @@ When the user replaces a photo or attaches a photo to a photoless row through th
 ```mermaid
 sequenceDiagram
   participant Manager as UploadManagerService
+  participant PhotoLoad as PhotoLoadService
   participant Shell as MapShellComponent
   participant Marker as L.Marker (Leaflet)
 
-  Manager->>Shell: imageReplaced$ {imageId, newStoragePath, localObjectUrl}
+  Manager->>PhotoLoad: setLocalUrl(imageId, blobUrl)
+  PhotoLoad->>PhotoLoad: Cache blobUrl for all sizes (incl. 'marker'), loadState → 'loaded'
+  Manager->>Shell: imageReplaced$ {imageId, newStoragePath}
   Shell->>Shell: Look up marker by imageId in markersByImageId map
-  Shell->>Shell: Update PhotoMarkerState.thumbnailUrl = localObjectUrl
-  Shell->>Shell: Rebuild DivIcon HTML via buildPhotoMarkerHtml()
+  Shell->>PhotoLoad: Read cached URL for imageId + 'marker' size
+  Shell->>Shell: Rebuild DivIcon HTML via buildPhotoMarkerHtml() with blobUrl
   Shell->>Marker: marker.setIcon(newDivIcon)
   Note over Marker: Marker instantly shows the new photo
-  Note over Shell: On next viewport query, signed URL replaces ObjectURL
+  Note over Shell: On next viewport query, photoLoad re-signs and revokes blob
 ```
 
 ### Attach Photo Flow (Photoless → Photo)
@@ -238,15 +247,18 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant Manager as UploadManagerService
+  participant PhotoLoad as PhotoLoadService
   participant Shell as MapShellComponent
   participant Marker as L.Marker (Leaflet)
 
-  Manager->>Shell: imageAttached$ {imageId, newStoragePath, localObjectUrl, coords}
+  Manager->>PhotoLoad: setLocalUrl(imageId, blobUrl)
+  PhotoLoad->>PhotoLoad: Cache blobUrl for all sizes (incl. 'marker'), loadState → 'loaded'
+  Manager->>Shell: imageAttached$ {imageId, newStoragePath, coords}
   Shell->>Shell: Look up marker by imageId in markersByImageId map
-  Shell->>Shell: Update PhotoMarkerState.thumbnailUrl = localObjectUrl
+  Shell->>PhotoLoad: Read cached URL for imageId + 'marker' size
   Shell->>Shell: Rebuild DivIcon HTML: placeholder → real thumbnail
   Shell->>Marker: marker.setIcon(newDivIcon)
-  Note over Marker: Marker switches from placeholder to photo thumbnail
+  Note over Marker: Marker switches from PHOTO_PLACEHOLDER_ICON to photo thumbnail
 ```
 
 ### Key Mapping
@@ -286,12 +298,14 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 - Marker sizing variables are declared in `styles.scss` so marker geometry derives from shared design tokens instead of hardcoded body sizes.
 - The Map Shell listens to `moveend`, debounces 300 ms, then issues a viewport query. On response, it reconciles the marker set (add/remove/update) rather than rebuilding all markers.
 - Freshly uploaded markers from `ImageUploadedEvent` are placed optimistically and reconciled on the next viewport query.
+- **All thumbnail signing is delegated to `PhotoLoadService`.** The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` for individual markers and `photoLoad.batchSign(items, 'marker')` for batch operations. It calls `photoLoad.invalidateStale(STALE_THRESHOLD_MS)` on `moveend` before re-signing visible markers. The Map Shell **does not** call `supabase.client.storage.from('images').createSignedUrl` directly, manage per-marker URL caches, or track URL age. The service handles caching, staleness, and re-signing.
+- Placeholder icons use `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` for consistent visuals across all surfaces.
 - The Map Shell passes `corrected` and `uploading` flags to `buildPhotoMarkerHtml()` when building or refreshing marker icons. `corrected` is derived from comparing current coordinates to EXIF originals. `uploading` is set during the upload lifecycle and cleared on completion or error.
 - The Map Shell includes the `direction` column in the initial-load and viewport queries so that bearing-based direction cones render for all markers, not only freshly uploaded ones.
 - Marker click handling opens the Workspace Pane for both single markers and cluster markers. Single marker click selects one image; cluster marker click fetches all image IDs for the cluster cell, populates Active Selection with those IDs, and signals the Workspace Pane to open. The map never zooms or re-centers on cluster click.
 - Hover direction cones are driven by CSS `:hover` on desktop. Touch long-press direction cones require a Leaflet pointer-event listener (~500 ms threshold) that toggles a `data-long-pressed` attribute or class.
-- The Map Shell subscribes to `UploadManagerService.imageReplaced$` to update marker thumbnails when a photo is replaced in the detail view. On event, it looks up the marker via `markersByImageId`, rebuilds the DivIcon with the `localObjectUrl`, and calls `marker.setIcon()`.
-- The Map Shell subscribes to `UploadManagerService.imageAttached$` to update markers when a photo is attached to a photoless row. Same lookup and rebuild flow as `imageReplaced$`.
+- The Map Shell subscribes to `UploadManagerService.imageReplaced$` to update marker thumbnails when a photo is replaced in the detail view. On event, it looks up the marker via `markersByImageId`, reads the blob URL from `PhotoLoadService` cache, rebuilds the DivIcon, and calls `marker.setIcon()`.
+- The Map Shell subscribes to `UploadManagerService.imageAttached$` to update markers when a photo is attached to a photoless row. Same lookup and rebuild flow as `imageReplaced$`, reading the blob URL from `PhotoLoadService`.
 - The Map Shell maintains a `markersByImageId` secondary index (`Map<string, L.Marker>`) for O(1) lookups when applying upload manager events. This index is populated during marker creation and cleaned up during marker removal.
 
 ## Acceptance Criteria
@@ -344,21 +358,24 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 - [x] No marker DOM work during zoom animation — all updates fire on `moveend` only (`zoomAnimating` flag)
 - [x] DivIcon HTML is not regenerated when rendered state has not changed (`refreshPhotoMarker` dirty-checks via `lastRendered` snapshot)
 - [x] `refreshAllPhotoMarkers()` on `zoomend` is replaced by viewport-query-driven reconciliation (`handleMoveEnd` debounce)
-- [ ] Thumbnail signed-URL requests are batched, not issued per-marker (blocked — requires batch signing utility)
+- [ ] Thumbnail signed-URL requests are batched via `photoLoad.batchSign(items, 'marker')`, not issued per-marker
 
 ### Thumbnail Loading & Placeholders
 
-- [x] Single markers at near zoom show a CSS placeholder while thumbnail URL is loading
-- [x] Placeholder uses gradient background + camera icon (SVG mask), no `<img>` tag
+- [x] Single markers at near zoom show `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` while thumbnail URL is loading
+- [x] Placeholder uses gradient background + `PHOTO_PLACEHOLDER_ICON` (SVG data-URI), no `<img>` tag
 - [x] Placeholder matches marker body geometry exactly (same border-radius, dimensions)
-- [x] `createSignedUrl` uses `transform: { width: 80, height: 80, resize: 'cover' }` for Tier 1 thumbnails
-- [x] Error from `createSignedUrl` (file missing) leaves placeholder visible — no broken `<img>` icon
-- [x] Freshly uploaded markers use local `ObjectURL` as thumbnail — no placeholder needed
-- [x] Signed URLs cached in `PhotoMarkerState.thumbnailUrl` survive zoom-out / zoom-in cycles
-- [x] URLs older than 50 minutes are proactively cleared and re-signed on next viewport query
-- [x] On `imageReplaced$`: marker thumbnail swapped instantly via `localObjectUrl` — DivIcon rebuilt with `<img>`, no placeholder flash
-- [x] On `imageAttached$`: marker transitions from CSS placeholder to real thumbnail via `localObjectUrl` — DivIcon rebuilt with `<img>`
-- [x] `localObjectUrl` revoked after signed URL takes over on next viewport query
+- [ ] Thumbnail signing delegated to `PhotoLoadService` via `photoLoad.getSignedUrl(path, 'marker')` — Map Shell does not call `createSignedUrl` directly
+- [ ] Service applies `transform: { width: 80, height: 80, resize: 'cover' }` for marker size preset
+- [x] Error from signing (file missing) leaves `PHOTO_PLACEHOLDER_ICON` visible — no broken `<img>` icon
+- [x] Freshly uploaded markers use local `ObjectURL` as thumbnail via `photoLoad.setLocalUrl()` — no placeholder needed
+- [ ] Signed URLs cached by `PhotoLoadService` — Map Shell does not maintain per-marker `thumbnailUrl` age tracking
+- [ ] Staleness managed by `photoLoad.invalidateStale(STALE_THRESHOLD_MS)` called on `moveend` — replaces manual 50-minute age check
+- [ ] Batch signing via `photoLoad.batchSign(items, 'marker')` for visible markers in a single pass
+- [ ] Preload via `photoLoad.preload(signedUrl)` confirms image downloads before DivIcon rebuild
+- [x] On `imageReplaced$`: blob URL from `PhotoLoadService` cache used to rebuild DivIcon instantly — no placeholder flash
+- [x] On `imageAttached$`: blob URL from `PhotoLoadService` cache used to rebuild DivIcon — placeholder → real thumbnail
+- [ ] `localObjectUrl` freed via `photoLoad.revokeLocalUrl()` after signed URL takes over on next viewport query
 
 ### State Affordances
 
@@ -372,9 +389,9 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 ### Reactive Updates from Upload Manager
 
 - [x] `markersByImageId` secondary index maintained for O(1) marker lookups by image UUID
-- [x] `MapShellComponent` subscribes to `UploadManagerService.imageReplaced$` — rebuilds marker DivIcon with new thumbnail (local ObjectURL) on photo replace
-- [x] `MapShellComponent` subscribes to `UploadManagerService.imageAttached$` — updates marker from placeholder to real thumbnail on photo attach
-- [x] Marker thumbnail uses local `ObjectURL` for instant display (no signed-URL delay); replaced by signed URL on next viewport query
+- [x] `MapShellComponent` subscribes to `UploadManagerService.imageReplaced$` — reads blob URL from `PhotoLoadService` cache, rebuilds marker DivIcon on photo replace
+- [x] `MapShellComponent` subscribes to `UploadManagerService.imageAttached$` — reads blob URL from `PhotoLoadService` cache, updates marker from placeholder to real thumbnail on photo attach
+- [x] Marker thumbnail uses blob URL from `PhotoLoadService` for instant display (no signed-URL delay); replaced by signed URL on next `photoLoad.getSignedUrl()` call
 - [ ] Correction mode drag updates `corrected` flag, shows correction dot, and updates `markerKey` mapping — handled by MapShell directly, not through Upload Manager
 - [ ] Coordinate change from correction mode updates the `markerKey` mapping (remove old key, insert new key)
 - [x] Upload Manager events and correction mode edits do not trigger a viewport query — changes are applied locally and reconciled on the next natural `moveend`
