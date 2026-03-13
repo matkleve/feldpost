@@ -32,26 +32,26 @@ Floating search surface pinned top-center over the map. Use the shared `.ui-cont
 
 Derived from the use cases. Each row maps to specific UC scenarios.
 
-| #   | User Action                                | System Response                                                           | Use Cases         | Triggers                                                  |
-| --- | ------------------------------------------ | ------------------------------------------------------------------------- | ----------------- | --------------------------------------------------------- |
-| 1   | Focuses input (click or tab)               | Opens dropdown with recent searches                                       | UC-1, UC-2        | State → `focused-empty`                                   |
-| 2   | Presses `Cmd/Ctrl+K`                       | Focuses input, opens dropdown                                             | UC-13             | State → `focused-empty`                                   |
-| 3   | Types characters                           | Debounces 300ms, queries DB + geocoder in parallel                        | UC-1, UC-4        | State → `typing` → `results-partial` → `results-complete` |
-| 4   | Presses ArrowDown / ArrowUp                | Moves highlight to next/prev selectable item (skips headers/dividers)     | UC-13             | `activeIndex` changes                                     |
-| 5   | Presses Enter                              | Commits highlighted item (or top item if none highlighted)                | UC-1, UC-6, UC-13 | Fires `SearchCommitAction`                                |
-| 6   | Presses Tab (with ghost text)              | Accepts inline ghost completion into input text, triggers new search      | UC-8, UC-11       | Query updated                                             |
-| 7   | Clicks a DB address result                 | Map centers on that location, adds Search Location Marker                 | UC-1, UC-10       | `commit` type `map-center`                                |
-| 8   | Clicks a DB content result (project/group) | Navigates to that content's context                                       | UC-6              | `commit` type `open-content`                              |
-| 9   | Clicks a geocoder result                   | Map centers on location                                                   | UC-10, UC-3       | `commit` type `map-center`                                |
-| 10  | Clicks a recent search item                | Re-executes that query                                                    | UC-2              | `commit` type `recent-selected`                           |
-| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                | UC-13             | State → `idle`                                            |
-| 12  | Clicks outside search                      | Closes dropdown                                                           | —                 | State → `idle` or `committed`                             |
-| 13  | Clicks `×` clear button                    | Clears query + committed state, removes Search Location Marker            | UC-12             | State → `idle`                                            |
-| 14  | Backspace on empty committed input         | Clears committed context                                                  | UC-12             | State → `focused-empty`                                   |
-| 15  | Query returns no results                   | Shows empty state with "No address found" + suggested actions             | UC-10             | —                                                         |
-| 16  | Geocoder slow/fails                        | DB results render immediately, geocoder section shows skeleton then hides | UC-7              | Graceful degradation                                      |
-| 17  | Pastes coordinates or Google Maps URL      | Detects coordinate format, centers map, reverse-geocodes label            | UC-5              | `commit` type `map-center`                                |
-| 18  | "Did you mean?" suggestion clicked         | Replaces query with corrected text, reruns search                         | UC-16             | Query updated, new search triggered                       |
+| #   | User Action                                | System Response                                                                                                                  | Use Cases         | Triggers                                                  |
+| --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------- | --------------------------------------------------------- |
+| 1   | Focuses input (click or tab)               | Opens dropdown with recent searches                                                                                              | UC-1, UC-2        | State → `focused-empty`                                   |
+| 2   | Presses `Cmd/Ctrl+K`                       | Focuses input, opens dropdown                                                                                                    | UC-13             | State → `focused-empty`                                   |
+| 3   | Types characters                           | Debounces 300ms, queries DB + geocoder in parallel                                                                               | UC-1, UC-4        | State → `typing` → `results-partial` → `results-complete` |
+| 4   | Presses ArrowDown / ArrowUp                | Moves highlight to next/prev selectable item (skips headers/dividers)                                                            | UC-13             | `activeIndex` changes                                     |
+| 5   | Presses Enter                              | Commits highlighted item (or top item if none highlighted)                                                                       | UC-1, UC-6, UC-13 | Fires `SearchCommitAction`                                |
+| 6   | Presses Tab (with ghost text)              | Accepts inline ghost completion into input text, triggers new search                                                             | UC-8, UC-11       | Query updated                                             |
+| 7   | Clicks a DB address result                 | Map centers on that location, adds Search Location Marker, and zooms to a tight local view (~50m horizontal span when supported) | UC-1, UC-10       | `commit` type `map-center`                                |
+| 8   | Clicks a DB content result (project/group) | Navigates to that content's context; when multiple geolocated items are in scope, map fits bounds to include all of them         | UC-6              | `commit` type `open-content`                              |
+| 9   | Clicks a geocoder result                   | Map centers on location and zooms to a tight local view (~50m horizontal span when supported)                                    | UC-10, UC-3       | `commit` type `map-center`                                |
+| 10  | Clicks a recent search item                | Re-executes that query                                                                                                           | UC-2              | `commit` type `recent-selected`                           |
+| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                                                                       | UC-13             | State → `idle`                                            |
+| 12  | Clicks outside search                      | Closes dropdown                                                                                                                  | —                 | State → `idle` or `committed`                             |
+| 13  | Clicks `×` clear button                    | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State → `idle`                                            |
+| 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State → `focused-empty`                                   |
+| 15  | Query returns no results                   | Shows empty state with "No address found" + suggested actions                                                                    | UC-10             | —                                                         |
+| 16  | Geocoder slow/fails                        | DB results render immediately, geocoder section shows skeleton then hides                                                        | UC-7              | Graceful degradation                                      |
+| 17  | Pastes coordinates or Google Maps URL      | Detects coordinate format, centers map, reverse-geocodes label                                                                   | UC-5              | `commit` type `map-center`                                |
+| 18  | "Did you mean?" suggestion clicked         | Replaces query with corrected text, reruns search                                                                                | UC-16             | Query updated, new search triggered                       |
 
 ### Interaction Flowchart
 
@@ -107,7 +107,7 @@ SearchBar                                  ← positioned top-center in Map Zone
     │   ├── SectionLabel "Places"
     │   └── DropdownItem × N               ← `.ui-item` row, globe icon + label + "External result"
     │
-    ├── [loading] GeocoderSkeleton         ← 2 pulse rows while geocoder is fetching
+    ├── [loading] GeocoderSkeleton         ← 2 pulse rows while geocoder is fetching, matching `.ui-item` row height/padding/media-column geometry and using light-gray loading surfaces
     │
     └── [no results] EmptyState
         ├── "No address found for {query}"
@@ -231,9 +231,12 @@ sequenceDiagram
 - [x] Leading search icon and trailing clear button use wrappers that preserve the fixed media slot alignment within the taller search row
 - [x] Results panel is revealed inside the same surface and does not behave like a detached floating dropdown
 - [x] Dropdown rows use `.ui-item` with a fixed leading media column
+- [x] Geocoder skeleton rows match final `.ui-item` geometry (row height, vertical padding, and media-column width)
+- [x] Geocoder skeleton rows use neutral light-gray loading surfaces (not clay/orange accents)
 - [x] Section divider only shows when both DB and geocoder sections have items
 - [x] Results panel expansion animates outer panel height without animating row height, row padding, media width, or panel radius
 - [x] Opening and closing the dropdown does not change outer corner radius, item padding, or media-column width
+- [x] Replacing geocoder skeleton rows with real geocoder rows does not cause vertical jump from row-size mismatch
 
 ### Interaction
 
@@ -244,6 +247,8 @@ sequenceDiagram
 - [x] Enter commits the highlighted item (or top item if none highlighted)
 - [x] Clicking a result commits it
 - [x] Address commit centers the map and shows Search Location Marker
+- [x] Single-location map-center commits zoom to a tight local view (target ~50m horizontal ground span when supported by map zoom limits)
+- [x] Multi-location commits (for example project/group contexts with several geolocated items) fit map bounds so all relevant locations are visible
 - [x] Content commit navigates to the correct route
 - [x] Escape closes dropdown; second Escape blurs input
 - [x] Click outside closes dropdown
