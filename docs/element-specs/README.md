@@ -48,6 +48,24 @@ All specs follow one shared core structure. This is the standard for future spec
 7. `State`
 8. `File Map`
 9. `Wiring`
+   Required sub-sections (in this order):
+   - `### Injected Services` — list every injected service,
+     store, or token with one-line purpose
+   - `### Inputs / Outputs` — all @Input() and @Output()
+     bindings with types
+   - `### Subscriptions` — every Observable or Signal
+     subscription; note where it is torn down
+   - `### Supabase Calls` — list every direct Supabase call
+     with table, operation, and trigger condition; write
+     "None — delegated to [ServiceName]" if calls live in
+     a service instead
+
+   If a sub-section is not applicable, keep the heading and
+   write "None."
+   A sequenceDiagram Mermaid is REQUIRED in the Wiring section
+   whenever there are 2 or more Supabase calls OR the component
+   coordinates across 2 or more services. The diagram must show
+   the full request/response flow including error branches.
 10. `Acceptance Criteria`
 
 Rules:
@@ -85,6 +103,30 @@ Cross-cutting options:
 - `Child Specs` (split parent specs only)
 
 Guidance: prefer one general structure with required core sections plus optional sections, rather than separate templates per element type.
+
+### Mermaid Diagram Policy
+
+Use Mermaid when behavior is temporal, stateful, or multi-source. Diagrams are not required for every spec.
+
+Required:
+
+- Include a `stateDiagram-v2` when a spec contains a `State Machine` section.
+- Include a `sequenceDiagram` or `flowchart` when behavior depends on async orchestration (for example phased loading, retries, cancellation, dedup, fallback chains, or multi-service handoffs).
+- Include a `flowchart TD` with decision nodes (`{ }`) when a spec's Actions or State section contains conditional branching logic (for example: permission checks, fallback chains, empty-state decisions, or feature-flag gates). Decision nodes must be labeled with the exact condition as written in the Actions section so agents can map them directly. If the same branching is already captured in a stateDiagram-v2, a separate flowchart is not required.
+- For split specs, require at least one Mermaid diagram in the child spec that owns orchestration/state logic.
+
+Optional:
+
+- Purely visual/static UI specs with straightforward synchronous behavior.
+- Cases where a compact table is clearer than a diagram.
+- Parent specs that delegate complex behavior to child specs; parent may link to the child diagram instead of duplicating it.
+
+Recommended limits and quality bar:
+
+- Default target: 0-2 Mermaid diagrams per spec to avoid noise.
+- Prefer one diagram per concern (state transitions, request pipeline, or lifecycle).
+- Keep labels short and deterministic so reviewers can map diagram nodes to Actions/State terms.
+- If a diagram drifts from the written contract, the written contract (sections + acceptance criteria) remains authoritative until updated.
 
 ## Lint & CI
 
@@ -126,6 +168,8 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 ### Search
 
 - ✅ `search-bar.md` — Search Bar (multi-intent search surface)
+- ✅ `search-bar-query-behavior.md` — Search Bar Query Behavior (formatting, ghost completion, forgiving matching)
+- ✅ `search-bar-data-and-service.md` — Search Bar Data and Service (pipeline, ranking, geo-bias, service contract)
 
 ### Map Markers
 
@@ -188,13 +232,9 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 
 Priority is review-first, not "all done." Work the queue top-to-bottom unless product direction changes.
 
-### Next Review Targets
-
-1. `search-bar.md` — align section naming and ordering with the contract where needed
-2. `filter-panel.md` — verify action table completeness and state naming consistency
-3. `workspace-view-system.md` — validate data-flow clarity and service boundary wording
-
 ### Next Split Candidates
+
+Check ESLint file.
 
 1. Any spec above 400 lines (warning) should be reviewed for optional split.
 2. Any spec above 600 lines (error) must be split before implementation changes continue.
