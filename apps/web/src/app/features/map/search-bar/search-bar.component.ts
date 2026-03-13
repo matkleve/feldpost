@@ -2,10 +2,13 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
+  EffectRef,
   HostListener,
   OnDestroy,
   OnInit,
   computed,
+  effect,
+  input,
   inject,
   output,
   signal,
@@ -72,6 +75,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private placeholderIndex = 0;
 
   readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
+  readonly queryContext = input<SearchQueryContext>({});
 
   readonly mapCenterRequested = output<{ lat: number; lng: number; label: string }>();
   readonly clearRequested = output<void>();
@@ -138,6 +142,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     ];
   });
 
+  private readonly contextSyncEffect: EffectRef = effect(() => {
+    const nextContext = this.queryContext();
+    this.contextChanges.next(nextContext);
+    this.rebuildGhostTrie();
+  });
+
   ngOnInit(): void {
     this.recentSearches.set(
       this.searchBarService.loadRecentSearches().slice(0, MAX_RECENT_SEARCHES),
@@ -155,6 +165,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.contextSyncEffect.destroy();
     this.stopPlaceholderRotation();
   }
 
@@ -351,7 +362,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     const dbAddressSection =
       result.sections.find((section) => section.family === 'db-address') ??
-      this.createSection('db-address', 'Photo Locations');
+      this.createSection('db-address', 'Addresses');
     const dbContentSection =
       result.sections.find((section) => section.family === 'db-content') ??
       this.createSection('db-content', 'Projects & Groups');
@@ -470,9 +481,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private configureSearchSources(): void {
     this.searchOrchestrator.configureSources({
-      dbAddressResolver: (query, ctx) => this.searchBarService.resolveDbAddresses(query, ctx),
-      dbContentResolver: (query, ctx) => this.searchBarService.resolveDbContent(query, ctx),
-      geocoderResolver: (query, ctx) => this.searchBarService.resolveGeocoder(query, ctx),
+      dbAddressResolver: (query, ctx) =>
+        this.searchBarService.resolveDbAddressCandidates(query, ctx),
+      dbContentResolver: (query, ctx) =>
+        this.searchBarService.resolveDbContentCandidates(query, ctx),
+      geocoderResolver: (query, ctx) => this.searchBarService.resolveGeocoderCandidates(query, ctx),
     });
   }
 
@@ -486,7 +499,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private createEmptySections(): SearchSectionsState {
     return {
-      dbAddress: this.createSection('db-address', 'Photo Locations'),
+      dbAddress: this.createSection('db-address', 'Addresses'),
       dbContent: this.createSection('db-content', 'Projects & Groups'),
       geocoder: this.createSection('geocoder', 'Places'),
     };

@@ -240,7 +240,7 @@ export class SearchOrchestratorService {
       .sort((left, right) => (right.score ?? 0) - (left.score ?? 0))
       .slice(0, MAX_GEOCODER_SECTION_ITEMS);
 
-    sections.push({ family: 'db-address', title: 'Photo Locations', items: rankedDbAddress });
+    sections.push({ family: 'db-address', title: 'Addresses', items: rankedDbAddress });
     sections.push({ family: 'db-content', title: 'Projects & Groups', items: rankedDbContent });
     sections.push({
       family: 'geocoder',

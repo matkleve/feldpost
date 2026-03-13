@@ -91,7 +91,7 @@
         }
 
         @if (sections().dbAddress.items.length > 0) {
-          <div class="search-bar__section-label" role="presentation">Photo Locations</div>
+          <div class="search-bar__section-label" role="presentation">Addresses</div>
           @for (candidate of sections().dbAddress.items; track candidate.id; let index = $index) {
             <ss-search-dropdown-item
               [candidate]="candidate"
