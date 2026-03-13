@@ -9,7 +9,7 @@ The data-flow and service contract for Search Bar orchestration. It defines phas
 
 ## What It Looks Like
 
-Results appear in progressive phases: instant local signals, fast DB sections, then slower geocoder sections. Geocoder loading is represented as transient skeleton rows and must never block DB sections. Section ordering remains fixed: Addresses, Projects & Groups, Places. Relevance adjusts with project context and geographic bias.
+Results appear in progressive phases: instant local signals, fast DB sections, then slower geocoder sections. Geocoder loading is represented as transient skeleton rows and must never block DB sections. Skeleton rows must mirror final geocoder row geometry so replacement does not shift layout and must use neutral light-gray loading surfaces. Section ordering remains fixed: Addresses, Projects & Groups, Places. Relevance adjusts with project context and geographic bias.
 
 ## Where It Lives
 
@@ -18,13 +18,13 @@ Results appear in progressive phases: instant local signals, fast DB sections, t
 
 ## Actions
 
-| #   | User Action              | System Response                                                  | Triggers                |
-| --- | ------------------------ | ---------------------------------------------------------------- | ----------------------- |
-| 1   | Types query              | Start phased orchestration (`typing` -> `partial` -> `complete`) | Debounced query stream  |
-| 2   | Geocoder timeout/failure | Hide geocoder section; keep DB results visible                   | Non-blocking error path |
-| 3   | Changes active project   | Re-emit `SearchQueryContext`, re-rank project-sensitive results  | Project context update  |
-| 4   | Repeats recent query     | Serve cached results when valid                                  | Cache hit               |
-| 5   | Commits result           | Persist recent search and update ranking signals                 | Commit event            |
+| #   | User Action              | System Response                                                                                                                     | Triggers                |
+| --- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| 1   | Types query              | Start phased orchestration (`typing` -> `partial` -> `complete`)                                                                    | Debounced query stream  |
+| 2   | Geocoder timeout/failure | Hide geocoder section; keep DB results visible                                                                                      | Non-blocking error path |
+| 3   | Changes active project   | Re-emit `SearchQueryContext`, re-rank project-sensitive results                                                                     | Project context update  |
+| 4   | Repeats recent query     | Serve cached results when valid                                                                                                     | Cache hit               |
+| 5   | Commits result           | Persist recent search, update ranking signals, and apply commit viewport policy (single-point tight zoom or multi-point fit-bounds) | Commit event            |
 
 ### Decision Flowchart
 
@@ -83,13 +83,14 @@ Search Data Orchestration
 
 ## State
 
-| Name           | Type                                   | Default     | Controls                             |
-| -------------- | -------------------------------------- | ----------- | ------------------------------------ |
-| `phase`        | `'typing' \| 'partial' \| 'complete'`  | `'typing'`  | Progressive rendering stage          |
-| `geoStatus`    | `'loading' \| 'loaded' \| 'error'`     | `'loading'` | Geocoder section visibility/skeleton |
-| `countryCodes` | `string[]`                             | `[]`        | Country bias for geocoder queries    |
-| `dataCentroid` | `{ lat: number; lng: number } \| null` | `null`      | Proximity-decay scoring              |
-| `cacheTtlMs`   | `number`                               | `300000`    | Search cache lifetime                |
+| Name             | Type                                                                   | Default     | Controls                             |
+| ---------------- | ---------------------------------------------------------------------- | ----------- | ------------------------------------ |
+| `phase`          | `'typing' \| 'partial' \| 'complete'`                                  | `'typing'`  | Progressive rendering stage          |
+| `geoStatus`      | `'loading' \| 'loaded' \| 'error'`                                     | `'loading'` | Geocoder section visibility/skeleton |
+| `viewportBounds` | `{ north: number; east: number; south: number; west: number } \| null` | `null`      | Viewbox bias for geocoder queries    |
+| `countryCodes`   | `string[]`                                                             | `[]`        | Country bias for geocoder queries    |
+| `dataCentroid`   | `{ lat: number; lng: number } \| null`                                 | `null`      | Proximity-decay scoring              |
+| `cacheTtlMs`     | `number`                                                               | `300000`    | Search cache lifetime                |
 
 ## File Map
 
@@ -164,15 +165,25 @@ sequenceDiagram
 - [ ] DB results render before geocoder results for typical latency conditions.
 - [ ] Geocoder calls go through Edge Function proxy only.
 - [ ] Fallback geocoder variants execute only when primary query yields no results.
+- [ ] Geocoder loading placeholders use the same row geometry as final Places rows (height, vertical padding, media-column width).
+- [ ] Geocoder loading placeholders use neutral light-gray loading surfaces (no clay/orange accent colors).
 - [ ] Section ordering remains fixed: Addresses -> Projects & Groups -> Places.
 - [ ] Active-project context materially boosts ranking in DB sections.
-- [ ] Geo-biasing uses country and centroid context when available.
+- [ ] Geo-priority requires `viewportBounds` and `countryCodes` inputs in `SearchQueryContext` when context is available.
+- [ ] With both `viewportBounds` and `countryCodes` present, geocoder requests apply both `viewbox` and `countrycodes` bias.
+- [ ] If `viewportBounds` and/or `countryCodes` are missing, search degrades gracefully (no error state) and still returns relevant results.
+- [ ] For short local-intent queries (for example: street names, districts, city neighborhoods), local candidates rank above unrelated global candidates when geo context is present.
 - [ ] Geocoder results within 30m of DB address candidates are deduplicated from Places output.
 - [ ] In-flight geocoder requests are canceled on query changes (`switchMap` or equivalent cancellation semantics).
 - [ ] `SearchQueryContext` includes and propagates `activeProjectId` from active project selection.
 - [ ] DB address ranking uses `textMatch × projectBoost × dataGravity × recencyDecay`.
 - [ ] DB content ranking uses `textMatch × projectBoost × sizeSignal`.
 - [ ] Geocoder ranking uses `nominatimImportance × proximityDecay × countryBoost`.
+- [ ] Places output is capped at 3 items after deduplication and ranking, and only when the Places section is rendered.
+- [ ] Places ordering is deterministic: local-context matches first, then near-data matches, then remaining global matches by relevance.
+- [ ] Single-point map-center commits apply a tight zoom target of approximately 50m horizontal ground span when map zoom constraints allow.
+- [ ] Multi-point commits (for example aggregate project/group locations) fit bounds so all committed points are visible in the viewport.
+- [ ] Replacing geocoder loading placeholders with final Places rows does not introduce vertical jump caused by row-size mismatch.
 - [ ] Session cache includes org `countryCodes` and `dataCentroid` for query-time geo bias.
 - [ ] Edge Function accepts and forwards `viewbox`, `bounded`, `countrycodes`, and `limit`.
 - [ ] Recent searches persist across sessions in `feldpost-recent-searches`.
@@ -239,12 +250,27 @@ Geocoder:
 
 ### Geo-Relevance Ranking
 
-Bias layers:
+Contract inputs:
 
-1. Country restriction (`countrycodes`)
-2. Viewport bias (`viewbox`)
-3. Data-gravity re-ranking
-4. Proximity decay
+1. `viewportBounds` (for `viewbox` bias)
+2. `countryCodes` (for `countrycodes` bias)
+
+Required behavior:
+
+1. When both inputs are present, geocoder queries must apply both country and viewport bias.
+2. When one input is missing, the available input must still be applied.
+3. When both inputs are missing, geocoder queries must still run (graceful degradation), but without geo-priority bias.
+
+Ranking order expectation (when both local and global candidates exist):
+
+1. In-country and in-viewport matches
+2. In-country but out-of-viewport matches with near-data proximity
+3. Remaining global matches ordered by relevance
+
+Near-data bias:
+
+- Near-data bias means candidates closer to `dataCentroid` are promoted relative to farther candidates at similar text relevance.
+- Near-data bias must not suppress all global results; it only reorders them.
 
 Centroid query:
 
@@ -258,12 +284,53 @@ WHERE organization_id = :org_id
 
 ### Edge Function Parameters
 
-| Parameter      | Type     | Description                             |
-| -------------- | -------- | --------------------------------------- |
-| `viewbox`      | `string` | `west,north,east,south` map viewport    |
-| `bounded`      | `0 \| 1` | Restrict-to-viewbox toggle              |
-| `countrycodes` | `string` | ISO 3166-1 comma list                   |
-| `limit`        | `number` | Result cap (default `5` for Search Bar) |
+| Parameter      | Type     | Description                                   |
+| -------------- | -------- | --------------------------------------------- |
+| `viewbox`      | `string` | `west,north,east,south` map viewport          |
+| `bounded`      | `0 \| 1` | Restrict-to-viewbox toggle                    |
+| `countrycodes` | `string` | ISO 3166-1 comma list                         |
+| `limit`        | `number` | Places cap input (default `3` for Search Bar) |
+
+Places cap application:
+
+1. Apply ranking and deduplication first.
+2. Then cap Places output to the top 3 items.
+3. Apply cap only to the Places section (not Addresses or Projects & Groups).
+
+### Commit Viewport Policy
+
+Single-point commits:
+
+1. Center map on committed coordinate.
+2. Apply tight zoom targeting approximately 50m horizontal ground span.
+3. If map zoom constraints prevent exact 50m span, use the closest tighter supported zoom level without exceeding map limits.
+
+Multi-point commits:
+
+1. Compute bounds from all committed coordinates.
+2. Fit viewport to include all points with existing safe-area/panel padding.
+3. Do not drop outlier points from the committed set.
+
+## Implementation Notes
+
+### Must (spec contract)
+
+- Treat `viewportBounds` and `countryCodes` as required geo-priority context inputs when available.
+- Apply graceful degradation when context is missing; never fail the full search flow due to missing geo context.
+- Prefer local-context candidates over unrelated global candidates when both are present.
+- Enforce Places max count of 3 after deduplication and ranking.
+
+### Should (suggested approach)
+
+- Use weighted scoring with explicit geo factors (`countryBoost`, `viewboxBoost`, `proximityDecay`) so ordering is predictable.
+- Treat missing geo inputs as neutral multipliers (for example `1.0`) rather than branching into separate pipelines.
+- Add test fixtures that pair short local-intent queries with distracting global lookalikes to prevent global-noise regressions.
+
+### Could (future improvements)
+
+- Add telemetry for geo-priority hit-rate (context-present vs context-absent result quality).
+- Add optional experiments for adaptive Places cap by query confidence.
+- Add explicit near-data and global buckets in Places if progressive disclosure is enabled.
 
 ## SearchBarService Contract
 

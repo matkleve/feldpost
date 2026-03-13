@@ -292,7 +292,9 @@ describe('SearchBarComponent', () => {
       .join('\n');
 
     expect(styleText).toContain('grid-template-rows: var(--search-bar-row-height) minmax(0, 0fr);');
-    expect(styleText).toContain('grid-template-rows: var(--search-bar-row-height) minmax(0, 1fr);');
+    expect(styleText).toContain(
+      'grid-template-rows: var(--search-bar-row-height) minmax(0, auto);',
+    );
     expect(styleText).toContain('height: var(--search-bar-row-height);');
   });
 });
