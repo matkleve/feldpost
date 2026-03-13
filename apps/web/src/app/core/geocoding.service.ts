@@ -77,6 +77,7 @@ export interface GeocoderSearchResult {
     road?: string;
     house_number?: string;
     postcode?: string;
+    country_code?: string;
     city?: string;
     town?: string;
     village?: string;
@@ -93,6 +94,7 @@ interface NominatimSearchResponse {
   name?: string;
   importance?: number;
   address?: NominatimReverseResponse['address'];
+  country_code?: string;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -303,6 +305,7 @@ export class GeocodingService {
             road: hit.address.road,
             house_number: hit.address.house_number,
             postcode: hit.address.postcode,
+            country_code: hit.country_code,
             city: hit.address.city,
             town: hit.address.town,
             village: hit.address.village,

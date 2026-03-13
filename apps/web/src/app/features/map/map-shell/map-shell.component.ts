@@ -42,6 +42,7 @@ import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
+import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
 import {
@@ -98,6 +99,20 @@ export class MapShellComponent implements OnDestroy {
   /** Whether the map is in placement mode (drives the banner + cursor class). */
   readonly placementActive = signal(false);
   readonly searchPlacementActive = signal(false);
+  private readonly searchViewportBounds = signal<
+    { north: number; east: number; south: number; west: number } | undefined
+  >(undefined);
+
+  readonly searchQueryContext = computed<SearchQueryContext>(() => {
+    const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
+    const activeProjectId =
+      selectedProjectIds.size > 0 ? Array.from(selectedProjectIds.values())[0] : undefined;
+
+    return {
+      activeProjectId,
+      viewportBounds: this.searchViewportBounds(),
+    };
+  });
 
   // ── GPS state ────────────────────────────────────────────────────────────
 
@@ -417,6 +432,7 @@ export class MapShellComponent implements OnDestroy {
     // Request user GPS position; fall back to Vienna if denied.
     this.initGeolocation();
     void this.queryViewportMarkers();
+    this.updateSearchViewportBounds();
 
     // Map click handler: closes upload panel and, when active, places images
     // that had no GPS EXIF data.
@@ -433,7 +449,10 @@ export class MapShellComponent implements OnDestroy {
 
     // Debounced moveend: refreshes markers only when zoom-level threshold changes.
     // No marker DOM work during zoom animation — all updates fire after moveend.
-    this.map.on('moveend', () => this.handleMoveEnd());
+    this.map.on('moveend', () => {
+      this.handleMoveEnd();
+      this.updateSearchViewportBounds();
+    });
   }
 
   private initGeolocation(): void {
@@ -531,6 +550,18 @@ export class MapShellComponent implements OnDestroy {
   private clearSearchLocationMarker(): void {
     this.searchLocationMarker?.remove();
     this.searchLocationMarker = null;
+  }
+
+  private updateSearchViewportBounds(): void {
+    const bounds = this.map?.getBounds();
+    if (!bounds) return;
+
+    this.searchViewportBounds.set({
+      north: bounds.getNorth(),
+      east: bounds.getEast(),
+      south: bounds.getSouth(),
+      west: bounds.getWest(),
+    });
   }
 
   /**

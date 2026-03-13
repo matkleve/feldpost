@@ -1,5 +1,6 @@
 :host {
   --search-bar-safe-inline: max(var(--container-inset), calc(3rem + var(--spacing-4)));
+  --search-bar-viewport-inset: var(--container-inset);
 
   position: absolute;
   top: var(--container-inset);
@@ -10,6 +11,7 @@
 
   @media (max-width: 47.9375rem) {
     --search-bar-safe-inline: var(--container-inset-mobile);
+    --search-bar-viewport-inset: var(--container-inset-mobile);
 
     width: calc(100% - (2 * var(--search-bar-safe-inline)));
     top: var(--container-inset-mobile);
@@ -26,7 +28,9 @@
   --search-bar-dropdown-gap: var(--container-gap-panel);
   --search-bar-media-size: var(--spacing-6);
   --search-bar-row-height: 3rem;
-  --search-bar-results-max-block-size: min(42rem, 78dvh);
+  --search-bar-results-max-block-size: calc(
+    100dvh - (2 * var(--search-bar-viewport-inset)) - var(--search-bar-row-height)
+  );
   --search-bar-reveal-duration: 180ms;
   --search-dropdown-item-padding-inline: var(--search-bar-padding-inline);
   --search-dropdown-item-padding-block: var(--container-padding-block-compact);

@@ -11,12 +11,16 @@ function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
     ilike: vi.fn(),
     not: vi.fn(),
     limit: vi.fn(),
+    eq: vi.fn(),
+    in: vi.fn(),
   };
 
   builder.select.mockReturnValue(builder);
   builder.ilike.mockReturnValue(builder);
   builder.not.mockReturnValue(builder);
   builder.limit.mockResolvedValue(result);
+  builder.eq.mockResolvedValue(result);
+  builder.in.mockResolvedValue(result);
 
   return builder;
 }
@@ -48,6 +52,10 @@ describe('SearchBarComponent', () => {
       data: [{ id: 'group-1', name: 'Burg Quote Group' }],
       error: null,
     });
+    const savedGroupImagesBuilder = createQueryBuilder({
+      data: [{ group_id: 'group-1' }],
+      error: null,
+    });
 
     await TestBed.configureTestingModule({
       imports: [SearchBarComponent],
@@ -65,6 +73,7 @@ describe('SearchBarComponent', () => {
                 if (table === 'images') return imagesBuilder;
                 if (table === 'projects') return projectsBuilder;
                 if (table === 'saved_groups') return groupsBuilder;
+                if (table === 'saved_group_images') return savedGroupImagesBuilder;
                 return createQueryBuilder({ data: [], error: null });
               }),
             },

@@ -59,6 +59,7 @@ export interface SearchRecentCandidate extends SearchBaseCandidate {
   family: 'recent';
   lastUsedAt: string;
   projectId?: string;
+  usageCount?: number;
 }
 
 export type SearchCandidate =
