@@ -1,6 +1,6 @@
 # Projects Page
 
-> **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+> **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md), [use-cases/projects-grouping-filter-sort.md](../use-cases/projects-grouping-filter-sort.md)
 
 ## What It Is
 
@@ -235,7 +235,7 @@ sequenceDiagram
 
 ## Use Cases
 
-> **Full use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+> **Full use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md), [use-cases/projects-grouping-filter-sort.md](../use-cases/projects-grouping-filter-sort.md)
 
 The scenarios in this use-case document define the expected behavior for project selection, project-scoped workspace browsing, map handoff, and state persistence on `/projects`.
 

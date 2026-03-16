@@ -23,6 +23,10 @@ interface ProjectActivityRow {
   project_id: string | null;
   captured_at: string | null;
   created_at: string | null;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  country: string | null;
 }
 
 const DEFAULT_PROJECT_COLOR: ProjectColorKey = 'clay';
@@ -36,16 +40,24 @@ export class ProjectsService {
 
     const { data: activityData, error: activityError } = await this.supabase.client
       .from('images')
-      .select('project_id,captured_at,created_at')
+      .select('project_id,captured_at,created_at,city,district,street,country')
       .not('project_id', 'is', null);
 
     const counts = new Map<string, number>();
     const lastActivity = new Map<string, string>();
+    const cityCounts = new Map<string, Map<string, number>>();
+    const districtCounts = new Map<string, Map<string, number>>();
+    const streetCounts = new Map<string, Map<string, number>>();
+    const countryCounts = new Map<string, Map<string, number>>();
 
     if (!activityError && Array.isArray(activityData)) {
       for (const row of activityData as ProjectActivityRow[]) {
         if (!row.project_id) continue;
         counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+        this.bumpValueCount(cityCounts, row.project_id, row.city);
+        this.bumpValueCount(districtCounts, row.project_id, row.district);
+        this.bumpValueCount(streetCounts, row.project_id, row.street);
+        this.bumpValueCount(countryCounts, row.project_id, row.country);
 
         const ts = row.captured_at ?? row.created_at;
         if (!ts) continue;
@@ -72,6 +84,10 @@ export class ProjectsService {
         totalImageCount,
         matchingImageCount: totalImageCount,
         lastActivity: lastActivity.get(row.id) ?? null,
+        city: this.pickMostFrequent(cityCounts, row.id),
+        district: this.pickMostFrequent(districtCounts, row.id),
+        street: this.pickMostFrequent(streetCounts, row.id),
+        country: this.pickMostFrequent(countryCounts, row.id),
       };
     });
   }
@@ -104,30 +120,12 @@ export class ProjectsService {
   }
 
   async createDraftProject(): Promise<ProjectListItem | null> {
-    const { data, error } = await this.supabase.client
-      .from('projects')
-      .insert({ name: 'Untitled project', color_key: DEFAULT_PROJECT_COLOR })
-      .select('id,name,color_key,archived_at,created_at,updated_at')
-      .single();
-
-    if (error || !data) {
+    const row = await this.tryCreateDraftProjectRow();
+    if (!row) {
       return null;
     }
 
-    const row = data as ProjectRow;
-
-    return {
-      id: row.id,
-      name: row.name?.trim() || 'Untitled project',
-      colorKey: this.normalizeColorKey(row.color_key),
-      archivedAt: row.archived_at ?? null,
-      createdAt: row.created_at ?? new Date().toISOString(),
-      updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
-      status: row.archived_at ? 'archived' : 'active',
-      totalImageCount: 0,
-      matchingImageCount: 0,
-      lastActivity: null,
-    };
+    return this.mapProjectRowToListItem(row);
   }
 
   async renameProject(projectId: string, name: string): Promise<boolean> {
@@ -145,21 +143,39 @@ export class ProjectsService {
   }
 
   async archiveProject(projectId: string): Promise<boolean> {
-    const { error } = await this.supabase.client
+    const preferred = await this.supabase.client
       .from('projects')
       .update({ archived_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .eq('id', projectId);
 
-    return !error;
+    if (!preferred.error) {
+      return true;
+    }
+
+    const fallback = await this.supabase.client
+      .from('projects')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', projectId);
+
+    return !fallback.error;
   }
 
   async setProjectColor(projectId: string, colorKey: ProjectColorKey): Promise<boolean> {
-    const { error } = await this.supabase.client
+    const preferred = await this.supabase.client
       .from('projects')
       .update({ color_key: colorKey, updated_at: new Date().toISOString() })
       .eq('id', projectId);
 
-    return !error;
+    if (!preferred.error) {
+      return true;
+    }
+
+    const fallback = await this.supabase.client
+      .from('projects')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', projectId);
+
+    return !fallback.error;
   }
 
   async loadProjectWorkspaceImages(projectId: string): Promise<ProjectScopedWorkspaceImage[]> {
@@ -238,6 +254,89 @@ export class ProjectsService {
       return value;
     }
     return DEFAULT_PROJECT_COLOR;
+  }
+
+  private mapProjectRowToListItem(row: ProjectRow): ProjectListItem {
+    return {
+      id: row.id,
+      name: row.name?.trim() || 'Untitled project',
+      colorKey: this.normalizeColorKey(row.color_key),
+      archivedAt: row.archived_at ?? null,
+      createdAt: row.created_at ?? new Date().toISOString(),
+      updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
+      status: row.archived_at ? 'archived' : 'active',
+      totalImageCount: 0,
+      matchingImageCount: 0,
+      lastActivity: null,
+      city: null,
+      district: null,
+      street: null,
+      country: null,
+    };
+  }
+
+  private bumpValueCount(
+    buckets: Map<string, Map<string, number>>,
+    projectId: string,
+    value: string | null,
+  ): void {
+    const normalized = value?.trim();
+    if (!normalized) return;
+
+    const projectBucket = buckets.get(projectId) ?? new Map<string, number>();
+    projectBucket.set(normalized, (projectBucket.get(normalized) ?? 0) + 1);
+    buckets.set(projectId, projectBucket);
+  }
+
+  private pickMostFrequent(
+    buckets: Map<string, Map<string, number>>,
+    projectId: string,
+  ): string | null {
+    const projectBucket = buckets.get(projectId);
+    if (!projectBucket || projectBucket.size === 0) {
+      return null;
+    }
+
+    let winner: string | null = null;
+    let winnerCount = -1;
+
+    for (const [value, count] of projectBucket) {
+      if (count > winnerCount || (count === winnerCount && (winner ? value < winner : true))) {
+        winner = value;
+        winnerCount = count;
+      }
+    }
+
+    return winner;
+  }
+
+  private async tryCreateDraftProjectRow(): Promise<ProjectRow | null> {
+    const preferred = await this.supabase.client
+      .from('projects')
+      .insert({ name: 'Untitled project', color_key: DEFAULT_PROJECT_COLOR })
+      .select('id,name,color_key,archived_at,created_at,updated_at')
+      .single();
+
+    if (!preferred.error && preferred.data) {
+      return preferred.data as ProjectRow;
+    }
+
+    const fallback = await this.supabase.client
+      .from('projects')
+      .insert({ name: 'Untitled project' })
+      .select('id,name,created_at,updated_at')
+      .single();
+
+    if (fallback.error || !fallback.data) {
+      return null;
+    }
+
+    const row = fallback.data as Pick<ProjectRow, 'id' | 'name' | 'created_at' | 'updated_at'>;
+    return {
+      ...row,
+      color_key: DEFAULT_PROJECT_COLOR,
+      archived_at: null,
+    };
   }
 
   private async collectTitleAndAddressMatches(

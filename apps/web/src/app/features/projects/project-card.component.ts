@@ -11,13 +11,17 @@ import type { ProjectListItem } from '../../core/projects/projects.types';
         <h3 class="project-card__title">{{ project().name }}</h3>
       </header>
 
-      <p class="project-card__badge">
-        @if (project().matchingImageCount > 0) {
-          {{ project().matchingImageCount }} results
-        } @else {
-          0 results
-        }
-      </p>
+      @if (showMatchCount()) {
+        <p class="project-card__badge">
+          @if (project().matchingImageCount > 0) {
+            {{ project().matchingImageCount }} results
+          } @else {
+            0 results
+          }
+        </p>
+      } @else {
+        <p class="project-card__badge">{{ project().totalImageCount }} photos</p>
+      }
 
       <p class="project-card__meta">
         {{ project().totalImageCount }} photos ·
@@ -48,8 +52,10 @@ import type { ProjectListItem } from '../../core/projects/projects.types';
     `
       .project-card {
         display: grid;
+        grid-template-rows: auto auto auto 1fr;
         gap: var(--spacing-3);
-        min-height: 14rem;
+        min-height: 14.5rem;
+        height: 100%;
         padding: var(--spacing-4);
         border: 1px solid var(--color-border);
         border-radius: var(--container-radius-panel);
@@ -74,6 +80,10 @@ import type { ProjectListItem } from '../../core/projects/projects.types';
         font-size: 1rem;
         line-height: 1.3;
         color: var(--color-text-primary);
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
       }
 
       .project-card__badge {
@@ -89,6 +99,7 @@ import type { ProjectListItem } from '../../core/projects/projects.types';
       .project-card__actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
+        align-content: end;
         gap: var(--spacing-2);
       }
 
@@ -96,14 +107,23 @@ import type { ProjectListItem } from '../../core/projects/projects.types';
         min-height: 2.75rem;
         border: 1px solid var(--color-border);
         border-radius: var(--container-radius-control);
-        background: var(--color-bg-surface);
-        color: var(--color-text-primary);
+        background: color-mix(in srgb, var(--color-bg-surface) 96%, var(--color-bg-base));
+        color: var(--color-text-secondary);
         padding-inline: var(--spacing-2);
         cursor: pointer;
+        font-weight: 600;
+      }
+
+      .project-card__btn:first-child {
+        border-color: color-mix(in srgb, var(--color-clay) 48%, var(--color-border));
+        color: var(--color-clay);
+        background: color-mix(in srgb, var(--color-clay) 10%, var(--color-bg-surface));
       }
 
       .project-card__btn--danger {
         color: var(--color-danger);
+        border-color: color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+        background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-surface));
       }
     `,
   ],
@@ -111,6 +131,7 @@ import type { ProjectListItem } from '../../core/projects/projects.types';
 export class ProjectCardComponent {
   readonly project = input.required<ProjectListItem>();
   readonly colorToken = input.required<string>();
+  readonly showMatchCount = input<boolean>(true);
 
   readonly open = output<string>();
   readonly rename = output<string>();

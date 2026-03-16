@@ -19,6 +19,10 @@ export interface ProjectListItem extends ProjectRecord {
   totalImageCount: number;
   matchingImageCount: number;
   lastActivity: string | null;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  country: string | null;
 }
 
 export interface ProjectsSnapshot {
