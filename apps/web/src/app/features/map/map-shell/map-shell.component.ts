@@ -449,7 +449,7 @@ export class MapShellComponent implements OnDestroy {
 
   /**
    * Recenters on the user's position once.
-    * If a recent position is already known, recenters immediately.
+   * If a recent position is already known, recenters immediately.
    */
   goToUserPosition(): void {
     if (this.gpsTrackingActive()) {

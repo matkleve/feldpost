@@ -7,13 +7,32 @@ This document is the current source-of-truth draft for role permissions and RLS 
 Defined in schema/seed:
 
 - admin
+- clerk
 - user
 - viewer
+- worker
 
 Important:
 
-- There is no dedicated `clerk` role in the database today.
-- Clerk is currently a persona that maps to either `user` or `viewer`.
+- `clerk` and `worker` now exist as explicit DB roles.
+- Current RLS behavior still treats them like `user` (same effective permissions), which matches the current product request.
+
+## Fit Check: admin, clerk, worker
+
+Current fit status against requested roles:
+
+- admin: fully represented (`admin` role exists).
+- clerk: represented (`clerk` role exists).
+- worker: represented (`worker` role exists).
+
+Short-term mapping (works today):
+
+- admin -> `admin`
+- clerk -> `clerk` (effective permissions currently same as `user`)
+- worker -> `worker` (effective permissions currently same as `user`)
+
+This gives clerk and worker the same permissions right now, as requested.
+Later, you can split them by introducing dedicated `clerk` and `worker` roles plus explicit RLS checks.
 
 ## Effective Security Model (Current)
 
@@ -86,6 +105,27 @@ Legend: ALLOW, DENY, CONDITIONAL
 | Assign/revoke roles      | ALLOW | DENY        | DENY   | admin-only policy                  |
 | Upload storage object    | ALLOW | ALLOW       | DENY   | path and role checks               |
 | Delete storage object    | ALLOW | CONDITIONAL | DENY   | owner or admin                     |
+
+## Action Matrix (Requested Role Names, Current Mapping)
+
+Current effective behavior: clerk and worker both follow non-viewer `user` behavior until dedicated RLS splits are introduced.
+
+| Action                   | admin | clerk       | worker      | Notes                              |
+| ------------------------ | ----- | ----------- | ----------- | ---------------------------------- |
+| Read images in own org   | ALLOW | ALLOW       | ALLOW       | org-scoped                         |
+| Upload image             | ALLOW | ALLOW       | ALLOW       | currently same as user             |
+| Edit image details       | ALLOW | ALLOW       | ALLOW       | currently org-wide for non-viewers |
+| Delete image             | ALLOW | ALLOW       | ALLOW       | currently org-wide for non-viewers |
+| Edit image metadata      | ALLOW | ALLOW       | ALLOW       | non-viewer org scope               |
+| Create metadata key      | ALLOW | ALLOW       | ALLOW       | non-viewer org scope               |
+| Delete metadata key      | ALLOW | CONDITIONAL | CONDITIONAL | creator or admin                   |
+| Read projects in own org | ALLOW | ALLOW       | ALLOW       | org-scoped                         |
+| Create project           | ALLOW | ALLOW       | ALLOW       | non-viewer                         |
+| Update project           | ALLOW | ALLOW       | ALLOW       | currently org-wide for non-viewers |
+| Delete project           | ALLOW | CONDITIONAL | CONDITIONAL | owner or admin                     |
+| Assign/revoke roles      | ALLOW | DENY        | DENY        | admin-only policy                  |
+| Upload storage object    | ALLOW | ALLOW       | ALLOW       | path and role checks               |
+| Delete storage object    | ALLOW | CONDITIONAL | CONDITIONAL | owner or admin                     |
 
 ## Production Decision Required
 
