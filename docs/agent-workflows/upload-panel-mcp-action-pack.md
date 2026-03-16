@@ -2,6 +2,15 @@
 
 This action pack turns MCP findings into execution-ready items for the upload-panel rollout.
 
+## Status (Executed)
+
+- [x] Added migration `20260316204500_upload_security_perf_hardening.sql`
+- [x] Applied migration with `npx supabase db push`
+- [x] Cleared security lints for mutable `search_path` on upload-related functions
+- [x] Cleared performance lint for unindexed `dedup_hashes.image_id` foreign key
+- [x] Cleared performance lint for `images: own insert` auth init-plan warning
+- [ ] Enable leaked password protection in hosted Supabase Auth settings (manual dashboard step)
+
 ## 1) Supabase MCP Findings (What this adds now)
 
 ### Security advisors
