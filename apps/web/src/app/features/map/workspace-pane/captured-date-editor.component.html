@@ -30,9 +30,15 @@
   <!-- Month navigation -->
   <div class="captured-date-editor__month-nav">
     <span class="captured-date-editor__month-label">{{ monthLabel() }}</span>
-    <button class="captured-date-editor__now-btn" type="button" (click)="setToday()">Today</button>
     <button
-      class="captured-date-editor__nav-btn"
+      class="captured-date-editor__now-btn focus-ring-primary"
+      type="button"
+      (click)="setToday()"
+    >
+      Today
+    </button>
+    <button
+      class="captured-date-editor__nav-btn focus-ring-primary"
       type="button"
       aria-label="Previous month"
       (click)="prevMonth()"
@@ -40,7 +46,7 @@
       <span class="material-icons" aria-hidden="true">chevron_left</span>
     </button>
     <button
-      class="captured-date-editor__nav-btn"
+      class="captured-date-editor__nav-btn focus-ring-primary"
       type="button"
       aria-label="Next month"
       (click)="nextMonth()"
@@ -58,7 +64,7 @@
     <!-- Day cells -->
     @for (day of calendarDays(); track day.date) {
       <button
-        class="captured-date-editor__day"
+        class="captured-date-editor__day focus-ring-primary"
         type="button"
         [class.captured-date-editor__day--other-month]="!day.isCurrentMonth"
         [class.captured-date-editor__day--today]="day.isToday"
@@ -74,9 +80,19 @@
 
   <!-- Action row -->
   <div class="captured-date-editor__actions">
-    <button class="captured-date-editor__clear-btn" type="button" (click)="emitClear()">
+    <button
+      class="captured-date-editor__clear-btn focus-ring-primary"
+      type="button"
+      (click)="emitClear()"
+    >
       Clear
     </button>
-    <button class="captured-date-editor__done-btn" type="button" (click)="emitSave()">Done</button>
+    <button
+      class="captured-date-editor__done-btn focus-ring-primary"
+      type="button"
+      (click)="emitSave()"
+    >
+      Done
+    </button>
   </div>
 </div>

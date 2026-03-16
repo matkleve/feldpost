@@ -41,11 +41,6 @@
     color: var(--color-text-primary);
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
   &--filled {
     background: color-mix(in srgb, var(--color-primary) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);

@@ -12,6 +12,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { FilterService } from '../../core/filter.service';
+import { ToastService } from '../../core/toast.service';
 import type {
   ProjectColorKey,
   ProjectListItem,
@@ -45,6 +46,7 @@ import { DropdownShellComponent } from '../../shared/dropdown-shell.component';
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
+type PendingProjectAction = 'archive' | 'delete' | null;
 
 const PROJECT_GROUPING_OPTIONS: GroupingProperty[] = [
   { id: 'status', label: 'Status', icon: 'inventory_2' },
@@ -120,6 +122,7 @@ interface ProjectGroupedSection {
 })
 export class ProjectsPageComponent {
   private readonly projectsService = inject(ProjectsService);
+  private readonly toastService = inject(ToastService);
   private readonly filterService = inject(FilterService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly router = inject(Router);
@@ -140,7 +143,9 @@ export class ProjectsPageComponent {
   readonly workspacePaneOpen = signal(false);
   readonly editingProjectId = signal<string | null>(null);
   readonly creatingProject = signal(false);
-  readonly archivingProjectId = signal<string | null>(null);
+  readonly pendingProjectAction = signal<PendingProjectAction>(null);
+  readonly pendingProjectId = signal<string | null>(null);
+  readonly pendingActionBusy = signal(false);
   readonly coloringProjectId = signal<string | null>(null);
   readonly detailImageId = signal<string | null>(null);
   readonly isMobile = signal(false);
@@ -169,6 +174,17 @@ export class ProjectsPageComponent {
   readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
   readonly hasFilters = computed(() => this.projectFilterRules().length > 0);
   readonly hasCustomSort = computed(() => this.activeProjectSorts().length > 0);
+  readonly hasPendingAction = computed(
+    () => !!this.pendingProjectAction() && !!this.pendingProjectId(),
+  );
+  readonly pendingProject = computed(() => {
+    const projectId = this.pendingProjectId();
+    if (!projectId) {
+      return null;
+    }
+
+    return this.projects().find((project) => project.id === projectId) ?? null;
+  });
 
   readonly workspacePaneWidth = signal(360);
   readonly workspacePaneMinWidth = 280;
@@ -514,44 +530,126 @@ export class ProjectsPageComponent {
   private closeOverlays(): void {
     this.closeToolbarDropdown();
     this.coloringProjectId.set(null);
+    this.cancelPendingAction();
   }
 
-  askArchive(projectId: string): void {
-    this.archivingProjectId.set(projectId);
-  }
-
-  async confirmArchive(projectId: string): Promise<void> {
-    const confirmed = window.confirm('Archive this project?');
-    if (!confirmed) {
-      this.archivingProjectId.set(null);
+  requestDangerAction(projectId: string): void {
+    const project = this.projects().find((entry) => entry.id === projectId);
+    if (!project) {
       return;
     }
 
-    const persisted = await this.projectsService.archiveProject(projectId);
-    if (!persisted) {
-      this.archivingProjectId.set(null);
+    this.pendingProjectAction.set(project.status === 'archived' ? 'delete' : 'archive');
+    this.pendingProjectId.set(projectId);
+    this.closeToolbarDropdown();
+    this.coloringProjectId.set(null);
+  }
+
+  cancelPendingAction(): void {
+    if (this.pendingActionBusy()) {
       return;
     }
 
-    this.projects.update((all) =>
-      all.map((project) =>
-        project.id === projectId
-          ? {
-              ...project,
-              archivedAt: new Date().toISOString(),
-              status: 'archived',
-              updatedAt: new Date().toISOString(),
-            }
-          : project,
-      ),
-    );
+    this.pendingProjectAction.set(null);
+    this.pendingProjectId.set(null);
+  }
 
-    if (this.selectedProjectId() === projectId) {
-      this.closeWorkspacePane();
+  async confirmPendingAction(): Promise<void> {
+    const projectId = this.pendingProjectId();
+    const action = this.pendingProjectAction();
+    const project = this.pendingProject();
+
+    if (!projectId || !action || !project) {
+      this.cancelPendingAction();
+      return;
     }
 
-    this.archivingProjectId.set(null);
-    await this.refreshSearchCounts();
+    this.pendingActionBusy.set(true);
+
+    try {
+      if (action === 'archive') {
+        const persisted = await this.projectsService.archiveProject(projectId);
+        if (!persisted) {
+          this.toastService.show({
+            message: 'Could not archive project. Please try again.',
+            type: 'error',
+            dedupe: true,
+          });
+          return;
+        }
+
+        const archivedAt = new Date().toISOString();
+        this.projects.update((all) =>
+          all.map((entry) =>
+            entry.id === projectId
+              ? {
+                  ...entry,
+                  archivedAt,
+                  status: 'archived',
+                  updatedAt: archivedAt,
+                }
+              : entry,
+          ),
+        );
+
+        this.toastService.show({ message: 'Project archived', type: 'success' });
+      }
+
+      if (action === 'delete') {
+        if (project.status !== 'archived') {
+          return;
+        }
+
+        const persisted = await this.projectsService.deleteProject(projectId);
+        if (!persisted) {
+          this.toastService.show({
+            message:
+              'Could not delete archived project. Check permissions or refresh and try again.',
+            type: 'error',
+            dedupe: true,
+          });
+          return;
+        }
+
+        this.projects.update((all) => all.filter((entry) => entry.id !== projectId));
+        this.toastService.show({ message: 'Archived project deleted', type: 'success' });
+      }
+
+      if (this.selectedProjectId() === projectId) {
+        this.closeWorkspacePane();
+      }
+
+      await this.refreshSearchCounts();
+      this.pendingProjectAction.set(null);
+      this.pendingProjectId.set(null);
+    } finally {
+      this.pendingActionBusy.set(false);
+    }
+  }
+
+  pendingActionTitle(): string {
+    if (this.pendingProjectAction() === 'delete') {
+      return 'Delete archived project?';
+    }
+
+    return 'Archive project?';
+  }
+
+  pendingActionMessage(): string {
+    const name = this.pendingProject()?.name ?? 'this project';
+    if (this.pendingProjectAction() === 'delete') {
+      return `"${name}" will be permanently deleted for your organization.`;
+    }
+
+    return `"${name}" will move to Archived and stay visible for all users in your organization.`;
+  }
+
+  pendingActionConfirmLabel(): string {
+    return this.pendingProjectAction() === 'delete' ? 'Delete now' : 'Archive now';
+  }
+
+  isDeletePending(): boolean {
+    return this.pendingProjectAction() === 'delete';
   }
 
   async openWorkspace(projectId: string, navigate = false): Promise<void> {

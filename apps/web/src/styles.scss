@@ -526,3 +526,111 @@ router-outlet + * {
     opacity: 1;
   }
 }
+
+// ── Shared toolbar primitives ───────────────────────────────────────────────
+// Reused by workspace toolbar and projects page toolbar controls.
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  height: 1.75rem;
+  padding-inline: var(--spacing-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 14%, transparent);
+    color: var(--color-clay);
+  }
+}
+
+.toolbar-btn--active {
+  background: color-mix(in srgb, var(--color-clay) 14%, transparent);
+  color: var(--color-clay);
+}
+
+.toolbar-btn--open {
+  background: color-mix(in srgb, var(--color-clay) 18%, transparent);
+  color: var(--color-clay);
+}
+
+.toolbar-btn__chevron {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 150ms ease-out;
+}
+
+.toolbar-btn--open .toolbar-btn__chevron {
+  transform: rotate(180deg);
+}
+
+.toolbar-dropdown,
+.projects-toolbar-dropdown {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  min-width: 15rem;
+  max-width: calc(100vw - 1rem);
+  max-height: min(24rem, calc(100vh - 6rem));
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-dropdown);
+}
+
+// ── Shared icon ghost button primitives ─────────────────────────────────────
+
+.icon-btn-ghost {
+  --icon-btn-size: 1.25rem;
+  --icon-btn-radius: var(--radius-sm);
+  --icon-btn-icon-size: 0.875rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn-size);
+  height: var(--icon-btn-size);
+  border: none;
+  border-radius: var(--icon-btn-radius);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+
+  .material-icons,
+  .material-symbols-outlined {
+    font-size: var(--icon-btn-icon-size);
+    line-height: 1;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    color: var(--color-text-primary);
+  }
+}
+
+.icon-btn-ghost--danger:hover {
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
+}
+
+// ── Shared focus-ring primitive ─────────────────────────────────────────────
+
+.focus-ring-primary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

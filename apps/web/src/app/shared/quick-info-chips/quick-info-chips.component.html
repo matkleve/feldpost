@@ -1,7 +1,7 @@
 <div class="chips">
   @for (chip of chips(); track $index) {
     <button
-      class="chip"
+      class="chip focus-ring-primary"
       [class.chip--filled]="chip.variant === 'filled'"
       [class.chip--success]="chip.variant === 'success'"
       [class.chip--warning]="chip.variant === 'warning'"

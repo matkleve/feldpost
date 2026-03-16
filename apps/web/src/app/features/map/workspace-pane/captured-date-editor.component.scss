@@ -83,11 +83,6 @@
       color: var(--color-primary);
       background: color-mix(in srgb, var(--color-primary) 8%, transparent);
     }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
   }
 
   &__nav-btn {
@@ -112,11 +107,6 @@
     &:hover {
       color: var(--color-text-primary);
       background: color-mix(in srgb, var(--color-clay) 8%, transparent);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
     }
   }
 
@@ -160,11 +150,6 @@
       background: color-mix(in srgb, var(--color-clay) 10%, transparent);
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
-
     &--other-month {
       color: var(--color-text-disabled);
     }
@@ -202,11 +187,6 @@
     transition:
       color 80ms ease-out,
       background 80ms ease-out;
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
   }
 
   &__clear-btn {

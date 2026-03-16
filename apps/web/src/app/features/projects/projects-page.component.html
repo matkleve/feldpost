@@ -71,6 +71,33 @@
           </button>
         </div>
 
+        <div class="projects-status-segment" role="group" aria-label="Project status filter">
+          <button
+            type="button"
+            class="projects-status-segment__button"
+            [class.projects-status-segment__button--active]="statusFilter() === 'all'"
+            (click)="onStatusFilterChange('all')"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            class="projects-status-segment__button"
+            [class.projects-status-segment__button--active]="statusFilter() === 'active'"
+            (click)="onStatusFilterChange('active')"
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            class="projects-status-segment__button"
+            [class.projects-status-segment__button--active]="statusFilter() === 'archived'"
+            (click)="onStatusFilterChange('archived')"
+          >
+            Archived
+          </button>
+        </div>
+
         <app-projects-view-toggle
           [viewMode]="viewMode()"
           (viewModeChange)="onViewModeChange($event)"
@@ -208,11 +235,17 @@
                             <button
                               type="button"
                               class="project-row__action project-row__action--danger"
-                              aria-label="Archive project"
-                              title="Archive project"
-                              (click)="$event.stopPropagation(); askArchive(project.id)"
+                              [attr.aria-label]="
+                                project.status === 'archived' ? 'Delete project' : 'Archive project'
+                              "
+                              [attr.title]="
+                                project.status === 'archived' ? 'Delete project' : 'Archive project'
+                              "
+                              (click)="$event.stopPropagation(); requestDangerAction(project.id)"
                             >
-                              <span class="material-icons" aria-hidden="true">archive</span>
+                              <span class="material-icons" aria-hidden="true">
+                                {{ project.status === 'archived' ? 'delete' : 'archive' }}
+                              </span>
                             </button>
                           </div>
 
@@ -314,11 +347,17 @@
                             <button
                               type="button"
                               class="projects-thumbnail-card__action projects-thumbnail-card__action--danger"
-                              aria-label="Archive project"
-                              title="Archive project"
-                              (click)="$event.stopPropagation(); askArchive(project.id)"
+                              [attr.aria-label]="
+                                project.status === 'archived' ? 'Delete project' : 'Archive project'
+                              "
+                              [attr.title]="
+                                project.status === 'archived' ? 'Delete project' : 'Archive project'
+                              "
+                              (click)="$event.stopPropagation(); requestDangerAction(project.id)"
                             >
-                              <span class="material-icons" aria-hidden="true">archive</span>
+                              <span class="material-icons" aria-hidden="true">
+                                {{ project.status === 'archived' ? 'delete' : 'archive' }}
+                              </span>
                             </button>
                           </div>
 
@@ -372,6 +411,50 @@
         (detailRequested)="onDetailRequested($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
       />
+    </section>
+  }
+
+  @if (hasPendingAction()) {
+    <section
+      class="projects-modal"
+      role="presentation"
+      (click)="cancelPendingAction()"
+      aria-label="Project action modal"
+    >
+      <article
+        class="projects-modal__dialog"
+        [class.projects-modal__dialog--warning]="!isDeletePending()"
+        [class.projects-modal__dialog--error]="isDeletePending()"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="pendingActionTitle()"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="projects-modal__header">
+          <h2>{{ pendingActionTitle() }}</h2>
+          <p>{{ pendingActionMessage() }}</p>
+        </header>
+
+        <div class="projects-modal__actions">
+          <button
+            type="button"
+            class="projects-modal__button projects-modal__button--ghost"
+            [disabled]="pendingActionBusy()"
+            (click)="cancelPendingAction()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="projects-modal__button"
+            [class.projects-modal__button--danger]="isDeletePending()"
+            [disabled]="pendingActionBusy()"
+            (click)="confirmPendingAction()"
+          >
+            {{ pendingActionConfirmLabel() }}
+          </button>
+        </div>
+      </article>
     </section>
   }
 </main>
