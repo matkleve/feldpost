@@ -14,15 +14,15 @@
 }
 
 .projects-main-zone {
+  --projects-page-inline-inset: calc(
+    var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--container-inset)
+  );
   flex: 1 1 0;
   min-width: 0;
   height: 100%;
   overflow: auto;
   padding-block: var(--spacing-4);
-  padding-inline-end: clamp(1rem, 2.8vw, 2rem);
-  padding-inline-start: calc(
-    var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--container-inset)
-  );
+  padding-inline: var(--projects-page-inline-inset);
 }
 
 .projects-rail {
@@ -35,7 +35,7 @@
 
 .projects-header {
   display: grid;
-  grid-template-columns: minmax(12rem, 1fr) minmax(0, 36rem) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 36rem) minmax(0, 1fr);
   grid-template-areas: 'title search actions';
   align-items: center;
   gap: var(--spacing-3);

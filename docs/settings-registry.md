@@ -8,7 +8,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Account & Profile | settings-overlay.md | profile identity fields and account-level controls. |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
-| Invite Management | qr-invite-flow.md | one-time invite generation, default target role, expiration window, revoke behavior, and share channel availability. |
+| Invite Management | qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
 | Invite Management | settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
 | Language / Locale | settings-overlay.md | UI language and regional formatting defaults. |
 | Map Marker Motion | photo-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
@@ -17,6 +17,8 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Project Color Palette | project-color-picker.md | temporary one-click random brand-hue generation (`brand-hue-###`) derived from brand orange by varying hue. |
 | Project Color Palette | projects-page.md | enabled semantic project color options and default fallback color. |
 | Projects View Mode | projects-page.md | default layout mode (`list` or `cards`) and persistence behavior. |
+| QR Invite Preferences | qr-invite-flow.md | default target role, auto-generate-on-open behavior, invite expiration window, and enabled share channels. |
+| QR Invite Preferences | settings-overlay.md | default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites. |
 | Roles & Permissions | settings-overlay.md | role-based capability visibility and access constraints. |
 | Search Tuning | search-tuning-settings.md | address and place search filters, weights, penalties, and retry thresholds. |
 | Search Tuning | settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |

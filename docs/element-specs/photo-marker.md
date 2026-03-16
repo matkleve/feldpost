@@ -149,10 +149,11 @@ The Map Shell listens to Leaflet's `moveend` event (fires after pan or zoom comp
 6. On response:
    - **Reconcile**, don't replace: diff incoming marker keys against the current `uploadedPhotoMarkers` map.
    - **Keep** markers that still match (same key, same count) — do not recreate their DivIcon.
-  - **Reuse and move** outgoing markers whenever possible — first by identity match, then by nearest-marker fallback — reassign to the new key and animate `setLatLng()` so as many markers as possible glide to the new centroid.
-  - **Add** new markers that entered the viewport.
-  - **Remove** markers that left the viewport (call `marker.remove()` and delete from the map).
-  - **Update** markers whose count or thumbnail changed (set a new icon via `setIcon()`).
+
+- **Reuse and move** outgoing markers whenever possible — first by identity match, then by nearest-marker fallback — reassign to the new key and animate `setLatLng()` so as many markers as possible glide to the new centroid.
+- **Add** new markers that entered the viewport.
+- **Remove** markers that left the viewport (call `marker.remove()` and delete from the map).
+- **Update** markers whose count or thumbnail changed (set a new icon via `setIcon()`).
 
 7. During the query flight, existing markers remain visible (optimistic retention).
 

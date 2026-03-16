@@ -66,11 +66,7 @@ export class WorkspaceViewService {
     const projectIds = this.selectedProjectIds();
     if (projectIds.size === 0) return images;
     return images.filter((img) => {
-      const ids = img.projectIds?.length
-        ? img.projectIds
-        : img.projectId
-          ? [img.projectId]
-          : [];
+      const ids = img.projectIds?.length ? img.projectIds : img.projectId ? [img.projectId] : [];
       return ids.some((id) => projectIds.has(id));
     });
   });

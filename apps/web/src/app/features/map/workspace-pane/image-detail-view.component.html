@@ -253,7 +253,7 @@
             <span class="detail-row__label">Projects</span>
             @if (editingField() === 'project_ids') {
               <div class="detail-tags" role="group" aria-label="Manage projects">
-                <div class="detail-tags__selected">
+                <div class="detail-tags__editor">
                   @for (opt of projectOptions(); track opt.id) {
                     @if (selectedProjectIds().has(opt.id)) {
                       <button
@@ -268,21 +268,36 @@
                       </button>
                     }
                   }
+
+                  <input
+                    #projectSearchInput
+                    class="detail-tags__input"
+                    type="text"
+                    [value]="projectSearch()"
+                    placeholder="Select project or create one"
+                    aria-label="Search projects"
+                    (input)="setProjectSearch(projectSearchInput.value)"
+                    (keydown.escape)="editingField.set(null)"
+                    (keydown.enter)="createProjectFromSearch()"
+                  />
                 </div>
 
-                <input
-                  #projectSearchInput
-                  class="detail-tags__input"
-                  type="text"
-                  [value]="projectSearch()"
-                  placeholder="Select project or create one"
-                  aria-label="Search projects"
-                  (input)="setProjectSearch(projectSearchInput.value)"
-                  (keydown.escape)="editingField.set(null)"
-                  (keydown.enter)="createProjectFromSearch()"
-                />
-
                 <div class="detail-tags__dropdown" role="listbox" aria-label="Project options">
+                  <div class="detail-tags__hint">Select an option or create one</div>
+
+                  @if (projectCanCreate()) {
+                    <button
+                      type="button"
+                      class="detail-tags__create"
+                      (click)="createProjectFromSearch()"
+                    >
+                      <span class="detail-tags__create-label">Create</span>
+                      <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
+                    </button>
+                  }
+
+                  <div class="detail-tags__divider" aria-hidden="true"></div>
+
                   @for (opt of filteredProjectOptions(); track opt.id) {
                     <button
                       type="button"
@@ -290,6 +305,7 @@
                       [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
                       (click)="toggleProjectMembership(opt.id)"
                     >
+                      <span class="detail-tags__option-color" aria-hidden="true"></span>
                       <span class="detail-tags__option-check" aria-hidden="true">
                         @if (selectedProjectIds().has(opt.id)) {
                           <span class="material-icons">check</span>
@@ -298,25 +314,10 @@
                       <span>{{ opt.label }}</span>
                     </button>
                   }
-
-                  @if (projectCanCreate()) {
-                    <button
-                      type="button"
-                      class="detail-tags__create"
-                      (click)="createProjectFromSearch()"
-                    >
-                      <span>Create</span>
-                      <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
-                    </button>
-                  }
                 </div>
               </div>
             } @else {
-              <button
-                class="detail-row__value"
-                type="button"
-                (click)="openProjectPicker()"
-              >
+              <button class="detail-row__value" type="button" (click)="openProjectPicker()">
                 {{ projectName() || '—' }}
               </button>
               <button

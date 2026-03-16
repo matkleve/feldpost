@@ -199,6 +199,7 @@ sequenceDiagram
 - **Account & Profile**: profile identity fields and account-level controls.
 - **Roles & Permissions**: role-based capability visibility and access constraints.
 - **Data & Storage**: data retention/export/cache/storage defaults.
+- **QR Invite Preferences**: default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites.
 - **Invite Management**: invite creation, acceptance, revocation defaults and controls.
 - **Custom Properties**: organization metadata key configuration defaults.
 - **Map Preferences**: map tile and map-behavior defaults.

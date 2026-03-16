@@ -6,18 +6,8 @@
       [key]="entry.key"
       [value]="entry.value"
       (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
-    >
-      <button
-        rowAction
-        class="metadata-delete"
-        type="button"
-        [attr.aria-label]="'Remove ' + entry.key"
-        title="Remove metadata"
-        (click)="entryRemoved.emit(entry)"
-      >
-        <span class="material-icons" aria-hidden="true">close</span>
-      </button>
-    </app-metadata-property-row>
+      (deleteRequested)="entryRemoved.emit(entry)"
+    />
   </div>
 }
 
