@@ -266,9 +266,6 @@
 
 .projects-list-group {
   overflow: visible;
-  border: 1px solid var(--color-border);
-  border-radius: var(--container-radius-md);
-  background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-bg-base));
   --group-header-bg: transparent;
   --group-header-hover-bg: transparent;
 }
