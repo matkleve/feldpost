@@ -41,6 +41,31 @@
     </span>
   </button>
 
+  <button
+    class="map-material-toggle"
+    type="button"
+    [attr.aria-pressed]="analogMaterialActive()"
+    [attr.aria-label]="
+      analogMaterialActive()
+        ? 'Analog map material enabled. Switch to standard map material'
+        : 'Enable analog map material'
+    "
+    [title]="
+      mapMaterialOptionEnabled()
+        ? analogMaterialActive()
+          ? 'Analog map material enabled. Switch to standard map material'
+          : 'Enable analog map material'
+        : 'Analog map material is only available in street map mode'
+    "
+    [disabled]="!mapMaterialOptionEnabled()"
+    [class.map-material-toggle--active]="analogMaterialActive()"
+    [class.map-material-toggle--disabled]="!mapMaterialOptionEnabled()"
+    (click)="toggleMapMaterial()"
+  >
+    <span class="material-icons" aria-hidden="true">history_edu</span>
+    <span>Analog</span>
+  </button>
+
   <!-- Upload button — top-right of map zone, visually over map -->
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
     <!-- Icon button (always visible) -->
@@ -82,6 +107,7 @@
     #mapContainer
     class="map-container"
     [class.map-container--placing]="placementActive() || searchPlacementActive()"
+    [class.map-container--analog-material]="analogMaterialActive()"
     aria-label="Site map"
   ></div>
 
