@@ -26,6 +26,8 @@
 }
 
 .map-upload-btn {
+  --upload-progress: 0%;
+
   width: 44px;
   height: 44px;
   border: none;
@@ -41,9 +43,13 @@
     background 120ms ease-out,
     transform 120ms ease-out;
   flex-shrink: 0;
+  position: relative;
+  isolation: isolate;
 
   .material-icons {
     font-size: 1.25rem;
+    position: relative;
+    z-index: 2;
   }
 
   &:hover {
@@ -53,6 +59,41 @@
 
   &--active {
     background: color-mix(in srgb, var(--color-clay) 80%, var(--color-text-primary));
+  }
+
+  &__progress {
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--radius-full);
+    background: conic-gradient(
+      var(--color-primary) 0 var(--upload-progress),
+      color-mix(in srgb, var(--color-bg-surface) 50%, transparent) var(--upload-progress) 100%
+    );
+    z-index: 1;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: var(--radius-full);
+      background: var(--color-clay);
+    }
+  }
+
+  &__percent {
+    position: absolute;
+    bottom: -0.8rem;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: 0.625rem;
+    line-height: 1;
+    color: var(--color-text-primary);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    padding: 0.125rem 0.35rem;
+    z-index: 3;
+    pointer-events: none;
   }
 }
 

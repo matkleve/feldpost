@@ -23,19 +23,23 @@ The matrix defaults to a square board using up to 10 columns by 10 rows per visi
 | 1   | Clicks Upload Button                              | Opens compact Upload Panel container                                     | `uploadPanelOpen` signal            |
 | 2   | Drags files onto Drop Zone                        | Creates upload jobs and starts pipeline (max 3 parallel)                 | `UploadManagerService.submit()`     |
 | 3   | Clicks Drop Zone                                  | Opens file picker with multi-select                                      | Native file picker                  |
-| 4   | No active jobs and no queued jobs                 | Shows Last Upload summary line                                           | `lastCompletedBatch()`              |
-| 5   | Active or queued jobs exist                       | Shows dot matrix board under Drop Zone                                   | `jobs().length > 0`                 |
-| 6   | Job is queued / not started                       | Dot stays muted gray                                                     | Job phase in queued/parsing/hashing |
-| 7   | Job is actively uploading                         | Dot turns blue and pulses while in-flight                                | Job phase `uploading`               |
-| 8   | Job succeeds                                      | Dot turns green                                                          | Job phase `complete`                |
-| 9   | Job has issue (GPS/title/address resolution etc.) | Dot turns orange and becomes selectable in Errors view                   | Job phase `error` or `missing_data` |
-| 10  | Switches segmented control to Uploading           | Gallery list filters to active jobs only                                 | `selectedLane = 'uploading'`        |
-| 11  | Switches segmented control to Uploaded            | Gallery list filters to completed jobs                                   | `selectedLane = 'uploaded'`         |
-| 12  | Switches segmented control to Issues              | Gallery list filters to problematic jobs                                 | `selectedLane = 'issues'`           |
-| 13  | Clicks image in Issues lane                       | Opens inline correction editor (address/title/coords retry path)         | `openJobEditor(jobId)`              |
-| 14  | Clicks image in Uploading lane                    | Opens live detail drawer (status + editable address draft where allowed) | `openJobEditor(jobId)`              |
-| 15  | Saves address correction for issue                | Retries resolver/update path and updates dot color based on result       | `retryResolution(jobId, payload)`   |
-| 16  | Closes panel                                      | Panel collapses; uploads continue in background                          | Root service lifecycle              |
+| 4   | Clicks Select Folder (when supported)             | Starts folder scan then enqueues discovered files                        | `UploadManagerService.submitFolder` |
+| 5   | Folder scan is running                            | Shows scanning status line and disables folder action                    | `activeBatch.state = scanning`      |
+| 6   | Clicks Take Photo                                 | Opens camera-capable file capture path and submits captured file         | Native capture input                |
+| 7   | Viewer attempts upload action                     | Upload is denied by RLS; UI shows permission error feedback              | Supabase policy deny                |
+| 8   | No active jobs and no queued jobs                 | Shows Last Upload summary line                                           | `lastCompletedBatch()`              |
+| 9   | Active or queued jobs exist                       | Shows dot matrix board under Drop Zone                                   | `jobs().length > 0`                 |
+| 10  | Job is queued / not started                       | Dot stays muted gray                                                     | Job phase in queued/parsing/hashing |
+| 11  | Job is actively uploading                         | Dot turns blue and pulses while in-flight                                | Job phase `uploading`               |
+| 12  | Job succeeds                                      | Dot turns green                                                          | Job phase `complete`                |
+| 13  | Job has issue (GPS/title/address resolution etc.) | Dot turns orange and becomes selectable in Errors view                   | Job phase `error` or `missing_data` |
+| 14  | Switches segmented control to Uploading           | Gallery list filters to active jobs only                                 | `selectedLane = 'uploading'`        |
+| 15  | Switches segmented control to Uploaded            | Gallery list filters to completed jobs                                   | `selectedLane = 'uploaded'`         |
+| 16  | Switches segmented control to Issues              | Gallery list filters to problematic jobs                                 | `selectedLane = 'issues'`           |
+| 17  | Clicks image in Issues lane                       | Opens inline correction editor (address/title/coords retry path)         | `openJobEditor(jobId)`              |
+| 18  | Clicks image in Uploading lane                    | Opens live detail drawer (status + editable address draft where allowed) | `openJobEditor(jobId)`              |
+| 19  | Saves address correction for issue                | Retries resolver/update path and updates dot color based on result       | `retryResolution(jobId, payload)`   |
+| 20  | Closes panel                                      | Panel collapses; uploads continue in background                          | Root service lifecycle              |
 
 ## Component Hierarchy
 
@@ -46,6 +50,10 @@ UploadPanel                                              ← compact `.ui-contai
 │   ├── CameraIcon                                       ← upload affordance
 │   ├── PrimaryHint                                      ← "Drop photos or click to upload"
 │   └── SecondaryHint                                    ← accepted formats and max size
+├── IntakeActions                                        ← secondary intake actions under drop zone
+│   ├── [if supported] SelectFolderButton                ← folder import trigger
+│   └── TakePhotoButton                                  ← capture-enabled photo intake
+├── [scanning] ScanStatus                                ← "Scanning folder..." feedback row
 ├── [idle only] LastUploadSummary                        ← summary of most recent batch/job result
 │   ├── LastUploadLabel                                  ← "Last upload"
 │   └── LastUploadValue                                  ← single file name OR "Batch · N photos"
@@ -79,6 +87,8 @@ flowchart TD
   E --> M
   M --> G[Geocoding and Address Resolver]
   G --> M
+  M --> S[(Supabase RLS and Storage Policies)]
+  S --> M
 ```
 
 | Field                | Source                                         | Type                                 |
@@ -115,6 +125,8 @@ stateDiagram-v2
 | `selectedJobId`   | `string \| null`                        | `null`        | Which job is open in editor drawer          |
 | `matrixPage`      | `number`                                | `0`           | Dot matrix page for batches larger than 100 |
 | `dotPulseEnabled` | `boolean`                               | `true`        | Uploading-dot pulse animation toggle        |
+| `folderSupported` | `boolean`                               | `false`       | Shows/hides folder intake action            |
+| `isScanning`      | `boolean`                               | `false`       | Folder scan feedback and action disablement |
 
 ## File Map
 
@@ -152,14 +164,19 @@ sequenceDiagram
 
 - Receives visibility from `MapShellComponent` and uses parent-controlled open/close behavior.
 - Injects `UploadManagerService` to submit files, read job state, and apply correction retries.
+- Uses one canonical intake pipeline for picker, drop, folder, and capture file sources.
 - Derives matrix dots from stable job ordering so colors do not shuffle between rerenders.
 - Opens `JobEditorDrawer` for selected jobs in Uploading and Issues lanes.
 - Emits map-refresh events through the upload manager event bus when corrected jobs complete.
+- Surfaces RLS permission denies as user-facing feedback while relying on backend enforcement.
 
 ## Acceptance Criteria
 
 - [ ] Panel appears as compact container expansion from Upload Button
 - [ ] Top section is a Drop Zone with drag-and-drop and click upload
+- [ ] Select Folder action appears when the browser supports folder import
+- [ ] Folder scan shows progress text and disables repeat folder action while scanning
+- [ ] Take Photo action opens capture-capable intake and submits into the same upload pipeline
 - [ ] If queue is empty, Last Upload summary appears under Drop Zone
 - [ ] Last Upload shows file name for single upload
 - [ ] Last Upload shows `Batch · N photos` for multi-file upload
@@ -174,3 +191,4 @@ sequenceDiagram
 - [ ] Clicking an item in Uploading opens live detail editor
 - [ ] Saving correction in Issues triggers retry and updates status color
 - [ ] Closing panel does not cancel active uploads
+- [ ] Viewer upload attempts are blocked by RLS and shown as a clear error state

@@ -67,6 +67,8 @@ import {
 export class MapShellComponent implements OnDestroy {
   private static readonly GPS_TRACKING_INTERVAL_MS = 60000;
   private static readonly GPS_RECENTER_MIN_ZOOM = 16;
+  private static readonly DETAIL_LOCATION_FOCUS_ZOOM = 21;
+  private static readonly DETAIL_LOCATION_FLY_DURATION_S = 0.35;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -99,6 +101,12 @@ export class MapShellComponent implements OnDestroy {
 
   /** Final visibility state: click-pinned open only. */
   readonly uploadPanelOpen = this.uploadPanelPinned;
+  readonly uploadBatch = this.uploadManagerService.activeBatch;
+  readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
+  readonly uploadBatchActive = computed(() => {
+    const batch = this.uploadBatch();
+    return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
+  });
 
   /**
    * When non-null the map is in "placement mode": the next click places an
@@ -397,11 +405,13 @@ export class MapShellComponent implements OnDestroy {
 
   /**
    * Handles the zoomToLocationRequested output from the detail view.
-   * Flies the map to the photo's coordinates at zoom 18 and pulses the marker.
+   * Flies the map to the photo's coordinates at a tight zoom and pulses the marker.
    */
   onZoomToLocation(event: { imageId: string; lat: number; lng: number }): void {
     if (!this.map) return;
-    this.map.flyTo([event.lat, event.lng], 18);
+    this.map.flyTo([event.lat, event.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM, {
+      duration: MapShellComponent.DETAIL_LOCATION_FLY_DURATION_S,
+    });
 
     // Pulse the marker after the fly animation completes
     this.map.once('moveend', () => {
@@ -694,7 +704,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.map.setView([payload.lat, payload.lng], 20);
+    this.map.setView([payload.lat, payload.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM);
     this.pendingMapFocus.set(null);
   }
 

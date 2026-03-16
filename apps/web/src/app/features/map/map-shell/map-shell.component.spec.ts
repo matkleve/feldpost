@@ -319,7 +319,7 @@ describe('MapShellComponent', () => {
 
     fixture.componentInstance.goToUserPosition();
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
-    expect(mapStub.setView).toHaveBeenCalledWith([48.2, 16.37], 15);
+    expect(mapStub.setView).toHaveBeenCalledWith([48.2, 16.37], 16);
     expect(fixture.componentInstance.gpsLocating()).toBe(false);
     expect(fixture.componentInstance.gpsTrackingActive()).toBe(true);
     expect(setIntervalSpy).toHaveBeenCalled();
@@ -365,11 +365,11 @@ describe('MapShellComponent', () => {
 
     fixture.componentInstance.goToUserPosition();
 
-    expect(mapStub.setView).toHaveBeenCalledWith([51.5, -0.12], 15);
-    expect(fixture.componentInstance.gpsLocating()).toBe(false);
+    expect(mapStub.setView).toHaveBeenCalledWith([51.5, -0.12], 16);
+    expect(fixture.componentInstance.gpsLocating()).toBe(true);
     expect(fixture.componentInstance.gpsTrackingActive()).toBe(true);
-    expect(setIntervalSpy).toHaveBeenCalled();
-    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
 
     fixture.componentInstance.goToUserPosition();
     expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
@@ -471,6 +471,12 @@ describe('MapShellComponent', () => {
       addLayer: vi.fn(),
       setView: vi.fn(),
       getZoom: vi.fn().mockReturnValue(12),
+      getBounds: vi.fn().mockReturnValue({
+        getNorth: () => 48.3,
+        getSouth: () => 48.1,
+        getEast: () => 16.5,
+        getWest: () => 16.2,
+      }),
       remove: vi.fn(),
     };
     (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
@@ -482,24 +488,36 @@ describe('MapShellComponent', () => {
       fixture.componentInstance as unknown as {
         userLocationMarker: {
           getElement: () => { classList: { add: typeof add; remove: typeof remove } };
+          setLatLng: ReturnType<typeof vi.fn>;
           remove: ReturnType<typeof vi.fn>;
         };
       }
     ).userLocationMarker = {
       getElement: () => ({ classList: { add, remove } }),
+      setLatLng: vi.fn(),
       remove: vi.fn(),
     };
 
     const originalGeolocation = navigator.geolocation;
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 51.5,
+          longitude: -0.12,
+        },
+      } as GeolocationPosition);
+    });
+
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
       value: {
-        getCurrentPosition: vi.fn(),
+        getCurrentPosition,
       },
     });
 
     fixture.componentInstance.goToUserPosition();
 
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
     expect(add).toHaveBeenCalledWith('map-user-location-marker--fresh');
 
     vi.advanceTimersByTime(1000);
@@ -537,6 +555,29 @@ describe('MapShellComponent', () => {
       (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
         .searchLocationMarker,
     ).not.toBeNull();
+  });
+
+  it('onZoomToLocation() flies quickly to a tighter detail zoom', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      flyTo: vi.fn(),
+      once: vi.fn(),
+      remove: vi.fn(),
+    };
+    (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
+
+    fixture.componentInstance.onZoomToLocation({
+      imageId: 'img-1',
+      lat: 48.2082,
+      lng: 16.3738,
+    });
+
+    expect(mapStub.flyTo).toHaveBeenCalledWith([48.2082, 16.3738], 21, {
+      duration: 0.35,
+    });
+    expect(mapStub.once).toHaveBeenCalledWith('moveend', expect.any(Function));
   });
 
   it('searchQueryContext includes centroid from active selection images', () => {
@@ -716,7 +757,7 @@ describe('MapShellComponent', () => {
   it('photo panel is not rendered when photoPanelOpen is false', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
-    const panel = (fixture.nativeElement as HTMLElement).querySelector('.photo-panel');
+    const panel = (fixture.nativeElement as HTMLElement).querySelector('app-workspace-pane');
     expect(panel).toBeNull();
   });
 
@@ -727,7 +768,7 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.photoPanelOpen.set(true);
     fixture.detectChanges();
 
-    const panel = (fixture.nativeElement as HTMLElement).querySelector('.photo-panel');
+    const panel = (fixture.nativeElement as HTMLElement).querySelector('app-workspace-pane');
     expect(panel).not.toBeNull();
   });
 
@@ -738,7 +779,7 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.photoPanelOpen.set(true);
     fixture.detectChanges();
 
-    const divider = (fixture.nativeElement as HTMLElement).querySelector('.drag-divider');
+    const divider = (fixture.nativeElement as HTMLElement).querySelector('app-drag-divider');
     expect(divider).not.toBeNull();
   });
 });

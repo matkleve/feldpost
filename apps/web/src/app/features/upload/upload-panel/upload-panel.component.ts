@@ -69,6 +69,8 @@ export class UploadPanelComponent {
 
   /** All upload jobs from the manager. */
   readonly jobs = this.uploadManager.jobs;
+  readonly activeBatch = this.uploadManager.activeBatch;
+  readonly folderImportSupported = this.uploadManager.isFolderImportSupported;
 
   readonly isDragging = signal(false);
 
@@ -79,6 +81,16 @@ export class UploadPanelComponent {
   readonly hasAwaitingPlacement = computed(() =>
     this.uploadManager.jobs().some((j) => j.phase === 'missing_data'),
   );
+
+  /** True while the manager scans a selected directory. */
+  readonly scanning = computed(() => this.activeBatch()?.status === 'scanning');
+
+  /** Live scan label shown during folder traversal. */
+  readonly scanningLabel = computed(() => {
+    const batch = this.activeBatch();
+    if (!batch || batch.status !== 'scanning') return null;
+    return `Scanning... ${batch.totalFiles} image${batch.totalFiles === 1 ? '' : 's'} found`;
+  });
 
   constructor() {
     // React to manager events and bridge them to component outputs.
@@ -141,6 +153,51 @@ export class UploadPanelComponent {
       this.uploadManager.submit(Array.from(input.files));
       // Reset so the same file can be re-selected if needed
       input.value = '';
+    }
+  }
+
+  onCaptureInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.uploadManager.submit([input.files[0]]);
+      input.value = '';
+    }
+  }
+
+  openFilePicker(input: HTMLInputElement): void {
+    input.click();
+  }
+
+  openCapturePicker(event: MouseEvent, input: HTMLInputElement): void {
+    event.preventDefault();
+    event.stopPropagation();
+    input.click();
+  }
+
+  onDropZoneKeydown(event: KeyboardEvent, input: HTMLInputElement): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      input.click();
+    }
+  }
+
+  async onSelectFolder(event: MouseEvent): Promise<void> {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const picker = (
+      window as Window & {
+        showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
+      }
+    ).showDirectoryPicker;
+
+    if (!picker) return;
+
+    try {
+      const dirHandle = await picker.call(window);
+      await this.uploadManager.submitFolder(dirHandle);
+    } catch {
+      // User cancel and permission errors are non-fatal for panel state.
     }
   }
 

@@ -32,7 +32,7 @@ Short-term mapping (works today):
 - worker -> `worker` (effective permissions currently same as `user`)
 
 This gives clerk and worker the same permissions right now, as requested.
-Later, you can split them by introducing dedicated `clerk` and `worker` roles plus explicit RLS checks.
+Later, you can split them by keeping the existing roles and adding explicit per-role RLS checks.
 
 ## Effective Security Model (Current)
 
