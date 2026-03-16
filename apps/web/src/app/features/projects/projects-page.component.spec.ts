@@ -246,4 +246,84 @@ describe('ProjectsPageComponent', () => {
 
     expect(component.isDeletePending()).toBe(true);
   });
+
+  it('creates a draft project, opens workspace, and starts rename mode', async () => {
+    projectsServiceMock.loadGroupedSearchCounts.mockClear();
+    projectsServiceMock.createDraftProject.mockResolvedValue({
+      id: 'project-new',
+      name: 'Untitled project',
+      colorKey: 'clay',
+      archivedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'active',
+      totalImageCount: 0,
+      matchingImageCount: 0,
+      lastActivity: null,
+      city: null,
+      district: null,
+      street: null,
+      country: null,
+    });
+    const openWorkspaceSpy = vi.spyOn(component, 'openWorkspace').mockResolvedValue();
+
+    await component.onNewProject();
+
+    expect(projectsServiceMock.createDraftProject).toHaveBeenCalledOnce();
+    expect(openWorkspaceSpy).toHaveBeenCalledWith('project-new');
+    expect(projectsServiceMock.loadGroupedSearchCounts).toHaveBeenCalledOnce();
+    expect(component.projects()[0]?.id).toBe('project-new');
+    expect(component.editingProjectId()).toBeNull();
+    expect(component.workspaceTitleEditProjectId()).toBe('project-new');
+    expect(component.workspaceTitleEditValue()).toBe('Untitled project');
+    expect(component.creatingProject()).toBe(false);
+  });
+
+  it('renames project from workspace title input on Enter submit', async () => {
+    const nowIso = new Date().toISOString();
+    projectsServiceMock.renameProject.mockResolvedValue(true);
+    component.projects.set([
+      {
+        id: 'project-new',
+        name: 'Untitled project',
+        colorKey: 'clay',
+        archivedAt: null,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        status: 'active',
+        totalImageCount: 0,
+        matchingImageCount: 0,
+        lastActivity: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+      },
+    ]);
+    component.selectedProjectId.set('project-new');
+    component.workspaceTitleEditProjectId.set('project-new');
+    component.workspaceTitleEditValue.set('Untitled project');
+
+    component.onWorkspaceTitleChanged('Bridge site');
+    await component.onWorkspaceTitleSubmit('Bridge site');
+
+    expect(projectsServiceMock.renameProject).toHaveBeenCalledWith('project-new', 'Bridge site');
+    expect(component.projects()[0]?.name).toBe('Bridge site');
+    expect(component.workspaceTitleEditProjectId()).toBeNull();
+    expect(component.workspaceTitleEditValue()).toBe('');
+  });
+
+  it('shows an error toast when draft project creation fails', async () => {
+    projectsServiceMock.createDraftProject.mockResolvedValue(null);
+
+    await component.onNewProject();
+
+    expect(toastServiceMock.show).toHaveBeenCalledWith({
+      message: 'Could not create project. Please try again.',
+      type: 'error',
+      dedupe: true,
+    });
+    expect(component.projects()).toHaveLength(0);
+    expect(component.creatingProject()).toBe(false);
+  });
 });

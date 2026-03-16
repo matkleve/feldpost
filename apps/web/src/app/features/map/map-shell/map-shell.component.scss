@@ -12,6 +12,93 @@
   background: var(--color-bg-base);
 }
 
+// ── Basemap switch button — top-left of map zone ────────────────────────────
+
+.map-basemap-switch {
+  --touch-target-base: 2.75rem; // ~44px desktop
+  --touch-target-mobile: 3rem; // ~48px mobile
+
+  position: absolute;
+  top: var(--spacing-3);
+  left: var(--spacing-3);
+  z-index: var(--z-upload-button);
+  min-height: var(--touch-target-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+  color: var(--color-text-primary);
+  box-shadow: var(--elevation-overlay);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.375rem var(--spacing-2);
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out,
+    border-color 120ms ease-out;
+
+  &:hover {
+    background: var(--color-bg-elevated);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &__track {
+    width: 2.1rem;
+    height: 1.25rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-text-secondary) 30%, transparent);
+    border: 1px solid var(--color-border-strong);
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 0.125rem;
+    transition: background 120ms ease-out;
+  }
+
+  &__thumb {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-surface);
+    box-shadow: var(--elevation-subtle);
+    transform: translateX(0);
+    transition:
+      transform 120ms ease-out,
+      background 120ms ease-out;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    min-width: 2.4rem;
+    text-align: left;
+  }
+
+  &--satellite {
+    border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
+    color: var(--color-clay);
+
+    .map-basemap-switch__track {
+      background: color-mix(in srgb, var(--color-clay) 35%, transparent);
+    }
+
+    .map-basemap-switch__thumb {
+      transform: translateX(0.8rem);
+      background: var(--color-clay);
+    }
+  }
+
+  @media (max-width: 767px) {
+    min-height: var(--touch-target-mobile);
+  }
+}
+
 // ── Upload button zone — fixed top-right, expands into panel ─────────────────
 
 .upload-btn-zone {

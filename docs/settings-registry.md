@@ -12,7 +12,9 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Fullscreen Project Mode | project-mixed-media-pre-spec.md | default entry behavior for project detail (inline pane vs fullscreen). |
 | Invite Management | qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
 | Invite Management | settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
+| Language / Locale | language-locale-settings.md | UI language switch between English and German plus regional formatting defaults. |
 | Language / Locale | settings-overlay.md | UI language and regional formatting defaults. |
+| Map Basemap | map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
 | Map Marker Motion | photo-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
 | Map Preferences | settings-overlay.md | map tile and map-behavior defaults. |
 | Notifications | settings-overlay.md | preference defaults for in-app feedback and alerts. |

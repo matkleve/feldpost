@@ -57,9 +57,11 @@ import {
 } from '../../../core/map/marker-factory';
 
 type MarkerMotionPreference = 'off' | 'smooth';
+type MapBasemapPreference = 'default' | 'satellite';
 
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
+const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
 
 @Component({
   selector: 'app-map-shell',
@@ -214,6 +216,7 @@ export class MapShellComponent implements OnDestroy {
   readonly gpsLocating = signal(false);
   /** True when GPS tracking mode is enabled via the toggle button. */
   readonly gpsTrackingActive = signal(false);
+  readonly mapBasemap = signal<MapBasemapPreference>(this.readMapBasemapPreference());
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -317,6 +320,7 @@ export class MapShellComponent implements OnDestroy {
 
   /** LayerGroup for all photo markers — enables batch add/remove. */
   private photoMarkerLayer: L.LayerGroup | null = null;
+  private activeBaseTileLayer: L.TileLayer | null = null;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -534,6 +538,13 @@ export class MapShellComponent implements OnDestroy {
     );
   }
 
+  toggleMapBasemap(): void {
+    const next: MapBasemapPreference = this.mapBasemap() === 'default' ? 'satellite' : 'default';
+    this.mapBasemap.set(next);
+    this.persistMapBasemapPreference(next);
+    this.applyMapBasemapLayer();
+  }
+
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
     if (!this.map) return;
 
@@ -562,13 +573,7 @@ export class MapShellComponent implements OnDestroy {
       zoomControl: false,
     });
 
-    // CartoDB Positron — clean, uncluttered light tile (design.md §3.1).
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxNativeZoom: 19,
-      maxZoom: 22,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    }).addTo(this.map);
+    this.applyMapBasemapLayer();
 
     // LayerGroup for all photo markers — batch add/remove.
     this.photoMarkerLayer = L.layerGroup().addTo(this.map);
@@ -704,6 +709,40 @@ export class MapShellComponent implements OnDestroy {
       clearInterval(this.gpsTrackingTimer);
       this.gpsTrackingTimer = null;
     }
+  }
+
+  private applyMapBasemapLayer(): void {
+    if (!this.map) {
+      return;
+    }
+
+    if (this.activeBaseTileLayer) {
+      this.map.removeLayer(this.activeBaseTileLayer);
+    }
+
+    this.activeBaseTileLayer = this.createMapBasemapLayer(this.mapBasemap());
+    this.activeBaseTileLayer.addTo(this.map);
+  }
+
+  private createMapBasemapLayer(mode: MapBasemapPreference): L.TileLayer {
+    if (mode === 'satellite') {
+      return L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          maxNativeZoom: 19,
+          maxZoom: 22,
+          attribution: 'Tiles &copy; Esri',
+        },
+      );
+    }
+
+    // CartoDB Positron — clean, uncluttered light tile (design.md §3.1).
+    return L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxNativeZoom: 19,
+      maxZoom: 22,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    });
   }
 
   private readMapFocusPayload(): { imageId: string; lat: number; lng: number } | null {
@@ -1420,6 +1459,17 @@ export class MapShellComponent implements OnDestroy {
     if (typeof window === 'undefined') return 'smooth';
     const stored = window.localStorage.getItem(MAP_MARKER_MOTION_STORAGE_KEY);
     return stored === 'off' ? 'off' : 'smooth';
+  }
+
+  private readMapBasemapPreference(): MapBasemapPreference {
+    if (typeof window === 'undefined') return 'default';
+    const stored = window.localStorage.getItem(MAP_BASEMAP_STORAGE_KEY);
+    return stored === 'satellite' ? 'satellite' : 'default';
+  }
+
+  private persistMapBasemapPreference(value: MapBasemapPreference): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(MAP_BASEMAP_STORAGE_KEY, value);
   }
 
   /**

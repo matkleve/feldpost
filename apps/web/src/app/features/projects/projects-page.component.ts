@@ -142,6 +142,8 @@ export class ProjectsPageComponent {
   readonly selectedProjectId = signal<string | null>(null);
   readonly workspacePaneOpen = signal(false);
   readonly editingProjectId = signal<string | null>(null);
+  readonly workspaceTitleEditProjectId = signal<string | null>(null);
+  readonly workspaceTitleEditValue = signal('');
   readonly creatingProject = signal(false);
   readonly pendingProjectAction = signal<PendingProjectAction>(null);
   readonly pendingProjectId = signal<string | null>(null);
@@ -243,6 +245,14 @@ export class ProjectsPageComponent {
 
     const selectedProject = this.projects().find((project) => project.id === selectedId);
     return selectedProject?.name ?? 'Workspace';
+  });
+  readonly workspaceTitleEditable = computed(() => {
+    const selectedId = this.selectedProjectId();
+    if (!selectedId) {
+      return false;
+    }
+
+    return this.workspaceTitleEditProjectId() === selectedId;
   });
 
   readonly groupedSections = computed<ProjectGroupedSection[]>(() => {
@@ -449,15 +459,34 @@ export class ProjectsPageComponent {
   }
 
   async onNewProject(): Promise<void> {
+    if (this.creatingProject()) {
+      return;
+    }
+
     this.creatingProject.set(true);
     try {
       const draft = await this.projectsService.createDraftProject();
-      if (!draft) return;
+      if (!draft) {
+        this.toastService.show({
+          message: 'Could not create project. Please try again.',
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
 
       this.projects.update((all) => [draft, ...all]);
-      this.editingProjectId.set(draft.id);
+      this.editingProjectId.set(null);
+      this.workspaceTitleEditProjectId.set(draft.id);
+      this.workspaceTitleEditValue.set(draft.name);
       await this.openWorkspace(draft.id);
       await this.refreshSearchCounts();
+    } catch {
+      this.toastService.show({
+        message: 'Could not create project. Please try again.',
+        type: 'error',
+        dedupe: true,
+      });
     } finally {
       this.creatingProject.set(false);
     }
@@ -467,15 +496,15 @@ export class ProjectsPageComponent {
     this.editingProjectId.set(projectId);
   }
 
-  async confirmRename(projectId: string, value: string): Promise<void> {
+  async confirmRename(projectId: string, value: string): Promise<boolean> {
     const trimmed = value.trim();
     if (!trimmed) {
-      return;
+      return false;
     }
 
     const persisted = await this.projectsService.renameProject(projectId, trimmed);
     if (!persisted) {
-      return;
+      return false;
     }
 
     this.projects.update((all) =>
@@ -495,6 +524,8 @@ export class ProjectsPageComponent {
     if (this.selectedProjectId() === projectId) {
       void this.router.navigate(['/projects', projectId]);
     }
+
+    return true;
   }
 
   onRenameInputKeydown(event: KeyboardEvent, projectId: string, value: string): void {
@@ -655,6 +686,12 @@ export class ProjectsPageComponent {
   async openWorkspace(projectId: string, navigate = false): Promise<void> {
     this.persistWorkspaceContext(this.selectedProjectId());
 
+    const titleEditProjectId = this.workspaceTitleEditProjectId();
+    if (titleEditProjectId && titleEditProjectId !== projectId) {
+      this.workspaceTitleEditProjectId.set(null);
+      this.workspaceTitleEditValue.set('');
+    }
+
     if (!this.workspacePaneOpen()) {
       this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
     }
@@ -686,8 +723,29 @@ export class ProjectsPageComponent {
     this.workspacePaneOpen.set(false);
     this.selectedProjectId.set(null);
     this.detailImageId.set(null);
+    this.workspaceTitleEditProjectId.set(null);
+    this.workspaceTitleEditValue.set('');
     this.workspaceViewService.selectedProjectIds.set(new Set());
     this.workspaceViewService.clearActiveSelection();
+  }
+
+  onWorkspaceTitleChanged(value: string): void {
+    this.workspaceTitleEditValue.set(value);
+  }
+
+  async onWorkspaceTitleSubmit(value: string): Promise<void> {
+    const selectedId = this.selectedProjectId();
+    if (!selectedId) {
+      return;
+    }
+
+    const renamed = await this.confirmRename(selectedId, value);
+    if (!renamed) {
+      return;
+    }
+
+    this.workspaceTitleEditProjectId.set(null);
+    this.workspaceTitleEditValue.set('');
   }
 
   onWorkspaceWidthChange(newWidth: number): void {

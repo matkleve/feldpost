@@ -15,6 +15,32 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
+  <button
+    class="map-basemap-switch"
+    [class.map-basemap-switch--satellite]="mapBasemap() === 'satellite'"
+    type="button"
+    role="switch"
+    [attr.aria-checked]="mapBasemap() === 'satellite'"
+    [attr.aria-label]="
+      mapBasemap() === 'satellite'
+        ? 'Photo map enabled. Switch to street map'
+        : 'Street map enabled. Switch to photo map'
+    "
+    [title]="
+      mapBasemap() === 'satellite'
+        ? 'Photo map enabled. Switch to street map'
+        : 'Street map enabled. Switch to photo map'
+    "
+    (click)="toggleMapBasemap()"
+  >
+    <span class="map-basemap-switch__track" aria-hidden="true">
+      <span class="map-basemap-switch__thumb"></span>
+    </span>
+    <span class="map-basemap-switch__label" aria-hidden="true">
+      {{ mapBasemap() === 'satellite' ? 'Photo' : 'Map' }}
+    </span>
+  </button>
+
   <!-- Upload button — top-right of map zone, visually over map -->
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
     <!-- Icon button (always visible) -->

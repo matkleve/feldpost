@@ -1,6 +1,13 @@
 <!-- Workspace Pane — right panel (desktop), bottom sheet (mobile, future) -->
 <div class="workspace-pane ui-container" role="region" aria-label="Workspace pane">
-  <app-pane-header [title]="title()" (close)="close()"></app-pane-header>
+  <app-pane-header
+    [title]="title()"
+    [editable]="titleEditable()"
+    [editValue]="titleEditValue()"
+    (editValueChange)="onTitleEditValueChange($event)"
+    (editSubmitted)="onTitleSubmit($event)"
+    (close)="close()"
+  ></app-pane-header>
 
   @if (detailImageId()) {
     <app-image-detail-view
