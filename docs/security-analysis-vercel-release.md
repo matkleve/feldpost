@@ -1,6 +1,6 @@
 # Security Analysis for Public Vercel Release
 
-**Project:** Feldpost (sitesnap)
+**Project:** Feldpost
 **Date:** 2026-03-16
 **Scope:** Angular web app (`apps/web`), Supabase (Auth, Postgres + RLS, Storage), Edge Function `geocode`
 **Goal:** Decide whether the app can be shared with non-dev company users (brother + father) on a public Vercel URL.

@@ -22,8 +22,8 @@ type SearchBias = 'balanced' | 'address-first' | 'place-first';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 
-const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
-const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
+const MAP_MARKER_MOTION_STORAGE_KEY = 'feldpost.settings.map.markerMotion';
+const MAP_MARKER_MOTION_EVENT = 'feldpost:map-marker-motion-changed';
 
 interface SettingsSection {
   id: string;

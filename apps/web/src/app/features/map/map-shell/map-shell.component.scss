@@ -99,6 +99,62 @@
   }
 }
 
+.map-material-toggle {
+  --touch-target-base: 2.75rem; // ~44px desktop
+  --touch-target-mobile: 3rem; // ~48px mobile
+
+  position: absolute;
+  top: calc(var(--spacing-3) + 3.125rem);
+  left: var(--spacing-3);
+  z-index: var(--z-upload-button);
+  min-height: var(--touch-target-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
+  color: var(--color-text-primary);
+  box-shadow: var(--elevation-overlay);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 0.375rem var(--spacing-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background 120ms ease-out,
+    color 120ms ease-out,
+    border-color 120ms ease-out,
+    opacity 120ms ease-out;
+
+  .material-icons {
+    font-size: 0.95rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--color-bg-elevated);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
+    color: var(--color-clay);
+    background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
+  }
+
+  &--disabled {
+    opacity: 0.55;
+  }
+
+  @media (max-width: 767px) {
+    min-height: var(--touch-target-mobile);
+  }
+}
+
 // ── Upload button zone — fixed top-right, expands into panel ─────────────────
 
 .upload-btn-zone {
@@ -226,6 +282,15 @@
       cursor: crosshair !important;
     }
   }
+}
+
+// Applies only to raster tiles so markers and overlays stay crisp.
+:host ::ng-deep .map-container--analog-material .leaflet-tile-pane {
+  filter: sepia(0.78) saturate(0.5) hue-rotate(-14deg) contrast(0.9) brightness(1.04);
+}
+
+:host ::ng-deep .map-container--analog-material .leaflet-tile {
+  opacity: 0.92;
 }
 
 :host ::ng-deep .map-user-location-marker {

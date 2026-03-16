@@ -58,10 +58,12 @@ import {
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapBasemapPreference = 'default' | 'satellite';
+type MapMaterialPreference = 'default' | 'analog';
 
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
+const MAP_MATERIAL_STORAGE_KEY = 'sitesnap.settings.map.material';
 
 @Component({
   selector: 'app-map-shell',
@@ -217,6 +219,11 @@ export class MapShellComponent implements OnDestroy {
   /** True when GPS tracking mode is enabled via the toggle button. */
   readonly gpsTrackingActive = signal(false);
   readonly mapBasemap = signal<MapBasemapPreference>(this.readMapBasemapPreference());
+  readonly mapMaterial = signal<MapMaterialPreference>(this.readMapMaterialPreference());
+  readonly mapMaterialOptionEnabled = computed(() => this.mapBasemap() === 'default');
+  readonly analogMaterialActive = computed(
+    () => this.mapBasemap() === 'default' && this.mapMaterial() === 'analog',
+  );
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -543,6 +550,12 @@ export class MapShellComponent implements OnDestroy {
     this.mapBasemap.set(next);
     this.persistMapBasemapPreference(next);
     this.applyMapBasemapLayer();
+  }
+
+  toggleMapMaterial(): void {
+    const next: MapMaterialPreference = this.mapMaterial() === 'default' ? 'analog' : 'default';
+    this.mapMaterial.set(next);
+    this.persistMapMaterialPreference(next);
   }
 
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
@@ -1470,6 +1483,17 @@ export class MapShellComponent implements OnDestroy {
   private persistMapBasemapPreference(value: MapBasemapPreference): void {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(MAP_BASEMAP_STORAGE_KEY, value);
+  }
+
+  private readMapMaterialPreference(): MapMaterialPreference {
+    if (typeof window === 'undefined') return 'default';
+    const stored = window.localStorage.getItem(MAP_MATERIAL_STORAGE_KEY);
+    return stored === 'analog' ? 'analog' : 'default';
+  }
+
+  private persistMapMaterialPreference(value: MapMaterialPreference): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(MAP_MATERIAL_STORAGE_KEY, value);
   }
 
   /**
