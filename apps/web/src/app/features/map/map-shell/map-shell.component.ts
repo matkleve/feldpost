@@ -32,6 +32,7 @@ import {
 } from '../../upload/upload-panel/upload-panel.component';
 import { ExifCoords } from '../../../core/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
+import { GeocodingService } from '../../../core/geocoding.service';
 import {
   UploadManagerService,
   ImageReplacedEvent,
@@ -65,6 +66,7 @@ import {
 export class MapShellComponent implements OnDestroy {
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
+  private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly photoLoadService = inject(PhotoLoadService);
@@ -102,6 +104,46 @@ export class MapShellComponent implements OnDestroy {
   private readonly searchViewportBounds = signal<
     { north: number; east: number; south: number; west: number } | undefined
   >(undefined);
+  private readonly searchCountryCodes = signal<string[] | undefined>(undefined);
+
+  private readonly searchDataCentroid = computed<{ lat: number; lng: number } | undefined>(() => {
+    const all = this.workspaceViewService.rawImages();
+    const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
+    const scoped =
+      selectedProjectIds.size > 0
+        ? all.filter((img) => img.projectId && selectedProjectIds.has(img.projectId))
+        : all;
+
+    const points = scoped
+      .filter(
+        (img) =>
+          typeof img.latitude === 'number' &&
+          typeof img.longitude === 'number' &&
+          Number.isFinite(img.latitude) &&
+          Number.isFinite(img.longitude),
+      )
+      .map((img) => ({ lat: img.latitude, lng: img.longitude }));
+
+    if (points.length === 0) {
+      const pos = this.userPosition();
+      if (!pos) return undefined;
+      return { lat: pos[0], lng: pos[1] };
+    }
+
+    const totals = points.reduce(
+      (acc, point) => {
+        acc.lat += point.lat;
+        acc.lng += point.lng;
+        return acc;
+      },
+      { lat: 0, lng: 0 },
+    );
+
+    return {
+      lat: totals.lat / points.length,
+      lng: totals.lng / points.length,
+    };
+  });
 
   readonly searchQueryContext = computed<SearchQueryContext>(() => {
     const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
@@ -111,6 +153,8 @@ export class MapShellComponent implements OnDestroy {
     return {
       activeProjectId,
       viewportBounds: this.searchViewportBounds(),
+      dataCentroid: this.searchDataCentroid(),
+      countryCodes: this.searchCountryCodes(),
     };
   });
 
@@ -380,6 +424,7 @@ export class MapShellComponent implements OnDestroy {
       (pos) => {
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         this.userPosition.set(coords);
+        void this.refreshSearchCountryCode(coords[0], coords[1]);
         this.renderOrUpdateUserLocationMarker(coords);
         const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
         this.map?.setView(coords, zoom);
@@ -461,6 +506,7 @@ export class MapShellComponent implements OnDestroy {
       (pos) => {
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         this.userPosition.set(coords);
+        void this.refreshSearchCountryCode(coords[0], coords[1]);
         this.renderOrUpdateUserLocationMarker(coords);
         this.map?.setView(coords, 13);
       },
@@ -473,6 +519,7 @@ export class MapShellComponent implements OnDestroy {
   private recenterOnKnownUserPosition(): boolean {
     const coords = this.userPosition();
     if (!coords) return false;
+    void this.refreshSearchCountryCode(coords[0], coords[1]);
     const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
     this.map?.setView(coords, zoom);
     return true;
@@ -550,6 +597,13 @@ export class MapShellComponent implements OnDestroy {
   private clearSearchLocationMarker(): void {
     this.searchLocationMarker?.remove();
     this.searchLocationMarker = null;
+  }
+
+  private async refreshSearchCountryCode(lat: number, lng: number): Promise<void> {
+    const result = await this.geocodingService.reverse(lat, lng);
+    const countryCode = result?.countryCode?.toLowerCase();
+    if (!countryCode) return;
+    this.searchCountryCodes.set([countryCode]);
   }
 
   private updateSearchViewportBounds(): void {

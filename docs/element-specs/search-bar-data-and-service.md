@@ -164,7 +164,8 @@ sequenceDiagram
 - [x] Search source loading is progressive and non-blocking across phases.
 - [x] DB results render before geocoder results for typical latency conditions.
 - [x] Geocoder calls go through Edge Function proxy only.
-- [x] Fallback geocoder variants execute only when primary query yields no results.
+- [x] Fallback variants execute only when strict/primary matching has no sufficiently confident winner: either zero primary results or top primary confidence below the fallback threshold (default 0.70).
+- [x] Partial-prefix queries (for example `Wilhe`) do not trigger fallback when primary returns a confident winner at or above threshold; fallback runs only when confidence is below threshold or no primary result exists.
 - [x] Geocoder loading placeholders use the same row geometry as final Places rows (height, vertical padding, media-column width).
 - [x] Geocoder loading placeholders use neutral light-gray loading surfaces (no clay/orange accent colors).
 - [x] Section ordering remains fixed: Addresses -> Projects & Groups -> Places.
@@ -340,6 +341,15 @@ Responsibilities:
 - Geocoder resolution via proxy
 - Fallback query strategy
 - DB address/content resolver orchestration
+
+Fallback trigger contract (normative):
+
+- Evaluate strict/primary result confidence first.
+- Trigger fallback only when:
+  - primary result set is empty, or
+  - top primary confidence is `< fallbackThreshold` (default `0.70`).
+- Do not run fallback when top primary confidence is `>= fallbackThreshold`.
+- This rule applies identically for partial prefixes, including queries like `Wilhe`.
 
 Interface:
 

@@ -16,6 +16,8 @@ The right-side panel that shows image groups, thumbnails, and detail views. It's
 
 **Desktop:** 320px wide by default, resizable 280–640px via Drag Divider. Uses the shared `.ui-container` panel shell so the workspace aligns with the same outer radius and panel padding language as other app surfaces. `--color-bg-surface` background. Slides in from the right edge when opened. Contains Group Tab Bar at top, content area below (thumbnail grid or image detail).
 
+Pane header includes a Notion-like fullscreen toggle button at top-right. Fullscreen mode expands the workspace pane to occupy the available app content area and hides divider resize affordances while active.
+
 **Mobile:** Bottom Sheet with drag handle. Three snap points: minimized (64px, shows handle + group name), half-screen (50vh, shows thumbnails), full-screen (100vh, shows detail). Map stays interactive in minimized and half-screen states.
 
 **Drag Divider:** See [drag-divider spec](drag-divider.md) for full details. Vertical resize handle between map and workspace pane. Desktop only.
@@ -27,23 +29,55 @@ The right-side panel that shows image groups, thumbnails, and detail views. It's
 
 ## Actions
 
-| #   | User Action                                 | System Response                                                                                                                        | Triggers                                           |
-| --- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| 1   | Clicks a single photo marker on map         | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                         | `workspacePaneOpen` → true, `detailImageId` set    |
-| 1b  | Clicks a cluster marker on map              | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null) | `workspacePaneOpen` → true, `detailImageId` → null |
-| 2   | Drags the Drag Divider                      | Resizes workspace pane width (clamped 280–640px)                                                                                       | CSS width change                                   |
-| 3   | Clicks close button                         | Workspace pane slides out                                                                                                              | `workspacePaneOpen` → false                        |
-| 4   | Swipes down on bottom sheet handle (mobile) | Snaps to lower position or closes                                                                                                      | Snap point logic                                   |
-| 5   | Swipes up on bottom sheet handle (mobile)   | Snaps to higher position                                                                                                               | Snap point logic                                   |
-| 6   | Clicks a thumbnail in the grid              | Image Detail View replaces grid, back arrow to return                                                                                  | Detail view state                                  |
-| 7   | Selects a group tab                         | Content switches to that group's thumbnails                                                                                            | Active tab change                                  |
+| #   | User Action                                   | System Response                                                                                                                        | Triggers                                           |
+| --- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 1   | Clicks a single photo marker on map           | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                         | `workspacePaneOpen` → true, `detailImageId` set    |
+| 1b  | Clicks a cluster marker on map                | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null) | `workspacePaneOpen` → true, `detailImageId` → null |
+| 2   | Drags the Drag Divider                        | Resizes workspace pane width (clamped 280–640px)                                                                                       | CSS width change                                   |
+| 3   | Clicks close button                           | Workspace pane slides out                                                                                                              | `workspacePaneOpen` → false                        |
+| 4   | Swipes down on bottom sheet handle (mobile)   | Snaps to lower position or closes                                                                                                      | Snap point logic                                   |
+| 5   | Swipes up on bottom sheet handle (mobile)     | Snaps to higher position                                                                                                               | Snap point logic                                   |
+| 6   | Clicks a thumbnail in the grid                | Image Detail View replaces grid, back arrow to return                                                                                  | Detail view state                                  |
+| 7   | Selects a group tab                           | Content switches to that group's thumbnails                                                                                            | Active tab change                                  |
+| 8   | Clicks fullscreen button in pane header       | Workspace enters fullscreen mode (desktop: expands pane; mobile: snaps to full and locks)                                              | `isFullscreen` → true                              |
+| 9   | Clicks fullscreen button again or presses Esc | Workspace exits fullscreen and restores prior width/snap                                                                               | `isFullscreen` → false                             |
+
+### Interaction Flowchart
+
+```mermaid
+flowchart TD
+    A[Workspace opened] --> B{Content mode}
+    B -- Grid --> C[Thumbnail grid visible]
+    B -- Detail --> D[Image detail visible]
+    C --> E{Header actions}
+    D --> E
+    E -- Fullscreen on --> F[Expand pane to fullscreen]
+    F --> G[Hide divider resize affordance]
+    G --> H{Exit action}
+    H -- Fullscreen button --> I[Restore prior width or snap]
+    H -- Esc --> I
+```
+
+### Fullscreen State
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> OpenSplit: open pane
+    OpenSplit --> Fullscreen: click fullscreen
+    Fullscreen --> OpenSplit: click fullscreen / Esc
+    OpenSplit --> Closed: close pane
+    Fullscreen --> Closed: close pane
+```
 
 ## Component Hierarchy
 
 ```
 WorkspacePane                              ← `.ui-container` right panel (desktop) or bottom sheet (mobile)
 ├── [desktop] DragDivider                  ← resize handle (see drag-divider spec)
-├── PaneHeader                             ← close button + group name
+├── PaneHeader                             ← close button + group name + fullscreen button
+│   ├── FullscreenToggleButton             ← top-right, notion-like control
+│   └── CloseButton
 ├── GroupTabBar                            ← scrollable horizontal tabs (see group-tab-bar spec)
 ├── SortingControls                        ← Date↓, Date↑, Distance, Name
 └── ContentArea                            ← switches between:
@@ -62,14 +96,17 @@ BottomSheet                                ← fixed bottom, full width
 
 ## State
 
-| Name                    | Type                              | Default       | Controls                                                                                                         |
-| ----------------------- | --------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `isOpen`                | `boolean`                         | `false`       | Pane visibility                                                                                                  |
-| `width`                 | `number`                          | `320`         | Desktop pane width in px                                                                                         |
-| `activeTabId`           | `string`                          | `'selection'` | Which group tab is active                                                                                        |
-| `detailImageId`         | `string \| null`                  | `null`        | If set, show detail view instead of grid                                                                         |
-| `activeClusterImageIds` | `string[] \| null`                | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
-| `mobileSnapPoint`       | `'minimized' \| 'half' \| 'full'` | `'minimized'` | Mobile bottom sheet position                                                                                     |
+| Name                    | Type                                      | Default       | Controls                                                                                                         |
+| ----------------------- | ----------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `isOpen`                | `boolean`                                 | `false`       | Pane visibility                                                                                                  |
+| `width`                 | `number`                                  | `320`         | Desktop pane width in px                                                                                         |
+| `activeTabId`           | `string`                                  | `'selection'` | Which group tab is active                                                                                        |
+| `detailImageId`         | `string \| null`                          | `null`        | If set, show detail view instead of grid                                                                         |
+| `activeClusterImageIds` | `string[] \| null`                        | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
+| `mobileSnapPoint`       | `'minimized' \| 'half' \| 'full'`         | `'minimized'` | Mobile bottom sheet position                                                                                     |
+| `isFullscreen`          | `boolean`                                 | `false`       | Fullscreen workspace mode                                                                                        |
+| `restoreWidth`          | `number \| null`                          | `null`        | Stored desktop width to restore after fullscreen                                                                 |
+| `restoreSnapPoint`      | `'minimized' \| 'half' \| 'full' \| null` | `null`        | Stored mobile snap point to restore after fullscreen                                                             |
 
 ## File Map
 
@@ -105,6 +142,10 @@ BottomSheet                                ← fixed bottom, full width
 - [x] Close button hides the pane
 - [x] Content switches between thumbnail grid and image detail
 - [x] Group Tab Bar is scrollable horizontally
+- [ ] Header includes fullscreen button at top-right
+- [ ] Fullscreen mode expands workspace pane and disables divider drag while active
+- [ ] Exiting fullscreen restores prior desktop width or mobile snap point
+- [ ] `Esc` exits fullscreen before other pane-level escape behavior
 - [ ] Cluster click opens pane with Active Selection tab active
 - [ ] Active Selection tab shows all images that belong to the clicked cluster
 - [ ] Pane header shows image count when cluster content is loaded (e.g., "12 photos")
