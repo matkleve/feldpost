@@ -18,402 +18,596 @@
 
 <!-- Content (visible when image is loaded) -->
 @if (image() && !loading()) {
-  <!-- DetailHeader: back button + editable title + context menu -->
-  <div class="detail-header">
-    <button
-      class="detail-back-btn"
-      type="button"
-      aria-label="Back to gallery"
-      title="Back to gallery"
-      (click)="close()"
-    >
-      <span class="material-icons" aria-hidden="true">arrow_back</span>
-    </button>
-
-    @if (editingField() === 'address_label') {
-      <input
-        #titleInput
-        class="detail-title-input"
-        type="text"
-        [value]="image()!.address_label ?? ''"
-        aria-label="Edit image title"
-        (keydown.enter)="saveImageField('address_label', titleInput.value)"
-        (keydown.escape)="editingField.set(null)"
-        (blur)="saveImageField('address_label', titleInput.value)"
-      />
-    } @else {
+  <div class="detail-main-column">
+    <!-- DetailHeader: back button + editable title + context menu -->
+    <div class="detail-header">
       <button
-        class="detail-title detail-title--editable"
+        class="detail-back-btn"
         type="button"
-        title="Click to edit title"
-        (click)="editingField.set('address_label')"
+        aria-label="Back to gallery"
+        title="Back to gallery"
+        (click)="close()"
       >
-        {{ displayTitle() }}
+        <span class="material-icons" aria-hidden="true">arrow_back</span>
       </button>
-    }
 
-    <button
-      class="detail-actions-btn"
-      type="button"
-      aria-label="More actions"
-      title="More actions"
-      aria-haspopup="true"
-      [attr.aria-expanded]="showContextMenu()"
-      (click)="toggleContextMenu()"
-    >
-      <span class="material-icons" aria-hidden="true">more_vert</span>
-    </button>
-
-    @if (showContextMenu()) {
-      <div class="detail-context-menu dd-items" role="menu" (keydown.escape)="closeContextMenu()">
-        <button
-          class="dd-item dd-item--danger"
-          type="button"
-          role="menuitem"
-          (click)="confirmDelete()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-          <span class="dd-item__label">Delete image</span>
-        </button>
-        <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinates()">
-          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">Copy coordinates</span>
-        </button>
-      </div>
-      <div
-        class="detail-context-menu-overlay"
-        aria-hidden="true"
-        (click)="closeContextMenu()"
-      ></div>
-    }
-  </div>
-
-  <!-- Hidden file input for photo replacement -->
-  <input
-    #fileInput
-    type="file"
-    [accept]="acceptTypes"
-    class="visually-hidden"
-    aria-hidden="true"
-    (change)="onFileSelected($event)"
-  />
-
-  <!-- Scrollable content area -->
-  <div class="detail-scroll">
-    <!-- Photo viewer: progressive load — click opens lightbox -->
-    @if (hasPhoto()) {
-      <div class="detail-image-container">
-        <button
-          class="detail-image-wrap"
-          type="button"
-          aria-label="View full-size photo"
-          (click)="showLightbox.set(true)"
-        >
-          <!-- Placeholder: pulsing gradient while loading (behind images via grid stacking) -->
-          @if (!fullResPreloaded()) {
-            @if (thumbState() === 'error' && fullState() === 'error') {
-              <div class="detail-image-placeholder detail-image-placeholder--no-photo">
-                <span class="detail-image-placeholder__icon detail-image-placeholder__icon--no-photo" aria-hidden="true"></span>
-                <span class="visually-hidden">Image unavailable</span>
-              </div>
-            } @else {
-              <div
-                class="detail-image-placeholder"
-                [class.detail-image-placeholder--loading]="isImageLoading()"
-              >
-                <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
-              </div>
-            }
-          }
-          <!-- Tier 2: blurred thumbnail (covers placeholder via grid stacking) -->
-          @if (thumbnailUrl() && thumbState() === 'loaded' && !fullResPreloaded()) {
-            <img
-              class="detail-image detail-image--thumb"
-              [src]="thumbnailUrl()"
-              alt="Photo preview"
-              aria-hidden="true"
-            />
-          }
-          <!-- Tier 3: full-res with crossfade (preloaded before showing) -->
-          @if (fullResUrl()) {
-            <img
-              class="detail-image detail-image--full"
-              [class.detail-image--loaded]="fullResPreloaded()"
-              [src]="fullResUrl()"
-              [alt]="displayTitle()"
-            />
-          }
-        </button>
-
-        <!-- Replace photo overlay button -->
-        <button
-          class="detail-image-edit-btn"
-          type="button"
-          aria-label="Replace photo"
-          title="Replace photo"
-          [disabled]="replacing()"
-          (click)="triggerFileInput()"
-        >
-          @if (replacing()) {
-            <span class="detail-image-edit-btn__spinner" aria-hidden="true"></span>
-          } @else {
-            <span class="material-icons" aria-hidden="true">edit</span>
-          }
-        </button>
-
-        @if (replaceError()) {
-          <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
-        }
-      </div>
-    } @else {
-      <!-- Upload prompt for photoless items (no-photo fast path) -->
-      <div class="detail-upload-prompt">
-        <div class="detail-upload-prompt__placeholder">
-          <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
-          <span class="detail-upload-prompt__text">No photo attached</span>
-        </div>
-        <button
-          class="detail-upload-prompt__button"
-          type="button"
-          [disabled]="replacing()"
-          (click)="triggerFileInput()"
-        >
-          @if (replacing()) {
-            <span class="detail-upload-prompt__spinner" aria-hidden="true"></span>
-          }
-          Upload photo
-        </button>
-        @if (replaceError()) {
-          <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
-        }
-      </div>
-    }
-
-    <!-- Metadata content area — capped width for readability -->
-    <div class="detail-content">
-      <!-- Quick Info Bar -->
-      <app-quick-info-chips [chips]="infoChips()" (chipClicked)="onChipClicked($event)" />
-
-      <!-- Details Section -->
-      <div class="detail-section">
-        <div class="dd-section-label">Details</div>
-
-        <!-- Captured date -->
-        <div class="detail-row" [class.detail-row--editing]="editingField() === 'captured_at'">
-          <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
-          <span class="detail-row__label">Captured</span>
-          @if (editingField() === 'captured_at') {
-            <app-captured-date-editor
-              [initialDate]="editDate()"
-              [initialTime]="editTime()"
-              (save)="saveCapturedAt($event)"
-              (cancel)="editingField.set(null)"
-            />
-          } @else {
-            <button class="detail-row__value" type="button" (click)="openCapturedAtEditor()">
-              {{ captureDate() ?? '—' }}
-            </button>
-            <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
-          }
-        </div>
-
-        <!-- Project -->
-        <div class="detail-row" [class.detail-row--editing]="editingField() === 'project_id'">
-          <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
-          <span class="detail-row__label">Project</span>
-          @if (editingField() === 'project_id') {
-            <select
-              #projectSelect
-              class="detail-row__input detail-row__input--select"
-              aria-label="Edit project"
-              (change)="saveImageField('project_id', projectSelect.value)"
-              (keydown.escape)="editingField.set(null)"
-              (blur)="saveImageField('project_id', projectSelect.value)"
-            >
-              <option value="">— None —</option>
-              @for (opt of projectOptions(); track opt.id) {
-                <option [value]="opt.id" [selected]="opt.id === image()!.project_id">
-                  {{ opt.label }}
-                </option>
-              }
-            </select>
-          } @else {
-            <button
-              class="detail-row__value"
-              type="button"
-              (click)="editingField.set('project_id')"
-            >
-              {{ projectName() || '—' }}
-            </button>
-            <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
-          }
-        </div>
-
-        <!-- Uploaded (read-only) -->
-        <div class="detail-row detail-row--readonly">
-          <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
-          <span class="detail-row__label">Uploaded</span>
-          <span class="detail-row__value detail-row__value--static">{{ uploadDate() ?? '—' }}</span>
-        </div>
-      </div>
-
-      <!-- Location Section -->
-      <div class="detail-section">
-        <div class="dd-section-label">Location</div>
-
-        <!-- Address search bar -->
-        <app-address-search
-          [currentAddress]="fullAddress()"
-          (suggestionApplied)="applyAddressSuggestion($event)"
+      @if (editingField() === 'address_label') {
+        <input
+          #titleInput
+          class="detail-title-input"
+          type="text"
+          [value]="image()!.address_label ?? ''"
+          aria-label="Edit image title"
+          (keydown.enter)="saveImageField('address_label', titleInput.value)"
+          (keydown.escape)="editingField.set(null)"
+          (blur)="saveImageField('address_label', titleInput.value)"
         />
+      } @else {
+        <button
+          class="detail-title detail-title--editable"
+          type="button"
+          title="Click to edit title"
+          (click)="editingField.set('address_label')"
+        >
+          {{ displayTitle() }}
+        </button>
+      }
 
-        <!-- Street -->
-        <div class="detail-row" [class.detail-row--editing]="editingField() === 'street'">
-          <span class="material-icons detail-row__icon" aria-hidden="true">signpost</span>
-          <span class="detail-row__label">Street</span>
-          @if (editingField() === 'street') {
-            <input
-              #streetInput
-              class="detail-row__input"
-              type="text"
-              [value]="image()!.street ?? ''"
-              aria-label="Edit street"
-              (keydown.enter)="saveImageField('street', streetInput.value)"
-              (keydown.escape)="editingField.set(null)"
-              (blur)="saveImageField('street', streetInput.value)"
-            />
-          } @else {
-            <button class="detail-row__value" type="button" (click)="editingField.set('street')">
-              {{ image()!.street ?? '—' }}
-            </button>
-            <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
-          }
+      <button
+        class="detail-actions-btn"
+        type="button"
+        aria-label="More actions"
+        title="More actions"
+        aria-haspopup="true"
+        [attr.aria-expanded]="showContextMenu()"
+        (click)="toggleContextMenu()"
+      >
+        <span class="material-icons" aria-hidden="true">more_vert</span>
+      </button>
+
+      @if (showContextMenu()) {
+        <div class="detail-context-menu dd-items" role="menu" (keydown.escape)="closeContextMenu()">
+          <button
+            class="dd-item dd-item--danger"
+            type="button"
+            role="menuitem"
+            (click)="confirmDelete()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
+            <span class="dd-item__label">Delete image</span>
+          </button>
+          <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinates()">
+            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+            <span class="dd-item__label">Copy coordinates</span>
+          </button>
         </div>
+        <div
+          class="detail-context-menu-overlay"
+          aria-hidden="true"
+          (click)="closeContextMenu()"
+        ></div>
+      }
+    </div>
 
-        <!-- City -->
-        <div class="detail-row" [class.detail-row--editing]="editingField() === 'city'">
-          <span class="material-icons detail-row__icon" aria-hidden="true">location_city</span>
-          <span class="detail-row__label">City</span>
-          @if (editingField() === 'city') {
-            <input
-              #cityInput
-              class="detail-row__input"
-              type="text"
-              [value]="image()!.city ?? ''"
-              aria-label="Edit city"
-              (keydown.enter)="saveImageField('city', cityInput.value)"
-              (keydown.escape)="editingField.set(null)"
-              (blur)="saveImageField('city', cityInput.value)"
-            />
-          } @else {
-            <button class="detail-row__value" type="button" (click)="editingField.set('city')">
-              {{ image()!.city ?? '—' }}
-            </button>
-            <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
-          }
-        </div>
+    <!-- Hidden file input for photo replacement -->
+    <input
+      #fileInput
+      type="file"
+      [accept]="acceptTypes"
+      class="visually-hidden"
+      aria-hidden="true"
+      (change)="onFileSelected($event)"
+    />
 
-        <!-- District -->
-        <div class="detail-row" [class.detail-row--editing]="editingField() === 'district'">
-          <span class="material-icons detail-row__icon" aria-hidden="true">map</span>
-          <span class="detail-row__label">District</span>
-          @if (editingField() === 'district') {
-            <input
-              #districtInput
-              class="detail-row__input"
-              type="text"
-              [value]="image()!.district ?? ''"
-              aria-label="Edit district"
-              (keydown.enter)="saveImageField('district', districtInput.value)"
-              (keydown.escape)="editingField.set(null)"
-              (blur)="saveImageField('district', districtInput.value)"
-            />
-          } @else {
-            <button class="detail-row__value" type="button" (click)="editingField.set('district')">
-              {{ image()!.district ?? '—' }}
-            </button>
-            <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
-          }
-        </div>
-
-        <!-- Country -->
-        <div class="detail-row" [class.detail-row--editing]="editingField() === 'country'">
-          <span class="material-icons detail-row__icon" aria-hidden="true">public</span>
-          <span class="detail-row__label">Country</span>
-          @if (editingField() === 'country') {
-            <input
-              #countryInput
-              class="detail-row__input"
-              type="text"
-              [value]="image()!.country ?? ''"
-              aria-label="Edit country"
-              (keydown.enter)="saveImageField('country', countryInput.value)"
-              (keydown.escape)="editingField.set(null)"
-              (blur)="saveImageField('country', countryInput.value)"
-            />
-          } @else {
-            <button class="detail-row__value" type="button" (click)="editingField.set('country')">
-              {{ image()!.country ?? '—' }}
-            </button>
-            <span class="material-icons detail-row__edit" aria-hidden="true">edit</span>
-          }
-        </div>
-
-        <!-- Coordinates (read-only — edited via map correction) -->
-        @if (image()!.latitude != null) {
-          <div class="detail-row detail-row--readonly">
-            <span class="material-icons detail-row__icon" aria-hidden="true">my_location</span>
-            <span class="detail-row__label">
-              Coordinates
-              @if (isCorrected()) {
-                <span class="detail-correction-badge">Corrected</span>
+    <!-- Scrollable content area -->
+    <div class="detail-scroll">
+      <!-- Photo viewer: progressive load — click opens lightbox -->
+      @if (hasPhoto()) {
+        <div class="detail-image-container">
+          <button
+            class="detail-image-wrap"
+            type="button"
+            aria-label="View full-size photo"
+            (click)="showLightbox.set(true)"
+          >
+            <!-- Placeholder: pulsing gradient while loading (behind images via grid stacking) -->
+            @if (!fullResPreloaded()) {
+              @if (thumbState() === 'error' && fullState() === 'error') {
+                <div class="detail-image-placeholder detail-image-placeholder--no-photo">
+                  <span
+                    class="detail-image-placeholder__icon detail-image-placeholder__icon--no-photo"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="visually-hidden">Image unavailable</span>
+                </div>
+              } @else {
+                <div
+                  class="detail-image-placeholder"
+                  [class.detail-image-placeholder--loading]="isImageLoading()"
+                >
+                  <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
+                </div>
               }
-            </span>
-            <span class="detail-row__value detail-row__value--static detail-row__value--mono">
-              {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
-            </span>
-          </div>
-        }
+            }
+            <!-- Tier 2: blurred thumbnail (covers placeholder via grid stacking) -->
+            @if (thumbnailUrl() && thumbState() === 'loaded' && !fullResPreloaded()) {
+              <img
+                class="detail-image detail-image--thumb"
+                [src]="thumbnailUrl()"
+                alt="Photo preview"
+                aria-hidden="true"
+              />
+            }
+            <!-- Tier 3: full-res with crossfade (preloaded before showing) -->
+            @if (fullResUrl()) {
+              <img
+                class="detail-image detail-image--full"
+                [class.detail-image--loaded]="fullResPreloaded()"
+                [src]="fullResUrl()"
+                [alt]="displayTitle()"
+              />
+            }
+          </button>
 
-        <!-- Correction History -->
-        @if (isCorrected()) {
-          <div class="detail-correction-history">
-            <div class="detail-correction-history__row">
-              <span class="detail-correction-history__key">Original EXIF</span>
-              <span class="detail-correction-history__value">
-                {{ formatCoord(image()!.exif_latitude) }}°,
-                {{ formatCoord(image()!.exif_longitude) }}°
+          <!-- Replace photo overlay button -->
+          <button
+            class="detail-image-edit-btn"
+            type="button"
+            aria-label="Replace photo"
+            title="Replace photo"
+            [disabled]="replacing()"
+            (click)="triggerFileInput()"
+          >
+            @if (replacing()) {
+              <span class="detail-image-edit-btn__spinner" aria-hidden="true"></span>
+            } @else {
+              <span class="material-icons" aria-hidden="true">edit</span>
+            }
+          </button>
+
+          @if (replaceError()) {
+            <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+          }
+        </div>
+      } @else {
+        <!-- Upload prompt for photoless items (no-photo fast path) -->
+        <div class="detail-upload-prompt">
+          <div class="detail-upload-prompt__placeholder">
+            <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
+            <span class="detail-upload-prompt__text">No photo attached</span>
+          </div>
+          <button
+            class="detail-upload-prompt__button"
+            type="button"
+            [disabled]="replacing()"
+            (click)="triggerFileInput()"
+          >
+            @if (replacing()) {
+              <span class="detail-upload-prompt__spinner" aria-hidden="true"></span>
+            }
+            Upload photo
+          </button>
+          @if (replaceError()) {
+            <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+          }
+        </div>
+      }
+
+      <!-- Metadata content area — capped width for readability -->
+      <div class="detail-content">
+        <!-- Quick Info Bar -->
+        <app-quick-info-chips [chips]="infoChips()" (chipClicked)="onChipClicked($event)" />
+
+        <!-- Details Section -->
+        <div class="detail-section">
+          <div class="dd-section-label">Details</div>
+
+          <!-- Captured date -->
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'captured_at'">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
+            <span class="detail-row__label">Captured</span>
+            @if (editingField() === 'captured_at') {
+              <app-captured-date-editor
+                [initialDate]="editDate()"
+                [initialTime]="editTime()"
+                (save)="saveCapturedAt($event)"
+                (cancel)="editingField.set(null)"
+              />
+            } @else {
+              <button class="detail-row__value" type="button" (click)="openCapturedAtEditor()">
+                {{ captureDate() ?? '—' }}
+              </button>
+            }
+            <button
+              class="detail-row-action detail-row-action--right"
+              type="button"
+              aria-label="Edit captured date"
+              title="Edit captured date"
+              (click)="openCapturedAtEditor()"
+            >
+              <span class="material-icons" aria-hidden="true">edit</span>
+            </button>
+          </div>
+
+          <!-- Project -->
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'project_id'">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
+            <span class="detail-row__label">Project</span>
+            @if (editingField() === 'project_id') {
+              <select
+                #projectSelect
+                class="detail-row__input detail-row__input--select"
+                aria-label="Edit project"
+                (change)="saveImageField('project_id', projectSelect.value)"
+                (keydown.escape)="editingField.set(null)"
+                (blur)="saveImageField('project_id', projectSelect.value)"
+              >
+                <option value="">— None —</option>
+                @for (opt of projectOptions(); track opt.id) {
+                  <option [value]="opt.id" [selected]="opt.id === image()!.project_id">
+                    {{ opt.label }}
+                  </option>
+                }
+              </select>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Save project"
+                title="Save project"
+                (click)="saveImageField('project_id', projectSelect.value)"
+              >
+                <span class="material-icons" aria-hidden="true">check</span>
+              </button>
+            } @else {
+              <button
+                class="detail-row__value"
+                type="button"
+                (click)="editingField.set('project_id')"
+              >
+                {{ projectName() || '—' }}
+              </button>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Edit project"
+                title="Edit project"
+                (click)="editingField.set('project_id')"
+              >
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+            }
+          </div>
+
+          <!-- Uploaded (read-only) -->
+          <div class="detail-row detail-row--readonly">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
+            <span class="detail-row__label">Uploaded</span>
+            <span class="detail-row__value detail-row__value--static">{{
+              uploadDate() ?? '—'
+            }}</span>
+            <button
+              class="detail-row-action detail-row-action--right detail-row-action--danger"
+              type="button"
+              aria-label="Delete image"
+              title="Delete image"
+              (click)="confirmDelete()"
+            >
+              <span class="material-icons" aria-hidden="true">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Location Section -->
+        <div class="detail-section">
+          <div class="dd-section-label">Location</div>
+
+          <!-- Address search bar -->
+          <app-address-search
+            [currentAddress]="fullAddress()"
+            (suggestionApplied)="applyAddressSuggestion($event)"
+          />
+
+          <!-- Street -->
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'street'">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">signpost</span>
+            <span class="detail-row__label">Street</span>
+            @if (editingField() === 'street') {
+              <input
+                #streetInput
+                class="detail-row__input"
+                type="text"
+                [value]="image()!.street ?? ''"
+                aria-label="Edit street"
+                (keydown.enter)="saveImageField('street', streetInput.value)"
+                (keydown.escape)="editingField.set(null)"
+                (blur)="saveImageField('street', streetInput.value)"
+              />
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Save street"
+                title="Save street"
+                (click)="saveImageField('street', streetInput.value)"
+              >
+                <span class="material-icons" aria-hidden="true">check</span>
+              </button>
+            } @else {
+              <button class="detail-row__value" type="button" (click)="editingField.set('street')">
+                {{ image()!.street ?? '—' }}
+              </button>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Edit street"
+                title="Edit street"
+                (click)="editingField.set('street')"
+              >
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+            }
+          </div>
+
+          <!-- City -->
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'city'">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">location_city</span>
+            <span class="detail-row__label">City</span>
+            @if (editingField() === 'city') {
+              <input
+                #cityInput
+                class="detail-row__input"
+                type="text"
+                [value]="image()!.city ?? ''"
+                aria-label="Edit city"
+                (keydown.enter)="saveImageField('city', cityInput.value)"
+                (keydown.escape)="editingField.set(null)"
+                (blur)="saveImageField('city', cityInput.value)"
+              />
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Save city"
+                title="Save city"
+                (click)="saveImageField('city', cityInput.value)"
+              >
+                <span class="material-icons" aria-hidden="true">check</span>
+              </button>
+            } @else {
+              <button class="detail-row__value" type="button" (click)="editingField.set('city')">
+                {{ image()!.city ?? '—' }}
+              </button>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Edit city"
+                title="Edit city"
+                (click)="editingField.set('city')"
+              >
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+            }
+          </div>
+
+          <!-- District -->
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'district'">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">map</span>
+            <span class="detail-row__label">District</span>
+            @if (editingField() === 'district') {
+              <input
+                #districtInput
+                class="detail-row__input"
+                type="text"
+                [value]="image()!.district ?? ''"
+                aria-label="Edit district"
+                (keydown.enter)="saveImageField('district', districtInput.value)"
+                (keydown.escape)="editingField.set(null)"
+                (blur)="saveImageField('district', districtInput.value)"
+              />
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Save district"
+                title="Save district"
+                (click)="saveImageField('district', districtInput.value)"
+              >
+                <span class="material-icons" aria-hidden="true">check</span>
+              </button>
+            } @else {
+              <button
+                class="detail-row__value"
+                type="button"
+                (click)="editingField.set('district')"
+              >
+                {{ image()!.district ?? '—' }}
+              </button>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Edit district"
+                title="Edit district"
+                (click)="editingField.set('district')"
+              >
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+            }
+          </div>
+
+          <!-- Country -->
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'country'">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">public</span>
+            <span class="detail-row__label">Country</span>
+            @if (editingField() === 'country') {
+              <input
+                #countryInput
+                class="detail-row__input"
+                type="text"
+                [value]="image()!.country ?? ''"
+                aria-label="Edit country"
+                (keydown.enter)="saveImageField('country', countryInput.value)"
+                (keydown.escape)="editingField.set(null)"
+                (blur)="saveImageField('country', countryInput.value)"
+              />
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Save country"
+                title="Save country"
+                (click)="saveImageField('country', countryInput.value)"
+              >
+                <span class="material-icons" aria-hidden="true">check</span>
+              </button>
+            } @else {
+              <button class="detail-row__value" type="button" (click)="editingField.set('country')">
+                {{ image()!.country ?? '—' }}
+              </button>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Edit country"
+                title="Edit country"
+                (click)="editingField.set('country')"
+              >
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+            }
+          </div>
+
+          <!-- Coordinates (read-only — edited via map correction) -->
+          @if (image()!.latitude != null) {
+            <div class="detail-row detail-row--readonly">
+              <button
+                class="detail-row-action detail-row-action--left"
+                type="button"
+                aria-label="Copy coordinates"
+                title="Copy coordinates"
+                (click)="copyCoordinates()"
+              >
+                <span class="material-icons" aria-hidden="true">content_copy</span>
+              </button>
+              <span class="material-icons detail-row__icon" aria-hidden="true">my_location</span>
+              <span class="detail-row__label">
+                Coordinates
+                @if (isCorrected()) {
+                  <span class="detail-correction-badge">Corrected</span>
+                }
               </span>
-            </div>
-            <div class="detail-correction-history__row">
-              <span class="detail-correction-history__key">Corrected</span>
-              <span class="detail-correction-history__value">
+              <span class="detail-row__value detail-row__value--static detail-row__value--mono">
                 {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
               </span>
+              <button
+                class="detail-row-action detail-row-action--right"
+                type="button"
+                aria-label="Zoom to location"
+                title="Zoom to location"
+                (click)="zoomToLocation()"
+              >
+                <span class="material-icons" aria-hidden="true">zoom_in_map</span>
+              </button>
             </div>
-          </div>
-        }
-      </div>
+          }
 
-      <!-- Custom Metadata Section -->
-      <div class="detail-section">
-        <app-metadata-section
-          [entries]="metadata()"
-          [allKeyNames]="allMetadataKeyNames()"
-          (valueChanged)="saveMetadata($event.entry, $event.newValue)"
-          (entryRemoved)="removeMetadata($event)"
-          (entryAdded)="addMetadata($event.key, $event.value)"
+          <!-- Correction History -->
+          @if (isCorrected()) {
+            <div class="detail-correction-history">
+              <div class="detail-correction-history__row">
+                <span class="detail-correction-history__key">Original EXIF</span>
+                <span class="detail-correction-history__value">
+                  {{ formatCoord(image()!.exif_latitude) }}°,
+                  {{ formatCoord(image()!.exif_longitude) }}°
+                </span>
+              </div>
+              <div class="detail-correction-history__row">
+                <span class="detail-correction-history__key">Corrected</span>
+                <span class="detail-correction-history__value">
+                  {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Custom Metadata Section -->
+        <div class="detail-section">
+          <app-metadata-section
+            [entries]="metadata()"
+            [allKeyNames]="allMetadataKeyNames()"
+            (valueChanged)="saveMetadata($event.entry, $event.newValue)"
+            (entryRemoved)="removeMetadata($event)"
+            (entryAdded)="addMetadata($event.key, $event.value)"
+          />
+        </div>
+
+        <!-- Actions Section -->
+        <app-detail-actions
+          [hasCoordinates]="hasCoordinates()"
+          (zoomToLocation)="zoomToLocation()"
+          (addToProject)="openProjectPicker()"
+          (copyCoordinates)="copyCoordinates()"
+          (deleteImage)="confirmDelete()"
         />
       </div>
-
-      <!-- Actions Section -->
-      <app-detail-actions
-        [hasCoordinates]="hasCoordinates()"
-        (zoomToLocation)="zoomToLocation()"
-        (addToProject)="openProjectPicker()"
-        (copyCoordinates)="copyCoordinates()"
-        (deleteImage)="confirmDelete()"
-      />
     </div>
   </div>
 }

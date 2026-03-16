@@ -235,6 +235,30 @@
                     [class.settings-overlay__toggle--on]="settingsModel().mapGridOverlay"
                   ></span>
                 </button>
+
+                <div class="settings-overlay__field-row">
+                  <span>Marker motion</span>
+                  <div class="settings-overlay__segmented" role="group" aria-label="Marker motion">
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().markerMotion === 'off'
+                      "
+                      (click)="setMarkerMotion('off')"
+                    >
+                      Off
+                    </button>
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().markerMotion === 'smooth'
+                      "
+                      (click)="setMarkerMotion('smooth')"
+                    >
+                      Smooth
+                    </button>
+                  </div>
+                </div>
               </section>
             }
 

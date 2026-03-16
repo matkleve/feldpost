@@ -139,7 +139,7 @@ sequenceDiagram
     MS->>MS: photoPanelOpen.set(true)
     MS->>Supa: rpc('cluster_images', {cluster_lat, cluster_lng, zoom})
     Note right of Supa: RPC re-snaps AVG coords<br/>to grid cell internally
-    Supa-->>MS: [{id, thumbnail_path, captured_at, project_id, ...}, ...]
+    Supa-->>MS: [{id, thumbnail_path, captured_at, project_ids, ...}, ...]
     MS->>WVS: loadClusterImages() → rawImages.set(images)
     WVS->>WVS: apply filters → sort → group
     WVS->>WP: emit grouped image sections
@@ -171,8 +171,8 @@ RETURNS TABLE (
   storage_path   text,
   captured_at    timestamptz,
   created_at     timestamptz,
-  project_id     uuid,
-  project_name   text,
+    project_ids    uuid[],
+    project_names  text[],
   direction      numeric,
   exif_latitude  numeric,
   exif_longitude numeric,
@@ -214,8 +214,8 @@ AS $$
     i.storage_path,
     i.captured_at,
     i.created_at,
-    i.project_id,
-    p.name          AS project_name,
+    COALESCE(ip.project_ids, '{}'::uuid[]) AS project_ids,
+    COALESCE(ip.project_names, '{}'::text[]) AS project_names,
     i.direction,
     i.exif_latitude,
     i.exif_longitude,
@@ -228,7 +228,14 @@ AS $$
   FROM public.images i
   CROSS JOIN grid g
   CROSS JOIN snapped_input si
-  LEFT JOIN public.projects p ON p.id = i.project_id
+    LEFT JOIN LATERAL (
+        SELECT
+            array_agg(p.id ORDER BY p.name) AS project_ids,
+            array_agg(p.name ORDER BY p.name) AS project_names
+        FROM public.image_projects ip
+        JOIN public.projects p ON p.id = ip.project_id
+        WHERE ip.image_id = i.id
+    ) ip ON TRUE
   LEFT JOIN public.profiles pr ON pr.id = i.user_id
   WHERE i.organization_id = public.user_org_id()
     AND i.latitude  IS NOT NULL
@@ -263,7 +270,7 @@ flowchart LR
 
     subgraph Pipeline["Processing Pipeline (computed signals)"]
         direction TB
-        P1["1. Project Filter\nimages where project_id IN selectedProjects"]
+        P1["1. Project Filter\nimages where project_ids intersects selectedProjects"]
         P2["2. Filter Rules\napply FilterService predicates"]
         P3["3. Sort\nby activeSort.key + direction"]
         P4["4. Group\nby activeGroupings (multi-level)"]

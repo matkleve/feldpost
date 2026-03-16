@@ -11,7 +11,7 @@ Markers are **Leaflet DivIcon elements**, not Angular components. Marker HTML is
 
 ## What It Looks Like
 
-The marker body geometry is derived from the shared media token system: `--photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25)` (40px), with `--ui-item-media-size-default` seeded from the shared UI item token in `styles.scss`. Single markers render a thumbnail inside a square body with `border-radius: var(--radius-md)`, a 2px white outline, and a persistent shadow for readability on light and dark tiles. **The marker body is centered exactly on the GPS coordinate** — `iconAnchor` is set to half the `iconSize` (`[20, 20]`), so the center of the hit zone sits directly on the location point. There is no pointer tail. Cluster markers are anchored at the centroid of their grid cell. Cluster markers reuse the same body geometry but with `width: auto; min-width: --photo-marker-body-size` to accommodate the count label without overflow: white background, black text (`0.875rem` bold), with counts capped at a maximum display of `999+`. The count text turns orange (`--color-clay`) when the marker is selected. Selected markers add a clear accent ring and a slight scale lift, while zoom-level classes (`.map-photo-marker--zoom-far`, `.map-photo-marker--zoom-mid`, `.map-photo-marker--zoom-near`) slightly adjust visual prominence without changing the underlying marker structure. On desktop, the Direction Cone appears on hover when bearing data exists; on touch devices, the same affordance appears on long press.
+The marker body geometry is derived from the shared media token system: `--photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25)` (40px), with `--ui-item-media-size-default` seeded from the shared UI item token in `styles.scss`. Single markers render a thumbnail inside a square body with `border-radius: var(--radius-md)`, a 2px white outline, and a persistent shadow for readability on light and dark tiles. **The marker body is centered exactly on the GPS coordinate** — `iconAnchor` is set to half the `iconSize` (`[20, 20]`), so the center of the hit zone sits directly on the location point. There is no pointer tail. Cluster markers are anchored at the centroid of their grid cell. Cluster markers reuse the same body geometry but with `width: auto; min-width: --photo-marker-body-size` to accommodate the count label without overflow: white background, black text (`0.875rem` bold), with counts capped at a maximum display of `999+`. The count text turns orange (`--color-clay`) when the marker is selected. Selected markers add a clear accent ring and a slight scale lift, while zoom-level classes (`.map-photo-marker--zoom-far`, `.map-photo-marker--zoom-mid`, `.map-photo-marker--zoom-near`) slightly adjust visual prominence without changing the underlying marker structure. Newly added markers fade in quickly (about `220ms`) when they enter the layer. When clustering reconciliation repositions a surviving marker, its map position transitions smoothly to the new coordinate (approximately `220ms`, ease-out) instead of popping to the new location. On desktop, the Direction Cone appears on hover when bearing data exists; on touch devices, the same affordance appears on long press.
 
 ## Where It Lives
 
@@ -29,7 +29,7 @@ The marker body geometry is derived from the shared media token system: `--photo
 | 3   | Clicks cluster marker              | Fetches all images in cluster, loads them into Active Selection, opens Workspace Pane | `SelectionService`, `workspacePaneOpen` → true |
 | 4   | Hovers single marker (desktop)     | Shows Direction Cone (if bearing available)                                           | CSS `:hover`                                   |
 | 5   | Long-presses single marker (touch) | Shows Direction Cone (if bearing available)                                           | Touch fallback                                 |
-| 6   | Right-clicks marker (desktop)      | Opens context menu (view detail, edit location, add to project)                       | Context menu                                   |
+| 6   | Right-clicks marker (desktop)      | Opens context menu (view detail, edit location, manage projects)                      | Context menu                                   |
 | 6b  | Long-press marker (mobile)         | Mobile equivalent of right-click context menu                                         | Context menu                                   |
 | 7   | Drags marker in correction mode    | Moves marker to new position, stores corrected coordinates                            | Correction flow                                |
 
@@ -149,9 +149,12 @@ The Map Shell listens to Leaflet's `moveend` event (fires after pan or zoom comp
 6. On response:
    - **Reconcile**, don't replace: diff incoming marker keys against the current `uploadedPhotoMarkers` map.
    - **Keep** markers that still match (same key, same count) — do not recreate their DivIcon.
-   - **Add** new markers that entered the viewport.
-   - **Remove** markers that left the viewport (call `marker.remove()` and delete from the map).
-   - **Update** markers whose count or thumbnail changed (set a new icon via `setIcon()`).
+
+- **Reuse and move** compatible outgoing markers when possible (identity match) — reassign them to the new key and animate `setLatLng()` so clusters glide to the new centroid.
+- **Add** new markers that entered the viewport.
+- **Remove** markers that left the viewport (call `marker.remove()` and delete from the map).
+- **Update** markers whose count or thumbnail changed (set a new icon via `setIcon()`).
+
 7. During the query flight, existing markers remain visible (optimistic retention).
 
 ### Constraints
@@ -283,6 +286,10 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 5. **Batch thumbnail signing.** When loading individual markers, batch signed-URL requests rather than issuing one per marker. Consider pre-signing URLs server-side in the viewport query response.
 6. **Keep markers as DivIcon, not Angular components.** Marker HTML is raw strings from `buildPhotoMarkerHtml()`. Pulling markers into Angular's change detection tree would degrade performance.
 
+## Settings
+
+- **Map Marker Motion**: toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`).
+
 ## File Map
 
 | File                                                               | Purpose                                                                        |
@@ -340,7 +347,7 @@ sequenceDiagram
 - [x] Selected markers have a clear visual state — `.map-photo-marker--selected` applies accent ring + `scale(1.05)`
 - [ ] Ctrl+click adds to Active Selection without clearing previous selection (blocked — requires `SelectionService`)
 - [ ] Long-press + tap provides mobile equivalent of multi-select (blocked — requires `SelectionService`)
-- [ ] Right-click opens context menu (view detail, edit location, add to project) (blocked — requires context menu component)
+- [ ] Right-click opens context menu (view detail, edit location, manage projects) (blocked — requires context menu component)
 - [ ] Long-press opens context menu on mobile (blocked — requires context menu component)
 - [ ] Drag marker in correction mode to update coordinates (blocked — requires correction mode handler)
 
@@ -365,6 +372,8 @@ sequenceDiagram
 - [ ] Cluster grid cell size adapts to zoom level (large cells at low zoom, small cells at high zoom) (server-side)
 - [ ] Clusters expand into individual markers when user zooms past the cluster's grid threshold (server-side)
 - [x] Collision offsets prevent overlapping marker bodies when nearby but not clustered — `mergeOverlappingClusters()` pixel-distance merge
+- [x] When clustering reconciliation shifts a surviving marker to a new centroid, it transitions smoothly to the new position (about 220 ms ease-out) instead of remove/add popping
+- [x] Newly created markers fade in on entry (about 220 ms), while reduced-motion users get no fade animation
 
 ### Performance
 

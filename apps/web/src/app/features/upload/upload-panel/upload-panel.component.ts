@@ -19,6 +19,7 @@ import {
   UploadManagerService,
   UploadJob,
   UploadPhase,
+  UploadBatch,
   ImageUploadedEvent as ManagerImageUploadedEvent,
 } from '../../../core/upload-manager.service';
 
@@ -34,6 +35,8 @@ export interface ImageUploadedEvent {
   /** Object URL used for marker thumbnail previews on the map. */
   thumbnailUrl?: string;
 }
+
+type UploadLane = 'uploading' | 'uploaded' | 'issues';
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -69,6 +72,7 @@ export class UploadPanelComponent {
 
   /** All upload jobs from the manager. */
   readonly jobs = this.uploadManager.jobs;
+  readonly batches = this.uploadManager.batches;
   readonly activeBatch = this.uploadManager.activeBatch;
   readonly folderImportSupported = this.uploadManager.isFolderImportSupported;
 
@@ -90,6 +94,60 @@ export class UploadPanelComponent {
     const batch = this.activeBatch();
     if (!batch || batch.status !== 'scanning') return null;
     return `Scanning... ${batch.totalFiles} image${batch.totalFiles === 1 ? '' : 's'} found`;
+  });
+
+  readonly selectedLane = signal<UploadLane>('uploading');
+
+  readonly laneCounts = computed(() => {
+    const jobs = this.jobs();
+    return {
+      uploading: jobs.filter((job) => this.getLaneForJob(job) === 'uploading').length,
+      uploaded: jobs.filter((job) => this.getLaneForJob(job) === 'uploaded').length,
+      issues: jobs.filter((job) => this.getLaneForJob(job) === 'issues').length,
+    };
+  });
+
+  readonly effectiveLane = computed<UploadLane>(() => {
+    const lane = this.selectedLane();
+    const counts = this.laneCounts();
+    const total = counts.uploading + counts.uploaded + counts.issues;
+    if (total === 0) return lane;
+    if (counts[lane] > 0) return lane;
+    if (counts.uploading > 0) return 'uploading';
+    if (counts.issues > 0) return 'issues';
+    return 'uploaded';
+  });
+
+  readonly laneJobs = computed(() => {
+    const lane = this.effectiveLane();
+    return this.jobs().filter((job) => this.getLaneForJob(job) === lane);
+  });
+
+  readonly dotItems = computed(() => {
+    return this.jobs().map((job) => ({
+      id: job.id,
+      lane: this.getLaneForJob(job),
+      statusClass: this.getDotStatusClass(job),
+    }));
+  });
+
+  readonly lastCompletedBatch = computed<UploadBatch | null>(() => {
+    const completeBatches = this.batches().filter((batch) => batch.status === 'complete');
+    if (completeBatches.length === 0) return null;
+    return completeBatches[completeBatches.length - 1] ?? null;
+  });
+
+  readonly showLastUpload = computed(() => this.jobs().length === 0 && !!this.lastCompletedBatch());
+
+  readonly showProgressBoard = computed(() => this.jobs().length > 0);
+
+  readonly lastUploadLabel = computed(() => {
+    const batch = this.lastCompletedBatch();
+    if (!batch) return null;
+    if (batch.totalFiles <= 1) {
+      return batch.label;
+    }
+    return `Batch · ${batch.totalFiles} photos`;
   });
 
   constructor() {
@@ -181,6 +239,23 @@ export class UploadPanelComponent {
     }
   }
 
+  setSelectedLane(lane: UploadLane): void {
+    this.selectedLane.set(lane);
+  }
+
+  onDotClick(jobId: string): void {
+    const job = this.jobs().find((entry) => entry.id === jobId);
+    if (!job) return;
+    this.selectedLane.set(this.getLaneForJob(job));
+  }
+
+  requestPlacement(jobId: string, phase: UploadPhase, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (phase !== 'missing_data') return;
+    this.placementRequested.emit(jobId);
+  }
+
   async onSelectFolder(event: MouseEvent): Promise<void> {
     event.preventDefault();
     event.stopPropagation();
@@ -259,5 +334,26 @@ export class UploadPanelComponent {
   /** TrackBy function used in the template. */
   trackByJobId(_idx: number, job: UploadJob): string {
     return job.id;
+  }
+
+  private getLaneForJob(job: UploadJob): UploadLane {
+    if (job.phase === 'complete' || job.phase === 'skipped') return 'uploaded';
+    if (job.phase === 'error' || job.phase === 'missing_data') return 'issues';
+    return 'uploading';
+  }
+
+  private getDotStatusClass(job: UploadJob): string {
+    if (job.phase === 'complete' || job.phase === 'skipped') return 'complete';
+    if (job.phase === 'error' || job.phase === 'missing_data') return 'issue';
+    if (
+      job.phase === 'uploading' ||
+      job.phase === 'saving_record' ||
+      job.phase === 'replacing_record' ||
+      job.phase === 'resolving_address' ||
+      job.phase === 'resolving_coordinates'
+    ) {
+      return 'uploading';
+    }
+    return 'queued';
   }
 }

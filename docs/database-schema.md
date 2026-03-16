@@ -26,11 +26,12 @@ erDiagram
 
     roles ||--o{ user_roles : "assigned via"
 
-    projects ||--o{ images : "groups (SET NULL)"
+    projects ||--o{ image_projects : "groups via memberships"
 
     images ||--o{ image_metadata : "has metadata"
     images ||--o{ coordinate_corrections : "has corrections"
     images ||--o{ saved_group_images : "in groups"
+    images ||--o{ image_projects : "belongs to projects"
 
     saved_groups ||--o{ saved_group_images : "contains"
 
@@ -75,7 +76,6 @@ erDiagram
         uuid id PK
         uuid user_id FK
         uuid organization_id FK
-        uuid project_id FK
         text storage_path
         text thumbnail_path
         numeric exif_latitude
@@ -92,6 +92,11 @@ erDiagram
         text street
         text country
         boolean location_unresolved
+    }
+    image_projects {
+        uuid image_id PK_FK
+        uuid project_id PK_FK
+        timestamptz created_at
     }
     metadata_keys {
         uuid id PK
@@ -255,7 +260,7 @@ Columns:
 
 Notes:
 
-- Projects are grouping entities referenced by `images.project_id`.
+- Projects are grouping entities connected to images via `image_projects` (many-to-many).
 - Projects are scoped to an organization. Users can only see projects in their own organization.
 - `created_by` uses ON DELETE SET NULL (not RESTRICT) so that user deletion is not blocked by project ownership. The project survives; authorship becomes unknown.
 - Access to projects is controlled by RLS (see `security-boundaries.md`).
@@ -271,7 +276,6 @@ Columns:
 - `id` (uuid, primary key, default `gen_random_uuid()`)
 - `user_id` (uuid, not null, references `auth.users(id)` ON DELETE CASCADE)
 - `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
-- `project_id` (uuid, nullable, references `projects(id)` ON DELETE SET NULL)
 - `storage_path` (text, nullable) — relative path in Supabase Storage (e.g., `{org_id}/{user_id}/{uuid}.jpg`). NULL for photoless datapoints (rows created via folder import or manual address entry that have no photo yet). Not a full URL. URLs are generated at runtime (signed or public).
 - `thumbnail_path` (text, not null) — relative path to the 128×128 JPEG thumbnail in Supabase Storage.
 - `exif_latitude` (numeric(10,7), nullable)
@@ -337,6 +341,33 @@ CREATE TRIGGER trg_images_geog
 
 ---
 
+## 7a. Image Projects Join Table
+
+Table: `image_projects`
+
+Purpose:
+
+- Model many-to-many membership between images and projects.
+- Allow one image to appear in multiple projects.
+
+Columns:
+
+- `image_id` (uuid, not null, references `images(id)` ON DELETE CASCADE)
+- `project_id` (uuid, not null, references `projects(id)` ON DELETE CASCADE)
+- `created_at` (timestamptz, not null, default `now()`)
+
+Primary Key:
+
+- (`image_id`, `project_id`)
+
+Invariants:
+
+- Duplicate memberships are prevented by the composite primary key.
+- Cross-organization links are rejected by trigger/RLS policy (`images.organization_id` must equal `projects.organization_id`).
+- Deleting an image or project removes only membership links, not the surviving parent rows.
+
+---
+
 ## 8. Metadata Tables
 
 Table: `metadata_keys`
@@ -390,9 +421,10 @@ Feldpost uses **PostGIS** with GiST indexes as the MVP default for spatial queri
 - `CREATE INDEX idx_images_user_id ON images (user_id);` — RLS policy checks (`user_id = auth.uid()`).
 - `CREATE INDEX idx_images_org_id ON images (organization_id);` — organization-scoped queries.
 
-**Project + Time:**
+**Project Memberships:**
 
-- `CREATE INDEX idx_images_project_time ON images (project_id, created_at DESC);` — project + time filter combination.
+- `CREATE INDEX idx_image_projects_project_image ON image_projects (project_id, image_id);` — project filter and grouped counts.
+- `CREATE INDEX idx_image_projects_image_project ON image_projects (image_id, project_id);` — fast membership lookup for detail/workspace rows.
 
 **Metadata:**
 
@@ -505,7 +537,7 @@ flowchart TD
     end
 
     subgraph "DELETE projects"
-        PRD[projects] -->|SET NULL| I3[images.project_id]
+        PRD[projects] -->|CASCADE| IP1[image_projects.project_id]
     end
 
     subgraph "DELETE metadata_keys"
@@ -527,7 +559,8 @@ flowchart TD
 | `organizations` | `images`                 | `organization_id` | CASCADE   | Org deletion removes all images               |
 | `organizations` | `metadata_keys`          | `organization_id` | CASCADE   | Org deletion removes all metadata keys        |
 | `roles`         | `user_roles`             | `role_id`         | CASCADE   | Removing a role unassigns it                  |
-| `projects`      | `images`                 | `project_id`      | SET NULL  | Image survives without project                |
+| `images`        | `image_projects`         | `image_id`        | CASCADE   | Deleting image removes memberships            |
+| `projects`      | `image_projects`         | `project_id`      | CASCADE   | Deleting project removes memberships          |
 | `images`        | `image_metadata`         | `image_id`        | CASCADE   | Metadata is image-scoped                      |
 | `images`        | `coordinate_corrections` | `image_id`        | CASCADE   | History is image-scoped                       |
 | `images`        | `saved_group_images`     | `image_id`        | CASCADE   | Deleting image removes it from groups         |

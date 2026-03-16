@@ -1,20 +1,14 @@
 <div class="dd-section-label">Metadata</div>
 
 @for (entry of entries(); track entry.metadataKeyId) {
-  <div class="metadata-row-grid">
-    <span class="metadata-action-slot" aria-hidden="true"></span>
-    <span class="metadata-action-slot" aria-hidden="true"></span>
-
-    <div class="metadata-row-main">
-      <app-metadata-property-row
-        [key]="entry.key"
-        [value]="entry.value"
-        (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
-      />
-    </div>
-
+  <div class="metadata-row-wrap">
+    <app-metadata-property-row
+      [key]="entry.key"
+      [value]="entry.value"
+      (valueChanged)="valueChanged.emit({ entry, newValue: $event })"
+    />
     <button
-      class="metadata-row-action metadata-row-action--remove"
+      class="metadata-delete"
       type="button"
       [attr.aria-label]="'Remove ' + entry.key"
       title="Remove metadata"
@@ -22,8 +16,6 @@
     >
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
-
-    <span class="metadata-action-slot" aria-hidden="true"></span>
   </div>
 }
 
