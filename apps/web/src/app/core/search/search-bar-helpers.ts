@@ -88,7 +88,11 @@ export function computeCountryBoost(result: GeocoderSearchResult, countryCodes?:
 
   const normalized = new Set(countryCodes.map((code) => code.toLowerCase()));
   const resultCountryCode = result.address?.country_code?.toLowerCase();
-  return resultCountryCode && normalized.has(resultCountryCode) ? 1.6 : 0.7;
+  if (!resultCountryCode) {
+    return 1;
+  }
+
+  return normalized.has(resultCountryCode) ? 1.6 : 0.7;
 }
 
 export function distanceToCentroidMeters(

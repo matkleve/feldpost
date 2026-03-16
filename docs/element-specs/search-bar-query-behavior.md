@@ -9,7 +9,7 @@ The query behavior contract for Search Bar text handling. It defines address lab
 
 ## What It Looks Like
 
-Address results show concise labels in `Street Number, Postcode City` form. Named places render a two-line row with a bold name and a muted secondary address line. Ghost completion appears inline as faded text after the caret and is accepted with `Tab`. Approximate matches and correction suggestions are visually labeled.
+Address results show concise labels in `Street Number, Postcode City` form. Named places render a two-line row with a bold name and a muted secondary address line. Ghost completion appears inline as faded text after the caret and is accepted with `Tab`. Approximate matches and correction suggestions are visually labeled. Ranking is personalized to the user's active context (current working marker geography, viewport, and current location), not tied to any specific city.
 
 ## Where It Lives
 
@@ -127,7 +127,7 @@ sequenceDiagram
 
     alt strict path found
         UI-->>UI: render strict candidates
-    else strict path empty/low confidence
+    else strict path empty/low confidence (below fallback threshold)
         UI->>SB: buildFallbackQueries(normalizedQuery)
         SB-->>UI: fallback variants
         UI->>ORCH: searchInput(fallbackVariant, context)
@@ -213,12 +213,19 @@ For typo tolerance and normalization:
 
 1. Normalize input first (case, spacing, diacritics, suffix variants).
 2. Run strict/primary query.
-3. Only if primary returns none or low confidence, run fallback variants:
-   - street + number
-   - street only
-   - token-corrected street-only
+3. Only if strict/primary matching has no sufficiently confident winner, run fallback variants.
+   - Trigger fallback when either primary returns no results, or top primary confidence is below the configured fallback threshold (default 0.70).
+   - Do not trigger fallback when top primary confidence is at or above threshold.
+   - Partial-prefix queries (for example `Wilhe`) follow the same rule: no fallback when strict/primary is confident.
+   - Execute fallback variants in this order: street + number, street only, token-corrected street-only.
 4. Show a "Did you mean" row only when fallback wins.
 5. Mark approximate matches clearly.
+
+Personalization rule:
+
+- For short/ambiguous prefixes, candidates near the user's active work area and current location should outrank globally unrelated streets.
+
+Fallback trigger contract is shared with [search-bar-data-and-service](search-bar-data-and-service.md) and must stay byte-for-byte equivalent in logic.
 
 ## Search + Filter Integration Rules
 

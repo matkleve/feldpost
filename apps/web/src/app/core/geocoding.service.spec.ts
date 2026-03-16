@@ -28,6 +28,7 @@ function nominatimResponse(overrides: Record<string, unknown> = {}) {
       county: 'Bezirk Zürich',
       state: 'Zürich',
       country: 'Switzerland',
+      country_code: 'ch',
       postcode: '8001',
       ...overrides,
     },
@@ -76,7 +77,31 @@ describe('GeocodingService', () => {
     expect(result!.district).toBe('Altstadt');
     expect(result!.street).toBe('Burgstraße 7');
     expect(result!.country).toBe('Switzerland');
+    expect(result!.countryCode).toBe('ch');
     expect(result!.addressLabel).toBe('Burgstraße 7, 8001 Zürich, Switzerland');
+  });
+
+  it('maps country_code from nested address in forward search hits', async () => {
+    invokeSpy.mockResolvedValueOnce({
+      data: [
+        {
+          lat: '48.2082',
+          lon: '16.3738',
+          display_name: 'Wilhelminenstraße, Wien, Austria',
+          address: {
+            road: 'Wilhelminenstraße',
+            city: 'Wien',
+            country: 'Austria',
+            country_code: 'at',
+          },
+        },
+      ],
+      error: null,
+    });
+
+    const results = await service.search('wilhe', { countrycodes: ['at'] });
+
+    expect(results[0]?.address?.country_code).toBe('at');
   });
 
   it('calls the geocode edge function with correct parameters', async () => {

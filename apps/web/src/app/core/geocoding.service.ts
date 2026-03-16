@@ -24,6 +24,7 @@ export interface ReverseGeocodeResult {
   district: string | null;
   street: string | null;
   country: string | null;
+  countryCode: string | null;
 }
 
 /** Raw Nominatim reverse-geocode JSON shape (subset we use). */
@@ -43,6 +44,7 @@ interface NominatimReverseResponse {
     county?: string;
     state?: string;
     country?: string;
+    country_code?: string;
     postcode?: string;
   };
 }
@@ -254,9 +256,11 @@ export class GeocodingService {
   }
 
   private parseReverseResponse(data: NominatimReverseResponse): ReverseGeocodeResult {
-    const { city, district, street, country } = this.extractAddressFields(data.address!);
+    const { city, district, street, country, countryCode } = this.extractAddressFields(
+      data.address!,
+    );
     const addressLabel = this.buildAddressLabel(data.address, street, city, data.display_name);
-    return { addressLabel, city, district, street, country };
+    return { addressLabel, city, district, street, country, countryCode };
   }
 
   private parseForwardResponse(hit: NominatimSearchResponse): ForwardGeocodeResult | null {
@@ -305,7 +309,7 @@ export class GeocodingService {
             road: hit.address.road,
             house_number: hit.address.house_number,
             postcode: hit.address.postcode,
-            country_code: hit.country_code,
+            country_code: hit.country_code ?? hit.address.country_code,
             city: hit.address.city,
             town: hit.address.town,
             village: hit.address.village,
@@ -322,8 +326,10 @@ export class GeocodingService {
     district: string | null;
     street: string | null;
     country: string | null;
+    countryCode: string | null;
   } {
-    if (!addr) return { city: null, district: null, street: null, country: null };
+    if (!addr)
+      return { city: null, district: null, street: null, country: null, countryCode: null };
 
     const city = this.firstOf(addr.city, addr.town, addr.village, addr.municipality);
     const district = this.firstOf(addr.city_district, addr.suburb, addr.borough, addr.quarter);
@@ -334,6 +340,7 @@ export class GeocodingService {
       district,
       street: streetParts.length > 0 ? streetParts.join(' ') : null,
       country: addr.country ?? null,
+      countryCode: addr.country_code?.toLowerCase() ?? null,
     };
   }
 
