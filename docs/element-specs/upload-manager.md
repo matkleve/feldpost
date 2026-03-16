@@ -1223,6 +1223,8 @@ sequenceDiagram
 - [x] **Path B**: No GPS + address in title → upload → save with address → forward-geocode coords (non-blocking)
 - [x] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for MissingDataManager
 - [x] Address resolution and coordinate resolution are enrichment — failure is silent
+- [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
+- [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)
 - [x] Orphaned storage files are cleaned up when DB insert fails
 - [x] Auth change (logout) cancels all active jobs
 - [ ] Global progress indicator visible from any page when uploads are active
