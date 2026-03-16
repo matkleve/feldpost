@@ -1,5 +1,7 @@
 # Search Tuning Settings
 
+> **Formula reference:** [search-algorithm-addresses-and-places.md](../search-algorithm-addresses-and-places.md)
+
 ## What It Is
 
 A settings section that lets authorized users tune address/place search behavior by adjusting filters, scoring weights, and penalties, then previewing the impact before saving.

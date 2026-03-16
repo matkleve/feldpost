@@ -12,9 +12,11 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Language / Locale | settings-overlay.md | UI language and regional formatting defaults. |
 | Map Preferences | settings-overlay.md | map tile and map-behavior defaults. |
 | Notifications | settings-overlay.md | preference defaults for in-app feedback and alerts. |
-| Project Color Palette | project-color-picker.md | enabled semantic color options (`clay`, `accent`, `success`, `warning`) available in the picker. |
+| Project Color Palette | project-color-picker.md | temporary one-click random brand-hue generation (`brand-hue-###`) derived from brand orange by varying hue. |
 | Project Color Palette | projects-page.md | enabled semantic project color options and default fallback color. |
 | Projects View Mode | projects-page.md | default layout mode (`list` or `cards`) and persistence behavior. |
 | Roles & Permissions | settings-overlay.md | role-based capability visibility and access constraints. |
+| Search Tuning | search-tuning-settings.md | address and place search filters, weights, penalties, and retry thresholds. |
+| Search Tuning | settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |
 | Theme | settings-overlay.md | active theme mode and persistence behavior. |
 | Workspace Sort Defaults | settings-overlay.md | default sorting and ordering preferences. |
