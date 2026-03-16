@@ -112,3 +112,18 @@ Out of scope:
 - **GO:** All P0 complete and acceptance tests pass.
 - **CONDITIONAL GO:** P0 complete, one P1 open with explicit owner/deadline.
 - **NO-GO:** Any open P0 item.
+
+---
+
+## 8. Implementation References
+
+The following implementation artifacts are already in the repository:
+
+- Vercel headers + CSP + SPA rewrites: `apps/web/vercel.json`
+- CSP-safe early theme boot script: `apps/web/public/theme-init.js`
+- Vercel build-time env injection: `apps/web/scripts/write-env.mjs`
+- Build script wiring: `apps/web/package.json` (`build:vercel`)
+- Geocode CORS allow-list logic: `supabase/functions/geocode/index.ts`
+- Operational runbook: `docs/vercel-deployment-security-runbook.md`
+
+Remaining actions before release are configuration + validation tasks (Vercel env values, Supabase redirect URLs, edge-function secret `ALLOWED_ORIGINS`, and acceptance test execution).

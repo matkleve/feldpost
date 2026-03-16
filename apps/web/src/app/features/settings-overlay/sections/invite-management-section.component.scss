@@ -115,6 +115,7 @@
 }
 
 .invite-section__qr-frame {
+  position: relative;
   display: grid;
   place-items: center;
   margin-inline: auto;
@@ -128,6 +129,35 @@
 .invite-section__qr-frame canvas {
   inline-size: 12rem;
   block-size: 12rem;
+}
+
+.invite-section__qr-canvas {
+  opacity: 0;
+  transition: opacity 180ms ease-in-out;
+}
+
+.invite-section__qr-canvas--visible {
+  opacity: 1;
+}
+
+.invite-section__qr-spinner {
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid color-mix(in srgb, var(--color-clay) 20%, var(--color-border));
+  border-top-color: var(--color-clay);
+  border-radius: var(--radius-full);
+  animation: invite-qr-spin 800ms linear infinite;
+}
+
+@keyframes invite-qr-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .invite-section__link-label {
@@ -149,7 +179,7 @@
 .invite-section__share-row {
   display: grid;
   grid-template-columns: repeat(3, auto);
-  justify-content: start;
+  justify-content: center;
   gap: var(--spacing-2);
 }
 
@@ -254,7 +284,7 @@
 
   .invite-section__share-row {
     grid-template-columns: repeat(3, auto);
-    justify-content: start;
+    justify-content: center;
   }
 
   .invite-section__qr-frame {

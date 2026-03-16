@@ -2,34 +2,26 @@
   class="invite-section ui-container ui-container--compact"
   aria-labelledby="invite-section-title"
 >
-  @if (panelMode() === 'loading') {
-    <div
-      class="invite-section__state invite-section__state--loading"
-      role="status"
-      aria-live="polite"
-    >
-      <span class="material-icons" aria-hidden="true">sync</span>
-      <h3>Generating invite</h3>
-      <p>Your QR invite is being created.</p>
-    </div>
-  } @else if (panelMode() === 'error') {
+  @if (panelMode() === 'error') {
     <div class="invite-section__state invite-section__state--error" role="alert">
       <span class="material-icons" aria-hidden="true">warning</span>
       <h3>Invite unavailable</h3>
       <p>{{ lastError() }}</p>
       <button type="button" class="invite-section__ghost" (click)="retry()">Try again</button>
     </div>
-  } @else if (activeInvite(); as invite) {
+  } @else {
     <header class="invite-section__header ui-item">
       <div class="invite-section__title-wrap ui-item-label">
         <h3 id="invite-section-title">Invite Management</h3>
         <p>Share a role-scoped one-time invite to your organization.</p>
       </div>
-      <span class="invite-section__status-chip" [attr.data-status]="invite.status">
-        <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
-        <span>{{ statusLabel() }}</span>
-      </span>
-      <p class="invite-section__expires">Expires: {{ invite.expiresAt | date: 'short' }}</p>
+      @if (activeInvite(); as invite) {
+        <span class="invite-section__status-chip" [attr.data-status]="invite.status">
+          <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
+          <span>{{ statusLabel() }}</span>
+        </span>
+        <p class="invite-section__expires">Expires: {{ invite.expiresAt | date: 'short' }}</p>
+      }
     </header>
 
     <div class="invite-section__stack">
@@ -41,7 +33,7 @@
             id="invite-role-select"
             class="invite-section__select"
             [value]="targetRole()"
-            [disabled]="panelMode() !== 'ready'"
+            [disabled]="isRegenerateDisabled()"
             (change)="onRoleChange($event)"
           >
             <option value="worker">Worker</option>
@@ -58,7 +50,7 @@
           <button
             type="button"
             class="invite-section__button invite-section__button--danger"
-            [disabled]="invite.status !== 'active'"
+            [disabled]="activeInvite()?.status !== 'active'"
             (click)="onRevoke()"
           >
             Revoke
@@ -68,10 +60,20 @@
 
       <section class="invite-section__qr-block" aria-label="QR preview">
         <div class="invite-section__qr-frame">
-          <canvas #qrCanvas aria-label="Invite QR code"></canvas>
+          @if (qrLoading() || !activeInvite()) {
+            <span class="invite-section__qr-spinner" aria-label="Loading QR code"></span>
+          }
+          <canvas
+            #qrCanvas
+            class="invite-section__qr-canvas"
+            [class.invite-section__qr-canvas--visible]="qrVisible()"
+            aria-label="Invite QR code"
+          ></canvas>
         </div>
         <p class="invite-section__link-label">Invite link</p>
-        <p class="invite-section__link-preview">{{ invite.inviteUrl }}</p>
+        <p class="invite-section__link-preview">
+          {{ activeInvite()?.inviteUrl ?? 'Generating link...' }}
+        </p>
       </section>
 
       <section class="invite-section__share-block" aria-label="Share actions">

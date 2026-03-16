@@ -157,3 +157,22 @@ However, before public release, there are **high-priority operational hardening 
 
 The core architecture is built in the right way (RLS-first, private storage, signed URLs).
 The remaining work is mostly **deployment hardening and operations readiness**, not a full security redesign.
+
+---
+
+## 8. Implementation Status (2026-03-16)
+
+Implemented in repository:
+
+- Vercel security headers/CSP baseline (`apps/web/vercel.json`)
+- Inline startup theme script replaced by external file for CSP compatibility (`apps/web/src/index.html`, `apps/web/public/theme-init.js`)
+- Geocode edge function CORS switched to origin allow-list mode (`supabase/functions/geocode/index.ts`)
+- Build-time production env injection for Supabase URL/anon key (`apps/web/scripts/write-env.mjs`, `apps/web/package.json`)
+- Deployment runbook for exact release steps (`docs/vercel-deployment-security-runbook.md`)
+
+Still required outside code:
+
+- Set Vercel env vars (`SUPABASE_URL`, `SUPABASE_ANON_KEY`)
+- Set Supabase edge-function secret `ALLOWED_ORIGINS`
+- Tighten Supabase Auth redirect allow-list to production URLs
+- Execute and document acceptance tests from the release spec

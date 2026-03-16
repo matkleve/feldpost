@@ -125,7 +125,7 @@
         <button
           type="button"
           role="tab"
-          class="upload-panel__lane-btn"
+          class="upload-panel__lane-btn upload-panel__lane-btn--uploading"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploading'"
           [attr.aria-selected]="effectiveLane() === 'uploading'"
           (click)="setSelectedLane('uploading')"
@@ -135,7 +135,7 @@
         <button
           type="button"
           role="tab"
-          class="upload-panel__lane-btn"
+          class="upload-panel__lane-btn upload-panel__lane-btn--uploaded"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploaded'"
           [attr.aria-selected]="effectiveLane() === 'uploaded'"
           (click)="setSelectedLane('uploaded')"
@@ -145,7 +145,7 @@
         <button
           type="button"
           role="tab"
-          class="upload-panel__lane-btn"
+          class="upload-panel__lane-btn upload-panel__lane-btn--issues"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'issues'"
           [attr.aria-selected]="effectiveLane() === 'issues'"
           (click)="setSelectedLane('issues')"
@@ -176,7 +176,15 @@
             <span class="material-icons" aria-hidden="true">my_location</span>
           </button>
 
-          <div class="upload-panel__file-main">
+          <div
+            class="upload-panel__file-main"
+            [class.upload-panel__file-main--interactive]="canZoomToJob(job)"
+            [attr.role]="canZoomToJob(job) ? 'button' : null"
+            [attr.tabindex]="canZoomToJob(job) ? '0' : null"
+            [attr.aria-label]="canZoomToJob(job) ? 'Zoom map to ' + job.file.name : null"
+            (click)="onRowMainClick(job)"
+            (keydown)="onRowMainKeydown(job, $event)"
+          >
             <!-- Thumbnail preview -->
             @if (job.thumbnailUrl) {
               <img

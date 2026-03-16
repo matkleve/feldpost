@@ -8,6 +8,8 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Account & Profile | settings-overlay.md | profile identity fields and account-level controls. |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
+| File Type Visibility | project-mixed-media-pre-spec.md | default selected media families in map/workspace/project views. |
+| Fullscreen Project Mode | project-mixed-media-pre-spec.md | default entry behavior for project detail (inline pane vs fullscreen). |
 | Invite Management | qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
 | Invite Management | settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
 | Language / Locale | settings-overlay.md | UI language and regional formatting defaults. |
@@ -22,5 +24,6 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Roles & Permissions | settings-overlay.md | role-based capability visibility and access constraints. |
 | Search Tuning | search-tuning-settings.md | address and place search filters, weights, penalties, and retry thresholds. |
 | Search Tuning | settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |
+| Section Rules | project-mixed-media-pre-spec.md | max sections per project, empty-section auto-collapse, and deletion confirmation mode. |
 | Theme | settings-overlay.md | active theme mode and persistence behavior. |
 | Workspace Sort Defaults | settings-overlay.md | default sorting and ordering preferences. |

@@ -36,6 +36,12 @@ export interface ImageUploadedEvent {
   thumbnailUrl?: string;
 }
 
+export interface ZoomToLocationEvent {
+  imageId: string;
+  lat: number;
+  lng: number;
+}
+
 type UploadLane = 'uploading' | 'uploaded' | 'issues';
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -67,6 +73,12 @@ export class UploadPanelComponent {
    * map click supplies coordinates for this file.
    */
   readonly placementRequested = output<string>();
+
+  /**
+   * Emitted when users click an uploaded row that already has map coordinates.
+   * The parent can fly/zoom the map to this photo location.
+   */
+  readonly zoomToLocationRequested = output<ZoomToLocationEvent>();
 
   // ── State (read from UploadManagerService) ─────────────────────────────────
 
@@ -171,7 +183,6 @@ export class UploadPanelComponent {
         });
       }
     });
-
   }
 
   // ── Drag-and-drop ──────────────────────────────────────────────────────────
@@ -250,6 +261,31 @@ export class UploadPanelComponent {
     event.stopPropagation();
     if (phase !== 'missing_data') return;
     this.placementRequested.emit(jobId);
+  }
+
+  canZoomToJob(job: UploadJob): boolean {
+    return (
+      this.getLaneForJob(job) === 'uploaded' &&
+      !!job.imageId &&
+      typeof job.coords?.lat === 'number' &&
+      typeof job.coords?.lng === 'number'
+    );
+  }
+
+  onRowMainClick(job: UploadJob): void {
+    if (!this.canZoomToJob(job)) return;
+    this.zoomToLocationRequested.emit({
+      imageId: job.imageId!,
+      lat: job.coords!.lat,
+      lng: job.coords!.lng,
+    });
+  }
+
+  onRowMainKeydown(job: UploadJob, event: KeyboardEvent): void {
+    if (!this.canZoomToJob(job)) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    this.onRowMainClick(job);
   }
 
   async onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): Promise<void> {
