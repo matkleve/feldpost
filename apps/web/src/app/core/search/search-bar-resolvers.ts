@@ -289,7 +289,10 @@ function rankGeocoderCandidates(
     .slice(0, limit);
 }
 
-function matchesCountryConstraint(result: GeocoderSearchResult, context: SearchQueryContext): boolean {
+function matchesCountryConstraint(
+  result: GeocoderSearchResult,
+  context: SearchQueryContext,
+): boolean {
   const allowedCountryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
   if (allowedCountryCodes.length === 0) {
     if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
@@ -308,7 +311,10 @@ function matchesCountryConstraint(result: GeocoderSearchResult, context: SearchQ
   return isCoordinateInViewport(result.lat, result.lng, context.viewportBounds);
 }
 
-function meetsLexicalMatchThreshold(result: GeocoderSearchResult, normalizedQuery: string): boolean {
+function meetsLexicalMatchThreshold(
+  result: GeocoderSearchResult,
+  normalizedQuery: string,
+): boolean {
   const displayNameScore = computeTextMatchScore(result.displayName ?? '', normalizedQuery);
   const roadScore = computeTextMatchScore(result.address?.road ?? '', normalizedQuery);
   const nameScore = computeTextMatchScore(result.name ?? '', normalizedQuery);
@@ -331,7 +337,9 @@ function isCoordinateInViewport(
   viewport?: { north: number; east: number; south: number; west: number },
 ): boolean {
   if (!viewport) return false;
-  return lat <= viewport.north && lat >= viewport.south && lng >= viewport.west && lng <= viewport.east;
+  return (
+    lat <= viewport.north && lat >= viewport.south && lng >= viewport.west && lng <= viewport.east
+  );
 }
 
 function distanceFromContextMeters(lat: number, lng: number, context: SearchQueryContext): number {
@@ -422,7 +430,9 @@ function mergeAndRankCandidates(
     }
   }
 
-  return [...merged.values()].sort((left, right) => compareCandidateRank(left, right, context, query));
+  return [...merged.values()].sort((left, right) =>
+    compareCandidateRank(left, right, context, query),
+  );
 }
 
 function startsWithQueryPrefix(label: string, query: string): boolean {

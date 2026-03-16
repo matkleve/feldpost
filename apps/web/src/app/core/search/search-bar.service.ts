@@ -200,7 +200,10 @@ export class SearchBarService {
     return from(this.fetchDbContentCandidates(query, context)).pipe(catchError(() => of([])));
   }
 
-  resolveGeocoder(query: string, context: SearchQueryContext): Observable<SearchAddressCandidate[]> {
+  resolveGeocoder(
+    query: string,
+    context: SearchQueryContext,
+  ): Observable<SearchAddressCandidate[]> {
     return this.resolveGeocoderCandidates(query, context);
   }
 
