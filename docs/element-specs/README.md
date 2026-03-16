@@ -180,6 +180,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `search-bar.md` — Search Bar (multi-intent search surface)
 - ✅ `search-bar-query-behavior.md` — Search Bar Query Behavior (formatting, ghost completion, forgiving matching)
 - ✅ `search-bar-data-and-service.md` — Search Bar Data and Service (pipeline, ranking, geo-bias, service contract)
+- ✅ `search-tuning-settings.md` — Search Tuning Settings (editable filters/weights/penalties preview + persistence contract)
 
 ### Map Markers
 

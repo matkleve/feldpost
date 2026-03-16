@@ -71,14 +71,14 @@ This warm clay tint is used on **all** hover states — items, action rows, sear
 
 ## Actions
 
-| # | Trigger | System Response | Surface |
-| --- | --- | --- | --- |
-| 1 | Opens any toolbar dropdown | Container shell renders with shared elevated surface tokens | Sort, Grouping, Projects, Filter |
-| 2 | Hovers an actionable row | Warm clay hover tint appears with no geometry shift | Any `dd-item` consumer |
-| 3 | Navigates item list via pointer | Label/icon/trailing align to `dd-item` layout contract | Any `dd-item` consumer |
-| 4 | Opens dropdown with search | Search row uses `dd-search` and input/action primitives | Sort, Projects |
-| 5 | Dropdown has no rows | Empty state uses `dd-empty` style primitive | Sort, Filter, future consumers |
-| 6 | Renders destructive menu action | Row uses `dd-item--danger` styling on icon and label | Image detail context menu |
+| #   | Trigger                         | System Response                                             | Surface                          |
+| --- | ------------------------------- | ----------------------------------------------------------- | -------------------------------- |
+| 1   | Opens any toolbar dropdown      | Container shell renders with shared elevated surface tokens | Sort, Grouping, Projects, Filter |
+| 2   | Hovers an actionable row        | Warm clay hover tint appears with no geometry shift         | Any `dd-item` consumer           |
+| 3   | Navigates item list via pointer | Label/icon/trailing align to `dd-item` layout contract      | Any `dd-item` consumer           |
+| 4   | Opens dropdown with search      | Search row uses `dd-search` and input/action primitives     | Sort, Projects                   |
+| 5   | Dropdown has no rows            | Empty state uses `dd-empty` style primitive                 | Sort, Filter, future consumers   |
+| 6   | Renders destructive menu action | Row uses `dd-item--danger` styling on icon and label        | Image detail context menu        |
 
 ## Dropdown Inventory
 

@@ -3,12 +3,7 @@ import type { WorkspaceImage } from '../workspace-view.types';
 export type ProjectStatusFilter = 'all' | 'active' | 'archived';
 export type ProjectsViewMode = 'list' | 'cards';
 export type ProjectsSortMode = 'name' | 'updated' | 'image-count';
-export type ProjectColorKey =
-  | 'clay'
-  | 'accent'
-  | 'success'
-  | 'warning'
-  | `brand-hue-${number}`;
+export type ProjectColorKey = 'clay' | 'accent' | 'success' | 'warning' | `brand-hue-${number}`;
 
 export interface ProjectRecord {
   id: string;

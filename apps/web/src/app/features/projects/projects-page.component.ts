@@ -367,9 +367,7 @@ export class ProjectsPageComponent {
   }
 
   onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
-    this.activeGroupings.set(
-      active.filter((group) => this.projectGroupingOptionIds.has(group.id)),
-    );
+    this.activeGroupings.set(active.filter((group) => this.projectGroupingOptionIds.has(group.id)));
     // Reset collapsed state when grouping structure changes.
     this.collapsedGroupIds.set(new Set());
   }
@@ -922,7 +920,8 @@ export class ProjectsPageComponent {
     }
 
     if (option?.type === 'number' || NUMBER_OPERATORS.includes(rule.operator)) {
-      const fieldNumber = typeof fieldValue === 'number' ? fieldValue : Number.parseFloat(fieldValue);
+      const fieldNumber =
+        typeof fieldValue === 'number' ? fieldValue : Number.parseFloat(fieldValue);
       const ruleNumber = Number.parseFloat(ruleValue);
       if (Number.isNaN(fieldNumber) || Number.isNaN(ruleNumber)) {
         return false;
@@ -986,7 +985,10 @@ export class ProjectsPageComponent {
     }
   }
 
-  private getProjectFilterValue(project: ProjectListItem, propertyId: string): string | number | null {
+  private getProjectFilterValue(
+    project: ProjectListItem,
+    propertyId: string,
+  ): string | number | null {
     switch (propertyId) {
       case 'name':
         return project.name;
@@ -1016,7 +1018,9 @@ export class ProjectsPageComponent {
       .map((rule) => {
         if (!rule.property) return rule;
 
-        const validOperators = operatorsForType(this.projectFilterOptionById.get(rule.property)?.type);
+        const validOperators = operatorsForType(
+          this.projectFilterOptionById.get(rule.property)?.type,
+        );
         if (!rule.operator || validOperators.includes(rule.operator)) {
           return rule;
         }
@@ -1024,7 +1028,10 @@ export class ProjectsPageComponent {
         return { ...rule, operator: '' };
       });
 
-    if (normalized.length !== rules.length || normalized.some((rule, index) => rule !== rules[index])) {
+    if (
+      normalized.length !== rules.length ||
+      normalized.some((rule, index) => rule !== rules[index])
+    ) {
       this.filterService.rules.set(normalized);
     }
   }
