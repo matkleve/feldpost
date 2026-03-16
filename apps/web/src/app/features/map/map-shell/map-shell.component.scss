@@ -102,7 +102,7 @@
   display: none;
   flex-direction: column;
   width: min(420px, calc(100vw - var(--spacing-6)));
-  max-height: 46vh;
+  max-height: min(82vh, 48rem);
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--color-bg-surface) 95%, transparent);

@@ -1165,10 +1165,6 @@ export class MapShellComponent implements OnDestroy {
           // Rebind click handler so interaction resolves the new marker key.
           this.bindMarkerClickInteraction(key, reusableState.marker);
           this.animateMarkerPosition(reusableState.marker, row.cluster_lat, row.cluster_lng);
-          const reusedEl = reusableState.marker.getElement();
-          if (reusedEl) {
-            this.triggerMarkerFadeIn(reusedEl);
-          }
 
           if (needsVisualRefresh) {
             this.refreshPhotoMarker(key);
@@ -1184,12 +1180,12 @@ export class MapShellComponent implements OnDestroy {
       const marker = L.marker(
         spawnOrigin ? [spawnOrigin.lat, spawnOrigin.lng] : [row.cluster_lat, row.cluster_lng],
         {
-        icon: this.buildPhotoMarkerIcon(key, { count, direction, corrected }),
+          icon: this.buildPhotoMarkerIcon(key, { count, direction, corrected }),
         },
       );
 
       this.photoMarkerLayer!.addLayer(marker);
-      this.attachMarkerInteractions(key, marker);
+      this.attachMarkerInteractions(key, marker, { fadeIn: !spawnOrigin });
 
       if (spawnOrigin) {
         this.animateMarkerPosition(marker, row.cluster_lat, row.cluster_lng);
@@ -1302,14 +1298,21 @@ export class MapShellComponent implements OnDestroy {
   }
 
   /** Attach click + touch long-press interactions consistently for each new marker. */
-  private attachMarkerInteractions(markerKey: string, marker: L.Marker): void {
+  private attachMarkerInteractions(
+    markerKey: string,
+    marker: L.Marker,
+    options?: { fadeIn?: boolean },
+  ): void {
+    const shouldFadeIn = options?.fadeIn ?? true;
     this.bindMarkerClickInteraction(markerKey, marker);
     // Attach long-press handler for touch direction cone after element is in DOM.
     marker.once('add', () => {
       const el = marker.getElement();
       if (el) {
         this.attachLongPressHandler(el);
-        this.triggerMarkerFadeIn(el);
+        if (shouldFadeIn) {
+          this.triggerMarkerFadeIn(el);
+        }
       }
     });
   }
@@ -1472,8 +1475,8 @@ export class MapShellComponent implements OnDestroy {
     if (!this.map) return null;
 
     const incomingIsSingle = Number(row.image_count) === 1;
-    // Main target: cluster splitting into smaller markers.
-    if (!incomingIsSingle) return null;
+    // For split: single marker can emerge from outgoing cluster center.
+    // For merge: cluster marker can emerge from outgoing single markers.
 
     const incomingPoint = this.map.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]);
     const maxDistancePx = 240;
@@ -1485,7 +1488,12 @@ export class MapShellComponent implements OnDestroy {
     for (const candidateKey of recyclableKeys) {
       const candidate = this.uploadedPhotoMarkers.get(candidateKey);
       if (!candidate) continue;
-      if (candidate.count <= 1) continue;
+
+      if (incomingIsSingle) {
+        if (candidate.count <= 1) continue;
+      } else {
+        if (candidate.count !== 1) continue;
+      }
 
       const candidatePoint = this.map.latLngToContainerPoint([candidate.lat, candidate.lng]);
       const dx = incomingPoint.x - candidatePoint.x;

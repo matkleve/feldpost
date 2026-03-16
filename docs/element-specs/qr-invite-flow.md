@@ -18,20 +18,20 @@ The feature appears as a dedicated section in Settings Overlay and as a command 
 
 ## Actions
 
-| # | User Action | System Response | Triggers |
-| --- | --- | --- | --- |
-| 1 | Opens Invite Management section | Immediately creates a new active invite draft and renders QR preview | section selection in settings overlay |
-| 2 | Commits `/image` command `Create QR Invite` | Opens Invite Management and pre-focuses role picker | search commit action `run-command` |
-| 3 | Changes target role (Clerk or Worker) | Regenerates invite token and QR payload for the selected role | role dropdown change |
-| 4 | Clicks `Regenerate` | Revokes current active draft and creates a fresh one | regenerate action |
-| 5 | Clicks `Copy Link` | Copies one-time invite URL to clipboard and logs share channel | clipboard write + share event insert |
-| 6 | Clicks `Share via Email` | Opens device/app share intent with invite URL and logs share channel | web share or mailto fallback |
-| 7 | Clicks `Share via WhatsApp` | Opens WhatsApp share URL with invite URL and logs share channel | external deep link |
-| 8 | Invited user scans QR | Join flow validates token and marks invite as accepted once completed | invite accept endpoint/RPC |
-| 9 | Invite reaches expiration | UI changes state to expired and disables share controls | now() > expires_at |
-| 10 | Creator clicks `Revoke` | Invite state becomes revoked and further acceptance is blocked | update invite status |
-| 11 | Non-allowed role attempts invite creation | UI shows permission-denied message; no invite row created | RLS insert deny |
-| 12 | Network/create error on auto-generation | Shows retry state with actionable `Try again` button | service error |
+| #   | User Action                                 | System Response                                                       | Triggers                              |
+| --- | ------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------- |
+| 1   | Opens Invite Management section             | Immediately creates a new active invite draft and renders QR preview  | section selection in settings overlay |
+| 2   | Commits `/image` command `Create QR Invite` | Opens Invite Management and pre-focuses role picker                   | search commit action `run-command`    |
+| 3   | Changes target role (Clerk or Worker)       | Regenerates invite token and QR payload for the selected role         | role dropdown change                  |
+| 4   | Clicks `Regenerate`                         | Revokes current active draft and creates a fresh one                  | regenerate action                     |
+| 5   | Clicks `Copy Link`                          | Copies one-time invite URL to clipboard and logs share channel        | clipboard write + share event insert  |
+| 6   | Clicks `Share via Email`                    | Opens device/app share intent with invite URL and logs share channel  | web share or mailto fallback          |
+| 7   | Clicks `Share via WhatsApp`                 | Opens WhatsApp share URL with invite URL and logs share channel       | external deep link                    |
+| 8   | Invited user scans QR                       | Join flow validates token and marks invite as accepted once completed | invite accept endpoint/RPC            |
+| 9   | Invite reaches expiration                   | UI changes state to expired and disables share controls               | now() > expires_at                    |
+| 10  | Creator clicks `Revoke`                     | Invite state becomes revoked and further acceptance is blocked        | update invite status                  |
+| 11  | Non-allowed role attempts invite creation   | UI shows permission-denied message; no invite row created             | RLS insert deny                       |
+| 12  | Network/create error on auto-generation     | Shows retry state with actionable `Try again` button                  | service error                         |
 
 ```mermaid
 sequenceDiagram
@@ -77,20 +77,20 @@ QrInviteFlowHost (Settings section or command entry host)
 
 ## Data
 
-| Field | Source | Type |
-| --- | --- | --- |
-| inviteId | `qr_invites.id` | `string` |
-| organizationId | `qr_invites.organization_id` | `string` |
-| createdBy | `qr_invites.created_by` | `string` |
-| targetRole | `qr_invites.target_role` | `'clerk' | 'worker'` |
-| inviteUrl | `qr_invites.invite_url` | `string` |
-| qrPayload | `qr_invites.qr_payload` | `string` |
-| tokenHash | `qr_invites.token_hash` | `string` |
-| status | `qr_invites.status` | `'active' | 'expired' | 'revoked' | 'accepted'` |
-| expiresAt | `qr_invites.expires_at` | `string` |
-| acceptedAt | `qr_invites.accepted_at` | `string | null` |
-| acceptedUserId | `qr_invites.accepted_user_id` | `string | null` |
-| shareEvents | `invite_share_events` | `InviteShareEvent[]` |
+| Field          | Source                        | Type                                               |
+| -------------- | ----------------------------- | -------------------------------------------------- |
+| inviteId       | `qr_invites.id`               | `string`                                           |
+| organizationId | `qr_invites.organization_id`  | `string`                                           |
+| createdBy      | `qr_invites.created_by`       | `string`                                           |
+| targetRole     | `qr_invites.target_role`      | `'clerk' \| 'worker'`                              |
+| inviteUrl      | `qr_invites.invite_url`       | `string`                                           |
+| qrPayload      | `qr_invites.qr_payload`       | `string`                                           |
+| tokenHash      | `qr_invites.token_hash`       | `string`                                           |
+| status         | `qr_invites.status`           | `'active' \| 'expired' \| 'revoked' \| 'accepted'` |
+| expiresAt      | `qr_invites.expires_at`       | `string`                                           |
+| acceptedAt     | `qr_invites.accepted_at`      | `string \| null`                                   |
+| acceptedUserId | `qr_invites.accepted_user_id` | `string \| null`                                   |
+| shareEvents    | `invite_share_events`         | `InviteShareEvent[]`                               |
 
 ```mermaid
 erDiagram
@@ -126,28 +126,28 @@ erDiagram
 
 ## State
 
-| Name | Type | Default | Controls |
-| --- | --- | --- | --- |
-| `panelMode` | `'loading' | 'ready' | 'error'` | `'loading'` | Auto-generation lifecycle on open |
-| `targetRole` | `'clerk' | 'worker'` | `'worker'` | Role preselection for generated invite |
-| `activeInvite` | `QrInviteViewModel | null` | `null` | QR preview, link, status chip |
-| `shareInFlight` | `boolean` | `false` | Temporary disabled state for share controls |
-| `lastError` | `string | null` | `null` | Error message and retry visibility |
+| Name            | Type                              | Default     | Controls                                    |
+| --------------- | --------------------------------- | ----------- | ------------------------------------------- |
+| `panelMode`     | `'loading' \| 'ready' \| 'error'` | `'loading'` | Auto-generation lifecycle on open           |
+| `targetRole`    | `'clerk' \| 'worker'`             | `'worker'`  | Role preselection for generated invite      |
+| `activeInvite`  | `QrInviteViewModel \| null`       | `null`      | QR preview, link, status chip               |
+| `shareInFlight` | `boolean`                         | `false`     | Temporary disabled state for share controls |
+| `lastError`     | `string \| null`                  | `null`      | Error message and retry visibility          |
 
 ## File Map
 
-| File | Purpose |
-| --- | --- |
-| `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts` | Invite settings section host |
-| `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html` | Invite UI template with role picker and QR preview |
-| `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.scss` | Invite layout and visual states |
-| `apps/web/src/app/core/invites/invite.service.ts` | Invite create/regenerate/revoke/share orchestration |
-| `apps/web/src/app/core/invites/invite.types.ts` | Shared invite DTOs and UI models |
-| `apps/web/src/app/core/search/search.models.ts` | Extend command union with invite command |
-| `apps/web/src/app/core/search/search-orchestrator.service.ts` | Emit `/image` invite command candidate |
-| `apps/web/src/app/features/map/search-bar/search-bar.component.ts` | Handle invite command commit routing |
-| `supabase/migrations/20260316230000_qr_invites.sql` | Schema + RLS for invite generation and sharing |
-| `docs/use-cases/qr-invite-flow.md` | Detailed scenarios for QA and implementation checks |
+| File                                                                                           | Purpose                                             |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts`   | Invite settings section host                        |
+| `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html` | Invite UI template with role picker and QR preview  |
+| `apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.scss` | Invite layout and visual states                     |
+| `apps/web/src/app/core/invites/invite.service.ts`                                              | Invite create/regenerate/revoke/share orchestration |
+| `apps/web/src/app/core/invites/invite.types.ts`                                                | Shared invite DTOs and UI models                    |
+| `apps/web/src/app/core/search/search.models.ts`                                                | Extend command union with invite command            |
+| `apps/web/src/app/core/search/search-orchestrator.service.ts`                                  | Emit `/image` invite command candidate              |
+| `apps/web/src/app/features/map/search-bar/search-bar.component.ts`                             | Handle invite command commit routing                |
+| `supabase/migrations/20260316230000_qr_invites.sql`                                            | Schema + RLS for invite generation and sharing      |
+| `docs/use-cases/qr-invite-flow.md`                                                             | Detailed scenarios for QA and implementation checks |
 
 ## Wiring
 
@@ -205,4 +205,5 @@ flowchart LR
 
 ## Settings
 
-- **Invite Management**: one-time invite generation, default target role, expiration window, revoke behavior, and share channel availability.
+- **QR Invite Preferences**: default target role, auto-generate-on-open behavior, invite expiration window, and enabled share channels.
+- **Invite Management**: invite creation, acceptance, and revocation controls.

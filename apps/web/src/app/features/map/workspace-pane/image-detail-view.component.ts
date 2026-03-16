@@ -374,7 +374,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     }
   }
 
-  private async loadProjectMemberships(imageId: string, fallbackProjectId: string | null): Promise<void> {
+  private async loadProjectMemberships(
+    imageId: string,
+    fallbackProjectId: string | null,
+  ): Promise<void> {
     const { data, error } = await this.supabaseService.client
       .from('image_projects')
       .select('project_id')
@@ -387,7 +390,9 @@ export class ImageDetailViewComponent implements OnDestroy {
       return;
     }
 
-    const memberships = new Set<string>((data as Array<{ project_id: string }>).map((row) => row.project_id));
+    const memberships = new Set<string>(
+      (data as Array<{ project_id: string }>).map((row) => row.project_id),
+    );
     if (memberships.size === 0 && fallbackProjectId) {
       memberships.add(fallbackProjectId);
     }
@@ -406,7 +411,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     const toDelete = prevIds.filter((id) => !next.has(id));
 
     if (toInsert.length > 0) {
-      const insertPayload = toInsert.map((projectId) => ({ image_id: img.id, project_id: projectId }));
+      const insertPayload = toInsert.map((projectId) => ({
+        image_id: img.id,
+        project_id: projectId,
+      }));
       const { error } = await this.supabaseService.client
         .from('image_projects')
         .upsert(insertPayload, { onConflict: 'image_id,project_id' });
@@ -484,7 +492,9 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (error || !data) return;
 
     const created = { id: data.id as string, label: data.name as string };
-    this.projectOptions.update((list) => [...list, created].sort((a, b) => a.label.localeCompare(b.label)));
+    this.projectOptions.update((list) =>
+      [...list, created].sort((a, b) => a.label.localeCompare(b.label)),
+    );
     this.projectSearch.set('');
     await this.toggleProjectMembership(created.id);
   }

@@ -1,7 +1,12 @@
 <div class="dd-section-label">Actions</div>
 
-<button class="dd-item" type="button" [disabled]="!hasCoordinates()" (click)="zoomToLocation.emit()">
-  <span class="material-icons dd-item__icon" aria-hidden="true">my_location</span>
+<button
+  class="dd-item"
+  type="button"
+  [disabled]="!hasCoordinates()"
+  (click)="zoomToLocation.emit()"
+>
+  <span class="material-icons dd-item__icon" aria-hidden="true">gps_fixed</span>
   <span class="dd-item__label">Zoom to location</span>
 </button>
 
