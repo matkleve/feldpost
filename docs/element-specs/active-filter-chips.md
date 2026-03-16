@@ -33,6 +33,16 @@ ActiveFilterChips                          ← flex wrap row, gap-2, below searc
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field          | Source                         | Type             |
 | -------------- | ------------------------------ | ---------------- |
 | Active filters | `FilterService.activeFilters$` | `ActiveFilter[]` |
@@ -48,6 +58,19 @@ No own state — derived from `FilterService`. Chips appear/disappear reactively
 | `features/map/filter-chips/active-filter-chips.component.ts` | Chip strip component |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Import `ActiveFilterChipsComponent` in `MapShellComponent`
 - Inject `FilterService` to read active filters

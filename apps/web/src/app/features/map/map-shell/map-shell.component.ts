@@ -25,6 +25,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import * as L from 'leaflet';
 import {
   UploadPanelComponent,
@@ -71,12 +72,16 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly photoLoadService = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
 
   /** Reference to the UploadPanelComponent child (for placeFile calls). */
   private readonly uploadPanelChild = viewChild(UploadPanelComponent);
+  private readonly pendingMapFocus = signal<{ imageId: string; lat: number; lng: number } | null>(
+    this.readMapFocusPayload(),
+  );
 
   /**
    * Leaflet map instance. Protected (not private) so unit tests can inject
@@ -145,13 +150,32 @@ export class MapShellComponent implements OnDestroy {
     };
   });
 
+  private readonly searchActiveMarkerCentroid = computed<{ lat: number; lng: number } | undefined>(
+    () => {
+      const selectedMarkerKey = this.selectedMarkerKey();
+      if (!selectedMarkerKey) return undefined;
+      const markerState = this.uploadedPhotoMarkers.get(selectedMarkerKey);
+      if (!markerState) return undefined;
+      return { lat: markerState.lat, lng: markerState.lng };
+    },
+  );
+
   readonly searchQueryContext = computed<SearchQueryContext>(() => {
     const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
     const activeProjectId =
       selectedProjectIds.size > 0 ? Array.from(selectedProjectIds.values())[0] : undefined;
+    const userPos = this.userPosition();
 
     return {
       activeProjectId,
+      activeMarkerCentroid: this.searchActiveMarkerCentroid(),
+      activeProjectCentroid: this.searchDataCentroid(),
+      currentLocation: userPos
+        ? {
+            lat: userPos[0],
+            lng: userPos[1],
+          }
+        : undefined,
       viewportBounds: this.searchViewportBounds(),
       dataCentroid: this.searchDataCentroid(),
       countryCodes: this.searchCountryCodes(),
@@ -478,6 +502,7 @@ export class MapShellComponent implements OnDestroy {
     this.initGeolocation();
     void this.queryViewportMarkers();
     this.updateSearchViewportBounds();
+    this.applyPendingMapFocus();
 
     // Map click handler: closes upload panel and, when active, places images
     // that had no GPS EXIF data.
@@ -508,12 +533,51 @@ export class MapShellComponent implements OnDestroy {
         this.userPosition.set(coords);
         void this.refreshSearchCountryCode(coords[0], coords[1]);
         this.renderOrUpdateUserLocationMarker(coords);
+        if (this.pendingMapFocus()) {
+          return;
+        }
         this.map?.setView(coords, 13);
       },
       () => {
         // Geolocation denied or unavailable — Vienna fallback already set.
       },
     );
+  }
+
+  private readMapFocusPayload(): { imageId: string; lat: number; lng: number } | null {
+    const fromNavigation = this.router.getCurrentNavigation()?.extras?.state?.['mapFocus'];
+    const fromHistory =
+      typeof window !== 'undefined' ? (window.history.state?.['mapFocus'] as unknown) : null;
+    const candidate = fromNavigation ?? fromHistory;
+
+    if (!candidate || typeof candidate !== 'object') {
+      return null;
+    }
+
+    const payload = candidate as Partial<{ imageId: string; lat: number; lng: number }>;
+    if (
+      typeof payload.imageId !== 'string' ||
+      typeof payload.lat !== 'number' ||
+      typeof payload.lng !== 'number'
+    ) {
+      return null;
+    }
+
+    return { imageId: payload.imageId, lat: payload.lat, lng: payload.lng };
+  }
+
+  private applyPendingMapFocus(): void {
+    if (!this.map) {
+      return;
+    }
+
+    const payload = this.pendingMapFocus();
+    if (!payload) {
+      return;
+    }
+
+    this.map.setView([payload.lat, payload.lng], 18);
+    this.pendingMapFocus.set(null);
   }
 
   private recenterOnKnownUserPosition(): boolean {

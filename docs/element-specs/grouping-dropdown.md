@@ -61,6 +61,16 @@ GroupingDropdown                           ← floating dropdown, --color-bg-ele
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field               | Source                                                                                     | Type            |
 | ------------------- | ------------------------------------------------------------------------------------------ | --------------- |
 | Built-in properties | Hardcoded list: Date, Year, Month, Project, City, District, Street, Country, Address, User | `PropertyDef[]` |

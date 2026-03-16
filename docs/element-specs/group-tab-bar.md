@@ -38,6 +38,16 @@ GroupTabBar                                ← scrollable horizontal row, h-8, o
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field            | Source                                        | Type           |
 | ---------------- | --------------------------------------------- | -------------- |
 | Saved groups     | `supabase.from('saved_groups').select(...)`   | `SavedGroup[]` |
@@ -57,6 +67,19 @@ GroupTabBar                                ← scrollable horizontal row, h-8, o
 | `features/map/workspace-pane/group-tab-bar.component.ts` | Tab bar component |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Import `GroupTabBarComponent` in `WorkspacePaneComponent`
 - Inject `GroupService` for CRUD operations

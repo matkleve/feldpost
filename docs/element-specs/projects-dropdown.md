@@ -45,6 +45,16 @@ ProjectsDropdown                           ← floating dropdown, --color-bg-ele
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field        | Source                                                                                                  | Type                  |
 | ------------ | ------------------------------------------------------------------------------------------------------- | --------------------- |
 | Projects     | `supabase.from('projects').select('id, name').eq('organization_id', org)`                               | `Project[]`           |

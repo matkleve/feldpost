@@ -43,6 +43,12 @@ Create `docs/element-specs/{element-name}.md` following the [element spec format
 9. **Wiring** — parent integration
 10. **Acceptance Criteria** — testable checklist
 
+Mermaid requirements for every spec:
+
+- Include at least 2 Mermaid diagrams
+- Required: one **Wiring** diagram (`sequenceDiagram` or `flowchart`)
+- Required: one **Data Requirements** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`)
+
 When applicable, specs should explicitly call for the shared layout primitives instead of describing one-off row or panel geometry.
 
 Unit rules for every new spec:
@@ -77,6 +83,7 @@ For each feature the user describes, update the relevant spec sections:
 
 - **Actions table** — add rows for new user interactions and system responses
 - **Component Hierarchy** — add new child components or restructure the tree
+- **Mermaid Data/Wiring diagrams** — update schema/data flow and integration flow when feature behavior changes
 - **State table** — add new signals/variables with type, default, and what they control
 - **Data Requirements** — add new Supabase tables, columns, RPC calls, or service methods
 - **File Map** — add new files that need to be created

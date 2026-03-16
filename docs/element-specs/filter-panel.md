@@ -49,6 +49,16 @@ FilterPanel                                ← `.ui-container` sliding panel, --
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field                    | Source                                              | Type            |
 | ------------------------ | --------------------------------------------------- | --------------- |
 | Projects list            | `supabase.from('projects').select('id, name')`      | `Project[]`     |
@@ -74,6 +84,19 @@ FilterPanel                                ← `.ui-container` sliding panel, --
 | `core/filter.service.ts`                                | Filter state management, query building |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Floating element in Map Zone, positioned top-right (below upload button area)
 - `FilterService` holds the active filters and emits changes

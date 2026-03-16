@@ -6,6 +6,8 @@ import {
   concat,
   debounceTime,
   distinctUntilChanged,
+  firstValueFrom,
+  from,
   map,
   of,
   shareReplay,
@@ -26,6 +28,8 @@ import {
   SearchResultSet,
   SearchSection,
 } from './search.models';
+import { buildFallbackQueries, normalizeSearchQuery } from './search-query';
+import { isInViewport } from './search-bar-helpers';
 
 type DbAddressResolver = (
   query: string,
@@ -54,6 +58,8 @@ interface CachedResult {
 }
 
 const MAX_GEOCODER_SECTION_ITEMS = 3;
+const FALLBACK_CONFIDENCE_THRESHOLD = 0.7;
+const FALLBACK_SCORE_IMPROVEMENT_MIN = 0.05;
 
 @Injectable({ providedIn: 'root' })
 export class SearchOrchestratorService {
@@ -229,16 +235,34 @@ export class SearchOrchestratorService {
     const rankedDbAddress = [...dbAddress].sort((left, right) => {
       const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
       if (scoreDelta !== 0) return scoreDelta;
-      return (right.imageCount ?? 0) - (left.imageCount ?? 0);
+      const countDelta = (right.imageCount ?? 0) - (left.imageCount ?? 0);
+      if (countDelta !== 0) return countDelta;
+      const labelDelta = left.label.localeCompare(right.label);
+      if (labelDelta !== 0) return labelDelta;
+      return (left.stableId ?? left.id).localeCompare(right.stableId ?? right.id);
     });
 
-    const rankedDbContent = [...dbContent].sort(
-      (left, right) => (right.score ?? 0) - (left.score ?? 0),
-    );
+    const rankedDbContent = [...dbContent].sort((left, right) => {
+      const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
+      if (scoreDelta !== 0) return scoreDelta;
+      const labelDelta = left.label.localeCompare(right.label);
+      if (labelDelta !== 0) return labelDelta;
+      return (left.stableId ?? left.id).localeCompare(right.stableId ?? right.id);
+    });
 
     const rankedGeocoder = [...geocoder]
-      .sort((left, right) => (right.score ?? 0) - (left.score ?? 0))
+      .sort((left, right) => {
+        const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
+        if (scoreDelta !== 0) return scoreDelta;
+        const labelDelta = left.label.localeCompare(right.label);
+        if (labelDelta !== 0) return labelDelta;
+        return (left.stableId ?? left.id).localeCompare(right.stableId ?? right.id);
+      })
       .slice(0, MAX_GEOCODER_SECTION_ITEMS);
+
+    this.annotateCandidates(rankedDbAddress, context, 'db-address');
+    this.annotateCandidates(rankedDbContent, context, 'db-content');
+    this.annotateCandidates(rankedGeocoder, context, 'geocoder');
 
     sections.push({ family: 'db-address', title: 'Addresses', items: rankedDbAddress });
     sections.push({ family: 'db-content', title: 'Projects & Groups', items: rankedDbContent });
@@ -335,6 +359,133 @@ export class SearchOrchestratorService {
     return `${query}::${JSON.stringify(context)}`;
   }
 
+  private annotateCandidates(
+    candidates: SearchCandidate[],
+    context: SearchQueryContext,
+    family: SearchSection['family'],
+  ): void {
+    if (candidates.length === 0) return;
+    const topScore = candidates[0]?.score ?? 0;
+    const secondScore = candidates[1]?.score ?? 0;
+    const topMargin = Math.max(0, topScore - secondScore);
+
+    candidates.forEach((candidate, index) => {
+      const candidateScore = candidate.score ?? 0;
+      const confidenceLabel = this.toConfidenceLabel(candidateScore, index === 0 ? topMargin : 0);
+      const explanationTags: string[] = [];
+
+      if (
+        (family === 'db-address' || family === 'geocoder') &&
+        'lat' in candidate &&
+        'lng' in candidate &&
+        isInViewport(candidate, context.viewportBounds)
+      ) {
+        explanationTags.push('In viewport');
+      }
+
+      if (family === 'db-address' && context.activeProjectId) {
+        explanationTags.push('Near active project');
+      }
+
+      if (family === 'geocoder' && !context.viewportBounds && !context.countryCodes?.length) {
+        explanationTags.push('Global fallback result');
+      }
+
+      candidate.totalScore = candidateScore;
+      candidate.confidenceLabel = confidenceLabel;
+      candidate.explanationTags = explanationTags;
+      candidate.stableId = candidate.stableId ?? candidate.id;
+    });
+  }
+
+  private toConfidenceLabel(score: number, topMargin: number): 'high' | 'medium' | 'low' {
+    if (score >= 0.78 && topMargin >= 0.08) return 'high';
+    if (score >= 0.62 || topMargin >= 0.04) return 'medium';
+    return 'low';
+  }
+
+  private topScore(result: SearchResultSet): number {
+    const scores = result.sections
+      .flatMap((section) => section.items)
+      .map((item) => item.score ?? 0);
+    if (scores.length === 0) return 0;
+    return Math.max(...scores);
+  }
+
+  private shouldRunFallback(query: string, result: SearchResultSet): boolean {
+    const trimmed = query.trim();
+    if (trimmed.length < 3) return false;
+    if (result.empty) return true;
+    return this.topScore(result) < FALLBACK_CONFIDENCE_THRESHOLD;
+  }
+
+  private runSearchOnce(query: string, context: SearchQueryContext): Observable<SearchResultSet> {
+    const dbAddress$ = (
+      this.adapters.dbAddressResolver ? this.adapters.dbAddressResolver(query, context) : of([])
+    ).pipe(catchError(() => of([])));
+
+    const dbContent$ = (
+      this.adapters.dbContentResolver ? this.adapters.dbContentResolver(query, context) : of([])
+    ).pipe(catchError(() => of([])));
+
+    const geocoder$ = (
+      this.adapters.geocoderResolver ? this.adapters.geocoderResolver(query, context) : of([])
+    ).pipe(catchError(() => of([])));
+
+    return combineLatest([dbAddress$, dbContent$, geocoder$]).pipe(
+      take(1),
+      map(([dbAddress, dbContent, geocoder]) => {
+        const dedupedGeocoder = this.deduplicateGeocoderNearDb(dbAddress, geocoder);
+        const sections = this.buildSections(query, context, dbAddress, dbContent, dedupedGeocoder);
+        return {
+          query,
+          state: 'results-complete' as const,
+          sections,
+          empty: sections.every((section) => section.items.length === 0),
+        };
+      }),
+    );
+  }
+
+  private async resolveBestFallbackResult(
+    query: string,
+    context: SearchQueryContext,
+    strictResult: SearchResultSet,
+  ): Promise<SearchResultSet> {
+    const normalized = normalizeSearchQuery(query);
+    const fallbackQueries = buildFallbackQueries(normalized);
+    if (fallbackQueries.length === 0) return strictResult;
+
+    let bestResult = strictResult;
+    let bestScore = this.topScore(strictResult);
+
+    for (const fallbackQuery of fallbackQueries) {
+      const fallbackResult = await firstValueFrom(this.runSearchOnce(fallbackQuery, context));
+      const fallbackScore = this.topScore(fallbackResult);
+      if (fallbackScore > bestScore + FALLBACK_SCORE_IMPROVEMENT_MIN) {
+        bestScore = fallbackScore;
+        bestResult = {
+          ...fallbackResult,
+          query,
+          sections: fallbackResult.sections.map((section) => ({
+            ...section,
+            items: section.items.map((item) => ({
+              ...item,
+              explanationTags: [
+                ...(item.explanationTags ?? []),
+                ...(item.explanationTags?.includes('Global fallback result')
+                  ? []
+                  : ['Global fallback result']),
+              ],
+            })),
+          })),
+        };
+      }
+    }
+
+    return bestResult;
+  }
+
   private searchSequence(query: string, context: SearchQueryContext): Observable<SearchResultSet> {
     const trimmedQuery = query.trim();
 
@@ -412,6 +563,15 @@ export class SearchOrchestratorService {
           sections,
           empty: sections.every((section) => section.items.length === 0),
         };
+      }),
+      switchMap((strictResult) => {
+        if (!this.shouldRunFallback(trimmedQuery, strictResult)) {
+          return of(strictResult);
+        }
+
+        return from(this.resolveBestFallbackResult(trimmedQuery, context, strictResult)).pipe(
+          catchError(() => of(strictResult)),
+        );
       }),
       tap((result) => {
         this.cache.set(cacheKey, {

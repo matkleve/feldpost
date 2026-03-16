@@ -58,6 +58,16 @@ MetadataSection ← .detail-section, dd-section-label heading "Metadata"
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Source             | Table / RPC      | Columns / Fields                                  | Operation              |
 | ------------------ | ---------------- | ------------------------------------------------- | ---------------------- |
 | Metadata entries   | `image_metadata` | `image_id`, `metadata_key_id`, `value_text`       | SELECT, UPSERT, DELETE |

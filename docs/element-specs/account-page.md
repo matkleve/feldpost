@@ -52,6 +52,16 @@ AccountPage                                ← full-width, max-width 640px cente
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field        | Source                                     | Type      |
 | ------------ | ------------------------------------------ | --------- |
 | Current user | `AuthService.currentUser()`                | `User`    |
@@ -75,6 +85,19 @@ AccountPage                                ← full-width, max-width 640px cente
 | `core/auth.service.ts`                    | Email/password update, delete account  |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Email change sends Supabase confirmation email to new address
 - Password change requires current password for verification

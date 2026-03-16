@@ -143,6 +143,19 @@ stateDiagram-v2
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Injects `PhotoLoadService` — reads `photoLoad.getLoadState(imageId, 'thumb')` signal to drive all visual states (placeholder, pulse, fade-in, error, no-photo). Uses `PHOTO_PLACEHOLDER_ICON` and `PHOTO_NO_PHOTO_ICON` for consistent placeholder visuals. **Does not call Supabase Storage directly.**
 - Signed URLs are obtained by the parent `WorkspaceViewService` via `photoLoad.batchSign(images, 'thumb')` and passed down, or the card reads from the service cache directly.
 - Import `ThumbnailCardComponent` in `ThumbnailGridComponent`

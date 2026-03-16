@@ -30,7 +30,7 @@ Every user action and system response. If it's not in this table, the agent won'
 
 ### 5. Component Hierarchy (tree diagram)
 
-The most important section. Shows what nests inside what, using a simple tree diagram (not real HTML or Angular template code). Each node = a component or visual area. Include:
+The most important section. Shows what nests inside what, using a simple ASCII tree (not real HTML or Angular template code). Each node = a component or visual area. Include:
 
 - Position/sizing hints as inline notes
 - Conditional visibility in `[brackets]`
@@ -39,6 +39,11 @@ The most important section. Shows what nests inside what, using a simple tree di
 Keep it readable — this is a structural guideline, not copy-pasteable code.
 
 When a panel or list row matches an existing shared primitive, name it directly in the hierarchy (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`) instead of describing new bespoke geometry.
+
+In addition to the hierarchy tree, every spec should include at least two Mermaid diagrams:
+
+- A **Wiring** diagram (`sequenceDiagram` or `flowchart`) for parent/component/service integration
+- A **Data** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`) for schema or query/data flow
 
 ### 6. Data (table)
 
@@ -96,32 +101,54 @@ ElementRoot ← positioning, size, role
 ├── SubArea ← what this area does
 │ ├── ChildA ← brief description
 │ └── ChildB ← brief description
-│
 └── [conditional] AnotherArea
 ├── ChildC × N ← repeated for each item
 └── EmptyState ← shown when no items
 
+````
+
+## Data Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+	participant C as Component
+	participant S as Service
+	participant DB as Supabase
+
+	C->>S: Request query/data
+	S->>DB: Read/write
+	DB-->>S: Rows/result
+	S-->>C: Mapped view model
+````
+
+## Wiring Flow (Mermaid)
+
+```mermaid
+flowchart LR
+	Parent[Parent Component] --> Child[Element Component]
+	Child --> Service[Feature Service]
+	Service --> Adapter[Adapter / API Layer]
 ```
 
 ## Data
 
-| Field | Source | Type |
-|-------|--------|------|
+| Field | Source                                 | Type     |
+| ----- | -------------------------------------- | -------- |
 | items | `supabase.from('table').select('...')` | `Type[]` |
 
 ## State
 
-| Name | Type | Default | Controls |
-|------|------|---------|----------|
+| Name   | Type      | Default | Controls         |
+| ------ | --------- | ------- | ---------------- |
 | isOpen | `boolean` | `false` | panel visibility |
 
 ## File Map
 
-| File | Purpose |
-|------|---------|
-| `features/x/x.component.ts` | root component |
-| `features/x/x.component.html` | template |
-| `core/x.service.ts` | data access |
+| File                          | Purpose        |
+| ----------------------------- | -------------- |
+| `features/x/x.component.ts`   | root component |
+| `features/x/x.component.html` | template       |
+| `core/x.service.ts`           | data access    |
 
 ## Wiring
 
@@ -133,6 +160,7 @@ ElementRoot ← positioning, size, role
 
 - [ ] Specific testable behavior 1
 - [ ] Specific testable behavior 2
+
 ```
 
 ---
@@ -158,8 +186,11 @@ ElementRoot ← positioning, size, role
 - Specs are the **source of truth** — code must match spec, not the other way around
 - Update specs BEFORE asking agents to modify features
 - Keep "What It Is" and "What It Looks Like" short — detail goes in Actions and Hierarchy
+- Keep Component Hierarchy as a tree diagram for readability
+- Include at least 2 Mermaid diagrams in each spec: one for Data and one for Wiring
 - Prefer shared layout primitives in the spec before inventing new panel or row patterns
 - Use `rem` as the primary unit for accessibility-sensitive UI dimensions: touch targets, button heights, interactive sizes, spacing, and layout dimensions. Include the px equivalent as an annotation when the exact reference size matters.
 - Use `em` only for component-internal spacing that should scale with the component's own font size.
 - Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.
 - Use `vh` / `vw` only for viewport-relative layout behavior.
+```

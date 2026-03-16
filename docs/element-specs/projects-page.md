@@ -124,6 +124,16 @@ ProjectsPage                                ← route root, full width
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field                     | Source                                                                                      | Type                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- | -------- |
 | Projects                  | `supabase.from('projects').select('id,name,color_key,archived_at,created_at,updated_at')`   | `Project[]`                             |
@@ -170,6 +180,19 @@ Search behavior on this page is explicitly aggregation-first: query images, then
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Add route `{ path: 'projects', component: ProjectsPageComponent }` in app routes.
 - Add sidebar entry that navigates to `/projects`.
 - Inject `ProjectsService` in `ProjectsPageComponent`.
@@ -183,31 +206,31 @@ Search behavior on this page is explicitly aggregation-first: query images, then
 
 ## Acceptance Criteria
 
-- [ ] Route `/projects` renders a list of projects for the active organization.
-- [ ] Projects page reuses the same Search Bar component family as map search (no duplicated search UI implementation).
-- [ ] Search uses image-level matching and groups results by project with query-specific counts.
-- [ ] Search fields include custom metadata values (for example query `Fang 5`).
-- [ ] Query `Fang 5` shows grouped result badges such as `5 results` on matching projects.
-- [ ] Keyboard interaction model stays consistent with map search.
-- [ ] Status control filters Active vs Archived rows.
-- [ ] View toggle switches between List and Cards without resetting search/filter/sort state.
-- [ ] List view is default and optimized for scan/compare.
-- [ ] Cards view keeps card internals structurally consistent for fast comparison.
-- [ ] "New project" creates a draft row and persists after confirmation.
-- [ ] Rename is inline, validates input, and persists without full-page reload.
-- [ ] Each project can be assigned a semantic color token and the color is visible in list and card presentations.
-- [ ] Archive requires confirmation and removes project from Active view.
-- [ ] Clicking project row opens in-page workspace details scoped to that project without leaving `/projects`.
-- [ ] "Open in workspace" opens the same in-page workspace details behavior as row click.
-- [ ] Image-details map action from project-scoped workspace navigates to `/map` and zooms to the selected photo location.
-- [ ] Empty state appears when no projects match current filters.
-- [ ] Loading state appears during initial fetch and refresh operations.
-- [ ] Center content rail is horizontally centered and capped at max-width 70rem (1120px).
-- [ ] Mobile layout is single-column with accessible touch targets.
-- [ ] [PPW-1] Selecting a project opens the workspace pane in place while remaining on `/projects`.
-- [ ] [PPW-2] Selecting a project-scoped thumbnail opens image details for that scoped image.
-- [ ] [PPW-3] Using the image-details map action navigates to `/map` and focuses the exact selected photo location.
-- [ ] [PPW-4] Closing the workspace pane preserves Projects page search/filter/view mode state.
+- [x] Route `/projects` renders a list of projects for the active organization.
+- [x] Projects page reuses the same Search Bar component family as map search (no duplicated search UI implementation).
+- [x] Search uses image-level matching and groups results by project with query-specific counts.
+- [x] Search fields include custom metadata values (for example query `Fang 5`).
+- [x] Query `Fang 5` shows grouped result badges such as `5 results` on matching projects.
+- [x] Keyboard interaction model stays consistent with map search.
+- [x] Status control filters Active vs Archived rows.
+- [x] View toggle switches between List and Cards without resetting search/filter/sort state.
+- [x] List view is default and optimized for scan/compare.
+- [x] Cards view keeps card internals structurally consistent for fast comparison.
+- [x] "New project" creates a draft row and persists after confirmation.
+- [x] Rename is inline, validates input, and persists without full-page reload.
+- [x] Each project can be assigned a semantic color token and the color is visible in list and card presentations.
+- [x] Archive requires confirmation and removes project from Active view.
+- [x] Clicking project row opens in-page workspace details scoped to that project without leaving `/projects`.
+- [x] "Open in workspace" opens the same in-page workspace details behavior as row click.
+- [x] Image-details map action from project-scoped workspace navigates to `/map` and zooms to the selected photo location.
+- [x] Empty state appears when no projects match current filters.
+- [x] Loading state appears during initial fetch and refresh operations.
+- [x] Center content rail is horizontally centered and capped at max-width 70rem (1120px).
+- [x] Mobile layout is single-column with accessible touch targets.
+- [x] [PPW-1] Selecting a project opens the workspace pane in place while remaining on `/projects`.
+- [x] [PPW-2] Selecting a project-scoped thumbnail opens image details for that scoped image.
+- [x] [PPW-3] Using the image-details map action navigates to `/map` and focuses the exact selected photo location.
+- [x] [PPW-4] Closing the workspace pane preserves Projects page search/filter/view mode state.
 - [ ] [PPW-5] Re-opening the same project restores prior project-scoped browsing context (including prior subview and scroll position).
 
 ## Use Cases

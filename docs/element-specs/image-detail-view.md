@@ -140,6 +140,16 @@ ImageDetailView                            ← fills Workspace Pane content area
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field              | Source                                                | Type                             |
 | ------------------ | ----------------------------------------------------- | -------------------------------- |
 | Image record       | `supabase.from('images').select('*')`                 | `ImageRecord`                    |
@@ -173,6 +183,19 @@ When the Supabase record loads and `storage_path IS NULL`, the view is **fully r
 | `features/map/workspace-pane/editable-property-row.component.ts`  | Click-to-edit row for image fields (text, date, select) |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Displayed inside Workspace Pane when `detailImageId` is set
 - On desktop: replaces Thumbnail Grid, back arrow returns to grid

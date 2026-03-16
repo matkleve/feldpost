@@ -1,4 +1,4 @@
-﻿# Search Bar
+# Search Bar
 
 > **Blueprint:** [implementation-blueprints/search-bar.md](../implementation-blueprints/search-bar.md)
 
@@ -17,11 +17,11 @@ This parent spec defines the implementation contract for the search surface UI a
 
 ## What It Looks Like
 
-Floating search surface pinned top-center over the map. Use the shared `.ui-container` panel geometry with the same corner radius, panel padding, and panel gap as the Sidebar, subtle shadow, and warm `--color-bg-surface` background. The structure is: panel container → compact search row → results panel revealed inside the same surface. Do not morph the container into a pill in any state. The leading search icon and trailing clear button both sit inside helper wrappers that absorb the extra search-row height while preserving the shared fixed square media-slot rhythm. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
+Floating search surface pinned top-center over the map. Use the shared `.ui-container` panel geometry with the same corner radius, panel padding, and panel gap as the Sidebar, subtle shadow, and warm `--color-bg-surface` background. The structure is: panel container ? compact search row ? results panel revealed inside the same surface. Do not morph the container into a pill in any state. The leading search icon and trailing clear button both sit inside helper wrappers that absorb the extra search-row height while preserving the shared fixed square media-slot rhythm. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
 
 ## Where It Lives
 
-- **Route**: Global — rendered inside `MapShellComponent` template
+- **Route**: Global � rendered inside `MapShellComponent` template
 - **Parent**: `MapShellComponent` at `features/map/map-shell/map-shell.component.ts`
 - **Appears when**: Always visible when map page is active
 - **Dropdown appears when**: Input is focused or has query text
@@ -34,9 +34,9 @@ Derived from the use cases. Each row maps to specific UC scenarios.
 
 | #   | User Action                                | System Response                                                                                                                  | Use Cases         | Triggers                                                  |
 | --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ----------------- | --------------------------------------------------------- |
-| 1   | Focuses input (click or tab)               | Opens dropdown with recent searches                                                                                              | UC-1, UC-2        | State → `focused-empty`                                   |
-| 2   | Presses `Cmd/Ctrl+K`                       | Focuses input, opens dropdown                                                                                                    | UC-13             | State → `focused-empty`                                   |
-| 3   | Types characters                           | Debounces 300ms, queries DB + geocoder in parallel                                                                               | UC-1, UC-4        | State → `typing` → `results-partial` → `results-complete` |
+| 1   | Focuses input (click or tab)               | Opens dropdown with recent searches                                                                                              | UC-1, UC-2        | State ? `focused-empty`                                   |
+| 2   | Presses `Cmd/Ctrl+K`                       | Focuses input, opens dropdown                                                                                                    | UC-13             | State ? `focused-empty`                                   |
+| 3   | Types characters                           | Debounces 300ms, queries DB + geocoder in parallel                                                                               | UC-1, UC-4        | State ? `typing` ? `results-partial` ? `results-complete` |
 | 4   | Presses ArrowDown / ArrowUp                | Moves highlight to next/prev selectable item (skips headers/dividers)                                                            | UC-13             | `activeIndex` changes                                     |
 | 5   | Presses Enter                              | Commits highlighted item (or top item if none highlighted)                                                                       | UC-1, UC-6, UC-13 | Fires `SearchCommitAction`                                |
 | 6   | Presses Tab (with ghost text)              | Accepts inline ghost completion into input text, triggers new search                                                             | UC-8, UC-11       | Query updated                                             |
@@ -44,11 +44,11 @@ Derived from the use cases. Each row maps to specific UC scenarios.
 | 8   | Clicks a DB content result (project/group) | Navigates to that content's context; when multiple geolocated items are in scope, map fits bounds to include all of them         | UC-6              | `commit` type `open-content`                              |
 | 9   | Clicks a geocoder result                   | Map centers on location and zooms to a tight local view (~50m horizontal span when supported)                                    | UC-10, UC-3       | `commit` type `map-center`                                |
 | 10  | Clicks a recent search item                | Re-executes that query                                                                                                           | UC-2              | `commit` type `recent-selected`                           |
-| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                                                                       | UC-13             | State → `idle`                                            |
-| 12  | Clicks outside search                      | Closes dropdown                                                                                                                  | —                 | State → `idle` or `committed`                             |
-| 13  | Clicks `×` clear button                    | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State → `idle`                                            |
-| 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State → `focused-empty`                                   |
-| 15  | Query returns no results                   | Shows empty state with "No address found" + suggested actions                                                                    | UC-10             | —                                                         |
+| 11  | Presses Escape                             | Closes dropdown; second Escape blurs input                                                                                       | UC-13             | State ? `idle`                                            |
+| 12  | Clicks outside search                      | Closes dropdown                                                                                                                  | �                 | State ? `idle` or `committed`                             |
+| 13  | Clicks `�` clear button                    | Clears query + committed state, removes Search Location Marker                                                                   | UC-12             | State ? `idle`                                            |
+| 14  | Backspace on empty committed input         | Clears committed context                                                                                                         | UC-12             | State ? `focused-empty`                                   |
+| 15  | Query returns no results                   | Shows empty state with "No address found" + suggested actions                                                                    | UC-10             | �                                                         |
 | 16  | Geocoder slow/fails                        | DB results render immediately, geocoder section shows skeleton then hides                                                        | UC-7              | Graceful degradation                                      |
 | 17  | Pastes coordinates or Google Maps URL      | Detects coordinate format, centers map, reverse-geocodes label                                                                   | UC-5              | `commit` type `map-center`                                |
 | 18  | "Did you mean?" suggestion clicked         | Replaces query with corrected text, reruns search                                                                                | UC-16             | Query updated, new search triggered                       |
@@ -79,65 +79,75 @@ flowchart TD
 ## Component Hierarchy
 
 ```
-SearchBar                                  ← positioned top-center in Map Zone, z-30, `.ui-container`
-├── InputRow                               ← compact search row inside shared panel surface
-│   ├── SearchIconSlot                     ← fixed square media slot, non-clickable
-│   │   └── SearchIcon                     ← 16px, left side, wrapped to absorb extra row height
-│   ├── <input type="search">              ← flex-1, role="combobox", placeholder "Search address, project, group…"
-│   └── ClearButton (×)                    ← shown only in committed state, same wrapped media-slot geometry as leading icon
-│
-└── ResultsPanel                           ← revealed inside the same surface (not an overlay), role="listbox", same width, animates panel height only
-    │
-    ├── [focused-empty] RecentSection
-    │   ├── SectionLabel "Recent searches"
-    │   └── DropdownItem × N               ← `.ui-item` row, clock icon + label, role="option"
-    │                                         Active-project recents ranked first, then others by recency
-    │
-    ├── [has results] AddressSection
-    │   ├── SectionLabel "Addresses"
-    │   └── DropdownItem × N               ← `.ui-item` row, map-pin icon + label + "N photos" meta
-    │
-    ├── [has results] ContentSection
-    │   ├── SectionLabel "Projects & Groups"
-    │   └── DropdownItem × N               ← `.ui-item` row, folder icon + label + subtitle
-    │
-    ├── Divider                            ← 1px line, only if both DB and geocoder have results
-    │
-    ├── [has results] GeocoderSection
-    │   ├── SectionLabel "Places"
-    │   └── DropdownItem × N               ← `.ui-item` row, globe icon + label + "External result"
-    │
-    ├── [loading] GeocoderSkeleton         ← 2 pulse rows while geocoder is fetching, matching `.ui-item` row height/padding/media-column geometry and using light-gray loading surfaces
-    │
-    └── [no results] EmptyState
-        ├── "No address found for {query}"
-        ├── "Try a different address or pin manually"
-        └── GhostButton "Drop pin"         ← starts placement mode
+SearchBar                                  ? positioned top-center in Map Zone, z-30, `.ui-container`
++-- InputRow                               ? compact search row inside shared panel surface
+�   +-- SearchIconSlot                     ? fixed square media slot, non-clickable
+�   �   +-- SearchIcon                     ? 16px, left side, wrapped to absorb extra row height
+�   +-- <input type="search">              ? flex-1, role="combobox", placeholder "Search address, project, group�"
+�   +-- ClearButton (�)                    ? shown only in committed state, same wrapped media-slot geometry as leading icon
+�
++-- ResultsPanel                           ? revealed inside the same surface (not an overlay), role="listbox", same width, animates panel height only
+    �
+    +-- [focused-empty] RecentSection
+    �   +-- SectionLabel "Recent searches"
+    �   +-- DropdownItem � N               ? `.ui-item` row, clock icon + label, role="option"
+    �                                         Active-project recents ranked first, then others by recency
+    �
+    +-- [has results] AddressSection
+    �   +-- SectionLabel "Addresses"
+    �   +-- DropdownItem � N               ? `.ui-item` row, map-pin icon + label + "N photos" meta
+    �
+    +-- [has results] ContentSection
+    �   +-- SectionLabel "Projects & Groups"
+    �   +-- DropdownItem � N               ? `.ui-item` row, folder icon + label + subtitle
+    �
+    +-- Divider                            ? 1px line, only if both DB and geocoder have results
+    �
+    +-- [has results] GeocoderSection
+    �   +-- SectionLabel "Places"
+    �   +-- DropdownItem � N               ? `.ui-item` row, globe icon + label + "External result"
+    �
+    +-- [loading] GeocoderSkeleton         ? 2 pulse rows while geocoder is fetching, matching `.ui-item` row height/padding/media-column geometry and using light-gray loading surfaces
+    �
+    +-- [no results] EmptyState
+        +-- "No address found for {query}"
+        +-- "Try a different address or pin manually"
+        +-- GhostButton "Drop pin"         ? starts placement mode
 ```
 
 ### DropdownItem (shared child component)
 
-Each result row uses the shared row contract: `.ui-item` → `.ui-item-media` + `.ui-item-label`. The leading media column stays fixed width across all result families. Labels and optional meta lines truncate inside the flexible label column rather than changing row geometry.  
+Each result row uses the shared row contract: `.ui-item` ? `.ui-item-media` + `.ui-item-label`. The leading media column stays fixed width across all result families. Labels and optional meta lines truncate inside the flexible label column rather than changing row geometry.  
 Highlighted state via `activeIndex`. Icons by family:
 
-- `db-address` → map-pin
-- `db-content` → folder / image (by contentType)
-- `geocoder` → globe
-- `recent` → clock
-- `command` → terminal
+- `db-address` ? map-pin
+- `db-content` ? folder / image (by contentType)
+- `geocoder` ? globe
+- `recent` ? clock
+- `command` ? terminal
 
 Address formatting rules and ghost completion algorithm details are defined in [search-bar-query-behavior](search-bar-query-behavior.md).
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field                 | Source                                            | Type                          |
 | --------------------- | ------------------------------------------------- | ----------------------------- |
-| DB address candidates | `SearchOrchestratorService` → `dbAddressResolver` | `SearchAddressCandidate[]`    |
-| DB content candidates | `SearchOrchestratorService` → `dbContentResolver` | `SearchContentCandidate[]`    |
-| Geocoder candidates   | `SearchOrchestratorService` → `geocoderResolver`  | `SearchAddressCandidate[]`    |
-| Recent searches       | `SearchBarService` → `localStorage`               | `SearchRecentCandidate[]`     |
+| DB address candidates | `SearchOrchestratorService` ? `dbAddressResolver` | `SearchAddressCandidate[]`    |
+| DB content candidates | `SearchOrchestratorService` ? `dbContentResolver` | `SearchContentCandidate[]`    |
+| Geocoder candidates   | `SearchOrchestratorService` ? `geocoderResolver`  | `SearchAddressCandidate[]`    |
+| Recent searches       | `SearchBarService` ? `localStorage`               | `SearchRecentCandidate[]`     |
 | Search result set     | `SearchOrchestratorService.searchInput()`         | `Observable<SearchResultSet>` |
-| Ghost completion      | `SearchBarService` → prefix trie (in-memory)      | `string \| null`              |
+| Ghost completion      | `SearchBarService` ? prefix trie (in-memory)      | `string \| null`              |
 
 The `SearchOrchestratorService` already exists at `core/search/search-orchestrator.service.ts`. It handles debouncing, caching, deduplication, and ranking. The component drives it with a query observable + context observable.
 
@@ -162,7 +172,7 @@ Types are defined in `core/search/search.models.ts` (already exists).
 
 | File                                                        | Purpose                                                                |
 | ----------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `features/map/search-bar/search-bar.component.ts`           | Main search bar component (standalone) — UI + keyboard only            |
+| `features/map/search-bar/search-bar.component.ts`           | Main search bar component (standalone) � UI + keyboard only            |
 | `features/map/search-bar/search-bar.component.html`         | Template matching hierarchy above                                      |
 | `features/map/search-bar/search-bar.component.scss`         | Scoped styles (shared panel surface, reveal panel, skeleton)           |
 | `features/map/search-bar/search-dropdown-item.component.ts` | Single result row (standalone, inline template)                        |
@@ -174,10 +184,10 @@ Types are defined in `core/search/search.models.ts` (already exists).
 
 ### Injected Services
 
-- `SearchBarService` — orchestrates search logic, recents, and geocoder resolution delegation.
-- `MapAdapter` — centers map and manages Search Location Marker placement on map-center commits.
-- `Router` — navigates for open-content commits.
-- `ProjectsDropdownService` (or equivalent project selection source) — emits active-project context changes.
+- `SearchBarService` � orchestrates search logic, recents, and geocoder resolution delegation.
+- `MapAdapter` � centers map and manages Search Location Marker placement on map-center commits.
+- `Router` � navigates for open-content commits.
+- `ProjectsDropdownService` (or equivalent project selection source) � emits active-project context changes.
 
 ### Inputs / Outputs
 
@@ -185,13 +195,13 @@ None.
 
 ### Subscriptions
 
-- Query input stream (`valueChanges`/signal equivalent) — debounced and torn down in component destroy lifecycle.
-- Active project selection stream — updates `SearchQueryContext`; torn down in component destroy lifecycle.
-- Keyboard shortcut/click-outside listeners — registered on init and removed on destroy.
+- Query input stream (`valueChanges`/signal equivalent) � debounced and torn down in component destroy lifecycle.
+- Active project selection stream � updates `SearchQueryContext`; torn down in component destroy lifecycle.
+- Keyboard shortcut/click-outside listeners � registered on init and removed on destroy.
 
 ### Supabase Calls
 
-None — delegated to `SearchBarService`.
+None � delegated to `SearchBarService`.
 
 ```mermaid
 sequenceDiagram
@@ -252,8 +262,8 @@ sequenceDiagram
 - [x] Content commit navigates to the correct route
 - [x] Escape closes dropdown; second Escape blurs input
 - [x] Click outside closes dropdown
-- [x] `×` clear button appears after commit; clicking it resets everything
-- [x] `×` clear button uses square control geometry aligned to shared control/media sizing tokens
+- [x] `�` clear button appears after commit; clicking it resets everything
+- [x] `�` clear button uses square control geometry aligned to shared control/media sizing tokens
 - [x] Empty state shows "No address found" with "Drop pin" recovery action
 - [x] Pasting coordinates or Google Maps URL auto-detects and centers map
 
@@ -269,7 +279,7 @@ sequenceDiagram
 
 ## Use Cases
 
-> **Full use cases:** [use-cases/search-bar.md](../use-cases/search-bar.md) — 18 scenarios (UC-1 through UC-18) with 50+ edge cases.
+> **Full use cases:** [use-cases/search-bar.md](../use-cases/search-bar.md) � 18 scenarios (UC-1 through UC-18) with 50+ edge cases.
 
 The actions table is derived from these use cases. Deep query behavior and ranking details are split into the child specs to keep this parent contract concise.
 
@@ -277,26 +287,26 @@ The actions table is derived from these use cases. Deep query behavior and ranki
 
 Search state progression is defined as:
 
-`idle` → `focused-empty` → `typing` → `results-partial` → `results-complete` → `committed`
+`idle` ? `focused-empty` ? `typing` ? `results-partial` ? `results-complete` ? `committed`
 
 Coordinate pastes can short-circuit to `committed`. Geocoder failures must never block `results-partial` rendering. Full transition diagrams and timing phases live in [search-bar-data-and-service](search-bar-data-and-service.md).
 
 ## Data Pipeline
 
-Not applicable — moved to [search-bar-data-and-service](search-bar-data-and-service.md).
+Not applicable � moved to [search-bar-data-and-service](search-bar-data-and-service.md).
 
 ## Search + Filter Integration Rules
 
-Not applicable — moved to [search-bar-query-behavior](search-bar-query-behavior.md).
+Not applicable � moved to [search-bar-query-behavior](search-bar-query-behavior.md).
 
 ## Geo-Relevance Ranking
 
-Not applicable — moved to [search-bar-data-and-service](search-bar-data-and-service.md).
+Not applicable � moved to [search-bar-data-and-service](search-bar-data-and-service.md).
 
 ## Forgiving Address Matching
 
-Not applicable — moved to [search-bar-query-behavior](search-bar-query-behavior.md).
+Not applicable � moved to [search-bar-query-behavior](search-bar-query-behavior.md).
 
 ## SearchBarService
 
-Not applicable — moved to [search-bar-data-and-service](search-bar-data-and-service.md).
+Not applicable � moved to [search-bar-data-and-service](search-bar-data-and-service.md).

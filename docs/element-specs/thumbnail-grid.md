@@ -104,6 +104,19 @@ sequenceDiagram
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Import `ThumbnailGridComponent` in `WorkspacePaneComponent`
 - Inject `GroupService` and `SelectionService` for image data
 - Place as default content area within Workspace Pane

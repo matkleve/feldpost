@@ -26,6 +26,10 @@ Write an element spec for the described UI element.
    - Wiring
    - Acceptance Criteria (checklist)
 
+8. Include at least 2 Mermaid diagrams:
+   - Wiring diagram (`sequenceDiagram` or `flowchart`)
+   - Data Requirements diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`)
+
 ## Rules
 
 - Use glossary names for all components

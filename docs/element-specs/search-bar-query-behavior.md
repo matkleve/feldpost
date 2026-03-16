@@ -1,105 +1,171 @@
-# Search Bar - Query Behavior
+# Search Bar - Query Behavior V2
 
 > **Parent spec:** [search-bar](search-bar.md)
+> **Data/service contract:** [search-bar-data-and-service](search-bar-data-and-service.md)
 > **Use cases:** [use-cases/search-bar.md](../use-cases/search-bar.md)
 
 ## What It Is
 
-The query behavior contract for Search Bar text handling. It defines address label formatting, ghost completion, forgiving matching, and search/filter coexistence rules.
+This spec defines the Search Bar query behavior contract from raw input to deterministic ranked output. It governs normalization, intent detection, fallback escalation, ambiguity guards, correction suggestions, confidence labels, and explanation labels.
 
 ## What It Looks Like
 
-Address results show concise labels in `Street Number, Postcode City` form. Named places render a two-line row with a bold name and a muted secondary address line. Ghost completion appears inline as faded text after the caret and is accepted with `Tab`. Approximate matches and correction suggestions are visually labeled. Ranking is personalized to the user's active context (current working marker geography, viewport, and current location), not tied to any specific city.
+The Search Bar keeps the existing UI structure and progressive feel while adding strict behavioral guarantees. For short ambiguous prefixes (for example: `Wilhe`), local results tied to the active work context must outrank unrelated global lookalikes unless user intent clearly requests global scope. Results can display confidence labels and short explanation labels (for example: "Near active project", "In viewport", "Global fallback"). Correction suggestions appear only when improvement is meaningful and measurable.
 
 ## Where It Lives
 
 - **Parent**: `SearchBarComponent` behavior contract
-- **Appears when**: Search Bar is focused or processing typed input
+- **Applies to**: Query parsing and candidate ordering logic used by `SearchOrchestratorService`
+- **Appears when**: User focuses search, types input, accepts ghost completion, or commits search results
 
 ## Actions
 
-| #   | User Action                      | System Response                              | Triggers              |
-| --- | -------------------------------- | -------------------------------------------- | --------------------- |
-| 1   | Types text prefix                | Compute ghost completion from local sources  | Debounced input event |
-| 2   | Presses `Tab` with ghost text    | Accept ghost text and rerun search           | Query update          |
-| 3   | Presses `Tab` without ghost text | Preserve default focus behavior              | Browser default       |
-| 4   | Selects correction suggestion    | Replace input with corrected query and rerun | Suggestion row click  |
-| 5   | Commits geocoder or DB address   | Render normalized display label format       | Commit event          |
-| 6   | Runs search while filters active | Keep filter chips and filter state intact    | Query commit          |
+| #   | User Action                           | System Response                                      | Trigger                  |
+| --- | ------------------------------------- | ---------------------------------------------------- | ------------------------ |
+| 1   | Types any query text                  | Normalize query, classify intent, run strict stage   | Debounced input          |
+| 2   | Types 3 to 6 char ambiguous prefix    | Enable anti-noise guards and local-priority scoring  | Ambiguity class = `high` |
+| 3   | Presses `Tab` while ghost text exists | Accept ghost text and rerun strict stage             | `tab-accept` event       |
+| 4   | Presses `Tab` without ghost text      | Keep default browser focus behavior                  | Browser default          |
+| 5   | Pastes coordinates or map URL         | Short-circuit text search and commit map-center path | `intent=coordinate/url`  |
+| 6   | Strict stage has low confidence       | Escalate fallback to next widening stage             | Fallback policy          |
+| 7   | Strict stage has high confidence      | Stop widening, emit final ranking                    | Fallback policy          |
+| 8   | Candidate correction has strong lift  | Show "Did you mean" suggestion row                   | Suggestion policy        |
+| 9   | Commits candidate                     | Persist recency + priors, keep filters intact        | Commit event             |
 
-### Decision Flowchart
+### Query Decision Flow
 
 ```mermaid
 flowchart TD
-    A[User types query] --> B{ghost text exists}
-    B -- yes --> C[Tab accepts ghost]
-    B -- no --> D[Tab keeps default focus behavior]
+    A[Raw Query] --> B[Normalize Input]
+    B --> C{Intent}
+    C -- Coordinate or URL --> D[Commit Map Center]
+    C -- Text --> E[Run Strict Stage]
+    E --> F{Top1 Confidence}
+    F -- High --> G[Stop and Emit]
+    F -- Medium with local proof --> G
+    F -- Low or empty --> H[Escalate Fallback Stage]
+    H --> I{Stage < 4}
+    I -- Yes --> J[Widen Geography and Re-score]
+    J --> F
+    I -- No --> K[Emit Global Fallback Labeled]
+```
 
-    C --> E{strict match confident}
-    D --> E
-    E -- yes --> F[Render strict result]
-    E -- no --> G[Run fallback variants]
+### Fallback Escalation State Machine
 
-    G --> H{fallback winner exists}
-    H -- yes --> I[Show Did-you-mean row]
-    H -- no --> J[Show no-result path]
+```mermaid
+stateDiagram-v2
+    [*] --> Strict
+    Strict --> Complete: confidence high
+    Strict --> WidenViewportCountry: low confidence or empty
+    WidenViewportCountry --> Complete: stop criteria met
+    WidenViewportCountry --> WidenProjectRegion: still low confidence
+    WidenProjectRegion --> Complete: stop criteria met
+    WidenProjectRegion --> WidenUserPriors: still low confidence
+    WidenUserPriors --> Complete: stop criteria met
+    WidenUserPriors --> GlobalOpen: still low confidence
+    GlobalOpen --> Complete: emit with global-fallback explanation
+    Complete --> [*]
+```
 
-    F --> K{active filters present}
-    I --> K
-    J --> K
-    K -- yes --> L[Preserve filter chips and filter state]
-    K -- no --> M[Normal commit path]
+### Suggestion Gate Flow
+
+```mermaid
+flowchart LR
+    A[Strict Winner] --> B{Needs Fallback?}
+    B -- No --> Z[No Suggestion]
+    B -- Yes --> C[Build Correction Candidate]
+    C --> D{Correction confidence >= 0.85}
+    D -- No --> Z
+    D -- Yes --> E[Compute Score Delta]
+    E --> F{Delta >= 10 points}
+    F -- No --> Z
+    F -- Yes --> G[Show Did You Mean]
+```
+
+### Prefix Anti-Noise Guard Flow
+
+```mermaid
+flowchart TD
+    A[Query Length 3..6] --> B{Ambiguous Prefix?}
+    B -- No --> C[Normal Scoring]
+    B -- Yes --> D[Apply Global Penalty]
+    D --> E[Apply Country Mismatch Demotion]
+    E --> F[Enforce Local Diversity in Top3]
+    F --> G[Stability Guard on Near Ties]
 ```
 
 ## Component Hierarchy
 
 ```
 SearchBar Query Layer
-├── InputNormalization
+├── QueryNormalizer
 │   ├── DiacriticNormalizer
+│   ├── TokenCanonicalizer
 │   ├── SuffixNormalizer
 │   └── WhitespaceCollapser
-├── GhostCompletion
-│   ├── PrefixTrie
-│   ├── RankedCandidatePicker
-│   └── InlineGhostRenderer
-├── AddressFormatter
-│   ├── PoiPrimaryLineBuilder
-│   └── StructuredAddressFallbackBuilder
-└── SuggestionRow
-    └── DidYouMeanAction
+├── IntentDetector
+│   ├── CoordinateDetector
+│   ├── MapUrlDetector
+│   └── TextIntentClassifier
+├── AmbiguityGuard
+│   ├── PrefixAmbiguityClassifier
+│   ├── GlobalNoisePenaltyGate
+│   └── LocalDiversityGate
+├── FallbackPolicyEngine
+│   ├── ContinueStopEvaluator
+│   ├── GeographyWideningPlanner
+│   └── SuggestionGate
+└── ExplanationLayer
+    ├── ConfidenceLabeler
+    └── ExplanationTagBuilder
 ```
 
 ## Data
 
-| Field                          | Source                                            | Type                      |
-| ------------------------------ | ------------------------------------------------- | ------------------------- |
-| Ghost candidates               | Recents + cached DB labels + cached content names | `string[]`                |
-| Nominatim structured address   | `GeocodingService.search()` result                | `Record<string, string>`  |
-| Query normalization dictionary | Static normalization rules                        | `Record<string, string>`  |
-| Active filters snapshot        | Search/filter integration context                 | `number` + filter payload |
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
+| Field                 | Source                      | Type                                           |
+| --------------------- | --------------------------- | ---------------------------------------------- |
+| `normalizedQuery`     | Query normalization stage   | `string`                                       |
+| `intent`              | Intent detector             | `'coordinate' \| 'url' \| 'text' \| 'command'` |
+| `ambiguityClass`      | Prefix ambiguity classifier | `'low' \| 'medium' \| 'high'`                  |
+| `fallbackStage`       | Fallback policy             | `0 \| 1 \| 2 \| 3 \| 4`                        |
+| `topConfidence`       | Confidence labeler          | `'high' \| 'medium' \| 'low'`                  |
+| `explanationTags`     | Explanation builder         | `string[]`                                     |
+| `suggestionCandidate` | Suggestion gate             | `string \| null`                               |
 
 ## State
 
-| Name               | Type             | Default | Controls                               |
-| ------------------ | ---------------- | ------- | -------------------------------------- |
-| `normalizedQuery`  | `string`         | `''`    | Matching and fallback query generation |
-| `ghostText`        | `string \| null` | `null`  | Inline completion rendering            |
-| `suggestionText`   | `string \| null` | `null`  | "Did you mean" suggestion visibility   |
-| `hasActiveFilters` | `boolean`        | `false` | Search/filter integration behavior     |
+| Name                  | Type                                           | Default  | Controls                    |
+| --------------------- | ---------------------------------------------- | -------- | --------------------------- |
+| `normalizedQuery`     | `string`                                       | `''`     | Canonical matching input    |
+| `intent`              | `'coordinate' \| 'url' \| 'text' \| 'command'` | `'text'` | Query execution path        |
+| `ambiguityClass`      | `'low' \| 'medium' \| 'high'`                  | `'low'`  | Ambiguity guard behavior    |
+| `fallbackStage`       | `0 \| 1 \| 2 \| 3 \| 4`                        | `0`      | Geography widening stage    |
+| `topConfidence`       | `'high' \| 'medium' \| 'low'`                  | `'low'`  | Stop/continue decisions     |
+| `suggestionCandidate` | `string \| null`                               | `null`   | Did-you-mean row visibility |
 
 ## File Map
 
-| File                                              | Purpose                                |
-| ------------------------------------------------- | -------------------------------------- |
-| `docs/element-specs/search-bar-query-behavior.md` | Query behavior contract for Search Bar |
+| File                                              | Purpose                                               |
+| ------------------------------------------------- | ----------------------------------------------------- |
+| `docs/element-specs/search-bar-query-behavior.md` | Query behavior contract for v2 personalized geosearch |
 
 ## Wiring
 
 ### Injected Services
 
-- `SearchBarService` — owns normalization, formatting, and recent-search behavior contracts.
-- `SearchOrchestratorService` — executes query orchestration and candidate composition.
+- `SearchOrchestratorService` owns stage progression and final deterministic ordering.
+- `SearchBarService` provides local recents/ghost primitives and persistence responsibilities.
+- `GeocodingService` remains behind service adapters only.
 
 ### Inputs / Outputs
 
@@ -107,137 +173,106 @@ None.
 
 ### Subscriptions
 
-- Query text stream — used to recompute ghost text and fallback decisions; torn down with owning component/service lifecycle.
-- Active filter state stream — used to enforce filter-preservation rules; torn down with owning component/service lifecycle.
+- Query stream: triggers normalization + intent detection + strict stage.
+- Context stream: updates personalization signals and re-scores deterministically.
+- Commit stream: updates recency and priors.
 
-### Supabase Calls
-
-None — delegated to `SearchBarService`.
+### Sequence: Query To Final Result
 
 ```mermaid
 sequenceDiagram
     participant UI as SearchBarComponent
-    participant SB as SearchBarService
     participant ORCH as SearchOrchestratorService
+    participant NORM as QueryNormalizer
+    participant POL as FallbackPolicy
+    participant SCORE as ScoringEngine
 
-    UI->>SB: normalizeQuery(rawInput)
-    SB-->>UI: normalizedQuery
-    UI->>ORCH: searchInput(normalizedQuery, context)
-    ORCH-->>UI: strict candidates or empty
-
-    alt strict path found
-        UI-->>UI: render strict candidates
-    else strict path empty/low confidence (below fallback threshold)
-        UI->>SB: buildFallbackQueries(normalizedQuery)
-        SB-->>UI: fallback variants
-        UI->>ORCH: searchInput(fallbackVariant, context)
-        ORCH-->>UI: fallback candidates or empty
+    UI->>ORCH: query + context
+    ORCH->>NORM: normalize + detect intent
+    alt coordinate/url intent
+        ORCH-->>UI: map-center commit action
+    else text intent
+        ORCH->>SCORE: strict-stage scoring
+        SCORE-->>ORCH: ranked strict candidates
+        ORCH->>POL: evaluate stop/continue
+        alt stop
+            ORCH-->>UI: final deterministic results
+        else continue
+            ORCH->>SCORE: widened-stage scoring
+            SCORE-->>ORCH: re-ranked candidates
+            ORCH-->>UI: final deterministic results
+        end
     end
+```
 
-    alt suggestion selected
-        UI->>ORCH: searchInput(correctedQuery, context)
-        ORCH-->>UI: corrected result set
+### Sequence: Suggestion Selection
+
+```mermaid
+sequenceDiagram
+    participant UI as SearchBarComponent
+    participant ORCH as SearchOrchestratorService
+    participant POL as SuggestionGate
+
+    UI->>ORCH: strict result quality
+    ORCH->>POL: evaluate correction eligibility
+    POL-->>ORCH: suggestion candidate or null
+    alt suggestion exists
+        ORCH-->>UI: render did-you-mean row
+        UI->>ORCH: user selects suggestion
+        ORCH-->>UI: rerun strict stage with corrected query
     else no suggestion
-        UI-->>UI: retain no-result state
+        ORCH-->>UI: keep current result list
     end
 ```
 
 ## Acceptance Criteria
 
-- [ ] All committed address labels use `Street Number, Postcode City` where structured fields exist.
-- [ ] Named-place rows render a primary name line plus formatted secondary address line.
-- [ ] Ghost completion is computed locally and never waits for geocoder responses.
-- [ ] `Tab` accepts ghost text only when ghost text exists.
-- [ ] Query normalization handles diacritics, spacing, and common street suffix variants.
-- [ ] Correction suggestions appear only when strict matching has no sufficiently confident result.
-- [ ] Search commits do not clear active filters unless user explicitly clears filters.
-- [ ] Pasted decimal coordinates skip text search and commit map-center behavior directly.
-- [ ] Pasted Google Maps URLs extract coordinates and follow the same commit path as decimal input.
-- [ ] DMS coordinate input is converted to decimal before commit.
-- [ ] Reverse geocode after coordinate commit populates committed label; on failure, raw coordinates are shown.
-- [ ] Ghost completion trie lookup remains local (no network) and target query lookup is <1ms.
-- [ ] Ghost tie-breaking prefers shorter labels when scores are equal.
-- [ ] Weighted ghost scoring applies `sourcePriority × relevanceSignal × projectBoost × recencyDecay`.
-- [ ] Active-project ghost candidates receive a 2x weight multiplier.
-- [ ] Smart suggestions in focused-empty state replace plain recents when context cards are available.
-- [ ] Saved search pins appear above recents and are not evicted by recent-search caps.
-- [ ] Slash-command mode (`/`) can switch search into command intent without breaking standard search mode.
-- [ ] Optional inline map preview can render for highlighted geocoder candidates without changing row geometry.
+### Core Query Behavior
 
-## Address Display Formatting
+- [ ] Query normalization is deterministic and idempotent for identical input.
+- [ ] Intent detection short-circuits coordinate/map URL input before text retrieval.
+- [ ] Query behavior never depends on a hardcoded city.
+- [x] Missing personalization signals degrade to neutral behavior, never failure.
 
-Nominatim can return verbose display labels. Search Bar display labels must be compact and scannable.
+### Fallback And Corrections
 
-Primary format: `Street Number, Postcode City`
+- [x] Fallback widening starts only after strict stage confidence evaluation.
+- [ ] Fallback widening order is exactly: viewport+country -> project-region -> user-priors -> global.
+- [ ] Fallback stops immediately when stop criteria are met.
+- [ ] Did-you-mean appears only when correction confidence and score-lift thresholds pass.
 
-Fallback cascade:
+### Prefix Ambiguity And Noise Suppression
 
-| Available fields                     | Display format                |
-| ------------------------------------ | ----------------------------- |
-| street + number + postcode + city    | `Schleiergasse 18, 1100 Wien` |
-| street + postcode + city (no number) | `Schleiergasse, 1100 Wien`    |
-| street + city (no postcode)          | `Schleiergasse, Wien`         |
-| city only                            | `Wien`                        |
-| none                                 | Truncated `display_name`      |
+- [ ] For ambiguous prefixes length 3 to 6, local-context candidates outrank unrelated global candidates when local candidates exist.
+- [ ] Country mismatch demotion is applied during non-global stages.
+- [x] Global fallback candidates are clearly explanation-labeled.
+- [ ] Top3 stability guard prevents reorder jitter for near ties below configured delta.
 
-For POI/name matches where `name` differs from road name, use two-line display:
+### Determinism And Labels
 
-- Primary: place name (bold)
-- Secondary: formatted address (muted)
+- [ ] Every candidate has a confidence label (`high`, `medium`, `low`).
+- [ ] Every candidate has explanation tags from scoring factors.
+- [x] Deterministic tie-break order is applied consistently across repeated identical queries.
+- [ ] Search commits do not clear active filters unless explicitly requested by user.
 
-`formatAddressLabel(nominatimResult)` belongs in service code, not component code.
+## Scoring Inputs (Behavior Contract)
 
-## Tab Autocomplete (Inline Ghost Completion)
+The scoring formula is owned by [search-bar-data-and-service](search-bar-data-and-service.md), but this behavior layer requires these inputs to be consumed by confidence and explanation generation:
 
-Ghost completion is ranked by source priority and local relevance. It is computed from local/in-memory datasets:
+1. Text relevance
+2. Geo relevance (marker/project/user/viewport)
+3. Project affinity
+4. Recency priors
+5. Source utility
+6. Result quality prior
+7. Anti-noise penalty
 
-1. Recent searches in active project
-2. Recent searches in other projects
-3. DB addresses (weighted by image count)
-4. DB content names
-5. Previous geocoder commits
+## Tie-Break Contract
 
-Scoring formula:
+When scores are equal, apply this deterministic chain:
 
-`weight = sourcePriority × relevanceSignal × projectBoost × recencyDecay`
-
-Rules:
-
-- `Tab` accepts ghost text and triggers a new query.
-- Other input invalidates and recomputes ghost text on next keystroke.
-- Screen readers ignore ghost text (`aria-hidden="true"`).
-
-## Forgiving Address Matching
-
-For typo tolerance and normalization:
-
-1. Normalize input first (case, spacing, diacritics, suffix variants).
-2. Run strict/primary query.
-3. Only if strict/primary matching has no sufficiently confident winner, run fallback variants.
-   - Trigger fallback when either primary returns no results, or top primary confidence is below the configured fallback threshold (default 0.70).
-   - Do not trigger fallback when top primary confidence is at or above threshold.
-   - Partial-prefix queries (for example `Wilhe`) follow the same rule: no fallback when strict/primary is confident.
-   - Execute fallback variants in this order: street + number, street only, token-corrected street-only.
-4. Show a "Did you mean" row only when fallback wins.
-5. Mark approximate matches clearly.
-
-Personalization rule:
-
-- For short/ambiguous prefixes, candidates near the user's active work area and current location should outrank globally unrelated streets.
-
-Fallback trigger contract is shared with [search-bar-data-and-service](search-bar-data-and-service.md) and must stay byte-for-byte equivalent in logic.
-
-## Search + Filter Integration Rules
-
-1. Search commits can set distance reference points for distance filters.
-2. Active filter chips remain visible while search is active.
-3. Search never resets filters unless user explicitly clears filters.
-4. Search context persists through image-detail navigation and tab switches.
-5. If user pans far from a committed target, show a "Return to selected" affordance in search area.
-
-## Advanced Query UX (Future)
-
-1. **Smart suggestions on empty focus**: show context cards such as "Photos uploaded today", "Unresolved addresses", and "Nearest project site" when data exists.
-2. **Saved searches / bookmarks**: pin favorite searches above recents with no LRU eviction.
-3. **Command mode**: starting with `/` enters command intent (`/upload`, `/export`, `/settings`, `/go project-name`).
-4. **Inline map preview**: keyboard-highlighted geocoder rows can show a tiny preview thumbnail without affecting row dimensions.
+1. Higher confidence label rank
+2. Higher source priority rank
+3. Shorter geo distance to nearest personalization centroid
+4. Lexicographic `normalizedLabel`
+5. Stable candidate id

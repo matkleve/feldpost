@@ -57,6 +57,16 @@ ProjectsPage (host route)
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field                   | Source                                                            | Type                 |
 | ----------------------- | ----------------------------------------------------------------- | -------------------- | ----- |
 | Active project          | Selected project from projects list/cards + projects table        | `string` / `Project` |
@@ -82,6 +92,19 @@ ProjectsPage (host route)
 | `apps/web/src/app/features/projects/projects-page.component.spec.ts`       | Integration tests for in-page project details behavior       |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Keep route as `{ path: 'projects', component: ProjectsPageComponent }`.
 - On project open action, set selected project scope in page/workspace state without route transition.

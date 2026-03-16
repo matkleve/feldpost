@@ -38,6 +38,19 @@ Part of `core/map/leaflet-osm-adapter.ts` (MapAdapter manages this marker).
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Created and managed by `LeafletOsmAdapter` (MapAdapter implementation)
 - GPS Button triggers `MapAdapter.showUserLocation()`
 - Marker is added/removed from the Leaflet map layer directly by the adapter

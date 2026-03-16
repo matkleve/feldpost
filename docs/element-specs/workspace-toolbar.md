@@ -41,6 +41,16 @@ WorkspaceToolbar                           ← horizontal flex row, gap-2, paddi
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field               | Source                        | Type             |
 | ------------------- | ----------------------------- | ---------------- |
 | Active filter count | `FilterService.activeCount()` | `number`         |

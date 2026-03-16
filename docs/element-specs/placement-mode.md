@@ -66,6 +66,16 @@ sequenceDiagram
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field          | Source                  | Type                           |
 | -------------- | ----------------------- | ------------------------------ |
 | Placement file | Emitted by Upload Panel | `File \| null`                 |
@@ -83,6 +93,19 @@ sequenceDiagram
 Part of `MapShellComponent` template and styles — not a separate component. The banner HTML and the `--placing` CSS class live in `map-shell.component.html` and `.scss`.
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Placement mode state managed by `placementFile` signal in `MapShellComponent`
 - Banner template is inline in `map-shell.component.html`

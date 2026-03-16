@@ -38,6 +38,16 @@ MapZone                                    ← div, flex-1, relative, overflow-h
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 No own data — Map Zone is a layout container. Data flows through child components.
 
 ## State

@@ -49,6 +49,16 @@ GpsButton                                  ← 2.75rem/3rem circle, floating bot
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field         | Source                  | Type                                      |
 | ------------- | ----------------------- | ----------------------------------------- |
 | User position | Browser Geolocation API | `GeolocationPosition`                     |

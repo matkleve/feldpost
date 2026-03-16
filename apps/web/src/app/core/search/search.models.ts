@@ -13,6 +13,9 @@ export type SearchContentType = 'photo' | 'group' | 'project' | 'metadata';
 export interface SearchQueryContext {
   organizationId?: string;
   activeProjectId?: string;
+  activeMarkerCentroid?: { lat: number; lng: number };
+  activeProjectCentroid?: { lat: number; lng: number };
+  currentLocation?: { lat: number; lng: number };
   viewportBounds?: {
     north: number;
     east: number;
@@ -21,6 +24,13 @@ export interface SearchQueryContext {
   };
   dataCentroid?: { lat: number; lng: number };
   countryCodes?: string[];
+  userLocationPriors?: Array<{ key: string; lat: number; lng: number; weight: number }>;
+  projectLocationPriors?: Array<{ key: string; lat: number; lng: number; weight: number }>;
+  recencySignals?: {
+    last24hWeight?: number;
+    last30dWeight?: number;
+    last180dWeight?: number;
+  };
   activeFilterCount?: number;
   commandMode?: boolean;
   selectedGroupId?: string;
@@ -28,10 +38,21 @@ export interface SearchQueryContext {
 
 export interface SearchBaseCandidate {
   id: string;
+  stableId?: string;
   label: string;
   secondaryLabel?: string;
   family: SearchResultFamily;
   score?: number;
+  textScore?: number;
+  geoScore?: number;
+  projectScore?: number;
+  recencyScore?: number;
+  sourceUtilityScore?: number;
+  qualityScore?: number;
+  noisePenalty?: number;
+  totalScore?: number;
+  confidenceLabel?: 'high' | 'medium' | 'low';
+  explanationTags?: string[];
 }
 
 export interface SearchAddressCandidate extends SearchBaseCandidate {
