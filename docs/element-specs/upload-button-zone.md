@@ -2,13 +2,15 @@
 
 ## What It Is
 
-The upload trigger and its container. A round button fixed in the top-right of the Map Zone that toggles the Upload Panel open/closed. The zone holds both the button and the expanded panel in a vertical layout.
+The upload trigger and its morph container. A round button fixed in the top-right of the Map Zone expands into a compact upload container when tapped. The zone holds the trigger, the expanded Upload Panel, and batch-state indicators.
 
 ## What It Looks Like
 
-**Button:** 44px circle, `--color-clay` background, white camera icon. Desktop: top-right of map. Mobile: 56px FAB, bottom-right. When panel is open, button gets an active/pressed state.
+**Closed state:** 2.75rem (44px) circle, `--color-clay` background, white camera icon. Desktop is top-right of map; mobile is 3.5rem (56px) FAB bottom-right.
 
-**Zone:** Fixed-position container that holds the button at top and the Upload Panel below when expanded. Desktop: top-right corner. Mobile: bottom-right for FAB, panel slides up.
+**Open state:** the circle morphs into a compact rounded container (`min-width: 20rem`, `max-width: 24rem`) with the drop area and status board handled by Upload Panel. The morph should animate radius, width, and elevation in 180ms using `--motion-standard` timing.
+
+**Zone:** fixed-position stack container with a single visual surface in open state so it feels like one control, not a floating button plus separate card.
 
 ## Where It Lives
 
@@ -17,24 +19,27 @@ The upload trigger and its container. A round button fixed in the top-right of t
 
 ## Actions
 
-| #   | User Action                       | System Response                                     | Triggers                      |
-| --- | --------------------------------- | --------------------------------------------------- | ----------------------------- |
-| 1   | Clicks upload button              | Toggles Upload Panel open/closed                    | `uploadPanelOpen` signal      |
-| 2   | Clicks button while panel is open | Closes panel                                        | `uploadPanelOpen` → false     |
-| 3   | Upload batch is active            | Button shows progress ring / badge overlay (0–100%) | `batchProgress$` subscription |
-| 4   | All uploads complete              | Progress ring disappears, optional success flash    | `batchComplete$` event        |
+| #   | User Action                     | System Response                                             | Triggers                      |
+| --- | ------------------------------- | ----------------------------------------------------------- | ----------------------------- |
+| 1   | Clicks upload button            | Button morphs into compact upload container and opens panel | `uploadPanelOpen` signal      |
+| 2   | Clicks collapse control         | Container collapses back into round upload button           | `uploadPanelOpen` → false     |
+| 3   | Upload batch is active          | Button shell shows aggregate progress ring (0–100%)         | `batchProgress$` subscription |
+| 4   | Queue empty + no active uploads | Progress ring hidden; control returns to idle visual        | `activeBatch() === null`      |
+| 5   | Batch transitions to complete   | Brief success edge flash (200ms) before settling            | `batchComplete$` event        |
 
 ## Component Hierarchy
 
 ```
-UploadButtonZone                           ← fixed position container, z-20
-├── UploadButton                           ← 44px circle (desktop) / 56px FAB (mobile)
-│   ├── Icon "add_photo_alternate"         ← Material Icon, white
-│   └── [uploading] ProgressRing           ← SVG circular progress (0–100%), --color-primary stroke
-└── [open] UploadPanel                     ← slides down from button (see upload-panel spec)
+UploadButtonZone                                   ← fixed position container, z-20
+├── MorphShell                                     ← transitions circle → rounded panel shell
+│   ├── UploadButton                               ← closed state: 44px desktop / 56px mobile
+│   │   ├── Icon "add_photo_alternate"             ← Material Icon, white
+│   │   └── [uploading] ProgressRing               ← SVG circular progress (0–100%), --color-primary stroke
+│   └── [open] UploadPanel                         ← integrated content surface (see upload-panel spec)
+└── [complete pulse] ShellFlash                    ← 200ms success outline flash
 ```
 
-The `ProgressRing` is a thin (2px) SVG circle overlaying the button border. It fills clockwise from 0–100% as the active batch progresses. When no batch is active, it is hidden. When the batch completes, it flashes `--color-success` briefly (200ms) before fading out.
+The `ProgressRing` is a thin (2px) SVG circle overlaying the trigger edge. It fills clockwise from 0–100% as the active batch progresses. When no batch is active, it is hidden. When the batch completes, the shell flashes `--color-success` briefly (200ms) before fading.
 
 ## Data
 
@@ -42,16 +47,17 @@ The `ProgressRing` is a thin (2px) SVG circle overlaying the button border. It f
 
 ```mermaid
 flowchart LR
-  UI[UI Component] --> S[Service Layer]
-  S --> DB[(Supabase Tables)]
-  DB --> S
-  S --> UI
+  U[User Tap] --> Z[UploadButtonZone]
+  Z --> M[MapShellComponent]
+  M --> UM[UploadManagerService]
+  UM --> Z
 ```
 
 | Field        | Source                               | Type                          |
 | ------------ | ------------------------------------ | ----------------------------- |
 | Active batch | `UploadManagerService.activeBatch()` | `Signal<UploadBatch \| null>` |
 | Is busy      | `UploadManagerService.isBusy()`      | `Signal<boolean>`             |
+| Open state   | `MapShellComponent.uploadPanelOpen`  | `WritableSignal<boolean>`     |
 
 ## State
 
@@ -59,6 +65,7 @@ flowchart LR
 | ----------------- | --------- | ------- | ------------------------------------- |
 | `uploadPanelOpen` | `boolean` | `false` | Panel visibility, button active state |
 | `batchProgress`   | `number`  | `0`     | Progress ring fill (0–100)            |
+| `isMorphing`      | `boolean` | `false` | Prevents double-tap during transition |
 
 ## File Map
 
@@ -70,13 +77,16 @@ Part of `MapShellComponent` template (button + zone container are in `map-shell.
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  actor User
+  participant Zone as UploadButtonZone
+  participant Shell as MapShellComponent
+  participant Manager as UploadManagerService
+  User->>Zone: Click UploadButton
+  Zone->>Shell: toggleUploadPanel()
+  Shell->>Zone: uploadPanelOpen = true
+  Zone->>Zone: runMorphOpenAnimation()
+  Manager-->>Zone: batchProgress updates
+  Zone-->>User: shows ring + open shell
 ```
 
 - Button and zone container live in `map-shell.component.html`
@@ -90,7 +100,8 @@ sequenceDiagram
 - [ ] Button always visible on map page
 - [ ] Desktop: 44px, top-right
 - [ ] Mobile: 56px FAB, bottom-right
-- [ ] Click toggles Upload Panel
+- [ ] Click morphs button into compact upload container
+- [ ] Collapse control returns container to round button
 - [ ] Button shows active state when panel is open
 - [ ] `--color-clay` background, white icon
 - [ ] Progress ring (SVG circle) appears on button when a batch is active

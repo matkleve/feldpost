@@ -57,9 +57,23 @@
   <button
     class="map-gps-btn"
     type="button"
-    [attr.aria-label]="gpsLocating() ? 'Finding my location' : 'Go to my location'"
-    [title]="gpsLocating() ? 'Finding my location' : 'Go to my location'"
+    [attr.aria-label]="
+      gpsLocating()
+        ? 'Finding my location'
+        : gpsTrackingActive()
+          ? 'Stop GPS tracking'
+          : 'Go to my location'
+    "
+    [title]="
+      gpsLocating()
+        ? 'Finding my location'
+        : gpsTrackingActive()
+          ? 'Stop GPS tracking'
+          : 'Go to my location'
+    "
+    [attr.aria-pressed]="gpsTrackingActive()"
     [class.map-gps-btn--locating]="gpsLocating()"
+    [class.map-gps-btn--active]="gpsTrackingActive()"
     (click)="goToUserPosition()"
   >
     @if (gpsLocating()) {

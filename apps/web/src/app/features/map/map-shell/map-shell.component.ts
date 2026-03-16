@@ -65,6 +65,8 @@ import {
   },
 })
 export class MapShellComponent implements OnDestroy {
+  private static readonly GPS_TRACKING_INTERVAL_MS = 60000;
+
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
@@ -192,6 +194,8 @@ export class MapShellComponent implements OnDestroy {
 
   /** True while waiting for a GPS fix after pressing the button. */
   readonly gpsLocating = signal(false);
+  /** True when GPS tracking mode is enabled via the toggle button. */
+  readonly gpsTrackingActive = signal(false);
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -317,6 +321,8 @@ export class MapShellComponent implements OnDestroy {
   private deferredStartupRafId: number | null = null;
   private deferredStartupTimer: ReturnType<typeof setTimeout> | null = null;
   private markerBootstrapTimer: ReturnType<typeof setTimeout> | null = null;
+  private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
+  private gpsTrackingTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -330,6 +336,11 @@ export class MapShellComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.gpsLocating.set(false);
+    this.stopGpsTracking();
+    if (this.userLocationFoundTimer) {
+      clearTimeout(this.userLocationFoundTimer);
+      this.userLocationFoundTimer = null;
+    }
     this.cancelDeferredStartupWork();
     if (this.moveEndDebounceTimer) {
       clearTimeout(this.moveEndDebounceTimer);
@@ -440,10 +451,19 @@ export class MapShellComponent implements OnDestroy {
    * If a recent position is already known, reuses it without requesting GPS again.
    */
   goToUserPosition(): void {
+    if (this.gpsTrackingActive()) {
+      this.stopGpsTracking();
+      return;
+    }
+
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+
+    this.gpsTrackingActive.set(true);
 
     const hasKnownPosition = this.recenterOnKnownUserPosition();
     if (hasKnownPosition) {
+      this.triggerUserLocationFoundState();
+      this.startGpsTracking();
       return;
     }
 
@@ -456,9 +476,12 @@ export class MapShellComponent implements OnDestroy {
         this.renderOrUpdateUserLocationMarker(coords);
         const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
         this.map?.setView(coords, zoom);
+        this.triggerUserLocationFoundState();
+        this.startGpsTracking();
         this.gpsLocating.set(false);
       },
       () => {
+        this.stopGpsTracking();
         this.gpsLocating.set(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
@@ -586,15 +609,54 @@ export class MapShellComponent implements OnDestroy {
         this.userPosition.set(coords);
         void this.refreshSearchCountryCode(coords[0], coords[1]);
         this.renderOrUpdateUserLocationMarker(coords);
-        if (this.pendingMapFocus()) {
-          return;
-        }
-        this.map?.setView(coords, 13);
       },
       () => {
         // Geolocation denied or unavailable — Vienna fallback already set.
       },
     );
+  }
+
+  private startGpsTracking(): void {
+    if (this.gpsTrackingTimer) {
+      clearInterval(this.gpsTrackingTimer);
+      this.gpsTrackingTimer = null;
+    }
+
+    this.gpsTrackingTimer = setInterval(() => {
+      if (!this.gpsTrackingActive()) {
+        return;
+      }
+      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+        this.stopGpsTracking();
+        return;
+      }
+
+      this.gpsLocating.set(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          this.userPosition.set(coords);
+          void this.refreshSearchCountryCode(coords[0], coords[1]);
+          this.renderOrUpdateUserLocationMarker(coords);
+          this.triggerUserLocationFoundState();
+          this.gpsLocating.set(false);
+        },
+        () => {
+          // When tracking can no longer get a fix, leave toggle mode.
+          this.stopGpsTracking();
+          this.gpsLocating.set(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
+      );
+    }, MapShellComponent.GPS_TRACKING_INTERVAL_MS);
+  }
+
+  private stopGpsTracking(): void {
+    this.gpsTrackingActive.set(false);
+    if (this.gpsTrackingTimer) {
+      clearInterval(this.gpsTrackingTimer);
+      this.gpsTrackingTimer = null;
+    }
   }
 
   private readMapFocusPayload(): { imageId: string; lat: number; lng: number } | null {
@@ -683,11 +745,33 @@ export class MapShellComponent implements OnDestroy {
         icon,
         interactive: false,
         keyboard: false,
+        zIndexOffset: 2000,
       }).addTo(this.map);
       return;
     }
 
     this.userLocationMarker.setLatLng(coords);
+  }
+
+  private triggerUserLocationFoundState(): void {
+    if (!this.userLocationMarker) {
+      return;
+    }
+
+    const markerElement = this.userLocationMarker.getElement();
+    if (!markerElement) {
+      return;
+    }
+
+    markerElement.classList.add('map-user-location-marker--fresh');
+    if (this.userLocationFoundTimer) {
+      clearTimeout(this.userLocationFoundTimer);
+    }
+
+    this.userLocationFoundTimer = setTimeout(() => {
+      markerElement.classList.remove('map-user-location-marker--fresh');
+      this.userLocationFoundTimer = null;
+    }, 1000);
   }
 
   private renderOrUpdateSearchLocationMarker(coords: [number, number]): void {
