@@ -24,36 +24,22 @@
   white-space: nowrap;
   transition:
     background 120ms ease-out,
-    color 120ms ease-out,
-    font-weight 120ms ease-out;
+    color 120ms ease-out;
 
   &:hover {
     background: color-mix(in srgb, var(--color-clay) 14%, transparent);
     color: var(--color-clay);
-    font-weight: 600;
   }
 
   &--active {
     background: color-mix(in srgb, var(--color-clay) 14%, transparent);
     color: var(--color-clay);
-    font-weight: 600;
   }
 
   &--open {
     background: color-mix(in srgb, var(--color-clay) 18%, transparent);
     color: var(--color-clay);
-    font-weight: 600;
   }
-}
-
-// ── Active dot indicator ────────────────────────────────────────────────
-.toolbar-btn__dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-clay);
-  flex-shrink: 0;
 }
 
 // ── Chevron icon ────────────────────────────────────────────────────────

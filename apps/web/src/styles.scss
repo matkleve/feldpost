@@ -13,6 +13,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '@angular/cdk/overlay-prebuilt.css';
+
 /* =============================================================
    Feldpost — Global Styles & Design Token System
    M-UI1: All CSS custom property tokens from design.md §3.
@@ -227,6 +229,11 @@ body {
 app-root {
   display: block;
   height: 100%;
+}
+
+// Keep CDK overlays below the floating sidebar so nav hover remains interactive.
+.cdk-overlay-container {
+  z-index: 1000;
 }
 
 // ── App layout helpers ─────────────────────────────────────────────────────────
