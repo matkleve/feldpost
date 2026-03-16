@@ -294,6 +294,11 @@ describe('SearchBarService', () => {
           viewbox: '15,49,17,47',
         }),
       );
+
+      const lastCallOptions = geocodingMock.search.mock.calls.at(-1)?.[1] as
+        | Record<string, unknown>
+        | undefined;
+      expect(lastCallOptions?.['bounded']).toBeUndefined();
     });
 
     it('returns empty array on geocoder failure', async () => {
@@ -323,6 +328,44 @@ describe('SearchBarService', () => {
       expect(results[0].label).toBe('Kuratorium für Verkehrssicherheit');
       expect(results[0].secondaryLabel).toBe('Schleiergasse 18, 1100 Wien');
     });
+
+    it('retries fallback queries when initial geocoder hits are filtered out', async () => {
+      geocodingMock.search
+        .mockResolvedValueOnce([
+          {
+            lat: 48.22,
+            lng: 16.39,
+            displayName: 'Austria',
+            name: null,
+            importance: 0.2,
+            address: { country: 'Austria' },
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            lat: 48.2211,
+            lng: 16.3912,
+            displayName: 'Franz-Jonas-Platz, 1210 Wien, Austria',
+            name: null,
+            importance: 0.71,
+            address: {
+              road: 'Franz-Jonas-Platz',
+              postcode: '1210',
+              city: 'Wien',
+              country_code: 'at',
+              country: 'Austria',
+            },
+          },
+        ]);
+
+      const results = await firstValueFrom(service.resolveGeocoder('Franz2', {}));
+
+      expect(geocodingMock.search).toHaveBeenCalledTimes(2);
+      expect(geocodingMock.search.mock.calls[0]?.[0]).toBe('franz2');
+      expect(geocodingMock.search.mock.calls[1]?.[0]).toBe('franz');
+      expect(results.length).toBe(1);
+      expect(results[0].label).toContain('Franz-Jonas-Platz');
+    });
   });
 
   // ── Query Normalization ──────────────────────────────────────────────
@@ -343,6 +386,17 @@ describe('SearchBarService', () => {
       const fallbacks = service.buildFallbackQueries('schleiergase 18');
       expect(fallbacks.length).toBeGreaterThan(0);
       expect(fallbacks).toContain('schleiergasse 18');
+    });
+
+    it('adds digit-stripped fallback for noisy input', () => {
+      const fallbacks = service.buildFallbackQueries('franz2');
+      expect(fallbacks).toContain('franz');
+    });
+
+    it('adds prefix-backoff fallback for truncated input', () => {
+      const fallbacks = service.buildFallbackQueries('praterst');
+      expect(fallbacks).toContain('praters');
+      expect(fallbacks).toContain('prater');
     });
   });
 

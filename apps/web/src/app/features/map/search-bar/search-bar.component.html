@@ -123,8 +123,24 @@
 
           @if (geocoderLoading()) {
             <div class="search-bar__skeleton-list" aria-hidden="true">
-              <div class="search-bar__skeleton-row"></div>
-              <div class="search-bar__skeleton-row"></div>
+              <div class="search-bar__skeleton-row">
+                <span class="search-bar__skeleton-media"></span>
+                <span class="search-bar__skeleton-content">
+                  <span class="search-bar__skeleton-line search-bar__skeleton-line--primary"></span>
+                  <span
+                    class="search-bar__skeleton-line search-bar__skeleton-line--secondary"
+                  ></span>
+                </span>
+              </div>
+              <div class="search-bar__skeleton-row">
+                <span class="search-bar__skeleton-media"></span>
+                <span class="search-bar__skeleton-content">
+                  <span class="search-bar__skeleton-line search-bar__skeleton-line--primary"></span>
+                  <span
+                    class="search-bar__skeleton-line search-bar__skeleton-line--secondary"
+                  ></span>
+                </span>
+              </div>
             </div>
           }
 

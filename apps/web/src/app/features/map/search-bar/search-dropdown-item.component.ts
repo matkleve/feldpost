@@ -35,7 +35,7 @@ import { SearchCandidate } from '../../../core/search/search.models';
   styles: [
     `
       .search-dropdown-item {
-        --ui-item-min-height: 3rem;
+        --ui-item-min-height: var(--search-dropdown-item-row-min-height, 3rem);
         --ui-item-padding-inline: var(
           --search-dropdown-item-padding-inline,
           var(--container-padding-inline)

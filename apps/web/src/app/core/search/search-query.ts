@@ -81,13 +81,56 @@ export function buildFallbackQueries(normalizedQuery: string): string[] {
   addIfDistinct(candidates, correctedFull, normalizedQuery);
 
   const base = correctedFull || normalizedQuery;
+
+  const noDigitQuery = base.replace(/\d+/g, ' ').replace(/\s+/g, ' ').trim();
+  addIfDistinct(candidates, noDigitQuery, normalizedQuery, correctedFull, base);
+
   const streetOnly = base.replace(/\s+\d+[a-zA-Z]?\s*$/, '').trim();
   addIfDistinct(candidates, streetOnly, normalizedQuery, correctedFull);
+
+  const streetOnlyNoDigits = streetOnly.replace(/\d+/g, ' ').replace(/\s+/g, ' ').trim();
+  addIfDistinct(
+    candidates,
+    streetOnlyNoDigits,
+    normalizedQuery,
+    correctedFull,
+    base,
+    noDigitQuery,
+    streetOnly,
+  );
 
   const correctedStreetOnly = applyStreetTokenCorrections(streetOnly);
   addIfDistinct(candidates, correctedStreetOnly, normalizedQuery, correctedFull, streetOnly);
 
+  for (const prefix of buildPrefixBackoffQueries(base)) {
+    addIfDistinct(
+      candidates,
+      prefix,
+      normalizedQuery,
+      correctedFull,
+      base,
+      noDigitQuery,
+      streetOnly,
+      streetOnlyNoDigits,
+      correctedStreetOnly,
+    );
+  }
+
   return [...candidates];
+}
+
+function buildPrefixBackoffQueries(query: string): string[] {
+  const compact = query.replace(/\s+/g, ' ').trim();
+  if (!compact || compact.includes(' ')) return [];
+
+  const fallbacks: string[] = [];
+  for (let cut = 1; cut <= 3; cut++) {
+    const candidate = compact.slice(0, Math.max(0, compact.length - cut)).trim();
+    if (candidate.length >= 5) {
+      fallbacks.push(candidate);
+    }
+  }
+  return fallbacks;
 }
 
 function addIfDistinct(set: Set<string>, value: string, ...exclude: string[]): void {
