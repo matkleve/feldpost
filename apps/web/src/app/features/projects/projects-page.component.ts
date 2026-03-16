@@ -1,7 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectsService } from '../../core/projects/projects.service';
+import { FilterService } from '../../core/filter.service';
+import { PropertyRegistryService } from '../../core/property-registry.service';
 import type {
   ProjectColorKey,
   ProjectListItem,
@@ -10,14 +21,23 @@ import type {
   ProjectsViewMode,
   ProjectsWorkspaceContext,
 } from '../../core/projects/projects.types';
+import type { PropertyRef, SortConfig } from '../../core/workspace-view.types';
 import { WorkspaceViewService } from '../../core/workspace-view.service';
 import { SearchBarComponent } from '../map/search-bar/search-bar.component';
+import { DragDividerComponent } from '../map/workspace-pane/drag-divider/drag-divider.component';
 import { WorkspacePaneComponent } from '../map/workspace-pane/workspace-pane.component';
+import {
+  GroupingDropdownComponent,
+  type GroupingProperty,
+} from '../map/workspace-pane/workspace-toolbar/grouping-dropdown.component';
+import { FilterDropdownComponent } from '../map/workspace-pane/workspace-toolbar/filter-dropdown.component';
+import { SortDropdownComponent } from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
 import { ProjectCardComponent } from './project-card.component';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
+type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 
 @Component({
   selector: 'app-projects-page',
@@ -25,7 +45,11 @@ const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
   imports: [
     CommonModule,
     SearchBarComponent,
+    DragDividerComponent,
     WorkspacePaneComponent,
+    GroupingDropdownComponent,
+    FilterDropdownComponent,
+    SortDropdownComponent,
     ProjectsViewToggleComponent,
     ProjectCardComponent,
     ProjectColorPickerComponent,
@@ -35,8 +59,12 @@ const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 })
 export class ProjectsPageComponent {
   private readonly projectsService = inject(ProjectsService);
+  private readonly filterService = inject(FilterService);
+  private readonly registry = inject(PropertyRegistryService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly projects = signal<ProjectListItem[]>([]);
   readonly loading = signal(false);
@@ -52,6 +80,40 @@ export class ProjectsPageComponent {
   readonly archivingProjectId = signal<string | null>(null);
   readonly coloringProjectId = signal<string | null>(null);
   readonly detailImageId = signal<string | null>(null);
+  readonly isMobile = signal(false);
+  readonly activeToolbarDropdown = signal<ProjectsToolbarDropdown>(null);
+  readonly toolbarDropdownTop = signal(0);
+  readonly toolbarDropdownLeft = signal(0);
+  readonly activeGroupings = signal<GroupingProperty[]>([]);
+  readonly isToolbarDragging = signal(false);
+  readonly activeProjectSorts = signal<SortConfig[]>([]);
+
+  readonly availableGroupings = computed<GroupingProperty[]>(() => {
+    const activeIds = new Set(this.activeGroupings().map((group) => group.id));
+    return this.registry
+      .groupableProperties()
+      .filter((property) => !activeIds.has(property.id))
+      .map((property) => ({ id: property.id, label: property.label, icon: property.icon }));
+  });
+
+  readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
+  readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
+  readonly hasCustomSort = computed(() => {
+    const sorts = this.workspaceViewService.activeSorts();
+    return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
+  });
+
+  readonly workspacePaneWidth = signal(360);
+  readonly workspacePaneMinWidth = 280;
+  readonly workspacePaneMaxWidth = computed(() => {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    return Math.max(this.workspacePaneMinWidth, viewportWidth - 320);
+  });
+  readonly workspacePaneDefaultWidth = computed(() => {
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    const golden = Math.round(viewportWidth * (1 - 1 / 1.618));
+    return Math.min(Math.max(golden, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
+  });
 
   private readonly workspaceContexts = new Map<string, ProjectsWorkspaceContext>();
   private readonly searchRefreshTimer = signal<ReturnType<typeof setTimeout> | null>(null);
@@ -80,7 +142,7 @@ export class ProjectsPageComponent {
       ? statusScoped.filter((project) => (counts[project.id] ?? 0) > 0)
       : statusScoped;
 
-    return this.sortProjects(queryScoped, this.sortMode());
+    return this.sortProjects(queryScoped, this.sortMode(), this.activeProjectSorts());
   });
 
   readonly projectCountLabel = computed(() => {
@@ -97,7 +159,28 @@ export class ProjectsPageComponent {
       this.persistViewMode(this.viewMode());
     });
 
+    this.syncViewportMode();
     void this.refreshProjects();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncViewportMode();
+    this.closeToolbarDropdown();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.isToolbarDragging()) return;
+    if (!this.activeToolbarDropdown()) return;
+    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
+      this.closeToolbarDropdown();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeToolbarDropdown();
   }
 
   async refreshProjects(): Promise<void> {
@@ -106,6 +189,11 @@ export class ProjectsPageComponent {
       const projects = await this.projectsService.loadProjects();
       this.projects.set(projects);
       await this.refreshSearchCounts();
+
+      const routeProjectId = this.route.snapshot.paramMap.get('projectId');
+      if (routeProjectId && projects.some((project) => project.id === routeProjectId)) {
+        await this.openWorkspace(routeProjectId, false);
+      }
     } finally {
       this.loading.set(false);
     }
@@ -142,6 +230,59 @@ export class ProjectsPageComponent {
     this.viewMode.set(mode);
   }
 
+  toggleToolbarDropdown(id: Exclude<ProjectsToolbarDropdown, null>, event: MouseEvent): void {
+    if (this.activeToolbarDropdown() === id) {
+      this.closeToolbarDropdown();
+      return;
+    }
+
+    const trigger = event.currentTarget as HTMLElement;
+    const rect = trigger.getBoundingClientRect();
+    const dropdownWidth = 240;
+    const viewportWidth = window.innerWidth;
+    const padding = 16;
+
+    let left = rect.left;
+    if (left + dropdownWidth > viewportWidth - padding) {
+      left = Math.max(padding, viewportWidth - dropdownWidth - padding);
+    }
+
+    this.toolbarDropdownTop.set(rect.bottom + 4);
+    this.toolbarDropdownLeft.set(left);
+    this.activeToolbarDropdown.set(id);
+  }
+
+  closeToolbarDropdown(): void {
+    this.activeToolbarDropdown.set(null);
+  }
+
+  onDragStarted(): void {
+    this.isToolbarDragging.set(true);
+  }
+
+  onDragEnded(): void {
+    setTimeout(() => this.isToolbarDragging.set(false));
+  }
+
+  onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
+    this.activeGroupings.set(active);
+    this.workspaceViewService.activeGroupings.set(
+      active.map(
+        (group) => ({ id: group.id, label: group.label, icon: group.icon }) as PropertyRef,
+      ),
+    );
+  }
+
+  onSortChanged(sortConfigs: SortConfig[]): void {
+    this.workspaceViewService.activeSorts.set(sortConfigs);
+    this.activeProjectSorts.set(sortConfigs);
+
+    const nextSort = this.mapSortConfigToProjectsSortMode(sortConfigs);
+    if (nextSort) {
+      this.sortMode.set(nextSort);
+    }
+  }
+
   async onNewProject(): Promise<void> {
     this.creatingProject.set(true);
     try {
@@ -150,6 +291,7 @@ export class ProjectsPageComponent {
 
       this.projects.update((all) => [draft, ...all]);
       this.editingProjectId.set(draft.id);
+      await this.openWorkspace(draft.id);
       await this.refreshSearchCounts();
     } finally {
       this.creatingProject.set(false);
@@ -184,6 +326,10 @@ export class ProjectsPageComponent {
     );
 
     this.editingProjectId.set(null);
+
+    if (this.selectedProjectId() === projectId) {
+      void this.router.navigate(['/projects', projectId]);
+    }
   }
 
   onRenameInputKeydown(event: KeyboardEvent, projectId: string, value: string): void {
@@ -253,8 +399,12 @@ export class ProjectsPageComponent {
     await this.refreshSearchCounts();
   }
 
-  async openWorkspace(projectId: string): Promise<void> {
+  async openWorkspace(projectId: string, navigate = true): Promise<void> {
     this.persistWorkspaceContext(this.selectedProjectId());
+
+    if (!this.workspacePaneOpen()) {
+      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+    }
 
     this.selectedProjectId.set(projectId);
     this.workspacePaneOpen.set(true);
@@ -266,6 +416,10 @@ export class ProjectsPageComponent {
 
     const context = this.workspaceContexts.get(projectId);
     this.detailImageId.set(context?.detailImageId ?? null);
+
+    if (navigate) {
+      void this.router.navigate(['/projects', projectId]);
+    }
 
     setTimeout(() => {
       const host = this.workspacePaneHost();
@@ -281,6 +435,11 @@ export class ProjectsPageComponent {
     this.detailImageId.set(null);
     this.workspaceViewService.selectedProjectIds.set(new Set());
     this.workspaceViewService.clearActiveSelection();
+    void this.router.navigate(['/projects']);
+  }
+
+  onWorkspaceWidthChange(newWidth: number): void {
+    this.workspacePaneWidth.set(newWidth);
   }
 
   onDetailRequested(imageId: string): void {
@@ -350,8 +509,52 @@ export class ProjectsPageComponent {
     });
   }
 
-  private sortProjects(projects: ProjectListItem[], mode: ProjectsSortMode): ProjectListItem[] {
+  private sortProjects(
+    projects: ProjectListItem[],
+    mode: ProjectsSortMode,
+    activeSorts: SortConfig[],
+  ): ProjectListItem[] {
     const sorted = [...projects];
+
+    if (activeSorts.length === 0 && this.activeGroupings().length > 0) {
+      const groupingSorts: SortConfig[] = this.activeGroupings().map((grouping) => ({
+        key: grouping.id,
+        direction: 'asc',
+      }));
+
+      sorted.sort((left, right) => {
+        for (const sort of groupingSorts) {
+          const leftValue = this.getProjectSortValue(left, sort.key);
+          const rightValue = this.getProjectSortValue(right, sort.key);
+          const order = this.compareSortValues(leftValue, rightValue);
+          if (order !== 0) {
+            return order;
+          }
+        }
+
+        return left.name.localeCompare(right.name);
+      });
+
+      return sorted;
+    }
+
+    if (activeSorts.length > 0) {
+      sorted.sort((left, right) => {
+        for (const sort of activeSorts) {
+          const leftValue = this.getProjectSortValue(left, sort.key);
+          const rightValue = this.getProjectSortValue(right, sort.key);
+
+          const order = this.compareSortValues(leftValue, rightValue);
+          if (order !== 0) {
+            return sort.direction === 'asc' ? order : -order;
+          }
+        }
+
+        return left.name.localeCompare(right.name);
+      });
+
+      return sorted;
+    }
 
     if (mode === 'name') {
       sorted.sort((left, right) => left.name.localeCompare(right.name));
@@ -369,6 +572,83 @@ export class ProjectsPageComponent {
     return sorted;
   }
 
+  private mapSortConfigToProjectsSortMode(sortConfigs: SortConfig[]): ProjectsSortMode | null {
+    const primary = sortConfigs[0]?.key;
+    if (!primary) return null;
+
+    if (primary === 'project-name' || primary === 'name' || primary === 'title') {
+      return 'name';
+    }
+
+    if (
+      primary === 'image-count' ||
+      primary === 'photo-count' ||
+      primary === 'images-count' ||
+      primary === 'photos-count'
+    ) {
+      return 'image-count';
+    }
+
+    if (
+      primary === 'updated-at' ||
+      primary === 'updated' ||
+      primary === 'date-captured' ||
+      primary === 'created-at'
+    ) {
+      return 'updated';
+    }
+
+    return null;
+  }
+
+  private getProjectSortValue(project: ProjectListItem, sortKey: string): string | number | null {
+    switch (sortKey) {
+      case 'name':
+      case 'project-name':
+      case 'project':
+        return project.name;
+      case 'image-count':
+      case 'photo-count':
+      case 'images-count':
+      case 'photos-count':
+        return project.totalImageCount;
+      case 'updated':
+      case 'updated-at':
+      case 'date-captured':
+      case 'date-uploaded':
+      case 'created-at':
+        return project.updatedAt;
+      case 'district':
+        return project.district;
+      case 'city':
+        return project.city;
+      case 'street':
+        return project.street;
+      case 'country':
+        return project.country;
+      default:
+        return null;
+    }
+  }
+
+  private compareSortValues(left: string | number | null, right: string | number | null): number {
+    if (left == null && right == null) return 0;
+    if (left == null) return 1;
+    if (right == null) return -1;
+
+    if (typeof left === 'number' && typeof right === 'number') {
+      return left - right;
+    }
+
+    const leftAsDate = Date.parse(String(left));
+    const rightAsDate = Date.parse(String(right));
+    if (Number.isFinite(leftAsDate) && Number.isFinite(rightAsDate)) {
+      return leftAsDate - rightAsDate;
+    }
+
+    return String(left).localeCompare(String(right));
+  }
+
   private loadStoredViewMode(): ProjectsViewMode {
     if (typeof window === 'undefined') {
       return 'list';
@@ -384,5 +664,14 @@ export class ProjectsPageComponent {
     }
 
     window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+  }
+
+  private syncViewportMode(): void {
+    if (typeof window === 'undefined') {
+      this.isMobile.set(false);
+      return;
+    }
+
+    this.isMobile.set(window.innerWidth < 768);
   }
 }

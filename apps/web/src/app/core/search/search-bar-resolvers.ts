@@ -11,6 +11,7 @@ import {
 } from './search.models';
 import { computeTextMatchScore } from './search-query';
 import { distanceToSearchContextMeters, isInViewport, toSizeSignal } from './search-bar-helpers';
+import { logGeocoderResolverStage } from './search-debug';
 
 interface DbContentRow {
   id: string;
@@ -37,7 +38,7 @@ export async function fetchDbContentCandidates(
   let projectsQuery = supabase.client
     .from('projects')
     .select('id,name')
-    .ilike('name', `%${trimmedQuery}%`)
+    .ilike('name', `*${trimmedQuery}*`)
     .limit(maxDbContentResults);
 
   if (context.organizationId) {
@@ -49,7 +50,7 @@ export async function fetchDbContentCandidates(
     supabase.client
       .from('saved_groups')
       .select('id,name')
-      .ilike('name', `%${trimmedQuery}%`)
+      .ilike('name', `*${trimmedQuery}*`)
       .limit(maxDbContentResults),
   ]);
 
@@ -158,6 +159,85 @@ export async function fetchGeocoderCandidates(
 ): Promise<SearchAddressCandidate[]> {
   if (normalizedQuery.length < 3) return [];
 
+  const constrainedOptions = buildConstrainedSearchOptions(context, maxGeocoderResults);
+  logGeocoderResolverStage('constrained-request', {
+    query: normalizedQuery,
+    options: constrainedOptions,
+  });
+  const constrainedResults = await geocodingService.search(normalizedQuery, constrainedOptions);
+  logGeocoderResolverStage('constrained-response', {
+    query: normalizedQuery,
+    count: constrainedResults.length,
+    labels: constrainedResults.slice(0, 10).map((result) => result.displayName),
+  });
+
+  const constrainedCandidates = rankGeocoderCandidates(
+    constrainedResults,
+    normalizedQuery,
+    context,
+    toCandidate,
+    maxGeocoderResults,
+  );
+
+  const shouldRetry = shouldRunUnconstrainedRetry(normalizedQuery, context, constrainedCandidates);
+  logGeocoderResolverStage('retry-decision', {
+    query: normalizedQuery,
+    shouldRetry,
+    constrainedTop: constrainedCandidates.slice(0, 3).map((candidate) => ({
+      label: candidate.label,
+      score: candidate.score,
+      distanceMeters: distanceToSearchContextMeters(candidate, context),
+    })),
+  });
+
+  if (!shouldRetry) {
+    return constrainedCandidates;
+  }
+
+  logGeocoderResolverStage('unconstrained-request', {
+    query: normalizedQuery,
+    options: { limit: maxGeocoderResults * 3 },
+  });
+  const unconstrainedResults = await geocodingService.search(normalizedQuery, {
+    limit: maxGeocoderResults * 3,
+  });
+  logGeocoderResolverStage('unconstrained-response', {
+    query: normalizedQuery,
+    count: unconstrainedResults.length,
+    labels: unconstrainedResults.slice(0, 20).map((result) => result.displayName),
+  });
+
+  const unconstrainedCandidates = rankGeocoderCandidates(
+    unconstrainedResults,
+    normalizedQuery,
+    context,
+    toCandidate,
+    maxGeocoderResults * 3,
+  );
+
+  const merged = mergeAndRankCandidates(
+    constrainedCandidates,
+    unconstrainedCandidates,
+    context,
+    normalizedQuery,
+  ).slice(0, maxGeocoderResults);
+
+  logGeocoderResolverStage('final-ranked', {
+    query: normalizedQuery,
+    top: merged.slice(0, 3).map((candidate) => ({
+      label: candidate.label,
+      score: candidate.score,
+      distanceMeters: distanceToSearchContextMeters(candidate, context),
+    })),
+  });
+
+  return merged;
+}
+
+function buildConstrainedSearchOptions(
+  context: SearchQueryContext,
+  maxGeocoderResults: number,
+): GeocoderSearchOptions {
   const searchOptions: GeocoderSearchOptions = { limit: maxGeocoderResults };
   if (context.countryCodes?.length) {
     searchOptions.countrycodes = context.countryCodes;
@@ -166,29 +246,200 @@ export async function fetchGeocoderCandidates(
     const b = context.viewportBounds;
     searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
   }
+  return searchOptions;
+}
 
-  const results = await geocodingService.search(normalizedQuery, searchOptions);
-  if (results.length === 0) return [];
-
-  const streetLevelResults = results.filter((r) => isStreetLevelResult(r));
+function rankGeocoderCandidates(
+  rawResults: GeocoderSearchResult[],
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  toCandidate: (
+    result: GeocoderSearchResult,
+    query: string,
+    index: number,
+    context: SearchQueryContext,
+  ) => SearchAddressCandidate,
+  limit: number,
+): SearchAddressCandidate[] {
+  const streetLevelResults = rawResults.filter((r) => isStreetLevelResult(r));
   if (streetLevelResults.length === 0) return [];
 
-  return streetLevelResults
+  const localizedResults = streetLevelResults.filter((result) =>
+    matchesCountryConstraint(result, context),
+  );
+
+  const lexicalResults = localizedResults.filter((result) =>
+    meetsLexicalMatchThreshold(result, normalizedQuery),
+  );
+
+  logGeocoderResolverStage('candidate-filter', {
+    query: normalizedQuery,
+    raw: rawResults.length,
+    streetLevel: streetLevelResults.length,
+    localized: localizedResults.length,
+    lexical: lexicalResults.length,
+  });
+
+  if (lexicalResults.length === 0) return [];
+
+  return lexicalResults
     .map((result, index) => toCandidate(result, normalizedQuery, index, context))
-    .sort((left, right) => {
-      const leftLocal = isInViewport(left, context.viewportBounds);
-      const rightLocal = isInViewport(right, context.viewportBounds);
-      if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
+    .filter((candidate) => (candidate.score ?? 0) > 0.01)
+    .sort((left, right) => compareCandidateRank(left, right, context, normalizedQuery))
+    .slice(0, limit);
+}
 
-      const leftNearContext = distanceToSearchContextMeters(left, context);
-      const rightNearContext = distanceToSearchContextMeters(right, context);
-      if (leftNearContext !== rightNearContext) return leftNearContext - rightNearContext;
+function matchesCountryConstraint(result: GeocoderSearchResult, context: SearchQueryContext): boolean {
+  const allowedCountryCodes = context.countryCodes?.map((code) => code.toLowerCase()) ?? [];
+  if (allowedCountryCodes.length === 0) {
+    if (isCoordinateInViewport(result.lat, result.lng, context.viewportBounds)) {
+      return true;
+    }
 
-      const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
-      if (scoreDelta !== 0) return scoreDelta;
-      return left.label.localeCompare(right.label);
-    })
-    .slice(0, maxGeocoderResults);
+    const contextDistance = distanceFromContextMeters(result.lat, result.lng, context);
+    return contextDistance <= 120000;
+  }
+
+  const resultCountryCode = result.address?.country_code?.toLowerCase();
+  if (resultCountryCode && allowedCountryCodes.includes(resultCountryCode)) {
+    return true;
+  }
+
+  return isCoordinateInViewport(result.lat, result.lng, context.viewportBounds);
+}
+
+function meetsLexicalMatchThreshold(result: GeocoderSearchResult, normalizedQuery: string): boolean {
+  const displayNameScore = computeTextMatchScore(result.displayName ?? '', normalizedQuery);
+  const roadScore = computeTextMatchScore(result.address?.road ?? '', normalizedQuery);
+  const nameScore = computeTextMatchScore(result.name ?? '', normalizedQuery);
+  const cityScore = computeTextMatchScore(result.address?.city ?? '', normalizedQuery);
+  const bestScore = Math.max(displayNameScore, roadScore, nameScore, cityScore);
+
+  return bestScore >= minimumLexicalScore(normalizedQuery);
+}
+
+function minimumLexicalScore(query: string): number {
+  if (query.length <= 4) return 0.6;
+  if (query.length <= 6) return 0.7;
+  if (query.length <= 9) return 0.8;
+  return 0.9;
+}
+
+function isCoordinateInViewport(
+  lat: number,
+  lng: number,
+  viewport?: { north: number; east: number; south: number; west: number },
+): boolean {
+  if (!viewport) return false;
+  return lat <= viewport.north && lat >= viewport.south && lng >= viewport.west && lng <= viewport.east;
+}
+
+function distanceFromContextMeters(lat: number, lng: number, context: SearchQueryContext): number {
+  return distanceToSearchContextMeters(
+    {
+      id: 'context-distance',
+      family: 'geocoder',
+      label: '',
+      lat,
+      lng,
+    },
+    context,
+  );
+}
+
+function compareCandidateRank(
+  left: SearchAddressCandidate,
+  right: SearchAddressCandidate,
+  context: SearchQueryContext,
+  query: string,
+): number {
+  const leftLocal = isInViewport(left, context.viewportBounds);
+  const rightLocal = isInViewport(right, context.viewportBounds);
+  if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
+
+  const leftPrefixLeading = startsWithQueryPrefix(left.label, query);
+  const rightPrefixLeading = startsWithQueryPrefix(right.label, query);
+  if (leftPrefixLeading !== rightPrefixLeading) return leftPrefixLeading ? -1 : 1;
+
+  const leftNearContext = distanceToSearchContextMeters(left, context);
+  const rightNearContext = distanceToSearchContextMeters(right, context);
+  if (leftNearContext !== rightNearContext) return leftNearContext - rightNearContext;
+
+  const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
+  if (scoreDelta !== 0) return scoreDelta;
+  return left.label.localeCompare(right.label);
+}
+
+function shouldRunUnconstrainedRetry(
+  normalizedQuery: string,
+  context: SearchQueryContext,
+  constrainedCandidates: SearchAddressCandidate[],
+): boolean {
+  if (!context.countryCodes?.length && !context.viewportBounds) {
+    return false;
+  }
+
+  if (!isShortAmbiguousPrefixQuery(normalizedQuery)) {
+    return false;
+  }
+
+  if (constrainedCandidates.length === 0) {
+    return true;
+  }
+
+  const top = constrainedCandidates[0];
+  const topDistance = distanceToSearchContextMeters(top, context);
+  if (!startsWithQueryPrefix(top.label, normalizedQuery)) {
+    return true;
+  }
+
+  if (!Number.isFinite(topDistance)) {
+    return true;
+  }
+
+  const clearlyRemote = topDistance > 60000;
+  const weakTopScore = (top.score ?? 0) < 0.75;
+  return clearlyRemote || weakTopScore;
+}
+
+function isShortAmbiguousPrefixQuery(query: string): boolean {
+  return query.length >= 3 && query.length <= 6 && !query.includes(' ');
+}
+
+function mergeAndRankCandidates(
+  constrainedCandidates: SearchAddressCandidate[],
+  unconstrainedCandidates: SearchAddressCandidate[],
+  context: SearchQueryContext,
+  query: string,
+): SearchAddressCandidate[] {
+  const merged = new Map<string, SearchAddressCandidate>();
+
+  for (const candidate of [...constrainedCandidates, ...unconstrainedCandidates]) {
+    const key = `${candidate.label.toLowerCase()}::${candidate.lat.toFixed(5)}::${candidate.lng.toFixed(5)}`;
+    const existing = merged.get(key);
+    if (!existing || (candidate.score ?? 0) > (existing.score ?? 0)) {
+      merged.set(key, candidate);
+    }
+  }
+
+  return [...merged.values()].sort((left, right) => compareCandidateRank(left, right, context, query));
+}
+
+function startsWithQueryPrefix(label: string, query: string): boolean {
+  const normalizedLabel = label
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const normalizedQuery = query
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  if (!normalizedLabel || !normalizedQuery) return false;
+
+  const firstToken = normalizedLabel.split(/\s+/).find(Boolean) ?? '';
+  return firstToken.startsWith(normalizedQuery);
 }
 
 async function loadProjectSizeSignals(

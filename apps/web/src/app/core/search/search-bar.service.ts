@@ -29,7 +29,7 @@ import {
   computeShortPrefixNoisePenalty,
   isCandidateInViewport,
 } from './search-geocoder-scoring';
-import { logGeocoderDiagnostics } from './search-debug';
+import { logGeocoderDiagnostics, logSearchEvent } from './search-debug';
 import { fetchDbContentCandidates, fetchGeocoderCandidates } from './search-bar-resolvers';
 import {
   AddressGroup,
@@ -200,10 +200,7 @@ export class SearchBarService {
     return from(this.fetchDbContentCandidates(query, context)).pipe(catchError(() => of([])));
   }
 
-  resolveGeocoder(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchAddressCandidate[]> {
+  resolveGeocoder(query: string, context: SearchQueryContext): Observable<SearchAddressCandidate[]> {
     return this.resolveGeocoderCandidates(query, context);
   }
 
@@ -214,14 +211,32 @@ export class SearchBarService {
     const normalizedQuery = this.normalizeSearchQuery(query);
     if (!normalizedQuery) return of([]);
 
+    logSearchEvent('geocoder-query', {
+      query,
+      normalizedQuery,
+      context: {
+        countryCodes: context.countryCodes,
+        viewportBounds: context.viewportBounds,
+        activeProjectCentroid: context.activeProjectCentroid,
+        activeMarkerCentroid: context.activeMarkerCentroid,
+        currentLocation: context.currentLocation,
+      },
+    });
+
     return from(this.fetchGeocoderCandidates(normalizedQuery, context)).pipe(
-      catchError(() => of([])),
+      catchError((error) => {
+        logSearchEvent('geocoder-error', {
+          query,
+          normalizedQuery,
+          message: error instanceof Error ? error.message : String(error),
+        });
+        return of([]);
+      }),
       tap((results) => logGeocoderDiagnostics(query, normalizedQuery, context, results)),
     );
   }
 
   formatAddressLabel = formatGeocoderAddressLabel;
-
   normalizeSearchQuery = normalizeSearchQuery;
 
   buildFallbackQueries = buildFallbackQueries;
@@ -236,7 +251,7 @@ export class SearchBarService {
     let request = this.supabaseService.client
       .from('images')
       .select('id,address_label,street,postcode,city,latitude,longitude,project_id,created_at')
-      .ilike('address_label', `%${trimmedQuery}%`)
+      .ilike('address_label', `*${trimmedQuery}*`)
       .not('address_label', 'is', null)
       .not('latitude', 'is', null)
       .not('longitude', 'is', null)
@@ -370,10 +385,8 @@ export class SearchBarService {
     context: SearchQueryContext,
   ): SearchAddressCandidate {
     const formatted = this.formatAddressLabel(result);
-    const isPoi =
-      result.name != null && result.address?.road != null && result.name !== result.address.road;
-
-    const primaryLabel = isPoi ? result.name! : formatted;
+    const primaryLabel = this.selectGeocoderPrimaryLabel(result, formatted, query);
+    const secondaryLabel = primaryLabel !== formatted ? formatted : undefined;
     const textScore = computeGeocoderTextScore(primaryLabel, formatted, query);
     const geoScore = computeProximityDecay(result.lat, result.lng, context);
     const countryBoost = computeCountryBoost(result, context.countryCodes);
@@ -381,8 +394,16 @@ export class SearchBarService {
     const qualityScore = clamp01(result.importance || 0);
 
     const inViewport = isCandidateInViewport(primaryLabel, result.lat, result.lng, context);
-    const noisePenalty = computeShortPrefixNoisePenalty(query, textScore, inViewport, countryBoost);
+    const noisePenalty = computeShortPrefixNoisePenalty(
+      query,
+      textScore,
+      inViewport,
+      countryBoost,
+      geoScore,
+      primaryLabel,
+    );
     const weightedScore = computeGeocoderWeightedScore(
+      query,
       textScore,
       geoScore,
       qualityScore,
@@ -395,8 +416,8 @@ export class SearchBarService {
       id: `geo-${query}-${index}`,
       stableId: `geo-${result.lat.toFixed(6)}-${result.lng.toFixed(6)}-${index}`,
       family: 'geocoder',
-      label: isPoi ? result.name! : formatted,
-      secondaryLabel: isPoi ? formatted : undefined,
+      label: primaryLabel,
+      secondaryLabel,
       lat: result.lat,
       lng: result.lng,
       textScore,
@@ -405,6 +426,27 @@ export class SearchBarService {
       noisePenalty,
       score,
     };
+  }
+
+  private selectGeocoderPrimaryLabel(
+    result: GeocoderSearchResult,
+    formatted: string,
+    query: string,
+  ): string {
+    const candidates = [result.address?.road, result.name, formatted]
+      .map((value) => value?.trim() ?? '')
+      .filter((value, idx, all) => value.length > 0 && all.indexOf(value) === idx);
+
+    if (candidates.length === 0) return formatted;
+
+    const best = candidates
+      .map((label) => ({
+        label,
+        score: computeGeocoderTextScore(label, formatted, query),
+      }))
+      .sort((left, right) => right.score - left.score || left.label.length - right.label.length)[0];
+
+    return best?.label ?? formatted;
   }
 
   private persistRecentSearches(recents: SearchRecentCandidate[]): void {
