@@ -143,31 +143,32 @@ export async function fetchGeocoderCandidates(
   if (context.viewportBounds) {
     const b = context.viewportBounds;
     searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
-    searchOptions.bounded = true;
   }
 
   const queries = [normalizedQuery, ...buildFallbackQueries(normalizedQuery)];
   for (const currentQuery of queries) {
     const results = await geocodingService.search(currentQuery, searchOptions);
-    if (results.length > 0) {
-      return results
-        .filter((r) => isStreetLevelResult(r))
-        .map((result, index) => toCandidate(result, currentQuery, index, context))
-        .sort((left, right) => {
-          const leftLocal = isInViewport(left, context.viewportBounds);
-          const rightLocal = isInViewport(right, context.viewportBounds);
-          if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
+    if (results.length === 0) continue;
 
-          const leftNearData = distanceToCentroidMeters(left, context.dataCentroid);
-          const rightNearData = distanceToCentroidMeters(right, context.dataCentroid);
-          if (leftNearData !== rightNearData) return leftNearData - rightNearData;
+    const streetLevelResults = results.filter((r) => isStreetLevelResult(r));
+    if (streetLevelResults.length === 0) continue;
 
-          const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
-          if (scoreDelta !== 0) return scoreDelta;
-          return left.label.localeCompare(right.label);
-        })
-        .slice(0, maxGeocoderResults);
-    }
+    return streetLevelResults
+      .map((result, index) => toCandidate(result, currentQuery, index, context))
+      .sort((left, right) => {
+        const leftLocal = isInViewport(left, context.viewportBounds);
+        const rightLocal = isInViewport(right, context.viewportBounds);
+        if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
+
+        const leftNearData = distanceToCentroidMeters(left, context.dataCentroid);
+        const rightNearData = distanceToCentroidMeters(right, context.dataCentroid);
+        if (leftNearData !== rightNearData) return leftNearData - rightNearData;
+
+        const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
+        if (scoreDelta !== 0) return scoreDelta;
+        return left.label.localeCompare(right.label);
+      })
+      .slice(0, maxGeocoderResults);
   }
 
   return [];
