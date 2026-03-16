@@ -3,6 +3,7 @@ export interface ImageRecord {
   user_id: string;
   organization_id: string | null;
   project_id: string | null;
+  project_ids?: string[];
   storage_path: string | null;
   thumbnail_path: string | null;
   latitude: number | null;

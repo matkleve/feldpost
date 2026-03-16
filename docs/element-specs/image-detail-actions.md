@@ -14,7 +14,7 @@ Actions use **`dd-item`** button styling — not bordered outline buttons. Each 
 
 ```pseudo
 ┌─ �  Zoom to location        ─┐   ← dd-item style, clay hover
-├─ 📁  Add to project          ─┤   ← dd-item style, clay hover
+├─ 📁  Manage projects         ─┤   ← dd-item style, clay hover
 ├─ 📋  Copy coordinates        ─┤   ← dd-item style, clay hover
 ├──────────────────────────────-─┤   ← dd-divider
 └─ 🗑️  Delete image            ─┘   ← dd-item--danger style
@@ -30,7 +30,7 @@ Actions use **`dd-item`** button styling — not bordered outline buttons. Each 
 | #   | User Action               | System Response                                                       | Triggers            |
 | --- | ------------------------- | --------------------------------------------------------------------- | ------------------- |
 | 1   | Clicks "Zoom to location" | Pans & zooms map to photo's coordinates, highlights marker with pulse | Map flyTo + marker  |
-| 2   | Clicks "Add to project"   | Opens project membership picker (multi-select)                        | Project memberships |
+| 2   | Clicks "Manage projects"  | Opens project membership picker (multi-select)                        | Project memberships |
 | 3   | Clicks "Copy coordinates" | Copies coordinates to clipboard, shows toast confirmation             | Clipboard + toast   |
 | 4   | Clicks "Delete image"     | Shows delete confirmation dialog                                      | `showDeleteConfirm` |
 | 5   | Confirms delete           | Deletes image from DB and storage, returns to grid                    | Supabase delete     |
@@ -60,7 +60,7 @@ The detail view **does not emit output events for marker sync**. Instead:
 ```
 ActionsSection                         ← dd-section-label "Actions", dd-item styled rows
 ├── ZoomToLocationAction               ← dd-item: my_location icon + "Zoom to location"
-├── AddToProjectAction                 ← dd-item: folder_open icon + "Add to project"
+├── ManageProjectsAction               ← dd-item: folder_open icon + "Manage projects"
 ├── CopyCoordinatesAction              ← dd-item: content_copy icon + "Copy coordinates"
 ├── dd-divider
 └── DeleteAction                       ← dd-item--danger: delete icon + "Delete image"
@@ -86,7 +86,7 @@ flowchart TD
     E --> E1[MapShell calls map.flyTo coords, zoom 18]
     E1 --> E2[Marker highlighted with pulse animation]
 
-    C -->|Add to project| F[Open project membership picker]
+    C -->|Manage projects| F[Open project membership picker]
     F --> F1[User selects one or more projects]
     F1 --> F2[Upsert/delete links in image_projects]
 
@@ -110,7 +110,7 @@ flowchart TD
 - [x] Zoom to location pans & zooms map to photo coordinates (flyTo, zoom 18)
 - [x] Zoom to location highlights the target marker with a pulse animation
 - [x] Zoom to location is disabled when image has no coordinates
-- [ ] Add to project opens project membership picker (multi-select)
+- [ ] Manage projects opens project membership picker (multi-select)
 - [x] Copy coordinates writes to clipboard with toast confirmation
 - [x] Delete confirmation dialog shown before removal
 - [x] Replace Photo triggers marker thumbnail update via `UploadManagerService.imageReplaced$` (not direct output events)

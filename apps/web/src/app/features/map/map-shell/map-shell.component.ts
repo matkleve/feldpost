@@ -1165,6 +1165,10 @@ export class MapShellComponent implements OnDestroy {
           // Rebind click handler so interaction resolves the new marker key.
           this.bindMarkerClickInteraction(key, reusableState.marker);
           this.animateMarkerPosition(reusableState.marker, row.cluster_lat, row.cluster_lng);
+          const reusedEl = reusableState.marker.getElement();
+          if (reusedEl) {
+            this.triggerMarkerFadeIn(reusedEl);
+          }
 
           if (needsVisualRefresh) {
             this.refreshPhotoMarker(key);
@@ -1174,13 +1178,22 @@ export class MapShellComponent implements OnDestroy {
         }
       }
 
+      const spawnOrigin = this.findSpawnOriginForIncomingRow(row, recyclableKeys);
+
       // New marker — add to LayerGroup (not directly to map) for batch ops.
-      const marker = L.marker([row.cluster_lat, row.cluster_lng], {
+      const marker = L.marker(
+        spawnOrigin ? [spawnOrigin.lat, spawnOrigin.lng] : [row.cluster_lat, row.cluster_lng],
+        {
         icon: this.buildPhotoMarkerIcon(key, { count, direction, corrected }),
-      });
+        },
+      );
 
       this.photoMarkerLayer!.addLayer(marker);
       this.attachMarkerInteractions(key, marker);
+
+      if (spawnOrigin) {
+        this.animateMarkerPosition(marker, row.cluster_lat, row.cluster_lng);
+      }
 
       this.uploadedPhotoMarkers.set(key, {
         marker,
@@ -1403,7 +1416,7 @@ export class MapShellComponent implements OnDestroy {
   /**
    * Select a recyclable outgoing marker that can represent an incoming row.
    * Prefer exact single-image identity; otherwise pick the nearest marker of
-   * the same kind (single vs cluster) within a small screen-space threshold.
+   * the same kind (single vs cluster) within a bounded screen distance.
    */
   private findReusableMarkerKey(
     row: { cluster_lat: number; cluster_lng: number; image_count: number; image_id: string | null },
@@ -1422,11 +1435,10 @@ export class MapShellComponent implements OnDestroy {
     if (!this.map) return null;
 
     const incomingPoint = this.map.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]);
-    const maxDistancePx = incomingIsSingle ? 80 : 140;
+    const maxDistancePx = incomingIsSingle ? 120 : 170;
     const maxDistanceSq = maxDistancePx * maxDistancePx;
-
-    let bestKey: string | null = null;
-    let bestDistanceSq = Number.POSITIVE_INFINITY;
+    let bestSameKindKey: string | null = null;
+    let bestSameKindDistanceSq = Number.POSITIVE_INFINITY;
 
     for (const candidateKey of recyclableKeys) {
       const candidate = this.uploadedPhotoMarkers.get(candidateKey);
@@ -1440,12 +1452,52 @@ export class MapShellComponent implements OnDestroy {
       const dy = incomingPoint.y - candidatePoint.y;
       const distSq = dx * dx + dy * dy;
 
-      if (distSq > maxDistanceSq || distSq >= bestDistanceSq) continue;
-      bestDistanceSq = distSq;
-      bestKey = candidateKey;
+      if (distSq <= maxDistanceSq && distSq < bestSameKindDistanceSq) {
+        bestSameKindDistanceSq = distSq;
+        bestSameKindKey = candidateKey;
+      }
     }
 
-    return bestKey;
+    return bestSameKindKey;
+  }
+
+  /**
+   * For cluster-split visuals, spawn new child markers at the previous
+   * parent-cluster centroid so they visibly emerge from that cluster.
+   */
+  private findSpawnOriginForIncomingRow(
+    row: { cluster_lat: number; cluster_lng: number; image_count: number },
+    recyclableKeys: Set<string>,
+  ): { lat: number; lng: number } | null {
+    if (!this.map) return null;
+
+    const incomingIsSingle = Number(row.image_count) === 1;
+    // Main target: cluster splitting into smaller markers.
+    if (!incomingIsSingle) return null;
+
+    const incomingPoint = this.map.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]);
+    const maxDistancePx = 240;
+    const maxDistanceSq = maxDistancePx * maxDistancePx;
+
+    let best: { lat: number; lng: number } | null = null;
+    let bestDistanceSq = Number.POSITIVE_INFINITY;
+
+    for (const candidateKey of recyclableKeys) {
+      const candidate = this.uploadedPhotoMarkers.get(candidateKey);
+      if (!candidate) continue;
+      if (candidate.count <= 1) continue;
+
+      const candidatePoint = this.map.latLngToContainerPoint([candidate.lat, candidate.lng]);
+      const dx = incomingPoint.x - candidatePoint.x;
+      const dy = incomingPoint.y - candidatePoint.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq > maxDistanceSq || distSq >= bestDistanceSq) continue;
+
+      bestDistanceSq = distSq;
+      best = { lat: candidate.lat, lng: candidate.lng };
+    }
+
+    return best;
   }
 
   /**

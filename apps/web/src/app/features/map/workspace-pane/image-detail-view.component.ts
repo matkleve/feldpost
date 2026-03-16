@@ -83,6 +83,8 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly showDeleteConfirm = signal(false);
   readonly saving = signal(false);
   readonly projectOptions = signal<SelectOption[]>([]);
+  readonly selectedProjectIds = signal<Set<string>>(new Set());
+  readonly projectSearch = signal('');
   readonly editingField = signal<string | null>(null);
   readonly fullResUrl = signal<string | null>(null);
   readonly thumbnailUrl = signal<string | null>(null);
@@ -175,10 +177,34 @@ export class ImageDetailViewComponent implements OnDestroy {
   });
 
   readonly projectName = computed(() => {
-    const img = this.image();
-    if (!img?.project_id) return '';
-    const match = this.projectOptions().find((p) => p.id === img.project_id);
-    return match?.label ?? '';
+    const selected = this.selectedProjectLabels();
+    if (selected.length === 0) return '';
+    if (selected.length === 1) return selected[0];
+    return `${selected[0]} +${selected.length - 1}`;
+  });
+
+  readonly selectedProjectLabels = computed(() => {
+    const selectedIds = this.selectedProjectIds();
+    if (selectedIds.size === 0) return [] as string[];
+    return this.projectOptions()
+      .filter((option) => selectedIds.has(option.id))
+      .map((option) => option.label);
+  });
+
+  readonly filteredProjectOptions = computed(() => {
+    const term = this.projectSearch().trim().toLowerCase();
+    const options = this.projectOptions();
+    if (!term) return options;
+    return options.filter((option) => option.label.toLowerCase().includes(term));
+  });
+
+  readonly projectCanCreate = computed(() => {
+    const term = this.projectSearch().trim();
+    if (!term) return false;
+    const exists = this.projectOptions().some(
+      (option) => option.label.toLowerCase() === term.toLowerCase(),
+    );
+    return !exists;
   });
 
   readonly fullAddress = computed(() => {
@@ -212,8 +238,8 @@ export class ImageDetailViewComponent implements OnDestroy {
       {
         icon: 'folder',
         text: this.projectName() || 'No project',
-        variant: img.project_id ? ('filled' as const) : ('default' as const),
-        title: 'Project',
+        variant: this.selectedProjectIds().size > 0 ? ('filled' as const) : ('default' as const),
+        title: 'Projects',
       },
       {
         icon: 'schedule',
@@ -280,6 +306,8 @@ export class ImageDetailViewComponent implements OnDestroy {
   private reset(): void {
     this.image.set(null);
     this.metadata.set([]);
+    this.selectedProjectIds.set(new Set());
+    this.projectSearch.set('');
     this.fullResPreloaded.set(false);
     this.fullResUrl.set(null);
     this.thumbnailUrl.set(null);
@@ -339,10 +367,126 @@ export class ImageDetailViewComponent implements OnDestroy {
     } else {
       this.photoLoad.markNoPhoto(imgData.id);
     }
+    await this.loadProjectMemberships(id, imgData.project_id);
     if (imgData.organization_id) {
       this.loadProjects(imgData.organization_id);
       this.loadMetadataKeys(imgData.organization_id);
     }
+  }
+
+  private async loadProjectMemberships(imageId: string, fallbackProjectId: string | null): Promise<void> {
+    const { data, error } = await this.supabaseService.client
+      .from('image_projects')
+      .select('project_id')
+      .eq('image_id', imageId);
+
+    if (error || !Array.isArray(data)) {
+      const fallback = new Set<string>();
+      if (fallbackProjectId) fallback.add(fallbackProjectId);
+      this.selectedProjectIds.set(fallback);
+      return;
+    }
+
+    const memberships = new Set<string>((data as Array<{ project_id: string }>).map((row) => row.project_id));
+    if (memberships.size === 0 && fallbackProjectId) {
+      memberships.add(fallbackProjectId);
+    }
+    this.selectedProjectIds.set(memberships);
+  }
+
+  private async persistProjectMemberships(previous: Set<string>): Promise<void> {
+    const img = this.image();
+    if (!img) return;
+
+    const next = this.selectedProjectIds();
+    const prevIds = [...previous];
+    const nextIds = [...next];
+
+    const toInsert = nextIds.filter((id) => !previous.has(id));
+    const toDelete = prevIds.filter((id) => !next.has(id));
+
+    if (toInsert.length > 0) {
+      const insertPayload = toInsert.map((projectId) => ({ image_id: img.id, project_id: projectId }));
+      const { error } = await this.supabaseService.client
+        .from('image_projects')
+        .upsert(insertPayload, { onConflict: 'image_id,project_id' });
+      if (error) {
+        this.selectedProjectIds.set(previous);
+        return;
+      }
+    }
+
+    if (toDelete.length > 0) {
+      const { error } = await this.supabaseService.client
+        .from('image_projects')
+        .delete()
+        .eq('image_id', img.id)
+        .in('project_id', toDelete);
+      if (error) {
+        this.selectedProjectIds.set(previous);
+        return;
+      }
+    }
+
+    const primaryProjectId = nextIds[0] ?? null;
+    const { error: syncError } = await this.supabaseService.client
+      .from('images')
+      .update({ project_id: primaryProjectId })
+      .eq('id', img.id);
+
+    if (syncError) {
+      this.selectedProjectIds.set(previous);
+      return;
+    }
+
+    this.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
+  }
+
+  async toggleProjectMembership(projectId: string): Promise<void> {
+    const previous = new Set(this.selectedProjectIds());
+    const next = new Set(previous);
+    if (next.has(projectId)) {
+      next.delete(projectId);
+    } else {
+      next.add(projectId);
+    }
+
+    this.selectedProjectIds.set(next);
+    await this.persistProjectMemberships(previous);
+  }
+
+  setProjectSearch(value: string): void {
+    this.projectSearch.set(value);
+  }
+
+  async createProjectFromSearch(): Promise<void> {
+    const name = this.projectSearch().trim();
+    if (!name) return;
+
+    const img = this.image();
+    if (!img?.organization_id) return;
+
+    const existing = this.projectOptions().find(
+      (option) => option.label.toLowerCase() === name.toLowerCase(),
+    );
+    if (existing) {
+      await this.toggleProjectMembership(existing.id);
+      this.projectSearch.set('');
+      return;
+    }
+
+    const { data, error } = await this.supabaseService.client
+      .from('projects')
+      .insert({ name, organization_id: img.organization_id })
+      .select('id,name')
+      .single();
+
+    if (error || !data) return;
+
+    const created = { id: data.id as string, label: data.name as string };
+    this.projectOptions.update((list) => [...list, created].sort((a, b) => a.label.localeCompare(b.label)));
+    this.projectSearch.set('');
+    await this.toggleProjectMembership(created.id);
   }
 
   private async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
@@ -690,7 +834,8 @@ export class ImageDetailViewComponent implements OnDestroy {
   onChipClicked(index: number): void {
     switch (index) {
       case 0:
-        this.editingField.set('project_id');
+        this.editingField.set('project_ids');
+        this.projectSearch.set('');
         break;
       case 1:
         this.openCapturedAtEditor();
@@ -702,7 +847,8 @@ export class ImageDetailViewComponent implements OnDestroy {
   }
 
   openProjectPicker(): void {
-    this.editingField.set('project_id');
+    this.editingField.set('project_ids');
+    this.projectSearch.set('');
   }
 
   /** Accepted MIME types for the file input */

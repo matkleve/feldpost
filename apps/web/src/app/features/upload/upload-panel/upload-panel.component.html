@@ -63,6 +63,7 @@
       type="button"
       (click)="openCapturePicker($event, captureInput)"
     >
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">photo_camera</span>
       Take photo
     </button>
 
@@ -96,17 +97,20 @@
 
   @if (showProgressBoard()) {
     <section class="upload-panel__progress-board" aria-label="Upload progress board">
-      <div class="upload-panel__dot-matrix" role="list" aria-label="Upload status matrix">
-        @for (dot of dotItems(); track dot.id) {
-          <button
-            type="button"
-            class="upload-panel__dot upload-panel__dot--{{ dot.statusClass }}"
-            [attr.aria-label]="'Open ' + dot.lane + ' item'"
-            (click)="onDotClick(dot.id)"
-          ></button>
-        }
+      <div class="upload-panel__dot-strip" aria-label="Upload status dots">
+        <div class="upload-panel__dot-matrix" role="list" aria-label="Upload status matrix">
+          @for (dot of dotItems(); track dot.id) {
+            <button
+              type="button"
+              class="upload-panel__dot upload-panel__dot--{{ dot.statusClass }}"
+              [attr.aria-label]="'Open ' + dot.lane + ' item'"
+              (click)="onDotClick(dot.id)"
+            ></button>
+          }
+        </div>
       </div>
 
+      <div class="upload-panel__lane-shell">
       <div class="upload-panel__lane-switch" role="tablist" aria-label="Upload lanes">
         <button
           type="button"
@@ -139,6 +143,7 @@
           Issues ({{ laneCounts().issues }})
         </button>
       </div>
+      </div>
     </section>
   }
 
@@ -151,16 +156,18 @@
             phaseToStatusClass(job.phase)
           }}"
         >
-          <button
-            class="upload-panel__row-action upload-panel__row-action--left"
-            type="button"
-            aria-label="Place {{ job.file.name }} on map"
-            title="Place on map"
-            [disabled]="job.phase !== 'missing_data'"
-            (click)="requestPlacement(job.id, job.phase, $event)"
-          >
-            <span class="material-icons" aria-hidden="true">my_location</span>
-          </button>
+          <div class="upload-panel__rail upload-panel__rail--left">
+            <button
+              class="upload-panel__row-action upload-panel__row-action--left"
+              type="button"
+              aria-label="Place {{ job.file.name }} on map"
+              title="Place on map"
+              [disabled]="job.phase !== 'missing_data'"
+              (click)="requestPlacement(job.id, job.phase, $event)"
+            >
+              <span class="material-icons" aria-hidden="true">my_location</span>
+            </button>
+          </div>
 
           <div class="upload-panel__file-main">
             <!-- Thumbnail preview -->
@@ -201,15 +208,17 @@
             </div>
           </div>
 
-          <button
-            class="upload-panel__row-action upload-panel__row-action--right"
-            type="button"
-            aria-label="Dismiss {{ job.file.name }}"
-            title="Dismiss"
-            (click)="dismissFile(job.id)"
-          >
-            <span class="material-icons" aria-hidden="true">close</span>
-          </button>
+          <div class="upload-panel__rail upload-panel__rail--right">
+            <button
+              class="upload-panel__row-action upload-panel__row-action--right"
+              type="button"
+              aria-label="Dismiss {{ job.file.name }}"
+              title="Dismiss"
+              (click)="dismissFile(job.id)"
+            >
+              <span class="material-icons" aria-hidden="true">close</span>
+            </button>
+          </div>
         </li>
       }
     </ul>

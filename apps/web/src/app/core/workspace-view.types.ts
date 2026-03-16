@@ -14,6 +14,8 @@ export interface WorkspaceImage {
   createdAt: string;
   projectId: string | null;
   projectName: string | null;
+  projectIds?: string[];
+  projectNames?: string[];
   direction: number | null;
   exifLatitude: number | null;
   exifLongitude: number | null;

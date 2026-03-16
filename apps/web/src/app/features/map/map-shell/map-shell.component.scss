@@ -101,7 +101,7 @@
 .upload-expand {
   display: none;
   flex-direction: column;
-  width: min(340px, calc(100vw - var(--spacing-6)));
+  width: min(420px, calc(100vw - var(--spacing-6)));
   max-height: 46vh;
   overflow: hidden;
   border-radius: var(--radius-lg);

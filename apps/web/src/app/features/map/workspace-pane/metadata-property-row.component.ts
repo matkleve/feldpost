@@ -35,13 +35,16 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
           {{ metaValue() || '—' }}
         </button>
       }
+      <div class="prop-action">
+        <ng-content select="[rowAction]" />
+      </div>
     </div>
   `,
   styles: [
     `
       .prop-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
         align-items: center;
         min-height: 2.5rem;
         padding-block: var(--spacing-2);
@@ -98,6 +101,13 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
         font-family: inherit;
         outline: none;
         box-shadow: var(--shadow-focus);
+      }
+
+      .prop-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: var(--spacing-1);
       }
     `,
   ],
