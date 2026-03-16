@@ -87,8 +87,8 @@
 }
 
 .thumbnail-grid__skeleton-card {
-  width: 128px;
-  height: 128px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: var(--radius-md);
   background: var(--color-bg-elevated, var(--color-bg-surface));
   animation: skeleton-pulse 1.5s ease-in-out infinite;

@@ -29,7 +29,7 @@
   --sidebar-label-size: var(--layout-sidebar-label-size);
 
   position: fixed;
-  z-index: 2147483647;
+  z-index: var(--z-panel);
 
   @media (min-width: 768px) {
     top: 50%;

@@ -9,6 +9,10 @@
     <p class="upload-panel__subtitle">Add site images with EXIF location when available.</p>
   </header>
 
+  @if (scanningLabel(); as label) {
+    <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
+  }
+
   <!-- Drop zone / file picker trigger -->
   <div
     class="upload-panel__dropzone"
@@ -19,9 +23,8 @@
     role="button"
     tabindex="0"
     aria-label="Drag images here or click to select"
-    (click)="fileInput.click()"
-    (keydown.enter)="fileInput.click()"
-    (keydown.space)="fileInput.click()"
+    (click)="openFilePicker(fileInput)"
+    (keydown)="onDropZoneKeydown($event, fileInput)"
   >
     <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">photo_camera</span>
     <p class="upload-panel__dropzone-label">
@@ -29,6 +32,7 @@
       <span class="upload-panel__dropzone-sub">or click to select files</span>
     </p>
     <p class="upload-panel__dropzone-hint">JPEG · PNG · HEIC · WebP · max 25 MB</p>
+
     <!-- Hidden file input; trigger by clicking the drop zone -->
     <input
       #fileInput
@@ -39,6 +43,38 @@
       aria-hidden="true"
       tabindex="-1"
       (change)="onFileInputChange($event)"
+    />
+  </div>
+
+  <div class="upload-panel__intake-actions" role="group" aria-label="Additional upload actions">
+    @if (folderImportSupported) {
+      <button
+        class="upload-panel__intake-btn"
+        type="button"
+        [disabled]="scanning()"
+        (click)="onSelectFolder($event)"
+      >
+        Select folder
+      </button>
+    }
+
+    <button
+      class="upload-panel__intake-btn upload-panel__intake-btn--capture"
+      type="button"
+      (click)="openCapturePicker($event, captureInput)"
+    >
+      Take photo
+    </button>
+
+    <input
+      #captureInput
+      type="file"
+      class="upload-panel__capture-input"
+      accept="image/*"
+      capture="environment"
+      aria-hidden="true"
+      tabindex="-1"
+      (change)="onCaptureInputChange($event)"
     />
   </div>
 

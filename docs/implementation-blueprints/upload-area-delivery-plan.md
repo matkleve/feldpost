@@ -2,6 +2,10 @@
 
 This plan covers end-to-end delivery of the upload area, including file uploads, batch progress board, lane triage, and photo capture support.
 
+## Why This Plan Exists
+
+Use this as a release safety checklist, not process overhead. It keeps specs, security policy, and implementation in sync so upload can ship without permission regressions.
+
 ## 0) Target Outcome
 
 Ship an upload area that:
@@ -29,6 +33,19 @@ Done criteria for this phase:
 - All upload-area behaviors are represented in specs/use-cases.
 - Permission assumptions in specs match `docs/role-permissions.md`.
 
+## 1.1) MCP and Security Guardrails (Mandatory)
+
+1. Any schema, policy, or function change must be delivered as a migration file under `supabase/migrations/`.
+2. Do not run DDL through ad-hoc SQL commands in production paths.
+3. After each security-relevant migration, run Supabase advisors (`security` and `performance`) and attach findings.
+4. Keep the hosted auth leaked-password protection enabled before public launch.
+5. Treat frontend permission checks as UX only; RLS is the enforcement boundary.
+
+Done criteria:
+
+- Migration history captures every policy/schema change.
+- Advisor results are reviewed and documented after each permission/security change.
+
 ## 2) Permission and Security Baseline
 
 Current role baseline:
@@ -42,6 +59,7 @@ Tasks:
 2. Validate upload and metadata writes under clerk and worker sessions.
 3. Add SQL validation script per role for upload, edit, delete, metadata actions.
 4. Re-run Supabase advisors after each permission migration.
+5. Keep role matrix in `docs/role-permissions.md` updated when policy behavior changes.
 
 Done criteria:
 
@@ -75,6 +93,12 @@ Done criteria:
 
 - Intake paths work consistently with unified queue creation.
 
+Current status:
+
+- In progress: drop, picker, and folder intake are wired.
+- In progress: map-shell tests are aligned with current upload-button behavior.
+- Pending: finalize edge-case messaging for role-deny and unsupported capture flows.
+
 ### 3.3 Photo Capture (NEW explicit requirement)
 
 Tasks:
@@ -96,6 +120,11 @@ Done criteria:
 
 - User can take a photo and it appears in the exact same pipeline/state model as picked files.
 - Capture failures are surfaced with actionable message.
+
+Current status:
+
+- In progress: `Take photo` action and capture-file input path are implemented.
+- Pending: optional in-app camera stream (`getUserMedia`) decision and implementation.
 
 ### 3.4 Progress Board and Lanes
 
@@ -135,6 +164,12 @@ Done criteria:
 
 - One canonical job lifecycle regardless of upload source.
 
+Current status:
+
+- In progress: folder intake now enters canonical manager pipeline.
+- In progress: capture input also enters the same manager submit pipeline.
+- Pending: completion-event verification for all capture edge cases.
+
 ## 5) Testing and Verification
 
 ### Unit/Integration
@@ -164,6 +199,12 @@ Done criteria:
 
 - All scenarios pass in staging with expected role outcomes.
 
+Current status:
+
+- Build passes.
+- Upload-panel and map-shell focused tests pass.
+- Pending: add/execute explicit viewer-deny role scenario checks in staging.
+
 ## 6) Rollout Plan
 
 1. Deploy DB migrations first.
@@ -185,3 +226,9 @@ Done criteria:
 - [ ] M4: Dot matrix + lane triage complete
 - [ ] M5: Issue correction loop complete
 - [ ] M6: Full QA + staged rollout complete
+
+Status notes:
+
+- M1: Mostly done, but requires repeatable SQL validation script output attached to release docs.
+- M2: Done for current scope (container, intake, progress trigger, tests green).
+- M3: In progress (capture-input path complete; stream-preview path optional/pending).

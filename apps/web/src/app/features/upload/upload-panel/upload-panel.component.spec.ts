@@ -26,6 +26,7 @@ import {
 
 function buildFakeUploadManager() {
   const jobsSignal = signal<ReadonlyArray<UploadJob>>([]);
+  const activeBatchSignal = signal<any>(null);
   const imageUploaded$ = new Subject<ManagerImageUploadedEvent>();
   const missingData$ = new Subject<MissingDataEvent>();
 
@@ -33,11 +34,14 @@ function buildFakeUploadManager() {
     jobs: jobsSignal.asReadonly(),
     activeJobs: signal<ReadonlyArray<UploadJob>>([]).asReadonly(),
     isBusy: signal(false).asReadonly(),
+    activeBatch: activeBatchSignal.asReadonly(),
+    isFolderImportSupported: false,
     activeCount: signal(0).asReadonly(),
     imageUploaded$: imageUploaded$.asObservable(),
     uploadFailed$: new Subject().asObservable(),
     missingData$: missingData$.asObservable(),
     submit: vi.fn().mockReturnValue([]),
+    submitFolder: vi.fn().mockResolvedValue('batch-1'),
     retryJob: vi.fn(),
     dismissJob: vi.fn(),
     dismissAllCompleted: vi.fn(),
@@ -45,6 +49,7 @@ function buildFakeUploadManager() {
     placeJob: vi.fn(),
     // Helpers for tests to control state
     _jobsSignal: jobsSignal,
+    _activeBatchSignal: activeBatchSignal,
     _imageUploaded$: imageUploaded$,
     _missingData$: missingData$,
   };
@@ -110,13 +115,13 @@ describe('UploadPanelComponent', () => {
 
     it('renders a hidden file input', async () => {
       const { fixture } = await setup();
-      const input = fixture.debugElement.query(By.css('input[type="file"]'));
+      const input = fixture.debugElement.query(By.css('.upload-panel__file-input'));
       expect(input).not.toBeNull();
     });
 
     it('file input accepts the correct MIME types', async () => {
       const { fixture } = await setup();
-      const input = fixture.debugElement.query(By.css('input[type="file"]'))
+      const input = fixture.debugElement.query(By.css('.upload-panel__file-input'))
         .nativeElement as HTMLInputElement;
       expect(input.accept).toContain('image/jpeg');
       expect(input.accept).toContain('image/png');
@@ -125,9 +130,26 @@ describe('UploadPanelComponent', () => {
 
     it('file input has multiple attribute', async () => {
       const { fixture } = await setup();
-      const input = fixture.debugElement.query(By.css('input[type="file"]'))
+      const input = fixture.debugElement.query(By.css('.upload-panel__file-input'))
         .nativeElement as HTMLInputElement;
       expect(input.multiple).toBe(true);
+    });
+
+    it('renders a hidden capture input for take-photo flow', async () => {
+      const { fixture } = await setup();
+      const input = fixture.debugElement.query(By.css('.upload-panel__capture-input'))
+        .nativeElement as HTMLInputElement;
+      expect(input).not.toBeNull();
+      expect(input.accept).toBe('image/*');
+      expect(input.getAttribute('capture')).toBe('environment');
+      expect(input.multiple).toBe(false);
+    });
+
+    it('renders the take-photo intake button', async () => {
+      const { fixture } = await setup();
+      const button = fixture.debugElement.query(By.css('.upload-panel__intake-btn--capture'));
+      expect(button).not.toBeNull();
+      expect((button.nativeElement as HTMLButtonElement).textContent).toContain('Take photo');
     });
   });
 
@@ -234,6 +256,36 @@ describe('UploadPanelComponent', () => {
       const { component, fakeManager } = await setup();
       component.retryFile('some-id');
       expect(fakeManager.retryJob).toHaveBeenCalledWith('some-id');
+    });
+  });
+
+  describe('photo capture intake', () => {
+    it('onCaptureInputChange submits exactly one captured file', async () => {
+      const { component, fakeManager } = await setup();
+      const file = new File([new Uint8Array(128)], 'captured.jpg', { type: 'image/jpeg' });
+      const input = { files: [file], value: 'placeholder' } as unknown as HTMLInputElement;
+      const event = { target: input } as unknown as Event;
+
+      component.onCaptureInputChange(event);
+
+      expect(fakeManager.submit).toHaveBeenCalledWith([file]);
+      expect(input.value).toBe('');
+    });
+
+    it('openCapturePicker stops bubbling and triggers capture input click', async () => {
+      const { component } = await setup();
+      const preventDefault = vi.fn();
+      const stopPropagation = vi.fn();
+      const click = vi.fn();
+
+      component.openCapturePicker(
+        { preventDefault, stopPropagation } as unknown as MouseEvent,
+        { click } as unknown as HTMLInputElement,
+      );
+
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(stopPropagation).toHaveBeenCalledTimes(1);
+      expect(click).toHaveBeenCalledTimes(1);
     });
   });
 

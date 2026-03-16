@@ -19,13 +19,13 @@ The upload trigger and its morph container. A round button fixed in the top-righ
 
 ## Actions
 
-| #   | User Action                     | System Response                                             | Triggers                      |
-| --- | ------------------------------- | ----------------------------------------------------------- | ----------------------------- |
-| 1   | Clicks upload button            | Button morphs into compact upload container and opens panel | `uploadPanelOpen` signal      |
-| 2   | Clicks collapse control         | Container collapses back into round upload button           | `uploadPanelOpen` → false     |
-| 3   | Upload batch is active          | Button shell shows aggregate progress ring (0–100%)         | `batchProgress$` subscription |
-| 4   | Queue empty + no active uploads | Progress ring hidden; control returns to idle visual        | `activeBatch() === null`      |
-| 5   | Batch transitions to complete   | Brief success edge flash (200ms) before settling            | `batchComplete$` event        |
+| #   | User Action                     | System Response                                             | Triggers                     |
+| --- | ------------------------------- | ----------------------------------------------------------- | ---------------------------- |
+| 1   | Clicks upload button            | Button morphs into compact upload container and opens panel | `uploadPanelOpen` signal     |
+| 2   | Clicks collapse control         | Container collapses back into round upload button           | `uploadPanelOpen` → false    |
+| 3   | Upload batch is active          | Button shell shows aggregate progress ring (0–100%)         | `activeBatch()` signal       |
+| 4   | Queue empty + no active uploads | Progress ring hidden; control returns to idle visual        | `activeBatch() === null`     |
+| 5   | User reopens while uploads run  | Panel restores current intake/progress state                | `UploadManagerService` state |
 
 ## Component Hierarchy
 
@@ -34,12 +34,11 @@ UploadButtonZone                                   ← fixed position container,
 ├── MorphShell                                     ← transitions circle → rounded panel shell
 │   ├── UploadButton                               ← closed state: 44px desktop / 56px mobile
 │   │   ├── Icon "add_photo_alternate"             ← Material Icon, white
-│   │   └── [uploading] ProgressRing               ← SVG circular progress (0–100%), --color-primary stroke
+│   │   └── [uploading] ProgressRing               ← circular edge ring (0–100%), token-driven stroke/fill
 │   └── [open] UploadPanel                         ← integrated content surface (see upload-panel spec)
-└── [complete pulse] ShellFlash                    ← 200ms success outline flash
 ```
 
-The `ProgressRing` is a thin (2px) SVG circle overlaying the trigger edge. It fills clockwise from 0–100% as the active batch progresses. When no batch is active, it is hidden. When the batch completes, the shell flashes `--color-success` briefly (200ms) before fading.
+The `ProgressRing` is a thin (2px) circular edge overlay around the trigger. It fills clockwise from 0–100% as the active batch progresses. When no batch is active, it is hidden.
 
 ## Data
 
@@ -92,8 +91,8 @@ sequenceDiagram
 - Button and zone container live in `map-shell.component.html`
 - `uploadPanelOpen` signal in `MapShellComponent` controls panel visibility
 - Click handler toggles `uploadPanelOpen` signal
-- Subscribes to `UploadManagerService.batchProgress$` for the progress ring
-- Subscribes to `UploadManagerService.batchComplete$` for the success flash
+- Reads `UploadManagerService.activeBatch()` for ring visibility and aggregate progress
+- Reopening panel rehydrates view state from `UploadManagerService`
 
 ## Acceptance Criteria
 
@@ -104,7 +103,7 @@ sequenceDiagram
 - [ ] Collapse control returns container to round button
 - [ ] Button shows active state when panel is open
 - [ ] `--color-clay` background, white icon
-- [ ] Progress ring (SVG circle) appears on button when a batch is active
+- [ ] Progress ring appears on button when a batch is active
 - [ ] Progress ring fills 0–100% as batch progresses
-- [ ] Progress ring flashes `--color-success` on batch completion
 - [ ] Progress ring hidden when no batch is active
+- [ ] Reopening while uploads continue shows current panel state

@@ -26,7 +26,19 @@
       [class.map-upload-btn--active]="uploadPanelOpen()"
       (click)="toggleUploadPanel()"
     >
+      @if (uploadBatchActive()) {
+        <span
+          class="map-upload-btn__progress"
+          [style.--upload-progress]="uploadBatchProgress() + '%'"
+          aria-hidden="true"
+        ></span>
+      }
       <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
+      @if (uploadBatchActive()) {
+        <span class="map-upload-btn__percent" aria-hidden="true">
+          {{ uploadBatchProgress() }}%
+        </span>
+      }
     </button>
 
     <!-- Expanded panel -->

@@ -2,55 +2,81 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
+  --metadata-action-cell-size: calc(var(--spacing-4) * 2);
 }
 
-.metadata-row-wrap {
-  position: relative;
-  display: flex;
+.metadata-row-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, var(--metadata-action-cell-size))
+    minmax(0, var(--metadata-action-cell-size))
+    minmax(0, 1fr)
+    minmax(0, var(--metadata-action-cell-size))
+    minmax(0, var(--metadata-action-cell-size));
   align-items: center;
+  gap: var(--spacing-1);
+
+  &:hover .metadata-row-main,
+  &:focus-within .metadata-row-main {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+  }
+
+  &:hover .metadata-row-action--remove,
+  &:focus-within .metadata-row-action--remove {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.metadata-action-slot {
+  width: var(--metadata-action-cell-size);
+  height: var(--metadata-action-cell-size);
+}
+
+.metadata-row-main {
   border-radius: var(--radius-sm);
   transition: background 80ms ease-out;
 
   app-metadata-property-row {
-    flex: 1 1 auto;
-    min-width: 0;
+    display: block;
   }
+}
 
-  .metadata-delete {
-    position: absolute;
-    right: var(--spacing-1);
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition:
-      color 80ms ease-out,
-      background 80ms ease-out;
+.metadata-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--metadata-action-cell-size);
+  height: var(--metadata-action-cell-size);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    color 80ms ease-out,
+    background 80ms ease-out,
+    opacity 80ms ease-out;
 
-    .material-icons {
-      font-size: 0.875rem;
-    }
-
-    &:hover {
-      color: var(--color-danger);
-      background: color-mix(in srgb, var(--color-danger) 10%, transparent);
-    }
+  .material-icons {
+    font-size: 0.875rem;
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  }
+}
 
-    .metadata-delete {
-      display: inline-flex;
-    }
+.metadata-row-action--remove {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (hover: none) {
+  .metadata-row-action--remove {
+    opacity: 1;
+    visibility: visible;
   }
 }
 

@@ -64,7 +64,10 @@
   padding: var(--spacing-2) var(--spacing-3);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
-  width: min(40rem, 100%);
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .detail-back-btn,

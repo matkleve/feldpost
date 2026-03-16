@@ -90,6 +90,30 @@ Expected:
 - Uploading dots pulse while in-flight.
 - Color transitions happen per dot without layout shuffle.
 
+## UP-2b: Folder Intake with Scan Feedback
+
+Context: User selects a folder to enqueue many images at once and needs clear scanning feedback.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Panel as UploadPanelComponent
+  participant Manager as UploadManagerService
+
+  User->>Panel: Click Select Folder
+  Panel->>Manager: submitFolder(files)
+  Manager-->>Panel: activeBatch.state = scanning
+  Panel-->>User: show "Scanning folder..." and disable folder action
+  Manager-->>Panel: jobs discovered and queued
+  Panel-->>User: render matrix + lanes
+```
+
+Expected:
+
+- Folder action appears only when support is available.
+- Scanning feedback is visible while folder parsing is in progress.
+- Discovered files are pushed into the same queue lifecycle as dropped/picked files.
+
 ## UP-3: Lane Switch Triage (Uploading, Uploaded, Issues)
 
 Context: User needs to inspect different subsets without scanning the whole matrix manually.
@@ -196,6 +220,31 @@ Expected:
 - Upload button still reflects aggregate progress.
 - Reopening panel restores current matrix and lane state from service data.
 
+## UP-7: Role Security Enforcement (Viewer Deny)
+
+Context: Viewer role attempts upload action from drop zone, picker, folder, or capture path.
+
+```mermaid
+sequenceDiagram
+  actor Viewer
+  participant Panel as UploadPanelComponent
+  participant Manager as UploadManagerService
+  participant DB as Supabase RLS/Storage Policies
+
+  Viewer->>Panel: Attempt upload
+  Panel->>Manager: submit(input)
+  Manager->>DB: write image/object
+  DB-->>Manager: deny
+  Manager-->>Panel: permission error state
+  Panel-->>Viewer: show actionable "No upload permission" feedback
+```
+
+Expected:
+
+- Viewer writes are denied by backend policies in every intake mode.
+- UI reports permission failure clearly without exposing sensitive internals.
+- No partial image row/object is left behind after deny.
+
 ## Acceptance Checklist for This Use-Case Set
 
 - [ ] Covers idle state with last-upload fallback
@@ -204,3 +253,6 @@ Expected:
 - [ ] Covers 3-lane triage interaction
 - [ ] Covers issue correction loop
 - [ ] Covers background continuation after panel close
+- [ ] Covers folder-scan intake behavior
+- [ ] Covers camera/capture path
+- [ ] Covers viewer deny security behavior
