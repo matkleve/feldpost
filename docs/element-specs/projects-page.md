@@ -8,7 +8,7 @@ A dedicated management page for organization projects. It lets users create, ren
 
 ## What It Looks Like
 
-Full-width page with a header row: title "Projects", total project count, and a primary "New project" button. Below header, the same Search Bar surface pattern is reused (same geometry, icon rhythm, focus behavior), but in Projects mode results are aggregated as project cards/rows with matching-image counts. The center content rail is horizontally centered and constrained to a readable maximum width of 70rem (1120px) so scanning remains comfortable on large monitors. A view toggle switches between List view (default, optimized for quick scanning/comparison) and Cards view (optimized for browsing and visual grouping). Each project item shows name, color chip, status, matching image count, total image count, last activity, and quick actions; cards use consistent structure and fixed action zones.
+Full-width page with a header row: title "Projects", total project count, and a primary "New project" button. Below header, the same Search Bar surface pattern is reused (same geometry, icon rhythm, focus behavior), but in Projects mode results are aggregated as project cards/rows with matching-image counts. The center content rail is horizontally centered and constrained to a narrow maximum width of 25rem (400px) so project controls and lists stay focused in a compact management column. A view toggle switches between List view (default, optimized for quick scanning/comparison) and Cards view (optimized for browsing and visual grouping). Each project item shows name, color chip, status, matching image count, total image count, last activity, and quick actions; cards use consistent structure and fixed action zones.
 
 ## Where It Lives
 
@@ -109,7 +109,7 @@ ProjectsPage                                ← route root, full width
 │   ├── GroupingDropdown                       ← project-level grouping fields only
 │   ├── FilterDropdown                         ← project-level filter fields only
 │   └── SortDropdown                           ← project-level sorting fields only
-├── ContentRail                                ← centered layout rail, max-width 70rem (1120px)
+├── ContentRail                                ← centered layout rail, max-width 25rem (400px)
 │   ├── [viewMode=list] ProjectsList (.ui-container)
 │   │   ├── [grouping active] ProjectGroupSection × N
 │   │   │   ├── ProjectGroupHeader             ← grouping label + count
@@ -240,7 +240,7 @@ sequenceDiagram
 - On row open action, set selected project and open the in-page workspace pane; do not change route.
 - Reuse existing image-details map action to navigate to `/map` with selected image id/coordinates so map zoom/focus can be applied.
 - Keep `Projects Dropdown` behavior consistent with this page by sharing the same source-of-truth project scope state.
-- Constrain the central project content area to max-width 70rem (1120px) and center it in the available viewport.
+- Constrain the central project content area to max-width 25rem (400px) and center it in the available viewport.
 
 ## Acceptance Criteria
 
@@ -269,7 +269,7 @@ sequenceDiagram
 - [x] Image-details map action from project-scoped workspace navigates to `/map` and zooms to the selected photo location.
 - [x] Empty state appears when no projects match current filters.
 - [x] Loading state appears during initial fetch and refresh operations.
-- [x] Center content rail is horizontally centered and capped at max-width 70rem (1120px).
+- [x] Center content rail is horizontally centered and capped at max-width 25rem (400px).
 - [x] Mobile layout is single-column with accessible touch targets.
 - [ ] Grouping/Filter/Sort dropdowns in Projects mode expose project-level fields only.
 - [ ] Image-level-only fields (`date-captured`, `distance`, `project`) are not shown in Projects operator menus.

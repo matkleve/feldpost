@@ -17,8 +17,10 @@
  *  - routerLinkActive uses exact matching for '/' to avoid it always being active.
  */
 
-import { Component, computed, inject } from '@angular/core';
+import { Component, HostListener, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { SettingsOverlayComponent } from '../settings-overlay/settings-overlay.component';
 import { AuthService } from '../../core/auth.service';
 
 export interface NavItem {
@@ -32,12 +34,13 @@ export interface NavItem {
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, CdkOverlayOrigin, SettingsOverlayComponent],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
 export class NavComponent {
   private readonly authService = inject(AuthService);
+  private readonly settingsOverlay = viewChild(SettingsOverlayComponent);
 
   /** Nav items in display order. Items with disabled: true are visually greyed
    *  out and non-interactive — reserved for future features. */
@@ -46,6 +49,8 @@ export class NavComponent {
     { icon: 'photo_camera', label: 'Photos', route: '/photos' },
     { icon: 'folder', label: 'Projects', route: '/projects' },
   ];
+
+  readonly settingsOverlayOpen = signal(false);
 
   readonly avatarName = computed<string>(() => {
     const user = this.authService.user();
@@ -74,4 +79,55 @@ export class NavComponent {
     const name = this.avatarName();
     return name.length === 0 ? '?' : name[0].toUpperCase();
   });
+
+  toggleSettingsOverlay(): void {
+    this.settingsOverlayOpen.update((open) => !open);
+
+    this.deferOverlayPositionRefresh();
+  }
+
+  onSettingsOverlayOpenChange(open: boolean): void {
+    this.settingsOverlayOpen.set(open);
+  }
+
+  onSidebarLeave(): void {
+    this.deferOverlayPositionRefresh();
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: PointerEvent): void {
+    if (!this.settingsOverlayOpen()) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const clickedInsideSidebar = target.closest('.sidebar') !== null;
+    const clickedInsideSettingsPane = target.closest('.settings-overlay') !== null;
+
+    if (!clickedInsideSidebar && !clickedInsideSettingsPane) {
+      this.settingsOverlayOpen.set(false);
+    }
+  }
+
+  refreshSettingsOverlayPosition(): void {
+    this.deferOverlayPositionRefresh();
+  }
+
+  private deferOverlayPositionRefresh(): void {
+    if (!this.settingsOverlayOpen()) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      this.settingsOverlay()?.updatePosition();
+    });
+
+    setTimeout(() => {
+      this.settingsOverlay()?.updatePosition();
+    }, 190);
+  }
 }

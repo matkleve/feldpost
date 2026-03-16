@@ -26,7 +26,7 @@
 }
 
 .projects-rail {
-  width: min(70rem, 100%);
+  width: min(60rem, 100%);
   margin-inline: auto;
   display: grid;
   gap: var(--spacing-4);
@@ -129,35 +129,22 @@
   white-space: nowrap;
   transition:
     background 120ms ease-out,
-    color 120ms ease-out,
-    font-weight 120ms ease-out;
+    color 120ms ease-out;
 }
 
 .toolbar-btn:hover {
   background: color-mix(in srgb, var(--color-clay) 14%, transparent);
   color: var(--color-clay);
-  font-weight: 600;
 }
 
 .toolbar-btn--active {
   background: color-mix(in srgb, var(--color-clay) 14%, transparent);
   color: var(--color-clay);
-  font-weight: 600;
 }
 
 .toolbar-btn--open {
   background: color-mix(in srgb, var(--color-clay) 18%, transparent);
   color: var(--color-clay);
-  font-weight: 600;
-}
-
-.toolbar-btn__dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-clay);
-  flex-shrink: 0;
 }
 
 .toolbar-btn__chevron {

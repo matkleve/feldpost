@@ -106,6 +106,7 @@ Key layout dimensions:
 | Bottom sheet (min / half / full) | 64px (4rem) / 50vh / 100vh                                                 |
 | Map padding (viewport pre-fetch) | 10% on each edge                                                           |
 | Filter panel width (desktop)     | 280px (17.5rem)                                                            |
+| Narrow content rail width        | 400px (25rem)                                                              |
 | Thumbnail size (grid)            | 128×128px (px intentional — image display size should not scale with font) |
 | Thumbnail size (list)            | 64×64px (px intentional — image display size should not scale with font)   |
 | Tap target minimum (mobile)      | 3rem × 3rem (48×48px)                                                      |

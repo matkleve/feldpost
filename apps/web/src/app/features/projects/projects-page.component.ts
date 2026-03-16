@@ -41,6 +41,7 @@ import {
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
 import { ClickOutsideDirective } from '../../shared/click-outside.directive';
+import { DropdownShellComponent } from '../../shared/dropdown-shell.component';
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
@@ -112,6 +113,7 @@ interface ProjectGroupedSection {
     ProjectsViewToggleComponent,
     ProjectColorPickerComponent,
     ClickOutsideDirective,
+    DropdownShellComponent,
   ],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',

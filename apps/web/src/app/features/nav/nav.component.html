@@ -6,9 +6,20 @@
            expands right on hover to show icon + label (150 ms ease-out).
   Mobile:  full-width bottom tab bar (unchanged behaviour).
 -->
-<nav class="sidebar" aria-label="Main navigation">
+<nav
+  class="sidebar"
+  aria-label="Main navigation"
+  (mouseenter)="refreshSettingsOverlayPosition()"
+  (mouseleave)="onSidebarLeave()"
+>
+  <span
+    class="sidebar__overlay-anchor"
+    cdkOverlayOrigin
+    #settingsOverlayOrigin="cdkOverlayOrigin"
+  ></span>
+
   <!-- Desktop sidebar panel -->
-  <div class="sidebar__panel ui-container">
+  <div class="sidebar__panel ui-container" (transitionend)="refreshSettingsOverlayPosition()">
     <ul class="nav__list" role="list">
       @for (item of navItems; track item.route) {
         <li class="sidebar__item">
@@ -47,12 +58,15 @@
       <li class="sidebar__item sidebar__item--spacer ui-spacer" aria-hidden="true"></li>
 
       <li class="sidebar__item sidebar__item--account">
-        <a
+        <button
+          type="button"
           class="nav__link nav__account-link ui-item"
-          routerLink="/settings"
-          routerLinkActive="nav__link--active"
+          [class.nav__link--active]="settingsOverlayOpen()"
           title="Settings"
-          aria-label="Go to Settings page"
+          aria-label="Open settings overlay"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="settingsOverlayOpen()"
+          (click)="toggleSettingsOverlay()"
         >
           <span class="nav__media ui-item-media" aria-hidden="true">
             <span class="nav__avatar-badge">
@@ -64,10 +78,16 @@
             </span>
           </span>
           <span class="nav__label nav__account-name ui-item-label">Settings</span>
-        </a>
+        </button>
       </li>
     </ul>
   </div>
+
+  <ss-settings-overlay
+    [origin]="settingsOverlayOrigin"
+    [open]="settingsOverlayOpen()"
+    (openChange)="onSettingsOverlayOpenChange($event)"
+  />
 
   <span id="nav-disabled-tip" class="nav__sr-only">This feature is coming soon.</span>
 </nav>

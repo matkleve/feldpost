@@ -29,7 +29,7 @@
   --sidebar-label-size: var(--layout-sidebar-label-size);
 
   position: fixed;
-  z-index: var(--z-panel);
+  z-index: 2147483647;
 
   @media (min-width: 768px) {
     top: 50%;
@@ -43,8 +43,7 @@
     align-items: stretch;
     transition: width 180ms ease-out;
 
-    &:hover,
-    &:focus-within {
+    &:hover {
       width: var(--sidebar-width-expanded);
 
       .nav__label {
@@ -69,6 +68,26 @@
     background: var(--color-bg-surface);
     border-top: 1px solid var(--color-border);
     box-shadow: var(--elevation-subtle);
+  }
+}
+
+.sidebar__overlay-anchor {
+  position: absolute;
+  pointer-events: none;
+
+  @media (min-width: 768px) {
+    top: 50%;
+    left: var(--sidebar-width-collapsed);
+    width: 1px;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+
+  @media (max-width: 767px) {
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
   }
 }
 
@@ -253,6 +272,10 @@
 }
 
 .nav__account-link {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  text-align: left;
   color: var(--color-text-primary);
 }
 

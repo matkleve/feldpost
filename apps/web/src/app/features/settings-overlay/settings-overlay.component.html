@@ -1,0 +1,347 @@
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayOrigin]="origin()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  [cdkConnectedOverlayGrowAfterOpen]="false"
+  [cdkConnectedOverlayPush]="false"
+  [cdkConnectedOverlayPanelClass]="panelClass"
+  (attach)="onOverlayAttach()"
+  (overlayKeydown)="onEscape($event)"
+>
+  <section
+    class="settings-overlay ui-container"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Settings"
+  >
+    <button
+      type="button"
+      class="settings-overlay__close"
+      aria-label="Close settings overlay"
+      (click)="requestClose()"
+    >
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+
+    <div class="settings-overlay__lead-divider" aria-hidden="true"></div>
+
+    <div class="settings-overlay__shell">
+      <aside class="settings-overlay__sections" aria-label="Settings sections">
+        <header class="settings-overlay__sections-header">
+          <p class="settings-overlay__kicker">Settings</p>
+          <h2 class="settings-overlay__title">Workspace Preferences</h2>
+          <p class="settings-overlay__subtitle">
+            iOS-style section navigation with Feldpost controls.
+          </p>
+        </header>
+
+        <div class="settings-overlay__section-list" role="list">
+          @for (section of sectionList; track section.id) {
+            <button
+              type="button"
+              class="settings-overlay__section-item ui-item dd-item"
+              [class.settings-overlay__section-item--active]="isSectionSelected(section.id)"
+              [attr.aria-current]="isSectionSelected(section.id) ? 'true' : null"
+              (click)="selectSection(section.id)"
+            >
+              <span class="settings-overlay__section-media ui-item-media" aria-hidden="true">
+                <span class="material-icons">{{ section.icon }}</span>
+              </span>
+              <span class="settings-overlay__section-label ui-item-label">
+                <strong>{{ section.title }}</strong>
+                <small>{{ section.subtitle }}</small>
+              </span>
+              <span class="settings-overlay__section-chevron material-icons" aria-hidden="true"
+                >chevron_right</span
+              >
+            </button>
+          }
+        </div>
+      </aside>
+
+      <div class="settings-overlay__column-divider" aria-hidden="true"></div>
+
+      <div class="settings-overlay__detail" aria-live="polite">
+        @if (loadState() === 'loading') {
+          <div class="settings-overlay__state settings-overlay__state--loading">
+            <span class="material-icons" aria-hidden="true">sync</span>
+            <h3>Loading settings</h3>
+            <p>We are preparing your configuration profile.</p>
+          </div>
+        } @else if (loadState() === 'error') {
+          <div class="settings-overlay__state settings-overlay__state--error">
+            <span class="material-icons" aria-hidden="true">warning</span>
+            <h3>Could not load settings</h3>
+            <p>{{ lastError() }}</p>
+            <button type="button" class="settings-overlay__ghost-button" (click)="retryLoad()">
+              Retry
+            </button>
+          </div>
+        } @else {
+          @switch (selectedSectionId()) {
+            @case ('general') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>General</h3>
+                <p>Control base language and content density for workspace surfaces.</p>
+
+                <div class="settings-overlay__field-row">
+                  <span>Language</span>
+                  <div class="settings-overlay__segmented" role="group" aria-label="Language">
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().language === 'en'
+                      "
+                      (click)="setLanguage('en')"
+                    >
+                      English
+                    </button>
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().language === 'de'
+                      "
+                      (click)="setLanguage('de')"
+                    >
+                      Deutsch
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-overlay__field-row">
+                  <span>Density</span>
+                  <div class="settings-overlay__segmented" role="group" aria-label="Density">
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().density === 'compact'
+                      "
+                      (click)="setDensity('compact')"
+                    >
+                      Compact
+                    </button>
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().density === 'comfortable'
+                      "
+                      (click)="setDensity('comfortable')"
+                    >
+                      Comfortable
+                    </button>
+                  </div>
+                </div>
+              </section>
+            }
+
+            @case ('appearance') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>Appearance</h3>
+                <p>Use the same palette behavior as dropdowns and map surfaces.</p>
+                <div class="settings-overlay__field-row">
+                  <span>Theme mode</span>
+                  <div class="settings-overlay__segmented" role="group" aria-label="Theme mode">
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().themeMode === 'light'
+                      "
+                      (click)="setThemeMode('light')"
+                    >
+                      Light
+                    </button>
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().themeMode === 'dark'
+                      "
+                      (click)="setThemeMode('dark')"
+                    >
+                      Dark
+                    </button>
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().themeMode === 'system'
+                      "
+                      (click)="setThemeMode('system')"
+                    >
+                      System
+                    </button>
+                  </div>
+                </div>
+              </section>
+            }
+
+            @case ('notifications') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>Notifications</h3>
+                <p>Choose what feedback appears while working on-site.</p>
+
+                <button
+                  type="button"
+                  class="settings-overlay__toggle-row ui-item"
+                  (click)="toggleSetting('notificationsEnabled')"
+                >
+                  <span class="ui-item-label">
+                    <strong>In-app notifications</strong>
+                    <small>Show success and warning notices for actions.</small>
+                  </span>
+                  <span
+                    class="settings-overlay__toggle"
+                    [class.settings-overlay__toggle--on]="settingsModel().notificationsEnabled"
+                  ></span>
+                </button>
+
+                <button
+                  type="button"
+                  class="settings-overlay__toggle-row ui-item"
+                  (click)="toggleSetting('uploadFailureAlerts')"
+                >
+                  <span class="ui-item-label">
+                    <strong>Upload failure alerts</strong>
+                    <small>Raise immediate warning toasts for failed uploads.</small>
+                  </span>
+                  <span
+                    class="settings-overlay__toggle"
+                    [class.settings-overlay__toggle--on]="settingsModel().uploadFailureAlerts"
+                  ></span>
+                </button>
+              </section>
+            }
+
+            @case ('map') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>Map Preferences</h3>
+                <p>Keep map behavior consistent with field navigation workflows.</p>
+
+                <button
+                  type="button"
+                  class="settings-overlay__toggle-row ui-item"
+                  (click)="toggleSetting('mapAutoLocate')"
+                >
+                  <span class="ui-item-label">
+                    <strong>Auto-locate after login</strong>
+                    <small>Center map to your current position when entering map shell.</small>
+                  </span>
+                  <span
+                    class="settings-overlay__toggle"
+                    [class.settings-overlay__toggle--on]="settingsModel().mapAutoLocate"
+                  ></span>
+                </button>
+
+                <button
+                  type="button"
+                  class="settings-overlay__toggle-row ui-item"
+                  (click)="toggleSetting('mapGridOverlay')"
+                >
+                  <span class="ui-item-label">
+                    <strong>Grid helper overlay</strong>
+                    <small>Show subtle grid alignment lines on high zoom levels.</small>
+                  </span>
+                  <span
+                    class="settings-overlay__toggle"
+                    [class.settings-overlay__toggle--on]="settingsModel().mapGridOverlay"
+                  ></span>
+                </button>
+              </section>
+            }
+
+            @case ('search') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>Search Tuning</h3>
+                <p>Adjust bias and distance defaults for address and place results.</p>
+
+                <div class="settings-overlay__field-row">
+                  <span>Search bias</span>
+                  <select
+                    class="settings-overlay__select"
+                    [value]="settingsModel().searchBias"
+                    (change)="setSearchBias($any($event.target).value)"
+                  >
+                    <option value="balanced">Balanced</option>
+                    <option value="address-first">Address first</option>
+                    <option value="place-first">Place first</option>
+                  </select>
+                </div>
+
+                <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
+                  <span>Default radius (km)</span>
+                  <input
+                    class="settings-overlay__range"
+                    type="range"
+                    min="1"
+                    max="10"
+                    [value]="settingsModel().searchRadiusKm"
+                    (input)="setSearchRadius(+$any($event.target).value)"
+                  />
+                  <strong>{{ settingsModel().searchRadiusKm }} km</strong>
+                </div>
+              </section>
+            }
+
+            @case ('data') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>Data and Privacy</h3>
+                <p>Control retention and diagnostics behavior.</p>
+
+                <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
+                  <span>Local cache retention</span>
+                  <input
+                    class="settings-overlay__range"
+                    type="range"
+                    min="7"
+                    max="90"
+                    [value]="settingsModel().cacheRetentionDays"
+                    (input)="setCacheRetentionDays(+$any($event.target).value)"
+                  />
+                  <strong>{{ settingsModel().cacheRetentionDays }} days</strong>
+                </div>
+
+                <button
+                  type="button"
+                  class="settings-overlay__toggle-row ui-item"
+                  (click)="toggleSetting('telemetryEnabled')"
+                >
+                  <span class="ui-item-label">
+                    <strong>Diagnostics telemetry</strong>
+                    <small>Send anonymous performance and crash diagnostics.</small>
+                  </span>
+                  <span
+                    class="settings-overlay__toggle"
+                    [class.settings-overlay__toggle--on]="settingsModel().telemetryEnabled"
+                  ></span>
+                </button>
+              </section>
+            }
+
+            @case ('account') {
+              <section class="settings-overlay__detail-card ui-container ui-container--compact">
+                <h3>Account</h3>
+                <p>Signed-in identity and workspace session context.</p>
+
+                <div class="settings-overlay__identity">
+                  <span class="material-icons" aria-hidden="true">account_circle</span>
+                  <div>
+                    <strong>{{ userDisplayName() }}</strong>
+                    <p>{{ userEmail() }}</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="settings-overlay__ghost-button"
+                  (click)="requestClose()"
+                >
+                  Close settings
+                </button>
+              </section>
+            }
+          }
+        }
+      </div>
+    </div>
+  </section>
+</ng-template>

@@ -41,9 +41,6 @@
             (click)="toggleToolbarDropdown('grouping', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">Grouping</span>
-            @if (hasGrouping()) {
-              <span class="toolbar-btn__dot" aria-hidden="true"></span>
-            }
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
 
@@ -57,9 +54,6 @@
             (click)="toggleToolbarDropdown('filter', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">Filter</span>
-            @if (hasFilters()) {
-              <span class="toolbar-btn__dot" aria-hidden="true"></span>
-            }
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
 
@@ -73,9 +67,6 @@
             (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">Sort</span>
-            @if (hasCustomSort()) {
-              <span class="toolbar-btn__dot" aria-hidden="true"></span>
-            }
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
         </div>
@@ -87,14 +78,12 @@
       </section>
 
       @if (activeToolbarDropdown()) {
-        <div
-          class="projects-toolbar-dropdown"
-          appClickOutside
-          [appClickOutsideEnabled]="!isToolbarDragging()"
-          (clickOutside)="onOutsideInteraction()"
-          [style.top.px]="toolbarDropdownTop()"
-          [style.left.px]="toolbarDropdownLeft()"
-          (click)="$event.stopPropagation()"
+        <app-dropdown-shell
+          panelClass="projects-toolbar-dropdown"
+          [top]="toolbarDropdownTop()"
+          [left]="toolbarDropdownLeft()"
+          [outsideCloseEnabled]="!isToolbarDragging()"
+          (closeRequested)="onOutsideInteraction()"
         >
           @switch (activeToolbarDropdown()) {
             @case ('grouping') {
@@ -119,7 +108,7 @@
               />
             }
           }
-        </div>
+        </app-dropdown-shell>
       }
 
       @if (loading()) {

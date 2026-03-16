@@ -7,7 +7,7 @@ import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { FilterService } from '../../../../core/filter.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyRef, SortConfig } from '../../../../core/workspace-view.types';
-import { ClickOutsideDirective } from '../../../../shared/click-outside.directive';
+import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -16,7 +16,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
   templateUrl: './workspace-toolbar.component.html',
   styleUrl: './workspace-toolbar.component.scss',
   imports: [
-    ClickOutsideDirective,
+    DropdownShellComponent,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
