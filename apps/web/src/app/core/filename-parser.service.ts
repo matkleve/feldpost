@@ -19,7 +19,26 @@ const TIMESTAMP_PATTERN = /^\d{4}[-_]?\d{2}[-_]?\d{2}([-_T]\d{2}[-_]?\d{2}[-_]?\
  * Matches in the middle or end of a token sequence.
  */
 const STREET_SUFFIXES =
-  /(?:stra(?:ß|ss)e|strasse|str\.?|gasse|weg|allee|platz|gässli|ring|damm|ufer|road|street|st\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|court|ct\.?|way)\b/i;
+  /(?:stra(?:ß|ss)e|strasse|str\.?|gasse|weg|allee|platz|gässli|ring|damm|ufer|zeile|road|street|st\.?|avenue|ave\.?|drive|dr\.?|lane|ln\.?|boulevard|blvd\.?|court|ct\.?|way)\b/i;
+
+/**
+ * Conservative fallback: "StreetName 12" with optional ", City".
+ * Used only when no explicit street suffix was detected.
+ */
+const STREET_NUMBER_PATTERN =
+  /^([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.'-]*(?:\s+[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.'-]*)*)\s+(\d{1,4}[A-Za-z]?)(?:,\s*([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.'\s-]*))?$/;
+
+const NON_ADDRESS_WORDS = new Set([
+  'img',
+  'dsc',
+  'screenshot',
+  'photo',
+  'picture',
+  'pic',
+  'test',
+  'upload',
+  'file',
+]);
 
 @Injectable({ providedIn: 'root' })
 export class FilenameParserService {
@@ -40,11 +59,49 @@ export class FilenameParserService {
     // Normalise separators to spaces
     const normalised = base.replace(/[_-]+/g, ' ').trim();
 
-    // Look for a street suffix pattern
-    if (!STREET_SUFFIXES.test(normalised)) return undefined;
+    const withoutTrailingArtifacts = normalised
+      // Remove trailing camera-like counters, e.g. "_0327", "-0001".
+      .replace(/[\s,]+\d{3,6}$/g, '')
+      .trim();
 
-    // Clean up: collapse multiple spaces, trim
-    const cleaned = normalised.replace(/\s+/g, ' ').trim();
-    return cleaned || undefined;
+    const cleaned = withoutTrailingArtifacts.replace(/\s+/g, ' ').trim();
+    if (!cleaned) return undefined;
+
+    // Primary path: explicit street-type suffix (high confidence).
+    if (STREET_SUFFIXES.test(cleaned)) {
+      return cleaned;
+    }
+
+    // Fallback path: conservative "StreetName 12[, City]" detection.
+    return this.extractFallbackAddress(cleaned);
+  }
+
+  private extractFallbackAddress(cleaned: string): string | undefined {
+    const match = cleaned.match(STREET_NUMBER_PATTERN);
+    if (!match) return undefined;
+
+    const streetPart = (match[1] ?? '').trim();
+    const cityPart = (match[3] ?? '').trim();
+    if (!streetPart) return undefined;
+
+    const streetWords = streetPart.split(/\s+/).filter(Boolean);
+    if (streetWords.length === 0) return undefined;
+
+    // Guard against generic filename words.
+    const hasNonAddressWord = streetWords.some((word) =>
+      NON_ADDRESS_WORDS.has(word.toLowerCase().replace(/[^a-zäöüß]/gi, '')),
+    );
+    if (hasNonAddressWord) return undefined;
+
+    // Confidence guard:
+    // - single-word street names must be long enough
+    // - multi-word names are accepted with normal token length
+    if (streetWords.length === 1) {
+      if (streetWords[0].length < 8 && cityPart.length < 3) return undefined;
+    } else if (streetWords.some((word) => word.length < 3)) {
+      return undefined;
+    }
+
+    return cleaned;
   }
 }

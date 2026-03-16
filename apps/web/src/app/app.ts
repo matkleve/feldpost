@@ -8,6 +8,7 @@ import { LocationResolverService } from './core/location-resolver.service';
 import { AuthService } from './core/auth.service';
 import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
 import { SettingsPaneService } from './core/settings-pane.service';
+import { UploadNotificationService } from './core/upload-notification.service';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ export class App implements OnInit {
   private readonly locationResolver = inject(LocationResolverService);
   private readonly auth = inject(AuthService);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly uploadNotifications = inject(UploadNotificationService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -38,6 +40,9 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
+    // Ensure root-level upload error notifications are active.
+    void this.uploadNotifications;
+
     // Start background location resolution once the user is authenticated.
     // Runs at ~1 req/sec through all unresolved images — non-blocking.
     if (this.auth.user()) {

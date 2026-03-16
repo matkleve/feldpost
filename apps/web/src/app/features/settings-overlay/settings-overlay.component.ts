@@ -9,6 +9,8 @@ import {
   signal,
 } from '@angular/core';
 import { AuthService } from '../../core/auth.service';
+import { SettingsPaneService } from '../../core/settings-pane.service';
+import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 
 type SettingsLoadState = 'loading' | 'error' | 'populated';
 
@@ -48,12 +50,14 @@ interface SettingsModel {
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
+  imports: [InviteManagementSectionComponent],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsOverlayComponent {
   private readonly authService = inject(AuthService);
+  private readonly settingsPaneService = inject(SettingsPaneService);
   private hasLoadedOnce = false;
 
   readonly open = input(false);
@@ -102,11 +106,18 @@ export class SettingsOverlayComponent {
       title: 'Account',
       subtitle: 'Identity and sign-in context',
     },
+    {
+      id: 'invite-management',
+      icon: 'qr_code_2',
+      title: 'Invite Management',
+      subtitle: 'Role-scoped QR and share links',
+    },
   ];
 
   readonly selectedSectionId = signal<string>(this.sectionList[0].id);
   readonly loadState = signal<SettingsLoadState>('loading');
   readonly lastError = signal<string | null>(null);
+  readonly inviteSectionRequest = this.settingsPaneService.inviteSectionRequest;
 
   readonly settingsModel = signal<SettingsModel>({
     themeMode: 'system',
@@ -151,6 +162,13 @@ export class SettingsOverlayComponent {
         this.hasLoadedOnce = true;
       }
     });
+
+    effect(() => {
+      const pendingSection = this.settingsPaneService.selectedSectionId();
+      if (pendingSection) {
+        this.selectedSectionId.set(pendingSection);
+      }
+    });
   }
 
   onOverlayAttach(): void {
@@ -173,6 +191,18 @@ export class SettingsOverlayComponent {
 
   selectSection(sectionId: string): void {
     this.selectedSectionId.set(sectionId);
+    if (
+      sectionId === 'general' ||
+      sectionId === 'appearance' ||
+      sectionId === 'notifications' ||
+      sectionId === 'map' ||
+      sectionId === 'search' ||
+      sectionId === 'data' ||
+      sectionId === 'account' ||
+      sectionId === 'invite-management'
+    ) {
+      this.settingsPaneService.setSelectedSection(sectionId);
+    }
   }
 
   retryLoad(): void {

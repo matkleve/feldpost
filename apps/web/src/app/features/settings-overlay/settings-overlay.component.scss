@@ -1,9 +1,10 @@
 :host {
   display: contents;
-  --settings-overlay-width: min(70rem, calc(100vw - (var(--container-inset) * 4)));
+  --settings-overlay-width: min(54rem, calc(100vw - (var(--container-inset) * 4)));
   --settings-overlay-height: min(44rem, calc(100vh - (var(--container-inset) * 2)));
   --settings-overlay-left-width: clamp(17rem, 24vw, 21rem);
-  --settings-overlay-right-width: minmax(0, 1fr);
+  /* Uses the existing narrow-rail step (25rem) and caps near 30rem on desktop. */
+  --settings-overlay-right-width: clamp(25rem, 40vw, 30rem);
 }
 
 .settings-overlay {
@@ -154,7 +155,8 @@
 }
 
 .settings-overlay__detail {
-  flex: 1 1 auto;
+  flex: 0 0 var(--settings-overlay-right-width);
+  max-width: var(--settings-overlay-right-width);
   padding: var(--spacing-4);
   background: var(--color-bg-surface);
   overflow: auto;

@@ -574,6 +574,15 @@
           @if (image()!.latitude != null) {
             <div class="detail-row detail-row--readonly">
               <button
+                class="detail-row-action detail-row-action--left-outer"
+                type="button"
+                aria-label="Zoom to location"
+                title="Zoom to location"
+                (click)="zoomToLocation()"
+              >
+                <span class="material-icons" aria-hidden="true">zoom_in_map</span>
+              </button>
+              <button
                 class="detail-row-action detail-row-action--left"
                 type="button"
                 aria-label="Copy coordinates"
@@ -582,7 +591,7 @@
               >
                 <span class="material-icons" aria-hidden="true">content_copy</span>
               </button>
-              <span class="material-icons detail-row__icon" aria-hidden="true">my_location</span>
+              <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
               <span class="detail-row__label">
                 Coordinates
                 @if (isCorrected()) {
@@ -593,13 +602,14 @@
                 {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
               </span>
               <button
-                class="detail-row-action detail-row-action--right"
+                class="detail-row-action detail-row-action--right detail-row-action--danger"
                 type="button"
-                aria-label="Zoom to location"
-                title="Zoom to location"
-                (click)="zoomToLocation()"
+                aria-label="Revert corrected coordinates"
+                title="Revert corrected coordinates"
+                [disabled]="!isCorrected() || saving()"
+                (click)="revertCoordinatesToExif()"
               >
-                <span class="material-icons" aria-hidden="true">zoom_in_map</span>
+                <span class="material-icons" aria-hidden="true">close</span>
               </button>
             </div>
           }

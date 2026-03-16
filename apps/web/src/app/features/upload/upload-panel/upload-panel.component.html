@@ -47,16 +47,15 @@
   </div>
 
   <div class="upload-panel__intake-actions" role="group" aria-label="Additional upload actions">
-    @if (folderImportSupported) {
-      <button
-        class="upload-panel__intake-btn"
-        type="button"
-        [disabled]="scanning()"
-        (click)="onSelectFolder($event)"
-      >
-        Select folder
-      </button>
-    }
+    <button
+      class="upload-panel__intake-btn"
+      type="button"
+      [disabled]="scanning()"
+      (click)="onSelectFolder($event, folderInput)"
+    >
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
+      Upload folder
+    </button>
 
     <button
       class="upload-panel__intake-btn upload-panel__intake-btn--capture"
@@ -78,6 +77,18 @@
       aria-hidden="true"
       tabindex="-1"
       (change)="onCaptureInputChange($event)"
+    />
+
+    <input
+      #folderInput
+      type="file"
+      class="upload-panel__folder-input"
+      multiple
+      webkitdirectory
+      directory
+      aria-hidden="true"
+      tabindex="-1"
+      (change)="onFolderInputChange($event)"
     />
   </div>
 

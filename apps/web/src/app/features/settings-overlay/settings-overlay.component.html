@@ -352,6 +352,14 @@
                 </button>
               </section>
             }
+
+            @case ('invite-management') {
+              <ss-invite-management-section
+                [openContext]="inviteSectionRequest().openContext"
+                [preselectedRole]="inviteSectionRequest().preselectedRole"
+                [requestToken]="inviteSectionRequest().requestToken"
+              />
+            }
           }
         }
       </div>

@@ -1,0 +1,269 @@
+:host {
+  display: block;
+}
+
+.invite-section {
+  --ui-container-gap: var(--spacing-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+.invite-section__header {
+  --ui-item-padding-inline: var(--spacing-3);
+  --ui-item-padding-block: var(--spacing-2);
+  --ui-item-media-size: 0;
+
+  grid-template-columns: minmax(0, 1fr) auto;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-bg-surface) 85%, transparent);
+}
+
+.invite-section__title-wrap {
+  gap: var(--spacing-1);
+}
+
+.invite-section__title-wrap h3 {
+  font-size: 1.125rem;
+  color: var(--color-text-primary);
+}
+
+.invite-section__title-wrap p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.invite-section__expires {
+  grid-column: 1 / -1;
+  margin-top: var(--spacing-1);
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.invite-section__status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.invite-section__status-chip .material-icons {
+  font-size: 0.95rem;
+}
+
+.invite-section__status-chip[data-status='active'] {
+  color: var(--color-success);
+  border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+}
+
+.invite-section__status-chip[data-status='expired'] {
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+}
+
+.invite-section__status-chip[data-status='revoked'] {
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.invite-section__status-chip[data-status='accepted'] {
+  color: var(--color-map-user-marker);
+  border-color: color-mix(in srgb, var(--color-map-user-marker) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-map-user-marker) 14%, transparent);
+}
+
+.invite-section__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.invite-section__label {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.invite-section__role-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--spacing-2);
+}
+
+.invite-section__select {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding: 0.6rem 0.75rem;
+}
+
+.invite-section__qr-block {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.invite-section__qr-frame {
+  display: grid;
+  place-items: center;
+  margin-inline: auto;
+  inline-size: 12rem;
+  block-size: 12rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+}
+
+.invite-section__qr-frame canvas {
+  inline-size: 12rem;
+  block-size: 12rem;
+}
+
+.invite-section__link-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.invite-section__link-preview {
+  padding: var(--spacing-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent);
+  color: var(--color-text-primary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.invite-section__share-row {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: var(--spacing-2);
+}
+
+.invite-section__icon-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.invite-section__icon-button .material-icons {
+  font-size: 1.1rem;
+}
+
+.invite-section__icon-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
+}
+
+.invite-section__icon-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.invite-section__button {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
+  color: var(--color-text-primary);
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.invite-section__button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
+}
+
+.invite-section__button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.invite-section__button--ghost {
+  background: transparent;
+}
+
+.invite-section__button--danger {
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+}
+
+.invite-section__state {
+  min-height: 16rem;
+  display: grid;
+  place-content: center;
+  gap: var(--spacing-2);
+  text-align: center;
+}
+
+.invite-section__state .material-icons {
+  justify-self: center;
+  color: var(--color-clay);
+}
+
+.invite-section__state h3 {
+  color: var(--color-text-primary);
+}
+
+.invite-section__state p {
+  color: var(--color-text-secondary);
+}
+
+.invite-section__ghost {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-primary);
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+.invite-section__inline-error {
+  color: var(--color-danger);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 47.9375rem) {
+  .invite-section__role-row {
+    grid-template-columns: 1fr;
+  }
+
+  .invite-section__share-row {
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+  }
+
+  .invite-section__qr-frame {
+    inline-size: 10rem;
+    block-size: 10rem;
+  }
+
+  .invite-section__qr-frame canvas {
+    inline-size: 10rem;
+    block-size: 10rem;
+  }
+}

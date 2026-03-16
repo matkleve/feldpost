@@ -172,10 +172,6 @@ export class UploadPanelComponent {
       }
     });
 
-    // Bridge missingData$ events to the placementRequested output.
-    this.uploadManager.missingData$.subscribe((event) => {
-      this.placementRequested.emit(event.jobId);
-    });
   }
 
   // ── Drag-and-drop ──────────────────────────────────────────────────────────
@@ -256,7 +252,7 @@ export class UploadPanelComponent {
     this.placementRequested.emit(jobId);
   }
 
-  async onSelectFolder(event: MouseEvent): Promise<void> {
+  async onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): Promise<void> {
     event.preventDefault();
     event.stopPropagation();
 
@@ -266,13 +262,24 @@ export class UploadPanelComponent {
       }
     ).showDirectoryPicker;
 
-    if (!picker) return;
+    if (!picker) {
+      folderInput.click();
+      return;
+    }
 
     try {
       const dirHandle = await picker.call(window);
       await this.uploadManager.submitFolder(dirHandle);
     } catch {
       // User cancel and permission errors are non-fatal for panel state.
+    }
+  }
+
+  onFolderInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.uploadManager.submit(Array.from(input.files));
+      input.value = '';
     }
   }
 

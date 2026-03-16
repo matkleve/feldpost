@@ -154,6 +154,22 @@ describe('UploadPanelComponent', () => {
       expect(button).not.toBeNull();
       expect((button.nativeElement as HTMLButtonElement).textContent).toContain('Take photo');
     });
+
+    it('renders a hidden folder input for directory fallback', async () => {
+      const { fixture } = await setup();
+      const input = fixture.debugElement.query(By.css('.upload-panel__folder-input'))
+        .nativeElement as HTMLInputElement;
+      expect(input).not.toBeNull();
+      expect(input.multiple).toBe(true);
+      expect(input.hasAttribute('webkitdirectory')).toBe(true);
+    });
+
+    it('renders the upload-folder intake button', async () => {
+      const { fixture } = await setup();
+      const buttons = fixture.debugElement.queryAll(By.css('.upload-panel__intake-btn'));
+      expect(buttons.length).toBeGreaterThan(0);
+      expect((buttons[0].nativeElement as HTMLButtonElement).textContent).toContain('Upload folder');
+    });
   });
 
   describe('panel visibility', () => {
@@ -358,6 +374,36 @@ describe('UploadPanelComponent', () => {
       expect(stopPropagation).toHaveBeenCalledTimes(1);
       expect(click).toHaveBeenCalledTimes(1);
     });
+
+    it('onFolderInputChange submits all selected files', async () => {
+      const { component, fakeManager } = await setup();
+      const files = [
+        new File([new Uint8Array(64)], 'a.jpg', { type: 'image/jpeg' }),
+        new File([new Uint8Array(64)], 'b.jpg', { type: 'image/jpeg' }),
+      ];
+      const input = { files, value: 'placeholder' } as unknown as HTMLInputElement;
+
+      component.onFolderInputChange({ target: input } as unknown as Event);
+
+      expect(fakeManager.submit).toHaveBeenCalledWith(files);
+      expect(input.value).toBe('');
+    });
+
+    it('onSelectFolder falls back to directory input click when picker API is unavailable', async () => {
+      const { component } = await setup();
+      const click = vi.fn();
+      const preventDefault = vi.fn();
+      const stopPropagation = vi.fn();
+
+      await component.onSelectFolder(
+        { preventDefault, stopPropagation } as unknown as MouseEvent,
+        { click } as unknown as HTMLInputElement,
+      );
+
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(stopPropagation).toHaveBeenCalledTimes(1);
+      expect(click).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('placement', () => {
@@ -401,6 +447,20 @@ describe('UploadPanelComponent', () => {
         preventDefault: vi.fn(),
         stopPropagation: vi.fn(),
       } as unknown as MouseEvent);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not auto-emit placementRequested on missingData$ manager event', async () => {
+      const { component, fakeManager } = await setup();
+      const emitSpy = vi.spyOn(component.placementRequested, 'emit');
+
+      fakeManager._missingData$.next({
+        jobId: 'job-1',
+        batchId: 'batch-1',
+        fileName: 'x.jpg',
+        reason: 'no_gps_no_address',
+      });
 
       expect(emitSpy).not.toHaveBeenCalled();
     });

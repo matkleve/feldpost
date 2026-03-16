@@ -115,6 +115,20 @@
             }
           }
 
+          @if (commandSection(); as commands) {
+            @if (commands.items.length > 0) {
+              <div class="search-bar__section-label" role="presentation">Commands</div>
+              @for (candidate of commands.items; track candidate.id; let index = $index) {
+                <ss-search-dropdown-item
+                  [candidate]="candidate"
+                  [active]="activeIndex() === commandOptionIndex(index)"
+                  [optionId]="optionIdFor(commandOptionIndex(index))"
+                  (selected)="onCandidateSelected($event)"
+                />
+              }
+            }
+          }
+
           @if (sections().dbAddress.items.length > 0 && sections().geocoder.items.length > 0) {
             <div class="search-bar__divider" role="presentation"></div>
           }
