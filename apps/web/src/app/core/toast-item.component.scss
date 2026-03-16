@@ -1,9 +1,10 @@
 :host {
   display: block;
-  background: var(--color-bg-elevated);
+  background: color-mix(in srgb, var(--color-bg-elevated) 90%, var(--color-bg-surface));
   box-shadow: var(--elevation-overlay);
-  border-radius: 0.5rem; // rounded-lg (8px)
-  border-left: 2px solid var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  border-left: 0.25rem solid var(--color-text-secondary);
   pointer-events: auto;
   animation: toast-enter 200ms ease-out forwards;
 }
@@ -39,11 +40,11 @@
 @keyframes toast-enter {
   from {
     opacity: 0;
-    transform: translateY(1rem);
+    transform: translateY(0.5rem) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -87,21 +88,40 @@
 .toast-body {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.625rem 0.75rem;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+.toast-icon-wrap {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent);
 }
 
 .toast-icon {
-  flex-shrink: 0;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
+:host(.success) .toast-icon-wrap {
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+}
 :host(.success) .toast-icon {
   color: var(--color-success);
 }
+:host(.error) .toast-icon-wrap {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
 :host(.error) .toast-icon {
   color: var(--color-danger);
+}
+:host(.warning) .toast-icon-wrap {
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
 }
 :host(.warning) .toast-icon {
   color: var(--color-warning);
@@ -112,8 +132,9 @@
 
 .toast-message {
   flex: 1;
-  font-size: 0.9375rem; // 15px — --text-body
-  line-height: 1.4;
+  margin-top: 0.08rem;
+  font-size: 0.875rem;
+  line-height: 1.35;
   color: var(--color-text-primary);
   word-break: break-word;
   display: -webkit-box;
@@ -128,10 +149,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -139,10 +160,11 @@
   transition: color 120ms;
 
   .material-symbols-outlined {
-    font-size: 1.125rem;
+    font-size: 0.95rem;
   }
 
   &:hover {
     color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-bg-surface) 65%, transparent);
   }
 }

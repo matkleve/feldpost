@@ -72,7 +72,7 @@ export interface SearchContentCandidate extends SearchBaseCandidate {
 
 export interface SearchCommandCandidate extends SearchBaseCandidate {
   family: 'command';
-  command: 'upload' | 'clear-filters' | 'go-to-location' | 'open-group';
+  command: 'upload' | 'clear-filters' | 'go-to-location' | 'open-group' | 'create-qr-invite';
   payload?: string;
 }
 

@@ -273,7 +273,8 @@ export class SearchOrchestratorService {
       loading: options?.geocoderLoading ?? false,
     });
 
-    if (context.commandMode) {
+    const commandMode = context.commandMode || query.trim().startsWith('/');
+    if (commandMode) {
       sections.push({
         family: 'command',
         title: 'Commands',
@@ -286,7 +287,22 @@ export class SearchOrchestratorService {
 
   private buildCommandItems(query: string, context: SearchQueryContext): SearchCommandCandidate[] {
     const items: SearchCommandCandidate[] = [];
-    const normalizedQuery = query.toLowerCase();
+    const normalizedQuery = query.trim().toLowerCase();
+    const slashCommandMode = normalizedQuery.startsWith('/');
+
+    if (normalizedQuery.startsWith('/image')) {
+      items.push({
+        id: 'cmd-create-qr-invite',
+        family: 'command',
+        label: 'Create QR Invite',
+        command: 'create-qr-invite',
+      });
+      return items;
+    }
+
+    if (!slashCommandMode && !context.commandMode) {
+      return items;
+    }
 
     const pushIfMatch = (
       id: string,

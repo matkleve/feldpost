@@ -295,7 +295,7 @@ export class ImageDetailViewComponent implements OnDestroy {
       .subscribe((event: UploadFailedEvent) => {
         this.replaceError.set(event.error);
         this.activeJobId.set(null);
-        this.toastService.show({ message: event.error, type: 'error' });
+        this.toastService.show({ message: event.error, type: 'error', dedupe: true });
       });
   }
 
@@ -654,6 +654,50 @@ export class ImageDetailViewComponent implements OnDestroy {
     const img = this.image();
     if (!img || img.latitude == null || img.longitude == null) return;
     this.zoomToLocationRequested.emit({ imageId: img.id, lat: img.latitude, lng: img.longitude });
+  }
+
+  async revertCoordinatesToExif(): Promise<void> {
+    const img = this.image();
+    if (!img || img.exif_latitude == null || img.exif_longitude == null) return;
+
+    const oldLatitude = img.latitude;
+    const oldLongitude = img.longitude;
+
+    this.image.update((prev) =>
+      prev
+        ? {
+            ...prev,
+            latitude: img.exif_latitude,
+            longitude: img.exif_longitude,
+          }
+        : prev,
+    );
+
+    this.saving.set(true);
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({
+        latitude: img.exif_latitude,
+        longitude: img.exif_longitude,
+      })
+      .eq('id', img.id);
+
+    if (error) {
+      this.image.update((prev) =>
+        prev
+          ? {
+              ...prev,
+              latitude: oldLatitude,
+              longitude: oldLongitude,
+            }
+          : prev,
+      );
+      this.toastService.show({ message: 'Could not revert coordinates', type: 'error' });
+    } else {
+      this.toastService.show({ message: 'Coordinates reverted to EXIF', type: 'success' });
+    }
+
+    this.saving.set(false);
   }
 
   confirmDelete(): void {

@@ -82,6 +82,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   readonly mapCenterRequested = output<{ lat: number; lng: number; label: string }>();
   readonly clearRequested = output<void>();
   readonly dropPinRequested = output<void>();
+  readonly qrInviteCommandRequested = output<void>();
   readonly queryChanged = output<string>();
 
   readonly state = signal<SearchState>('idle');
@@ -355,6 +356,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.matchingRecents().length +
       this.sections().dbAddress.items.length +
       this.sections().dbContent.items.length +
+      (this.commandSection()?.items.length ?? 0) +
+      index
+    );
+  }
+
+  commandOptionIndex(index: number): number {
+    return (
+      this.matchingRecents().length +
+      this.sections().dbAddress.items.length +
+      this.sections().dbContent.items.length +
       index
     );
   }
@@ -497,6 +508,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       case 'run-command':
         if (commitAction.command === 'go-to-location') {
           this.dropPinRequested.emit();
+        }
+
+        if (commitAction.command === 'create-qr-invite') {
+          this.qrInviteCommandRequested.emit();
         }
         break;
       case 'recent-selected':

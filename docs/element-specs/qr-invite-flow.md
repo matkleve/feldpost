@@ -191,16 +191,17 @@ flowchart LR
 
 ## Acceptance Criteria
 
-- [ ] Opening Invite Management auto-generates an active invite and visible QR without extra clicks.
-- [ ] `/image` command mode can launch the same invite flow from Search Bar.
-- [ ] Visual block order is always `Role picker -> QR preview -> Share actions` on desktop and mobile.
-- [ ] Role picker supports `clerk` and `worker` and regenerates invite payload when changed.
-- [ ] Share actions include copy link, email share, and WhatsApp share.
-- [ ] Every share action writes an `invite_share_events` row.
-- [ ] Invite states include `active`, `expired`, `revoked`, `accepted` and are reflected in UI.
-- [ ] Revoked or expired invites cannot be accepted.
-- [ ] RLS prevents viewers and out-of-org users from creating invites.
-- [ ] Clerk users can create clerk/worker invites.
+[x] Opening Invite Management auto-generates an active invite and visible QR without extra clicks.
+[x] `/image` command mode can launch the same invite flow from Search Bar.
+[x] Visual block order is always `Role picker -> QR preview -> Share actions` on desktop and mobile.
+[x] Role picker supports `clerk` and `worker` and regenerates invite payload when changed.
+[x] Share actions include copy link, email share, and WhatsApp share.
+[x] Every share action writes an `invite_share_events` row.
+[x] Invite states include `active`, `expired`, `revoked`, `accepted` and are reflected in UI.
+[ ] Revoked or expired invites cannot be accepted.
+[x] RLS prevents viewers and out-of-org users from creating invites.
+[x] Clerk users can create clerk/worker invites.
+
 - [ ] Admin can later change granted role after acceptance (handled outside this element).
 
 ## Settings

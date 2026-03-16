@@ -1,0 +1,301 @@
+import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { toCanvas } from 'qrcode';
+import { InviteService } from '../../../core/invites/invite.service';
+import {
+  InviteOpenContext,
+  InvitePanelMode,
+  InviteTargetRole,
+  QrInviteViewModel,
+} from '../../../core/invites/invite.types';
+
+@Component({
+  selector: 'ss-invite-management-section',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './invite-management-section.component.html',
+  styleUrl: './invite-management-section.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class InviteManagementSectionComponent implements OnInit, OnDestroy {
+  private readonly inviteService = inject(InviteService);
+
+  private expirationTimer: ReturnType<typeof setInterval> | null = null;
+
+  readonly roleSelect = viewChild<ElementRef<HTMLSelectElement>>('roleSelect');
+  readonly qrCanvas = viewChild<ElementRef<HTMLCanvasElement>>('qrCanvas');
+
+  readonly openContext = input<InviteOpenContext>('settings');
+  readonly preselectedRole = input<InviteTargetRole>('worker');
+  readonly requestToken = input(0);
+
+  readonly inviteCreated = output<string>();
+  readonly inviteRevoked = output<string>();
+
+  readonly panelMode = signal<InvitePanelMode>('loading');
+  readonly targetRole = signal<InviteTargetRole>('worker');
+  readonly activeInvite = signal<QrInviteViewModel | null>(null);
+  readonly shareInFlight = signal(false);
+  readonly lastError = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      this.requestToken();
+      this.targetRole.set(this.preselectedRole());
+      void this.initializePanel(this.targetRole());
+    });
+
+    effect(() => {
+      const invite = this.activeInvite();
+      const canvasRef = this.qrCanvas();
+
+      if (!invite || !canvasRef) {
+        return;
+      }
+
+      void toCanvas(canvasRef.nativeElement, invite.qrPayload, {
+        width: 192,
+        margin: 1,
+      });
+    });
+  }
+
+  ngOnInit(): void {
+    this.expirationTimer = setInterval(() => {
+      void this.syncInviteExpiration();
+    }, 60_000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.expirationTimer) {
+      clearInterval(this.expirationTimer);
+      this.expirationTimer = null;
+    }
+  }
+
+  async onRoleChange(event: Event): Promise<void> {
+    const nextRole = (event.target as HTMLSelectElement).value as InviteTargetRole;
+    this.targetRole.set(nextRole);
+
+    const currentInvite = this.activeInvite();
+    if (!currentInvite) {
+      await this.initializePanel(nextRole);
+      return;
+    }
+
+    await this.regenerateInvite(nextRole);
+  }
+
+  async onRegenerate(): Promise<void> {
+    await this.regenerateInvite(this.targetRole());
+  }
+
+  async onRevoke(): Promise<void> {
+    const invite = this.activeInvite();
+    if (!invite) {
+      return;
+    }
+
+    this.panelMode.set('loading');
+    this.lastError.set(null);
+
+    try {
+      await this.inviteService.revokeInvite(invite.inviteId);
+      this.activeInvite.update((current) =>
+        current
+          ? {
+              ...current,
+              status: 'revoked',
+            }
+          : null,
+      );
+      this.panelMode.set('ready');
+      this.inviteRevoked.emit(invite.inviteId);
+    } catch (error) {
+      this.panelMode.set('error');
+      this.lastError.set(error instanceof Error ? error.message : 'Unable to revoke invite.');
+    }
+  }
+
+  async onCopyLink(): Promise<void> {
+    await this.withShareAction(async (invite) => {
+      await navigator.clipboard.writeText(invite.inviteUrl);
+      await this.inviteService.logShareEvent(invite.inviteId, 'copy-link');
+    });
+  }
+
+  async onShareEmail(): Promise<void> {
+    await this.withShareAction(async (invite) => {
+      const subject = encodeURIComponent('Join my organization');
+      const body = encodeURIComponent(`Use this invite link: ${invite.inviteUrl}`);
+
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        await navigator.share({
+          title: 'Organization invite',
+          text: 'Use this invite link to join.',
+          url: invite.inviteUrl,
+        });
+      } else if (typeof window !== 'undefined') {
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      }
+
+      await this.inviteService.logShareEvent(invite.inviteId, 'email');
+    });
+  }
+
+  async onShareWhatsApp(): Promise<void> {
+    await this.withShareAction(async (invite) => {
+      if (typeof window !== 'undefined') {
+        const text = encodeURIComponent(`Join my organization: ${invite.inviteUrl}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+      }
+
+      await this.inviteService.logShareEvent(invite.inviteId, 'whatsapp');
+    });
+  }
+
+  async retry(): Promise<void> {
+    await this.initializePanel(this.targetRole());
+  }
+
+  isShareDisabled(): boolean {
+    const invite = this.activeInvite();
+    if (!invite) {
+      return true;
+    }
+
+    return this.shareInFlight() || invite.status !== 'active';
+  }
+
+  isRegenerateDisabled(): boolean {
+    const invite = this.activeInvite();
+    return this.panelMode() !== 'ready' || (invite !== null && invite.status === 'accepted');
+  }
+
+  statusLabel(): string {
+    const status = this.activeInvite()?.status;
+    switch (status) {
+      case 'active':
+        return 'Active';
+      case 'expired':
+        return 'Expired';
+      case 'revoked':
+        return 'Revoked';
+      case 'accepted':
+        return 'Accepted';
+      default:
+        return 'Pending';
+    }
+  }
+
+  statusIcon(): string {
+    const status = this.activeInvite()?.status;
+    switch (status) {
+      case 'active':
+        return 'check_circle';
+      case 'expired':
+        return 'schedule';
+      case 'revoked':
+        return 'cancel';
+      case 'accepted':
+        return 'task_alt';
+      default:
+        return 'hourglass_top';
+    }
+  }
+
+  private async initializePanel(targetRole: InviteTargetRole): Promise<void> {
+    this.panelMode.set('loading');
+    this.lastError.set(null);
+
+    try {
+      const invite = await this.inviteService.createInviteDraft(targetRole);
+      this.activeInvite.set(invite);
+      this.panelMode.set('ready');
+      this.inviteCreated.emit(invite.inviteId);
+      await this.syncInviteExpiration();
+
+      if (this.openContext() === 'command') {
+        queueMicrotask(() => {
+          this.roleSelect()?.nativeElement.focus();
+        });
+      }
+    } catch (error) {
+      this.activeInvite.set(null);
+      this.panelMode.set('error');
+      this.lastError.set(error instanceof Error ? error.message : 'Unable to create invite.');
+    }
+  }
+
+  private async regenerateInvite(targetRole: InviteTargetRole): Promise<void> {
+    const current = this.activeInvite();
+
+    this.panelMode.set('loading');
+    this.lastError.set(null);
+
+    try {
+      const invite = current
+        ? await this.inviteService.regenerateInvite(current.inviteId, targetRole)
+        : await this.inviteService.createInviteDraft(targetRole);
+      this.activeInvite.set(invite);
+      this.panelMode.set('ready');
+      this.inviteCreated.emit(invite.inviteId);
+      await this.syncInviteExpiration();
+    } catch (error) {
+      this.panelMode.set('error');
+      this.lastError.set(error instanceof Error ? error.message : 'Unable to regenerate invite.');
+    }
+  }
+
+  private async syncInviteExpiration(): Promise<void> {
+    const invite = this.activeInvite();
+    if (!invite || invite.status !== 'active') {
+      return;
+    }
+
+    const expired = Date.now() > new Date(invite.expiresAt).getTime();
+    if (!expired) {
+      return;
+    }
+
+    this.activeInvite.update((current) => (current ? { ...current, status: 'expired' } : null));
+
+    try {
+      await this.inviteService.expireInvite(invite.inviteId);
+    } catch {
+      // Keep UI state expired even if persistence fails.
+    }
+  }
+
+  private async withShareAction(
+    action: (invite: QrInviteViewModel) => Promise<void>,
+  ): Promise<void> {
+    const invite = this.activeInvite();
+    if (!invite || invite.status !== 'active' || this.shareInFlight()) {
+      return;
+    }
+
+    this.shareInFlight.set(true);
+    this.lastError.set(null);
+
+    try {
+      await action(invite);
+    } catch (error) {
+      this.lastError.set(error instanceof Error ? error.message : 'Unable to share invite.');
+    } finally {
+      this.shareInFlight.set(false);
+    }
+  }
+}

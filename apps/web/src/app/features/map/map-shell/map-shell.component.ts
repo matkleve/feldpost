@@ -47,6 +47,7 @@ import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
+import { SettingsPaneService } from '../../../core/settings-pane.service';
 import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
@@ -85,6 +86,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly photoLoadService = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly settingsPaneService = inject(SettingsPaneService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -401,6 +403,10 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneWidth.set(newWidth);
     // After resize, invalidate the Leaflet map size so tiles re-render.
     this.map?.invalidateSize();
+  }
+
+  onQrInviteCommandRequested(): void {
+    this.settingsPaneService.openInviteManagementFromCommand('worker');
   }
 
   /** Closes the Image Detail View and returns to the thumbnail grid. */
@@ -877,7 +883,7 @@ export class MapShellComponent implements OnDestroy {
         this.handleImageAttached(event);
       }),
       this.uploadManagerService.uploadFailed$.subscribe((event: UploadFailedEvent) => {
-        this.toastService.show({ message: event.error, type: 'error' });
+        this.toastService.show({ message: event.error, type: 'error', dedupe: true });
       }),
     );
   }

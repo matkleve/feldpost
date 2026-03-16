@@ -1,0 +1,117 @@
+<section
+  class="invite-section ui-container ui-container--compact"
+  aria-labelledby="invite-section-title"
+>
+  @if (panelMode() === 'loading') {
+    <div
+      class="invite-section__state invite-section__state--loading"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="material-icons" aria-hidden="true">sync</span>
+      <h3>Generating invite</h3>
+      <p>Your QR invite is being created.</p>
+    </div>
+  } @else if (panelMode() === 'error') {
+    <div class="invite-section__state invite-section__state--error" role="alert">
+      <span class="material-icons" aria-hidden="true">warning</span>
+      <h3>Invite unavailable</h3>
+      <p>{{ lastError() }}</p>
+      <button type="button" class="invite-section__ghost" (click)="retry()">Try again</button>
+    </div>
+  } @else if (activeInvite(); as invite) {
+    <header class="invite-section__header ui-item">
+      <div class="invite-section__title-wrap ui-item-label">
+        <h3 id="invite-section-title">Invite Management</h3>
+        <p>Share a role-scoped one-time invite to your organization.</p>
+      </div>
+      <span class="invite-section__status-chip" [attr.data-status]="invite.status">
+        <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
+        <span>{{ statusLabel() }}</span>
+      </span>
+      <p class="invite-section__expires">Expires: {{ invite.expiresAt | date: 'short' }}</p>
+    </header>
+
+    <div class="invite-section__stack">
+      <section class="invite-section__role-block" aria-label="Role picker">
+        <label class="invite-section__label" for="invite-role-select">Target role</label>
+        <div class="invite-section__role-row">
+          <select
+            #roleSelect
+            id="invite-role-select"
+            class="invite-section__select"
+            [value]="targetRole()"
+            [disabled]="panelMode() !== 'ready'"
+            (change)="onRoleChange($event)"
+          >
+            <option value="worker">Worker</option>
+            <option value="clerk">Clerk</option>
+          </select>
+          <button
+            type="button"
+            class="invite-section__button invite-section__button--ghost"
+            [disabled]="isRegenerateDisabled()"
+            (click)="onRegenerate()"
+          >
+            Regenerate
+          </button>
+          <button
+            type="button"
+            class="invite-section__button invite-section__button--danger"
+            [disabled]="invite.status !== 'active'"
+            (click)="onRevoke()"
+          >
+            Revoke
+          </button>
+        </div>
+      </section>
+
+      <section class="invite-section__qr-block" aria-label="QR preview">
+        <div class="invite-section__qr-frame">
+          <canvas #qrCanvas aria-label="Invite QR code"></canvas>
+        </div>
+        <p class="invite-section__link-label">Invite link</p>
+        <p class="invite-section__link-preview">{{ invite.inviteUrl }}</p>
+      </section>
+
+      <section class="invite-section__share-block" aria-label="Share actions">
+        <div class="invite-section__share-row">
+          <button
+            type="button"
+            class="invite-section__icon-button"
+            aria-label="Copy invite link"
+            title="Copy invite link"
+            [disabled]="isShareDisabled()"
+            (click)="onCopyLink()"
+          >
+            <span class="material-icons" aria-hidden="true">content_copy</span>
+          </button>
+          <button
+            type="button"
+            class="invite-section__icon-button"
+            aria-label="Share invite via email"
+            title="Share via email"
+            [disabled]="isShareDisabled()"
+            (click)="onShareEmail()"
+          >
+            <span class="material-icons" aria-hidden="true">mail</span>
+          </button>
+          <button
+            type="button"
+            class="invite-section__icon-button"
+            aria-label="Share invite via WhatsApp"
+            title="Share via WhatsApp"
+            [disabled]="isShareDisabled()"
+            (click)="onShareWhatsApp()"
+          >
+            <span class="material-icons" aria-hidden="true">chat</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    @if (lastError()) {
+      <p class="invite-section__inline-error" role="status">{{ lastError() }}</p>
+    }
+  }
+</section>
