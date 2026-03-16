@@ -371,12 +371,15 @@
 // ── GPS button — bottom-right of map zone ─────────────────────────────────────
 
 .map-gps-btn {
+  --touch-target-base: 2.75rem; // ≈44px desktop
+  --touch-target-mobile: 3rem; // ≈48px mobile
+
   position: absolute;
   bottom: var(--spacing-5);
   right: var(--spacing-4);
   z-index: var(--z-upload-button);
-  width: 44px;
-  height: 44px;
+  width: var(--touch-target-base);
+  height: var(--touch-target-base);
   border: none;
   border-radius: var(--radius-full);
   background: var(--color-bg-surface);
@@ -413,6 +416,11 @@
   &--active,
   &--locating {
     color: var(--color-clay);
+  }
+
+  @media (max-width: 767px) {
+    width: var(--touch-target-mobile);
+    height: var(--touch-target-mobile);
   }
 }
 
