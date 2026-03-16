@@ -5,23 +5,15 @@
 }
 
 .metadata-row-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  border-radius: var(--radius-sm);
-  transition: background 80ms ease-out;
+  display: block;
 
   app-metadata-property-row {
-    flex: 1 1 auto;
+    display: block;
     min-width: 0;
   }
 
   .metadata-delete {
-    position: absolute;
-    right: var(--spacing-1);
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 1.5rem;
@@ -30,8 +22,11 @@
     border-radius: var(--radius-sm);
     background: none;
     color: var(--color-text-secondary);
+    opacity: 0;
+    pointer-events: none;
     cursor: pointer;
     transition:
+      opacity 80ms ease-out,
       color 80ms ease-out,
       background 80ms ease-out;
 
@@ -46,10 +41,16 @@
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
-
     .metadata-delete {
-      display: inline-flex;
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  &:focus-within {
+    .metadata-delete {
+      opacity: 1;
+      pointer-events: auto;
     }
   }
 }

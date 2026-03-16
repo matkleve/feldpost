@@ -65,7 +65,14 @@ export class WorkspaceViewService {
     const images = this.rawImages();
     const projectIds = this.selectedProjectIds();
     if (projectIds.size === 0) return images;
-    return images.filter((img) => img.projectId && projectIds.has(img.projectId));
+    return images.filter((img) => {
+      const ids = img.projectIds?.length
+        ? img.projectIds
+        : img.projectId
+          ? [img.projectId]
+          : [];
+      return ids.some((id) => projectIds.has(id));
+    });
   });
 
   /** Step 2: Apply filter rules from FilterService. */
@@ -402,6 +409,8 @@ interface RawClusterRow {
   created_at: string;
   project_id: string | null;
   project_name: string | null;
+  project_ids: string[] | null;
+  project_names: string[] | null;
   direction: number | null;
   exif_latitude: number | null;
   exif_longitude: number | null;
@@ -414,6 +423,9 @@ interface RawClusterRow {
 }
 
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {
+  const membershipIds = Array.isArray(row.project_ids) ? row.project_ids : [];
+  const membershipNames = Array.isArray(row.project_names) ? row.project_names : [];
+
   return {
     id: row.image_id,
     latitude: row.latitude,
@@ -424,6 +436,8 @@ function mapClusterRow(row: RawClusterRow): WorkspaceImage {
     createdAt: row.created_at,
     projectId: row.project_id,
     projectName: row.project_name,
+    projectIds: membershipIds,
+    projectNames: membershipNames,
     direction: row.direction,
     exifLatitude: row.exif_latitude,
     exifLongitude: row.exif_longitude,

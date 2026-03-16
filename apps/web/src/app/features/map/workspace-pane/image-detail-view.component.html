@@ -239,7 +239,7 @@
           </div>
 
           <!-- Project -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'project_id'">
+          <div class="detail-row" [class.detail-row--editing]="editingField() === 'project_ids'">
             <button
               class="detail-row-action detail-row-action--left"
               type="button"
@@ -250,46 +250,81 @@
               <span class="material-icons" aria-hidden="true">content_copy</span>
             </button>
             <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
-            <span class="detail-row__label">Project</span>
-            @if (editingField() === 'project_id') {
-              <select
-                #projectSelect
-                class="detail-row__input detail-row__input--select"
-                aria-label="Edit project"
-                (change)="saveImageField('project_id', projectSelect.value)"
-                (keydown.escape)="editingField.set(null)"
-                (blur)="saveImageField('project_id', projectSelect.value)"
-              >
-                <option value="">— None —</option>
-                @for (opt of projectOptions(); track opt.id) {
-                  <option [value]="opt.id" [selected]="opt.id === image()!.project_id">
-                    {{ opt.label }}
-                  </option>
-                }
-              </select>
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                aria-label="Save project"
-                title="Save project"
-                (click)="saveImageField('project_id', projectSelect.value)"
-              >
-                <span class="material-icons" aria-hidden="true">check</span>
-              </button>
+            <span class="detail-row__label">Projects</span>
+            @if (editingField() === 'project_ids') {
+              <div class="detail-tags" role="group" aria-label="Manage projects">
+                <div class="detail-tags__selected">
+                  @for (opt of projectOptions(); track opt.id) {
+                    @if (selectedProjectIds().has(opt.id)) {
+                      <button
+                        type="button"
+                        class="detail-tags__chip"
+                        (click)="toggleProjectMembership(opt.id)"
+                        [attr.aria-label]="'Remove project ' + opt.label"
+                        title="Remove"
+                      >
+                        <span class="detail-tags__chip-label">{{ opt.label }}</span>
+                        <span class="material-icons" aria-hidden="true">close</span>
+                      </button>
+                    }
+                  }
+                </div>
+
+                <input
+                  #projectSearchInput
+                  class="detail-tags__input"
+                  type="text"
+                  [value]="projectSearch()"
+                  placeholder="Select project or create one"
+                  aria-label="Search projects"
+                  (input)="setProjectSearch(projectSearchInput.value)"
+                  (keydown.escape)="editingField.set(null)"
+                  (keydown.enter)="createProjectFromSearch()"
+                />
+
+                <div class="detail-tags__dropdown" role="listbox" aria-label="Project options">
+                  @for (opt of filteredProjectOptions(); track opt.id) {
+                    <button
+                      type="button"
+                      class="detail-tags__option"
+                      [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
+                      (click)="toggleProjectMembership(opt.id)"
+                    >
+                      <span class="detail-tags__option-check" aria-hidden="true">
+                        @if (selectedProjectIds().has(opt.id)) {
+                          <span class="material-icons">check</span>
+                        }
+                      </span>
+                      <span>{{ opt.label }}</span>
+                    </button>
+                  }
+
+                  @if (projectCanCreate()) {
+                    <button
+                      type="button"
+                      class="detail-tags__create"
+                      (click)="createProjectFromSearch()"
+                    >
+                      <span>Create</span>
+                      <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
             } @else {
               <button
                 class="detail-row__value"
                 type="button"
-                (click)="editingField.set('project_id')"
+                (click)="openProjectPicker()"
               >
                 {{ projectName() || '—' }}
               </button>
               <button
                 class="detail-row-action detail-row-action--right"
                 type="button"
-                aria-label="Edit project"
-                title="Edit project"
-                (click)="editingField.set('project_id')"
+                aria-label="Edit projects"
+                title="Edit projects"
+                (click)="openProjectPicker()"
               >
                 <span class="material-icons" aria-hidden="true">edit</span>
               </button>

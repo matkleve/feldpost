@@ -11,7 +11,7 @@ Markers are **Leaflet DivIcon elements**, not Angular components. Marker HTML is
 
 ## What It Looks Like
 
-The marker body geometry is derived from the shared media token system: `--photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25)` (40px), with `--ui-item-media-size-default` seeded from the shared UI item token in `styles.scss`. Single markers render a thumbnail inside a square body with `border-radius: var(--radius-md)`, a 2px white outline, and a persistent shadow for readability on light and dark tiles. **The marker body is centered exactly on the GPS coordinate** — `iconAnchor` is set to half the `iconSize` (`[20, 20]`), so the center of the hit zone sits directly on the location point. There is no pointer tail. Cluster markers are anchored at the centroid of their grid cell. Cluster markers reuse the same body geometry but with `width: auto; min-width: --photo-marker-body-size` to accommodate the count label without overflow: white background, black text (`0.875rem` bold), with counts capped at a maximum display of `999+`. The count text turns orange (`--color-clay`) when the marker is selected. Selected markers add a clear accent ring and a slight scale lift, while zoom-level classes (`.map-photo-marker--zoom-far`, `.map-photo-marker--zoom-mid`, `.map-photo-marker--zoom-near`) slightly adjust visual prominence without changing the underlying marker structure. Newly added markers fade in quickly (about `220ms`) when they enter the layer. When clustering reconciliation repositions a surviving marker, its map position transitions smoothly to the new coordinate (approximately `220ms`, ease-out) instead of popping to the new location. On desktop, the Direction Cone appears on hover when bearing data exists; on touch devices, the same affordance appears on long press.
+The marker body geometry is derived from the shared media token system: `--photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25)` (40px), with `--ui-item-media-size-default` seeded from the shared UI item token in `styles.scss`. Single markers render a thumbnail inside a square body with `border-radius: var(--radius-md)`, a 2px white outline, and a persistent shadow for readability on light and dark tiles. **The marker body is centered exactly on the GPS coordinate** — `iconAnchor` is set to half the `iconSize` (`[20, 20]`), so the center of the hit zone sits directly on the location point. There is no pointer tail. Cluster markers are anchored at the centroid of their grid cell. Cluster markers reuse the same body geometry but with `width: auto; min-width: --photo-marker-body-size` to accommodate the count label without overflow: white background, black text (`0.875rem` bold), with counts capped at a maximum display of `999+`. The count text turns orange (`--color-clay`) when the marker is selected. Selected markers add a clear accent ring and a slight scale lift, while zoom-level classes (`.map-photo-marker--zoom-far`, `.map-photo-marker--zoom-mid`, `.map-photo-marker--zoom-near`) slightly adjust visual prominence without changing the underlying marker structure. Newly added markers fade in quickly (about `220ms`) when they enter the layer. During cluster split (large marker to smaller markers), newly created child markers originate from the previous parent-cluster centroid and glide to their new positions so the motion reads as one continuous split. When clustering reconciliation repositions a surviving marker, its map position transitions smoothly to the new coordinate (approximately `220ms`, ease-out) instead of popping to the new location. On desktop, the Direction Cone appears on hover when bearing data exists; on touch devices, the same affordance appears on long press.
 
 ## Where It Lives
 
@@ -149,11 +149,10 @@ The Map Shell listens to Leaflet's `moveend` event (fires after pan or zoom comp
 6. On response:
    - **Reconcile**, don't replace: diff incoming marker keys against the current `uploadedPhotoMarkers` map.
    - **Keep** markers that still match (same key, same count) — do not recreate their DivIcon.
-
-- **Reuse and move** compatible outgoing markers when possible (identity match) — reassign them to the new key and animate `setLatLng()` so clusters glide to the new centroid.
-- **Add** new markers that entered the viewport.
-- **Remove** markers that left the viewport (call `marker.remove()` and delete from the map).
-- **Update** markers whose count or thumbnail changed (set a new icon via `setIcon()`).
+  - **Reuse and move** outgoing markers whenever possible — first by identity match, then by nearest-marker fallback — reassign to the new key and animate `setLatLng()` so as many markers as possible glide to the new centroid.
+  - **Add** new markers that entered the viewport.
+  - **Remove** markers that left the viewport (call `marker.remove()` and delete from the map).
+  - **Update** markers whose count or thumbnail changed (set a new icon via `setIcon()`).
 
 7. During the query flight, existing markers remain visible (optimistic retention).
 
@@ -373,7 +372,8 @@ sequenceDiagram
 - [ ] Clusters expand into individual markers when user zooms past the cluster's grid threshold (server-side)
 - [x] Collision offsets prevent overlapping marker bodies when nearby but not clustered — `mergeOverlappingClusters()` pixel-distance merge
 - [x] When clustering reconciliation shifts a surviving marker to a new centroid, it transitions smoothly to the new position (about 220 ms ease-out) instead of remove/add popping
-- [x] Newly created markers fade in on entry (about 220 ms), while reduced-motion users get no fade animation
+- [x] Newly created and reused/re-keyed markers fade in on reconciliation (about 220 ms), while reduced-motion users get no fade animation
+- [x] On cluster split, child markers visually emerge from the previous parent-cluster centroid before settling at their final positions
 
 ### Performance
 

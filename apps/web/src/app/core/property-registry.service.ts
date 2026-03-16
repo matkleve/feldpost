@@ -157,7 +157,12 @@ const BUILT_IN_FIELD_MAP: Record<string, (img: WorkspaceImage) => string | numbe
   district: (img) => img.district,
   street: (img) => img.street,
   country: (img) => img.country,
-  project: (img) => img.projectName,
+  project: (img) => {
+    if (img.projectNames && img.projectNames.length > 0) {
+      return img.projectNames.join(', ');
+    }
+    return img.projectName;
+  },
   date: (img) => img.capturedAt,
   year: (img) => img.capturedAt,
   month: (img) => img.capturedAt,
@@ -184,7 +189,14 @@ const BUILT_IN_GROUP_FORMAT: Record<string, (img: WorkspaceImage) => string> = {
   },
   name: (img) => img.storagePath ?? 'Unnamed',
   distance: () => 'Unknown distance',
-  project: (img) => img.projectName ?? 'No project',
+  project: (img) => {
+    if (img.projectNames && img.projectNames.length > 0) {
+      return img.projectNames.length === 1
+        ? img.projectNames[0]
+        : `${img.projectNames[0]} +${img.projectNames.length - 1}`;
+    }
+    return img.projectName ?? 'No project';
+  },
   date: (img) => {
     if (!img.capturedAt) return 'Unknown date';
     return new Date(img.capturedAt).toLocaleDateString('de-AT', {

@@ -8,6 +8,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Account & Profile | settings-overlay.md | profile identity fields and account-level controls. |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
+| Invite Management | qr-invite-flow.md | one-time invite generation, default target role, expiration window, revoke behavior, and share channel availability. |
 | Invite Management | settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
 | Language / Locale | settings-overlay.md | UI language and regional formatting defaults. |
 | Map Marker Motion | photo-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |

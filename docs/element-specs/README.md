@@ -235,7 +235,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 
 ### Planned / Missing Specs
 
-- 🔲 `qr-invite-flow.md` — QR invite and join flow (invite creation, scan/join, failure states)
+- ✅ `qr-invite-flow.md` — QR invite and join flow (invite creation, scan/join, failure states)
 - 🔲 `role-system.md` — Role and permission system UI (owner/admin/member permissions)
 - 🔲 `slash-commands.md` — Slash command palette and action execution UX
 
