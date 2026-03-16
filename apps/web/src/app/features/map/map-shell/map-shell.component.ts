@@ -66,6 +66,7 @@ import {
 })
 export class MapShellComponent implements OnDestroy {
   private static readonly GPS_TRACKING_INTERVAL_MS = 60000;
+  private static readonly GPS_RECENTER_MIN_ZOOM = 16;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -448,7 +449,7 @@ export class MapShellComponent implements OnDestroy {
 
   /**
    * Recenters on the user's position once.
-   * If a recent position is already known, reuses it without requesting GPS again.
+    * If a recent position is already known, recenters immediately.
    */
   goToUserPosition(): void {
     if (this.gpsTrackingActive()) {
@@ -459,23 +460,25 @@ export class MapShellComponent implements OnDestroy {
     if (typeof navigator === 'undefined' || !navigator.geolocation) return;
 
     this.gpsTrackingActive.set(true);
-
-    const hasKnownPosition = this.recenterOnKnownUserPosition();
-    if (hasKnownPosition) {
-      this.triggerUserLocationFoundState();
-      this.startGpsTracking();
-      return;
-    }
-
     this.gpsLocating.set(true);
+
+    // Known coordinates provide immediate recentering, but activation still
+    // requests a fresh high-accuracy fix before tracking continues.
+    this.recenterOnKnownUserPosition();
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (!this.gpsTrackingActive()) {
+          this.gpsLocating.set(false);
+          return;
+        }
+
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         this.userPosition.set(coords);
         void this.refreshSearchCountryCode(coords[0], coords[1]);
-        this.renderOrUpdateUserLocationMarker(coords);
-        const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
+        const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
         this.map?.setView(coords, zoom);
+        this.renderOrUpdateUserLocationMarker(coords);
         this.triggerUserLocationFoundState();
         this.startGpsTracking();
         this.gpsLocating.set(false);
@@ -513,7 +516,7 @@ export class MapShellComponent implements OnDestroy {
       center: [48.2082, 16.3738], // Vienna, Austria (fallback)
       zoom: 13,
       maxZoom: 22,
-      zoomControl: true,
+      zoomControl: false,
     });
 
     // CartoDB Positron — clean, uncluttered light tile (design.md §3.1).
@@ -699,7 +702,7 @@ export class MapShellComponent implements OnDestroy {
     const coords = this.userPosition();
     if (!coords) return false;
     void this.refreshSearchCountryCode(coords[0], coords[1]);
-    const zoom = Math.max(this.map?.getZoom() ?? 0, 15);
+    const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
     this.map?.setView(coords, zoom);
     return true;
   }

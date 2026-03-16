@@ -158,13 +158,13 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] Floating bottom-right in Map Zone
-- [ ] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
-- [ ] Button is a toggle: first click enables tracking, second click disables tracking
-- [ ] Map recenters to user location only when GPS button is clicked (not on startup geolocation)
-- [ ] While active, geolocation refresh runs roughly every 60 seconds
-- [ ] If geolocation times out or becomes unavailable, tracking deactivates and icon returns inactive color
-- [ ] Icon color is orange while active or seeking and black when inactive
-- [ ] User marker flashes orange for 1 second on each successful fix, then becomes blue
-- [ ] Search marker remains orange at all times
-- [ ] User marker renders above photo markers
+- [x] Floating bottom-right in Map Zone
+- [x] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
+- [x] Button is a toggle: first click enables tracking, second click disables tracking
+- [x] Map recenters to user location only when GPS button is clicked (not on startup geolocation)
+- [x] While active, geolocation refresh runs roughly every 60 seconds
+- [x] If geolocation times out or becomes unavailable, tracking deactivates and icon returns inactive color
+- [x] Icon color is orange while active or seeking and black when inactive
+- [x] User marker flashes orange for 1 second on each successful fix, then becomes blue
+- [x] Search marker remains orange at all times
+- [x] User marker renders above photo markers
