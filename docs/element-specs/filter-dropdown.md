@@ -85,6 +85,16 @@ The filter dropdown's rule list has `max-height: 20rem` with `overflow-y: auto`.
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field           | Source                                                                                         | Type            |
 | --------------- | ---------------------------------------------------------------------------------------------- | --------------- |
 | Properties list | Hardcoded built-ins + `metadata_keys` (org-scoped)                                             | `PropertyDef[]` |

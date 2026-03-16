@@ -52,6 +52,16 @@ This follows the VS Code / Figma resizable-pane pill handle pattern.
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 None — the Drag Divider is purely a layout interaction component with no data dependencies.
 
 ## State
@@ -84,6 +94,19 @@ None — the Drag Divider is purely a layout interaction component with no data 
 | `features/map/workspace-pane/drag-divider/drag-divider.component.scss` | Styles: rest/hover/active states, grip lines     |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Imported in `MapShellComponent`, rendered between Map Zone and Workspace Pane when `workspacePaneOpen` is `true`
 - `MapShellComponent` passes `currentWidth`, `minWidth`, `maxWidth`, `defaultWidth` as inputs

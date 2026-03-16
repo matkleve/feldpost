@@ -27,6 +27,11 @@ Every UI element must have a spec before implementation. Follow the template exa
 - Update specs BEFORE modifying features
 - Use canonical names from [glossary](../../docs/glossary.md)
 - Keep "What It Is" and "What It Looks Like" short — detail goes in Actions and Hierarchy
+- Keep **Component Hierarchy** as an ASCII tree for fast readability.
+- Use Mermaid syntax for integration and data-flow clarity.
+- Include at least 2 Mermaid diagrams in every spec:
+  - A **Wiring** diagram (`sequenceDiagram` or `flowchart`) showing parent/component/service integration
+  - A **Data Requirements** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`) showing schema or query/data flow
 - Use `rem` as the primary unit for accessibility-sensitive UI dimensions: touch targets, button heights, interactive sizes, spacing, and layout dimensions. Include px as an annotation when the exact reference size matters.
 - Use `em` only for component-internal spacing that should scale with the component's own font size.
 - Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.

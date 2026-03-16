@@ -168,6 +168,16 @@ Uses the same row shell as NavLink. The leading media column contains either the
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field             | Source                                                                    | Type             |
 | ----------------- | ------------------------------------------------------------------------- | ---------------- |
 | User display name | `AuthService.user().user_metadata.full_name` fallback to email local-part | `string`         |
@@ -190,6 +200,19 @@ Uses the same row shell as NavLink. The leading media column contains either the
 | `features/nav/nav.component.scss` | Styles (already exists)    |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Imported directly in `MapShellComponent` template
 - Uses `RouterLink` and `RouterLinkActive` for navigation

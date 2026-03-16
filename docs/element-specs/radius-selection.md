@@ -56,6 +56,19 @@ Note: This is primarily a Leaflet layer managed by `MapAdapter`, not a standalon
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Right-click/long-press interaction detected by `MapAdapter`
 - On commit, passes center + radius to `FilterService`
 - `FilterService` includes radius in spatial queries

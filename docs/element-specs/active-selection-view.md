@@ -321,6 +321,19 @@ flowchart TD
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - `ActiveSelectionView` is the default content area inside `WorkspacePaneComponent` when `activeTabId === 'selection'` and `detailImageId === null`
 - Inject `WorkspaceViewService` — the single source of truth for pipeline state
 - Inject `FilterService` — manages filter rules, exposes predicates to `WorkspaceViewService`

@@ -46,6 +46,16 @@ GroupsPage                                 ← full-width, flex column
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field            | Source                                                     | Type                 |
 | ---------------- | ---------------------------------------------------------- | -------------------- |
 | Groups           | `supabase.from('groups').select('*, group_images(count)')` | `Group[]`            |
@@ -69,6 +79,19 @@ GroupsPage                                 ← full-width, flex column
 | `core/group.service.ts`                 | Group CRUD operations                  |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Add route `{ path: 'groups', component: GroupsComponent }` in `app.routes.ts`
 - Import `GroupsComponent` standalone

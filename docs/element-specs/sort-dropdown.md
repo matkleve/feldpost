@@ -103,6 +103,16 @@ The `.dd-items` container inside the sort dropdown has `max-height: 24rem` with 
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field               | Source                                   | Type            |
 | ------------------- | ---------------------------------------- | --------------- |
 | Built-in properties | Hardcoded list                           | `SortOption[]`  |

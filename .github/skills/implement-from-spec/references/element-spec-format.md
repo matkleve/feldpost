@@ -34,6 +34,11 @@ The most important section. Shows what nests inside what, using a simple tree di
 - Conditional visibility in `[brackets]`
 - Short description of what each node renders
 
+Every spec should also include at least two Mermaid diagrams:
+
+- A **Wiring** diagram (`sequenceDiagram` or `flowchart`)
+- A **Data Requirements** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`)
+
 ### 6. Data Requirements (table)
 
 Where does data come from? Which Supabase tables, which columns, which service methods.

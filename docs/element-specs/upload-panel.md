@@ -72,6 +72,16 @@ UploadPanel                                ← `.ui-container` glassmorphic pane
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field           | Source                               | Type                          |
 | --------------- | ------------------------------------ | ----------------------------- |
 | Upload jobs     | `UploadManagerService.jobs()`        | `Signal<UploadJob[]>`         |
@@ -100,6 +110,19 @@ Types: `FileUploadState` and `FileUploadStatus` are defined in the component fil
 | `core/geocoding.service.ts`                                | Nominatim reverse geocoding (address resolution on upload) |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Receives `[visible]` input from parent to control slide animation
 - Injects `UploadManagerService` to call `submit()` / `submitFolder()` and read `jobs()` / `activeBatch()`

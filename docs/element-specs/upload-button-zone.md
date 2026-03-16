@@ -38,6 +38,16 @@ The `ProgressRing` is a thin (2px) SVG circle overlaying the button border. It f
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field        | Source                               | Type                          |
 | ------------ | ------------------------------------ | ----------------------------- |
 | Active batch | `UploadManagerService.activeBatch()` | `Signal<UploadBatch \| null>` |
@@ -55,6 +65,19 @@ The `ProgressRing` is a thin (2px) SVG circle overlaying the button border. It f
 Part of `MapShellComponent` template (button + zone container are in `map-shell.component.html`). The Upload Panel itself is a separate component.
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Button and zone container live in `map-shell.component.html`
 - `uploadPanelOpen` signal in `MapShellComponent` controls panel visibility

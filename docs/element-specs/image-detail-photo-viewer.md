@@ -327,6 +327,19 @@ stateDiagram-v2
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Injects `PhotoLoadService` — calls `getSignedUrl(path, 'thumb')`, `getSignedUrl(path, 'full')`, `preload(url)`, and reads `getLoadState(imageId, size)` signals. **Does not call Supabase Storage directly.**
 - Uses `PHOTO_PLACEHOLDER_ICON` (camera icon) and `PHOTO_NO_PHOTO_ICON` (crossed-out image) from `PhotoLoadService` for consistent placeholder visuals across all surfaces.
 - Injects `UploadManagerService` — calls `replaceFile()` or `attachFile()`. Does **not** manage upload lifecycle directly.

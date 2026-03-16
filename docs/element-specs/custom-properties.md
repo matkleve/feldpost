@@ -115,6 +115,16 @@ PropertyPicker                             ← floating dropdown, 12rem, --color
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field                 | Source                                                                                              | Type              |
 | --------------------- | --------------------------------------------------------------------------------------------------- | ----------------- |
 | Org properties        | `supabase.from('metadata_keys').select('id, key_name, value_type, chip_options').eq('org_id', org)` | `MetadataKey[]`   |

@@ -44,7 +44,7 @@ export class NavComponent {
   navItems: NavItem[] = [
     { icon: 'map', label: 'Map', route: '/' },
     { icon: 'photo_camera', label: 'Photos', route: '/photos' },
-    { icon: 'folder', label: 'Projects', route: '/groups' },
+    { icon: 'folder', label: 'Projects', route: '/projects' },
   ];
 
   readonly avatarName = computed<string>(() => {

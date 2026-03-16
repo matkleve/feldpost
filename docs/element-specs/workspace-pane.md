@@ -119,11 +119,34 @@ BottomSheet                                ← fixed bottom, full width
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - Imported in `MapShellComponent` template, placed after Map Zone
 - Receives `activeTabId` and `detailImageId` from parent or via service
 - Drag Divider emits width changes to parent for map reflow
 
 ## Data
+
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
 
 | Field               | Source                                                   | Type                        |
 | ------------------- | -------------------------------------------------------- | --------------------------- |

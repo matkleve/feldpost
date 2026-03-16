@@ -76,10 +76,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('searchInput');
   readonly queryContext = input<SearchQueryContext>({});
+  readonly mode = input<'map' | 'projects'>('map');
 
   readonly mapCenterRequested = output<{ lat: number; lng: number; label: string }>();
   readonly clearRequested = output<void>();
   readonly dropPinRequested = output<void>();
+  readonly queryChanged = output<string>();
 
   readonly state = signal<SearchState>('idle');
   readonly query = signal('');
@@ -113,6 +115,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.query().trim().length > 0 &&
       !this.geocoderLoading() &&
       this.allEmpty(),
+  );
+  readonly isProjectsMode = computed(() => this.mode() === 'projects');
+  readonly showClearButton = computed(() =>
+    this.isProjectsMode() ? this.query().trim().length > 0 : this.committedCandidate() !== null,
   );
 
   readonly matchingRecents = computed(() => {
@@ -152,15 +158,19 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.recentSearches.set(
       this.searchBarService.loadRecentSearches().slice(0, MAX_RECENT_SEARCHES),
     );
-    this.configureSearchSources();
-    this.rebuildGhostTrie();
+    if (!this.isProjectsMode()) {
+      this.configureSearchSources();
+      this.rebuildGhostTrie();
+    }
     this.startPlaceholderRotation();
 
-    this.subscription.add(
-      this.searchOrchestrator
-        .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
-        .subscribe((result) => this.applySearchResult(result)),
-    );
+    if (!this.isProjectsMode()) {
+      this.subscription.add(
+        this.searchOrchestrator
+          .searchInput(this.queryChanges.asObservable(), this.contextChanges.asObservable())
+          .subscribe((result) => this.applySearchResult(result)),
+      );
+    }
   }
 
   ngOnDestroy(): void {
@@ -182,7 +192,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.recentSearches.set(
       this.searchBarService.loadRecentSearches().slice(0, MAX_RECENT_SEARCHES),
     );
-    this.dropdownOpen.set(true);
+    this.dropdownOpen.set(!this.isProjectsMode());
     this.activeIndex.set(-1);
     this.state.set(this.query().trim() ? this.state() : 'focused-empty');
   }
@@ -190,8 +200,19 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   onInput(event: Event): void {
     const nextQuery = (event.target as HTMLInputElement).value;
     this.query.set(nextQuery);
-    this.dropdownOpen.set(true);
+    this.dropdownOpen.set(!this.isProjectsMode());
     this.activeIndex.set(-1);
+    this.queryChanged.emit(nextQuery);
+
+    if (this.isProjectsMode()) {
+      if (!nextQuery.trim()) {
+        this.state.set('focused-empty');
+      } else {
+        this.state.set('typing');
+      }
+      this.queryChanges.next(nextQuery);
+      return;
+    }
 
     const committedCandidate = this.committedCandidate();
     if (
@@ -237,6 +258,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   onInputKeydown(event: KeyboardEvent): void {
+    if (this.isProjectsMode()) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.searchInput().nativeElement.blur();
+        this.state.set(this.query().trim().length > 0 ? 'typing' : 'idle');
+      }
+      return;
+    }
+
     if (event.key === 'Tab' && this.ghostText()) {
       event.preventDefault();
       const fullQuery = this.query() + this.ghostText();
@@ -351,7 +381,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     if (!this.hostElement.nativeElement.contains(target)) {
       this.dropdownOpen.set(false);
       this.activeIndex.set(-1);
-      this.state.set(this.committedCandidate() ? 'committed' : 'idle');
+      this.state.set(
+        this.isProjectsMode()
+          ? this.query().trim().length > 0
+            ? 'typing'
+            : 'idle'
+          : this.committedCandidate()
+            ? 'committed'
+            : 'idle',
+      );
     }
   }
 
@@ -476,6 +514,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.liveRegionText.set('');
     this.committedCandidate.set(null);
     this.queryChanges.next('');
+    this.queryChanged.emit('');
     this.clearRequested.emit();
   }
 
@@ -529,6 +568,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   private rebuildGhostTrie(): void {
+    if (this.isProjectsMode()) {
+      return;
+    }
+
     const entries: GhostTrieEntry[] = [];
     const activeProjectId = this.contextChanges.value.activeProjectId;
 

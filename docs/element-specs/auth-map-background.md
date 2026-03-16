@@ -34,6 +34,16 @@ AuthShell (auth-shell auth-shell--map)                    ← full viewport, rel
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field         | Source                                               | Type     |
 | ------------- | ---------------------------------------------------- | -------- |
 | `mapEmbedUrl` | Static OpenStreetMap embed URL (fixed bbox + marker) | `string` |
@@ -54,6 +64,19 @@ AuthShell (auth-shell auth-shell--map)                    ← full viewport, rel
 | `apps/web/src/app/features/auth/register/register.component.html` | Enables map background on register          |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Add `auth-shell--map` modifier class in login/register templates.
 - Render `auth-map-bg` and `auth-map-overlay` as siblings before `auth-card`.

@@ -149,6 +149,16 @@ ToastContainerComponent                    ← fixed position, bottom-left, z-in
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field         | Source                 | Type                  |
 | ------------- | ---------------------- | --------------------- |
 | Active toasts | `ToastService.items()` | `Signal<ToastItem[]>` |
@@ -211,6 +221,19 @@ interface ToastOptions {
 | 6   | **`dismissAll()` usage**                   | Called only from unit tests (`_testReset()`) and from `AccountPageComponent` on sign-out (clears stale toasts). No other consumer. If no sign-out toast clearing is needed, `dismissAll()` may be kept for tests only.                                  |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 ### Root integration
 

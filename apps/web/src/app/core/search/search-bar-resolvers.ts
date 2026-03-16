@@ -74,10 +74,34 @@ export async function fetchDbContentCandidates(
     ),
   ]);
 
-  const projectCandidates = projectRows
+  const projectCandidates = buildProjectContentCandidates(
+    projectRows,
+    trimmedQuery,
+    context,
+    projectSizes,
+  );
+
+  const groupCandidates = buildGroupContentCandidates(groupRows, trimmedQuery, context, groupSizes);
+
+  return [...projectCandidates, ...groupCandidates]
+    .sort((left, right) => {
+      const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
+      if (scoreDelta !== 0) return scoreDelta;
+      return left.label.localeCompare(right.label);
+    })
+    .slice(0, maxDbContentResults);
+}
+
+function buildProjectContentCandidates(
+  projectRows: DbContentRow[],
+  query: string,
+  context: SearchQueryContext,
+  projectSizes: Map<string, number>,
+): SearchContentCandidate[] {
+  return projectRows
     .map((row) => {
       const label = row.name?.trim() ?? '';
-      const textMatch = computeTextMatchScore(row.name ?? '', trimmedQuery);
+      const textMatch = computeTextMatchScore(row.name ?? '', query);
       const projectBoost = context.activeProjectId === row.id ? 2 : 1;
       const sizeSignal = toSizeSignal(projectSizes.get(row.id) ?? 0);
 
@@ -92,11 +116,18 @@ export async function fetchDbContentCandidates(
       };
     })
     .filter((candidate) => candidate.label.length > 0);
+}
 
-  const groupCandidates = groupRows
+function buildGroupContentCandidates(
+  groupRows: DbContentRow[],
+  query: string,
+  context: SearchQueryContext,
+  groupSizes: Map<string, number>,
+): SearchContentCandidate[] {
+  return groupRows
     .map((row) => {
       const label = row.name?.trim() ?? '';
-      const textMatch = computeTextMatchScore(row.name ?? '', trimmedQuery);
+      const textMatch = computeTextMatchScore(row.name ?? '', query);
       const projectBoost = context.selectedGroupId === row.id ? 1.6 : 1;
       const sizeSignal = toSizeSignal(groupSizes.get(row.id) ?? 0);
 
@@ -111,14 +142,6 @@ export async function fetchDbContentCandidates(
       };
     })
     .filter((candidate) => candidate.label.length > 0);
-
-  return [...projectCandidates, ...groupCandidates]
-    .sort((left, right) => {
-      const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
-      if (scoreDelta !== 0) return scoreDelta;
-      return left.label.localeCompare(right.label);
-    })
-    .slice(0, maxDbContentResults);
 }
 
 export async function fetchGeocoderCandidates(
@@ -126,7 +149,6 @@ export async function fetchGeocoderCandidates(
   normalizedQuery: string,
   context: SearchQueryContext,
   maxGeocoderResults: number,
-  buildFallbackQueries: (query: string) => string[],
   toCandidate: (
     result: GeocoderSearchResult,
     query: string,
@@ -145,33 +167,28 @@ export async function fetchGeocoderCandidates(
     searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
   }
 
-  const queries = [normalizedQuery, ...buildFallbackQueries(normalizedQuery)];
-  for (const currentQuery of queries) {
-    const results = await geocodingService.search(currentQuery, searchOptions);
-    if (results.length === 0) continue;
+  const results = await geocodingService.search(normalizedQuery, searchOptions);
+  if (results.length === 0) return [];
 
-    const streetLevelResults = results.filter((r) => isStreetLevelResult(r));
-    if (streetLevelResults.length === 0) continue;
+  const streetLevelResults = results.filter((r) => isStreetLevelResult(r));
+  if (streetLevelResults.length === 0) return [];
 
-    return streetLevelResults
-      .map((result, index) => toCandidate(result, currentQuery, index, context))
-      .sort((left, right) => {
-        const leftLocal = isInViewport(left, context.viewportBounds);
-        const rightLocal = isInViewport(right, context.viewportBounds);
-        if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
+  return streetLevelResults
+    .map((result, index) => toCandidate(result, normalizedQuery, index, context))
+    .sort((left, right) => {
+      const leftLocal = isInViewport(left, context.viewportBounds);
+      const rightLocal = isInViewport(right, context.viewportBounds);
+      if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
 
-        const leftNearData = distanceToCentroidMeters(left, context.dataCentroid);
-        const rightNearData = distanceToCentroidMeters(right, context.dataCentroid);
-        if (leftNearData !== rightNearData) return leftNearData - rightNearData;
+      const leftNearData = distanceToCentroidMeters(left, context.dataCentroid);
+      const rightNearData = distanceToCentroidMeters(right, context.dataCentroid);
+      if (leftNearData !== rightNearData) return leftNearData - rightNearData;
 
-        const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
-        if (scoreDelta !== 0) return scoreDelta;
-        return left.label.localeCompare(right.label);
-      })
-      .slice(0, maxGeocoderResults);
-  }
-
-  return [];
+      const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
+      if (scoreDelta !== 0) return scoreDelta;
+      return left.label.localeCompare(right.label);
+    })
+    .slice(0, maxGeocoderResults);
 }
 
 async function loadProjectSizeSignals(

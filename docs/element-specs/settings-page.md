@@ -37,6 +37,16 @@ SettingsPage                               ← full-width, max-width 640px cente
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field         | Source                            | Type                            |
 | ------------- | --------------------------------- | ------------------------------- |
 | Current theme | `ThemeService.themeMode()`        | `'light' \| 'dark' \| 'system'` |
@@ -59,6 +69,19 @@ SettingsPage                               ← full-width, max-width 640px cente
 | `core/theme.service.ts`                     | Shared theme service                   |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Add route `{ path: 'settings', component: SettingsComponent }` in `app.routes.ts`
 - Import `SettingsComponent` standalone

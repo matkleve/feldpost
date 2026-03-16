@@ -294,6 +294,19 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 
 ## Wiring
 
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
+
 - The Map Shell creates Leaflet markers and delegates DivIcon HTML generation to `marker-factory.ts`.
 - Marker sizing variables are declared in `styles.scss` so marker geometry derives from shared design tokens instead of hardcoded body sizes.
 - The Map Shell listens to `moveend`, debounces 300 ms, then issues a viewport query. On response, it reconciles the marker set (add/remove/update) rather than rebuilding all markers.

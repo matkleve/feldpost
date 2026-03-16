@@ -1,0 +1,325 @@
+import { Injectable, inject } from '@angular/core';
+import { SupabaseService } from '../supabase.service';
+import type {
+  ProjectColorKey,
+  ProjectListItem,
+  ProjectSearchCounts,
+  ProjectStatusFilter,
+  ProjectsImageMetadataRow,
+  ProjectsImageRow,
+  ProjectScopedWorkspaceImage,
+} from './projects.types';
+
+interface ProjectRow {
+  id: string;
+  name: string | null;
+  color_key?: string | null;
+  archived_at?: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+interface ProjectActivityRow {
+  project_id: string | null;
+  captured_at: string | null;
+  created_at: string | null;
+}
+
+const DEFAULT_PROJECT_COLOR: ProjectColorKey = 'clay';
+
+@Injectable({ providedIn: 'root' })
+export class ProjectsService {
+  private readonly supabase = inject(SupabaseService);
+
+  async loadProjects(): Promise<ProjectListItem[]> {
+    const projectRows = await this.fetchProjects();
+
+    const { data: activityData, error: activityError } = await this.supabase.client
+      .from('images')
+      .select('project_id,captured_at,created_at')
+      .not('project_id', 'is', null);
+
+    const counts = new Map<string, number>();
+    const lastActivity = new Map<string, string>();
+
+    if (!activityError && Array.isArray(activityData)) {
+      for (const row of activityData as ProjectActivityRow[]) {
+        if (!row.project_id) continue;
+        counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+
+        const ts = row.captured_at ?? row.created_at;
+        if (!ts) continue;
+
+        const existing = lastActivity.get(row.project_id);
+        if (!existing || new Date(ts).getTime() > new Date(existing).getTime()) {
+          lastActivity.set(row.project_id, ts);
+        }
+      }
+    }
+
+    return projectRows.map((row) => {
+      const archivedAt = row.archived_at ?? null;
+      const totalImageCount = counts.get(row.id) ?? 0;
+
+      return {
+        id: row.id,
+        name: row.name?.trim() || 'Untitled project',
+        colorKey: this.normalizeColorKey(row.color_key),
+        archivedAt,
+        createdAt: row.created_at ?? new Date().toISOString(),
+        updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
+        status: archivedAt ? 'archived' : 'active',
+        totalImageCount,
+        matchingImageCount: totalImageCount,
+        lastActivity: lastActivity.get(row.id) ?? null,
+      };
+    });
+  }
+
+  async loadGroupedSearchCounts(
+    searchTerm: string,
+    statusFilter: ProjectStatusFilter,
+  ): Promise<ProjectSearchCounts> {
+    const trimmed = searchTerm.trim();
+    if (!trimmed) {
+      return {};
+    }
+
+    const imageIdsByProject = new Map<string, Set<string>>();
+
+    await this.collectTitleAndAddressMatches(trimmed, imageIdsByProject);
+    await this.collectMetadataMatches(trimmed, imageIdsByProject);
+
+    const statusByProject = await this.loadStatusByProjectId();
+    const result: ProjectSearchCounts = {};
+
+    for (const [projectId, imageIds] of imageIdsByProject) {
+      const isArchived = statusByProject.get(projectId) ?? false;
+      if (statusFilter === 'active' && isArchived) continue;
+      if (statusFilter === 'archived' && !isArchived) continue;
+      result[projectId] = imageIds.size;
+    }
+
+    return result;
+  }
+
+  async createDraftProject(): Promise<ProjectListItem | null> {
+    const { data, error } = await this.supabase.client
+      .from('projects')
+      .insert({ name: 'Untitled project', color_key: DEFAULT_PROJECT_COLOR })
+      .select('id,name,color_key,archived_at,created_at,updated_at')
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    const row = data as ProjectRow;
+
+    return {
+      id: row.id,
+      name: row.name?.trim() || 'Untitled project',
+      colorKey: this.normalizeColorKey(row.color_key),
+      archivedAt: row.archived_at ?? null,
+      createdAt: row.created_at ?? new Date().toISOString(),
+      updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
+      status: row.archived_at ? 'archived' : 'active',
+      totalImageCount: 0,
+      matchingImageCount: 0,
+      lastActivity: null,
+    };
+  }
+
+  async renameProject(projectId: string, name: string): Promise<boolean> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return false;
+    }
+
+    const { error } = await this.supabase.client
+      .from('projects')
+      .update({ name: trimmed, updated_at: new Date().toISOString() })
+      .eq('id', projectId);
+
+    return !error;
+  }
+
+  async archiveProject(projectId: string): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('projects')
+      .update({ archived_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('id', projectId);
+
+    return !error;
+  }
+
+  async setProjectColor(projectId: string, colorKey: ProjectColorKey): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('projects')
+      .update({ color_key: colorKey, updated_at: new Date().toISOString() })
+      .eq('id', projectId);
+
+    return !error;
+  }
+
+  async loadProjectWorkspaceImages(projectId: string): Promise<ProjectScopedWorkspaceImage[]> {
+    const { data, error } = await this.supabase.client
+      .from('images')
+      .select(
+        'id,project_id,latitude,longitude,thumbnail_path,storage_path,captured_at,created_at,direction,exif_latitude,exif_longitude,address_label,city,district,street,country',
+      )
+      .eq('project_id', projectId)
+      .order('captured_at', { ascending: false, nullsFirst: false });
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return (data as ProjectsImageRow[])
+      .filter(
+        (row) =>
+          typeof row.latitude === 'number' &&
+          Number.isFinite(row.latitude) &&
+          typeof row.longitude === 'number' &&
+          Number.isFinite(row.longitude),
+      )
+      .map((row) => ({
+        id: row.id,
+        projectId: row.project_id,
+        projectName: null,
+        latitude: row.latitude as number,
+        longitude: row.longitude as number,
+        thumbnailPath: row.thumbnail_path,
+        storagePath: row.storage_path,
+        capturedAt: row.captured_at,
+        createdAt: row.created_at,
+        direction: row.direction,
+        exifLatitude: row.exif_latitude,
+        exifLongitude: row.exif_longitude,
+        addressLabel: row.address_label,
+        city: row.city,
+        district: row.district,
+        street: row.street,
+        country: row.country,
+        userName: null,
+      }));
+  }
+
+  private async fetchProjects(): Promise<ProjectRow[]> {
+    const preferredResponse = await this.supabase.client
+      .from('projects')
+      .select('id,name,color_key,archived_at,created_at,updated_at')
+      .order('updated_at', { ascending: false });
+
+    if (!preferredResponse.error && Array.isArray(preferredResponse.data)) {
+      return preferredResponse.data as ProjectRow[];
+    }
+
+    const fallbackResponse = await this.supabase.client
+      .from('projects')
+      .select('id,name,created_at,updated_at')
+      .order('updated_at', { ascending: false });
+
+    if (fallbackResponse.error || !Array.isArray(fallbackResponse.data)) {
+      return [];
+    }
+
+    return (
+      fallbackResponse.data as Array<Pick<ProjectRow, 'id' | 'name' | 'created_at' | 'updated_at'>>
+    ).map((row) => ({
+      ...row,
+      color_key: DEFAULT_PROJECT_COLOR,
+      archived_at: null,
+    }));
+  }
+
+  private normalizeColorKey(value: string | null | undefined): ProjectColorKey {
+    if (value === 'accent' || value === 'success' || value === 'warning' || value === 'clay') {
+      return value;
+    }
+    return DEFAULT_PROJECT_COLOR;
+  }
+
+  private async collectTitleAndAddressMatches(
+    searchTerm: string,
+    imageIdsByProject: Map<string, Set<string>>,
+  ): Promise<void> {
+    const escaped = this.escapeIlike(searchTerm);
+
+    const preferred = await this.supabase.client
+      .from('images')
+      .select('id,project_id')
+      .not('project_id', 'is', null)
+      .or(`title.ilike.%${escaped}%,address_label.ilike.%${escaped}%`);
+
+    const response = preferred.error
+      ? await this.supabase.client
+          .from('images')
+          .select('id,project_id')
+          .not('project_id', 'is', null)
+          .ilike('address_label', `%${escaped}%`)
+      : preferred;
+
+    if (response.error || !Array.isArray(response.data)) {
+      return;
+    }
+
+    for (const row of response.data as Array<{ id: string; project_id: string | null }>) {
+      if (!row.project_id) continue;
+      const bucket = imageIdsByProject.get(row.project_id) ?? new Set<string>();
+      bucket.add(row.id);
+      imageIdsByProject.set(row.project_id, bucket);
+    }
+  }
+
+  private async collectMetadataMatches(
+    searchTerm: string,
+    imageIdsByProject: Map<string, Set<string>>,
+  ): Promise<void> {
+    const escaped = this.escapeIlike(searchTerm);
+
+    const response = await this.supabase.client
+      .from('image_metadata')
+      .select('image_id,value_text,images!inner(project_id)')
+      .ilike('value_text', `%${escaped}%`);
+
+    if (response.error || !Array.isArray(response.data)) {
+      return;
+    }
+
+    for (const row of response.data as ProjectsImageMetadataRow[]) {
+      const relatedImage = Array.isArray(row.images) ? row.images[0] : row.images;
+      const projectId = relatedImage?.project_id ?? null;
+      if (!projectId) continue;
+
+      const bucket = imageIdsByProject.get(projectId) ?? new Set<string>();
+      bucket.add(row.image_id);
+      imageIdsByProject.set(projectId, bucket);
+    }
+  }
+
+  private async loadStatusByProjectId(): Promise<Map<string, boolean>> {
+    const status = new Map<string, boolean>();
+
+    const preferred = await this.supabase.client.from('projects').select('id,archived_at');
+    if (!preferred.error && Array.isArray(preferred.data)) {
+      for (const row of preferred.data as Array<{ id: string; archived_at: string | null }>) {
+        status.set(row.id, !!row.archived_at);
+      }
+      return status;
+    }
+
+    const fallback = await this.supabase.client.from('projects').select('id');
+    if (!fallback.error && Array.isArray(fallback.data)) {
+      for (const row of fallback.data as Array<{ id: string }>) {
+        status.set(row.id, false);
+      }
+    }
+
+    return status;
+  }
+
+  private escapeIlike(value: string): string {
+    return value.replace(/[%_]/g, (match) => `\\${match}`);
+  }
+}

@@ -316,11 +316,16 @@ export class SearchBarService {
       .sort((left, right) => {
         const scoreDelta = right.score - left.score;
         if (scoreDelta !== 0) return scoreDelta;
-        return right.count - left.count;
+        const countDelta = right.count - left.count;
+        if (countDelta !== 0) return countDelta;
+        const labelDelta = left.label.localeCompare(right.label);
+        if (labelDelta !== 0) return labelDelta;
+        return (left.ids[0] ?? '').localeCompare(right.ids[0] ?? '');
       })
       .slice(0, MAX_DB_ADDRESS_RESULTS)
       .map((entry, index) => ({
         id: entry.ids[0] ?? `db-address-${index}`,
+        stableId: entry.ids[0] ?? `db-address-${index}`,
         family: 'db-address' as const,
         label: entry.label,
         lat: entry.latTotal / entry.count,
@@ -346,7 +351,6 @@ export class SearchBarService {
       normalizedQuery,
       context,
       MAX_GEOCODER_RESULTS,
-      this.buildFallbackQueries,
       (result, query, index, candidateContext) =>
         this.toGeocoderCandidate(result, query, index, candidateContext),
     );
@@ -367,6 +371,7 @@ export class SearchBarService {
 
     return {
       id: `geo-${query}-${index}`,
+      stableId: `geo-${result.lat.toFixed(6)}-${result.lng.toFixed(6)}-${index}`,
       family: 'geocoder',
       label: isPoi ? result.name! : formatted,
       secondaryLabel: isPoi ? formatted : undefined,

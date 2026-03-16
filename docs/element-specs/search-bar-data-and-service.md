@@ -1,110 +1,234 @@
-# Search Bar - Data And Service
+# Search Bar - Data And Service V2
 
 > **Parent spec:** [search-bar](search-bar.md)
-> **Blueprint:** [implementation-blueprints/search-bar.md](../implementation-blueprints/search-bar.md)
+> **Query behavior contract:** [search-bar-query-behavior](search-bar-query-behavior.md)
 
 ## What It Is
 
-The data-flow and service contract for Search Bar orchestration. It defines phased source loading, geocoder proxy constraints, ranking formulas, geo-biasing, and `SearchBarService` responsibilities.
+This spec defines the v2 data-flow and service architecture for personalized geosearch. It establishes strict boundaries for normalization, candidate retrieval, scoring, deduplication, fallback escalation, explanation labeling, and deterministic output ordering.
 
 ## What It Looks Like
 
-Results appear in progressive phases: instant local signals, fast DB sections, then slower geocoder sections. Geocoder loading is represented as transient skeleton rows and must never block DB sections. Skeleton rows must mirror final geocoder row geometry so replacement does not shift layout and must use neutral light-gray loading surfaces. Section ordering remains fixed: Addresses, Projects & Groups, Places. Relevance adjusts with project context and geographic bias.
+Search remains progressive and non-blocking: typing feedback first, DB and recents second, geocoder append third. Ranking is personalized by active marker geography, active project geography, current user geography, and viewport geography. Irrelevant global candidates are strongly de-prioritized for short ambiguous prefixes unless user intent explicitly widens geography.
 
 ## Where It Lives
 
 - **Parent**: `SearchBarComponent` orchestration contract
-- **Appears when**: Search queries are executed or result sections are rendered
+- **Core pipeline**: `SearchOrchestratorService` and search-core collaborators
+- **Context source**: `MapShellComponent` + workspace/user state providers
 
 ## Actions
 
-| #   | User Action              | System Response                                                                                                                     | Triggers                |
-| --- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| 1   | Types query              | Start phased orchestration (`typing` -> `partial` -> `complete`)                                                                    | Debounced query stream  |
-| 2   | Geocoder timeout/failure | Hide geocoder section; keep DB results visible                                                                                      | Non-blocking error path |
-| 3   | Changes active project   | Re-emit `SearchQueryContext`, re-rank project-sensitive results                                                                     | Project context update  |
-| 4   | Repeats recent query     | Serve cached results when valid                                                                                                     | Cache hit               |
-| 5   | Commits result           | Persist recent search, update ranking signals, and apply commit viewport policy (single-point tight zoom or multi-point fit-bounds) | Commit event            |
+| #   | Trigger                     | System Response                             | Phase              |
+| --- | --------------------------- | ------------------------------------------- | ------------------ |
+| 1   | Debounced query             | Build context snapshot and run strict stage | `typing`           |
+| 2   | Strict retrieval returns    | Emit partial ranked DB/recents output       | `results-partial`  |
+| 3   | Geocoder returns or fails   | Append geocoder results or preserve partial | `results-complete` |
+| 4   | Strict quality insufficient | Escalate fallback widening stage            | `results-complete` |
+| 5   | Commit candidate            | Persist recency and update priors           | commit path        |
 
-### Decision Flowchart
+### Pipeline Overview
 
 ```mermaid
 flowchart TD
-  A[Debounced query starts] --> B{cache hit valid}
-  B -- yes --> C[Return cached result set]
-  B -- no --> D[Run phase 1 typing state]
+    A[Debounced Query] --> B[Build Personalization Context]
+    B --> C[Normalize and Detect Intent]
+    C --> D{Coordinate or URL}
+    D -- Yes --> E[Commit Map Center]
+    D -- No --> F[Strict Retrieval]
+    F --> G[Score Candidates]
+    G --> H[Deduplicate]
+    H --> I[Deterministic Rank]
+    I --> J{Stop Criteria Met}
+    J -- Yes --> K[Emit Final]
+    J -- No --> L[Widen Geography Stage]
+    L --> F
+```
 
-  D --> E[Run DB and recents]
-  E --> F{DB returned candidates}
-  F -- yes --> G[Emit partial with DB sections]
-  F -- no --> H[Emit partial with empty DB sections]
+### Progressive Rendering Timeline
 
-  G --> I{geocoder success before timeout}
-  H --> I
-  I -- yes --> J[Append geocoder section and emit complete]
-  I -- no --> K[Suppress geocoder section and keep partial]
+```mermaid
+sequenceDiagram
+    participant UI as SearchBarComponent
+    participant ORCH as SearchOrchestrator
+    participant DB as DB Resolvers
+    participant GEO as Geocoder Resolver
 
-  J --> L{activeProjectId present}
-  K --> L
-  L -- yes --> M[Apply project boost and rerank]
-  L -- no --> N[Use base ranking]
+    UI->>ORCH: query + context
+    ORCH-->>UI: typing phase
+    par DB/Recents
+        ORCH->>DB: fetch db-address + db-content + recents
+        DB-->>ORCH: db candidates
+    and Geocoder
+        ORCH->>GEO: fetch geocoder candidates
+        GEO-->>ORCH: geocoder candidates or timeout
+    end
+    ORCH-->>UI: results-partial (DB/recents)
+    ORCH-->>UI: results-complete (with geocoder if available)
+```
+
+### Fallback Widening Order
+
+```mermaid
+flowchart LR
+    S0[Stage 0 Strict: viewport+country] --> S1[Stage 1 Project Region]
+    S1 --> S2[Stage 2 User Priors]
+    S2 --> S3[Stage 3 Global Open]
+    S0 --> STOP[Stop When Criteria Met]
+    S1 --> STOP
+    S2 --> STOP
+    S3 --> STOP
+```
+
+### Dedup Decision Tree
+
+```mermaid
+flowchart TD
+    A[Incoming Candidate] --> B{Same normalized label?}
+    B -- No --> C[Keep Candidate]
+    B -- Yes --> D{Within 30m?}
+    D -- Yes --> E[Merge Semantic + Spatial Duplicate]
+    D -- No --> F{Same admin area?}
+    F -- Yes --> G[Merge Semantic Duplicate]
+    F -- No --> C
+```
+
+### Ranking Tie-Break Chain
+
+```mermaid
+flowchart TD
+    A[Equal totalScore] --> B[Compare confidence rank]
+    B --> C{Still tied?}
+    C -- Yes --> D[Compare source priority]
+    D --> E{Still tied?}
+    E -- Yes --> F[Compare nearest geo distance]
+    F --> G{Still tied?}
+    G -- Yes --> H[Compare normalized label]
+    H --> I{Still tied?}
+    I -- Yes --> J[Compare stable id]
+    I -- No --> K[Final Order]
 ```
 
 ## Component Hierarchy
 
 ```
-Search Data Orchestration
+Search Data Orchestration V2
 ├── SearchOrchestratorService
 │   ├── TypingPhaseEmitter
-│   ├── PartialPhaseEmitter (DB + recents)
-│   └── CompletePhaseEmitter (geocoder append)
-├── SearchBarService
-│   ├── DbAddressResolver
-│   ├── DbContentResolver
-│   ├── GeocoderResolver (via GeocodingService)
-│   └── RecentSearchStore
-└── RankingPipeline
-    ├── ProjectBoostScorer
-    ├── DataGravityScorer
-    ├── GeoBiasScorer
-    └── DedupReducer
+│   ├── PartialPhaseEmitter
+│   ├── CompletePhaseEmitter
+│   └── StableOrderingReducer
+├── SearchContextBuilderService
+│   ├── ActiveMarkerContextBuilder
+│   ├── ActiveProjectContextBuilder
+│   ├── UserLocationContextBuilder
+│   ├── ViewportContextBuilder
+│   └── PriorsBuilder
+├── SearchCandidateRetrievalService
+│   ├── DbAddressRetriever
+│   ├── DbContentRetriever
+│   ├── GeocoderRetriever
+│   └── RecentRetriever
+├── SearchScoringServiceV2
+│   ├── TextRelevanceScorer
+│   ├── GeoPersonalizationScorer
+│   ├── PriorScorer
+│   └── AntiNoisePenaltyScorer
+├── SearchDedupServiceV2
+│   ├── SpatialDeduper
+│   └── SemanticDeduper
+└── SearchExplanationServiceV2
+    ├── ConfidenceLabeler
+    └── ExplanationTagBuilder
 ```
 
 ## Data
 
-| Field                 | Source                                           | Type                          |
-| --------------------- | ------------------------------------------------ | ----------------------------- |
-| DB address candidates | `SearchOrchestratorService -> dbAddressResolver` | `SearchAddressCandidate[]`    |
-| DB content candidates | `SearchOrchestratorService -> dbContentResolver` | `SearchContentCandidate[]`    |
-| Geocoder candidates   | `SearchOrchestratorService -> geocoderResolver`  | `SearchAddressCandidate[]`    |
-| Recent searches       | `SearchBarService -> localStorage`               | `SearchRecentCandidate[]`     |
-| Search result set     | `SearchOrchestratorService.searchInput()`        | `Observable<SearchResultSet>` |
-| Query context         | Project/map/org context providers                | `SearchQueryContext`          |
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
+### SearchQueryContextV2 Contract
+
+```typescript
+export interface SearchQueryContextV2 {
+  organizationId?: string;
+  activeProjectId?: string;
+  activeMarkerCentroid?: { lat: number; lng: number };
+  activeProjectCentroid?: { lat: number; lng: number };
+  viewportBounds?: { north: number; east: number; south: number; west: number };
+  currentLocation?: { lat: number; lng: number };
+  countryCodes?: string[];
+  userLocationPriors?: Array<{
+    key: string;
+    lat: number;
+    lng: number;
+    weight: number;
+  }>;
+  projectLocationPriors?: Array<{
+    key: string;
+    lat: number;
+    lng: number;
+    weight: number;
+  }>;
+  recencySignals?: {
+    last24hWeight?: number;
+    last30dWeight?: number;
+    last180dWeight?: number;
+  };
+  activeFilterCount?: number;
+  commandMode?: boolean;
+  selectedGroupId?: string;
+}
+```
+
+### Candidate Schema Additions
+
+| Field                | Type                          | Purpose                        |
+| -------------------- | ----------------------------- | ------------------------------ |
+| `stableId`           | `string`                      | Final deterministic tie-break  |
+| `textScore`          | `number`                      | Query match quality            |
+| `geoScore`           | `number`                      | Personalized geo relevance     |
+| `projectScore`       | `number`                      | Active project affinity        |
+| `recencyScore`       | `number`                      | Recency prior contribution     |
+| `sourceUtilityScore` | `number`                      | Source reliability utility     |
+| `qualityScore`       | `number`                      | Candidate quality prior        |
+| `noisePenalty`       | `number`                      | Short-prefix noise suppression |
+| `totalScore`         | `number`                      | Final ranking score            |
+| `confidenceLabel`    | `'high' \| 'medium' \| 'low'` | Confidence bucket              |
+| `explanationTags`    | `string[]`                    | Human-readable ranking reasons |
 
 ## State
 
-| Name             | Type                                                                   | Default     | Controls                             |
-| ---------------- | ---------------------------------------------------------------------- | ----------- | ------------------------------------ |
-| `phase`          | `'typing' \| 'partial' \| 'complete'`                                  | `'typing'`  | Progressive rendering stage          |
-| `geoStatus`      | `'loading' \| 'loaded' \| 'error'`                                     | `'loading'` | Geocoder section visibility/skeleton |
-| `viewportBounds` | `{ north: number; east: number; south: number; west: number } \| null` | `null`      | Viewbox bias for geocoder queries    |
-| `countryCodes`   | `string[]`                                                             | `[]`        | Country bias for geocoder queries    |
-| `dataCentroid`   | `{ lat: number; lng: number } \| null`                                 | `null`      | Proximity-decay scoring              |
-| `cacheTtlMs`     | `number`                                                               | `300000`    | Search cache lifetime                |
+| Name                       | Type                                  | Default     | Controls                    |
+| -------------------------- | ------------------------------------- | ----------- | --------------------------- |
+| `phase`                    | `'typing' \| 'partial' \| 'complete'` | `'typing'`  | Progressive rendering stage |
+| `geoStatus`                | `'loading' \| 'loaded' \| 'error'`    | `'loading'` | Geocoder visibility         |
+| `fallbackStage`            | `0 \| 1 \| 2 \| 3`                    | `0`         | Widening stage              |
+| `contextVersion`           | `number`                              | `0`         | Snapshot freshness          |
+| `stableRankingFingerprint` | `string`                              | `''`        | Stability assertions        |
+| `cacheTtlMs`               | `number`                              | `300000`    | Search cache lifetime       |
 
 ## File Map
 
-| File                                                | Purpose                                  |
-| --------------------------------------------------- | ---------------------------------------- |
-| `docs/element-specs/search-bar-data-and-service.md` | Data and service contract for Search Bar |
+| File                                                | Purpose                                                 |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| `docs/element-specs/search-bar-data-and-service.md` | Data and service contract for v2 personalized geosearch |
 
 ## Wiring
 
 ### Injected Services
 
-- `SearchBarService` — coordinates query lifecycle, recents, fallback, and ranking orchestration.
-- `SearchOrchestratorService` — emits phased result sets and handles dedup pipeline behavior.
-- `GeocodingService` — proxies external geocoder calls via Supabase Edge Function.
+- `SearchOrchestratorService` owns phase emission and final ordering.
+- `SearchBarService` handles recents persistence and retrieval adapters.
+- `GeocodingService` proxies all external geocoder access via edge function.
+- `MapShellComponent` supplies live context signals via query context snapshot.
 
 ### Inputs / Outputs
 
@@ -112,285 +236,173 @@ None.
 
 ### Subscriptions
 
-- Query input stream — debounced phase trigger; torn down with owning lifecycle.
-- Project selection/context stream — updates `SearchQueryContext` and ranking; torn down with owning lifecycle.
-- Geocoder response stream — merged into complete phase and canceled on query changes.
+- Query stream: debounced stage entry.
+- Context stream: re-score on context changes.
+- Geocoder stream: cancellable (`switchMap`) and merged non-blockingly.
 
 ### Supabase Calls
 
-- `images` table, `select` (address candidate lookup) — triggered on non-empty query in DB address resolver.
-- `projects` table, `select` (project content candidates) — triggered on non-empty query in DB content resolver.
-- `saved_groups` table, `select` (group content candidates) — triggered on non-empty query in DB content resolver.
-- Edge Function `/functions/v1/geocode`, `invoke` (forward geocoder query) — triggered after debounce for geocoder phase.
+- `images` table: address candidate retrieval.
+- `projects` and `saved_groups`: content candidate retrieval.
+- Edge function `geocode`: forward geocoder retrieval with bias params.
+
+### Sequence: Strict Then Widened Retrieval
 
 ```mermaid
 sequenceDiagram
-  participant UI as SearchBarComponent
-  participant SB as SearchBarService
-  participant ORCH as SearchOrchestratorService
-  participant DB as Supabase DB
-  participant FX as Supabase Edge Function (geocode)
+    participant ORCH as SearchOrchestrator
+    participant RET as CandidateRetrieval
+    participant SCORE as ScoringV2
+    participant POL as FallbackPolicy
 
-  UI->>SB: search(query, context)
-  SB->>ORCH: searchInput(query, context)
-  ORCH-->>UI: phase 1 typing
-
-  par phase 2 DB
-    ORCH->>DB: select images.address_label
-    ORCH->>DB: select projects.name
-    ORCH->>DB: select saved_groups.name
-  and phase 3 geocoder
-    ORCH->>FX: invoke geocode(query, viewbox, countrycodes, limit)
-  end
-
-  DB-->>ORCH: DB results or DB error
-  alt DB error
-    ORCH-->>UI: partial with available sources + error-safe fallback
-  else DB success
-    ORCH-->>UI: partial (DB sections)
-  end
-
-  FX-->>ORCH: geocoder results or timeout/error
-  alt geocoder timeout/error
-    ORCH-->>UI: keep partial; suppress geocoder section
-  else geocoder success
-    ORCH->>ORCH: dedup + geo-bias rerank
-    ORCH-->>UI: complete (DB + geocoder)
-  end
+    ORCH->>RET: strict retrieval
+    RET-->>ORCH: strict candidates
+    ORCH->>SCORE: score strict candidates
+    SCORE-->>ORCH: scored strict list
+    ORCH->>POL: evaluate strict quality
+    alt stop
+        ORCH-->>ORCH: finalize deterministic ranking
+    else continue
+        ORCH->>RET: widened retrieval stage n+1
+        RET-->>ORCH: widened candidates
+        ORCH->>SCORE: rescore merged candidates
+        SCORE-->>ORCH: scored merged list
+    end
 ```
+
+### Sequence: Commit And Priors Update
+
+```mermaid
+sequenceDiagram
+    participant UI as SearchBarComponent
+    participant ORCH as SearchOrchestrator
+    participant SB as SearchBarService
+    participant CTX as ContextBuilder
+
+    UI->>ORCH: commit(candidate)
+    ORCH->>SB: addRecentSearch(candidate.label)
+    ORCH->>CTX: updateUserAndProjectPriors(candidate)
+    CTX-->>ORCH: new prior snapshot version
+    ORCH-->>UI: commit action result
+```
+
+## Ranking Formula Contract
+
+Final score:
+
+$$
+S(c)=100\cdot\left(0.42T+0.30G+0.10P+0.08R+0.06U+0.04Q\right)-N
+$$
+
+Geo sub-score:
+
+$$
+G=0.30g_{marker}+0.30g_{project}+0.20g_{user}+0.20g_{viewport}
+$$
+
+Distance transform:
+
+$$
+g_x=\exp(-d_x/\tau_x)
+$$
+
+Recommended decays:
+
+- $\tau_{marker}=1500$
+- $\tau_{project}=5000$
+- $\tau_{user}=8000$
+
+Neutral defaults when signal missing:
+
+- Missing geo signal contribution = `0.5`
+- Missing priors contribution = `0.5`
+- Missing context never blocks result generation
+
+Short-prefix anti-noise penalty:
+
+$$
+N=
+\begin{cases}
+28,& 3\le |q|\le 6,\ prefix\_only,\ country\ mismatch,\ far\ global\\
+14,& 3\le |q|\le 6,\ prefix\_only,\ far\ global\\
+0,& otherwise
+\end{cases}
+$$
+
+## Fallback Policy Contract
+
+Continue if any is true:
+
+1. No candidates in strict stage.
+2. Top1 confidence is `low`.
+3. Top1 text score < `0.70`.
+4. Query length 3 to 6 and all top3 are flagged global-noise.
+
+Stop if any is true:
+
+1. Top1 confidence is `high`.
+2. Top1 confidence is `medium` with margin >= `6` and at least one local explanation tag.
+3. Latency ceiling reached.
+
+Widening order (fixed):
+
+1. Viewport + country constrained
+2. Project regional
+3. User priors
+4. Global open
+
+Suggestion row rule:
+
+- Show only when correction confidence >= `0.85` and top1 score lift >= `10` points.
+
+## Metrics And Quality Gates
+
+| Metric                     | Definition                                                                         | Gate     |
+| -------------------------- | ---------------------------------------------------------------------------------- | -------- |
+| Top1 local relevance       | Ambiguous prefix queries where top1 is local-context candidate                     | >= 92%   |
+| Top3 local relevance       | Ambiguous prefix queries with >= 2 local-context candidates in top3 when available | >= 95%   |
+| Global noise suppression   | Ambiguous prefix top3 containing global-noise candidates                           | <= 5%    |
+| Strict-stage latency p95   | End-to-end strict stage                                                            | <= 250ms |
+| Complete-stage latency p95 | End-to-end complete stage                                                          | <= 900ms |
+| Ranking stability          | Identical query+context with identical top3 order                                  | >= 95%   |
 
 ## Acceptance Criteria
 
-- [x] Search source loading is progressive and non-blocking across phases.
-- [x] DB results render before geocoder results for typical latency conditions.
-- [x] Geocoder calls go through Edge Function proxy only.
-- [x] Fallback variants execute only when strict/primary matching has no sufficiently confident winner: either zero primary results or top primary confidence below the fallback threshold (default 0.70).
-- [x] Partial-prefix queries (for example `Wilhe`) do not trigger fallback when primary returns a confident winner at or above threshold; fallback runs only when confidence is below threshold or no primary result exists.
-- [x] Geocoder loading placeholders use the same row geometry as final Places rows (height, vertical padding, media-column width).
-- [x] Geocoder loading placeholders use neutral light-gray loading surfaces (no clay/orange accent colors).
-- [x] Section ordering remains fixed: Addresses -> Projects & Groups -> Places.
-- [x] Active-project context materially boosts ranking in DB sections.
-- [ ] Geo-priority requires `viewportBounds` and `countryCodes` inputs in `SearchQueryContext` when context is available.
-- [x] With both `viewportBounds` and `countryCodes` present, geocoder requests apply both `viewbox` and `countrycodes` bias.
-- [x] If `viewportBounds` and/or `countryCodes` are missing, search degrades gracefully (no error state) and still returns relevant results.
-- [x] For short local-intent queries (for example: street names, districts, city neighborhoods), local candidates rank above unrelated global candidates when geo context is present.
-- [x] Geocoder results within 30m of DB address candidates are deduplicated from Places output.
-- [x] In-flight geocoder requests are canceled on query changes (`switchMap` or equivalent cancellation semantics).
-- [x] `SearchQueryContext` includes and propagates `activeProjectId` from active project selection.
-- [x] DB address ranking uses `textMatch × projectBoost × dataGravity × recencyDecay`.
-- [x] DB content ranking uses `textMatch × projectBoost × sizeSignal`.
-- [x] Geocoder ranking uses `nominatimImportance × proximityDecay × countryBoost`.
-- [x] Places output is capped at 3 items after deduplication and ranking, and only when the Places section is rendered.
-- [x] Places ordering is deterministic: local-context matches first, then near-data matches, then remaining global matches by relevance.
-- [ ] Single-point map-center commits apply a tight zoom target of approximately 50m horizontal ground span when map zoom constraints allow.
-- [ ] Multi-point commits (for example aggregate project/group locations) fit bounds so all committed points are visible in the viewport.
-- [x] Replacing geocoder loading placeholders with final Places rows does not introduce vertical jump caused by row-size mismatch.
-- [ ] Session cache includes org `countryCodes` and `dataCentroid` for query-time geo bias.
-- [x] Edge Function accepts and forwards `viewbox`, `bounded`, `countrycodes`, and `limit`.
-- [x] Recent searches persist across sessions in `feldpost-recent-searches`.
-- [x] Recent entries include `projectId` context and are ranked project-first, then recency/usage.
-- [x] Recent search storage is capped at 20 with deterministic eviction behavior.
-- [x] `SearchBarService` retains non-UI responsibilities; component layer does not directly call `fetch()` or `localStorage`.
-- [ ] DB address labels are normalized to `Street Number, Postcode City` on write path when source fields permit normalization.
-- [ ] "Search this area" can trigger viewport-bound re-query when pan distance crosses threshold.
-- [ ] Progressive geo-disclosure can group geocoder output into near-data and other-locations buckets.
-- [ ] Offline cache mode can return address/coordinate cache entries with explicit offline labeling.
+### Architecture Boundaries
 
-## Data Pipeline
+- [ ] Normalization, retrieval, scoring, deduplication, fallback policy, and explanation are defined as separate service boundaries.
+- [ ] Component layer contains no direct scoring or fallback logic.
+- [x] Geocoder access remains proxy-only via service adapters.
 
-### Search Source Tiers
+### Context And Personalization
 
-| Tier    | Source             | Latency   | Table / API                          | Section           |
-| ------- | ------------------ | --------- | ------------------------------------ | ----------------- |
-| Instant | Recent searches    | 0ms       | localStorage                         | Recent searches   |
-| Instant | Ghost completion   | <1ms      | in-memory trie                       | inline ghost      |
-| Fast    | DB addresses       | ~50-200ms | `images.address_label`               | Addresses         |
-| Fast    | DB projects/groups | ~50-200ms | `projects.name`, `saved_groups.name` | Projects & Groups |
-| Slow    | Geocoder           | ~1-2s     | Edge Function -> Nominatim           | Places            |
+- [x] Context includes active marker geography, active project geography, current location geography, and viewport geography.
+- [ ] Context includes user and project location priors with recency decay windows.
+- [x] Missing context signals use neutral defaults and do not throw.
 
-Phases:
+### Scoring, Dedup, And Determinism
 
-- Phase 1: typing feedback and ghost completion
-- Phase 2: DB and recents
-- Phase 3: geocoder append
+- [ ] Final ranking uses explicit weighted scoring terms and anti-noise penalty.
+- [ ] Dedup uses semantic and spatial checks, with deterministic representative selection.
+- [ ] Deterministic tie-break chain is applied exactly as specified.
+- [ ] Global fallback candidates include explicit explanation labels.
 
-The three phases must be emitted independently so a failure in geocoder phase does not suppress phase-2 output.
+### Fallback And Suggestions
 
-### SearchQueryContext
+- [x] Strict stage is always executed before widening stages.
+- [ ] Widening proceeds only in the specified order and stops at first valid stage.
+- [ ] Suggestion row appears only when confidence and score-lift thresholds are met.
 
-```typescript
-export interface SearchQueryContext {
-  organizationId?: string;
-  activeProjectId?: string;
-  viewportBounds?: { north: number; east: number; south: number; west: number };
-  dataCentroid?: { lat: number; lng: number };
-  countryCodes?: string[];
-  activeFilterCount?: number;
-  commandMode?: boolean;
-  selectedGroupId?: string;
-}
-```
+### Progressive UX And Performance
 
-### Geocoder Resolution - Proxy Only
+- [x] Typing/partial/complete phases remain non-blocking.
+- [x] Geocoder timeout or error never suppresses DB partial output.
+- [ ] Latency and stability quality gates pass before full rollout.
 
-All geocoder requests must go through `GeocodingService` via the Supabase Edge Function (`/functions/v1/geocode`). No direct browser calls to Nominatim are allowed.
+## Rollout Plan Contract
 
-### Result Ranking Algorithm
-
-DB addresses:
-
-`score = textMatch × projectBoost × dataGravity × recencyDecay`
-
-DB content:
-
-`score = textMatch × projectBoost × sizeSignal`
-
-Geocoder:
-
-`score = nominatimImportance × proximityDecay × countryBoost`
-
-### Geo-Relevance Ranking
-
-Contract inputs:
-
-1. `viewportBounds` (for `viewbox` bias)
-2. `countryCodes` (for `countrycodes` bias)
-
-Required behavior:
-
-1. When both inputs are present, geocoder queries must apply both country and viewport bias.
-2. When one input is missing, the available input must still be applied.
-3. When both inputs are missing, geocoder queries must still run (graceful degradation), but without geo-priority bias.
-
-Ranking order expectation (when both local and global candidates exist):
-
-1. In-country and in-viewport matches
-2. In-country but out-of-viewport matches with near-data proximity
-3. Remaining global matches ordered by relevance
-
-Near-data bias:
-
-- Near-data bias means candidates closer to `dataCentroid` are promoted relative to farther candidates at similar text relevance.
-- Near-data bias must not suppress all global results; it only reorders them.
-
-Centroid query:
-
-```sql
-SELECT ST_X(ST_Centroid(ST_Collect(geog::geometry))) AS lng,
-       ST_Y(ST_Centroid(ST_Collect(geog::geometry))) AS lat
-FROM images
-WHERE organization_id = :org_id
-  AND latitude IS NOT NULL;
-```
-
-### Edge Function Parameters
-
-| Parameter      | Type     | Description                                   |
-| -------------- | -------- | --------------------------------------------- |
-| `viewbox`      | `string` | `west,north,east,south` map viewport          |
-| `bounded`      | `0 \| 1` | Restrict-to-viewbox toggle                    |
-| `countrycodes` | `string` | ISO 3166-1 comma list                         |
-| `limit`        | `number` | Places cap input (default `3` for Search Bar) |
-
-Places cap application:
-
-1. Apply ranking and deduplication first.
-2. Then cap Places output to the top 3 items.
-3. Apply cap only to the Places section (not Addresses or Projects & Groups).
-
-### Commit Viewport Policy
-
-Single-point commits:
-
-1. Center map on committed coordinate.
-2. Apply tight zoom targeting approximately 50m horizontal ground span.
-3. If map zoom constraints prevent exact 50m span, use the closest tighter supported zoom level without exceeding map limits.
-
-Multi-point commits:
-
-1. Compute bounds from all committed coordinates.
-2. Fit viewport to include all points with existing safe-area/panel padding.
-3. Do not drop outlier points from the committed set.
-
-## Implementation Notes
-
-### Must (spec contract)
-
-- Treat `viewportBounds` and `countryCodes` as required geo-priority context inputs when available.
-- Apply graceful degradation when context is missing; never fail the full search flow due to missing geo context.
-- Prefer local-context candidates over unrelated global candidates when both are present.
-- Enforce Places max count of 3 after deduplication and ranking.
-
-### Should (suggested approach)
-
-- Use weighted scoring with explicit geo factors (`countryBoost`, `viewboxBoost`, `proximityDecay`) so ordering is predictable.
-- Treat missing geo inputs as neutral multipliers (for example `1.0`) rather than branching into separate pipelines.
-- Add test fixtures that pair short local-intent queries with distracting global lookalikes to prevent global-noise regressions.
-
-### Could (future improvements)
-
-- Add telemetry for geo-priority hit-rate (context-present vs context-absent result quality).
-- Add optional experiments for adaptive Places cap by query confidence.
-- Add explicit near-data and global buckets in Places if progressive disclosure is enabled.
-
-## SearchBarService Contract
-
-Responsibilities:
-
-- Recent search persistence and ranking
-- Geocoder resolution via proxy
-- Fallback query strategy
-- DB address/content resolver orchestration
-
-Fallback trigger contract (normative):
-
-- Evaluate strict/primary result confidence first.
-- Trigger fallback only when:
-  - primary result set is empty, or
-  - top primary confidence is `< fallbackThreshold` (default `0.70`).
-- Do not run fallback when top primary confidence is `>= fallbackThreshold`.
-- This rule applies identically for partial prefixes, including queries like `Wilhe`.
-
-Interface:
-
-```typescript
-@Injectable({ providedIn: "root" })
-export class SearchBarService {
-  resolveGeocoderCandidates(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchAddressCandidate[]>;
-  resolveDbAddressCandidates(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchAddressCandidate[]>;
-  resolveDbContentCandidates(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchContentCandidate[]>;
-  getRecentSearches(activeProjectId?: string): SearchRecentCandidate[];
-  addRecentSearch(label: string, activeProjectId?: string): void;
-  clearRecentSearches(): void;
-}
-```
-
-Recent storage key: `feldpost-recent-searches`.
-
-```typescript
-interface StoredRecentSearch {
-  label: string;
-  lastUsedAt: string;
-  projectId?: string;
-  usageCount: number;
-}
-```
-
-Storage/ranking rules:
-
-- Cap at 20 entries with LRU-style eviction.
-- Upsert duplicate labels by bumping `lastUsedAt` and `usageCount`.
-- Rank active-project recents first, then others by recency and usage.
-
-Future enhancement:
-
-- Replace DB `ilike` matching with `pg_trgm` similarity search for typo tolerance.
+1. `search_v2_shadow`: compute v2 scores in shadow mode.
+2. `search_v2_rank_10pct`: enable ranked output for canary users.
+3. `search_v2_prefix_guard`: apply v2 logic for ambiguous prefixes first.
+4. `search_v2_full`: full v2 rollout.
+5. Remove v1 path only after 14 consecutive days of gate compliance.

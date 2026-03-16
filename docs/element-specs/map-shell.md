@@ -51,6 +51,16 @@ MapShell                                   ← full viewport, flex row, --color-
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field            | Source                                                   | Type            |
 | ---------------- | -------------------------------------------------------- | --------------- |
 | Viewport markers | `supabase.rpc('viewport_markers', { bounds, zoom })`     | `ViewportRow[]` |
@@ -74,6 +84,19 @@ MapShell                                   ← full viewport, flex row, --color-
 | `features/map/map-shell/map-shell.component.scss` | Layout styles (already exists)  |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - Loaded via Angular Router at `/` with `authGuard`
 - Initializes Leaflet in `afterNextRender` (browser-only)

@@ -35,6 +35,12 @@ Your job is to create structured element specs that agents can implement precise
 9. **Wiring** — parent integration, routing, imports
 10. **Acceptance Criteria** — checkbox list, each testable
 
+Mermaid requirements for every spec:
+
+- Include at least 2 Mermaid diagrams
+- Required: one **Wiring** diagram (`sequenceDiagram` or `flowchart`)
+- Required: one **Data Requirements** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`)
+
 ## Spec Update Mode
 
 When the user provides one or more existing spec files and describes features to add:

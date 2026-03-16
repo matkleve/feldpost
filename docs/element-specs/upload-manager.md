@@ -1133,6 +1133,16 @@ graph LR
 
 ## Data
 
+### Data Flow (Mermaid)
+
+```mermaid
+flowchart LR
+  UI[UI Component] --> S[Service Layer]
+  S --> DB[(Supabase Tables)]
+  DB --> S
+  S --> UI
+```
+
 | Field          | Source                                  | Type                          |
 | -------------- | --------------------------------------- | ----------------------------- |
 | Jobs           | `UploadManagerService.jobs()`           | `Signal<UploadJob[]>`         |
@@ -1168,6 +1178,19 @@ graph LR
 | `features/upload/upload-panel/upload-panel.component.ts` | Refactor — delegate to UploadManagerService               |
 
 ## Wiring
+
+### Wiring Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant P as Parent
+  participant C as Component
+  participant S as Service
+  P->>C: Provide inputs and bindings
+  C->>S: Request data or action
+  S-->>C: Return updates
+  C-->>P: Emit outputs/events
+```
 
 - `UploadManagerService` is `providedIn: 'root'` — no module import needed
 - Inject into `UploadPanelComponent` (replace internal queue logic)
