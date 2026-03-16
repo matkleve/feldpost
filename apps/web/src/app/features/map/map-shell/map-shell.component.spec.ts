@@ -123,6 +123,18 @@ describe('MapShellComponent', () => {
     expect(bar).not.toBeNull();
   });
 
+  it('renders the top-left basemap switch button', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const switchButton = (fixture.nativeElement as HTMLElement).querySelector(
+      '.map-basemap-switch',
+    );
+    expect(switchButton).not.toBeNull();
+    expect((switchButton as HTMLButtonElement).getAttribute('role')).toBe('switch');
+    expect((switchButton as HTMLButtonElement).getAttribute('aria-checked')).toBe('false');
+  });
+
   it('renders the map container element', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
@@ -153,6 +165,51 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.toggleUploadPanel();
 
     expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
+  });
+
+  it('toggleMapBasemap() flips the basemap and persists the preference', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.mapBasemap()).toBe('default');
+
+    fixture.componentInstance.toggleMapBasemap();
+
+    expect(fixture.componentInstance.mapBasemap()).toBe('satellite');
+    expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('satellite');
+
+    fixture.componentInstance.toggleMapBasemap();
+
+    expect(fixture.componentInstance.mapBasemap()).toBe('default');
+    expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
+  });
+
+  it('toggleMapBasemap() replaces the active tile layer when map exists', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const previousLayer = { addTo: vi.fn() };
+    const nextLayer = { addTo: vi.fn() };
+    const mapStub = {
+      removeLayer: vi.fn(),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: { removeLayer: ReturnType<typeof vi.fn> };
+      activeBaseTileLayer: { addTo: ReturnType<typeof vi.fn> } | null;
+      createMapBasemapLayer: (mode: 'default' | 'satellite') => { addTo: ReturnType<typeof vi.fn> };
+      toggleMapBasemap: () => void;
+    };
+
+    component.map = mapStub;
+    component.activeBaseTileLayer = previousLayer;
+    component.createMapBasemapLayer = vi.fn().mockReturnValue(nextLayer);
+
+    component.toggleMapBasemap();
+
+    expect(mapStub.removeLayer).toHaveBeenCalledWith(previousLayer);
+    expect(nextLayer.addTo).toHaveBeenCalledWith(mapStub);
   });
 
   it('toggleUploadPanel() hides the panel when called twice', () => {

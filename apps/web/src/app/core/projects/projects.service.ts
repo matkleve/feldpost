@@ -29,6 +29,67 @@ interface ProjectActivityRow {
   country: string | null;
 }
 
+interface MediaActivityJoinRow {
+  project_id: string | null;
+  media_items:
+    | {
+        captured_at: string | null;
+        created_at: string | null;
+      }
+    | Array<{
+        captured_at: string | null;
+        created_at: string | null;
+      }>
+    | null;
+}
+
+interface MediaWorkspaceJoinRow {
+  project_id: string;
+  media_items:
+    | {
+        id: string;
+        latitude: number | null;
+        longitude: number | null;
+        thumbnail_path: string | null;
+        storage_path: string | null;
+        captured_at: string | null;
+        created_at: string;
+        exif_latitude: number | null;
+        exif_longitude: number | null;
+      }
+    | Array<{
+        id: string;
+        latitude: number | null;
+        longitude: number | null;
+        thumbnail_path: string | null;
+        storage_path: string | null;
+        captured_at: string | null;
+        created_at: string;
+        exif_latitude: number | null;
+        exif_longitude: number | null;
+      }>
+    | null;
+}
+
+interface MediaProjectMembershipRow {
+  media_item_id?: string;
+  project_id: string;
+}
+
+interface MediaSourceLinkRow {
+  id: string;
+  source_image_id: string | null;
+}
+
+interface ProfileOrgRow {
+  organization_id: string | null;
+}
+
+interface ProjectInsertContext {
+  userId: string;
+  organizationId: string;
+}
+
 const DEFAULT_PROJECT_COLOR: ProjectColorKey = 'clay';
 const PROJECTS_CACHE_TTL_MS = 60_000;
 const SEARCH_COUNTS_CACHE_TTL_MS = 15_000;
@@ -47,6 +108,7 @@ export class ProjectsService {
     string,
     { value: ProjectScopedWorkspaceImage[]; expiresAt: number }
   >();
+  private projectInsertContextCache: ProjectInsertContext | null = null;
 
   async loadProjects(): Promise<ProjectListItem[]> {
     const now = Date.now();
@@ -69,11 +131,7 @@ export class ProjectsService {
 
   private async loadProjectsFresh(): Promise<ProjectListItem[]> {
     const projectRows = await this.fetchProjects();
-
-    const { data: activityData, error: activityError } = await this.supabase.client
-      .from('images')
-      .select('project_id,captured_at,created_at,city,district,street,country')
-      .not('project_id', 'is', null);
+    const activityRows = await this.loadProjectActivityRows();
 
     const counts = new Map<string, number>();
     const lastActivity = new Map<string, string>();
@@ -82,22 +140,20 @@ export class ProjectsService {
     const streetCounts = new Map<string, Map<string, number>>();
     const countryCounts = new Map<string, Map<string, number>>();
 
-    if (!activityError && Array.isArray(activityData)) {
-      for (const row of activityData as ProjectActivityRow[]) {
-        if (!row.project_id) continue;
-        counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
-        this.bumpValueCount(cityCounts, row.project_id, row.city);
-        this.bumpValueCount(districtCounts, row.project_id, row.district);
-        this.bumpValueCount(streetCounts, row.project_id, row.street);
-        this.bumpValueCount(countryCounts, row.project_id, row.country);
+    for (const row of activityRows) {
+      if (!row.project_id) continue;
+      counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
+      this.bumpValueCount(cityCounts, row.project_id, row.city);
+      this.bumpValueCount(districtCounts, row.project_id, row.district);
+      this.bumpValueCount(streetCounts, row.project_id, row.street);
+      this.bumpValueCount(countryCounts, row.project_id, row.country);
 
-        const ts = row.captured_at ?? row.created_at;
-        if (!ts) continue;
+      const ts = row.captured_at ?? row.created_at;
+      if (!ts) continue;
 
-        const existing = lastActivity.get(row.project_id);
-        if (!existing || new Date(ts).getTime() > new Date(existing).getTime()) {
-          lastActivity.set(row.project_id, ts);
-        }
+      const existing = lastActivity.get(row.project_id);
+      if (!existing || new Date(ts).getTime() > new Date(existing).getTime()) {
+        lastActivity.set(row.project_id, ts);
       }
     }
 
@@ -258,7 +314,53 @@ export class ProjectsService {
       return cached.value;
     }
 
-    const { data, error } = await this.supabase.client
+    const preferred = await this.supabase.client
+      .from('media_projects')
+      .select(
+        'project_id,media_items!inner(id,latitude,longitude,thumbnail_path,storage_path,captured_at,created_at,exif_latitude,exif_longitude)',
+      )
+      .eq('project_id', projectId)
+      .order('created_at', { foreignTable: 'media_items', ascending: false });
+
+    if (!preferred.error && Array.isArray(preferred.data) && preferred.data.length > 0) {
+      const mappedPreferred: ProjectScopedWorkspaceImage[] = [];
+      for (const row of preferred.data as MediaWorkspaceJoinRow[]) {
+        const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
+        if (!media) continue;
+        if (typeof media.latitude !== 'number' || !Number.isFinite(media.latitude)) continue;
+        if (typeof media.longitude !== 'number' || !Number.isFinite(media.longitude)) continue;
+
+        mappedPreferred.push({
+          id: media.id,
+          projectId: row.project_id,
+          projectName: null,
+          latitude: media.latitude,
+          longitude: media.longitude,
+          thumbnailPath: media.thumbnail_path,
+          storagePath: media.storage_path,
+          capturedAt: media.captured_at,
+          createdAt: media.created_at,
+          direction: null,
+          exifLatitude: media.exif_latitude,
+          exifLongitude: media.exif_longitude,
+          addressLabel: null,
+          city: null,
+          district: null,
+          street: null,
+          country: null,
+          userName: null,
+        });
+      }
+
+      this.projectWorkspaceImagesCache.set(projectId, {
+        value: mappedPreferred,
+        expiresAt: now + PROJECT_WORKSPACE_CACHE_TTL_MS,
+      });
+
+      return mappedPreferred;
+    }
+
+    const fallback = await this.supabase.client
       .from('images')
       .select(
         'id,project_id,latitude,longitude,thumbnail_path,storage_path,captured_at,created_at,direction,exif_latitude,exif_longitude,address_label,city,district,street,country',
@@ -266,11 +368,11 @@ export class ProjectsService {
       .eq('project_id', projectId)
       .order('captured_at', { ascending: false, nullsFirst: false });
 
-    if (error || !Array.isArray(data)) {
+    if (fallback.error || !Array.isArray(fallback.data)) {
       return [];
     }
 
-    const mapped = (data as ProjectsImageRow[])
+    const mapped = (fallback.data as ProjectsImageRow[])
       .filter(
         (row) =>
           typeof row.latitude === 'number' &&
@@ -305,6 +407,67 @@ export class ProjectsService {
     });
 
     return mapped;
+  }
+
+  async loadMediaProjectMemberships(mediaItemId: string): Promise<string[]> {
+    const { data, error } = await this.supabase.client
+      .from('media_projects')
+      .select('project_id')
+      .eq('media_item_id', mediaItemId);
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return (data as MediaProjectMembershipRow[])
+      .map((row) => row.project_id)
+      .filter((value): value is string => typeof value === 'string' && value.length > 0);
+  }
+
+  async addMediaToProject(mediaItemId: string, projectId: string): Promise<boolean> {
+    const { error } = await this.supabase.client.from('media_projects').insert({
+      media_item_id: mediaItemId,
+      project_id: projectId,
+    });
+
+    const ok = !error;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.projectWorkspaceImagesCache.clear();
+    }
+
+    return ok;
+  }
+
+  async removeMediaFromProject(mediaItemId: string, projectId: string): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('media_projects')
+      .delete()
+      .eq('media_item_id', mediaItemId)
+      .eq('project_id', projectId);
+
+    const ok = !error;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.projectWorkspaceImagesCache.clear();
+    }
+
+    return ok;
+  }
+
+  async setMediaPrimaryProject(mediaItemId: string, projectId: string): Promise<boolean> {
+    const { error } = await this.supabase.client
+      .from('media_items')
+      .update({ primary_project_id: projectId, updated_at: new Date().toISOString() })
+      .eq('id', mediaItemId);
+
+    const ok = !error;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.projectWorkspaceImagesCache.clear();
+    }
+
+    return ok;
   }
 
   private invalidateProjectsReadCaches(): void {
@@ -415,9 +578,19 @@ export class ProjectsService {
   }
 
   private async tryCreateDraftProjectRow(): Promise<ProjectRow | null> {
+    const context = await this.resolveProjectInsertContext();
+    if (!context) {
+      return null;
+    }
+
     const preferred = await this.supabase.client
       .from('projects')
-      .insert({ name: 'Untitled project', color_key: DEFAULT_PROJECT_COLOR })
+      .insert({
+        name: 'Untitled project',
+        color_key: DEFAULT_PROJECT_COLOR,
+        organization_id: context.organizationId,
+        created_by: context.userId,
+      })
       .select('id,name,color_key,archived_at,created_at,updated_at')
       .single();
 
@@ -427,7 +600,11 @@ export class ProjectsService {
 
     const fallback = await this.supabase.client
       .from('projects')
-      .insert({ name: 'Untitled project' })
+      .insert({
+        name: 'Untitled project',
+        organization_id: context.organizationId,
+        created_by: context.userId,
+      })
       .select('id,name,created_at,updated_at')
       .single();
 
@@ -441,6 +618,34 @@ export class ProjectsService {
       color_key: DEFAULT_PROJECT_COLOR,
       archived_at: null,
     };
+  }
+
+  private async resolveProjectInsertContext(): Promise<ProjectInsertContext | null> {
+    const { data: authData, error: authError } = await this.supabase.client.auth.getUser();
+    const userId = authData.user?.id ?? null;
+    if (authError || !userId) {
+      return null;
+    }
+
+    const cached = this.projectInsertContextCache;
+    if (cached && cached.userId === userId) {
+      return cached;
+    }
+
+    const { data: profile, error: profileError } = await this.supabase.client
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const organizationId = (profile as ProfileOrgRow | null)?.organization_id ?? null;
+    if (profileError || !organizationId) {
+      return null;
+    }
+
+    const context = { userId, organizationId };
+    this.projectInsertContextCache = context;
+    return context;
   }
 
   private async collectTitleAndAddressMatches(
@@ -467,11 +672,25 @@ export class ProjectsService {
       return;
     }
 
+    const matchedImageIds = new Set<string>();
+
     for (const row of response.data as Array<{ id: string; project_id: string | null }>) {
+      matchedImageIds.add(row.id);
       if (!row.project_id) continue;
       const bucket = imageIdsByProject.get(row.project_id) ?? new Set<string>();
       bucket.add(row.id);
       imageIdsByProject.set(row.project_id, bucket);
+    }
+
+    const membershipProjectsByImageId = await this.loadMembershipProjectsBySourceImageIds([
+      ...matchedImageIds,
+    ]);
+    for (const [imageId, projectIds] of membershipProjectsByImageId) {
+      for (const projectId of projectIds) {
+        const bucket = imageIdsByProject.get(projectId) ?? new Set<string>();
+        bucket.add(imageId);
+        imageIdsByProject.set(projectId, bucket);
+      }
     }
   }
 
@@ -490,7 +709,10 @@ export class ProjectsService {
       return;
     }
 
+    const matchedImageIds = new Set<string>();
+
     for (const row of response.data as ProjectsImageMetadataRow[]) {
+      matchedImageIds.add(row.image_id);
       const relatedImage = Array.isArray(row.images) ? row.images[0] : row.images;
       const projectId = relatedImage?.project_id ?? null;
       if (!projectId) continue;
@@ -499,6 +721,106 @@ export class ProjectsService {
       bucket.add(row.image_id);
       imageIdsByProject.set(projectId, bucket);
     }
+
+    const membershipProjectsByImageId = await this.loadMembershipProjectsBySourceImageIds([
+      ...matchedImageIds,
+    ]);
+    for (const [imageId, projectIds] of membershipProjectsByImageId) {
+      for (const projectId of projectIds) {
+        const bucket = imageIdsByProject.get(projectId) ?? new Set<string>();
+        bucket.add(imageId);
+        imageIdsByProject.set(projectId, bucket);
+      }
+    }
+  }
+
+  private async loadMembershipProjectsBySourceImageIds(
+    imageIds: string[],
+  ): Promise<Map<string, Set<string>>> {
+    const result = new Map<string, Set<string>>();
+    if (imageIds.length === 0) {
+      return result;
+    }
+
+    const mediaLinksResponse = await this.supabase.client
+      .from('media_items')
+      .select('id,source_image_id')
+      .in('source_image_id', imageIds);
+
+    if (mediaLinksResponse.error || !Array.isArray(mediaLinksResponse.data)) {
+      return result;
+    }
+
+    const mediaItemToSourceImage = new Map<string, string>();
+    const mediaItemIds: string[] = [];
+
+    for (const row of mediaLinksResponse.data as MediaSourceLinkRow[]) {
+      if (!row.source_image_id) continue;
+      mediaItemToSourceImage.set(row.id, row.source_image_id);
+      mediaItemIds.push(row.id);
+    }
+
+    if (mediaItemIds.length === 0) {
+      return result;
+    }
+
+    const membershipsResponse = await this.supabase.client
+      .from('media_projects')
+      .select('media_item_id,project_id')
+      .in('media_item_id', mediaItemIds);
+
+    if (membershipsResponse.error || !Array.isArray(membershipsResponse.data)) {
+      return result;
+    }
+
+    for (const row of membershipsResponse.data as MediaProjectMembershipRow[]) {
+      if (!row.media_item_id) continue;
+      const sourceImageId = mediaItemToSourceImage.get(row.media_item_id);
+      if (!sourceImageId) continue;
+
+      const bucket = result.get(sourceImageId) ?? new Set<string>();
+      bucket.add(row.project_id);
+      result.set(sourceImageId, bucket);
+    }
+
+    return result;
+  }
+
+  private async loadProjectActivityRows(): Promise<ProjectActivityRow[]> {
+    const preferred = await this.supabase.client
+      .from('media_projects')
+      .select('project_id,media_items!inner(captured_at,created_at)');
+
+    if (!preferred.error && Array.isArray(preferred.data) && preferred.data.length > 0) {
+      const rows: ProjectActivityRow[] = [];
+      for (const row of preferred.data as MediaActivityJoinRow[]) {
+        const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
+        if (!media || !row.project_id) continue;
+
+        rows.push({
+          project_id: row.project_id,
+          captured_at: media.captured_at,
+          created_at: media.created_at,
+          city: null,
+          district: null,
+          street: null,
+          country: null,
+        });
+      }
+
+      return rows;
+    }
+
+    const fallback = await this.supabase.client
+      .from('images')
+      .select('project_id,captured_at,created_at,city,district,street,country')
+      .not('project_id', 'is', null);
+
+    if (fallback.error || !Array.isArray(fallback.data)) {
+      return [];
+    }
+
+    return fallback.data as ProjectActivityRow[];
   }
 
   private async loadStatusByProjectId(): Promise<Map<string, boolean>> {

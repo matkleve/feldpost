@@ -405,7 +405,11 @@
     >
       <app-workspace-pane
         [title]="workspacePaneTitle()"
+        [titleEditable]="workspaceTitleEditable()"
+        [titleEditValue]="workspaceTitleEditValue()"
         [detailImageId]="detailImageId()"
+        (titleEditValueChange)="onWorkspaceTitleChanged($event)"
+        (titleSubmitRequested)="onWorkspaceTitleSubmit($event)"
         (closed)="closeWorkspacePane()"
         (detailClosed)="onDetailClosed()"
         (detailRequested)="onDetailRequested($event)"

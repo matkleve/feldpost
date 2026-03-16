@@ -19,27 +19,27 @@ Full-width page with a header row: title "Projects", total project count, and a 
 
 ## Actions
 
-| #   | User Action                           | System Response                                                                                                        | Triggers                         |
-| --- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| 1   | Navigates to `/projects`              | Loads organization projects, image counts, and summary metadata                                                        | Supabase query                   |
-| 2   | Types in shared Search Bar            | Runs image-level search (title/address/custom properties) and groups matches by project with per-project result counts | `searchTerm` state               |
-| 3   | Clicks "New project"                  | Inserts draft project and opens inline name edit                                                                       | Supabase insert                  |
-| 4   | Submits project name                  | Persists new name and exits edit mode                                                                                  | Supabase update                  |
-| 5   | Clicks project row                    | Opens workspace pane in-place and scopes content to that project                                                       | `selectedProjectId` + pane state |
-| 6   | Opens row menu and clicks Rename      | Enables inline rename for that row                                                                                     | Local state                      |
-| 7   | Confirms rename                       | Validates name and updates project row                                                                                 | Supabase update                  |
-| 8   | Opens color picker on project         | Assigns predefined project color token and updates chip/accent                                                         | Supabase update                  |
-| 9   | Opens row menu and clicks Archive     | Asks confirmation, then archives project (not hard delete)                                                             | Supabase update                  |
-| 10  | Uses status filter                    | Restricts grouped results to Active or Archived projects                                                               | `statusFilter` state             |
-| 11  | Toggles view mode                     | Switches between List and Cards layouts without losing search/filter/sort state                                        | `viewMode` state                 |
-| 12  | Hovers project color chip             | Shows a palette affordance on the chip so users discover color editing without opening menus                           | Card/list color-chip hover state |
-| 13  | Clicks project color chip             | Opens anchored color picker with semantic project colors                                                               | `coloringProjectId` state        |
-| 14  | Opens workspace from project card/row | Opens pane with title set to selected project name instead of generic "Workspace"                                      | `workspacePaneTitle` computed    |
-| 15  | Clicks map button in image details    | Navigates to `/map` and zooms to the selected image location                                                           | Router + map focus payload       |
-| 16  | Opens Grouping dropdown               | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                   | Projects operator profile        |
-| 17  | Activates one or more groupings       | Renders explicit group headers and nests project rows/cards under those sections                                       | `activeGroupings` state          |
-| 18  | Opens Sort dropdown                   | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys)   | Projects operator profile        |
-| 19  | Changes sort direction                | Reorders grouped or flat project result set deterministically                                                          | `activeProjectSorts` state       |
+| #   | User Action                            | System Response                                                                                                        | Triggers                         |
+| --- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 1   | Navigates to `/projects`               | Loads organization projects, image counts, and summary metadata                                                        | Supabase query                   |
+| 2   | Types in shared Search Bar             | Runs image-level search (title/address/custom properties) and groups matches by project with per-project result counts | `searchTerm` state               |
+| 3   | Clicks "New project"                   | Inserts draft project, opens workspace pane, and focuses title text input in pane header                               | Supabase insert                  |
+| 4   | Presses Enter in workspace title input | Persists new name, exits title edit mode, and updates the project label in list/cards                                  | Supabase update                  |
+| 5   | Clicks project row                     | Opens workspace pane in-place and scopes content to that project                                                       | `selectedProjectId` + pane state |
+| 6   | Opens row menu and clicks Rename       | Enables inline rename for that row                                                                                     | Local state                      |
+| 7   | Confirms rename                        | Validates name and updates project row                                                                                 | Supabase update                  |
+| 8   | Opens color picker on project          | Assigns predefined project color token and updates chip/accent                                                         | Supabase update                  |
+| 9   | Opens row menu and clicks Archive      | Asks confirmation, then archives project (not hard delete)                                                             | Supabase update                  |
+| 10  | Uses status filter                     | Restricts grouped results to Active or Archived projects                                                               | `statusFilter` state             |
+| 11  | Toggles view mode                      | Switches between List and Cards layouts without losing search/filter/sort state                                        | `viewMode` state                 |
+| 12  | Hovers project color chip              | Shows a palette affordance on the chip so users discover color editing without opening menus                           | Card/list color-chip hover state |
+| 13  | Clicks project color chip              | Opens anchored color picker with semantic project colors                                                               | `coloringProjectId` state        |
+| 14  | Opens workspace from project card/row  | Opens pane with title set to selected project name instead of generic "Workspace"                                      | `workspacePaneTitle` computed    |
+| 15  | Clicks map button in image details     | Navigates to `/map` and zooms to the selected image location                                                           | Router + map focus payload       |
+| 16  | Opens Grouping dropdown                | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                   | Projects operator profile        |
+| 17  | Activates one or more groupings        | Renders explicit group headers and nests project rows/cards under those sections                                       | `activeGroupings` state          |
+| 18  | Opens Sort dropdown                    | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys)   | Projects operator profile        |
+| 19  | Changes sort direction                 | Reorders grouped or flat project result set deterministically                                                          | `activeProjectSorts` state       |
 
 ### Interaction Flowchart
 
@@ -116,7 +116,7 @@ ProjectsPage                                ← route root, full width
 │   │   │   └── ProjectRow (.ui-item) × N
 │   │   │       ├── ProjectColorChip           ← token color indicator
 │   │   │       ├── ProjectStatusDot           ← active/archived state
-│   │   │       ├── ProjectName (.ui-item-label) ← inline editable on rename
+│   │   │       ├── ProjectName (.ui-item-label) ← static by default, inline editable via row Rename action
 │   │   │       ├── MatchingCountMeta          ← "5 results" for current search query
 │   │   │       ├── ImageCountMeta             ← total photos
 │   │   │       ├── LastActivityMeta           ← relative date
@@ -135,6 +135,7 @@ ProjectsPage                                ← route root, full width
 │   ├── ProjectScopedPhotoGrid                  ← selected project photos
 │   └── ImageDetailView                          ← includes MapButton to `/map`
 │   └── WorkspacePaneTitleBinding                ← shows selected project name
+│   └── WorkspacePaneTitleInput                  ← focused edit mode after New project
 ├── [loading] ProjectsLoadingState           ← skeleton rows
 └── [empty] ProjectsEmptyState               ← guidance + CTA
 ```
@@ -183,22 +184,24 @@ Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 
 ## State
 
-| Name                 | Type                              | Default  | Controls                                   |
-| -------------------- | --------------------------------- | -------- | ------------------------------------------ |
-| `projects`           | `ProjectListItem[]`               | `[]`     | Rendered project rows/cards                |
-| `loading`            | `boolean`                         | `false`  | Loading skeleton visibility                |
-| `searchTerm`         | `string`                          | `''`     | Search query                               |
-| `statusFilter`       | `'all' \| 'active' \| 'archived'` | `'all'`  | Status scoping                             |
-| `viewMode`           | `'list' \| 'cards'`               | `'list'` | Active layout mode                         |
-| `projectMatchCounts` | `Record<string, number>`          | `{}`     | Search-result count per project            |
-| `activeGroupings`    | `GroupingProperty[]`              | `[]`     | Grouping hierarchy for list/card rendering |
-| `activeProjectSorts` | `SortConfig[]`                    | `[]`     | Explicit project-level sort criteria       |
-| `selectedProjectId`  | `string \| null`                  | `null`   | Active project opened in workspace pane    |
-| `workspacePaneOpen`  | `boolean`                         | `false`  | In-page workspace visibility               |
-| `editingProjectId`   | `string \| null`                  | `null`   | Inline rename row                          |
-| `creatingProject`    | `boolean`                         | `false`  | New-project draft input visibility         |
-| `archivingProjectId` | `string \| null`                  | `null`   | Archive confirmation pending state         |
-| `coloringProjectId`  | `string \| null`                  | `null`   | Color picker visibility target             |
+| Name                          | Type                              | Default  | Controls                                                      |
+| ----------------------------- | --------------------------------- | -------- | ------------------------------------------------------------- |
+| `projects`                    | `ProjectListItem[]`               | `[]`     | Rendered project rows/cards                                   |
+| `loading`                     | `boolean`                         | `false`  | Loading skeleton visibility                                   |
+| `searchTerm`                  | `string`                          | `''`     | Search query                                                  |
+| `statusFilter`                | `'all' \| 'active' \| 'archived'` | `'all'`  | Status scoping                                                |
+| `viewMode`                    | `'list' \| 'cards'`               | `'list'` | Active layout mode                                            |
+| `projectMatchCounts`          | `Record<string, number>`          | `{}`     | Search-result count per project                               |
+| `activeGroupings`             | `GroupingProperty[]`              | `[]`     | Grouping hierarchy for list/card rendering                    |
+| `activeProjectSorts`          | `SortConfig[]`                    | `[]`     | Explicit project-level sort criteria                          |
+| `selectedProjectId`           | `string \| null`                  | `null`   | Active project opened in workspace pane                       |
+| `workspacePaneOpen`           | `boolean`                         | `false`  | In-page workspace visibility                                  |
+| `editingProjectId`            | `string \| null`                  | `null`   | Inline rename row                                             |
+| `workspaceTitleEditProjectId` | `string \| null`                  | `null`   | Enables workspace header title input for the selected project |
+| `workspaceTitleEditValue`     | `string`                          | `''`     | Live value for workspace header title input                   |
+| `creatingProject`             | `boolean`                         | `false`  | New-project draft input visibility                            |
+| `archivingProjectId`          | `string \| null`                  | `null`   | Archive confirmation pending state                            |
+| `coloringProjectId`           | `string \| null`                  | `null`   | Color picker visibility target                                |
 
 ## File Map
 
@@ -254,7 +257,8 @@ sequenceDiagram
 - [x] View toggle switches between List and Cards without resetting search/filter/sort state.
 - [x] List view is default and optimized for scan/compare.
 - [x] Cards view keeps card internals structurally consistent for fast comparison.
-- [x] "New project" creates a draft row and persists after confirmation.
+- [x] "New project" creates a draft row, opens workspace pane, and focuses the workspace title input.
+- [x] Pressing Enter in the workspace title input persists the name and updates the project label in list/cards.
 - [x] Rename is inline, validates input, and persists without full-page reload.
 - [x] Each project can be assigned a semantic color token and the color is visible in list and card presentations.
 - [x] Archive requires confirmation and removes project from Active view.

@@ -22,6 +22,30 @@
   max-width: calc(100% - 3rem);
 }
 
+.pane-header__title-input {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  text-align: center;
+  width: min(24rem, calc(100% - 3rem));
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-clay) 12%, var(--color-bg-surface));
+  outline: none;
+  transition:
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out,
+    background 120ms ease-out;
+
+  &:focus-visible {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-clay) 18%, var(--color-bg-surface));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
+}
+
 .pane-header__close-btn {
   position: absolute;
   inset-inline-end: var(--spacing-4);

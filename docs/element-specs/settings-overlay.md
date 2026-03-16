@@ -106,16 +106,17 @@ stateDiagram-v2
 
 ## File Map
 
-| File                                                                                        | Purpose                                                           |
-| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                  | Overlay shell with CDK overlay open/close and state orchestration |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`                | Overlay template with section list and detail host                |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`                | Overlay styling, dividers, and two-column layout                  |
-| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`                   | Registry token and section registration contract                  |
-| `apps/web/src/app/features/settings-overlay/settings-section-outlet.component.ts`           | Dynamic section host component                                    |
-| `apps/web/src/app/features/settings-overlay/sections/profile-settings-section.component.ts` | Account/Profile section implementation                            |
-| `apps/web/src/app/features/settings-overlay/sections/theme-settings-section.component.ts`   | Theme section implementation                                      |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.spec.ts`             | Overlay behavior tests (open/load/error/retry/dismiss/reposition) |
+| File                                                                                                | Purpose                                                           |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                          | Overlay shell with CDK overlay open/close and state orchestration |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`                        | Overlay template with section list and detail host                |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`                        | Overlay styling, dividers, and two-column layout                  |
+| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`                           | Registry token and section registration contract                  |
+| `apps/web/src/app/features/settings-overlay/settings-section-outlet.component.ts`                   | Dynamic section host component                                    |
+| `apps/web/src/app/features/settings-overlay/sections/profile-settings-section.component.ts`         | Account/Profile section implementation                            |
+| `apps/web/src/app/features/settings-overlay/sections/theme-settings-section.component.ts`           | Theme section implementation                                      |
+| `apps/web/src/app/features/settings-overlay/sections/language-locale-settings-section.component.ts` | Language/locale section implementation                            |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.spec.ts`                     | Overlay behavior tests (open/load/error/retry/dismiss/reposition) |
 
 ## Wiring
 
@@ -188,6 +189,7 @@ sequenceDiagram
 - [ ] Error state includes a Retry action that re-attempts profile fetch.
 - [ ] Click-outside/Escape dismiss closes immediately and discards unsaved changes.
 - [ ] Section list is registry-driven and supports adding new sections without shell edits.
+- [ ] Language/Locale section integration provides English and German switching behavior.
 - [ ] Profile/preference reads/writes are delegated through `UserProfileService` (Supabase-backed).
 
 ## Settings
