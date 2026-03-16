@@ -101,6 +101,40 @@ sequenceDiagram
 - The picker is anchored to the clicked project item and uses existing click-outside + escape handling from Projects page overlays.
 - Selection closes the picker after successful persistence.
 
+### Random Color Runtime Flows
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant C as ProjectColorPickerComponent
+  participant P as ProjectsPageComponent
+  participant S as ProjectsService
+  participant DB as projects table
+
+  U->>C: Click "Random brand hue"
+  C->>C: Generate hue 0..359
+  C->>P: Emit colorSelected(brand-hue-###)
+  P->>S: setProjectColor(projectId, colorKey)
+  S->>DB: UPDATE projects SET color_key, updated_at
+  DB-->>S: Updated row returned
+  S-->>P: true
+  P->>P: Update projects[].colorKey
+  P->>P: Close picker (coloringProjectId = null)
+  P-->>U: Chip color updates in row/card
+```
+
+```mermaid
+flowchart TD
+  A[Random brand hue clicked] --> B[ProjectsPageComponent.onColorSelected]
+  B --> C[ProjectsService.setProjectColor]
+  C --> D{Row updated?}
+  D -->|Yes| E[Return true]
+  D -->|No| F[Return false]
+  E --> G[Update local project color + close picker]
+  F --> H[Keep existing color; no UI color change]
+  H --> I[Typical cause: RLS denies UPDATE for current user]
+```
+
 ## Acceptance Criteria
 
 - [ ] Color chip trigger is larger than status dots and visually discoverable in both list and card layouts.

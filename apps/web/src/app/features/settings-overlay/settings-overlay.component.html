@@ -1,15 +1,4 @@
-<ng-template
-  cdkConnectedOverlay
-  [cdkConnectedOverlayOpen]="open()"
-  [cdkConnectedOverlayOrigin]="origin()"
-  [cdkConnectedOverlayPositions]="positions"
-  [cdkConnectedOverlayFlexibleDimensions]="false"
-  [cdkConnectedOverlayGrowAfterOpen]="false"
-  [cdkConnectedOverlayPush]="false"
-  [cdkConnectedOverlayPanelClass]="panelClass"
-  (attach)="onOverlayAttach()"
-  (overlayKeydown)="onEscape($event)"
->
+@if (open()) {
   <section
     class="settings-overlay ui-container"
     role="dialog"
@@ -344,4 +333,4 @@
       </div>
     </div>
   </section>
-</ng-template>
+}

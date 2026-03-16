@@ -314,12 +314,15 @@ export class MapShellComponent implements OnDestroy {
 
   /** Subscriptions for upload manager events — cleaned up in ngOnDestroy. */
   private uploadManagerSubs: { unsubscribe(): void }[] = [];
+  private deferredStartupRafId: number | null = null;
+  private deferredStartupTimer: ReturnType<typeof setTimeout> | null = null;
+  private markerBootstrapTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     afterNextRender(() => {
       this.initMap();
       this.subscribeToUploadManagerEvents();
-      void this.workspaceViewService.loadCustomProperties();
+      this.scheduleDeferredStartupWork();
     });
   }
 
@@ -327,6 +330,7 @@ export class MapShellComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.gpsLocating.set(false);
+    this.cancelDeferredStartupWork();
     if (this.moveEndDebounceTimer) {
       clearTimeout(this.moveEndDebounceTimer);
       this.moveEndDebounceTimer = null;
@@ -485,12 +489,14 @@ export class MapShellComponent implements OnDestroy {
     this.map = L.map(this.mapContainerRef().nativeElement, {
       center: [48.2082, 16.3738], // Vienna, Austria (fallback)
       zoom: 13,
+      maxZoom: 22,
       zoomControl: true,
     });
 
     // CartoDB Positron — clean, uncluttered light tile (design.md §3.1).
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
+      maxNativeZoom: 19,
+      maxZoom: 22,
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(this.map);
@@ -498,9 +504,6 @@ export class MapShellComponent implements OnDestroy {
     // LayerGroup for all photo markers — batch add/remove.
     this.photoMarkerLayer = L.layerGroup().addTo(this.map);
 
-    // Request user GPS position; fall back to Vienna if denied.
-    this.initGeolocation();
-    void this.queryViewportMarkers();
     this.updateSearchViewportBounds();
     this.applyPendingMapFocus();
 
@@ -523,6 +526,56 @@ export class MapShellComponent implements OnDestroy {
       this.handleMoveEnd();
       this.updateSearchViewportBounds();
     });
+  }
+
+  private scheduleDeferredStartupWork(): void {
+    const runStartup = () => {
+      if (!this.map) {
+        return;
+      }
+
+      // Keep first route paint responsive, then run startup data work.
+      this.initGeolocation();
+      void this.workspaceViewService.loadCustomProperties();
+
+      this.markerBootstrapTimer = setTimeout(() => {
+        this.markerBootstrapTimer = null;
+        if (!this.map) {
+          return;
+        }
+        void this.queryViewportMarkers();
+      }, 120);
+    };
+
+    if (typeof window === 'undefined') {
+      runStartup();
+      return;
+    }
+
+    this.deferredStartupRafId = window.requestAnimationFrame(() => {
+      this.deferredStartupRafId = null;
+      this.deferredStartupTimer = setTimeout(() => {
+        this.deferredStartupTimer = null;
+        runStartup();
+      }, 0);
+    });
+  }
+
+  private cancelDeferredStartupWork(): void {
+    if (this.deferredStartupRafId !== null && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.deferredStartupRafId);
+      this.deferredStartupRafId = null;
+    }
+
+    if (this.deferredStartupTimer) {
+      clearTimeout(this.deferredStartupTimer);
+      this.deferredStartupTimer = null;
+    }
+
+    if (this.markerBootstrapTimer) {
+      clearTimeout(this.markerBootstrapTimer);
+      this.markerBootstrapTimer = null;
+    }
   }
 
   private initGeolocation(): void {
@@ -576,7 +629,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.map.setView([payload.lat, payload.lng], 18);
+    this.map.setView([payload.lat, payload.lng], 20);
     this.pendingMapFocus.set(null);
   }
 

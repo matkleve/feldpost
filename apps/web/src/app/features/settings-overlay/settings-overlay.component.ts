@@ -2,18 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
   signal,
-  viewChild,
 } from '@angular/core';
-import {
-  CdkConnectedOverlay,
-  CdkOverlayOrigin,
-  ConnectedPosition,
-  OverlayModule,
-} from '@angular/cdk/overlay';
 import { AuthService } from '../../core/auth.service';
 
 type SettingsLoadState = 'loading' | 'error' | 'populated';
@@ -48,7 +42,6 @@ interface SettingsModel {
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
-  imports: [OverlayModule],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,12 +50,8 @@ export class SettingsOverlayComponent {
   private readonly authService = inject(AuthService);
   private hasLoadedOnce = false;
 
-  readonly origin = input.required<CdkOverlayOrigin>();
   readonly open = input(false);
   readonly openChange = output<boolean>();
-  readonly panelClass = 'settings-overlay-panel';
-
-  readonly overlayRef = viewChild(CdkConnectedOverlay);
 
   readonly sectionList: ReadonlyArray<SettingsSection> = [
     {
@@ -148,29 +137,14 @@ export class SettingsOverlayComponent {
     return typeof email === 'string' && email.length > 0 ? email : 'No email available';
   });
 
-  readonly positions: ConnectedPosition[] = [
-    {
-      originX: 'end',
-      originY: 'center',
-      overlayX: 'start',
-      overlayY: 'center',
-      offsetX: 12,
-    },
-    {
-      originX: 'end',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetX: 12,
-    },
-    {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'bottom',
-      offsetX: 12,
-    },
-  ];
+  constructor() {
+    effect(() => {
+      if (this.open() && !this.hasLoadedOnce) {
+        this.startLoad();
+        this.hasLoadedOnce = true;
+      }
+    });
+  }
 
   onOverlayAttach(): void {
     if (!this.hasLoadedOnce) {
@@ -199,7 +173,7 @@ export class SettingsOverlayComponent {
   }
 
   updatePosition(): void {
-    this.overlayRef()?.overlayRef.updatePosition();
+    // No-op: overlay is now a fixed pane rendered inside app-nav.
   }
 
   isSectionSelected(sectionId: string): boolean {

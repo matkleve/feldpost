@@ -16,7 +16,12 @@ import {
   inject,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import {
+  PreloadAllModules,
+  provideRouter,
+  withComponentInputBinding,
+  withPreloading,
+} from '@angular/router';
 import { routes } from './app.routes';
 import { AuthService } from './core/auth.service';
 
@@ -24,8 +29,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
 
-    // Router with component-input binding enabled for future use
-    provideRouter(routes, withComponentInputBinding()),
+    // Router with component-input binding and background preloading enabled.
+    provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
 
     // Initialize auth session before the first route renders.
     // Guards will wait for loading() === false before deciding.

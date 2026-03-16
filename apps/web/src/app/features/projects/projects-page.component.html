@@ -144,6 +144,7 @@
                         <article
                           class="project-row ui-item"
                           [class.project-row--picker-open]="coloringProjectId() === project.id"
+                          [style.--project-item-color]="colorTokenFor(project.colorKey)"
                           (click)="openWorkspace(project.id)"
                         >
                           <button
@@ -259,6 +260,7 @@
                           [class.projects-thumbnail-card--picker-open]="
                             coloringProjectId() === project.id
                           "
+                          [style.--project-item-color]="colorTokenFor(project.colorKey)"
                           (click)="openWorkspace(project.id)"
                         >
                           <header class="projects-thumbnail-card__header">

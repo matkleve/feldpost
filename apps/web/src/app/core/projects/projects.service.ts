@@ -30,12 +30,44 @@ interface ProjectActivityRow {
 }
 
 const DEFAULT_PROJECT_COLOR: ProjectColorKey = 'clay';
+const PROJECTS_CACHE_TTL_MS = 60_000;
+const SEARCH_COUNTS_CACHE_TTL_MS = 15_000;
+const PROJECT_WORKSPACE_CACHE_TTL_MS = 30_000;
 
 @Injectable({ providedIn: 'root' })
 export class ProjectsService {
   private readonly supabase = inject(SupabaseService);
+  private projectsCache: { value: ProjectListItem[]; expiresAt: number } | null = null;
+  private projectsLoadPromise: Promise<ProjectListItem[]> | null = null;
+  private readonly groupedSearchCountsCache = new Map<
+    string,
+    { value: ProjectSearchCounts; expiresAt: number }
+  >();
+  private readonly projectWorkspaceImagesCache = new Map<
+    string,
+    { value: ProjectScopedWorkspaceImage[]; expiresAt: number }
+  >();
 
   async loadProjects(): Promise<ProjectListItem[]> {
+    const now = Date.now();
+    const cached = this.projectsCache;
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
+    }
+
+    if (this.projectsLoadPromise) {
+      return this.projectsLoadPromise;
+    }
+
+    this.projectsLoadPromise = this.loadProjectsFresh();
+    try {
+      return await this.projectsLoadPromise;
+    } finally {
+      this.projectsLoadPromise = null;
+    }
+  }
+
+  private async loadProjectsFresh(): Promise<ProjectListItem[]> {
     const projectRows = await this.fetchProjects();
 
     const { data: activityData, error: activityError } = await this.supabase.client
@@ -69,7 +101,7 @@ export class ProjectsService {
       }
     }
 
-    return projectRows.map((row) => {
+    const projects: ProjectListItem[] = projectRows.map((row) => {
       const archivedAt = row.archived_at ?? null;
       const totalImageCount = counts.get(row.id) ?? 0;
 
@@ -80,7 +112,7 @@ export class ProjectsService {
         archivedAt,
         createdAt: row.created_at ?? new Date().toISOString(),
         updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
-        status: archivedAt ? 'archived' : 'active',
+        status: archivedAt ? ('archived' as const) : ('active' as const),
         totalImageCount,
         matchingImageCount: totalImageCount,
         lastActivity: lastActivity.get(row.id) ?? null,
@@ -90,6 +122,13 @@ export class ProjectsService {
         country: this.pickMostFrequent(countryCounts, row.id),
       };
     });
+
+    this.projectsCache = {
+      value: projects,
+      expiresAt: Date.now() + PROJECTS_CACHE_TTL_MS,
+    };
+
+    return projects;
   }
 
   async loadGroupedSearchCounts(
@@ -99,6 +138,13 @@ export class ProjectsService {
     const trimmed = searchTerm.trim();
     if (!trimmed) {
       return {};
+    }
+
+    const cacheKey = `${statusFilter}|${trimmed.toLowerCase()}`;
+    const now = Date.now();
+    const cached = this.groupedSearchCountsCache.get(cacheKey);
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
     }
 
     const imageIdsByProject = new Map<string, Set<string>>();
@@ -116,6 +162,11 @@ export class ProjectsService {
       result[projectId] = imageIds.size;
     }
 
+    this.groupedSearchCountsCache.set(cacheKey, {
+      value: result,
+      expiresAt: now + SEARCH_COUNTS_CACHE_TTL_MS,
+    });
+
     return result;
   }
 
@@ -124,6 +175,8 @@ export class ProjectsService {
     if (!row) {
       return null;
     }
+
+    this.invalidateProjectsReadCaches();
 
     return this.mapProjectRowToListItem(row);
   }
@@ -139,7 +192,13 @@ export class ProjectsService {
       .update({ name: trimmed, updated_at: new Date().toISOString() })
       .eq('id', projectId);
 
-    return !error;
+    const ok = !error;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.invalidateProjectWorkspaceCache(projectId);
+    }
+
+    return ok;
   }
 
   async archiveProject(projectId: string): Promise<boolean> {
@@ -149,6 +208,8 @@ export class ProjectsService {
       .eq('id', projectId);
 
     if (!preferred.error) {
+      this.invalidateProjectsReadCaches();
+      this.invalidateProjectWorkspaceCache(projectId);
       return true;
     }
 
@@ -157,19 +218,39 @@ export class ProjectsService {
       .update({ updated_at: new Date().toISOString() })
       .eq('id', projectId);
 
-    return !fallback.error;
+    const ok = !fallback.error;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.invalidateProjectWorkspaceCache(projectId);
+    }
+
+    return ok;
   }
 
   async setProjectColor(projectId: string, colorKey: ProjectColorKey): Promise<boolean> {
-    const { error } = await this.supabase.client
+    const { data, error } = await this.supabase.client
       .from('projects')
       .update({ color_key: colorKey, updated_at: new Date().toISOString() })
-      .eq('id', projectId);
+      .eq('id', projectId)
+      .select('id')
+      .maybeSingle();
 
-    return !error;
+    const ok = !error && !!data;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.invalidateProjectWorkspaceCache(projectId);
+    }
+
+    return ok;
   }
 
   async loadProjectWorkspaceImages(projectId: string): Promise<ProjectScopedWorkspaceImage[]> {
+    const now = Date.now();
+    const cached = this.projectWorkspaceImagesCache.get(projectId);
+    if (cached && cached.expiresAt > now) {
+      return cached.value;
+    }
+
     const { data, error } = await this.supabase.client
       .from('images')
       .select(
@@ -182,7 +263,7 @@ export class ProjectsService {
       return [];
     }
 
-    return (data as ProjectsImageRow[])
+    const mapped = (data as ProjectsImageRow[])
       .filter(
         (row) =>
           typeof row.latitude === 'number' &&
@@ -210,6 +291,22 @@ export class ProjectsService {
         country: row.country,
         userName: null,
       }));
+
+    this.projectWorkspaceImagesCache.set(projectId, {
+      value: mapped,
+      expiresAt: now + PROJECT_WORKSPACE_CACHE_TTL_MS,
+    });
+
+    return mapped;
+  }
+
+  private invalidateProjectsReadCaches(): void {
+    this.projectsCache = null;
+    this.groupedSearchCountsCache.clear();
+  }
+
+  private invalidateProjectWorkspaceCache(projectId: string): void {
+    this.projectWorkspaceImagesCache.delete(projectId);
   }
 
   private async fetchProjects(): Promise<ProjectRow[]> {

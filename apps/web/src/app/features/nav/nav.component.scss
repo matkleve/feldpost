@@ -71,29 +71,12 @@
   }
 }
 
-.sidebar__overlay-anchor {
-  position: absolute;
-  pointer-events: none;
-
-  @media (min-width: 768px) {
-    top: 50%;
-    left: var(--sidebar-width-collapsed);
-    width: 1px;
-    height: 1px;
-    transform: translateY(-50%);
-  }
-
-  @media (max-width: 767px) {
-    top: 0;
-    left: 0;
-    width: 1px;
-    height: 1px;
-  }
-}
-
 // ── Panel — visual container ─────────────────────────────────────────────────
 
 .sidebar__panel {
+  position: relative;
+  z-index: 2;
+
   @media (min-width: 768px) {
     --ui-container-radius: var(--container-radius-panel);
 

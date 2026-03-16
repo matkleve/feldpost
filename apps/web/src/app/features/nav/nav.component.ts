@@ -17,11 +17,10 @@
  *  - routerLinkActive uses exact matching for '/' to avoid it always being active.
  */
 
-import { Component, HostListener, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, HostListener, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { CdkOverlayOrigin } from '@angular/cdk/overlay';
-import { SettingsOverlayComponent } from '../settings-overlay/settings-overlay.component';
 import { AuthService } from '../../core/auth.service';
+import { SettingsPaneService } from '../../core/settings-pane.service';
 
 export interface NavItem {
   /** Google Material Icon ligature name (e.g. 'map', 'photo_camera'). */
@@ -34,13 +33,13 @@ export interface NavItem {
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CdkOverlayOrigin, SettingsOverlayComponent],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
 })
 export class NavComponent {
   private readonly authService = inject(AuthService);
-  private readonly settingsOverlay = viewChild(SettingsOverlayComponent);
+  private readonly settingsPaneService = inject(SettingsPaneService);
 
   /** Nav items in display order. Items with disabled: true are visually greyed
    *  out and non-interactive — reserved for future features. */
@@ -50,7 +49,7 @@ export class NavComponent {
     { icon: 'folder', label: 'Projects', route: '/projects' },
   ];
 
-  readonly settingsOverlayOpen = signal(false);
+  readonly settingsOverlayOpen = this.settingsPaneService.open;
 
   readonly avatarName = computed<string>(() => {
     const user = this.authService.user();
@@ -81,17 +80,7 @@ export class NavComponent {
   });
 
   toggleSettingsOverlay(): void {
-    this.settingsOverlayOpen.update((open) => !open);
-
-    this.deferOverlayPositionRefresh();
-  }
-
-  onSettingsOverlayOpenChange(open: boolean): void {
-    this.settingsOverlayOpen.set(open);
-  }
-
-  onSidebarLeave(): void {
-    this.deferOverlayPositionRefresh();
+    this.settingsPaneService.toggle();
   }
 
   @HostListener('document:pointerdown', ['$event'])
@@ -109,25 +98,7 @@ export class NavComponent {
     const clickedInsideSettingsPane = target.closest('.settings-overlay') !== null;
 
     if (!clickedInsideSidebar && !clickedInsideSettingsPane) {
-      this.settingsOverlayOpen.set(false);
+      this.settingsPaneService.close();
     }
-  }
-
-  refreshSettingsOverlayPosition(): void {
-    this.deferOverlayPositionRefresh();
-  }
-
-  private deferOverlayPositionRefresh(): void {
-    if (!this.settingsOverlayOpen()) {
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      this.settingsOverlay()?.updatePosition();
-    });
-
-    setTimeout(() => {
-      this.settingsOverlay()?.updatePosition();
-    }, 190);
   }
 }

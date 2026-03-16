@@ -231,11 +231,6 @@ app-root {
   height: 100%;
 }
 
-// Keep CDK overlays below the floating sidebar so nav hover remains interactive.
-.cdk-overlay-container {
-  z-index: 1000;
-}
-
 // ── App layout helpers ─────────────────────────────────────────────────────────
 // router-outlet host needs full height. Nav is floating (position: fixed),
 // so no margin offset is needed for the map view.
