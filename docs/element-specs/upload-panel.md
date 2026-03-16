@@ -2,112 +2,129 @@
 
 ## What It Is
 
-The file upload interface that slides open from the Upload Button. Users drag-and-drop or pick files, see upload progress per file, and handle files that need manual map placement (missing GPS).
+The Upload Panel is the compact upload workspace that appears from the Upload Button Zone. It lets users add files, watch per-photo progress in a dot matrix, and triage uploads by state (uploading, uploaded, errors).
 
 ## What It Looks Like
 
-Slides down from Upload Button. Uses the shared `.ui-container` panel shell so outer radius, panel padding, and panel gap align with the Sidebar and Search Bar. Glassmorphic background (`--color-bg-surface` at 95% opacity + `backdrop-filter: blur(12px)`). Contains: header with title + close, a dashed drop zone, and a scrollable file list. Max height ~400px, scrolls internally.
+The panel is a single `.ui-container` surface that feels like the button expanded into a small control card. The top section is a dashed Drop Zone, followed by a Last Upload summary when no active queue exists. When uploads are running, a progress board appears under the Drop Zone with a dense dot matrix and a segmented 3-option switch.
+
+The matrix defaults to a square board using up to 10 columns by 10 rows per visible page; each dot is 0.5rem (8px) with 0.25rem (4px) gap. Dot colors use design tokens: idle/queued `--color-bg-muted`, uploading `--color-primary` with pulse, uploaded `--color-success`, and issue `--color-warning`.
 
 ## Where It Lives
 
 - **Parent**: Upload Button Zone in `MapShellComponent`
 - **Component**: `UploadPanelComponent` at `features/upload/upload-panel/`
-- **Appears when**: Upload Button is toggled open
+- **Appears when**: user toggles Upload Button open
 
 ## Actions
 
-| #   | User Action                  | System Response                                                                       | Triggers                                     |
-| --- | ---------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------- |
-| 1   | Drags files onto Drop Zone   | Files added to queue, EXIF parsing starts                                             | Status → `parsing`                           |
-| 2   | Clicks Drop Zone             | Opens file picker dialog (multi-select enabled)                                       | Same as drag                                 |
-| 2b  | Clicks "Select folder"       | Opens native folder picker (`showDirectoryPicker()`), scans recursively for images    | Batch created, scan counter shown            |
-| 3   | Files have EXIF GPS          | Upload starts automatically (up to 3 parallel)                                        | Status → `uploading` → `complete`            |
-| 4   | File has no EXIF GPS         | Shows placement prompt, status = `awaiting_placement`                                 | Placement mode                               |
-| 4b  | File is a duplicate          | Shows "Already uploaded" label, status = `skipped`                                    | `uploadSkipped$` event                       |
-| 5   | Upload fails                 | Shows error message + Retry button on that file                                       | Status → `error`                             |
-| 6   | Clicks Dismiss (×) on a file | Removes file from queue, revokes object URL                                           | File removed                                 |
-| 7   | Clicks Retry on failed file  | Re-attempts upload                                                                    | Status → `uploading`                         |
-| 8   | Upload succeeds              | Marker appears on map at EXIF/placed coordinates                                      | `imageUploaded` event                        |
-| 9   | Upload succeeds + GPS known  | Background reverse-geocode populates address fields (city, district, street, country) | `GeocodingService.reverse()` fire-and-forget |
-| 10  | All uploads complete         | Panel stays open showing results (user closes manually)                               | —                                            |
-| 11  | Batch completes              | Shows summary: "480 uploaded, 18 already existed, 2 failed"                           | `batchComplete$` event                       |
+| #   | User Action                                       | System Response                                                          | Triggers                            |
+| --- | ------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
+| 1   | Clicks Upload Button                              | Opens compact Upload Panel container                                     | `uploadPanelOpen` signal            |
+| 2   | Drags files onto Drop Zone                        | Creates upload jobs and starts pipeline (max 3 parallel)                 | `UploadManagerService.submit()`     |
+| 3   | Clicks Drop Zone                                  | Opens file picker with multi-select                                      | Native file picker                  |
+| 4   | No active jobs and no queued jobs                 | Shows Last Upload summary line                                           | `lastCompletedBatch()`              |
+| 5   | Active or queued jobs exist                       | Shows dot matrix board under Drop Zone                                   | `jobs().length > 0`                 |
+| 6   | Job is queued / not started                       | Dot stays muted gray                                                     | Job phase in queued/parsing/hashing |
+| 7   | Job is actively uploading                         | Dot turns blue and pulses while in-flight                                | Job phase `uploading`               |
+| 8   | Job succeeds                                      | Dot turns green                                                          | Job phase `complete`                |
+| 9   | Job has issue (GPS/title/address resolution etc.) | Dot turns orange and becomes selectable in Errors view                   | Job phase `error` or `missing_data` |
+| 10  | Switches segmented control to Uploading           | Gallery list filters to active jobs only                                 | `selectedLane = 'uploading'`        |
+| 11  | Switches segmented control to Uploaded            | Gallery list filters to completed jobs                                   | `selectedLane = 'uploaded'`         |
+| 12  | Switches segmented control to Issues              | Gallery list filters to problematic jobs                                 | `selectedLane = 'issues'`           |
+| 13  | Clicks image in Issues lane                       | Opens inline correction editor (address/title/coords retry path)         | `openJobEditor(jobId)`              |
+| 14  | Clicks image in Uploading lane                    | Opens live detail drawer (status + editable address draft where allowed) | `openJobEditor(jobId)`              |
+| 15  | Saves address correction for issue                | Retries resolver/update path and updates dot color based on result       | `retryResolution(jobId, payload)`   |
+| 16  | Closes panel                                      | Panel collapses; uploads continue in background                          | Root service lifecycle              |
 
 ## Component Hierarchy
 
 ```
-UploadPanel                                ← `.ui-container` glassmorphic panel, slides down from button
-├── PanelHeader                            ← "Upload Photos" title + close button
-├── DropZone                               ← dashed border area
-│   ├── CameraIcon                         ← centered icon
-│   ├── "Drag photos here or click to select"
-│   ├── AcceptedTypesHint                  ← "JPEG, PNG, HEIF — max 20MB"
-│   └── [chromium] FolderSelectButton      ← "Select folder" text button (Chromium only)
-├── [batch active] BatchProgressBar        ← two-segment stacked bar: uploaded (--color-primary) + skipped (--color-bg-muted)
-│   ├── UploadedSegment                    ← left segment, width = uploadedPercent%, --color-primary
-│   ├── SkippedSegment                     ← right segment, width = skippedPercent%, --color-bg-muted (striped pattern)
-│   ├── ProgressPercent                    ← "67%" text (overallProgress)
-│   ├── BatchLabel                         ← "Burgstraße_7 — 142 images"
-│   └── BatchStats                         ← "96 uploaded · 12 skipped · 1 failed"
-└── FileList                               ← scrollable <ul>, max-height ~300px
-    └── FileItem × N                       ← one per queued file
-        ├── DismissButton (×)              ← left side, removes from queue
-        ├── FileThumbnail                  ← 48×48px object-fit:cover preview
-        ├── FileInfo
-        │   ├── FileName                   ← truncated, text-sm
-        │   └── FileStatusLabel            ← "Queued" / "Hashing…" / "Uploading…" / "Already uploaded" / etc.
-        ├── [uploading] UploadProgressBar  ← <progress> element, 0–100
-        ├── [skipped] SkippedBadge         ← "Already uploaded" with check icon, muted style
-        ├── [error] RetryButton            ← "↺ Retry" ghost button
-        └── [awaiting_placement] PlacementPrompt  ← "No GPS — click map to place"
+UploadPanel                                              ← compact `.ui-container` surface from button morph
+├── PanelHeader                                          ← title "Upload" + collapse icon + busy counter
+├── DropZone                                             ← dashed drag target, click to select files
+│   ├── CameraIcon                                       ← upload affordance
+│   ├── PrimaryHint                                      ← "Drop photos or click to upload"
+│   └── SecondaryHint                                    ← accepted formats and max size
+├── [idle only] LastUploadSummary                        ← summary of most recent batch/job result
+│   ├── LastUploadLabel                                  ← "Last upload"
+│   └── LastUploadValue                                  ← single file name OR "Batch · N photos"
+├── [queue or active exists] ProgressBoard               ← status board under Drop Zone
+│   ├── DotMatrixCanvas                                  ← 10×10 visual grid page (100 dots max per page)
+│   │   └── ProgressDot × N                              ← each job represented by one dot
+│   ├── LaneSwitch                                       ← 3-option segmented switch
+│   │   ├── UploadingLaneButton                          ← active jobs
+│   │   ├── UploadedLaneButton                           ← successful jobs
+│   │   └── IssuesLaneButton                             ← failed/needs-attention jobs
+│   └── LaneGallery                                      ← thumbnail strip/list for selected lane
+│       └── LaneItem × N                                 ← image preview + file title + compact status
+└── [job selected] JobEditorDrawer                        ← inline editor for selected Uploading/Issues item
+    ├── Preview                                          ← selected photo
+    ├── AddressInput                                     ← editable address field
+    ├── ResolutionMeta                                   ← resolver status text
+    └── SaveAndRetryActions                              ← save, retry, dismiss
 ```
-
-### File status colors
-
-- Queued / parsing / hashing: neutral background
-- Uploading: `--color-primary` progress bar
-- Complete: subtle `--color-success` tint
-- Skipped (duplicate): subtle `--color-bg-muted` tint, muted text
-- Error: subtle `--color-danger` tint
-- Awaiting placement: `--color-warning` tint
 
 ## Data
 
 ### Data Flow (Mermaid)
 
 ```mermaid
-flowchart LR
-  UI[UI Component] --> S[Service Layer]
-  S --> DB[(Supabase Tables)]
-  DB --> S
-  S --> UI
+flowchart TD
+  U[User adds files] --> P[UploadPanelComponent]
+  P --> M[UploadManagerService]
+  M --> J[(UploadJob state)]
+  J --> P
+  P --> E[JobEditorDrawer]
+  E --> M
+  M --> G[Geocoding and Address Resolver]
+  G --> M
 ```
 
-| Field           | Source                               | Type                          |
-| --------------- | ------------------------------------ | ----------------------------- |
-| Upload jobs     | `UploadManagerService.jobs()`        | `Signal<UploadJob[]>`         |
-| Batch progress  | `UploadManagerService.activeBatch()` | `Signal<UploadBatch \| null>` |
-| File validation | `UploadService.validateFile()`       | `FileValidation`              |
-| Parsed EXIF     | `UploadService.parseExif()`          | `ParsedExif`                  |
-| Upload result   | `UploadService.uploadImage()`        | `{ imageId, storagePath }`    |
+| Field                | Source                                         | Type                                 |
+| -------------------- | ---------------------------------------------- | ------------------------------------ |
+| Upload jobs          | `UploadManagerService.jobs()`                  | `Signal<UploadJob[]>`                |
+| Active batch         | `UploadManagerService.activeBatch()`           | `Signal<UploadBatch \| null>`        |
+| Last completed batch | `UploadManagerService.lastCompletedBatch()`    | `Signal<UploadBatchSummary \| null>` |
+| Selected lane items  | Derived from jobs by phase                     | `Computed<UploadJob[]>`              |
+| Resolution retry     | `UploadManagerService.retryResolution(jobId)`  | `Promise<void>`                      |
+| Address patch update | `UploadManagerService.updateJobAddress(jobId)` | `Promise<void>`                      |
+
+### Status Mapping (Mermaid)
+
+```mermaid
+stateDiagram-v2
+  [*] --> queued
+  queued --> uploading
+  uploading --> complete
+  uploading --> error
+  uploading --> missing_data
+  error --> uploading: retry
+  missing_data --> uploading: address corrected
+  complete --> [*]
+  error --> [*]
+  missing_data --> [*]
+```
 
 ## State
 
-| Name       | Type      | Default | Controls                                     |
-| ---------- | --------- | ------- | -------------------------------------------- |
-| `dragOver` | `boolean` | `false` | Visual feedback on drag hover over drop zone |
-| `scanning` | `boolean` | `false` | True while folder scan is in progress        |
-
-Types: `FileUploadState` and `FileUploadStatus` are defined in the component file.
+| Name              | Type                                    | Default       | Controls                                    |
+| ----------------- | --------------------------------------- | ------------- | ------------------------------------------- |
+| `dragOver`        | `boolean`                               | `false`       | Drop Zone hover treatment                   |
+| `selectedLane`    | `'uploading' \| 'uploaded' \| 'issues'` | `'uploading'` | Which lane is visible in lane gallery       |
+| `selectedJobId`   | `string \| null`                        | `null`        | Which job is open in editor drawer          |
+| `matrixPage`      | `number`                                | `0`           | Dot matrix page for batches larger than 100 |
+| `dotPulseEnabled` | `boolean`                               | `true`        | Uploading-dot pulse animation toggle        |
 
 ## File Map
 
-| File                                                       | Purpose                                                    |
-| ---------------------------------------------------------- | ---------------------------------------------------------- |
-| `features/upload/upload-panel/upload-panel.component.ts`   | Component (already exists)                                 |
-| `features/upload/upload-panel/upload-panel.component.html` | Template                                                   |
-| `features/upload/upload-panel/upload-panel.component.scss` | Styles                                                     |
-| `core/upload.service.ts`                                   | EXIF parsing, validation, Supabase upload (already exists) |
-| `core/geocoding.service.ts`                                | Nominatim reverse geocoding (address resolution on upload) |
+| File                                                       | Purpose                                                                |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `features/upload/upload-panel/upload-panel.component.ts`   | Upload panel orchestration, lane filters, matrix mapping               |
+| `features/upload/upload-panel/upload-panel.component.html` | Compact panel UI: drop zone, last upload, matrix board, lane gallery   |
+| `features/upload/upload-panel/upload-panel.component.scss` | Matrix dot styles, lane switch visuals, status animation tokens        |
+| `core/upload-manager.service.ts`                           | Root upload lifecycle, per-job phases, last batch summary, retry hooks |
+| `core/address-resolver.service.ts`                         | Address correction and forward resolution on issue retry               |
 
 ## Wiring
 
@@ -115,43 +132,45 @@ Types: `FileUploadState` and `FileUploadStatus` are defined in the component fil
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  actor User
+  participant Zone as UploadButtonZone
+  participant Panel as UploadPanelComponent
+  participant Manager as UploadManagerService
+  participant Map as MapShellComponent
+
+  User->>Zone: Click Upload Button
+  Zone->>Panel: visible = true
+  User->>Panel: Drop files
+  Panel->>Manager: submit(files)
+  Manager-->>Panel: jobs() updates
+  Panel-->>User: Dot matrix and lane gallery updates
+  User->>Panel: Open issue item and edit address
+  Panel->>Manager: updateJobAddress + retryResolution
+  Manager-->>Panel: job phase transitions
+  Manager-->>Map: imageUploaded event
 ```
 
-- Receives `[visible]` input from parent to control slide animation
-- Injects `UploadManagerService` to call `submit()` / `submitFolder()` and read `jobs()` / `activeBatch()`
-- Subscribes to `batchProgress$` for the aggregate progress bar
-- Subscribes to `batchComplete$` for the batch summary
-- Subscribes to `uploadSkipped$` to show "Already uploaded" labels
-- Subscribes to `jobPhaseChanged$` to update per-file status
-- Emits `(imageUploaded)` with coordinates + image ID when upload completes
-- Emits `(placementRequested)` when a file needs manual map placement
-- Parent (`MapShellComponent`) handles placement mode and coordinates
+- Receives visibility from `MapShellComponent` and uses parent-controlled open/close behavior.
+- Injects `UploadManagerService` to submit files, read job state, and apply correction retries.
+- Derives matrix dots from stable job ordering so colors do not shuffle between rerenders.
+- Opens `JobEditorDrawer` for selected jobs in Uploading and Issues lanes.
+- Emits map-refresh events through the upload manager event bus when corrected jobs complete.
 
 ## Acceptance Criteria
 
-- [ ] Slide-down animation from upload button
-- [x] Glassmorphic background with blur
-- [x] Uses `.ui-container` as the shared panel shell
-- [x] Drag-and-drop works (visual feedback on drag-over)
-- [x] Click on drop zone opens file picker (multi-select)
-- [ ] "Select folder" button visible on Chromium, hidden on unsupported browsers
-- [ ] Folder scan shows live counter ("Scanning… 142 images found")
-- [x] Per-file progress with status labels
-- [x] Up to 3 parallel uploads
-- [ ] Batch progress bar is a two-segment stacked bar (uploaded + skipped)
-- [ ] Uploaded segment uses `--color-primary`, skipped segment uses `--color-bg-muted` with subtle stripe pattern
-- [ ] Both segments grow left-to-right as `uploadedPercent` and `skippedPercent` update
-- [ ] Batch summary shown on completion (uploaded / skipped / failed)
-- [ ] Skipped files show "Already uploaded" with check icon (muted style)
-- [x] Failed files show Retry button
-- [x] Missing-GPS files show placement prompt
-- [x] Dismiss button removes file and revokes object URL
-- [x] Accepted types: JPEG, PNG, HEIF/HEIC, WebP; max 25MB
-- [x] New marker appears on map after successful upload
+- [ ] Panel appears as compact container expansion from Upload Button
+- [ ] Top section is a Drop Zone with drag-and-drop and click upload
+- [ ] If queue is empty, Last Upload summary appears under Drop Zone
+- [ ] Last Upload shows file name for single upload
+- [ ] Last Upload shows `Batch · N photos` for multi-file upload
+- [ ] If queue has jobs, Dot Matrix board appears under Drop Zone
+- [ ] Dot Matrix uses neutral gray for not-started jobs
+- [ ] Dot Matrix uses pulsing blue for active uploads
+- [ ] Dot Matrix uses green for completed jobs
+- [ ] Dot Matrix uses orange for jobs with issues
+- [ ] Lane switch contains exactly 3 options: Uploading, Uploaded, Issues
+- [ ] Clicking a lane filters visible image list to that lane only
+- [ ] Clicking an item in Issues opens correction editor
+- [ ] Clicking an item in Uploading opens live detail editor
+- [ ] Saving correction in Issues triggers retry and updates status color
+- [ ] Closing panel does not cancel active uploads

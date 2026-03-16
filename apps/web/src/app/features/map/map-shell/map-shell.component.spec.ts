@@ -92,7 +92,13 @@ function buildTestBed() {
           search: vi.fn().mockResolvedValue([]),
         },
       },
-      { provide: Router, useValue: { navigate: vi.fn() } },
+      {
+        provide: Router,
+        useValue: {
+          navigate: vi.fn(),
+          getCurrentNavigation: vi.fn().mockReturnValue(null),
+        },
+      },
     ],
   }).compileComponents();
 }
@@ -252,6 +258,11 @@ describe('MapShellComponent', () => {
     expect(fixture.componentInstance.gpsLocating()).toBe(false);
   });
 
+  it('gpsTrackingActive signal defaults to false', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
+  });
+
   it('userPosition signal defaults to null', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     expect(fixture.componentInstance.userPosition()).toBeNull();
@@ -277,6 +288,9 @@ describe('MapShellComponent', () => {
   it('goToUserPosition() requests current position when unknown', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+
+    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
+    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
 
     const mapStub = {
       addLayer: vi.fn(),
@@ -307,17 +321,28 @@ describe('MapShellComponent', () => {
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
     expect(mapStub.setView).toHaveBeenCalledWith([48.2, 16.37], 15);
     expect(fixture.componentInstance.gpsLocating()).toBe(false);
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(true);
+    expect(setIntervalSpy).toHaveBeenCalled();
     expect(fixture.componentInstance.userPosition()).toEqual([48.2, 16.37]);
+
+    fixture.componentInstance.goToUserPosition();
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
+    expect(clearIntervalSpy).toHaveBeenCalled();
 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
       value: originalGeolocation,
     });
+
+    setIntervalSpy.mockRestore();
+    clearIntervalSpy.mockRestore();
   });
 
   it('goToUserPosition() recenters immediately when userPosition is already known', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+
+    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
 
     const mapStub = {
       addLayer: vi.fn(),
@@ -342,12 +367,149 @@ describe('MapShellComponent', () => {
 
     expect(mapStub.setView).toHaveBeenCalledWith([51.5, -0.12], 15);
     expect(fixture.componentInstance.gpsLocating()).toBe(false);
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(true);
+    expect(setIntervalSpy).toHaveBeenCalled();
     expect(getCurrentPosition).not.toHaveBeenCalled();
+
+    fixture.componentInstance.goToUserPosition();
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
       value: originalGeolocation,
     });
+
+    setIntervalSpy.mockRestore();
+  });
+
+  it('goToUserPosition() deactivates tracking when location lookup fails', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const originalGeolocation = navigator.geolocation;
+    const getCurrentPosition = vi.fn((_success: PositionCallback, error: PositionErrorCallback) => {
+      error({
+        code: 3,
+        message: 'timeout',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3,
+      });
+    });
+
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition,
+      },
+    });
+
+    fixture.componentInstance.goToUserPosition();
+
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.gpsTrackingActive()).toBe(false);
+    expect(fixture.componentInstance.gpsLocating()).toBe(false);
+
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: originalGeolocation,
+    });
+  });
+
+  it('initGeolocation() resolves user position without auto-recentering map', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      addLayer: vi.fn(),
+      setView: vi.fn(),
+      getZoom: vi.fn().mockReturnValue(13),
+      remove: vi.fn(),
+    };
+    (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
+
+    const originalGeolocation = navigator.geolocation;
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 48.2082,
+          longitude: 16.3738,
+        },
+      } as GeolocationPosition);
+    });
+
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition,
+      },
+    });
+
+    (
+      fixture.componentInstance as unknown as {
+        initGeolocation: () => void;
+      }
+    ).initGeolocation();
+
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(mapStub.setView).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.userPosition()).toEqual([48.2082, 16.3738]);
+
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: originalGeolocation,
+    });
+  });
+
+  it('goToUserPosition() highlights the user marker for one second after recenter', () => {
+    vi.useFakeTimers();
+
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      addLayer: vi.fn(),
+      setView: vi.fn(),
+      getZoom: vi.fn().mockReturnValue(12),
+      remove: vi.fn(),
+    };
+    (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
+    fixture.componentInstance.userPosition.set([51.5, -0.12]);
+
+    const add = vi.fn();
+    const remove = vi.fn();
+    (
+      fixture.componentInstance as unknown as {
+        userLocationMarker: {
+          getElement: () => { classList: { add: typeof add; remove: typeof remove } };
+          remove: ReturnType<typeof vi.fn>;
+        };
+      }
+    ).userLocationMarker = {
+      getElement: () => ({ classList: { add, remove } }),
+      remove: vi.fn(),
+    };
+
+    const originalGeolocation = navigator.geolocation;
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: vi.fn(),
+      },
+    });
+
+    fixture.componentInstance.goToUserPosition();
+
+    expect(add).toHaveBeenCalledWith('map-user-location-marker--fresh');
+
+    vi.advanceTimersByTime(1000);
+    expect(remove).toHaveBeenCalledWith('map-user-location-marker--fresh');
+
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: originalGeolocation,
+    });
+    vi.useRealTimers();
   });
 
   // ── Search bar ─────────────────────────────────────────────────────────────

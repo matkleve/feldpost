@@ -105,10 +105,20 @@
   height: 18px !important;
   margin: 0 !important;
   border-radius: var(--radius-full);
-  background: var(--color-primary);
+  background: var(--color-map-user-marker);
   border: 3px solid var(--color-bg-surface);
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--color-primary) 28%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--color-map-user-marker) 28%, transparent),
+    var(--elevation-subtle);
+}
+
+:host ::ng-deep .map-user-location-marker.map-user-location-marker--fresh {
+  background: var(--color-map-search-marker);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-map-search-marker) 30%, transparent),
     var(--elevation-subtle);
 }
 
@@ -117,10 +127,10 @@
   height: 20px !important;
   margin: 0 !important;
   border-radius: var(--radius-full);
-  background: var(--color-clay);
+  background: var(--color-map-search-marker);
   border: 3px solid var(--color-bg-surface);
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--color-clay) 30%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--color-map-search-marker) 30%, transparent),
     var(--elevation-subtle);
 }
 
@@ -398,6 +408,11 @@
     border: 2px solid color-mix(in srgb, currentcolor 24%, transparent);
     border-top-color: currentcolor;
     animation: gps-btn-spin 700ms linear infinite;
+  }
+
+  &--active,
+  &--locating {
+    color: var(--color-clay);
   }
 }
 
