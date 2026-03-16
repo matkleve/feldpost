@@ -205,20 +205,27 @@ export class ProjectsService {
     const preferred = await this.supabase.client
       .from('projects')
       .update({ archived_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-      .eq('id', projectId);
+      .eq('id', projectId)
+      .select('id');
 
-    if (!preferred.error) {
+    const ok = !preferred.error && Array.isArray(preferred.data) && preferred.data.length > 0;
+    if (ok) {
       this.invalidateProjectsReadCaches();
       this.invalidateProjectWorkspaceCache(projectId);
-      return true;
     }
 
-    const fallback = await this.supabase.client
-      .from('projects')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', projectId);
+    return ok;
+  }
 
-    const ok = !fallback.error;
+  async deleteProject(projectId: string): Promise<boolean> {
+    const { data, error } = await this.supabase.client
+      .from('projects')
+      .delete()
+      .eq('id', projectId)
+      .not('archived_at', 'is', null)
+      .select('id');
+
+    const ok = !error && Array.isArray(data) && data.length > 0;
     if (ok) {
       this.invalidateProjectsReadCaches();
       this.invalidateProjectWorkspaceCache(projectId);

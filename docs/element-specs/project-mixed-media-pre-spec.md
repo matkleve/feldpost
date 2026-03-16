@@ -4,32 +4,32 @@
 
 ## What It Is
 
-A pre-spec contract for adding document and video support next to photos, while keeping Feldpost map-first behavior stable. It introduces file type aware rendering, a dedicated file type filter, fullscreen project media view, and project Sections for user-defined organization.
+A pre-spec contract for adding document and video support next to photos while keeping Feldpost map-first and stable. Every media item has one `primary_project_id`; GPS media may also belong to additional projects via membership links.
 
 ## What It Looks Like
 
-The map keeps existing marker and cluster language, but individual markers gain media-type signatures: photo squares, document portrait cards (3:4), and video cards with play badge. Project fullscreen view becomes a two-lane media surface with GPS media on top and project-only no-GPS media below. A compact file type filter strip sits next to existing toolbar controls but is not merged into the generic Filter operator. Section headers in project view use shared `.ui-container` rhythm and stable collapsed/expanded behavior.
+The map keeps current marker and cluster language, but individual markers gain media-type signatures: photo squares, document portrait cards (3:4), and video cards with play badge. Fullscreen project view uses two lanes: GPS media on top and project-only no-GPS media below. Shared GPS media shows a compact "shared" badge in project lists. A compact File Type filter strip sits beside existing toolbar controls but remains separate from the generic Filter operator.
 
 ## Where It Lives
 
 - Route: `/projects` (primary), `/map` (media-aware marker rendering)
 - Parent: `ProjectsPageComponent`, `MapShellComponent`
-- Appears when: user uploads mixed media, toggles file type filter, opens fullscreen project view, or manages project Sections
+- Appears when: user uploads mixed media, toggles file type filter, opens fullscreen project view, or manages project Sections and memberships
 
 ## Actions
 
-| #   | User Action                                           | System Response                                              | Triggers                       |
-| --- | ----------------------------------------------------- | ------------------------------------------------------------ | ------------------------------ |
-| 1   | Uploads mixed files (photo/video/document) to project | Creates media jobs and validates by MIME/size policy         | Upload manager pipeline        |
-| 2   | Upload finishes with coordinates                      | Item appears in GPS media lane and map marker set            | `location_status = gps`        |
-| 3   | Upload finishes without coordinates                   | Item appears in project-only lane, no map marker             | `location_status = no_gps`     |
-| 4   | Toggles File Type strip chip                          | Includes/excludes media family from current result set       | `fileTypeFilter` state         |
-| 5   | Opens fullscreen project view                         | Shows GPS lane and project-only lane with same detail drawer | `projectFullscreenOpen`        |
-| 6   | Creates custom Section                                | Persists section name/order and renders empty section slot   | `project_sections` insert      |
-| 7   | Assigns media to section                              | Media appears in section grouping                            | `project_section_items` upsert |
-| 8   | Renames/reorders section                              | UI updates immediately and persists new ordering             | section update/reorder action  |
-| 9   | Deletes non-empty section                             | Requires confirm, then detaches items and removes section    | section delete flow            |
-| 10  | Opens map marker detail for document/video            | Opens shared detail frame with type-specific metadata panel  | Detail drawer open             |
+| #   | User Action                                      | System Response                                                     | Triggers                       |
+| --- | ------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------ |
+| 1   | Uploads mixed files to selected project          | Creates media item with `primary_project_id` and initial membership | Upload manager pipeline        |
+| 2   | Upload finishes with coordinates                 | Item appears in GPS lane and map marker set                         | `location_status = gps`        |
+| 3   | Upload finishes without coordinates              | Item appears in project-only lane                                   | `location_status = no_gps`     |
+| 4   | Adds second project to GPS media                 | Inserts new membership while primary remains unchanged              | `media_projects` insert        |
+| 5   | Attempts second project for no-GPS media         | Rejects action and shows rule hint                                  | no-GPS membership constraint   |
+| 6   | Attempts GPS assignment for GPS-locked file type | Disables action and shows explanation                               | `gpsAssignmentAllowed = false` |
+| 7   | Toggles File Type strip chip                     | Includes/excludes media family from current result set              | `fileTypeFilter` state         |
+| 8   | Opens fullscreen project view                    | Shows GPS lane and project-only lane                                | `projectFullscreenOpen`        |
+| 9   | Creates/Renames/Reorders Section                 | Persists section update and rerenders order                         | section actions                |
+| 10  | Assigns media to section                         | Media appears in section grouping                                   | `project_section_items` upsert |
 
 ## Component Hierarchy
 
@@ -52,9 +52,11 @@ ProjectMixedMediaSystem
 │       │   └── SectionedMediaGrid
 │       └── ProjectOnlyMediaArea
 │           └── SectionedMediaGrid
-└── SectionManagement
+└── MembershipAndSections
+    ├── SharedBadge
+    ├── MembershipEditor
     ├── AddSectionAction
-    ├── SectionHeader (name, count, menu)
+    ├── SectionHeader
     └── SectionItemAssignment
 ```
 
@@ -65,33 +67,41 @@ ProjectMixedMediaSystem
 ```mermaid
 flowchart LR
   U[Upload inputs] --> UM[UploadManagerService]
-  UM --> M[(media_items)]
+  UM --> MI[(media_items with primary_project_id)]
+  UM --> MP[(media_projects memberships)]
   UM --> S[(storage objects)]
-  M --> Q[ProjectMediaQueryService]
-  Q --> MAP[Map marker view models]
-  Q --> PFV[Project fullscreen view models]
+
+  MI --> Q[ProjectMediaQueryService]
+  MP --> Q
+  Q --> P0[Resolve project scope by membership]
+  P0 --> FT[AND with file type predicate and existing operator filters]
+  FT --> MAP[Map marker view models: GPS only]
+  FT --> PFV[Project fullscreen view models: GPS and no-GPS partitions]
 ```
 
 ### Data Requirements Table
 
-| Field               | Source                                                        | Type                       |
-| ------------------- | ------------------------------------------------------------- | -------------------------- | -------- | ------------- |
-| Media item id       | `media_items.id`                                              | `string`                   |
-| Media type          | `media_items.media_type` (`photo`, `video`, `document`)       | `'photo'                   | 'video'  | 'document'`   |
-| MIME type           | `media_items.mime_type`                                       | `string`                   |
-| Location status     | `media_items.location_status` (`gps`, `no_gps`, `unresolved`) | `'gps'                     | 'no_gps' | 'unresolved'` |
-| Thumbnail path      | `media_items.thumbnail_path`                                  | `string                    | null`    |
-| Poster path (video) | `media_items.poster_path`                                     | `string                    | null`    |
-| Project membership  | `project_media` join                                          | `MediaProjectMembership[]` |
-| Section definition  | `project_sections`                                            | `ProjectSection[]`         |
-| Section membership  | `project_section_items`                                       | `SectionItem[]`            |
+| Field                  | Source                                                        | Type               |
+| ---------------------- | ------------------------------------------------------------- | ------------------ | -------- | ------------- |
+| Media item id          | `media_items.id`                                              | `string`           |
+| Primary project id     | `media_items.primary_project_id`                              | `string`           |
+| Membership projects    | `media_projects.project_id[]`                                 | `string[]`         |
+| Media type             | `media_items.media_type` (`photo`, `video`, `document`)       | `'photo'           | 'video'  | 'document'`   |
+| MIME type              | `media_items.mime_type`                                       | `string`           |
+| Location status        | `media_items.location_status` (`gps`, `no_gps`, `unresolved`) | `'gps'             | 'no_gps' | 'unresolved'` |
+| GPS assignment allowed | derived from media type policy                                | `boolean`          |
+| Thumbnail path         | `media_items.thumbnail_path`                                  | `string            | null`    |
+| Poster path (video)    | `media_items.poster_path`                                     | `string            | null`    |
+| Section definition     | `project_sections`                                            | `ProjectSection[]` |
+| Section membership     | `project_section_items`                                       | `SectionItem[]`    |
 
 ### Data Model Proposal (Mermaid)
 
 ```mermaid
 erDiagram
-  media_items ||--o{ project_media : belongs_to
-  projects ||--o{ project_media : groups
+  projects ||--o{ media_items : primary_for
+  projects ||--o{ media_projects : linked
+  media_items ||--o{ media_projects : belongs_to
   projects ||--o{ project_sections : contains
   project_sections ||--o{ project_section_items : includes
   media_items ||--o{ project_section_items : assigned
@@ -107,17 +117,19 @@ erDiagram
 | `projectOnlyMediaItems`   | `MediaItem[]` | `[]`    | No-GPS lane in fullscreen project view |
 | `activeProjectSectionIds` | `string[]`    | `[]`    | Expanded/collapsed sections            |
 | `selectedMediaItemId`     | `string       | null`   | `null`                                 | Shared detail drawer target |
-| `sectionDraftName`        | `string`      | `''`    | Add Section input                      |
+| `membershipEditorOpen`    | `boolean`     | `false` | Project membership editing state       |
+| `gpsAssignmentAllowed`    | `boolean`     | `true`  | Enables/disables manual map placement  |
 
 ## File Map
 
-| File                                                 | Purpose                                                                   |
-| ---------------------------------------------------- | ------------------------------------------------------------------------- |
-| `docs/use-cases/project-mixed-media.md`              | Cross-element interaction contract for mixed media                        |
-| `docs/element-specs/project-mixed-media-pre-spec.md` | Pre-spec contract and rollout boundaries                                  |
-| `docs/element-specs/project-details-view.md`         | Existing project detail view to extend with fullscreen and two-lane model |
-| `docs/element-specs/filter-panel.md`                 | Existing filter spec to keep stable while adding separate File Type strip |
-| `docs/element-specs/upload-panel.md`                 | Existing upload entry to extend for mixed media intake                    |
+| File                                                               | Purpose                                                                   |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `docs/use-cases/project-mixed-media.md`                            | Cross-element interaction contract for mixed media                        |
+| `docs/element-specs/project-mixed-media-pre-spec.md`               | Pre-spec contract and rollout boundaries                                  |
+| `docs/implementation-blueprints/project-mixed-media-data-model.md` | Technical schema/RLS/migration blueprint for safe rollout                 |
+| `docs/element-specs/project-details-view.md`                       | Existing project detail view to extend with fullscreen and two-lane model |
+| `docs/element-specs/filter-panel.md`                               | Existing filter spec to keep stable while adding separate File Type strip |
+| `docs/element-specs/upload-panel.md`                               | Existing upload entry to extend for mixed media intake                    |
 
 ## Wiring
 
@@ -126,15 +138,21 @@ erDiagram
 ```mermaid
 sequenceDiagram
   participant P as ProjectsPage
+  participant O as Existing Filter Operator
   participant F as FileTypeFilterStrip
+  participant E as MembershipEditor
   participant Q as ProjectMediaQueryService
   participant M as MapZone
   participant V as ProjectFullscreenView
 
-  P->>F: provide current fileTypeFilter
+  P->>O: provide standard filters
+  P->>F: provide file type filter
+  P->>E: open membership editor for selected media
+  E-->>P: emit membership changes
   F-->>P: emit filter changes
-  P->>Q: request media by project + file types
-  Q-->>P: gps and no_gps partitions
+  O-->>P: emit operator filters
+  P->>Q: request by membership scope plus operator plus file type
+  Q-->>P: gps/no-gps partitions and shared badges
   P->>V: bind partitioned media and sections
   P->>M: bind gps partition for marker rendering
 ```
@@ -147,8 +165,11 @@ sequenceDiagram
 
 - [ ] Dedicated File Type filter exists and does not replace existing Filter operator.
 - [ ] Document markers on map render portrait-oriented previews and remain accessible.
+- [ ] Every media item has one `primary_project_id` and at least one project membership.
+- [ ] GPS media can be linked to multiple projects.
+- [ ] No-GPS media is constrained to exactly one project membership.
+- [ ] GPS assignment is blocked for configured GPS-locked file types.
 - [ ] GPS and no-GPS project media are separated in fullscreen project view.
-- [ ] Videos and documents without GPS remain fully accessible in project-only area.
 - [ ] User can create, rename, reorder, and delete project Sections.
 - [ ] Legacy photo-only flows work unchanged when mixed media feature flag is off.
 - [ ] Query performance remains within existing viewport and project-page targets after adding media type predicates.
@@ -156,20 +177,20 @@ sequenceDiagram
 
 ## Complexity and Consequences
 
-- Data model expansion is mandatory. Reusing `images` for all asset types risks null-heavy schema and brittle constraints.
-- Storage policy surface increases. MIME and bucket rules must be segmented by media type to avoid privilege leaks.
-- Thumbnail strategy must be type-aware. Documents need generated first-page previews; videos need poster extraction; unsupported preview generation must degrade gracefully.
-- Map density can regress if non-photo media floods marker rendering. Keep cluster behavior unchanged and apply media type marker simplification at low zoom.
-- Search and grouping semantics become cross-type. Shared fields and type-specific fields must be normalized in one query contract.
-- Migration risk is high if done as a big bang. Roll out in phases behind flags and backfill jobs.
+- Hybrid membership model is more expressive but adds integrity logic.
+- Storage policy surface increases; MIME and path rules must remain strict per media type.
+- Thumbnail strategy must be type-aware: document first-page preview, video poster extraction, graceful fallback.
+- Map density can regress if non-photo media floods marker rendering; keep cluster behavior stable.
+- Membership constraints must be enforced in DB, not only UI.
 
 ## Rollout Plan (Do Not Break Current Project)
 
 1. Phase 0: Add data model + RLS + storage policies with no UI changes.
-2. Phase 1: Add mixed upload intake and persist media items; keep map photo-only.
-3. Phase 2: Add project fullscreen two-lane view and Section management.
-4. Phase 3: Add map rendering for GPS videos/documents and dedicated file type strip.
-5. Phase 4: Enable by organization feature flag; monitor performance and error rates before default-on.
+2. Phase 1: Add mixed upload intake and persist primary project plus initial membership.
+3. Phase 2: Add membership editor with no-GPS single-project rule.
+4. Phase 3: Add project fullscreen two-lane view and Section management.
+5. Phase 4: Add map rendering for GPS videos/documents and dedicated file type strip.
+6. Phase 5: Enable by organization feature flag and monitor performance/error rates.
 
 ## File Type Inventory
 
@@ -183,7 +204,7 @@ sequenceDiagram
 ## Thumbnail Strategy by Type
 
 - Photo: existing image thumbnail pipeline (square 128x128 plus larger lazy variants).
-- Video: poster frame thumbnail with play badge; optional duration label.
+- Video: poster frame thumbnail with play badge and optional duration label.
 - Document: first-page preview when possible; fallback icon card with file extension; map marker preview uses portrait 3:4 ratio.
 
 ## Settings

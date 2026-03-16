@@ -65,7 +65,7 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                 (input)="updateValue(rule.id, $any($event.target).value)"
               />
               <button
-                class="filter-rule__remove"
+                class="filter-rule__remove icon-btn-ghost icon-btn-ghost--danger"
                 (click)="removeRule(rule.id)"
                 aria-label="Remove filter"
               >

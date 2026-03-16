@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { ProjectsPageComponent } from './projects-page.component';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { WorkspaceViewService } from '../../core/workspace-view.service';
+import { ToastService } from '../../core/toast.service';
 
 const projectsServiceMock = {
   loadProjects: vi.fn(),
@@ -13,6 +14,7 @@ const projectsServiceMock = {
   createDraftProject: vi.fn(),
   renameProject: vi.fn(),
   archiveProject: vi.fn(),
+  deleteProject: vi.fn(),
   setProjectColor: vi.fn(),
   loadProjectWorkspaceImages: vi.fn(),
 };
@@ -21,6 +23,10 @@ const workspaceViewServiceMock = {
   selectedProjectIds: signal<Set<string>>(new Set()),
   setActiveSelectionImages: vi.fn(),
   clearActiveSelection: vi.fn(),
+};
+
+const toastServiceMock = {
+  show: vi.fn(),
 };
 
 const routerNavigate = vi.fn().mockResolvedValue(true);
@@ -40,12 +46,14 @@ describe('ProjectsPageComponent', () => {
     workspaceViewServiceMock.setActiveSelectionImages.mockClear();
     workspaceViewServiceMock.clearActiveSelection.mockClear();
     workspaceViewServiceMock.selectedProjectIds.set(new Set());
+    toastServiceMock.show.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [ProjectsPageComponent],
       providers: [
         { provide: ProjectsService, useValue: projectsServiceMock },
         { provide: WorkspaceViewService, useValue: workspaceViewServiceMock },
+        { provide: ToastService, useValue: toastServiceMock },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -146,5 +154,96 @@ describe('ProjectsPageComponent', () => {
 
     expect(component.activeToolbarDropdown()).toBeNull();
     expect(component.coloringProjectId()).toBe('project-9');
+  });
+
+  it('archives project via modal confirm flow', async () => {
+    projectsServiceMock.archiveProject.mockResolvedValue(true);
+    component.projects.set([
+      {
+        id: 'project-1',
+        name: 'Project 1',
+        colorKey: 'clay',
+        archivedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'active',
+        totalImageCount: 0,
+        matchingImageCount: 0,
+        lastActivity: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+      },
+    ]);
+
+    component.requestDangerAction('project-1');
+    await component.confirmPendingAction();
+
+    expect(projectsServiceMock.archiveProject).toHaveBeenCalledWith('project-1');
+    expect(component.projects()[0]?.status).toBe('archived');
+    expect(component.hasPendingAction()).toBe(false);
+    expect(toastServiceMock.show).toHaveBeenCalledWith({
+      message: 'Project archived',
+      type: 'success',
+    });
+  });
+
+  it('deletes archived project via modal confirm flow', async () => {
+    projectsServiceMock.deleteProject.mockResolvedValue(true);
+    component.projects.set([
+      {
+        id: 'project-archived',
+        name: 'Archived Project',
+        colorKey: 'clay',
+        archivedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'archived',
+        totalImageCount: 0,
+        matchingImageCount: 0,
+        lastActivity: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+      },
+    ]);
+
+    component.requestDangerAction('project-archived');
+    await component.confirmPendingAction();
+
+    expect(projectsServiceMock.deleteProject).toHaveBeenCalledWith('project-archived');
+    expect(component.projects()).toHaveLength(0);
+    expect(component.hasPendingAction()).toBe(false);
+    expect(toastServiceMock.show).toHaveBeenCalledWith({
+      message: 'Archived project deleted',
+      type: 'success',
+    });
+  });
+
+  it('opens delete action for archived project', () => {
+    component.projects.set([
+      {
+        id: 'project-archived',
+        name: 'Archived Project',
+        colorKey: 'clay',
+        archivedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'archived',
+        totalImageCount: 0,
+        matchingImageCount: 0,
+        lastActivity: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+      },
+    ]);
+
+    component.requestDangerAction('project-archived');
+
+    expect(component.isDeletePending()).toBe(true);
   });
 });
