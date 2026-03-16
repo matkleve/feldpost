@@ -652,9 +652,23 @@
   gap: var(--spacing-4);
   padding: var(--spacing-4);
   border: 1px solid var(--color-border);
+  border-left-width: 0.125rem;
   border-radius: var(--container-radius-panel);
   background: var(--color-bg-elevated);
   box-shadow: var(--elevation-dropdown);
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.projects-modal__dialog--warning {
+  border-color: color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 3%, var(--color-bg-elevated));
+}
+
+.projects-modal__dialog--error {
+  border-color: color-mix(in srgb, var(--color-danger) 50%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-elevated));
 }
 
 .projects-modal__header {
