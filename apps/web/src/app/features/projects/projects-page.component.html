@@ -104,10 +104,16 @@
               />
             }
             @case ('filter') {
-              <app-filter-dropdown />
+              <app-filter-dropdown [propertyOptionsInput]="projectFilterOptions" />
             }
             @case ('sort') {
-              <app-sort-dropdown (sortChanged)="onSortChanged($event)" />
+              <app-sort-dropdown
+                [optionsInput]="projectSortOptions"
+                [groupingIdsInput]="activeGroupingIds()"
+                [activeSortsInput]="activeProjectSorts()"
+                [defaultSorts]="projectDefaultSorts"
+                (sortChanged)="onSortChanged($event)"
+              />
             }
           }
         </div>
@@ -126,102 +132,196 @@
         </section>
       } @else {
         @if (viewMode() === 'list') {
-          <section class="projects-list ui-container" aria-label="Projects list">
-            @for (project of visibleProjects(); track project.id) {
-              <article class="project-row ui-item" (click)="openWorkspace(project.id)">
-                <span
-                  class="project-row__color"
-                  [style.background]="colorTokenFor(project.colorKey)"
-                ></span>
-
-                <div class="project-row__content">
-                  @if (editingProjectId() === project.id) {
-                    <input
-                      #renameInput
-                      class="project-row__rename"
-                      [value]="project.name"
-                      aria-label="Project name"
-                      (click)="$event.stopPropagation()"
-                      (blur)="confirmRename(project.id, renameInput.value)"
-                      (keydown)="onRenameInputKeydown($event, project.id, renameInput.value)"
-                    />
-                  } @else {
-                    <h3 class="project-row__name">{{ project.name }}</h3>
-                  }
-
-                  <p class="project-row__meta">
-                    @if (searchTerm().trim()) {
-                      {{ project.matchingImageCount }} results ·
-                      {{ project.totalImageCount }} photos ·
-                      {{ formatRelativeDate(project.lastActivity) }}
-                    } @else {
-                      {{ project.totalImageCount }} photos ·
-                      {{ formatRelativeDate(project.lastActivity) }}
-                    }
-                  </p>
-                </div>
-
-                <div class="project-row__actions" (click)="$event.stopPropagation()">
-                  <button
-                    type="button"
-                    class="project-row__action project-row__action--primary"
-                    (click)="$event.stopPropagation(); openWorkspace(project.id)"
-                  >
-                    Open in workspace
-                  </button>
-                  <button
-                    type="button"
-                    class="project-row__action"
-                    (click)="$event.stopPropagation(); startRename(project.id)"
-                  >
-                    Rename
-                  </button>
-                  <button
-                    type="button"
-                    class="project-row__action"
-                    (click)="$event.stopPropagation(); toggleColorPicker(project.id)"
-                  >
-                    Color
-                  </button>
-                  <button
-                    type="button"
-                    class="project-row__action project-row__action--danger"
-                    (click)="$event.stopPropagation(); askArchive(project.id)"
-                  >
-                    Archive
-                  </button>
-                </div>
-
-                @if (coloringProjectId() === project.id) {
-                  <div class="project-row__picker" (click)="$event.stopPropagation()">
-                    <app-project-color-picker
-                      [selectedColor]="project.colorKey"
-                      (colorSelected)="onColorSelected(project.id, $event)"
-                    />
-                  </div>
+          <section class="thumbnail-grid projects-list" aria-label="Projects list">
+            @for (section of groupedSections(); track section.id) {
+              <section class="projects-thumbnail-section projects-list-group">
+                @if (hasGrouping()) {
+                  <app-group-header
+                    [heading]="section.heading"
+                    [imageCount]="section.projectCount"
+                  />
                 }
-              </article>
+
+                <div class="thumbnail-grid__cards projects-group-list">
+                  @for (project of section.projects; track project.id) {
+                    <article class="project-row ui-item" (click)="openWorkspace(project.id)">
+                      <span
+                        class="project-row__color"
+                        [style.background]="colorTokenFor(project.colorKey)"
+                      ></span>
+
+                      <div class="project-row__content">
+                        @if (editingProjectId() === project.id) {
+                          <input
+                            #renameInput
+                            class="project-row__rename"
+                            [value]="project.name"
+                            aria-label="Project name"
+                            (click)="$event.stopPropagation()"
+                            (blur)="confirmRename(project.id, renameInput.value)"
+                            (keydown)="onRenameInputKeydown($event, project.id, renameInput.value)"
+                          />
+                        } @else {
+                          <h3 class="project-row__name">{{ project.name }}</h3>
+                        }
+
+                        <p class="project-row__meta">
+                          @if (searchTerm().trim()) {
+                            {{ project.matchingImageCount }} results ·
+                            {{ project.totalImageCount }} photos ·
+                            {{ formatRelativeDate(project.lastActivity) }}
+                          } @else {
+                            {{ project.totalImageCount }} photos ·
+                            {{ formatRelativeDate(project.lastActivity) }}
+                          }
+                        </p>
+                      </div>
+
+                      <div class="project-row__actions" (click)="$event.stopPropagation()">
+                        <button
+                          type="button"
+                          class="project-row__action project-row__action--primary"
+                          aria-label="Open in workspace"
+                          title="Open in workspace"
+                          (click)="$event.stopPropagation(); openWorkspace(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">open_in_new</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="project-row__action"
+                          aria-label="Rename project"
+                          title="Rename project"
+                          (click)="$event.stopPropagation(); startRename(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="project-row__action"
+                          aria-label="Change project color"
+                          title="Change project color"
+                          (click)="$event.stopPropagation(); toggleColorPicker(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">palette</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="project-row__action project-row__action--danger"
+                          aria-label="Archive project"
+                          title="Archive project"
+                          (click)="$event.stopPropagation(); askArchive(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">archive</span>
+                        </button>
+                      </div>
+
+                      @if (coloringProjectId() === project.id) {
+                        <div class="project-row__picker" (click)="$event.stopPropagation()">
+                          <app-project-color-picker
+                            [selectedColor]="project.colorKey"
+                            (colorSelected)="onColorSelected(project.id, $event)"
+                          />
+                        </div>
+                      }
+                    </article>
+                  }
+                </div>
+              </section>
             }
           </section>
         } @else {
-          <section class="projects-cards" aria-label="Projects card grid">
-            @for (project of visibleProjects(); track project.id) {
-              <app-project-card
-                [project]="project"
-                [showMatchCount]="searchTerm().trim().length > 0"
-                [colorToken]="colorTokenFor(project.colorKey)"
-                (open)="openWorkspace($event)"
-                (rename)="startRename($event)"
-                (color)="toggleColorPicker($event)"
-                (archive)="askArchive($event)"
-              />
+          <section class="thumbnail-grid projects-thumbnail-grid" aria-label="Projects card grid">
+            @for (section of groupedSections(); track section.id) {
+              <section class="projects-thumbnail-section">
+                @if (hasGrouping()) {
+                  <app-group-header
+                    [heading]="section.heading"
+                    [imageCount]="section.projectCount"
+                  />
+                }
 
-              @if (coloringProjectId() === project.id) {
-                <app-project-color-picker
-                  [selectedColor]="project.colorKey"
-                  (colorSelected)="onColorSelected(project.id, $event)"
-                />
-              }
+                <div class="thumbnail-grid__cards">
+                  @for (project of section.projects; track project.id) {
+                    <article class="projects-thumbnail-card" (click)="openWorkspace(project.id)">
+                      <header class="projects-thumbnail-card__header">
+                        <span
+                          class="projects-thumbnail-card__color"
+                          [style.background]="colorTokenFor(project.colorKey)"
+                        ></span>
+                        <h3 class="projects-thumbnail-card__name">{{ project.name }}</h3>
+                      </header>
+
+                      <p class="projects-thumbnail-card__badge">
+                        @if (searchTerm().trim()) {
+                          {{ project.matchingImageCount }} results
+                        } @else {
+                          {{ project.totalImageCount }} photos
+                        }
+                      </p>
+
+                      <p class="projects-thumbnail-card__meta">
+                        {{ project.totalImageCount }} photos ·
+                        {{ formatRelativeDate(project.lastActivity) }}
+                      </p>
+
+                      <div
+                        class="projects-thumbnail-card__actions"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <button
+                          type="button"
+                          class="projects-thumbnail-card__action projects-thumbnail-card__action--primary"
+                          aria-label="Open in workspace"
+                          title="Open in workspace"
+                          (click)="$event.stopPropagation(); openWorkspace(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">open_in_new</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="projects-thumbnail-card__action"
+                          aria-label="Rename project"
+                          title="Rename project"
+                          (click)="$event.stopPropagation(); startRename(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="projects-thumbnail-card__action"
+                          aria-label="Change project color"
+                          title="Change project color"
+                          (click)="$event.stopPropagation(); toggleColorPicker(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">palette</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="projects-thumbnail-card__action projects-thumbnail-card__action--danger"
+                          aria-label="Archive project"
+                          title="Archive project"
+                          (click)="$event.stopPropagation(); askArchive(project.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">archive</span>
+                        </button>
+                      </div>
+
+                      @if (coloringProjectId() === project.id) {
+                        <div
+                          class="projects-thumbnail-card__picker"
+                          (click)="$event.stopPropagation()"
+                        >
+                          <app-project-color-picker
+                            [selectedColor]="project.colorKey"
+                            (colorSelected)="onColorSelected(project.id, $event)"
+                          />
+                        </div>
+                      }
+                    </article>
+                  }
+                </div>
+              </section>
             }
           </section>
         }

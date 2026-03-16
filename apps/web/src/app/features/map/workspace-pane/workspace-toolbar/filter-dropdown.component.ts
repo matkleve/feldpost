@@ -1,7 +1,13 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { FilterService } from '../../../../core/filter.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyType } from '../../../../core/property-registry.types';
+
+export interface FilterDropdownPropertyOption {
+  id: string;
+  label: string;
+  type: PropertyType;
+}
 
 const TEXT_OPERATORS = ['contains', 'equals', 'is', 'is not', 'before', 'after'];
 const NUMBER_OPERATORS = ['=', '≠', '>', '<', '≥', '≤'];
@@ -81,9 +87,18 @@ export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);
   private readonly registry = inject(PropertyRegistryService);
 
-  readonly propertyOptions = computed(() =>
-    this.registry.filterableProperties().map((p) => ({ id: p.id, label: p.label })),
-  );
+  readonly propertyOptionsInput = input<FilterDropdownPropertyOption[] | null>(null);
+
+  readonly propertyOptions = computed(() => {
+    const provided = this.propertyOptionsInput();
+    if (provided) return provided;
+
+    return this.registry.filterableProperties().map((p) => ({
+      id: p.id,
+      label: p.label,
+      type: p.type,
+    }));
+  });
 
   removeRule(id: string): void {
     this.filterService.removeRule(id);
@@ -101,8 +116,8 @@ export class FilterDropdownComponent {
 
   updateProperty(id: string, value: string): void {
     // When property changes, reset operator if it's not valid for the new type
-    const prop = this.registry.getProperty(value);
-    const validOps = operatorsForType(prop?.type);
+    const propType = this.getPropertyType(value);
+    const validOps = operatorsForType(propType);
     const rules = this.filterService.rules();
     const rule = rules.find((r) => r.id === id);
     const patch: Record<string, string> = { property: value };
@@ -122,13 +137,20 @@ export class FilterDropdownComponent {
 
   getOperatorsForRule(propertyId: string): string[] {
     if (!propertyId) return TEXT_OPERATORS;
-    const prop = this.registry.getProperty(propertyId);
-    return operatorsForType(prop?.type);
+    return operatorsForType(this.getPropertyType(propertyId));
   }
 
   getInputType(propertyId: string): string {
     if (!propertyId) return 'text';
-    const prop = this.registry.getProperty(propertyId);
-    return prop?.type === 'number' ? 'number' : 'text';
+    return this.getPropertyType(propertyId) === 'number' ? 'number' : 'text';
+  }
+
+  private getPropertyType(propertyId: string): PropertyType | undefined {
+    const provided = this.propertyOptionsInput();
+    if (provided) {
+      return provided.find((option) => option.id === propertyId)?.type;
+    }
+
+    return this.registry.getProperty(propertyId)?.type;
   }
 }

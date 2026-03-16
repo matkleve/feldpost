@@ -2,19 +2,18 @@
  * geocode — Supabase Edge Function that proxies Nominatim requests.
  *
  * Eliminates browser CORS issues and enforces server-side rate limiting
- * (1 request/second to Nominatim). Requires a valid Supabase JWT.
+ * (1 request/second to Nominatim).
  *
  * Endpoints:
  *   POST /geocode  { action: "reverse", lat, lng }
  *   POST /geocode  { action: "forward", q }
  */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
 const MIN_INTERVAL_MS = 1100;
 const USER_AGENT = "Feldpost/1.0 (construction image management)";
+const NOMINATIM_TIMEOUT_MS = 10000;
 
 let lastRequestTime = 0;
 
@@ -37,6 +36,10 @@ function corsHeaders(): Record<string, string> {
   };
 }
 
+function sanitizeSnippet(input: string): string {
+  return input.replace(/\s+/g, " ").trim().slice(0, 500);
+}
+
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -46,38 +49,6 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders(), "Content-Type": "application/json" },
-    });
-  }
-
-  // Verify JWT — reject unauthenticated requests
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    return new Response(JSON.stringify({ error: "Missing authorization" }), {
-      status: 401,
-      headers: { ...corsHeaders(), "Content-Type": "application/json" },
-    });
-  }
-
-  try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders(), "Content-Type": "application/json" },
-      });
-    }
-  } catch {
-    return new Response(JSON.stringify({ error: "Auth verification failed" }), {
-      status: 401,
       headers: { ...corsHeaders(), "Content-Type": "application/json" },
     });
   }
@@ -160,6 +131,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const nominatimResp = await fetch(nominatimUrl, {
+      signal: AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
       headers: {
         "User-Agent": USER_AGENT,
         "Accept-Language": "en",
@@ -167,10 +139,13 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!nominatimResp.ok) {
+      const upstreamBody = sanitizeSnippet(await nominatimResp.text());
       return new Response(
         JSON.stringify({
           error: "Nominatim request failed",
+          failureType: "upstream_http",
           status: nominatimResp.status,
+          upstreamBody,
         }),
         {
           status: 502,
@@ -184,9 +159,15 @@ Deno.serve(async (req: Request) => {
       status: 200,
       headers: { ...corsHeaders(), "Content-Type": "application/json" },
     });
-  } catch {
+  } catch (error) {
+    const message =
+      error instanceof Error ? sanitizeSnippet(error.message) : "Unknown error";
     return new Response(
-      JSON.stringify({ error: "Failed to reach Nominatim" }),
+      JSON.stringify({
+        error: "Failed to reach Nominatim",
+        failureType: "network",
+        message,
+      }),
       {
         status: 502,
         headers: { ...corsHeaders(), "Content-Type": "application/json" },

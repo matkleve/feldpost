@@ -159,7 +159,11 @@ export async function fetchGeocoderCandidates(
 ): Promise<SearchAddressCandidate[]> {
   if (normalizedQuery.length < 3) return [];
 
-  const constrainedOptions = buildConstrainedSearchOptions(context, maxGeocoderResults);
+  const constrainedOptions = buildConstrainedSearchOptions(
+    context,
+    maxGeocoderResults,
+    normalizedQuery,
+  );
   logGeocoderResolverStage('constrained-request', {
     query: normalizedQuery,
     options: constrainedOptions,
@@ -237,14 +241,19 @@ export async function fetchGeocoderCandidates(
 function buildConstrainedSearchOptions(
   context: SearchQueryContext,
   maxGeocoderResults: number,
+  query: string,
 ): GeocoderSearchOptions {
-  const searchOptions: GeocoderSearchOptions = { limit: maxGeocoderResults };
+  const useShortPrefixHeadroom = !!context.viewportBounds && isShortAmbiguousPrefixQuery(query);
+  const searchOptions: GeocoderSearchOptions = {
+    limit: useShortPrefixHeadroom ? Math.max(maxGeocoderResults * 4, 12) : maxGeocoderResults,
+  };
   if (context.countryCodes?.length) {
     searchOptions.countrycodes = context.countryCodes;
   }
   if (context.viewportBounds) {
     const b = context.viewportBounds;
     searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
+    searchOptions.bounded = true;
   }
   return searchOptions;
 }
@@ -321,7 +330,50 @@ function meetsLexicalMatchThreshold(
   const cityScore = computeTextMatchScore(result.address?.city ?? '', normalizedQuery);
   const bestScore = Math.max(displayNameScore, roadScore, nameScore, cityScore);
 
+  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  if (queryTokens.length > 1) {
+    const normalizedFields = [
+      result.displayName ?? '',
+      result.address?.road ?? '',
+      result.name ?? '',
+      result.address?.city ?? '',
+      result.address?.town ?? '',
+      result.address?.village ?? '',
+      result.address?.municipality ?? '',
+    ]
+      .map((value) => normalizeForLexicalMatch(value))
+      .filter(Boolean);
+
+    const matchedTokens = queryTokens.filter((token) =>
+      normalizedFields.some((field) => field.includes(token)),
+    ).length;
+
+    const leadingToken = queryTokens[0] ?? '';
+    const hasLeadingPrefix = normalizedFields.some((field) =>
+      field
+        .split(/\s+/)
+        .filter(Boolean)
+        .some((part) => part.startsWith(leadingToken)),
+    );
+
+    if (matchedTokens >= Math.min(2, queryTokens.length) && hasLeadingPrefix) {
+      return true;
+    }
+
+    if (matchedTokens === queryTokens.length && bestScore >= 0.35) {
+      return true;
+    }
+  }
+
   return bestScore >= minimumLexicalScore(normalizedQuery);
+}
+
+function normalizeForLexicalMatch(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss');
 }
 
 function minimumLexicalScore(query: string): number {

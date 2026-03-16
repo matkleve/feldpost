@@ -1,9 +1,9 @@
-import { Component, computed, inject, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { SortConfig } from '../../../../core/workspace-view.types';
 
-type SortOption = {
+export type SortDropdownOption = {
   id: string;
   label: string;
   icon: string;
@@ -91,24 +91,34 @@ export class SortDropdownComponent {
   private readonly viewService = inject(WorkspaceViewService);
   private readonly registry = inject(PropertyRegistryService);
 
+  readonly optionsInput = input<SortDropdownOption[] | null>(null);
+  readonly groupingIdsInput = input<string[] | null>(null);
+  readonly activeSortsInput = input<SortConfig[] | null>(null);
+  readonly defaultSorts = input<SortConfig[]>([{ key: 'date-captured', direction: 'desc' }]);
+
   /** Sort options derived from the property registry (only sortable properties). */
-  private readonly options = computed<SortOption[]>(() =>
-    this.registry.sortableProperties().map((p) => ({
+  private readonly options = computed<SortDropdownOption[]>(() => {
+    const provided = this.optionsInput();
+    if (provided) return provided;
+
+    return this.registry.sortableProperties().map((p) => ({
       id: p.id,
       label: p.label,
       icon: p.icon,
       defaultDirection: p.defaultSortDirection,
-    })),
-  );
+    }));
+  });
 
   readonly searchTerm = signal('');
-  readonly activeSorts = signal<SortConfig[]>([...this.viewService.effectiveSorts()]);
+  readonly activeSorts = signal<SortConfig[]>([]);
   readonly sortChanged = output<SortConfig[]>();
 
   /** IDs of properties currently used as groupings. */
-  private readonly groupingIds = computed(() =>
-    this.viewService.activeGroupings().map((g) => g.id),
-  );
+  private readonly groupingIds = computed(() => {
+    const provided = this.groupingIdsInput();
+    if (provided) return provided;
+    return this.viewService.activeGroupings().map((g) => g.id);
+  });
 
   /** Options in the "Sorted by grouping" section — match grouping order, filtered by search. */
   readonly groupedOptions = computed(() => {
@@ -117,7 +127,7 @@ export class SortDropdownComponent {
     const opts = this.options();
     return ids
       .map((id) => opts.find((o) => o.id === id))
-      .filter((o): o is SortOption => !!o)
+      .filter((o): o is SortDropdownOption => !!o)
       .filter((o) => !term || o.label.toLowerCase().includes(term));
   });
 
@@ -132,8 +142,21 @@ export class SortDropdownComponent {
 
   readonly hasCustomSort = computed(() => {
     const sorts = this.activeSorts();
-    return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
+    const defaults = this.defaultSorts();
+    return !this.areSortsEqual(sorts, defaults);
   });
+
+  constructor() {
+    effect(() => {
+      const provided = this.activeSortsInput();
+      if (provided) {
+        this.activeSorts.set([...provided]);
+        return;
+      }
+
+      this.activeSorts.set([...this.viewService.effectiveSorts()]);
+    });
+  }
 
   isSortActive(id: string): boolean {
     return this.activeSorts().some((s) => s.key === id);
@@ -181,8 +204,20 @@ export class SortDropdownComponent {
   }
 
   resetSort(): void {
-    const defaultSorts: SortConfig[] = [{ key: 'date-captured', direction: 'desc' }];
+    const defaultSorts = [...this.defaultSorts()];
     this.activeSorts.set(defaultSorts);
     this.sortChanged.emit(defaultSorts);
+  }
+
+  private areSortsEqual(left: SortConfig[], right: SortConfig[]): boolean {
+    if (left.length !== right.length) return false;
+
+    for (let i = 0; i < left.length; i++) {
+      if (left[i].key !== right[i].key || left[i].direction !== right[i].direction) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
