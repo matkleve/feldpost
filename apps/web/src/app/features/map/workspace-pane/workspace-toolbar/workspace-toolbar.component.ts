@@ -1,4 +1,4 @@
-import { Component, signal, computed, ElementRef, HostListener, inject } from '@angular/core';
+import { Component, signal, computed, HostListener, inject } from '@angular/core';
 import { GroupingDropdownComponent, type GroupingProperty } from './grouping-dropdown.component';
 import { FilterDropdownComponent } from './filter-dropdown.component';
 import { SortDropdownComponent } from './sort-dropdown.component';
@@ -7,6 +7,7 @@ import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { FilterService } from '../../../../core/filter.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyRef, SortConfig } from '../../../../core/workspace-view.types';
+import { ClickOutsideDirective } from '../../../../shared/click-outside.directive';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -15,6 +16,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
   templateUrl: './workspace-toolbar.component.html',
   styleUrl: './workspace-toolbar.component.scss',
   imports: [
+    ClickOutsideDirective,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
@@ -59,19 +61,17 @@ export class WorkspaceToolbarComponent {
   ];
 
   // Guard: skip click-outside detection during CDK drag operations
-  private _isDragging = false;
-
-  constructor(private readonly elRef: ElementRef<HTMLElement>) {}
+  readonly isDragging = signal(false);
 
   /** Called by child dropdowns to suppress click-outside while dragging. */
   onDragStarted(): void {
-    this._isDragging = true;
+    this.isDragging.set(true);
   }
 
   /** Called by child dropdowns when drag ends. */
   onDragEnded(): void {
     // Defer reset so the synthetic click from mouseup doesn't trigger close
-    setTimeout(() => (this._isDragging = false));
+    setTimeout(() => this.isDragging.set(false));
   }
 
   onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
@@ -114,14 +114,6 @@ export class WorkspaceToolbarComponent {
 
   closeDropdown(): void {
     this.activeDropdown.set(null);
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (this._isDragging) return;
-    if (this.activeDropdown() && !this.elRef.nativeElement.contains(event.target as Node)) {
-      this.closeDropdown();
-    }
   }
 
   @HostListener('document:keydown.escape')

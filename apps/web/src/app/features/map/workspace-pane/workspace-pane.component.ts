@@ -18,6 +18,7 @@ import { ImageDetailViewComponent } from './image-detail-view.component';
 export class WorkspacePaneComponent {
   // ── Inputs from MapShell ──────────────────────────────────────────────────
   readonly detailImageId = input<string | null>(null);
+  readonly title = input('Workspace');
 
   // ── Outputs to MapShell ──────────────────────────────────────────────────
   readonly closed = output<void>();

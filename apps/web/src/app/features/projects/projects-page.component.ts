@@ -40,6 +40,7 @@ import {
 } from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
+import { ClickOutsideDirective } from '../../shared/click-outside.directive';
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
@@ -110,6 +111,7 @@ interface ProjectGroupedSection {
     SortDropdownComponent,
     ProjectsViewToggleComponent,
     ProjectColorPickerComponent,
+    ClickOutsideDirective,
   ],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',
@@ -120,7 +122,6 @@ export class ProjectsPageComponent {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly projectGroupingOptionIds = new Set(PROJECT_GROUPING_OPTIONS.map((o) => o.id));
   private readonly projectFilterOptionIds = new Set(PROJECT_FILTER_OPTIONS.map((o) => o.id));
   private readonly projectSortOptionIds = new Set(PROJECT_SORT_OPTIONS.map((o) => o.id));
@@ -145,6 +146,7 @@ export class ProjectsPageComponent {
   readonly toolbarDropdownTop = signal(0);
   readonly toolbarDropdownLeft = signal(0);
   readonly activeGroupings = signal<GroupingProperty[]>([]);
+  readonly collapsedGroupIds = signal<Set<string>>(new Set());
   readonly isToolbarDragging = signal(false);
   readonly activeProjectSorts = signal<SortConfig[]>([]);
   readonly projectFilterOptions = PROJECT_FILTER_OPTIONS;
@@ -215,6 +217,16 @@ export class ProjectsPageComponent {
     return `${total} project${total === 1 ? '' : 's'}`;
   });
 
+  readonly workspacePaneTitle = computed(() => {
+    const selectedId = this.selectedProjectId();
+    if (!selectedId) {
+      return 'Workspace';
+    }
+
+    const selectedProject = this.projects().find((project) => project.id === selectedId);
+    return selectedProject?.name ?? 'Workspace';
+  });
+
   readonly groupedSections = computed<ProjectGroupedSection[]>(() => {
     const projects = this.visibleProjects();
     const groupings = this.activeGroupings();
@@ -231,7 +243,7 @@ export class ProjectsPageComponent {
       ];
     }
 
-    return this.buildGroupedSections(projects, groupings, [], []);
+    return this.buildGroupedSections(projects, groupings, []);
   });
 
   readonly showEmptyState = computed(
@@ -251,21 +263,20 @@ export class ProjectsPageComponent {
   @HostListener('window:resize')
   onWindowResize(): void {
     this.syncViewportMode();
-    this.closeToolbarDropdown();
+    this.closeOverlays();
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (this.isToolbarDragging()) return;
-    if (!this.activeToolbarDropdown()) return;
-    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
-      this.closeToolbarDropdown();
+  onOutsideInteraction(): void {
+    if (this.isToolbarDragging()) {
+      return;
     }
+
+    this.closeOverlays();
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.closeToolbarDropdown();
+    this.closeOverlays();
   }
 
   async refreshProjects(): Promise<void> {
@@ -339,6 +350,7 @@ export class ProjectsPageComponent {
       this.normalizeProjectFilterRules();
     }
 
+    this.coloringProjectId.set(null);
     this.activeToolbarDropdown.set(id);
   }
 
@@ -355,7 +367,59 @@ export class ProjectsPageComponent {
   }
 
   onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
-    this.activeGroupings.set(active.filter((group) => this.projectGroupingOptionIds.has(group.id)));
+    this.activeGroupings.set(
+      active.filter((group) => this.projectGroupingOptionIds.has(group.id)),
+    );
+    // Reset collapsed state when grouping structure changes.
+    this.collapsedGroupIds.set(new Set());
+  }
+
+  toggleGroupCollapsed(sectionId: string): void {
+    this.collapsedGroupIds.update((current) => {
+      const next = new Set(current);
+      if (next.has(sectionId)) {
+        next.delete(sectionId);
+      } else {
+        next.add(sectionId);
+      }
+      return next;
+    });
+  }
+
+  isGroupCollapsed(sectionId: string): boolean {
+    return this.collapsedGroupIds().has(sectionId);
+  }
+
+  isSectionHidden(index: number): boolean {
+    const sections = this.groupedSections();
+    const section = sections[index];
+
+    // Top-level group headers are never hidden.
+    if (section.heading && section.level === 0) {
+      return false;
+    }
+
+    let contextLevel = section.heading ? section.level : Number.POSITIVE_INFINITY;
+
+    for (let i = index - 1; i >= 0; i--) {
+      const prev = sections[i];
+      if (!prev.heading) {
+        continue;
+      }
+
+      if (prev.level < contextLevel) {
+        if (this.isGroupCollapsed(prev.id)) {
+          return true;
+        }
+
+        contextLevel = prev.level;
+        if (contextLevel === 0) {
+          break;
+        }
+      }
+    }
+
+    return false;
   }
 
   onSortChanged(sortConfigs: SortConfig[]): void {
@@ -430,6 +494,7 @@ export class ProjectsPageComponent {
   }
 
   toggleColorPicker(projectId: string): void {
+    this.closeToolbarDropdown();
     this.coloringProjectId.update((current) => (current === projectId ? null : projectId));
   }
 
@@ -443,6 +508,11 @@ export class ProjectsPageComponent {
       all.map((project) => (project.id === projectId ? { ...project, colorKey } : project)),
     );
 
+    this.coloringProjectId.set(null);
+  }
+
+  private closeOverlays(): void {
+    this.closeToolbarDropdown();
     this.coloringProjectId.set(null);
   }
 
@@ -484,7 +554,7 @@ export class ProjectsPageComponent {
     await this.refreshSearchCounts();
   }
 
-  async openWorkspace(projectId: string, navigate = true): Promise<void> {
+  async openWorkspace(projectId: string, navigate = false): Promise<void> {
     this.persistWorkspaceContext(this.selectedProjectId());
 
     if (!this.workspacePaneOpen()) {
@@ -520,7 +590,6 @@ export class ProjectsPageComponent {
     this.detailImageId.set(null);
     this.workspaceViewService.selectedProjectIds.set(new Set());
     this.workspaceViewService.clearActiveSelection();
-    void this.router.navigate(['/projects']);
   }
 
   onWorkspaceWidthChange(newWidth: number): void {
@@ -548,6 +617,15 @@ export class ProjectsPageComponent {
   }
 
   colorTokenFor(key: ProjectColorKey): string {
+    const brandHueMatch = key.match(/^brand-hue-(\d{1,3})$/);
+    if (brandHueMatch) {
+      const hue = Number.parseInt(brandHueMatch[1], 10);
+      if (Number.isFinite(hue)) {
+        // Keep saturation/lightness close to brand orange and only vary hue.
+        return `hsl(${hue} 58% 52%)`;
+      }
+    }
+
     if (key === 'accent') return 'var(--color-accent)';
     if (key === 'success') return 'var(--color-success)';
     if (key === 'warning') return 'var(--color-warning)';
@@ -738,14 +816,13 @@ export class ProjectsPageComponent {
     projects: ProjectListItem[],
     groupings: GroupingProperty[],
     pathKeys: string[],
-    pathLabels: string[],
   ): ProjectGroupedSection[] {
     if (groupings.length === 0) {
       return [
         {
           id: pathKeys.join('||') || 'all-projects',
-          heading: pathLabels.join(' / '),
-          level: pathLabels.length,
+          heading: '',
+          level: Math.max(pathKeys.length - 1, 0),
           projectCount: projects.length,
           projects,
         },
@@ -768,18 +845,27 @@ export class ProjectsPageComponent {
     const sections: ProjectGroupedSection[] = [];
     for (const [groupValue, bucket] of buckets) {
       const nextPathKeys = [...pathKeys, `${current.id}:${groupValue}`];
-      const nextPathLabels = [...pathLabels, `${current.label}: ${groupValue}`];
+      const heading = `${current.label}: ${groupValue}`;
+      const level = pathKeys.length;
+
+      sections.push({
+        id: `${nextPathKeys.join('||')}::header`,
+        heading,
+        level,
+        projectCount: bucket.length,
+        projects: [],
+      });
 
       if (rest.length === 0) {
         sections.push({
-          id: nextPathKeys.join('||'),
-          heading: nextPathLabels.join(' / '),
-          level: nextPathLabels.length,
+          id: `${nextPathKeys.join('||')}::leaf`,
+          heading: '',
+          level,
           projectCount: bucket.length,
           projects: bucket,
         });
       } else {
-        sections.push(...this.buildGroupedSections(bucket, rest, nextPathKeys, nextPathLabels));
+        sections.push(...this.buildGroupedSections(bucket, rest, nextPathKeys));
       }
     }
 
@@ -836,8 +922,7 @@ export class ProjectsPageComponent {
     }
 
     if (option?.type === 'number' || NUMBER_OPERATORS.includes(rule.operator)) {
-      const fieldNumber =
-        typeof fieldValue === 'number' ? fieldValue : Number.parseFloat(fieldValue);
+      const fieldNumber = typeof fieldValue === 'number' ? fieldValue : Number.parseFloat(fieldValue);
       const ruleNumber = Number.parseFloat(ruleValue);
       if (Number.isNaN(fieldNumber) || Number.isNaN(ruleNumber)) {
         return false;
@@ -901,10 +986,7 @@ export class ProjectsPageComponent {
     }
   }
 
-  private getProjectFilterValue(
-    project: ProjectListItem,
-    propertyId: string,
-  ): string | number | null {
+  private getProjectFilterValue(project: ProjectListItem, propertyId: string): string | number | null {
     switch (propertyId) {
       case 'name':
         return project.name;
@@ -934,9 +1016,7 @@ export class ProjectsPageComponent {
       .map((rule) => {
         if (!rule.property) return rule;
 
-        const validOperators = operatorsForType(
-          this.projectFilterOptionById.get(rule.property)?.type,
-        );
+        const validOperators = operatorsForType(this.projectFilterOptionById.get(rule.property)?.type);
         if (!rule.operator || validOperators.includes(rule.operator)) {
           return rule;
         }
@@ -944,10 +1024,7 @@ export class ProjectsPageComponent {
         return { ...rule, operator: '' };
       });
 
-    if (
-      normalized.length !== rules.length ||
-      normalized.some((rule, index) => rule !== rules[index])
-    ) {
+    if (normalized.length !== rules.length || normalized.some((rule, index) => rule !== rules[index])) {
       this.filterService.rules.set(normalized);
     }
   }

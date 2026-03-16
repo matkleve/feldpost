@@ -58,6 +58,7 @@ type SearchSectionsState = {
   styleUrl: './search-bar.component.scss',
   host: {
     class: 'search-bar-host',
+    '[class.search-bar-host--projects]': "mode() === 'projects'",
   },
 })
 export class SearchBarComponent implements OnInit, OnDestroy {

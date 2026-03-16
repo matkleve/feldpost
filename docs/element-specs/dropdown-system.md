@@ -60,6 +60,26 @@ This warm clay tint is used on **all** hover states — items, action rows, sear
 | Icon size      | `1rem` (16px)              |
 | Transition     | `background 80ms ease-out` |
 
+## Where It Lives
+
+- **Global classes**: `apps/web/src/styles.scss` — the `dd-*` block after `.ui-spacer`
+- **Sort**: `workspace-toolbar/sort-dropdown.component.ts` + `.scss`
+- **Grouping**: `workspace-toolbar/grouping-dropdown.component.ts` + `.scss`
+- **Projects**: `workspace-toolbar/projects-dropdown.component.ts` + `.scss`
+- **Filter**: `workspace-toolbar/filter-dropdown.component.ts` + `.scss`
+- **Context menu**: `workspace-pane/image-detail-view.component.html` + `.scss`
+
+## Actions
+
+| # | Trigger | System Response | Surface |
+| --- | --- | --- | --- |
+| 1 | Opens any toolbar dropdown | Container shell renders with shared elevated surface tokens | Sort, Grouping, Projects, Filter |
+| 2 | Hovers an actionable row | Warm clay hover tint appears with no geometry shift | Any `dd-item` consumer |
+| 3 | Navigates item list via pointer | Label/icon/trailing align to `dd-item` layout contract | Any `dd-item` consumer |
+| 4 | Opens dropdown with search | Search row uses `dd-search` and input/action primitives | Sort, Projects |
+| 5 | Dropdown has no rows | Empty state uses `dd-empty` style primitive | Sort, Filter, future consumers |
+| 6 | Renders destructive menu action | Row uses `dd-item--danger` styling on icon and label | Image detail context menu |
+
 ## Dropdown Inventory
 
 Every floating menu surface in Feldpost and which `dd-*` pieces it uses:
@@ -97,15 +117,6 @@ Uses: `dd-items`, `dd-item`, `dd-item--danger`, `dd-item__icon`, `dd-item__label
 Component-specific: Absolute positioning, click-outside overlay.
 
 **Search Bar Dropdown** — Separate system. Uses `.ui-item` grid with taller rows (`3rem`) and larger font (`0.9375rem`). Not a menu surface — not required to use `dd-*`.
-
-## Where It Lives
-
-- **Global classes**: `apps/web/src/styles.scss` — the `dd-*` block after `.ui-spacer`
-- **Sort**: `workspace-toolbar/sort-dropdown.component.ts` + `.scss`
-- **Grouping**: `workspace-toolbar/grouping-dropdown.component.ts` + `.scss`
-- **Projects**: `workspace-toolbar/projects-dropdown.component.ts` + `.scss`
-- **Filter**: `workspace-toolbar/filter-dropdown.component.ts` + `.scss`
-- **Context menu**: `workspace-pane/image-detail-view.component.html` + `.scss`
 
 ## Component Hierarchy
 

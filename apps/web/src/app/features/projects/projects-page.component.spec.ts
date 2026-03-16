@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { signal } from '@angular/core';
@@ -23,6 +24,7 @@ const workspaceViewServiceMock = {
 };
 
 const routerNavigate = vi.fn().mockResolvedValue(true);
+const routeParamGet = vi.fn().mockReturnValue(null);
 
 describe('ProjectsPageComponent', () => {
   let fixture: ComponentFixture<ProjectsPageComponent>;
@@ -34,6 +36,7 @@ describe('ProjectsPageComponent', () => {
     projectsServiceMock.loadGroupedSearchCounts.mockResolvedValue({});
     projectsServiceMock.loadProjectWorkspaceImages.mockResolvedValue([]);
     routerNavigate.mockClear();
+    routeParamGet.mockReturnValue(null);
     workspaceViewServiceMock.setActiveSelectionImages.mockClear();
     workspaceViewServiceMock.clearActiveSelection.mockClear();
     workspaceViewServiceMock.selectedProjectIds.set(new Set());
@@ -43,6 +46,16 @@ describe('ProjectsPageComponent', () => {
       providers: [
         { provide: ProjectsService, useValue: projectsServiceMock },
         { provide: WorkspaceViewService, useValue: workspaceViewServiceMock },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: routeParamGet,
+              },
+            },
+          },
+        },
         { provide: Router, useValue: { navigate: routerNavigate } },
       ],
     }).compileComponents();
@@ -96,7 +109,7 @@ describe('ProjectsPageComponent', () => {
     component.detailImageId.set(null);
 
     await component.openWorkspace('project-1');
-    vi.runAllTimers();
+    vi.advanceTimersByTime(1);
 
     expect(component.detailImageId()).toBe('image-7');
     expect(host.nativeElement.scrollTop).toBe(48);
@@ -114,5 +127,24 @@ describe('ProjectsPageComponent', () => {
         },
       },
     });
+  });
+
+  it('closes open overlays on outside interaction', () => {
+    component.activeToolbarDropdown.set('filter');
+    component.coloringProjectId.set('project-1');
+
+    component.onOutsideInteraction();
+
+    expect(component.activeToolbarDropdown()).toBeNull();
+    expect(component.coloringProjectId()).toBeNull();
+  });
+
+  it('closes toolbar dropdown when opening color picker', () => {
+    component.activeToolbarDropdown.set('grouping');
+
+    component.toggleColorPicker('project-9');
+
+    expect(component.activeToolbarDropdown()).toBeNull();
+    expect(component.coloringProjectId()).toBe('project-9');
   });
 });

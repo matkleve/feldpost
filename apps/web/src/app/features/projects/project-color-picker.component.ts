@@ -1,74 +1,46 @@
 import { Component, input, output } from '@angular/core';
 import type { ProjectColorKey } from '../../core/projects/projects.types';
 
-interface ProjectColorOption {
-  key: ProjectColorKey;
-  label: string;
-  token: string;
-}
-
-const COLOR_OPTIONS: ProjectColorOption[] = [
-  { key: 'clay', label: 'Clay', token: 'var(--color-clay)' },
-  { key: 'accent', label: 'Accent', token: 'var(--color-accent)' },
-  { key: 'success', label: 'Success', token: 'var(--color-success)' },
-  { key: 'warning', label: 'Warning', token: 'var(--color-warning)' },
-];
-
 @Component({
   selector: 'app-project-color-picker',
   standalone: true,
   template: `
     <div class="project-color-picker" role="menu" aria-label="Project color">
-      @for (option of colorOptions; track option.key) {
-        <button
-          type="button"
-          class="project-color-picker__option"
-          role="menuitemradio"
-          [attr.aria-checked]="selectedColor() === option.key"
-          [class.project-color-picker__option--active]="selectedColor() === option.key"
-          (click)="colorSelected.emit(option.key)"
-        >
-          <span class="project-color-picker__dot" [style.background]="option.token"></span>
-          {{ option.label }}
+      <div class="dd-items">
+        <button type="button" class="dd-item" (click)="pickRandomBrandHue()">
+          <span class="material-icons dd-item__icon" aria-hidden="true">palette</span>
+          <span class="dd-item__label">Random brand hue</span>
+          <span
+            class="dd-item__trailing project-color-picker__swatch"
+            [style.background]="previewColor()"
+          ></span>
         </button>
-      }
+      </div>
     </div>
   `,
   styles: [
     `
       .project-color-picker {
-        display: grid;
-        gap: var(--spacing-1);
-        padding: var(--spacing-2);
+        min-width: 14rem;
         border: 1px solid var(--color-border);
-        border-radius: var(--container-radius-control);
+        border-radius: var(--container-radius-panel);
         background: var(--color-bg-elevated);
         box-shadow: var(--elevation-dropdown);
       }
 
-      .project-color-picker__option {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-2);
-        min-height: 2.5rem;
-        border: 0;
-        border-radius: var(--container-radius-control);
-        background: transparent;
-        color: var(--color-text-primary);
-        padding-inline: var(--spacing-2);
-        cursor: pointer;
-        text-align: left;
+      .project-color-picker .dd-items {
+        max-height: none;
       }
 
-      .project-color-picker__option--active,
-      .project-color-picker__option:hover {
-        background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+      .project-color-picker .dd-item {
+        width: 100%;
       }
 
-      .project-color-picker__dot {
-        inline-size: 0.75rem;
-        block-size: 0.75rem;
+      .project-color-picker__swatch {
+        inline-size: 1rem;
+        block-size: 1rem;
         border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--color-border-strong) 64%, var(--color-border));
       }
     `,
   ],
@@ -77,5 +49,19 @@ export class ProjectColorPickerComponent {
   readonly selectedColor = input.required<ProjectColorKey>();
   readonly colorSelected = output<ProjectColorKey>();
 
-  protected readonly colorOptions = COLOR_OPTIONS;
+  protected previewColor(): string {
+    const match = this.selectedColor().match(/^brand-hue-(\d{1,3})$/);
+    if (match) {
+      const hue = Number.parseInt(match[1], 10);
+      if (Number.isFinite(hue)) {
+        return `hsl(${hue} 58% 52%)`;
+      }
+    }
+    return 'var(--color-clay)';
+  }
+
+  protected pickRandomBrandHue(): void {
+    const hue = Math.floor(Math.random() * 360);
+    this.colorSelected.emit(`brand-hue-${hue}`);
+  }
 }

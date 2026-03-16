@@ -6,6 +6,10 @@
 
 A centralized registry of all available image properties — both built-in (Date, City, Project, etc.) and custom (user-defined metadata keys like "Chimney Number", "Material"). Every operator in the workspace toolbar reads from this single source to populate its property lists, ensuring consistency.
 
+## What It Looks Like
+
+The registry is not a visible UI element; it appears indirectly as consistent property lists across Sort, Grouping, and Filter dropdowns. Built-in properties always render first in a stable order, followed by custom properties from the active organization. Each consumer sees the same icon, label, and type mapping for a given property id. Capability filtering changes which subset is shown per operator without changing property definitions.
+
 ## Where It Lives
 
 - Service: `core/property-registry.service.ts`
