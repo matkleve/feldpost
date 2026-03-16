@@ -21,13 +21,13 @@ Users experience this system as a responsive workspace pane that immediately ope
 
 ## Actions
 
-| # | Trigger | System Response | Notes |
-| --- | --- | --- | --- |
-| 1 | User clicks marker/cluster | Loads cluster images via RPC and sets raw image list | Single and cluster share pipeline |
-| 2 | Raw list updates | Applies filter, sort, and grouping pipeline | Deterministic order |
-| 3 | Toolbar control changes | Recomputes output sections without reloading unchanged raw data | Reactive updates |
-| 4 | Single image click path | Opens detail view and still maintains grid state for back navigation | No state loss |
-| 5 | Cluster path | Clears detail selection and renders grouped thumbnail content | Grid-first display |
+| #   | Trigger                    | System Response                                                      | Notes                             |
+| --- | -------------------------- | -------------------------------------------------------------------- | --------------------------------- |
+| 1   | User clicks marker/cluster | Loads cluster images via RPC and sets raw image list                 | Single and cluster share pipeline |
+| 2   | Raw list updates           | Applies filter, sort, and grouping pipeline                          | Deterministic order               |
+| 3   | Toolbar control changes    | Recomputes output sections without reloading unchanged raw data      | Reactive updates                  |
+| 4   | Single image click path    | Opens detail view and still maintains grid state for back navigation | No state loss                     |
+| 5   | Cluster path               | Clears detail selection and renders grouped thumbnail content        | Grid-first display                |
 
 ## Component Hierarchy
 

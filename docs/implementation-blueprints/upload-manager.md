@@ -7,9 +7,11 @@ This blueprint holds implementation-level details that were moved out of the ele
 ## Source Of Truth
 
 The contract remains in:
+
 - `docs/element-specs/upload-manager.md`
 
 This blueprint may include:
+
 - Extended phase narratives
 - Rich sequence walk-throughs
 - SQL migration examples

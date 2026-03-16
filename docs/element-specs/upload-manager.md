@@ -18,14 +18,14 @@ The Upload Manager is mostly invisible UI infrastructure, but it surfaces as con
 
 ## Actions
 
-| # | Trigger | System Response | Notes |
-| --- | --- | --- | --- |
-| 1 | Any entry point submits files | Creates jobs and batch, starts queued execution | Service-owned lifecycle |
-| 2 | A job starts processing | Runs validation, EXIF parse, dedup, upload, DB write | Max 3 concurrent active jobs |
-| 3 | Geocoding enrichment needed | Runs reverse or forward enrichment as non-blocking phase | Failure remains non-fatal |
-| 4 | Conflict detected | Job pauses in awaiting conflict resolution | Resumes on user decision |
-| 5 | User retries failed job | Requeues from start with new phase transitions | Job id retained |
-| 6 | User cancels job or batch | Stops work and performs cleanup as needed | Emits cancellation events |
+| #   | Trigger                       | System Response                                          | Notes                        |
+| --- | ----------------------------- | -------------------------------------------------------- | ---------------------------- |
+| 1   | Any entry point submits files | Creates jobs and batch, starts queued execution          | Service-owned lifecycle      |
+| 2   | A job starts processing       | Runs validation, EXIF parse, dedup, upload, DB write     | Max 3 concurrent active jobs |
+| 3   | Geocoding enrichment needed   | Runs reverse or forward enrichment as non-blocking phase | Failure remains non-fatal    |
+| 4   | Conflict detected             | Job pauses in awaiting conflict resolution               | Resumes on user decision     |
+| 5   | User retries failed job       | Requeues from start with new phase transitions           | Job id retained              |
+| 6   | User cancels job or batch     | Stops work and performs cleanup as needed                | Emits cancellation events    |
 
 ## Component Hierarchy
 

@@ -16,14 +16,14 @@ The trigger is a larger circular color chip inside project rows and cards. On ho
 
 ## Actions & Interactions
 
-| # | User Action | System Response | Triggers |
-| --- | --- | --- | --- |
-| 1 | Hovers color chip | Shows palette affordance on chip | CSS hover state |
-| 2 | Focuses chip via keyboard | Shows same affordance and focus ring | `:focus-visible` |
-| 3 | Clicks/taps color chip | Opens picker anchored to that project item | `coloringProjectId` |
-| 4 | Clicks "Random brand hue" | Generates and persists `brand-hue-###`, updates chip color in list/card | `ProjectsService.setProjectColor` |
-| 5 | Clicks outside picker | Closes picker without changing color | click outside handler |
-| 6 | Presses Escape while open | Closes picker | escape handler |
+| #   | User Action               | System Response                                                         | Triggers                          |
+| --- | ------------------------- | ----------------------------------------------------------------------- | --------------------------------- |
+| 1   | Hovers color chip         | Shows palette affordance on chip                                        | CSS hover state                   |
+| 2   | Focuses chip via keyboard | Shows same affordance and focus ring                                    | `:focus-visible`                  |
+| 3   | Clicks/taps color chip    | Opens picker anchored to that project item                              | `coloringProjectId`               |
+| 4   | Clicks "Random brand hue" | Generates and persists `brand-hue-###`, updates chip color in list/card | `ProjectsService.setProjectColor` |
+| 5   | Clicks outside picker     | Closes picker without changing color                                    | click outside handler             |
+| 6   | Presses Escape while open | Closes picker                                                           | escape handler                    |
 
 ## Component Hierarchy
 
@@ -50,30 +50,30 @@ flowchart LR
   B --> E[ProjectRow + ProjectCard color chip]
 ```
 
-| Field | Source | Type |
-| --- | --- | --- |
-| `projects.color_key` | `projects` table | `ProjectColorKey` |
-| `selectedColor` | Current project row/card model | `ProjectColorKey` |
-| `coloringProjectId` | Local UI state | `string \| null` |
+| Field                | Source                         | Type              |
+| -------------------- | ------------------------------ | ----------------- |
+| `projects.color_key` | `projects` table               | `ProjectColorKey` |
+| `selectedColor`      | Current project row/card model | `ProjectColorKey` |
+| `coloringProjectId`  | Local UI state                 | `string \| null`  |
 
 Supported keys include semantic values (`clay`, `accent`, `success`, `warning`) and generated brand-hue values (`brand-hue-###`, where ### is 0-359).
 
 ## State
 
-| Name | Type | Default | Controls |
-| --- | --- | --- | --- |
-| `coloringProjectId` | `string \| null` | `null` | Which row/card currently shows an open picker |
-| `projects[].colorKey` | `ProjectColorKey` | `clay` | Current swatch color in list/cards |
+| Name                  | Type              | Default | Controls                                      |
+| --------------------- | ----------------- | ------- | --------------------------------------------- |
+| `coloringProjectId`   | `string \| null`  | `null`  | Which row/card currently shows an open picker |
+| `projects[].colorKey` | `ProjectColorKey` | `clay`  | Current swatch color in list/cards            |
 
 ## File Map
 
-| File | Purpose |
-| --- | --- |
-| `apps/web/src/app/features/projects/projects-page.component.html` | Color chip trigger markup in row/card layouts |
-| `apps/web/src/app/features/projects/projects-page.component.scss` | Trigger sizing, hover affordance, and anchor placement |
-| `apps/web/src/app/features/projects/project-color-picker.component.ts` | Picker option UI and color selection output |
-| `apps/web/src/app/features/projects/projects-page.component.ts` | Open/close + persist color-selection behavior |
-| `apps/web/src/app/features/projects/projects-page.component.spec.ts` | Interaction and overlay behavior tests |
+| File                                                                   | Purpose                                                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------ |
+| `apps/web/src/app/features/projects/projects-page.component.html`      | Color chip trigger markup in row/card layouts          |
+| `apps/web/src/app/features/projects/projects-page.component.scss`      | Trigger sizing, hover affordance, and anchor placement |
+| `apps/web/src/app/features/projects/project-color-picker.component.ts` | Picker option UI and color selection output            |
+| `apps/web/src/app/features/projects/projects-page.component.ts`        | Open/close + persist color-selection behavior          |
+| `apps/web/src/app/features/projects/projects-page.component.spec.ts`   | Interaction and overlay behavior tests                 |
 
 ## Wiring
 

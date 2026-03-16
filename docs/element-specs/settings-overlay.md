@@ -195,6 +195,7 @@ sequenceDiagram
 - **Theme**: active theme mode and persistence behavior.
 - **Notifications**: preference defaults for in-app feedback and alerts.
 - **Language / Locale**: UI language and regional formatting defaults.
+- **Search Tuning**: address/place search filters, ranking weights, penalties, and retry behavior.
 - **Account & Profile**: profile identity fields and account-level controls.
 - **Roles & Permissions**: role-based capability visibility and access constraints.
 - **Data & Storage**: data retention/export/cache/storage defaults.
