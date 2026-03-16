@@ -277,7 +277,9 @@ export class ProjectsPageComponent {
   closeWorkspacePane(): void {
     this.persistWorkspaceContext(this.selectedProjectId());
     this.workspacePaneOpen.set(false);
+    this.selectedProjectId.set(null);
     this.detailImageId.set(null);
+    this.workspaceViewService.selectedProjectIds.set(new Set());
     this.workspaceViewService.clearActiveSelection();
   }
 

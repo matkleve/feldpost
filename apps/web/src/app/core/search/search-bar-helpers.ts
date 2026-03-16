@@ -33,17 +33,19 @@ export function compareRecents(
   right: SearchRecentCandidate,
   activeProjectId?: string,
 ): number {
-  const leftProject = activeProjectId && left.projectId === activeProjectId ? 1 : 0;
-  const rightProject = activeProjectId && right.projectId === activeProjectId ? 1 : 0;
+  const leftProject = projectMatchWeight(left.projectId, activeProjectId);
+  const rightProject = projectMatchWeight(right.projectId, activeProjectId);
   const leftLastUsed = Date.parse(left.lastUsedAt || '') || 0;
   const rightLastUsed = Date.parse(right.lastUsedAt || '') || 0;
   const leftUsage = left.usageCount ?? 1;
   const rightUsage = right.usageCount ?? 1;
 
-  if (leftProject !== rightProject) return rightProject - leftProject;
-  if (leftLastUsed !== rightLastUsed) return rightLastUsed - leftLastUsed;
-  if (leftUsage !== rightUsage) return rightUsage - leftUsage;
-  return left.label.localeCompare(right.label);
+  return (
+    compareNumberDesc(leftProject, rightProject) ||
+    compareNumberDesc(leftLastUsed, rightLastUsed) ||
+    compareNumberDesc(leftUsage, rightUsage) ||
+    left.label.localeCompare(right.label)
+  );
 }
 
 export function computeRecencyDecay(timestampMs: number): number {
@@ -61,24 +63,63 @@ export function computeProximityDecay(
   lng: number,
   context: SearchQueryContext,
 ): number {
-  const distances: number[] = [];
+  const markerScore = context.activeMarkerCentroid
+    ? expDecayMeters(
+        haversineMeters(
+          lat,
+          lng,
+          context.activeMarkerCentroid.lat,
+          context.activeMarkerCentroid.lng,
+        ),
+        1500,
+      )
+    : 0.5;
 
-  if (context.dataCentroid) {
-    distances.push(haversineMeters(lat, lng, context.dataCentroid.lat, context.dataCentroid.lng));
-  }
+  const projectScore = context.activeProjectCentroid
+    ? expDecayMeters(
+        haversineMeters(
+          lat,
+          lng,
+          context.activeProjectCentroid.lat,
+          context.activeProjectCentroid.lng,
+        ),
+        5000,
+      )
+    : 0.5;
 
-  if (context.viewportBounds) {
-    const centerLat = (context.viewportBounds.north + context.viewportBounds.south) / 2;
-    const centerLng = (context.viewportBounds.east + context.viewportBounds.west) / 2;
-    distances.push(haversineMeters(lat, lng, centerLat, centerLng));
-  }
+  const userScore = context.currentLocation
+    ? expDecayMeters(
+        haversineMeters(lat, lng, context.currentLocation.lat, context.currentLocation.lng),
+        8000,
+      )
+    : 0.5;
 
-  if (distances.length === 0) {
-    return 1;
-  }
+  const viewportScore = context.viewportBounds
+    ? expDecayMeters(
+        haversineMeters(
+          lat,
+          lng,
+          (context.viewportBounds.north + context.viewportBounds.south) / 2,
+          (context.viewportBounds.east + context.viewportBounds.west) / 2,
+        ),
+        6000,
+      )
+    : 0.5;
 
-  const minDistanceMeters = Math.min(...distances);
-  return 1 / (1 + minDistanceMeters / 6000);
+  const dataScore = context.dataCentroid
+    ? expDecayMeters(
+        haversineMeters(lat, lng, context.dataCentroid.lat, context.dataCentroid.lng),
+        9000,
+      )
+    : 0.5;
+
+  return (
+    markerScore * 0.3 +
+    projectScore * 0.25 +
+    userScore * 0.2 +
+    viewportScore * 0.15 +
+    dataScore * 0.1
+  );
 }
 
 export function computeCountryBoost(result: GeocoderSearchResult, countryCodes?: string[]): number {
@@ -103,6 +144,69 @@ export function distanceToCentroidMeters(
   return haversineMeters(candidate.lat, candidate.lng, centroid.lat, centroid.lng);
 }
 
+export function distanceToSearchContextMeters(
+  candidate: SearchAddressCandidate,
+  context: SearchQueryContext,
+): number {
+  const distances: number[] = [];
+
+  if (context.activeMarkerCentroid) {
+    distances.push(
+      haversineMeters(
+        candidate.lat,
+        candidate.lng,
+        context.activeMarkerCentroid.lat,
+        context.activeMarkerCentroid.lng,
+      ),
+    );
+  }
+
+  if (context.activeProjectCentroid) {
+    distances.push(
+      haversineMeters(
+        candidate.lat,
+        candidate.lng,
+        context.activeProjectCentroid.lat,
+        context.activeProjectCentroid.lng,
+      ),
+    );
+  }
+
+  if (context.currentLocation) {
+    distances.push(
+      haversineMeters(
+        candidate.lat,
+        candidate.lng,
+        context.currentLocation.lat,
+        context.currentLocation.lng,
+      ),
+    );
+  }
+
+  if (context.dataCentroid) {
+    distances.push(
+      haversineMeters(
+        candidate.lat,
+        candidate.lng,
+        context.dataCentroid.lat,
+        context.dataCentroid.lng,
+      ),
+    );
+  }
+
+  if (context.viewportBounds) {
+    const centerLat = (context.viewportBounds.north + context.viewportBounds.south) / 2;
+    const centerLng = (context.viewportBounds.east + context.viewportBounds.west) / 2;
+    distances.push(haversineMeters(candidate.lat, candidate.lng, centerLat, centerLng));
+  }
+
+  if (distances.length === 0) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return Math.min(...distances);
+}
+
 export function haversineMeters(
   leftLat: number,
   leftLng: number,
@@ -123,6 +227,19 @@ export function haversineMeters(
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return earthRadiusMeters * c;
+}
+
+function expDecayMeters(distanceMeters: number, tauMeters: number): number {
+  return Math.exp(-distanceMeters / tauMeters);
+}
+
+function compareNumberDesc(left: number, right: number): number {
+  return right - left;
+}
+
+function projectMatchWeight(projectId: string | undefined, activeProjectId?: string): number {
+  if (!activeProjectId) return 0;
+  return projectId === activeProjectId ? 1 : 0;
 }
 
 export function normalizeStreetPart(street: string | null): string | null {

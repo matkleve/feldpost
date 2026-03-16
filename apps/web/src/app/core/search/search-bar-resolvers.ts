@@ -10,7 +10,7 @@ import {
   SearchQueryContext,
 } from './search.models';
 import { computeTextMatchScore } from './search-query';
-import { distanceToCentroidMeters, isInViewport, toSizeSignal } from './search-bar-helpers';
+import { distanceToSearchContextMeters, isInViewport, toSizeSignal } from './search-bar-helpers';
 
 interface DbContentRow {
   id: string;
@@ -180,9 +180,9 @@ export async function fetchGeocoderCandidates(
       const rightLocal = isInViewport(right, context.viewportBounds);
       if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
 
-      const leftNearData = distanceToCentroidMeters(left, context.dataCentroid);
-      const rightNearData = distanceToCentroidMeters(right, context.dataCentroid);
-      if (leftNearData !== rightNearData) return leftNearData - rightNearData;
+      const leftNearContext = distanceToSearchContextMeters(left, context);
+      const rightNearContext = distanceToSearchContextMeters(right, context);
+      if (leftNearContext !== rightNearContext) return leftNearContext - rightNearContext;
 
       const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
       if (scoreDelta !== 0) return scoreDelta;
