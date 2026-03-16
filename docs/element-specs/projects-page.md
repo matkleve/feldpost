@@ -1,5 +1,7 @@
 # Projects Page
 
+> **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+
 ## What It Is
 
 A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. The page reuses the same Search Bar component pattern used on the map page, but the query algorithm is different: it searches across images and metadata and returns grouped project-level result counts.
@@ -202,6 +204,17 @@ Search behavior on this page is explicitly aggregation-first: query images, then
 - [ ] Loading state appears during initial fetch and refresh operations.
 - [ ] Center content rail is horizontally centered and capped at max-width 70rem (1120px).
 - [ ] Mobile layout is single-column with accessible touch targets.
+- [ ] [PPW-1] Selecting a project opens the workspace pane in place while remaining on `/projects`.
+- [ ] [PPW-2] Selecting a project-scoped thumbnail opens image details for that scoped image.
+- [ ] [PPW-3] Using the image-details map action navigates to `/map` and focuses the exact selected photo location.
+- [ ] [PPW-4] Closing the workspace pane preserves Projects page search/filter/view mode state.
+- [ ] [PPW-5] Re-opening the same project restores prior project-scoped browsing context (including prior subview and scroll position).
+
+## Use Cases
+
+> **Full use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+
+The scenarios in this use-case document define the expected behavior for project selection, project-scoped workspace browsing, map handoff, and state persistence on `/projects`.
 
 ## Settings
 

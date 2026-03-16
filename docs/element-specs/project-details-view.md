@@ -1,5 +1,7 @@
 # Project Details View
 
+> **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+
 ## What It Is
 
 A project-scoped workspace detail mode inside the Projects Page. It opens when a project is selected and reuses the existing workspace/image-detail experience to browse only that project's photos while remaining on `/projects`.
@@ -88,8 +90,15 @@ ProjectsPage (host route)
 
 ## Acceptance Criteria
 
-- [ ] Clicking a project in `/projects` opens project details in the workspace pane without leaving `/projects`.
+- [ ] [PPW-1] Clicking a project in `/projects` opens project details in the workspace pane without leaving `/projects`.
 - [ ] Existing workspace grid/collection and image details components are reused (no duplicate implementations).
-- [ ] Workspace content is filtered to the selected project photos.
-- [ ] Image details map button navigates to `/map` and zooms/focuses the selected photo location.
-- [ ] Closing the workspace pane preserves prior projects-page search/filter/view-mode state.
+- [ ] [PPW-2] Workspace content is filtered to the selected project photos and thumbnail selection opens image details for that scoped image.
+- [ ] [PPW-3] Image details map button navigates to `/map` and zooms/focuses the exact selected photo location.
+- [ ] [PPW-4] Closing the workspace pane preserves prior projects-page search/filter/view-mode state.
+- [ ] [PPW-5] Re-opening the same project restores prior project-scoped browsing context (including prior subview and scroll position).
+
+## Use Cases
+
+> **Full use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+
+This element must satisfy the project-scoped workspace scenarios in that document, including opening from a project row, browsing thumbnails, map handoff, and pane-close state preservation.
