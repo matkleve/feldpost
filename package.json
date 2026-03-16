@@ -1,4 +1,15 @@
 {
+  "name": "feldpost",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "test": "npm run test --workspace=apps/web",
+    "lint": "npm run lint --workspace=apps/web"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0"
   }
