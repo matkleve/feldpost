@@ -6,20 +6,9 @@
            expands right on hover to show icon + label (150 ms ease-out).
   Mobile:  full-width bottom tab bar (unchanged behaviour).
 -->
-<nav
-  class="sidebar"
-  aria-label="Main navigation"
-  (mouseenter)="refreshSettingsOverlayPosition()"
-  (mouseleave)="onSidebarLeave()"
->
-  <span
-    class="sidebar__overlay-anchor"
-    cdkOverlayOrigin
-    #settingsOverlayOrigin="cdkOverlayOrigin"
-  ></span>
-
+<nav class="sidebar" aria-label="Main navigation">
   <!-- Desktop sidebar panel -->
-  <div class="sidebar__panel ui-container" (transitionend)="refreshSettingsOverlayPosition()">
+  <div class="sidebar__panel ui-container">
     <ul class="nav__list" role="list">
       @for (item of navItems; track item.route) {
         <li class="sidebar__item">
@@ -82,12 +71,6 @@
       </li>
     </ul>
   </div>
-
-  <ss-settings-overlay
-    [origin]="settingsOverlayOrigin"
-    [open]="settingsOverlayOpen()"
-    (openChange)="onSettingsOverlayOpenChange($event)"
-  />
 
   <span id="nav-disabled-tip" class="nav__sr-only">This feature is coming soon.</span>
 </nav>

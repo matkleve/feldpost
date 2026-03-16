@@ -6,10 +6,12 @@ import { NavComponent } from './features/nav/nav.component';
 import { ToastContainerComponent } from './core/toast-container.component';
 import { LocationResolverService } from './core/location-resolver.service';
 import { AuthService } from './core/auth.service';
+import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
+import { SettingsPaneService } from './core/settings-pane.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavComponent, ToastContainerComponent],
+  imports: [RouterOutlet, NavComponent, SettingsOverlayComponent, ToastContainerComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -17,6 +19,7 @@ export class App implements OnInit {
   private readonly router = inject(Router);
   private readonly locationResolver = inject(LocationResolverService);
   private readonly auth = inject(AuthService);
+  private readonly settingsPaneService = inject(SettingsPaneService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -28,6 +31,11 @@ export class App implements OnInit {
   );
 
   readonly showNav = computed(() => !this.currentUrl().startsWith('/auth'));
+  readonly settingsOverlayOpen = this.settingsPaneService.open;
+
+  onSettingsOverlayOpenChange(open: boolean): void {
+    this.settingsPaneService.setOpen(open);
+  }
 
   ngOnInit(): void {
     // Start background location resolution once the user is authenticated.

@@ -1,18 +1,18 @@
 :host {
+  display: contents;
   --settings-overlay-width: min(70rem, calc(100vw - (var(--container-inset) * 4)));
   --settings-overlay-height: min(44rem, calc(100vh - (var(--container-inset) * 2)));
   --settings-overlay-left-width: clamp(17rem, 24vw, 21rem);
   --settings-overlay-right-width: minmax(0, 1fr);
 }
 
-:host ::ng-deep .cdk-overlay-pane.settings-overlay-panel {
-  z-index: calc(var(--z-panel) - 10);
-  pointer-events: none;
-}
-
 .settings-overlay {
   position: relative;
-  pointer-events: auto;
+  position: fixed;
+  top: 50%;
+  left: calc(var(--container-inset) + var(--layout-sidebar-width-collapsed) + var(--spacing-3));
+  transform: translateY(-50%);
+  z-index: 1;
   width: var(--settings-overlay-width);
   max-width: var(--settings-overlay-width);
   min-height: 26rem;
@@ -363,11 +363,6 @@
   background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
 }
 
-:host ::ng-deep .settings-overlay-backdrop {
-  background: color-mix(in srgb, var(--color-bg-base) 40%, transparent);
-  z-index: calc(var(--z-panel) - 11);
-}
-
 @media (max-width: 63.9375rem) {
   .settings-overlay {
     width: min(46rem, calc(100vw - (var(--container-inset) * 2)));
@@ -384,6 +379,7 @@
 
 @media (max-width: 47.9375rem) {
   .settings-overlay {
+    left: var(--container-inset);
     width: calc(100vw - (var(--container-inset) * 2));
     max-height: calc(100vh - (var(--container-inset) * 2));
   }
