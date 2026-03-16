@@ -66,6 +66,12 @@ At the bottom: "+ New property" row. Clicking opens an inline creation form:
 
 A compact floating dropdown (12rem / 192px wide) showing available properties. Search input at top. Click a property to add it to the image (creates an `image_metadata` row with empty value). Properties already on the image are grayed out.
 
+## Where It Lives
+
+- Route: `/settings` for full property management
+- Parent: `SettingsPage` and `ImageDetailViewComponent` metadata area
+- Appears when: User opens Settings -> Properties or uses `+ Add a property` in image detail
+
 ## Actions
 
 | #   | User Action                                  | System Response                                                             | Triggers                      |

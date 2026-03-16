@@ -1,10 +1,10 @@
-import { Component, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
     selector: 'app-pane-header',
     template: `
         <div class="pane-header">
-            <span class="pane-header__title">Workspace</span>
+            <span class="pane-header__title">{{ title() }}</span>
             <button
                 class="pane-header__close-btn"
                 type="button"
@@ -19,5 +19,6 @@ import { Component, output } from '@angular/core';
     styleUrl: './pane-header.component.scss',
 })
 export class PaneHeaderComponent {
+    readonly title = input('Workspace');
     readonly close = output<void>();
 }

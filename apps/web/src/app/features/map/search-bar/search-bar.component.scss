@@ -18,6 +18,15 @@
   }
 }
 
+:host(.search-bar-host--projects) {
+  position: static;
+  top: auto;
+  left: auto;
+  z-index: auto;
+  width: 100%;
+  transform: none;
+}
+
 .search-bar {
   --ui-container-radius: var(--container-radius-panel);
   --search-bar-padding-inline: var(--ui-container-padding-inline);

@@ -32,12 +32,14 @@ Full-width page with a header row: title "Projects", total project count, and a 
 | 9   | Opens row menu and clicks Archive  | Asks confirmation, then archives project (not hard delete)                                                             | Supabase update                  |
 | 10  | Uses status filter                 | Restricts grouped results to Active or Archived projects                                                               | `statusFilter` state             |
 | 11  | Toggles view mode                  | Switches between List and Cards layouts without losing search/filter/sort state                                        | `viewMode` state                 |
-| 12  | Clicks "Open in workspace"         | Opens the same in-page workspace pane scoped to that project (no route change)                                         | Shared open action               |
-| 13  | Clicks map button in image details | Navigates to `/map` and zooms to the selected image location                                                           | Router + map focus payload       |
-| 14  | Opens Grouping dropdown            | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                   | Projects operator profile        |
-| 15  | Activates one or more groupings    | Renders explicit group headers and nests project rows/cards under those sections                                       | `activeGroupings` state          |
-| 16  | Opens Sort dropdown                | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys)   | Projects operator profile        |
-| 17  | Changes sort direction             | Reorders grouped or flat project result set deterministically                                                          | `activeProjectSorts` state       |
+| 12  | Hovers project color chip           | Shows a palette affordance on the chip so users discover color editing without opening menus                            | Card/list color-chip hover state |
+| 13  | Clicks project color chip           | Opens anchored color picker with semantic project colors                                                                 | `coloringProjectId` state        |
+| 14  | Opens workspace from project card/row | Opens pane with title set to selected project name instead of generic "Workspace"                                      | `workspacePaneTitle` computed    |
+| 15  | Clicks map button in image details | Navigates to `/map` and zooms to the selected image location                                                           | Router + map focus payload       |
+| 16  | Opens Grouping dropdown            | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                   | Projects operator profile        |
+| 17  | Activates one or more groupings    | Renders explicit group headers and nests project rows/cards under those sections                                       | `activeGroupings` state          |
+| 18  | Opens Sort dropdown                | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys)   | Projects operator profile        |
+| 19  | Changes sort direction             | Reorders grouped or flat project result set deterministically                                                          | `activeProjectSorts` state       |
 
 ### Interaction Flowchart
 
@@ -61,12 +63,13 @@ flowchart TD
 	I3 --> K{Row action}
 	I4 --> K{Row action}
 	J --> K
-	K -- Open in workspace --> L[Open in-page workspace pane + apply project scope]
+	K -- Row/Card click --> L[Open in-page workspace pane + apply project scope]
 	K -- Rename --> M[Inline edit and persist]
-	K -- Color --> N[Assign semantic color token]
-	K -- Archive --> O[Confirm and archive]
-	L --> P{Image details map action}
-	P -- Clicked --> Q[Navigate to /map and zoom to image]
+	K -- Color chip hover --> N[Show palette affordance]
+	N --> O[Color chip click opens anchored picker]
+	O --> P[Assign semantic color token]
+	L --> Q{Image details map action}
+	Q -- Clicked --> R[Navigate to /map and zoom to image]
 ```
 
 ### View Mode State
@@ -117,8 +120,8 @@ ProjectsPage                                ← route root, full width
 │   │   │       ├── MatchingCountMeta          ← "5 results" for current search query
 │   │   │       ├── ImageCountMeta             ← total photos
 │   │   │       ├── LastActivityMeta           ← relative date
-│   │   │       ├── OpenInWorkspaceButton      ← map shortcut
-│   │   │       └── RowMenu                    ← Rename, Color, Archive
+│   │   │       ├── ProjectColorChipButton     ← larger token chip, hover palette affordance, click opens picker
+│   │   │       └── RowActions                 ← Rename, Archive
 │   │   └── [no grouping] ProjectRow (.ui-item) × N
 │   └── [viewMode=cards] ProjectsCardGrid      ← responsive grid, cards share stable info zones
 │       └── ProjectCard × N
@@ -126,11 +129,12 @@ ProjectsPage                                ← route root, full width
 │           ├── ProjectName                    ← primary label
 │           ├── MatchingCountBadge             ← query-specific count (e.g., "5 results")
 │           ├── ProjectMeta                    ← total count + status + updated
-│           ├── OpenInWorkspaceButton
-│           └── CardMenu                        ← Rename, Color, Archive
+│           ├── ProjectColorChipButton          ← larger token chip, hover palette affordance, click opens picker
+│           └── CardActions                     ← Rename, Archive
 ├── [projectSelected] WorkspacePaneComponent    ← in-page details surface, no route change
 │   ├── ProjectScopedPhotoGrid                  ← selected project photos
 │   └── ImageDetailView                          ← includes MapButton to `/map`
+│   └── WorkspacePaneTitleBinding                ← shows selected project name
 ├── [loading] ProjectsLoadingState           ← skeleton rows
 └── [empty] ProjectsEmptyState               ← guidance + CTA
 ```
@@ -159,7 +163,7 @@ flowchart LR
 | Search matches by project | RPC/search service: image-level query joined with project IDs, grouped by `project_id`      | `Record<string, number>`                |
 | Search fields             | `images.title`, `images.address_label`, custom metadata key/value pairs (`metadata_values`) | `string` query against normalized index |
 
-`color_key` is a semantic project color token key (for example `clay`, `accent`, `success`, `warning`) and maps to existing design tokens. Do not store arbitrary hex values.
+`color_key` accepts semantic keys (`clay`, `accent`, `success`, `warning`) and temporary generated brand-hue keys in the format `brand-hue-###` (0-359) used by the one-click random color action.
 Search behavior on this page is explicitly aggregation-first: query images, then group by project; it is not a simple project-name-only filter.
 
 ### Projects Operator Profile
@@ -255,7 +259,13 @@ sequenceDiagram
 - [x] Each project can be assigned a semantic color token and the color is visible in list and card presentations.
 - [x] Archive requires confirmation and removes project from Active view.
 - [x] Clicking project row opens in-page workspace details scoped to that project without leaving `/projects`.
-- [x] "Open in workspace" opens the same in-page workspace details behavior as row click.
+- [x] Project row/list item click opens the in-page workspace details behavior.
+- [x] Card click opens the same in-page workspace details behavior.
+- [ ] Project color chip is visually larger than status dots and remains readable at a glance.
+- [ ] Hovering the color chip reveals a palette affordance without opening the picker.
+- [ ] Clicking the color chip opens a dedicated anchored color picker.
+- [ ] Temporary picker variant offers one dropdown-style action to assign a random brand hue (`brand-hue-###`).
+- [ ] Opening workspace from a project shows the project name as pane title.
 - [x] Image-details map action from project-scoped workspace navigates to `/map` and zooms to the selected photo location.
 - [x] Empty state appears when no projects match current filters.
 - [x] Loading state appears during initial fetch and refresh operations.

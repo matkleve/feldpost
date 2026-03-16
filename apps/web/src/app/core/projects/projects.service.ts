@@ -161,21 +161,12 @@ export class ProjectsService {
   }
 
   async setProjectColor(projectId: string, colorKey: ProjectColorKey): Promise<boolean> {
-    const preferred = await this.supabase.client
+    const { error } = await this.supabase.client
       .from('projects')
       .update({ color_key: colorKey, updated_at: new Date().toISOString() })
       .eq('id', projectId);
 
-    if (!preferred.error) {
-      return true;
-    }
-
-    const fallback = await this.supabase.client
-      .from('projects')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', projectId);
-
-    return !fallback.error;
+    return !error;
   }
 
   async loadProjectWorkspaceImages(projectId: string): Promise<ProjectScopedWorkspaceImage[]> {
@@ -253,6 +244,15 @@ export class ProjectsService {
     if (value === 'accent' || value === 'success' || value === 'warning' || value === 'clay') {
       return value;
     }
+
+    const brandHueMatch = value?.match(/^brand-hue-(\d{1,3})$/);
+    if (brandHueMatch) {
+      const hue = Number.parseInt(brandHueMatch[1], 10);
+      if (Number.isFinite(hue) && hue >= 0 && hue <= 359) {
+        return `brand-hue-${hue}`;
+      }
+    }
+
     return DEFAULT_PROJECT_COLOR;
   }
 

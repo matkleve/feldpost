@@ -4,6 +4,59 @@
 
 This document describes the complete data flow and component interaction for the Workspace Pane's view system: how images are loaded, grouped, sorted, filtered, and displayed. It covers the cluster-click flow, the toolbar controls, and the `WorkspaceViewService` that orchestrates everything.
 
+## What It Is
+
+The Workspace View System is the orchestration layer that transforms raw image data into the rendered workspace content model (sections, groups, and ordered thumbnails). It coordinates map-originated image loading with toolbar-driven grouping, sorting, and filtering.
+
+## What It Looks Like
+
+Users experience this system as a responsive workspace pane that immediately opens with image content after marker interactions. Group headers, thumbnail sections, and detail-view transitions reflect a deterministic pipeline: load raw images, apply filters, apply sort, apply grouping, then render. Toolbar controls update the same underlying model, so visible content stays consistent across single-photo and cluster flows.
+
+## Where It Lives
+
+- Route: `/`
+- Parent: `MapShellComponent` and `WorkspacePane`
+- Core orchestrator: `WorkspaceViewService`
+- Triggered by: marker clicks, toolbar state changes, and active project/filter context
+
+## Actions
+
+| # | Trigger | System Response | Notes |
+| --- | --- | --- | --- |
+| 1 | User clicks marker/cluster | Loads cluster images via RPC and sets raw image list | Single and cluster share pipeline |
+| 2 | Raw list updates | Applies filter, sort, and grouping pipeline | Deterministic order |
+| 3 | Toolbar control changes | Recomputes output sections without reloading unchanged raw data | Reactive updates |
+| 4 | Single image click path | Opens detail view and still maintains grid state for back navigation | No state loss |
+| 5 | Cluster path | Clears detail selection and renders grouped thumbnail content | Grid-first display |
+
+## Component Hierarchy
+
+```
+MapShellComponent
+├── Map Zone
+├── WorkspacePane
+│   ├── WorkspaceToolbar
+│   │   ├── GroupingDropdown
+│   │   ├── FilterDropdown
+│   │   ├── SortDropdown
+│   │   └── ProjectsDropdown
+│   └── WorkspaceContent
+│       ├── GroupHeader(s)
+│       └── ThumbnailGrid
+└── WorkspaceViewService (orchestration)
+    ├── Raw image state
+    ├── FilterService integration
+    ├── Sorting stage
+    └── Grouping stage
+```
+
+## Acceptance Criteria
+
+- [ ] Marker and cluster interactions always produce a valid workspace content model.
+- [ ] Pipeline order remains filter -> sort -> group before render.
+- [ ] Toolbar changes update workspace output consistently without full app reload.
+- [ ] Single-image and cluster flows preserve deterministic behavior across back-navigation.
+
 ---
 
 ## 1. System Architecture
