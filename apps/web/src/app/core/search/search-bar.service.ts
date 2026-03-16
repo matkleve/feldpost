@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, from, of } from 'rxjs';
+import { Observable, catchError, from, of, tap } from 'rxjs';
 import { SupabaseService } from '../supabase.service';
 import {
   GeocodingService,
@@ -22,6 +22,14 @@ import {
   buildFallbackQueries,
   toNumber,
 } from './search-query';
+import {
+  clamp01,
+  computeGeocoderTextScore,
+  computeGeocoderWeightedScore,
+  computeShortPrefixNoisePenalty,
+  isCandidateInViewport,
+} from './search-geocoder-scoring';
+import { logGeocoderDiagnostics } from './search-debug';
 import { fetchDbContentCandidates, fetchGeocoderCandidates } from './search-bar-resolvers';
 import {
   AddressGroup,
@@ -31,8 +39,6 @@ import {
   computeCountryBoost,
   computeProximityDecay,
   computeRecencyDecay,
-  distanceToCentroidMeters,
-  isInViewport,
   normalizeStreetPart,
   sanitizeRecentLabel,
   toSizeSignal,
@@ -210,6 +216,7 @@ export class SearchBarService {
 
     return from(this.fetchGeocoderCandidates(normalizedQuery, context)).pipe(
       catchError(() => of([])),
+      tap((results) => logGeocoderDiagnostics(query, normalizedQuery, context, results)),
     );
   }
 
@@ -365,9 +372,24 @@ export class SearchBarService {
     const formatted = this.formatAddressLabel(result);
     const isPoi =
       result.name != null && result.address?.road != null && result.name !== result.address.road;
-    const proximityDecay = computeProximityDecay(result.lat, result.lng, context);
+
+    const primaryLabel = isPoi ? result.name! : formatted;
+    const textScore = computeGeocoderTextScore(primaryLabel, formatted, query);
+    const geoScore = computeProximityDecay(result.lat, result.lng, context);
     const countryBoost = computeCountryBoost(result, context.countryCodes);
-    const score = (result.importance || 0) * proximityDecay * countryBoost;
+    const countryScore = countryBoost > 1 ? 1 : countryBoost < 1 ? 0 : 0.5;
+    const qualityScore = clamp01(result.importance || 0);
+
+    const inViewport = isCandidateInViewport(primaryLabel, result.lat, result.lng, context);
+    const noisePenalty = computeShortPrefixNoisePenalty(query, textScore, inViewport, countryBoost);
+    const weightedScore = computeGeocoderWeightedScore(
+      textScore,
+      geoScore,
+      qualityScore,
+      countryScore,
+      noisePenalty,
+    );
+    const score = clamp01(weightedScore);
 
     return {
       id: `geo-${query}-${index}`,
@@ -377,6 +399,10 @@ export class SearchBarService {
       secondaryLabel: isPoi ? formatted : undefined,
       lat: result.lat,
       lng: result.lng,
+      textScore,
+      geoScore,
+      qualityScore,
+      noisePenalty,
       score,
     };
   }
