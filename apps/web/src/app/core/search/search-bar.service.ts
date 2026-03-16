@@ -53,12 +53,14 @@ const MAX_DB_ADDRESS_ROWS = 24;
 const MAX_DB_ADDRESS_RESULTS = 5;
 const MAX_DB_CONTENT_RESULTS = 6;
 const MAX_GEOCODER_RESULTS = 3;
+const CONTEXT_CITY_CACHE_TTL_MS = 10 * 60 * 1000;
+const MIN_CITY_HINT_STEM_LENGTH = 3;
+const MAX_CITY_HINT_STEMS = 4;
 
 interface DbAddressRow {
   id: string;
   address_label: string | null;
   street: string | null;
-  postcode: string | null;
   city: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
@@ -77,6 +79,10 @@ export class SearchBarService {
   private readonly geocodingService = inject(GeocodingService);
 
   private readonly ghostTrie = new GhostTrie();
+  private readonly contextCityCache = new Map<
+    string,
+    { value: string | null; expiresAt: number }
+  >();
 
   detectCoordinates(input: string): DetectedCoordinates | null {
     return detectCoordinates(input);
@@ -226,7 +232,7 @@ export class SearchBarService {
       },
     });
 
-    return from(this.fetchGeocoderCandidates(normalizedQuery, context)).pipe(
+    return from(this.fetchGeocoderCandidatesWithCityHint(normalizedQuery, context)).pipe(
       catchError((error) => {
         logSearchEvent('geocoder-error', {
           query,
@@ -253,7 +259,7 @@ export class SearchBarService {
 
     let request = this.supabaseService.client
       .from('images')
-      .select('id,address_label,street,postcode,city,latitude,longitude,project_id,created_at')
+      .select('id,address_label,street,city,latitude,longitude,project_id,created_at')
       .ilike('address_label', `*${trimmedQuery}*`)
       .not('address_label', 'is', null)
       .not('latitude', 'is', null)
@@ -266,7 +272,19 @@ export class SearchBarService {
 
     const response = await request;
 
-    if (response.error || !Array.isArray(response.data)) return [];
+    if (response.error) {
+      logSearchEvent('db-address-error', {
+        query: trimmedQuery,
+        context: {
+          organizationId: context.organizationId,
+          activeProjectId: context.activeProjectId,
+        },
+        error: this.describeDbAddressError(response.error),
+      });
+      return [];
+    }
+
+    if (!Array.isArray(response.data)) return [];
 
     const grouped = this.groupAddressRows(response.data as DbAddressRow[], trimmedQuery, context);
     return this.rankedAddressCandidates(grouped, context);
@@ -288,7 +306,7 @@ export class SearchBarService {
       const label = formatDbAddressLabel(
         rawLabel,
         normalizeStreetPart(row.street),
-        buildCityPart(row.postcode, row.city),
+        buildCityPart(null, row.city),
       );
       const key = label.toLowerCase();
       const textMatch = computeTextMatchScore(label, trimmedQuery);
@@ -381,6 +399,145 @@ export class SearchBarService {
     );
   }
 
+  private async fetchGeocoderCandidatesWithCityHint(
+    normalizedQuery: string,
+    context: SearchQueryContext,
+  ): Promise<SearchAddressCandidate[]> {
+    const strictCandidates = await this.fetchGeocoderCandidates(normalizedQuery, context);
+
+    if (strictCandidates.length > 0) {
+      return strictCandidates;
+    }
+
+    if (normalizedQuery.length < 4 || normalizedQuery.includes(' ')) {
+      return strictCandidates;
+    }
+
+    const cityHint = await this.resolveContextCityHint(context);
+    if (!cityHint) {
+      return strictCandidates;
+    }
+
+    const hintedQueries = this.buildCityHintQueries(normalizedQuery, cityHint);
+
+    for (const hintedQuery of hintedQueries) {
+      const hintedCandidates = await this.fetchGeocoderCandidates(hintedQuery, context);
+      const refinedCandidates = hintedCandidates.filter((candidate) =>
+        this.matchesOriginalPrefix(candidate.label, normalizedQuery),
+      );
+
+      if (refinedCandidates.length === 0) {
+        continue;
+      }
+
+      logSearchEvent('geocoder-city-hint-retry', {
+        query: normalizedQuery,
+        cityHint,
+        hintedQuery,
+        count: refinedCandidates.length,
+      });
+
+      return refinedCandidates.map((candidate, index) => ({
+        ...candidate,
+        id: `geo-${normalizedQuery}-cityhint-${index}`,
+        stableId:
+          candidate.stableId ??
+          `geo-${candidate.lat.toFixed(6)}-${candidate.lng.toFixed(6)}-cityhint-${index}`,
+      }));
+    }
+
+    return strictCandidates;
+  }
+
+  private buildCityHintQueries(normalizedQuery: string, cityHint: string): string[] {
+    const normalizedCityHint = normalizeSearchQuery(cityHint);
+    if (!normalizedCityHint) {
+      return [];
+    }
+
+    const aliases = this.cityHintAliases(normalizedCityHint);
+    const stems = this.buildCityHintStems(normalizedQuery);
+    const queries = new Set<string>();
+
+    for (const stem of stems) {
+      for (const hint of aliases) {
+        const hintedQuery = normalizeSearchQuery(`${stem} ${hint}`);
+        if (hintedQuery && hintedQuery !== normalizedQuery) {
+          queries.add(hintedQuery);
+        }
+      }
+    }
+
+    return [...queries];
+  }
+
+  private buildCityHintStems(normalizedQuery: string): string[] {
+    const stems = new Set<string>();
+    if (!normalizedQuery || normalizedQuery.includes(' ')) {
+      stems.add(normalizedQuery);
+      return [...stems];
+    }
+
+    stems.add(normalizedQuery);
+
+    let current = normalizedQuery;
+    while (current.length > MIN_CITY_HINT_STEM_LENGTH && stems.size < MAX_CITY_HINT_STEMS) {
+      current = current.slice(0, -1);
+      if (current.length >= MIN_CITY_HINT_STEM_LENGTH) {
+        stems.add(current);
+      }
+    }
+
+    return [...stems];
+  }
+
+  private matchesOriginalPrefix(label: string, normalizedQuery: string): boolean {
+    const normalizedLabel = normalizeSearchQuery(label);
+    if (!normalizedLabel || !normalizedQuery) {
+      return false;
+    }
+
+    if (normalizedLabel.includes(normalizedQuery)) {
+      return true;
+    }
+
+    const parts = normalizedLabel.split(/\s+/).filter(Boolean);
+    return parts.some((part) => part.startsWith(normalizedQuery));
+  }
+
+  private cityHintAliases(cityHint: string): string[] {
+    const aliases = new Set<string>([cityHint]);
+
+    if (cityHint === 'vienna') aliases.add('wien');
+    if (cityHint === 'wien') aliases.add('vienna');
+
+    return [...aliases];
+  }
+
+  private async resolveContextCityHint(context: SearchQueryContext): Promise<string | null> {
+    const coordinateSource =
+      context.currentLocation ?? context.activeProjectCentroid ?? context.activeMarkerCentroid;
+    if (!coordinateSource) {
+      return null;
+    }
+
+    const cacheKey = `${coordinateSource.lat.toFixed(2)},${coordinateSource.lng.toFixed(2)}`;
+    const cached = this.contextCityCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value;
+    }
+
+    const reverse = await this.geocodingService.reverse(coordinateSource.lat, coordinateSource.lng);
+    const cityHint = reverse?.city?.trim() || null;
+
+    this.contextCityCache.set(cacheKey, {
+      value: cityHint,
+      expiresAt: Date.now() + CONTEXT_CITY_CACHE_TTL_MS,
+    });
+
+    return cityHint;
+  }
+
   private toGeocoderCandidate(
     result: GeocoderSearchResult,
     query: string,
@@ -470,5 +627,33 @@ export class SearchBarService {
 
   private getStorage(): Storage | null {
     return typeof window === 'undefined' ? null : window.localStorage;
+  }
+
+  private describeDbAddressError(error: unknown): {
+    code: string | null;
+    message: string;
+    details: string | null;
+    hint: string | null;
+    status: number | null;
+  } {
+    const candidate =
+      typeof error === 'object' && error !== null
+        ? (error as {
+            code?: unknown;
+            message?: unknown;
+            details?: unknown;
+            hint?: unknown;
+            status?: unknown;
+          })
+        : null;
+
+    return {
+      code: typeof candidate?.code === 'string' ? candidate.code : null,
+      message:
+        typeof candidate?.message === 'string' ? candidate.message.slice(0, 300) : String(error),
+      details: typeof candidate?.details === 'string' ? candidate.details.slice(0, 300) : null,
+      hint: typeof candidate?.hint === 'string' ? candidate.hint.slice(0, 300) : null,
+      status: typeof candidate?.status === 'number' ? candidate.status : null,
+    };
   }
 }

@@ -12,7 +12,6 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { FilterService } from '../../core/filter.service';
-import { PropertyRegistryService } from '../../core/property-registry.service';
 import type {
   ProjectColorKey,
   ProjectListItem,
@@ -21,23 +20,81 @@ import type {
   ProjectsViewMode,
   ProjectsWorkspaceContext,
 } from '../../core/projects/projects.types';
-import type { PropertyRef, SortConfig } from '../../core/workspace-view.types';
+import type { FilterRule, SortConfig } from '../../core/workspace-view.types';
 import { WorkspaceViewService } from '../../core/workspace-view.service';
 import { SearchBarComponent } from '../map/search-bar/search-bar.component';
 import { DragDividerComponent } from '../map/workspace-pane/drag-divider/drag-divider.component';
+import { GroupHeaderComponent } from '../map/workspace-pane/group-header.component';
 import { WorkspacePaneComponent } from '../map/workspace-pane/workspace-pane.component';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
 } from '../map/workspace-pane/workspace-toolbar/grouping-dropdown.component';
-import { FilterDropdownComponent } from '../map/workspace-pane/workspace-toolbar/filter-dropdown.component';
-import { SortDropdownComponent } from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
-import { ProjectCardComponent } from './project-card.component';
+import {
+  FilterDropdownComponent,
+  type FilterDropdownPropertyOption,
+} from '../map/workspace-pane/workspace-toolbar/filter-dropdown.component';
+import {
+  SortDropdownComponent,
+  type SortDropdownOption,
+} from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
+
+const PROJECT_GROUPING_OPTIONS: GroupingProperty[] = [
+  { id: 'status', label: 'Status', icon: 'inventory_2' },
+  { id: 'district', label: 'Primary district', icon: 'map' },
+  { id: 'city', label: 'Primary city', icon: 'location_city' },
+  { id: 'color-key', label: 'Color', icon: 'palette' },
+];
+
+const PROJECT_FILTER_OPTIONS: FilterDropdownPropertyOption[] = [
+  { id: 'name', label: 'Name', type: 'text' },
+  { id: 'status', label: 'Status', type: 'text' },
+  { id: 'district', label: 'Primary district', type: 'text' },
+  { id: 'city', label: 'Primary city', type: 'text' },
+  { id: 'color-key', label: 'Color', type: 'text' },
+  { id: 'image-count', label: 'Image count', type: 'number' },
+  { id: 'updated-at', label: 'Updated', type: 'date' },
+  { id: 'last-activity', label: 'Last activity', type: 'date' },
+];
+
+const PROJECT_SORT_OPTIONS: SortDropdownOption[] = [
+  { id: 'name', label: 'Name', icon: 'sort_by_alpha', defaultDirection: 'asc' },
+  { id: 'updated-at', label: 'Updated', icon: 'update', defaultDirection: 'desc' },
+  { id: 'last-activity', label: 'Last activity', icon: 'history', defaultDirection: 'desc' },
+  { id: 'image-count', label: 'Image count', icon: 'photo_library', defaultDirection: 'desc' },
+  { id: 'status', label: 'Status', icon: 'inventory_2', defaultDirection: 'asc' },
+  { id: 'district', label: 'Primary district', icon: 'map', defaultDirection: 'asc' },
+  { id: 'city', label: 'Primary city', icon: 'location_city', defaultDirection: 'asc' },
+  { id: 'color-key', label: 'Color', icon: 'palette', defaultDirection: 'asc' },
+];
+
+const TEXT_OPERATORS = ['contains', 'equals', 'is', 'is not', 'before', 'after'];
+const NUMBER_OPERATORS = ['=', '≠', '>', '<', '≥', '≤'];
+const DATE_OPERATORS = ['is', 'is not', 'before', 'after'];
+
+function operatorsForType(type: FilterDropdownPropertyOption['type'] | undefined): string[] {
+  switch (type) {
+    case 'number':
+      return NUMBER_OPERATORS;
+    case 'date':
+      return DATE_OPERATORS;
+    default:
+      return TEXT_OPERATORS;
+  }
+}
+
+interface ProjectGroupedSection {
+  id: string;
+  heading: string;
+  level: number;
+  projectCount: number;
+  projects: ProjectListItem[];
+}
 
 @Component({
   selector: 'app-projects-page',
@@ -46,12 +103,12 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     CommonModule,
     SearchBarComponent,
     DragDividerComponent,
+    GroupHeaderComponent,
     WorkspacePaneComponent,
     GroupingDropdownComponent,
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsViewToggleComponent,
-    ProjectCardComponent,
     ProjectColorPickerComponent,
   ],
   templateUrl: './projects-page.component.html',
@@ -60,11 +117,14 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 export class ProjectsPageComponent {
   private readonly projectsService = inject(ProjectsService);
   private readonly filterService = inject(FilterService);
-  private readonly registry = inject(PropertyRegistryService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly projectGroupingOptionIds = new Set(PROJECT_GROUPING_OPTIONS.map((o) => o.id));
+  private readonly projectFilterOptionIds = new Set(PROJECT_FILTER_OPTIONS.map((o) => o.id));
+  private readonly projectSortOptionIds = new Set(PROJECT_SORT_OPTIONS.map((o) => o.id));
+  private readonly projectFilterOptionById = new Map(PROJECT_FILTER_OPTIONS.map((o) => [o.id, o]));
 
   readonly projects = signal<ProjectListItem[]>([]);
   readonly loading = signal(false);
@@ -87,21 +147,24 @@ export class ProjectsPageComponent {
   readonly activeGroupings = signal<GroupingProperty[]>([]);
   readonly isToolbarDragging = signal(false);
   readonly activeProjectSorts = signal<SortConfig[]>([]);
+  readonly projectFilterOptions = PROJECT_FILTER_OPTIONS;
+  readonly projectSortOptions = PROJECT_SORT_OPTIONS;
+  readonly projectDefaultSorts: SortConfig[] = [];
+  readonly activeGroupingIds = computed(() => this.activeGroupings().map((group) => group.id));
+  readonly projectFilterRules = computed(() =>
+    this.filterService
+      .rules()
+      .filter((rule) => !rule.property || this.projectFilterOptionIds.has(rule.property)),
+  );
 
   readonly availableGroupings = computed<GroupingProperty[]>(() => {
     const activeIds = new Set(this.activeGroupings().map((group) => group.id));
-    return this.registry
-      .groupableProperties()
-      .filter((property) => !activeIds.has(property.id))
-      .map((property) => ({ id: property.id, label: property.label, icon: property.icon }));
+    return PROJECT_GROUPING_OPTIONS.filter((grouping) => !activeIds.has(grouping.id));
   });
 
   readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
-  readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
-  readonly hasCustomSort = computed(() => {
-    const sorts = this.workspaceViewService.activeSorts();
-    return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
-  });
+  readonly hasFilters = computed(() => this.projectFilterRules().length > 0);
+  readonly hasCustomSort = computed(() => this.activeProjectSorts().length > 0);
 
   readonly workspacePaneWidth = signal(360);
   readonly workspacePaneMinWidth = 280;
@@ -142,12 +205,33 @@ export class ProjectsPageComponent {
       ? statusScoped.filter((project) => (counts[project.id] ?? 0) > 0)
       : statusScoped;
 
-    return this.sortProjects(queryScoped, this.sortMode(), this.activeProjectSorts());
+    const filterScoped = this.applyProjectFilters(queryScoped);
+
+    return this.sortProjects(filterScoped, this.sortMode(), this.activeProjectSorts());
   });
 
   readonly projectCountLabel = computed(() => {
     const total = this.visibleProjects().length;
     return `${total} project${total === 1 ? '' : 's'}`;
+  });
+
+  readonly groupedSections = computed<ProjectGroupedSection[]>(() => {
+    const projects = this.visibleProjects();
+    const groupings = this.activeGroupings();
+
+    if (groupings.length === 0) {
+      return [
+        {
+          id: 'all-projects',
+          heading: '',
+          level: 0,
+          projectCount: projects.length,
+          projects,
+        },
+      ];
+    }
+
+    return this.buildGroupedSections(projects, groupings, [], []);
   });
 
   readonly showEmptyState = computed(
@@ -159,6 +243,7 @@ export class ProjectsPageComponent {
       this.persistViewMode(this.viewMode());
     });
 
+    this.normalizeProjectFilterRules();
     this.syncViewportMode();
     void this.refreshProjects();
   }
@@ -249,6 +334,11 @@ export class ProjectsPageComponent {
 
     this.toolbarDropdownTop.set(rect.bottom + 4);
     this.toolbarDropdownLeft.set(left);
+
+    if (id === 'filter') {
+      this.normalizeProjectFilterRules();
+    }
+
     this.activeToolbarDropdown.set(id);
   }
 
@@ -265,19 +355,14 @@ export class ProjectsPageComponent {
   }
 
   onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
-    this.activeGroupings.set(active);
-    this.workspaceViewService.activeGroupings.set(
-      active.map(
-        (group) => ({ id: group.id, label: group.label, icon: group.icon }) as PropertyRef,
-      ),
-    );
+    this.activeGroupings.set(active.filter((group) => this.projectGroupingOptionIds.has(group.id)));
   }
 
   onSortChanged(sortConfigs: SortConfig[]): void {
-    this.workspaceViewService.activeSorts.set(sortConfigs);
-    this.activeProjectSorts.set(sortConfigs);
+    const sanitizedSorts = sortConfigs.filter((sort) => this.projectSortOptionIds.has(sort.key));
+    this.activeProjectSorts.set(sanitizedSorts);
 
-    const nextSort = this.mapSortConfigToProjectsSortMode(sortConfigs);
+    const nextSort = this.mapSortConfigToProjectsSortMode(sanitizedSorts);
     if (nextSort) {
       this.sortMode.set(nextSort);
     }
@@ -516,31 +601,10 @@ export class ProjectsPageComponent {
   ): ProjectListItem[] {
     const sorted = [...projects];
 
-    if (activeSorts.length === 0 && this.activeGroupings().length > 0) {
-      const groupingSorts: SortConfig[] = this.activeGroupings().map((grouping) => ({
-        key: grouping.id,
-        direction: 'asc',
-      }));
-
+    const effectiveSorts = this.buildEffectiveProjectSorts(activeSorts);
+    if (effectiveSorts.length > 0) {
       sorted.sort((left, right) => {
-        for (const sort of groupingSorts) {
-          const leftValue = this.getProjectSortValue(left, sort.key);
-          const rightValue = this.getProjectSortValue(right, sort.key);
-          const order = this.compareSortValues(leftValue, rightValue);
-          if (order !== 0) {
-            return order;
-          }
-        }
-
-        return left.name.localeCompare(right.name);
-      });
-
-      return sorted;
-    }
-
-    if (activeSorts.length > 0) {
-      sorted.sort((left, right) => {
-        for (const sort of activeSorts) {
+        for (const sort of effectiveSorts) {
           const leftValue = this.getProjectSortValue(left, sort.key);
           const rightValue = this.getProjectSortValue(right, sort.key);
 
@@ -572,6 +636,24 @@ export class ProjectsPageComponent {
     return sorted;
   }
 
+  private buildEffectiveProjectSorts(activeSorts: SortConfig[]): SortConfig[] {
+    const groupings = this.activeGroupings();
+    if (groupings.length === 0) {
+      return activeSorts;
+    }
+
+    const userSortMap = new Map(activeSorts.map((sort) => [sort.key, sort]));
+    const groupingIds = new Set(groupings.map((grouping) => grouping.id));
+
+    const groupingSorts: SortConfig[] = groupings.map((grouping) => {
+      const existing = userSortMap.get(grouping.id);
+      return { key: grouping.id, direction: existing?.direction ?? 'asc' };
+    });
+
+    const remainingSorts = activeSorts.filter((sort) => !groupingIds.has(sort.key));
+    return [...groupingSorts, ...remainingSorts];
+  }
+
   private mapSortConfigToProjectsSortMode(sortConfigs: SortConfig[]): ProjectsSortMode | null {
     const primary = sortConfigs[0]?.key;
     if (!primary) return null;
@@ -592,7 +674,7 @@ export class ProjectsPageComponent {
     if (
       primary === 'updated-at' ||
       primary === 'updated' ||
-      primary === 'date-captured' ||
+      primary === 'last-activity' ||
       primary === 'created-at'
     ) {
       return 'updated';
@@ -605,7 +687,6 @@ export class ProjectsPageComponent {
     switch (sortKey) {
       case 'name':
       case 'project-name':
-      case 'project':
         return project.name;
       case 'image-count':
       case 'photo-count':
@@ -614,10 +695,14 @@ export class ProjectsPageComponent {
         return project.totalImageCount;
       case 'updated':
       case 'updated-at':
-      case 'date-captured':
-      case 'date-uploaded':
       case 'created-at':
         return project.updatedAt;
+      case 'last-activity':
+        return project.lastActivity;
+      case 'status':
+        return project.status;
+      case 'color-key':
+        return project.colorKey;
       case 'district':
         return project.district;
       case 'city':
@@ -647,6 +732,224 @@ export class ProjectsPageComponent {
     }
 
     return String(left).localeCompare(String(right));
+  }
+
+  private buildGroupedSections(
+    projects: ProjectListItem[],
+    groupings: GroupingProperty[],
+    pathKeys: string[],
+    pathLabels: string[],
+  ): ProjectGroupedSection[] {
+    if (groupings.length === 0) {
+      return [
+        {
+          id: pathKeys.join('||') || 'all-projects',
+          heading: pathLabels.join(' / '),
+          level: pathLabels.length,
+          projectCount: projects.length,
+          projects,
+        },
+      ];
+    }
+
+    const [current, ...rest] = groupings;
+    const buckets = new Map<string, ProjectListItem[]>();
+
+    for (const project of projects) {
+      const value = this.getProjectGroupingValue(project, current.id);
+      const bucket = buckets.get(value);
+      if (bucket) {
+        bucket.push(project);
+      } else {
+        buckets.set(value, [project]);
+      }
+    }
+
+    const sections: ProjectGroupedSection[] = [];
+    for (const [groupValue, bucket] of buckets) {
+      const nextPathKeys = [...pathKeys, `${current.id}:${groupValue}`];
+      const nextPathLabels = [...pathLabels, `${current.label}: ${groupValue}`];
+
+      if (rest.length === 0) {
+        sections.push({
+          id: nextPathKeys.join('||'),
+          heading: nextPathLabels.join(' / '),
+          level: nextPathLabels.length,
+          projectCount: bucket.length,
+          projects: bucket,
+        });
+      } else {
+        sections.push(...this.buildGroupedSections(bucket, rest, nextPathKeys, nextPathLabels));
+      }
+    }
+
+    return sections;
+  }
+
+  private getProjectGroupingValue(project: ProjectListItem, groupingId: string): string {
+    switch (groupingId) {
+      case 'status':
+        return project.status === 'archived' ? 'Archived' : 'Active';
+      case 'district':
+        return project.district?.trim() || 'Unknown district';
+      case 'city':
+        return project.city?.trim() || 'Unknown city';
+      case 'color-key':
+        return project.colorKey.charAt(0).toUpperCase() + project.colorKey.slice(1);
+      default:
+        return 'Other';
+    }
+  }
+
+  private applyProjectFilters(projects: ProjectListItem[]): ProjectListItem[] {
+    const rules = this.projectFilterRules();
+    if (rules.length === 0) return projects;
+
+    return projects.filter((project) => this.matchesProjectRules(project, rules));
+  }
+
+  private matchesProjectRules(project: ProjectListItem, rules: FilterRule[]): boolean {
+    let result = this.evaluateProjectRule(project, rules[0]);
+
+    for (let i = 1; i < rules.length; i++) {
+      const ruleResult = this.evaluateProjectRule(project, rules[i]);
+      if (rules[i].conjunction === 'or') {
+        result = result || ruleResult;
+      } else {
+        result = result && ruleResult;
+      }
+    }
+
+    return result;
+  }
+
+  private evaluateProjectRule(project: ProjectListItem, rule: FilterRule): boolean {
+    if (!rule.property || !rule.operator) return true;
+
+    const fieldValue = this.getProjectFilterValue(project, rule.property);
+    const option = this.projectFilterOptionById.get(rule.property);
+    const ruleValue = rule.value.trim();
+    const ruleLower = ruleValue.toLowerCase();
+
+    if (fieldValue == null || fieldValue === '') {
+      return rule.operator === 'is not' || rule.operator === '≠' ? ruleLower !== '' : false;
+    }
+
+    if (option?.type === 'number' || NUMBER_OPERATORS.includes(rule.operator)) {
+      const fieldNumber =
+        typeof fieldValue === 'number' ? fieldValue : Number.parseFloat(fieldValue);
+      const ruleNumber = Number.parseFloat(ruleValue);
+      if (Number.isNaN(fieldNumber) || Number.isNaN(ruleNumber)) {
+        return false;
+      }
+
+      switch (rule.operator) {
+        case '=':
+          return fieldNumber === ruleNumber;
+        case '≠':
+          return fieldNumber !== ruleNumber;
+        case '>':
+          return fieldNumber > ruleNumber;
+        case '<':
+          return fieldNumber < ruleNumber;
+        case '≥':
+          return fieldNumber >= ruleNumber;
+        case '≤':
+          return fieldNumber <= ruleNumber;
+        default:
+          return false;
+      }
+    }
+
+    if (option?.type === 'date') {
+      const left = Date.parse(String(fieldValue));
+      const right = Date.parse(ruleValue);
+      if (!Number.isFinite(left) || !Number.isFinite(right)) {
+        return false;
+      }
+
+      switch (rule.operator) {
+        case 'is':
+        case 'equals':
+          return left === right;
+        case 'is not':
+          return left !== right;
+        case 'before':
+          return left < right;
+        case 'after':
+          return left > right;
+        default:
+          return false;
+      }
+    }
+
+    const fieldLower = String(fieldValue).toLowerCase();
+    switch (rule.operator) {
+      case 'contains':
+        return fieldLower.includes(ruleLower);
+      case 'equals':
+      case 'is':
+        return fieldLower === ruleLower;
+      case 'is not':
+        return fieldLower !== ruleLower;
+      case 'before':
+        return fieldLower < ruleLower;
+      case 'after':
+        return fieldLower > ruleLower;
+      default:
+        return true;
+    }
+  }
+
+  private getProjectFilterValue(
+    project: ProjectListItem,
+    propertyId: string,
+  ): string | number | null {
+    switch (propertyId) {
+      case 'name':
+        return project.name;
+      case 'status':
+        return project.status;
+      case 'district':
+        return project.district;
+      case 'city':
+        return project.city;
+      case 'color-key':
+        return project.colorKey;
+      case 'image-count':
+        return project.totalImageCount;
+      case 'updated-at':
+        return project.updatedAt;
+      case 'last-activity':
+        return project.lastActivity;
+      default:
+        return null;
+    }
+  }
+
+  private normalizeProjectFilterRules(): void {
+    const rules = this.filterService.rules();
+    const normalized = rules
+      .filter((rule) => !rule.property || this.projectFilterOptionIds.has(rule.property))
+      .map((rule) => {
+        if (!rule.property) return rule;
+
+        const validOperators = operatorsForType(
+          this.projectFilterOptionById.get(rule.property)?.type,
+        );
+        if (!rule.operator || validOperators.includes(rule.operator)) {
+          return rule;
+        }
+
+        return { ...rule, operator: '' };
+      });
+
+    if (
+      normalized.length !== rules.length ||
+      normalized.some((rule, index) => rule !== rules[index])
+    ) {
+      this.filterService.rules.set(normalized);
+    }
   }
 
   private loadStoredViewMode(): ProjectsViewMode {

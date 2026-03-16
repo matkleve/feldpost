@@ -5,7 +5,7 @@
   width: 100%;
   padding: var(--spacing-2) var(--spacing-3);
   border: none;
-  background: var(--color-bg-surface);
+  background: var(--group-header-bg, var(--color-bg-surface));
   color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.8125rem;
@@ -17,7 +17,7 @@
   transition: background 150ms ease;
 
   &:hover {
-    background: var(--color-bg-elevated, var(--color-bg-surface));
+    background: var(--group-header-hover-bg, var(--color-bg-elevated, var(--color-bg-surface)));
   }
 
   &:focus-visible {

@@ -4,7 +4,7 @@
 
 ## What It Is
 
-A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. The page reuses the same Search Bar component pattern used on the map page, but the query algorithm is different: it searches across images and metadata and returns grouped project-level result counts.
+A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. The page reuses the same Search Bar component pattern used on the map page, but the query algorithm is different: it searches across images and metadata and returns grouped project-level result counts. Grouping/filtering/sorting on this page uses a project-level operator profile (not the image-level workspace operator profile).
 
 ## What It Looks Like
 
@@ -34,6 +34,10 @@ Full-width page with a header row: title "Projects", total project count, and a 
 | 11  | Toggles view mode                  | Switches between List and Cards layouts without losing search/filter/sort state                                        | `viewMode` state                 |
 | 12  | Clicks "Open in workspace"         | Opens the same in-page workspace pane scoped to that project (no route change)                                         | Shared open action               |
 | 13  | Clicks map button in image details | Navigates to `/map` and zooms to the selected image location                                                           | Router + map focus payload       |
+| 14  | Opens Grouping dropdown            | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                   | Projects operator profile        |
+| 15  | Activates one or more groupings    | Renders explicit group headers and nests project rows/cards under those sections                                       | `activeGroupings` state          |
+| 16  | Opens Sort dropdown                | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys)   | Projects operator profile        |
+| 17  | Changes sort direction             | Reorders grouped or flat project result set deterministically                                                          | `activeProjectSorts` state       |
 
 ### Interaction Flowchart
 
@@ -47,11 +51,15 @@ flowchart TD
 	E2 --> E3[Compute matching count per project]
 	D --> F{Status filter}
 	E3 --> F
-	F --> G[Render Active / Archived / All subset]
+	F --> G[Apply project-level grouping/filter/sort operators]
 	G --> H{View mode}
 	H -- List --> I[Render ProjectsList]
 	H -- Cards --> J[Render ProjectsCardGrid]
-	I --> K{Row action}
+	I --> I2{Grouping active?}
+	I2 -- Yes --> I3[Render GroupHeader + grouped rows]
+	I2 -- No --> I4[Render flat rows]
+	I3 --> K{Row action}
+	I4 --> K{Row action}
 	J --> K
 	K -- Open in workspace --> L[Open in-page workspace pane + apply project scope]
 	K -- Rename --> M[Inline edit and persist]
@@ -95,18 +103,23 @@ ProjectsPage                                ← route root, full width
 ├── ProjectsToolbar                           ← list controls
 │   ├── StatusSegmentedControl                 ← All / Active / Archived
 │   ├── ViewModeToggle                         ← List / Cards
-│   └── SortDropdown                           ← Name / Updated / Image count
+│   ├── GroupingDropdown                       ← project-level grouping fields only
+│   ├── FilterDropdown                         ← project-level filter fields only
+│   └── SortDropdown                           ← project-level sorting fields only
 ├── ContentRail                                ← centered layout rail, max-width 70rem (1120px)
 │   ├── [viewMode=list] ProjectsList (.ui-container)
-│   │   └── ProjectRow (.ui-item) × N
-│   │       ├── ProjectColorChip               ← token color indicator
-│   │       ├── ProjectStatusDot               ← active/archived state
-│   │       ├── ProjectName (.ui-item-label)   ← inline editable on rename
-│   │       ├── MatchingCountMeta              ← "5 results" for current search query
-│   │       ├── ImageCountMeta                 ← total photos
-│   │       ├── LastActivityMeta               ← relative date
-│   │       ├── OpenInWorkspaceButton          ← map shortcut
-│   │       └── RowMenu                         ← Rename, Color, Archive
+│   │   ├── [grouping active] ProjectGroupSection × N
+│   │   │   ├── ProjectGroupHeader             ← grouping label + count
+│   │   │   └── ProjectRow (.ui-item) × N
+│   │   │       ├── ProjectColorChip           ← token color indicator
+│   │   │       ├── ProjectStatusDot           ← active/archived state
+│   │   │       ├── ProjectName (.ui-item-label) ← inline editable on rename
+│   │   │       ├── MatchingCountMeta          ← "5 results" for current search query
+│   │   │       ├── ImageCountMeta             ← total photos
+│   │   │       ├── LastActivityMeta           ← relative date
+│   │   │       ├── OpenInWorkspaceButton      ← map shortcut
+│   │   │       └── RowMenu                    ← Rename, Color, Archive
+│   │   └── [no grouping] ProjectRow (.ui-item) × N
 │   └── [viewMode=cards] ProjectsCardGrid      ← responsive grid, cards share stable info zones
 │       └── ProjectCard × N
 │           ├── ProjectColorChip               ← token color indicator
@@ -135,34 +148,53 @@ flowchart LR
 ```
 
 | Field                     | Source                                                                                      | Type                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- | -------- |
+| ------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
 | Projects                  | `supabase.from('projects').select('id,name,color_key,archived_at,created_at,updated_at')`   | `Project[]`                             |
 | Image counts              | RPC or aggregated query by `project_id` from `images`                                       | `Record<string, number>`                |
 | Last activity             | Max `images.captured_at` per project                                                        | `Record<string, string>`                |
+| Primary city              | Most frequent `images.city` value per project (tie: lexicographic)                          | `string \| null`                        |
+| Primary district          | Most frequent `images.district` value per project (tie: lexicographic)                      | `string \| null`                        |
 | Active scope set          | Workspace project scope state (project IDs)                                                 | `Set<string>`                           |
-| View preference           | User preference store (profile preferences)                                                 | `'list'                                 | 'cards'` |
+| View preference           | User preference store (profile preferences)                                                 | `'list' \| 'cards'`                     |
 | Search matches by project | RPC/search service: image-level query joined with project IDs, grouped by `project_id`      | `Record<string, number>`                |
 | Search fields             | `images.title`, `images.address_label`, custom metadata key/value pairs (`metadata_values`) | `string` query against normalized index |
 
 `color_key` is a semantic project color token key (for example `clay`, `accent`, `success`, `warning`) and maps to existing design tokens. Do not store arbitrary hex values.
 Search behavior on this page is explicitly aggregation-first: query images, then group by project; it is not a simple project-name-only filter.
 
+### Projects Operator Profile
+
+```mermaid
+flowchart LR
+	A[Projects Toolbar] --> B{Operator}
+	B --> C[Grouping: status, primary-district, primary-city, color-key]
+	B --> D[Sort: name, updated-at, last-activity, image-count, status, location keys]
+	B --> E[Filter: project-level fields only]
+	C --> F[Grouped project renderer]
+	D --> F
+	E --> F
+```
+
+Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`) are not valid operator options in Projects mode.
+
 ## State
 
-| Name                 | Type                     | Default  | Controls                                |
-| -------------------- | ------------------------ | -------- | --------------------------------------- | ------------------ | -------------- |
-| `projects`           | `ProjectListItem[]`      | `[]`     | Rendered project rows                   |
-| `loading`            | `boolean`                | `false`  | Loading skeleton visibility             |
-| `searchTerm`         | `string`                 | `''`     | Client-side text filtering              |
-| `statusFilter`       | `'all'                   | 'active' | 'archived'`                             | `'all'`            | Status scoping |
-| `viewMode`           | `'list'                  | 'cards'` | `'list'`                                | Active layout mode |
-| `projectMatchCounts` | `Record<string, number>` | `{}`     | Search-result count per project         |
-| `selectedProjectId`  | `string \| null`         | `null`   | Active project opened in workspace pane |
-| `workspacePaneOpen`  | `boolean`                | `false`  | In-page workspace visibility            |
-| `editingProjectId`   | `string \| null`         | `null`   | Inline rename row                       |
-| `creatingProject`    | `boolean`                | `false`  | New-project draft input visibility      |
-| `archivingProjectId` | `string \| null`         | `null`   | Archive confirmation pending state      |
-| `coloringProjectId`  | `string \| null`         | `null`   | Color picker visibility target          |
+| Name                 | Type                              | Default  | Controls                                   |
+| -------------------- | --------------------------------- | -------- | ------------------------------------------ |
+| `projects`           | `ProjectListItem[]`               | `[]`     | Rendered project rows/cards                |
+| `loading`            | `boolean`                         | `false`  | Loading skeleton visibility                |
+| `searchTerm`         | `string`                          | `''`     | Search query                               |
+| `statusFilter`       | `'all' \| 'active' \| 'archived'` | `'all'`  | Status scoping                             |
+| `viewMode`           | `'list' \| 'cards'`               | `'list'` | Active layout mode                         |
+| `projectMatchCounts` | `Record<string, number>`          | `{}`     | Search-result count per project            |
+| `activeGroupings`    | `GroupingProperty[]`              | `[]`     | Grouping hierarchy for list/card rendering |
+| `activeProjectSorts` | `SortConfig[]`                    | `[]`     | Explicit project-level sort criteria       |
+| `selectedProjectId`  | `string \| null`                  | `null`   | Active project opened in workspace pane    |
+| `workspacePaneOpen`  | `boolean`                         | `false`  | In-page workspace visibility               |
+| `editingProjectId`   | `string \| null`                  | `null`   | Inline rename row                          |
+| `creatingProject`    | `boolean`                         | `false`  | New-project draft input visibility         |
+| `archivingProjectId` | `string \| null`                  | `null`   | Archive confirmation pending state         |
+| `coloringProjectId`  | `string \| null`                  | `null`   | Color picker visibility target             |
 
 ## File Map
 
@@ -199,6 +231,8 @@ sequenceDiagram
 - Reuse the existing Search Bar component family by importing a shared search-surface component in Projects mode; do not create a second independent search implementation.
 - The shared search-surface must support mode-specific behavior via inputs/adapter (`map` vs `projects`) while preserving identical keyboard and focus interactions.
 - Projects mode must call the grouped-search endpoint/service (image-level query -> group by project) instead of map-center commit behavior.
+- Projects mode must provide a dedicated project-level operator profile for Grouping/Filter/Sort, instead of exposing the full workspace image-property registry.
+- Grouping in list mode must render explicit group headers and grouped rows/cards; reordering groupings must re-render sections immediately.
 - On row open action, set selected project and open the in-page workspace pane; do not change route.
 - Reuse existing image-details map action to navigate to `/map` with selected image id/coordinates so map zoom/focus can be applied.
 - Keep `Projects Dropdown` behavior consistent with this page by sharing the same source-of-truth project scope state.
@@ -227,6 +261,10 @@ sequenceDiagram
 - [x] Loading state appears during initial fetch and refresh operations.
 - [x] Center content rail is horizontally centered and capped at max-width 70rem (1120px).
 - [x] Mobile layout is single-column with accessible touch targets.
+- [ ] Grouping/Filter/Sort dropdowns in Projects mode expose project-level fields only.
+- [ ] Image-level-only fields (`date-captured`, `distance`, `project`) are not shown in Projects operator menus.
+- [ ] Grouping in list mode renders explicit group headers and grouped project sections.
+- [ ] Primary district and primary city semantics are deterministic (most-frequent value, tie-break lexicographically).
 - [x] [PPW-1] Selecting a project opens the workspace pane in place while remaining on `/projects`.
 - [x] [PPW-2] Selecting a project-scoped thumbnail opens image details for that scoped image.
 - [x] [PPW-3] Using the image-details map action navigates to `/map` and focuses the exact selected photo location.

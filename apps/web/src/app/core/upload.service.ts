@@ -285,20 +285,20 @@ export class UploadService {
       const result = await this.geocoding.reverse(lat, lng);
       if (!result) return;
 
-      const { error } = await this.supabase.client.rpc(
-        'bulk_update_image_addresses',
-        {
-          p_image_ids: [imageId],
-          p_address_label: result.addressLabel,
-          p_city: result.city,
-          p_district: result.district,
-          p_street: result.street,
-          p_country: result.country,
-        },
-      );
+      const { error } = await this.supabase.client.rpc('bulk_update_image_addresses', {
+        p_image_ids: [imageId],
+        p_address_label: result.addressLabel,
+        p_city: result.city,
+        p_district: result.district,
+        p_street: result.street,
+        p_country: result.country,
+      });
 
       if (error) {
-        console.error('Failed to persist address for image', imageId, error);
+        console.error('Failed to persist address for image', imageId, {
+          imageId,
+          ...this.describePersistError(error),
+        });
       }
     } catch {
       // Non-critical — address will show as "Unknown district" until resolved.
@@ -318,5 +318,53 @@ export class UploadService {
     }
 
     return (error as Error | string) ?? 'Storage error.';
+  }
+
+  private describePersistError(error: unknown): {
+    code: string | null;
+    status: number | null;
+    message: string;
+    details: string | null;
+    hint: string | null;
+    bodySnippet: string | null;
+  } {
+    const candidate =
+      typeof error === 'object' && error !== null
+        ? (error as {
+            code?: unknown;
+            status?: unknown;
+            message?: unknown;
+            details?: unknown;
+            hint?: unknown;
+            context?: unknown;
+          })
+        : null;
+
+    return {
+      code: typeof candidate?.code === 'string' ? candidate.code : null,
+      status: typeof candidate?.status === 'number' ? candidate.status : null,
+      message:
+        typeof candidate?.message === 'string'
+          ? this.sanitizeSnippet(candidate.message)
+          : this.sanitizeSnippet(String(error)),
+      details:
+        typeof candidate?.details === 'string' ? this.sanitizeSnippet(candidate.details) : null,
+      hint: typeof candidate?.hint === 'string' ? this.sanitizeSnippet(candidate.hint) : null,
+      bodySnippet: this.extractBodySnippet(candidate?.context),
+    };
+  }
+
+  private extractBodySnippet(context: unknown): string | null {
+    if (typeof context === 'string') return this.sanitizeSnippet(context);
+    if (!context || typeof context !== 'object') return null;
+    try {
+      return this.sanitizeSnippet(JSON.stringify(context));
+    } catch {
+      return null;
+    }
+  }
+
+  private sanitizeSnippet(value: string): string {
+    return value.replace(/\s+/g, ' ').trim().slice(0, 300);
   }
 }

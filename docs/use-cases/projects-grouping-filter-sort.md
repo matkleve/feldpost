@@ -5,7 +5,15 @@
 ## Scope
 
 This document defines behavior for grouping, filtering, and sorting controls on the Projects page.
-The controls must use the same operator logic and interaction model as the Workspace Pane controls.
+The controls must use the same interaction model as the Workspace Pane controls, but operate on a project-level data model.
+
+Projects page operators are intentionally scoped to project-level fields. Image-level-only fields (for example `date-captured`, `distance`, `project`) are not valid in Projects grouping/sorting/filtering menus.
+
+Allowed project-level operator fields:
+
+- Grouping: `status`, `primary-district`, `primary-city`, `color-key`
+- Sorting: `name`, `updated-at`, `last-activity`, `image-count`, `status`, `primary-district`, `primary-city`
+- Filtering: `status`, `name`, `updated-at`, `last-activity`, `image-count`, `primary-district`, `primary-city`, `color-key`
 
 ## Scenario Index
 
@@ -26,15 +34,16 @@ The controls must use the same operator logic and interaction model as the Works
 | PGS-13 | Sort by grouping property                               |
 | PGS-14 | Multi-sort with primary and secondary sort              |
 | PGS-15 | Reset sort to default                                   |
-| PGS-16 | Group by district and sort by district                  |
-| PGS-17 | Group by district and then by street                    |
-| PGS-18 | Filter by district value and keep grouping stable       |
+| PGS-16 | Group by primary district and sort by primary district  |
+| PGS-17 | Group by status and then by primary district            |
+| PGS-18 | Filter by primary district and keep grouping stable     |
 | PGS-19 | Keep selections after closing/reopening dropdown        |
 | PGS-20 | Keep state after switching list/cards view              |
 | PGS-21 | Keep state after opening/closing project workspace pane |
 | PGS-22 | Keep state after route refresh with persisted settings  |
 | PGS-23 | Empty results state for strict filters                  |
 | PGS-24 | Fast typing in filter search does not break ordering    |
+| PGS-25 | Projects list renders explicit group headers            |
 
 ---
 
@@ -42,11 +51,11 @@ The controls must use the same operator logic and interaction model as the Works
 
 1. User clicks Grouping.
 2. System opens Grouping dropdown.
-3. System shows properties from Property Registry (not view format options).
+3. System shows the Projects operator profile fields only.
 
 Expected:
 
-- Grouping dropdown lists real properties.
+- Grouping dropdown lists project-level properties only (`status`, `primary-district`, `primary-city`, `color-key`).
 - List/Cards is not shown as grouping content.
 
 ## PGS-2: Add One Grouping Property
@@ -105,7 +114,7 @@ Expected:
 Expected:
 
 - Operators change according to property type.
-- Operator behavior matches Workspace Pane exactly.
+- Operator behavior matches Workspace Pane interaction model (same UI contract), but options are restricted to project-level fields.
 
 ## PGS-8: Text Filter Operators Match Workspace Pane
 
@@ -199,32 +208,32 @@ Expected:
 
 ## PGS-16: Group By District And Sort By District
 
-1. User opens Grouping and activates District.
-2. User opens Sort and sets District ascending.
+1. User opens Grouping and activates Primary district.
+2. User opens Sort and sets Primary district ascending.
 
 Expected:
 
-- Projects are grouped by district buckets.
-- District buckets are sorted ascending.
-- Scenario is fully supported without fallback behavior.
+- Projects are grouped by primary district buckets.
+- Primary district buckets are sorted ascending.
+- Grouping is deterministic even when a project has images in multiple districts.
 
-## PGS-17: Group By District And Then By Street
+## PGS-17: Group By Status And Then By Primary District
 
-1. User adds District then Street in Grouping.
-
-Expected:
-
-- Two-level grouping appears: District -> Street.
-- Changing order to Street -> District changes rendered hierarchy.
-
-## PGS-18: Filter By District Value And Keep Grouping Stable
-
-1. User groups by District.
-2. User filters District contains "Wien".
+1. User adds Status then Primary district in Grouping.
 
 Expected:
 
-- Only matching district groups remain.
+- Two-level grouping appears: Status -> Primary district.
+- Changing order to Primary district -> Status changes rendered hierarchy.
+
+## PGS-18: Filter By Primary District Value And Keep Grouping Stable
+
+1. User groups by Primary district.
+2. User filters Primary district contains "Wien".
+
+Expected:
+
+- Only matching primary district groups remain.
 - Existing grouping order remains unchanged.
 
 ## PGS-19: Keep Selections After Closing/Reopening Dropdown
@@ -283,13 +292,58 @@ Expected:
 - No visual flicker or unstable ordering.
 - Final state matches last user inputs.
 
+## PGS-25: Projects List Renders Explicit Group Headers
+
+1. User activates one or more grouping fields.
+2. User views list mode.
+
+Expected:
+
+- The projects list renders explicit group header rows (for example "Active", "Archived", "Wien 22").
+- Projects are rendered inside their matching group section.
+- When grouping is cleared, list returns to a flat projects list.
+
+---
+
+## Operator Domain Contract
+
+```mermaid
+flowchart TD
+	A[Open Projects toolbar dropdown] --> B{Operator type}
+	B -->|Grouping| C[Show project-level grouping fields only]
+	B -->|Sort| D[Show project-level sort fields only]
+	B -->|Filter| E[Show project-level filter fields only]
+
+	C --> F[Apply grouping to project list renderer]
+	D --> G[Apply effective sorts to project list renderer]
+	E --> H[Apply filter predicate to projects]
+
+	F --> I[Render grouped project sections]
+	G --> I
+	H --> I
+```
+
+## Location Semantics (Primary District/City)
+
+```mermaid
+flowchart LR
+	A[Project images with district values] --> B[Count frequency per district]
+	B --> C{Tie on count?}
+	C -->|No| D[Pick highest count district]
+	C -->|Yes| E[Pick alphabetically first district]
+	D --> F[Primary district]
+	E --> F
+	F --> G[Used in grouping/filtering/sorting]
+```
+
 ---
 
 ## Acceptance Matrix
 
-- Grouping dropdown uses Property Registry entries: yes
-- Filter dropdown operators equal Workspace Pane: yes
-- Sort dropdown behavior equals Workspace Pane: yes
-- District grouping + district sorting supported: yes
+- Grouping dropdown uses project-level operator profile: yes
+- Filter dropdown operators follow Workspace interaction model: yes
+- Sort dropdown behavior follows Workspace interaction model: yes
+- Primary district grouping + primary district sorting supported: yes
 - Multi-level grouping and multi-sort supported: yes
+- Grouped list renders explicit group headers: yes
 - State persistence rules defined: yes

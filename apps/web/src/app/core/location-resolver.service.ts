@@ -274,7 +274,11 @@ export class LocationResolverService {
       p_country: result.country,
     });
     if (error) {
-      console.error('[LocationResolver] Failed to persist address:', error);
+      console.error('[LocationResolver] Failed to persist address:', {
+        imageCount: imageIds.length,
+        imageIds: imageIds.slice(0, 5),
+        ...this.describeError(error),
+      });
     }
   }
 
@@ -289,7 +293,10 @@ export class LocationResolverService {
       p_country: result.country,
     });
     if (error) {
-      console.error('[LocationResolver] Failed to persist address for', imageId, error);
+      console.error('[LocationResolver] Failed to persist address for', imageId, {
+        imageId,
+        ...this.describeError(error),
+      });
     }
   }
 
@@ -317,8 +324,61 @@ export class LocationResolverService {
       p_country: address.country,
     });
     if (error) {
-      console.error('[LocationResolver] Failed to persist GPS + address for', imageId, error);
+      console.error('[LocationResolver] Failed to persist GPS + address for', imageId, {
+        imageId,
+        ...this.describeError(error),
+      });
     }
+  }
+
+  private describeError(error: unknown): {
+    code: string | null;
+    status: number | null;
+    message: string;
+    details: string | null;
+    hint: string | null;
+    bodySnippet: string | null;
+  } {
+    const candidate =
+      typeof error === 'object' && error !== null
+        ? (error as {
+            code?: unknown;
+            status?: unknown;
+            message?: unknown;
+            details?: unknown;
+            hint?: unknown;
+            context?: unknown;
+          })
+        : null;
+
+    const bodySnippet = this.extractBodySnippet(candidate?.context);
+
+    return {
+      code: typeof candidate?.code === 'string' ? candidate.code : null,
+      status: typeof candidate?.status === 'number' ? candidate.status : null,
+      message:
+        typeof candidate?.message === 'string'
+          ? this.sanitizeSnippet(candidate.message)
+          : this.sanitizeSnippet(String(error)),
+      details:
+        typeof candidate?.details === 'string' ? this.sanitizeSnippet(candidate.details) : null,
+      hint: typeof candidate?.hint === 'string' ? this.sanitizeSnippet(candidate.hint) : null,
+      bodySnippet,
+    };
+  }
+
+  private extractBodySnippet(context: unknown): string | null {
+    if (typeof context === 'string') return this.sanitizeSnippet(context);
+    if (!context || typeof context !== 'object') return null;
+    try {
+      return this.sanitizeSnippet(JSON.stringify(context));
+    } catch {
+      return null;
+    }
+  }
+
+  private sanitizeSnippet(value: string): string {
+    return value.replace(/\s+/g, ' ').trim().slice(0, 300);
   }
 }
 

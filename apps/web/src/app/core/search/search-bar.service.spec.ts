@@ -251,6 +251,58 @@ describe('SearchBarService', () => {
       // With 2 images: log2(3) ≈ 1.585
       expect(results[0].score).toBeGreaterThan(0);
     });
+
+    it('fails soft and records one structured debug entry when the images query returns 400', async () => {
+      localStorage.setItem('feldpost-search-debug', '1');
+
+      const failingImagesBuilder = createQueryBuilder({
+        data: [],
+        error: {
+          code: 'PGRST204',
+          message: "Could not find the 'postcode' column of 'images' in the schema cache",
+          details: null,
+          hint: null,
+          status: 400,
+        },
+      });
+
+      const defaultBuilder = createQueryBuilder({ data: [], error: null });
+      const failureSupabase = {
+        client: {
+          from: vi.fn((table: string) => {
+            if (table === 'images') return failingImagesBuilder;
+            return defaultBuilder;
+          }),
+        },
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          SearchBarService,
+          { provide: SupabaseService, useValue: failureSupabase },
+          { provide: GeocodingService, useValue: geocodingMock },
+        ],
+      });
+
+      const failureService = TestBed.inject(SearchBarService);
+      const results = await firstValueFrom(failureService.resolveDbAddresses('wilhe', {}));
+
+      expect(results).toEqual([]);
+
+      const logRaw = localStorage.getItem('feldpost-search-debug-log');
+      expect(logRaw).toBeTruthy();
+      const entries = JSON.parse(logRaw ?? '[]') as Array<{ kind: string; payload: unknown }>;
+      const dbAddressErrors = entries.filter((entry) => entry.kind === 'db-address-error');
+      expect(dbAddressErrors.length).toBe(1);
+      expect(dbAddressErrors[0]?.payload).toMatchObject({
+        query: 'wilhe',
+        error: {
+          code: 'PGRST204',
+          status: 400,
+        },
+      });
+    });
   });
 
   // ── DB Content Resolution ────────────────────────────────────────────
@@ -292,13 +344,14 @@ describe('SearchBarService', () => {
         expect.objectContaining({
           countrycodes: ['at'],
           viewbox: '15,49,17,47',
+          bounded: true,
         }),
       );
 
       const lastCallOptions = geocodingMock.search.mock.calls.at(-1)?.[1] as
         | Record<string, unknown>
         | undefined;
-      expect(lastCallOptions?.['bounded']).toBeUndefined();
+      expect(lastCallOptions?.['bounded']).toBe(true);
     });
 
     it('returns empty array on geocoder failure', async () => {
@@ -432,6 +485,65 @@ describe('SearchBarService', () => {
         'Wilhelminenstrasse 85, 1160 Wien',
       );
       expect(results[0].label).toBe('Wilhelminenstrasse 85, 1160 Wien');
+    });
+
+    it('broadens city-hint retries with query stems and keeps only original-prefix matches', async () => {
+      geocodingMock.reverse.mockResolvedValue({ city: 'Vienna' });
+      geocodingMock.search
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          {
+            lat: 48.2169,
+            lng: 16.3136,
+            displayName: 'Wilhelminenstrasse, Ottakring, Vienna, Austria',
+            name: null,
+            importance: 0.62,
+            address: {
+              road: 'Wilhelminenstrasse',
+              city: 'Vienna',
+              country_code: 'at',
+              country: 'Austria',
+            },
+          },
+          {
+            lat: 48.2346,
+            lng: 16.3193,
+            displayName: 'Dr. Wilhelmine Lowenstein-Brill, Bastiengasse, Vienna, Austria',
+            name: null,
+            importance: 0.68,
+            address: {
+              road: 'Bastiengasse',
+              city: 'Vienna',
+              country_code: 'at',
+              country: 'Austria',
+            },
+          },
+        ]);
+
+      const results = await firstValueFrom(
+        service.resolveGeocoder('wilhe', {
+          countryCodes: ['at'],
+          viewportBounds: {
+            north: 48.25,
+            east: 16.45,
+            south: 48.12,
+            west: 16.2,
+          },
+          currentLocation: { lat: 48.2083, lng: 16.3731 },
+        }),
+      );
+
+      expect(results.length).toBe(1);
+      expect(results[0].label).toBe('Wilhelminenstrasse');
+      expect(
+        geocodingMock.search.mock.calls.some(
+          ([query]) =>
+            typeof query === 'string' && /^(wil|wilh|wilhe)\s+(vienna|wien)$/.test(query),
+        ),
+      ).toBe(true);
     });
   });
 

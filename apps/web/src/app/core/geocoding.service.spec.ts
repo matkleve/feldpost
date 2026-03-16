@@ -39,6 +39,15 @@ function mockSupabaseService(invokeFn: ReturnType<typeof vi.fn>) {
   return {
     client: {
       functions: { invoke: invokeFn },
+      auth: {
+        getSession: vi.fn().mockResolvedValue({
+          data: {
+            session: {
+              access_token: 'test-token',
+            },
+          },
+        }),
+      },
     },
   };
 }
@@ -112,6 +121,7 @@ describe('GeocodingService', () => {
     expect(invokeSpy).toHaveBeenCalledTimes(1);
     expect(invokeSpy).toHaveBeenCalledWith('geocode', {
       body: { action: 'reverse', lat: 47.3769, lng: 8.5417 },
+      headers: { Authorization: 'Bearer test-token' },
     });
   });
 
@@ -212,6 +222,68 @@ describe('GeocodingService', () => {
     const result = await service.reverse(47.3, 8.5);
 
     expect(result).toBeNull();
+  });
+
+  it('retries boundedly when edge function responds with retryable 502 and then succeeds', async () => {
+    const retryableError = {
+      name: 'FunctionsHttpError',
+      message: 'Edge function returned status 502',
+      status: 502,
+      context: new Response(
+        JSON.stringify({
+          error: 'Nominatim request failed',
+          failureType: 'upstream_http',
+          status: 503,
+        }),
+        {
+          status: 502,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      ),
+    };
+
+    invokeSpy
+      .mockResolvedValueOnce({ data: null, error: retryableError })
+      .mockResolvedValueOnce({ data: nominatimResponse(), error: null });
+
+    const result = await service.reverse(47.3769, 8.5417);
+
+    expect(result).not.toBeNull();
+    expect(invokeSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry non-retryable 400 failures and logs one structured warning', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const nonRetryableError = {
+      name: 'FunctionsHttpError',
+      message: 'Edge function returned status 400',
+      status: 400,
+      code: 'BAD_REQUEST',
+      context: new Response(
+        JSON.stringify({
+          error: 'lat and lng are required numbers for reverse',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      ),
+    };
+
+    invokeSpy.mockResolvedValueOnce({ data: null, error: nonRetryableError });
+
+    const result = await service.reverse(47.3, 8.5);
+
+    expect(result).toBeNull();
+    expect(invokeSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[Geocoding] geocode request failed',
+      expect.objectContaining({
+        operation: 'reverse',
+        status: 400,
+        code: 'BAD_REQUEST',
+      }),
+    );
   });
 
   // ── Caching ──────────────────────────────────────────────────────────────

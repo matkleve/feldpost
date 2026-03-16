@@ -60,7 +60,8 @@ describe('fetchGeocoderCandidates', () => {
       expect.objectContaining({
         countrycodes: ['at'],
         viewbox: '16.2,48.25,16.45,48.12',
-        limit: 3,
+        limit: 12,
+        bounded: true,
       }),
     );
   });
@@ -448,5 +449,48 @@ describe('fetchGeocoderCandidates', () => {
     );
 
     expect(results).toEqual([]);
+  });
+
+  it('keeps multi-token city-hinted matches when query tokens are covered', async () => {
+    const hits: GeocoderSearchResult[] = [
+      {
+        lat: 48.217,
+        lng: 16.314,
+        displayName: 'Wilhelmine-Moik-Platz, Leopoldstadt, Vienna, 1020, Austria',
+        name: null,
+        importance: 0.55,
+        address: {
+          road: 'Wilhelmine-Moik-Platz',
+          city: 'Vienna',
+          country_code: 'at',
+          country: 'Austria',
+        },
+      },
+    ];
+
+    const geocodingService = {
+      search: async () => hits,
+    };
+
+    const results = await fetchGeocoderCandidates(
+      geocodingService as never,
+      'wilhe vienna',
+      {
+        countryCodes: ['at'],
+        viewportBounds: { north: 48.294, east: 16.508, south: 48.172, west: 16.222 },
+      },
+      3,
+      (result, query, index): SearchAddressCandidate => ({
+        id: `geo-${query}-${index}`,
+        family: 'geocoder',
+        label: result.address?.road ?? result.displayName,
+        lat: result.lat,
+        lng: result.lng,
+        score: result.importance,
+      }),
+    );
+
+    expect(results.length).toBe(1);
+    expect(results[0].label).toBe('Wilhelmine-Moik-Platz');
   });
 });

@@ -102,6 +102,17 @@ interface NominatimSearchResponse {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const MAX_PROXY_ATTEMPTS = 3;
+const LOG_DEDUP_WINDOW_MS = 30 * 1000;
+const AUTH_FAILURE_COOLDOWN_MS = 2 * 60 * 1000;
+
+interface GeocodeFailureDetails {
+  status: number | null;
+  code: string | null;
+  name: string | null;
+  message: string;
+  bodySnippet: string | null;
+}
 
 // ── Service ────────────────────────────────────────────────────────────────────
 
@@ -117,6 +128,8 @@ export class GeocodingService {
     string,
     { data: ForwardGeocodeResult; expires: number }
   >();
+  private readonly recentFailureLogs = new Map<string, number>();
+  private authFailureUntilMs = 0;
 
   /**
    * Serial queue: chains every request so only one is in-flight at a time.
@@ -143,11 +156,14 @@ export class GeocodingService {
       }
 
       try {
-        const data = await this.callProxy<NominatimReverseResponse>({
-          action: 'reverse',
-          lat,
-          lng,
-        });
+        const data = await this.callProxy<NominatimReverseResponse>(
+          {
+            action: 'reverse',
+            lat,
+            lng,
+          },
+          'reverse',
+        );
         if (!data?.address) return null;
 
         const result = this.parseReverseResponse(data);
@@ -180,10 +196,13 @@ export class GeocodingService {
       }
 
       try {
-        const results = await this.callProxy<NominatimSearchResponse[]>({
-          action: 'forward',
-          q: trimmed,
-        });
+        const results = await this.callProxy<NominatimSearchResponse[]>(
+          {
+            action: 'forward',
+            q: trimmed,
+          },
+          'forward',
+        );
         if (!results?.length || !results[0].lat || !results[0].lon) return null;
 
         const result = this.parseForwardResponse(results[0]);
@@ -220,7 +239,7 @@ export class GeocodingService {
         if (options?.viewbox) body['viewbox'] = options.viewbox;
         if (options?.bounded) body['bounded'] = 1;
 
-        const results = await this.callProxy<NominatimSearchResponse[]>(body);
+        const results = await this.callProxy<NominatimSearchResponse[]>(body, 'search');
         if (!results?.length) return [];
 
         return results
@@ -246,13 +265,171 @@ export class GeocodingService {
     return result;
   }
 
-  /** Call the `geocode` Supabase Edge Function. */
-  private async callProxy<T>(body: Record<string, unknown>): Promise<T> {
-    const { data, error } = await this.supabase.client.functions.invoke('geocode', {
-      body,
+  /** Call the `geocode` Supabase Edge Function with bounded retry/backoff. */
+  private async callProxy<T>(
+    body: Record<string, unknown>,
+    operation: 'reverse' | 'forward' | 'search',
+  ): Promise<T> {
+    if (Date.now() < this.authFailureUntilMs) {
+      throw new Error('Geocoding temporarily unavailable due to authentication failure');
+    }
+
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= MAX_PROXY_ATTEMPTS; attempt += 1) {
+      try {
+        const headers = await this.getFunctionAuthHeaders();
+        const { data, error } = await this.supabase.client.functions.invoke('geocode', {
+          body,
+          headers,
+        });
+        if (error) throw error;
+        this.authFailureUntilMs = 0;
+        return data as T;
+      } catch (error) {
+        lastError = error;
+        const details = await this.extractFailureDetails(error);
+        const retryable = this.isRetryableFailure(details);
+        const finalAttempt = attempt >= MAX_PROXY_ATTEMPTS || !retryable;
+
+        if (details.status === 401) {
+          this.authFailureUntilMs = Date.now() + AUTH_FAILURE_COOLDOWN_MS;
+        }
+
+        if (finalAttempt) {
+          this.logProxyFailure(operation, attempt, details, retryable);
+          throw error;
+        }
+
+        await this.delay(this.backoffMs(attempt));
+      }
+    }
+
+    throw lastError;
+  }
+
+  private async getFunctionAuthHeaders(): Promise<Record<string, string>> {
+    const {
+      data: { session },
+    } = await this.supabase.client.auth.getSession();
+
+    const accessToken = session?.access_token;
+    if (!accessToken) {
+      throw new Error('Missing Supabase access token for geocode function');
+    }
+
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    };
+  }
+
+  private async extractFailureDetails(error: unknown): Promise<GeocodeFailureDetails> {
+    const candidate =
+      typeof error === 'object' && error !== null
+        ? (error as {
+            status?: unknown;
+            code?: unknown;
+            name?: unknown;
+            message?: unknown;
+            context?: unknown;
+          })
+        : null;
+
+    const response = this.toResponse(candidate?.context);
+    const statusFromError = typeof candidate?.status === 'number' ? candidate.status : null;
+    const status = statusFromError ?? response?.status ?? null;
+
+    return {
+      status,
+      code: typeof candidate?.code === 'string' ? candidate.code : null,
+      name: typeof candidate?.name === 'string' ? candidate.name : null,
+      message:
+        typeof candidate?.message === 'string'
+          ? this.sanitizeSnippet(candidate.message)
+          : this.sanitizeSnippet(String(error)),
+      bodySnippet: response ? await this.readResponseSnippet(response) : null,
+    };
+  }
+
+  private isRetryableFailure(details: GeocodeFailureDetails): boolean {
+    const { status, name, message } = details;
+
+    if (status != null) {
+      if (status === 408 || status === 429) return true;
+      if (status >= 500) return true;
+      return false;
+    }
+
+    const normalizedName = (name ?? '').toLowerCase();
+    const normalizedMessage = message.toLowerCase();
+    if (normalizedName.includes('fetch') || normalizedName.includes('relay')) return true;
+    if (normalizedMessage.includes('networkerror')) return true;
+    if (normalizedMessage.includes('failed to fetch')) return true;
+    if (normalizedMessage.includes('network')) return true;
+    return false;
+  }
+
+  private logProxyFailure(
+    operation: 'reverse' | 'forward' | 'search',
+    attempt: number,
+    details: GeocodeFailureDetails,
+    retryable: boolean,
+  ): void {
+    const key = [
+      operation,
+      details.status ?? 'none',
+      details.code ?? 'none',
+      details.name ?? 'none',
+      details.message,
+      details.bodySnippet ?? 'none',
+    ].join('|');
+
+    const now = Date.now();
+    const lastLoggedAt = this.recentFailureLogs.get(key) ?? 0;
+    if (now - lastLoggedAt < LOG_DEDUP_WINDOW_MS) {
+      return;
+    }
+    this.recentFailureLogs.set(key, now);
+
+    console.warn('[Geocoding] geocode request failed', {
+      operation,
+      attempt,
+      maxAttempts: MAX_PROXY_ATTEMPTS,
+      retryable,
+      status: details.status,
+      code: details.code,
+      name: details.name,
+      message: details.message,
+      bodySnippet: details.bodySnippet,
     });
-    if (error) throw error;
-    return data as T;
+  }
+
+  private backoffMs(attempt: number): number {
+    if (attempt <= 1) return 250;
+    return 600;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private toResponse(value: unknown): Response | null {
+    if (typeof Response === 'undefined') return null;
+    return value instanceof Response ? value : null;
+  }
+
+  private async readResponseSnippet(response: Response): Promise<string | null> {
+    try {
+      const raw = await response.clone().text();
+      if (!raw) return null;
+      return this.sanitizeSnippet(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  private sanitizeSnippet(input: string): string {
+    return input.replace(/\s+/g, ' ').trim().slice(0, 300);
   }
 
   private parseReverseResponse(data: NominatimReverseResponse): ReverseGeocodeResult {
