@@ -14,6 +14,10 @@ const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
 const MIN_INTERVAL_MS = 1100;
 const USER_AGENT = "Feldpost/1.0 (construction image management)";
 const NOMINATIM_TIMEOUT_MS = 10000;
+const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
 
 let lastRequestTime = 0;
 
@@ -27,13 +31,38 @@ async function rateLimit(): Promise<void> {
   lastRequestTime = Date.now();
 }
 
-function corsHeaders(): Record<string, string> {
-  return {
-    "Access-Control-Allow-Origin": "*",
+function resolveAllowedOrigin(req: Request): string | null {
+  const origin = req.headers.get("origin");
+  if (!origin) {
+    return null;
+  }
+
+  if (ALLOWED_ORIGINS.length === 0) {
+    // Backward-compatible fallback for local development if not configured.
+    return origin;
+  }
+
+  if (ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin)) {
+    return origin;
+  }
+
+  return null;
+}
+
+function corsHeaders(req: Request): Record<string, string> {
+  const headers: Record<string, string> = {
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
+    Vary: "Origin",
   };
+
+  const allowedOrigin = resolveAllowedOrigin(req);
+  if (allowedOrigin) {
+    headers["Access-Control-Allow-Origin"] = allowedOrigin;
+  }
+
+  return headers;
 }
 
 function sanitizeSnippet(input: string): string {
@@ -41,15 +70,31 @@ function sanitizeSnippet(input: string): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const allowedOrigin = resolveAllowedOrigin(req);
+
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders() });
+    if (req.headers.get("origin") && !allowedOrigin) {
+      return new Response(JSON.stringify({ error: "Origin not allowed" }), {
+        status: 403,
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response("ok", { headers: corsHeaders(req) });
+  }
+
+  if (req.headers.get("origin") && !allowedOrigin) {
+    return new Response(JSON.stringify({ error: "Origin not allowed" }), {
+      status: 403,
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
+    });
   }
 
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders(), "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   }
 
@@ -69,7 +114,7 @@ Deno.serve(async (req: Request) => {
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
       status: 400,
-      headers: { ...corsHeaders(), "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   }
 
@@ -80,7 +125,7 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ error: 'Invalid action. Use "reverse" or "forward".' }),
       {
         status: 400,
-        headers: { ...corsHeaders(), "Content-Type": "application/json" },
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
       },
     );
   }
@@ -97,7 +142,7 @@ Deno.serve(async (req: Request) => {
         }),
         {
           status: 400,
-          headers: { ...corsHeaders(), "Content-Type": "application/json" },
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
         },
       );
     }
@@ -107,7 +152,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Coordinates out of range" }),
         {
           status: 400,
-          headers: { ...corsHeaders(), "Content-Type": "application/json" },
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
         },
       );
     }
@@ -119,7 +164,7 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "q is required for forward geocoding" }),
         {
           status: 400,
-          headers: { ...corsHeaders(), "Content-Type": "application/json" },
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
         },
       );
     }
@@ -149,7 +194,7 @@ Deno.serve(async (req: Request) => {
         }),
         {
           status: 502,
-          headers: { ...corsHeaders(), "Content-Type": "application/json" },
+          headers: { ...corsHeaders(req), "Content-Type": "application/json" },
         },
       );
     }
@@ -157,7 +202,7 @@ Deno.serve(async (req: Request) => {
     const data = await nominatimResp.json();
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { ...corsHeaders(), "Content-Type": "application/json" },
+      headers: { ...corsHeaders(req), "Content-Type": "application/json" },
     });
   } catch (error) {
     const message =
@@ -170,7 +215,7 @@ Deno.serve(async (req: Request) => {
       }),
       {
         status: 502,
-        headers: { ...corsHeaders(), "Content-Type": "application/json" },
+        headers: { ...corsHeaders(req), "Content-Type": "application/json" },
       },
     );
   }

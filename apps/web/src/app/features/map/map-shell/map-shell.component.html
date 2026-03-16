@@ -46,6 +46,7 @@
       <app-upload-panel
         [visible]="uploadPanelOpen()"
         (imageUploaded)="onImageUploaded($event)"
+        (zoomToLocationRequested)="onZoomToLocation($event)"
         (placementRequested)="enterPlacementMode($event)"
       />
     </div>

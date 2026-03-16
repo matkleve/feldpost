@@ -33,6 +33,7 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   private readonly inviteService = inject(InviteService);
 
   private expirationTimer: ReturnType<typeof setInterval> | null = null;
+  private qrRenderSequence = 0;
 
   readonly roleSelect = viewChild<ElementRef<HTMLSelectElement>>('roleSelect');
   readonly qrCanvas = viewChild<ElementRef<HTMLCanvasElement>>('qrCanvas');
@@ -44,9 +45,11 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   readonly inviteCreated = output<string>();
   readonly inviteRevoked = output<string>();
 
-  readonly panelMode = signal<InvitePanelMode>('loading');
+  readonly panelMode = signal<InvitePanelMode>('ready');
   readonly targetRole = signal<InviteTargetRole>('worker');
   readonly activeInvite = signal<QrInviteViewModel | null>(null);
+  readonly qrLoading = signal(false);
+  readonly qrVisible = signal(false);
   readonly shareInFlight = signal(false);
   readonly lastError = signal<string | null>(null);
 
@@ -65,10 +68,7 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
         return;
       }
 
-      void toCanvas(canvasRef.nativeElement, invite.qrPayload, {
-        width: 192,
-        margin: 1,
-      });
+      void this.renderQrCanvas(canvasRef.nativeElement, invite.qrPayload);
     });
   }
 
@@ -108,7 +108,6 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.panelMode.set('loading');
     this.lastError.set(null);
 
     try {
@@ -121,10 +120,8 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
             }
           : null,
       );
-      this.panelMode.set('ready');
       this.inviteRevoked.emit(invite.inviteId);
     } catch (error) {
-      this.panelMode.set('error');
       this.lastError.set(error instanceof Error ? error.message : 'Unable to revoke invite.');
     }
   }
@@ -176,12 +173,16 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
       return true;
     }
 
-    return this.shareInFlight() || invite.status !== 'active';
+    return this.shareInFlight() || this.qrLoading() || invite.status !== 'active';
   }
 
   isRegenerateDisabled(): boolean {
     const invite = this.activeInvite();
-    return this.panelMode() !== 'ready' || (invite !== null && invite.status === 'accepted');
+    return (
+      this.panelMode() !== 'ready' ||
+      this.qrLoading() ||
+      (invite !== null && invite.status === 'accepted')
+    );
   }
 
   statusLabel(): string {
@@ -217,8 +218,10 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   }
 
   private async initializePanel(targetRole: InviteTargetRole): Promise<void> {
-    this.panelMode.set('loading');
+    this.panelMode.set('ready');
     this.lastError.set(null);
+    this.qrLoading.set(true);
+    this.qrVisible.set(false);
 
     try {
       const invite = await this.inviteService.createInviteDraft(targetRole);
@@ -234,6 +237,7 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       this.activeInvite.set(null);
+      this.qrLoading.set(false);
       this.panelMode.set('error');
       this.lastError.set(error instanceof Error ? error.message : 'Unable to create invite.');
     }
@@ -242,7 +246,6 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   private async regenerateInvite(targetRole: InviteTargetRole): Promise<void> {
     const current = this.activeInvite();
 
-    this.panelMode.set('loading');
     this.lastError.set(null);
 
     try {
@@ -250,12 +253,42 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
         ? await this.inviteService.regenerateInvite(current.inviteId, targetRole)
         : await this.inviteService.createInviteDraft(targetRole);
       this.activeInvite.set(invite);
-      this.panelMode.set('ready');
       this.inviteCreated.emit(invite.inviteId);
       await this.syncInviteExpiration();
     } catch (error) {
-      this.panelMode.set('error');
       this.lastError.set(error instanceof Error ? error.message : 'Unable to regenerate invite.');
+    }
+  }
+
+  private async renderQrCanvas(canvas: HTMLCanvasElement, payload: string): Promise<void> {
+    const currentSequence = ++this.qrRenderSequence;
+    this.qrVisible.set(false);
+    this.qrLoading.set(true);
+
+    try {
+      await toCanvas(canvas, payload, {
+        width: 192,
+        margin: 1,
+      });
+
+      if (currentSequence !== this.qrRenderSequence) {
+        return;
+      }
+
+      this.qrLoading.set(false);
+      requestAnimationFrame(() => {
+        if (currentSequence === this.qrRenderSequence) {
+          this.qrVisible.set(true);
+        }
+      });
+    } catch {
+      if (currentSequence !== this.qrRenderSequence) {
+        return;
+      }
+
+      this.qrLoading.set(false);
+      this.qrVisible.set(false);
+      this.lastError.set('Unable to render QR code.');
     }
   }
 

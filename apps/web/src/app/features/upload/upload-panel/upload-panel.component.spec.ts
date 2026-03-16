@@ -168,7 +168,9 @@ describe('UploadPanelComponent', () => {
       const { fixture } = await setup();
       const buttons = fixture.debugElement.queryAll(By.css('.upload-panel__intake-btn'));
       expect(buttons.length).toBeGreaterThan(0);
-      expect((buttons[0].nativeElement as HTMLButtonElement).textContent).toContain('Upload folder');
+      expect((buttons[0].nativeElement as HTMLButtonElement).textContent).toContain(
+        'Upload folder',
+      );
     });
   });
 
@@ -463,6 +465,72 @@ describe('UploadPanelComponent', () => {
       });
 
       expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('emits zoomToLocationRequested when clicking uploaded row with coordinates', async () => {
+      const { fixture, component, fakeManager } = await setup();
+      const zoomSpy = vi.spyOn(component.zoomToLocationRequested, 'emit');
+      const job = makeUploadJob({
+        phase: 'complete',
+        imageId: 'img-123',
+        coords: { lat: 48.2082, lng: 16.3738 },
+      });
+
+      fakeManager._jobsSignal.set([job]);
+      fixture.detectChanges();
+
+      const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+      (rowMain.nativeElement as HTMLElement).click();
+
+      expect(zoomSpy).toHaveBeenCalledWith({
+        imageId: 'img-123',
+        lat: 48.2082,
+        lng: 16.3738,
+      });
+    });
+
+    it('does not emit zoomToLocationRequested when uploaded row has no coords', async () => {
+      const { fixture, component, fakeManager } = await setup();
+      const zoomSpy = vi.spyOn(component.zoomToLocationRequested, 'emit');
+
+      fakeManager._jobsSignal.set([
+        makeUploadJob({
+          phase: 'complete',
+          imageId: 'img-123',
+          coords: undefined,
+        }),
+      ]);
+      fixture.detectChanges();
+
+      const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+      (rowMain.nativeElement as HTMLElement).click();
+
+      expect(zoomSpy).not.toHaveBeenCalled();
+    });
+
+    it('supports keyboard zoom request on uploaded row', async () => {
+      const { fixture, component, fakeManager } = await setup();
+      const zoomSpy = vi.spyOn(component.zoomToLocationRequested, 'emit');
+
+      fakeManager._jobsSignal.set([
+        makeUploadJob({
+          phase: 'complete',
+          imageId: 'img-123',
+          coords: { lat: 48.2082, lng: 16.3738 },
+        }),
+      ]);
+      fixture.detectChanges();
+
+      const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+      (rowMain.nativeElement as HTMLElement).dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter' }),
+      );
+
+      expect(zoomSpy).toHaveBeenCalledWith({
+        imageId: 'img-123',
+        lat: 48.2082,
+        lng: 16.3738,
+      });
     });
   });
 
