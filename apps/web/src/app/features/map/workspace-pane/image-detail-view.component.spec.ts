@@ -20,12 +20,14 @@ import {
   UploadManagerService,
   ImageReplacedEvent,
   ImageAttachedEvent,
+  UploadFailedEvent,
 } from '../../../core/upload-manager.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 import { AuthService } from '../../../core/auth.service';
 import { UploadService } from '../../../core/upload.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { PhotoLoadService } from '../../../core/photo-load.service';
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 
@@ -877,16 +879,18 @@ describe('ImageDetailViewComponent', () => {
     });
   });
 
-  // ── onFullResLoaded ──────────────────────────────────────────────────────
+  // ── fullResPreloaded ──────────────────────────────────────────────────────
 
-  describe('onFullResLoaded', () => {
-    it('sets fullResLoaded to true', () => {
+  describe('fullResPreloaded', () => {
+    it('can gate imageReady once preloading is complete', () => {
       const { component } = setup();
-      expect(component.fullResLoaded()).toBe(false);
+      expect(component.fullResPreloaded()).toBe(false);
+      expect(component.imageReady()).toBe(false);
 
-      component.onFullResLoaded();
+      component.fullResPreloaded.set(true);
 
-      expect(component.fullResLoaded()).toBe(true);
+      expect(component.fullResPreloaded()).toBe(true);
+      expect(component.imageReady()).toBe(true);
     });
   });
 });
@@ -901,6 +905,7 @@ function setupReplace() {
   // ── UploadManagerService mock ──
   const imageReplaced$ = new Subject<ImageReplacedEvent>();
   const imageAttached$ = new Subject<ImageAttachedEvent>();
+  const uploadFailed$ = new Subject<UploadFailedEvent>();
   const jobsSignal = signal<ReadonlyArray<any>>([]);
 
   const fakeUploadManager = {
@@ -908,6 +913,7 @@ function setupReplace() {
     attachFile: vi.fn().mockReturnValue('job-002'),
     imageReplaced$: imageReplaced$.asObservable(),
     imageAttached$: imageAttached$.asObservable(),
+    uploadFailed$: uploadFailed$.asObservable(),
     jobs: jobsSignal,
   };
 
@@ -1027,6 +1033,16 @@ function setupReplace() {
     forward: vi.fn().mockResolvedValue(null),
     reverse: vi.fn().mockResolvedValue(null),
   };
+  const fakePhotoLoad = {
+    getLoadState: vi.fn().mockImplementation(() => signal<'idle' | 'loaded'>('loaded')),
+    getSignedUrl: vi.fn().mockResolvedValue({
+      url: 'https://example.com/signed-new',
+      error: null,
+    }),
+    preload: vi.fn().mockResolvedValue(true),
+    invalidate: vi.fn(),
+    markNoPhoto: vi.fn(),
+  };
 
   TestBed.configureTestingModule({
     imports: [ImageDetailViewComponent],
@@ -1036,6 +1052,7 @@ function setupReplace() {
       { provide: UploadService, useValue: fakeUpload },
       { provide: UploadManagerService, useValue: fakeUploadManager },
       { provide: WorkspaceViewService, useValue: fakeWorkspaceView },
+      { provide: PhotoLoadService, useValue: fakePhotoLoad },
     ],
   });
 
@@ -1135,7 +1152,7 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
 
   // ── imageReplaced$ handler ───────────────────────────────────────────────
 
-  it('updates image and sets heroSrc on imageReplaced$', () => {
+  it('updates image state on imageReplaced$', async () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE });
     // Simulate the component seeing this image as "current"
@@ -1150,10 +1167,10 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
       localObjectUrl: blobUrl,
     });
 
-    expect(ctx.component.heroSrc()).toBe(blobUrl);
+    await Promise.resolve();
+
     expect(ctx.component.image()?.storage_path).toBe('org-001/user-001/new-photo.jpg');
-    expect(ctx.component.fullResLoaded()).toBe(false);
-    expect(ctx.component.thumbnailLoaded()).toBe(false);
+    expect(ctx.component.fullResPreloaded()).toBe(false);
   });
 
   it('updates workspace grid cache on imageReplaced$', () => {
@@ -1169,14 +1186,19 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
     });
 
     const gridImage = ctx.fakeWorkspaceView.rawImages().find((wi) => wi.id === MOCK_IMAGE.id);
-    expect(gridImage?.storagePath).toBe('org-001/user-001/new-photo.jpg');
-    expect(gridImage?.signedThumbnailUrl).toBeUndefined();
-    expect(ctx.fakeWorkspaceView.batchSignThumbnails).toHaveBeenCalled();
+    expect(gridImage?.storagePath).toBe('org-001/user-001/photo.jpg');
+
+    return vi.waitFor(() => {
+      const updated = ctx.fakeWorkspaceView.rawImages().find((wi) => wi.id === MOCK_IMAGE.id);
+      expect(updated?.storagePath).toBe('org-001/user-001/new-photo.jpg');
+      expect(updated?.signedThumbnailUrl).toBeUndefined();
+      expect(ctx.fakeWorkspaceView.batchSignThumbnails).toHaveBeenCalled();
+    });
   });
 
   // ── imageAttached$ handler ───────────────────────────────────────────────
 
-  it('switches from no-photo to photo display on imageAttached$', () => {
+  it('switches from no-photo to photo display on imageAttached$', async () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE, storage_path: null });
     ctx.ref.setInput('imageId', MOCK_IMAGE.id);
@@ -1192,14 +1214,15 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
       hadExistingCoords: false,
     });
 
+    await Promise.resolve();
+
     expect(ctx.component.hasPhoto()).toBe(true);
-    expect(ctx.component.heroSrc()).toBe('blob:http://localhost/fake-blob');
     expect(ctx.component.image()?.storage_path).toBe('org-001/user-001/attached.jpg');
   });
 
   // ── Blob URL cleanup ──────────────────────────────────────────────────────
 
-  it('revokes blob URL after full-res loads', () => {
+  it('revokes blob URL after replace event is handled', async () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE });
     ctx.ref.setInput('imageId', MOCK_IMAGE.id);
@@ -1216,13 +1239,9 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
       localObjectUrl: blobUrl,
     });
 
-    expect(ctx.component.heroSrc()).toBe(blobUrl);
-
-    // Simulate full-res load
-    ctx.component.onFullResLoaded();
-
-    expect(ctx.component.heroSrc()).toBeNull();
-    expect(revokeSpy).toHaveBeenCalledWith(blobUrl);
+    await vi.waitFor(() => {
+      expect(revokeSpy).toHaveBeenCalledWith(blobUrl);
+    });
 
     revokeSpy.mockRestore();
   });

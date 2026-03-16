@@ -22,6 +22,7 @@ import {
   buildFallbackQueries,
   toNumber,
 } from './search-query';
+import { fetchDbContentCandidates, fetchGeocoderCandidates } from './search-bar-resolvers';
 import {
   AddressGroup,
   StoredRecentSearch,
@@ -62,14 +63,6 @@ interface DbAddressRow {
 interface DbContentRow {
   id: string;
   name: string | null;
-}
-
-interface SavedGroupImageRow {
-  group_id: string;
-}
-
-interface ImageProjectRow {
-  project_id: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -341,133 +334,22 @@ export class SearchBarService {
     query: string,
     context: SearchQueryContext,
   ): Promise<SearchContentCandidate[]> {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) return [];
-
-    let projectsQuery = this.supabaseService.client
-      .from('projects')
-      .select('id,name')
-      .ilike('name', `%${trimmedQuery}%`)
-      .limit(MAX_DB_CONTENT_RESULTS);
-
-    if (context.organizationId) {
-      projectsQuery = projectsQuery.eq('organization_id', context.organizationId);
-    }
-
-    const [projectsResponse, groupsResponse] = await Promise.all([
-      projectsQuery,
-      this.supabaseService.client
-        .from('saved_groups')
-        .select('id,name')
-        .ilike('name', `%${trimmedQuery}%`)
-        .limit(MAX_DB_CONTENT_RESULTS),
-    ]);
-
-    const projectRows =
-      projectsResponse.error || !Array.isArray(projectsResponse.data)
-        ? []
-        : (projectsResponse.data as DbContentRow[]).filter((row) => !!row.name);
-    const groupRows =
-      groupsResponse.error || !Array.isArray(groupsResponse.data)
-        ? []
-        : (groupsResponse.data as DbContentRow[]).filter((row) => !!row.name);
-
-    const [projectSizes, groupSizes] = await Promise.all([
-      this.loadProjectSizeSignals(
-        projectRows.map((row) => row.id),
-        context.organizationId,
-      ),
-      this.loadGroupSizeSignals(groupRows.map((row) => row.id)),
-    ]);
-
-    const projectCandidates = projectRows
-      .map((row) => {
-        const label = row.name?.trim() ?? '';
-        const textMatch = computeTextMatchScore(row.name ?? '', trimmedQuery);
-        const projectBoost = context.activeProjectId === row.id ? 2 : 1;
-        const sizeSignal = toSizeSignal(projectSizes.get(row.id) ?? 0);
-
-        return {
-          id: `project-${row.id}`,
-          family: 'db-content' as const,
-          label,
-          contentType: 'project' as const,
-          contentId: row.id,
-          subtitle: 'Project',
-          score: textMatch * projectBoost * sizeSignal,
-        };
-      })
-      .filter((candidate) => candidate.label.length > 0);
-
-    const groupCandidates = groupRows
-      .map((row) => {
-        const label = row.name?.trim() ?? '';
-        const textMatch = computeTextMatchScore(row.name ?? '', trimmedQuery);
-        const projectBoost = context.selectedGroupId === row.id ? 1.6 : 1;
-        const sizeSignal = toSizeSignal(groupSizes.get(row.id) ?? 0);
-
-        return {
-          id: `group-${row.id}`,
-          family: 'db-content' as const,
-          label,
-          contentType: 'group' as const,
-          contentId: row.id,
-          subtitle: 'Saved group',
-          score: textMatch * projectBoost * sizeSignal,
-        };
-      })
-      .filter((candidate) => candidate.label.length > 0);
-
-    return [...projectCandidates, ...groupCandidates]
-      .sort((left, right) => {
-        const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
-        if (scoreDelta !== 0) return scoreDelta;
-        return left.label.localeCompare(right.label);
-      })
-      .slice(0, MAX_DB_CONTENT_RESULTS);
+    return fetchDbContentCandidates(this.supabaseService, query, context, MAX_DB_CONTENT_RESULTS);
   }
 
   private async fetchGeocoderCandidates(
     normalizedQuery: string,
     context: SearchQueryContext,
   ): Promise<SearchAddressCandidate[]> {
-    if (normalizedQuery.length < 3) return [];
-
-    const searchOptions: GeocoderSearchOptions = { limit: MAX_GEOCODER_RESULTS };
-    if (context.countryCodes?.length) {
-      searchOptions.countrycodes = context.countryCodes;
-    }
-    if (context.viewportBounds) {
-      const b = context.viewportBounds;
-      searchOptions.viewbox = `${b.west},${b.north},${b.east},${b.south}`;
-      searchOptions.bounded = true;
-    }
-
-    const queries = [normalizedQuery, ...this.buildFallbackQueries(normalizedQuery)];
-    for (const currentQuery of queries) {
-      const results = await this.geocodingService.search(currentQuery, searchOptions);
-      if (results.length > 0) {
-        return results
-          .filter((r) => isStreetLevelResult(r))
-          .map((result, index) => this.toGeocoderCandidate(result, currentQuery, index, context))
-          .sort((left, right) => {
-            const leftLocal = isInViewport(left, context.viewportBounds);
-            const rightLocal = isInViewport(right, context.viewportBounds);
-            if (leftLocal !== rightLocal) return leftLocal ? -1 : 1;
-
-            const leftNearData = distanceToCentroidMeters(left, context.dataCentroid);
-            const rightNearData = distanceToCentroidMeters(right, context.dataCentroid);
-            if (leftNearData !== rightNearData) return leftNearData - rightNearData;
-
-            const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
-            if (scoreDelta !== 0) return scoreDelta;
-            return left.label.localeCompare(right.label);
-          })
-          .slice(0, MAX_GEOCODER_RESULTS);
-      }
-    }
-
-    return [];
+    return fetchGeocoderCandidates(
+      this.geocodingService,
+      normalizedQuery,
+      context,
+      MAX_GEOCODER_RESULTS,
+      this.buildFallbackQueries,
+      (result, query, index, candidateContext) =>
+        this.toGeocoderCandidate(result, query, index, candidateContext),
+    );
   }
 
   private toGeocoderCandidate(
@@ -513,57 +395,4 @@ export class SearchBarService {
   private getStorage(): Storage | null {
     return typeof window === 'undefined' ? null : window.localStorage;
   }
-
-  private async loadProjectSizeSignals(
-    projectIds: string[],
-    organizationId?: string,
-  ): Promise<Map<string, number>> {
-    const counts = new Map<string, number>();
-    if (projectIds.length === 0) return counts;
-
-    let request = this.supabaseService.client
-      .from('images')
-      .select('project_id')
-      .in('project_id', projectIds);
-
-    if (organizationId) {
-      request = request.eq('organization_id', organizationId);
-    }
-
-    const response = await request;
-    if (response.error || !Array.isArray(response.data)) return counts;
-
-    for (const row of response.data as ImageProjectRow[]) {
-      if (!row.project_id) continue;
-      counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
-    }
-
-    return counts;
-  }
-
-  private async loadGroupSizeSignals(groupIds: string[]): Promise<Map<string, number>> {
-    const counts = new Map<string, number>();
-    if (groupIds.length === 0) return counts;
-
-    const response = await this.supabaseService.client
-      .from('saved_group_images')
-      .select('group_id')
-      .in('group_id', groupIds);
-
-    if (response.error || !Array.isArray(response.data)) return counts;
-
-    for (const row of response.data as SavedGroupImageRow[]) {
-      counts.set(row.group_id, (counts.get(row.group_id) ?? 0) + 1);
-    }
-
-    return counts;
-  }
-}
-
-function isStreetLevelResult(result: GeocoderSearchResult): boolean {
-  const addr = result.address;
-  if (!addr) return true;
-  const hasCity = !!(addr.city || addr.town || addr.village || addr.municipality);
-  const hasRoad = !!addr.road;
-  return hasCity || hasRoad;
 }

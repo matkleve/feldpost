@@ -161,35 +161,35 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] Search source loading is progressive and non-blocking across phases.
-- [ ] DB results render before geocoder results for typical latency conditions.
-- [ ] Geocoder calls go through Edge Function proxy only.
-- [ ] Fallback geocoder variants execute only when primary query yields no results.
-- [ ] Geocoder loading placeholders use the same row geometry as final Places rows (height, vertical padding, media-column width).
-- [ ] Geocoder loading placeholders use neutral light-gray loading surfaces (no clay/orange accent colors).
-- [ ] Section ordering remains fixed: Addresses -> Projects & Groups -> Places.
-- [ ] Active-project context materially boosts ranking in DB sections.
+- [x] Search source loading is progressive and non-blocking across phases.
+- [x] DB results render before geocoder results for typical latency conditions.
+- [x] Geocoder calls go through Edge Function proxy only.
+- [x] Fallback geocoder variants execute only when primary query yields no results.
+- [x] Geocoder loading placeholders use the same row geometry as final Places rows (height, vertical padding, media-column width).
+- [x] Geocoder loading placeholders use neutral light-gray loading surfaces (no clay/orange accent colors).
+- [x] Section ordering remains fixed: Addresses -> Projects & Groups -> Places.
+- [x] Active-project context materially boosts ranking in DB sections.
 - [ ] Geo-priority requires `viewportBounds` and `countryCodes` inputs in `SearchQueryContext` when context is available.
-- [ ] With both `viewportBounds` and `countryCodes` present, geocoder requests apply both `viewbox` and `countrycodes` bias.
-- [ ] If `viewportBounds` and/or `countryCodes` are missing, search degrades gracefully (no error state) and still returns relevant results.
-- [ ] For short local-intent queries (for example: street names, districts, city neighborhoods), local candidates rank above unrelated global candidates when geo context is present.
-- [ ] Geocoder results within 30m of DB address candidates are deduplicated from Places output.
-- [ ] In-flight geocoder requests are canceled on query changes (`switchMap` or equivalent cancellation semantics).
-- [ ] `SearchQueryContext` includes and propagates `activeProjectId` from active project selection.
-- [ ] DB address ranking uses `textMatch × projectBoost × dataGravity × recencyDecay`.
-- [ ] DB content ranking uses `textMatch × projectBoost × sizeSignal`.
-- [ ] Geocoder ranking uses `nominatimImportance × proximityDecay × countryBoost`.
-- [ ] Places output is capped at 3 items after deduplication and ranking, and only when the Places section is rendered.
-- [ ] Places ordering is deterministic: local-context matches first, then near-data matches, then remaining global matches by relevance.
+- [x] With both `viewportBounds` and `countryCodes` present, geocoder requests apply both `viewbox` and `countrycodes` bias.
+- [x] If `viewportBounds` and/or `countryCodes` are missing, search degrades gracefully (no error state) and still returns relevant results.
+- [x] For short local-intent queries (for example: street names, districts, city neighborhoods), local candidates rank above unrelated global candidates when geo context is present.
+- [x] Geocoder results within 30m of DB address candidates are deduplicated from Places output.
+- [x] In-flight geocoder requests are canceled on query changes (`switchMap` or equivalent cancellation semantics).
+- [x] `SearchQueryContext` includes and propagates `activeProjectId` from active project selection.
+- [x] DB address ranking uses `textMatch × projectBoost × dataGravity × recencyDecay`.
+- [x] DB content ranking uses `textMatch × projectBoost × sizeSignal`.
+- [x] Geocoder ranking uses `nominatimImportance × proximityDecay × countryBoost`.
+- [x] Places output is capped at 3 items after deduplication and ranking, and only when the Places section is rendered.
+- [x] Places ordering is deterministic: local-context matches first, then near-data matches, then remaining global matches by relevance.
 - [ ] Single-point map-center commits apply a tight zoom target of approximately 50m horizontal ground span when map zoom constraints allow.
 - [ ] Multi-point commits (for example aggregate project/group locations) fit bounds so all committed points are visible in the viewport.
-- [ ] Replacing geocoder loading placeholders with final Places rows does not introduce vertical jump caused by row-size mismatch.
+- [x] Replacing geocoder loading placeholders with final Places rows does not introduce vertical jump caused by row-size mismatch.
 - [ ] Session cache includes org `countryCodes` and `dataCentroid` for query-time geo bias.
-- [ ] Edge Function accepts and forwards `viewbox`, `bounded`, `countrycodes`, and `limit`.
-- [ ] Recent searches persist across sessions in `feldpost-recent-searches`.
-- [ ] Recent entries include `projectId` context and are ranked project-first, then recency/usage.
-- [ ] Recent search storage is capped at 20 with deterministic eviction behavior.
-- [ ] `SearchBarService` retains non-UI responsibilities; component layer does not directly call `fetch()` or `localStorage`.
+- [x] Edge Function accepts and forwards `viewbox`, `bounded`, `countrycodes`, and `limit`.
+- [x] Recent searches persist across sessions in `feldpost-recent-searches`.
+- [x] Recent entries include `projectId` context and are ranked project-first, then recency/usage.
+- [x] Recent search storage is capped at 20 with deterministic eviction behavior.
+- [x] `SearchBarService` retains non-UI responsibilities; component layer does not directly call `fetch()` or `localStorage`.
 - [ ] DB address labels are normalized to `Street Number, Postcode City` on write path when source fields permit normalization.
 - [ ] "Search this area" can trigger viewport-bound re-query when pan distance crosses threshold.
 - [ ] Progressive geo-disclosure can group geocoder output into near-data and other-locations buckets.
