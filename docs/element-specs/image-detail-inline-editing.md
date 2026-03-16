@@ -5,7 +5,7 @@
 
 ## What It Is
 
-The inline editing system for image properties in the Image Detail View. Covers the click-to-edit pattern for address label (title), captured date, project assignment, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup.
+The inline editing system for image properties in the Image Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup.
 
 ## What It Looks Like
 
@@ -20,17 +20,17 @@ Read-only rows (Location, Uploaded) display with `--color-text-secondary` value 
 
 ## Actions
 
-| #   | User Action                               | System Response                                       | Triggers                         |
-| --- | ----------------------------------------- | ----------------------------------------------------- | -------------------------------- |
-| 1   | Clicks address label (title)              | Title becomes an inline text input                    | `editingField` → `address_label` |
-| 2   | Presses Enter or blurs title input        | Saves updated address_label to `images` table         | Supabase update                  |
-| 3   | Clicks captured date value                | Date becomes a `datetime-local` input                 | `editingField` → `captured_at`   |
-| 4   | Picks new date/time, blurs                | Saves updated captured_at to `images` table           | Supabase update                  |
-| 5   | Clicks project value                      | Value becomes a `<select>` dropdown with org projects | `editingField` → `project_id`    |
-| 6   | Selects a project                         | Saves project_id to `images` table                    | Supabase update                  |
-| 7   | Clicks street/city/district/country value | Value becomes an inline text input                    | `editingField` → field name      |
-| 8   | Presses Enter or blurs address input      | Saves updated address component to `images` table     | Supabase update                  |
-| 9   | Presses Escape during any edit            | Cancels edit, restores original value, no DB write    | `editingField` → null            |
+| #   | User Action                               | System Response                                          | Triggers                         |
+| --- | ----------------------------------------- | -------------------------------------------------------- | -------------------------------- |
+| 1   | Clicks address label (title)              | Title becomes an inline text input                       | `editingField` → `address_label` |
+| 2   | Presses Enter or blurs title input        | Saves updated address_label to `images` table            | Supabase update                  |
+| 3   | Clicks captured date value                | Date becomes a `datetime-local` input                    | `editingField` → `captured_at`   |
+| 4   | Picks new date/time, blurs                | Saves updated captured_at to `images` table              | Supabase update                  |
+| 5   | Clicks project value                      | Value becomes a multi-select checklist with org projects | `editingField` → `project_ids`   |
+| 6   | Checks/unchecks projects                  | Upserts/deletes memberships in `image_projects`          | Supabase write batch             |
+| 7   | Clicks street/city/district/country value | Value becomes an inline text input                       | `editingField` → field name      |
+| 8   | Presses Enter or blurs address input      | Saves updated address component to `images` table        | Supabase update                  |
+| 9   | Presses Escape during any edit            | Cancels edit, restores original value, no DB write       | `editingField` → null            |
 
 ## Inline Editing Flow
 
@@ -44,15 +44,15 @@ All editable fields follow the same interaction pattern:
 
 ### Editable Fields Map
 
-| Field         | Input Type       | DB Table | DB Column       | Validation       |
-| ------------- | ---------------- | -------- | --------------- | ---------------- |
-| Address label | `text`           | `images` | `address_label` | Max 500 chars    |
-| Captured date | `datetime-local` | `images` | `captured_at`   | Valid ISO date   |
-| Project       | `<select>`       | `images` | `project_id`    | Valid project ID |
-| Street        | `text`           | `images` | `street`        | Max 200 chars    |
-| City          | `text`           | `images` | `city`          | Max 200 chars    |
-| District      | `text`           | `images` | `district`      | Max 200 chars    |
-| Country       | `text`           | `images` | `country`       | Max 200 chars    |
+| Field         | Input Type       | DB Table         | DB Column                | Validation        |
+| ------------- | ---------------- | ---------------- | ------------------------ | ----------------- |
+| Address label | `text`           | `images`         | `address_label`          | Max 500 chars     |
+| Captured date | `datetime-local` | `images`         | `captured_at`            | Valid ISO date    |
+| Projects      | `multi-select`   | `image_projects` | `(image_id, project_id)` | Valid project IDs |
+| Street        | `text`           | `images`         | `street`                 | Max 200 chars     |
+| City          | `text`           | `images`         | `city`                   | Max 200 chars     |
+| District      | `text`           | `images`         | `district`               | Max 200 chars     |
+| Country       | `text`           | `images`         | `country`                | Max 200 chars     |
 
 ### Property Row Icon Mapping
 
@@ -84,7 +84,7 @@ At the top of the Location section sits an **Address Search Bar** — a full-wid
 ```
 DetailsSection                         ← dd-section-label "Details"
 ├── IconPropertyRow "Captured"         ← schedule icon, datetime-local on edit
-├── IconPropertyRow "Project"          ← folder icon, <select> dropdown on edit
+├── IconPropertyRow "Projects"         ← folder icon, multi-select checklist on edit
 └── IconPropertyRow "Uploaded"         ← cloud_upload icon, read-only, muted
 
 LocationSection                        ← dd-section-label "Location"
@@ -105,13 +105,13 @@ LocationSection                        ← dd-section-label "Location"
 | ---------------- | -------------------------------- | ------- | -------------------------------------------- |
 | `editingField`   | `string \| null`                 | `null`  | Which field is currently being edited inline |
 | `saving`         | `boolean`                        | `false` | Whether a save operation is in progress      |
-| `projectOptions` | `{ id: string, name: string }[]` | `[]`    | Available projects for the dropdown          |
+| `projectOptions` | `{ id: string, name: string }[]` | `[]`    | Available projects for the membership picker |
 
 ## Acceptance Criteria
 
 - [ ] **Address label**: click title → inline text input → save on Enter/blur → updates `images.address_label`
 - [ ] **Captured date**: click value → `datetime-local` input → save → updates `images.captured_at`
-- [ ] **Project**: click value → `<select>` dropdown → save → updates `images.project_id`
+- [ ] **Projects**: click value → multi-select checklist → save → updates `image_projects` memberships
 - [ ] **Street/City/District/Country**: click value → inline text input → save → updates `images.[field]`
 - [ ] Escape key cancels any active edit without saving
 - [ ] Optimistic updates: UI reflects changes immediately, rolls back on error

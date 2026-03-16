@@ -18,6 +18,11 @@ type DensityMode = 'compact' | 'comfortable';
 
 type SearchBias = 'balanced' | 'address-first' | 'place-first';
 
+type MarkerMotionPreference = 'off' | 'smooth';
+
+const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
+const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
+
 interface SettingsSection {
   id: string;
   icon: string;
@@ -33,6 +38,7 @@ interface SettingsModel {
   uploadFailureAlerts: boolean;
   mapAutoLocate: boolean;
   mapGridOverlay: boolean;
+  markerMotion: MarkerMotionPreference;
   searchBias: SearchBias;
   searchRadiusKm: number;
   cacheRetentionDays: number;
@@ -110,6 +116,7 @@ export class SettingsOverlayComponent {
     uploadFailureAlerts: true,
     mapAutoLocate: false,
     mapGridOverlay: false,
+    markerMotion: this.readMarkerMotionPreference(),
     searchBias: 'balanced',
     searchRadiusKm: 2,
     cacheRetentionDays: 30,
@@ -196,6 +203,18 @@ export class SettingsOverlayComponent {
     this.settingsModel.update((model) => ({ ...model, searchBias }));
   }
 
+  setMarkerMotion(markerMotion: MarkerMotionPreference): void {
+    this.settingsModel.update((model) => ({ ...model, markerMotion }));
+    if (typeof window === 'undefined') return;
+
+    window.localStorage.setItem(MAP_MARKER_MOTION_STORAGE_KEY, markerMotion);
+    window.dispatchEvent(
+      new CustomEvent(MAP_MARKER_MOTION_EVENT, {
+        detail: { markerMotion },
+      }),
+    );
+  }
+
   setSearchRadius(radiusKm: number): void {
     this.settingsModel.update((model) => ({ ...model, searchRadiusKm: radiusKm }));
   }
@@ -237,5 +256,11 @@ export class SettingsOverlayComponent {
       this.lastError.set(message);
       this.loadState.set('error');
     }
+  }
+
+  private readMarkerMotionPreference(): MarkerMotionPreference {
+    if (typeof window === 'undefined') return 'smooth';
+    const stored = window.localStorage.getItem(MAP_MARKER_MOTION_STORAGE_KEY);
+    return stored === 'off' ? 'off' : 'smooth';
   }
 }

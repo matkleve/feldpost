@@ -17,7 +17,7 @@ A single 128×128px image thumbnail in the grid. Shows photo preview with overla
 On hover (desktop): fade-in at 80ms with no layout shift:
 
 - Top-left: selection checkbox
-- Top-right: "Add to project" icon button
+- Top-right: "Manage projects" icon button
 - Bottom-right: context menu (⋯) button
 
 ## Where It Lives
@@ -32,7 +32,7 @@ On hover (desktop): fade-in at 80ms with no layout shift:
 | 1   | Clicks card                      | Opens Image Detail View                            | `detailImageId` set |
 | 2   | Hovers card (desktop)            | Reveals action buttons (checkbox, add-to-group, ⋯) | Opacity 0→1, 80ms   |
 | 3   | Clicks checkbox                  | Toggles selection for this image                   | Selection state     |
-| 4   | Clicks "Add to project"          | Opens project picker dropdown                      | Project selection   |
+| 4   | Clicks "Manage projects"         | Opens project membership picker (multi-select)     | Project memberships |
 | 5   | Clicks ⋯ (context menu)          | Opens menu: View detail, Edit metadata, Delete     | Context menu        |
 | 6   | Enters bulk-select mode (mobile) | Checkboxes become always visible                   | Bulk mode           |
 

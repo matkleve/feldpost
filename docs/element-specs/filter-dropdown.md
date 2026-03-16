@@ -215,7 +215,7 @@ flowchart TD
     end
 
     subgraph Result["Combined Query"]
-        Q["SELECT * FROM images\nWHERE address_label ILIKE '%Zürich%'\n  AND project_id = 'nord-uuid'\n  AND id IN (\n    SELECT image_id FROM image_metadata\n    WHERE key = 'Material'\n      AND value ILIKE '%Beton%'\n  )"]
+        Q["SELECT * FROM images i\nWHERE i.address_label ILIKE '%Zürich%'\n  AND EXISTS (\n    SELECT 1 FROM image_projects ip\n    WHERE ip.image_id = i.id\n      AND ip.project_id = 'nord-uuid'\n  )\n  AND i.id IN (\n    SELECT image_id FROM image_metadata\n    WHERE key = 'Material'\n      AND value ILIKE '%Beton%'\n  )"]
     end
 
     FilterDropdown --> Result

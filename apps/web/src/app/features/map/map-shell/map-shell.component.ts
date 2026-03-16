@@ -55,6 +55,11 @@ import {
   PhotoMarkerZoomLevel,
 } from '../../../core/map/marker-factory';
 
+type MarkerMotionPreference = 'off' | 'smooth';
+
+const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
+const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
+
 @Component({
   selector: 'app-map-shell',
   imports: [UploadPanelComponent, SearchBarComponent, WorkspacePaneComponent, DragDividerComponent],
@@ -67,8 +72,10 @@ import {
 export class MapShellComponent implements OnDestroy {
   private static readonly GPS_TRACKING_INTERVAL_MS = 60000;
   private static readonly GPS_RECENTER_MIN_ZOOM = 16;
+  private static readonly PLACEMENT_CLICK_GUARD_MS = 220;
   private static readonly DETAIL_LOCATION_FOCUS_ZOOM = 21;
   private static readonly DETAIL_LOCATION_FLY_DURATION_S = 0.35;
+  private static readonly MARKER_MOVE_DURATION_MS = 320;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -324,6 +331,17 @@ export class MapShellComponent implements OnDestroy {
    * handling upload manager events (replace, attach).
    */
   private readonly markersByImageId = new Map<string, string>();
+  private readonly markerMoveAnimationRaf = new WeakMap<L.Marker, number>();
+  private readonly markerMotionPreference = signal<MarkerMotionPreference>('smooth');
+  private readonly markerMotionEventHandler = (event: Event): void => {
+    const detail = (event as CustomEvent<{ markerMotion?: MarkerMotionPreference }>).detail;
+    const candidate = detail?.markerMotion;
+    if (candidate === 'off' || candidate === 'smooth') {
+      this.markerMotionPreference.set(candidate);
+      return;
+    }
+    this.markerMotionPreference.set(this.readMarkerMotionPreference());
+  };
 
   /** Subscriptions for upload manager events — cleaned up in ngOnDestroy. */
   private uploadManagerSubs: { unsubscribe(): void }[] = [];
@@ -332,9 +350,12 @@ export class MapShellComponent implements OnDestroy {
   private markerBootstrapTimer: ReturnType<typeof setTimeout> | null = null;
   private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
   private gpsTrackingTimer: ReturnType<typeof setInterval> | null = null;
+  private lastMapMoveAt = 0;
 
   constructor() {
     afterNextRender(() => {
+      this.markerMotionPreference.set(this.readMarkerMotionPreference());
+      window.addEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
       this.initMap();
       this.subscribeToUploadManagerEvents();
       this.scheduleDeferredStartupWork();
@@ -357,6 +378,12 @@ export class MapShellComponent implements OnDestroy {
     }
     this.viewportQueryController?.abort();
     this.viewportQueryController = null;
+    if (typeof window !== 'undefined') {
+      window.removeEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
+    }
+    for (const state of this.uploadedPhotoMarkers.values()) {
+      this.cancelMarkerMoveAnimation(state.marker);
+    }
     this.photoMarkerLayer?.clearLayers();
     this.uploadedPhotoMarkers.clear();
     this.markersByImageId.clear();
@@ -559,6 +586,7 @@ export class MapShellComponent implements OnDestroy {
     // Debounced moveend: refreshes markers only when zoom-level threshold changes.
     // No marker DOM work during zoom animation — all updates fire after moveend.
     this.map.on('moveend', () => {
+      this.lastMapMoveAt = Date.now();
       this.handleMoveEnd();
       this.updateSearchViewportBounds();
     });
@@ -718,8 +746,11 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private handleMapClick(e: L.LeafletMouseEvent): void {
-    this.uploadPanelPinned.set(false);
     if (this.pendingPlacementKey) {
+      // Prevent accidental placement immediately after drag/pan movement.
+      if (Date.now() - this.lastMapMoveAt < MapShellComponent.PLACEMENT_CLICK_GUARD_MS) {
+        return;
+      }
       const coords: ExifCoords = { lat: e.latlng.lat, lng: e.latlng.lng };
       const panel = this.uploadPanelChild();
       if (panel) {
@@ -732,6 +763,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     if (!this.searchPlacementActive()) {
+      this.uploadPanelPinned.set(false);
       // Deselect the active marker but keep the workspace pane open.
       // The pane is closed only via its own close button.
       this.setSelectedMarker(null);
@@ -1015,16 +1047,13 @@ export class MapShellComponent implements OnDestroy {
       incoming.set(key, row);
     }
 
-    // --- Remove markers that left the viewport (skip optimistic ones) ---
+    // Mark non-optimistic outgoing markers as recyclable first. Some can be
+    // re-used for incoming markers so they animate to the new centroid.
+    const recyclableKeys = new Set<string>();
     for (const [key, state] of this.uploadedPhotoMarkers) {
-      if (state.optimistic) continue; // keep until next reconciliation
+      if (state.optimistic) continue;
       if (!incoming.has(key)) {
-        this.photoMarkerLayer!.removeLayer(state.marker);
-        // Clean up secondary index for removed markers.
-        if (state.imageId) {
-          this.markersByImageId.delete(state.imageId);
-        }
-        this.uploadedPhotoMarkers.delete(key);
+        recyclableKeys.add(key);
       }
     }
 
@@ -1076,7 +1105,73 @@ export class MapShellComponent implements OnDestroy {
           // Always keep sourceCells in sync even if visuals haven't changed.
           existing.sourceCells = row.sourceCells;
         }
+        existing.lat = row.cluster_lat;
+        existing.lng = row.cluster_lng;
         continue;
+      }
+
+      // No exact key match: attempt marker re-use to avoid remove/add popping.
+      const reusableKey = this.findReusableMarkerKey(row, recyclableKeys);
+      if (reusableKey) {
+        const reusableState = this.uploadedPhotoMarkers.get(reusableKey);
+        if (reusableState) {
+          recyclableKeys.delete(reusableKey);
+
+          // Revoke stale ObjectURL when signed URL takes over from optimistic blob.
+          if (
+            reusableState.thumbnailUrl &&
+            reusableState.thumbnailUrl.startsWith('blob:') &&
+            thumbnailSourcePath
+          ) {
+            URL.revokeObjectURL(reusableState.thumbnailUrl);
+            reusableState.thumbnailUrl = undefined;
+            reusableState.signedAt = undefined;
+          }
+
+          const previousImageId = reusableState.imageId;
+          const nextImageId = count === 1 ? (row.image_id ?? undefined) : undefined;
+          if (previousImageId !== nextImageId) {
+            if (previousImageId) this.markersByImageId.delete(previousImageId);
+            if (nextImageId) this.markersByImageId.set(nextImageId, key);
+          } else if (nextImageId) {
+            this.markersByImageId.set(nextImageId, key);
+          }
+
+          // Preserve selection state if the selected marker is being re-keyed.
+          if (this.selectedMarkerKey() === reusableKey) {
+            this.selectedMarkerKey.set(key);
+          }
+
+          const needsVisualRefresh =
+            reusableState.count !== count ||
+            reusableState.direction !== direction ||
+            reusableState.corrected !== corrected ||
+            reusableState.uploading !== undefined ||
+            reusableState.thumbnailSourcePath !== thumbnailSourcePath;
+
+          reusableState.count = count;
+          reusableState.lat = row.cluster_lat;
+          reusableState.lng = row.cluster_lng;
+          reusableState.sourceCells = row.sourceCells;
+          reusableState.direction = direction;
+          reusableState.corrected = corrected;
+          reusableState.thumbnailSourcePath = thumbnailSourcePath;
+          reusableState.imageId = nextImageId;
+          reusableState.optimistic = false;
+
+          this.uploadedPhotoMarkers.delete(reusableKey);
+          this.uploadedPhotoMarkers.set(key, reusableState);
+
+          // Rebind click handler so interaction resolves the new marker key.
+          this.bindMarkerClickInteraction(key, reusableState.marker);
+          this.animateMarkerPosition(reusableState.marker, row.cluster_lat, row.cluster_lng);
+
+          if (needsVisualRefresh) {
+            this.refreshPhotoMarker(key);
+          }
+
+          continue;
+        }
       }
 
       // New marker — add to LayerGroup (not directly to map) for batch ops.
@@ -1103,6 +1198,22 @@ export class MapShellComponent implements OnDestroy {
       if (count === 1 && row.image_id) {
         this.markersByImageId.set(row.image_id, key);
       }
+    }
+
+    // Remove outgoing markers that were not re-used.
+    for (const oldKey of recyclableKeys) {
+      const oldState = this.uploadedPhotoMarkers.get(oldKey);
+      if (!oldState) continue;
+
+      this.cancelMarkerMoveAnimation(oldState.marker);
+      this.photoMarkerLayer!.removeLayer(oldState.marker);
+      if (oldState.imageId) {
+        this.markersByImageId.delete(oldState.imageId);
+      }
+      if (this.selectedMarkerKey() === oldKey) {
+        this.selectedMarkerKey.set(null);
+      }
+      this.uploadedPhotoMarkers.delete(oldKey);
     }
 
     // Clear optimistic flag from surviving markers.
@@ -1179,12 +1290,162 @@ export class MapShellComponent implements OnDestroy {
 
   /** Attach click + touch long-press interactions consistently for each new marker. */
   private attachMarkerInteractions(markerKey: string, marker: L.Marker): void {
-    marker.on('click', () => this.handlePhotoMarkerClick(markerKey));
+    this.bindMarkerClickInteraction(markerKey, marker);
     // Attach long-press handler for touch direction cone after element is in DOM.
     marker.once('add', () => {
       const el = marker.getElement();
-      if (el) this.attachLongPressHandler(el);
+      if (el) {
+        this.attachLongPressHandler(el);
+        this.triggerMarkerFadeIn(el);
+      }
     });
+  }
+
+  /** Ensure marker click always resolves to the current marker key. */
+  private bindMarkerClickInteraction(markerKey: string, marker: L.Marker): void {
+    marker.off('click');
+    marker.on('click', () => this.handlePhotoMarkerClick(markerKey));
+  }
+
+  /** Fade in newly added marker elements for smoother cluster reconciliation. */
+  private triggerMarkerFadeIn(el: HTMLElement): void {
+    if (
+      this.markerMotionPreference() === 'off' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+
+    el.classList.remove('map-photo-marker-wrapper--fade-in');
+    el.classList.add('map-photo-marker-wrapper--fade-prep');
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        el.classList.add('map-photo-marker-wrapper--fade-in');
+        el.classList.remove('map-photo-marker-wrapper--fade-prep');
+      });
+    });
+
+    window.setTimeout(() => {
+      if (el.isConnected) {
+        el.classList.remove('map-photo-marker-wrapper--fade-in');
+      }
+    }, 300);
+  }
+
+  /**
+   * Animate marker movement when a surviving marker gets a new centroid.
+   * Uses frame-based interpolation with easing so interrupted updates
+   * can be retargeted cleanly without visual popping.
+   */
+  private animateMarkerPosition(marker: L.Marker, lat: number, lng: number): void {
+    if (this.markerMotionPreference() === 'off') {
+      this.cancelMarkerMoveAnimation(marker);
+      marker.setLatLng([lat, lng]);
+      return;
+    }
+
+    const from = marker.getLatLng();
+    const to = L.latLng(lat, lng);
+
+    if (!Number.isFinite(from.lat) || !Number.isFinite(from.lng)) {
+      marker.setLatLng(to);
+      return;
+    }
+
+    const latDelta = to.lat - from.lat;
+    const lngDelta = to.lng - from.lng;
+    if (Math.abs(latDelta) < 1e-9 && Math.abs(lngDelta) < 1e-9) {
+      marker.setLatLng(to);
+      return;
+    }
+
+    this.cancelMarkerMoveAnimation(marker);
+
+    const start = performance.now();
+    const durationMs = MapShellComponent.MARKER_MOVE_DURATION_MS;
+    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+
+    const step = (now: number): void => {
+      const t = Math.min((now - start) / durationMs, 1);
+      const eased = easeOutCubic(t);
+
+      marker.setLatLng([from.lat + latDelta * eased, from.lng + lngDelta * eased]);
+
+      if (t < 1) {
+        const rafId = window.requestAnimationFrame(step);
+        this.markerMoveAnimationRaf.set(marker, rafId);
+        return;
+      }
+
+      this.markerMoveAnimationRaf.delete(marker);
+      marker.setLatLng(to);
+    };
+
+    const rafId = window.requestAnimationFrame(step);
+    this.markerMoveAnimationRaf.set(marker, rafId);
+  }
+
+  private cancelMarkerMoveAnimation(marker: L.Marker): void {
+    const rafId = this.markerMoveAnimationRaf.get(marker);
+    if (rafId == null) return;
+    window.cancelAnimationFrame(rafId);
+    this.markerMoveAnimationRaf.delete(marker);
+  }
+
+  private readMarkerMotionPreference(): MarkerMotionPreference {
+    if (typeof window === 'undefined') return 'smooth';
+    const stored = window.localStorage.getItem(MAP_MARKER_MOTION_STORAGE_KEY);
+    return stored === 'off' ? 'off' : 'smooth';
+  }
+
+  /**
+   * Select a recyclable outgoing marker that can represent an incoming row.
+   * Prefer exact single-image identity; otherwise pick the nearest marker of
+   * the same kind (single vs cluster) within a small screen-space threshold.
+   */
+  private findReusableMarkerKey(
+    row: { cluster_lat: number; cluster_lng: number; image_count: number; image_id: string | null },
+    recyclableKeys: Set<string>,
+  ): string | null {
+    const count = Number(row.image_count);
+    const incomingIsSingle = count === 1;
+
+    if (incomingIsSingle && row.image_id) {
+      const byImageId = this.markersByImageId.get(row.image_id);
+      if (byImageId && recyclableKeys.has(byImageId)) {
+        return byImageId;
+      }
+    }
+
+    if (!this.map) return null;
+
+    const incomingPoint = this.map.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]);
+    const maxDistancePx = incomingIsSingle ? 80 : 140;
+    const maxDistanceSq = maxDistancePx * maxDistancePx;
+
+    let bestKey: string | null = null;
+    let bestDistanceSq = Number.POSITIVE_INFINITY;
+
+    for (const candidateKey of recyclableKeys) {
+      const candidate = this.uploadedPhotoMarkers.get(candidateKey);
+      if (!candidate) continue;
+
+      const candidateIsSingle = candidate.count === 1;
+      if (candidateIsSingle !== incomingIsSingle) continue;
+
+      const candidatePoint = this.map.latLngToContainerPoint([candidate.lat, candidate.lng]);
+      const dx = incomingPoint.x - candidatePoint.x;
+      const dy = incomingPoint.y - candidatePoint.y;
+      const distSq = dx * dx + dy * dy;
+
+      if (distSq > maxDistanceSq || distSq >= bestDistanceSq) continue;
+      bestDistanceSq = distSq;
+      bestKey = candidateKey;
+    }
+
+    return bestKey;
   }
 
   /**

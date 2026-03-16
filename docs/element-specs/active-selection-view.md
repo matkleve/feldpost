@@ -120,7 +120,7 @@ flowchart LR
 
     subgraph Pipeline["Computed Signal Chain"]
         direction TB
-        S1["1. Project Filter\nkeep where project_id ∈ selectedProjectIds\n(skip if empty = all)"]
+        S1["1. Project Filter\nkeep where image has membership in selectedProjectIds\n(skip if empty = all)"]
         S2["2. Filter Rules\napply each FilterRule predicate\n(AND/OR conjunction logic)"]
         S3["3. Sort\norder by activeSort.key + direction"]
         S4["4. Group\nnest by activeGroupings (multi-level)"]

@@ -143,3 +143,7 @@ If you want least privilege before launch, implement option 3:
 - Replace org-wide non-viewer write checks with explicit role-based allow lists.
 - Add role-policy tests for every write action.
 - Keep frontend role checks as UX only; rely on RLS for enforcement.
+
+## Validation Script
+
+Use `scripts/validate-upload-role-rls.sql` to run a repeatable allow/deny matrix check for `admin`, `clerk`, `worker`, and `viewer` across upload-relevant tables and storage policy gates. The script is rollback-only and safe to run in staging.

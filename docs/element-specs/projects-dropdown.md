@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A dropdown for scoping the workspace view to one or more projects. Contains a search input at the top and a checklist of projects below. Checking projects filters the workspace to show only images belonging to those projects. Unchecking all shows all images (no project filter).
+A dropdown for scoping the workspace view to one or more projects. Contains a search input at the top and a checklist of projects below. Checking projects filters the workspace to show only images with membership in those projects. Unchecking all shows all images (no project filter).
 
 ## What It Looks Like
 
@@ -55,10 +55,10 @@ flowchart LR
   S --> UI
 ```
 
-| Field        | Source                                                                                                  | Type                  |
-| ------------ | ------------------------------------------------------------------------------------------------------- | --------------------- |
-| Projects     | `supabase.from('projects').select('id, name').eq('organization_id', org)`                               | `Project[]`           |
-| Image counts | `supabase.from('images').select('project_id, count').group('project_id')` or derived from loaded images | `Map<string, number>` |
+| Field        | Source                                                                                                          | Type                  |
+| ------------ | --------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Projects     | `supabase.from('projects').select('id, name').eq('organization_id', org)`                                       | `Project[]`           |
+| Image counts | `supabase.from('image_projects').select('project_id, count').group('project_id')` or derived from loaded images | `Map<string, number>` |
 
 ## State
 
@@ -117,7 +117,7 @@ sequenceDiagram
 
     U->>PD: check "Zürich-Nord"
     PD->>WVS: projectFilterChanged(Set['zurich-nord-id'])
-    WVS->>WVS: filter images where project_id IN set
+    WVS->>WVS: filter images where EXISTS image_projects membership in set
     WVS->>WP: emit filtered images
 
     U->>PD: check "Wien-Süd" (second project)

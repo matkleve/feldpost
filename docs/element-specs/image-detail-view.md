@@ -6,18 +6,18 @@
 
 ## What It Is
 
-The full detail view of a single photo. Shows the full-resolution image with all properties editable inline. Users can modify the address label (title), captured date, project assignment, address components (street, city, district, country), custom metadata key/values, and location. Desktop: replaces the thumbnail grid inside the Workspace Pane (with a back arrow to return). Mobile: full-screen overlay.
+The full detail view of a single photo. Shows the full-resolution image with all properties editable inline. Users can modify the address label (title), captured date, project memberships, address components (street, city, district, country), custom metadata key/values, and location. Desktop: replaces the thumbnail grid inside the Workspace Pane (with a back arrow to return). Mobile: full-screen overlay.
 
 ## Child Specs
 
 This spec covers layout, responsive behavior, navigation, and the Quick Info Bar. Feature-specific behavior is in these child specs:
 
-| Child Spec | Covers |
-| --- | --- |
-| [image-detail-photo-viewer](image-detail-photo-viewer.md) | Progressive loading, lightbox, replace/upload photo |
-| [image-detail-inline-editing](image-detail-inline-editing.md) | Click-to-edit fields, address search, property rows |
-| [custom-metadata](custom-metadata.md) | Metadata CRUD, chip types, typeahead add flow |
-| [image-detail-actions](image-detail-actions.md) | Actions section, delete, marker sync, correction mode |
+| Child Spec                                                    | Covers                                                |
+| ------------------------------------------------------------- | ----------------------------------------------------- |
+| [image-detail-photo-viewer](image-detail-photo-viewer.md)     | Progressive loading, lightbox, replace/upload photo   |
+| [image-detail-inline-editing](image-detail-inline-editing.md) | Click-to-edit fields, address search, property rows   |
+| [custom-metadata](custom-metadata.md)                         | Metadata CRUD, chip types, typeahead add flow         |
+| [image-detail-actions](image-detail-actions.md)               | Actions section, delete, marker sync, correction mode |
 
 ## What It Looks Like
 
@@ -37,7 +37,7 @@ The entire detail container is capped at `900px` max-width and centered (`margin
 
 Immediately below the photo, a horizontal row of **info chips** provides at-a-glance context:
 
-- **Project chip**: folder icon + project name. Filled `--color-primary` if assigned, outlined `--color-border` if none. Click opens project picker.
+- **Projects chip**: folder icon + project summary (single project name or `n projects`). Filled `--color-primary` if at least one membership exists, outlined `--color-border` if none. Click opens project membership picker.
 - **Date chip**: calendar icon + formatted capture date. Click enters edit mode (datetime-local).
 - **GPS chip**: location icon + "GPS" or "Corrected". `--color-success` tint if has coords, `--color-warning` if missing. Click copies coordinates.
 
@@ -88,14 +88,14 @@ onDestroy: observer.disconnect();
 
 ## Actions
 
-| #   | User Action                    | System Response                                  | Triggers               |
-| --- | ------------------------------ | ------------------------------------------------ | ---------------------- |
-| 1   | Clicks back arrow (desktop)    | Returns to Thumbnail Grid                        | `detailImageId` → null |
-| 2   | Clicks close (mobile)          | Closes overlay, returns to previous state         | Overlay dismissed      |
-| 3   | Clicks quick-info project chip | Opens project select dropdown                    | Project picker         |
-| 4   | Clicks quick-info date chip    | Enters date edit mode                            | Date edit              |
-| 5   | Clicks quick-info GPS chip     | Copies coordinates to clipboard (toast)          | Clipboard + toast      |
-| 6   | Scrolls down                   | Reveals more metadata and coordinate info        | Scroll                 |
+| #   | User Action                     | System Response                           | Triggers               |
+| --- | ------------------------------- | ----------------------------------------- | ---------------------- |
+| 1   | Clicks back arrow (desktop)     | Returns to Thumbnail Grid                 | `detailImageId` → null |
+| 2   | Clicks close (mobile)           | Closes overlay, returns to previous state | Overlay dismissed      |
+| 3   | Clicks quick-info projects chip | Opens project membership dropdown         | Project memberships    |
+| 4   | Clicks quick-info date chip     | Enters date edit mode                     | Date edit              |
+| 5   | Clicks quick-info GPS chip      | Copies coordinates to clipboard (toast)   | Clipboard + toast      |
+| 6   | Scrolls down                    | Reveals more metadata and coordinate info | Scroll                 |
 
 > See child specs for photo viewer, inline editing, metadata, and action interactions.
 
@@ -133,7 +133,7 @@ ImageDetailView                            ← fills Workspace Pane content area
 │       └── ActionsSection
 │
 └── QuickInfoBar                           ← horizontal chip row below photo
-    ├── ProjectChip                        ← folder icon + name, filled if assigned
+    ├── ProjectsChip                       ← folder icon + summary, filled if memberships exist
     ├── DateChip                           ← calendar icon + date, click to edit
     └── GpsChip                            ← location icon + status, click copies coords
 ```
@@ -150,21 +150,22 @@ flowchart LR
   S --> UI
 ```
 
-| Field              | Source                                                | Type                             |
-| ------------------ | ----------------------------------------------------- | -------------------------------- |
-| Image record       | `supabase.from('images').select('*')`                 | `ImageRecord`                    |
-| Projects list      | `supabase.from('projects').select('id, name').eq(…)`  | `{ id: string, name: string }[]` |
+| Field               | Source                                                                         | Type                             |
+| ------------------- | ------------------------------------------------------------------------------ | -------------------------------- |
+| Image record        | `supabase.from('images').select('*')`                                          | `ImageRecord`                    |
+| Projects list       | `supabase.from('projects').select('id, name').eq(…)`                           | `{ id: string, name: string }[]` |
+| Project memberships | `supabase.from('image_projects').select('project_id').eq('image_id', imageId)` | `string[]`                       |
 
 > See child specs for photo URLs, metadata, and correction history data sources.
 
 ## State
 
-| Name             | Type                  | Default | Controls                                         |
-| ---------------- | --------------------- | ------- | ------------------------------------------------ |
-| `image`          | `ImageRecord \| null` | `null`  | The displayed image record                       |
-| `loading`        | `boolean`             | `false` | Whether record is loading from Supabase          |
-| `error`          | `string \| null`      | `null`  | Error message if load failed                     |
-| `paneWidth`      | `number`              | `0`     | Measured via ResizeObserver on host element (px)  |
+| Name        | Type                  | Default | Controls                                         |
+| ----------- | --------------------- | ------- | ------------------------------------------------ |
+| `image`     | `ImageRecord \| null` | `null`  | The displayed image record                       |
+| `loading`   | `boolean`             | `false` | Whether record is loading from Supabase          |
+| `error`     | `string \| null`      | `null`  | Error message if load failed                     |
+| `paneWidth` | `number`              | `0`     | Measured via ResizeObserver on host element (px) |
 
 > See child specs for photo viewer, inline editing, metadata, and action state.
 
@@ -216,8 +217,8 @@ sequenceDiagram
 
 ### Quick Info Bar
 
-- [ ] Horizontal chip row below photo with Project, Date, GPS chips
-- [ ] Project chip: filled `--color-primary` when assigned, outlined when empty
+- [ ] Horizontal chip row below photo with Projects, Date, GPS chips
+- [ ] Projects chip: filled `--color-primary` when at least one membership exists, outlined when empty
 - [ ] Date chip: calendar icon + formatted date, click enters date edit
 - [ ] GPS chip: `--color-success` tint with coordinates, `--color-warning` if missing GPS
 - [ ] Chips use `rounded-full`, `--text-caption` size, compact padding

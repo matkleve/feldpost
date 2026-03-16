@@ -66,6 +66,10 @@ Done criteria:
 - No upload-path action bypasses RLS.
 - Validation script confirms expected allow/deny matrix.
 
+Validation artifact:
+
+- `scripts/validate-upload-role-rls.sql` (transactional, rollback-only role matrix check)
+
 ## 3) Upload UI Completion
 
 ### 3.1 Container and Entry
@@ -139,6 +143,11 @@ Done criteria:
 
 - Matrix and lanes reflect real-time job state transitions correctly.
 
+Current status:
+
+- In progress: dot matrix + lane switch + lane-filtered list implemented in Upload Panel.
+- Pending: broader integration pass against real mixed batches and issue-correction flow.
+
 ### 3.5 Issue Editing
 
 Tasks:
@@ -203,7 +212,7 @@ Current status:
 
 - Build passes.
 - Upload-panel and map-shell focused tests pass.
-- Pending: add/execute explicit viewer-deny role scenario checks in staging.
+- Pending: execute `scripts/validate-upload-role-rls.sql` in staging SQL Editor and attach output.
 
 ## 6) Rollout Plan
 
@@ -232,3 +241,4 @@ Status notes:
 - M1: Mostly done, but requires repeatable SQL validation script output attached to release docs.
 - M2: Done for current scope (container, intake, progress trigger, tests green).
 - M3: In progress (capture-input path complete; stream-preview path optional/pending).
+- M4: In progress (dot matrix + lane triage implemented; integration verification pending).

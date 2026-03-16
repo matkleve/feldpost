@@ -78,31 +78,97 @@
     />
   </div>
 
+  @if (showLastUpload() && lastUploadLabel(); as lastLabel) {
+    <section class="upload-panel__last-upload" aria-label="Last upload summary">
+      <span class="upload-panel__last-upload-label">Last upload</span>
+      <strong class="upload-panel__last-upload-value">{{ lastLabel }}</strong>
+    </section>
+  }
+
+  @if (!showProgressBoard() && !showLastUpload()) {
+    <section class="upload-panel__empty" aria-label="Upload idle state">
+      <span class="upload-panel__empty-title">No uploads yet</span>
+      <p class="upload-panel__empty-text">
+        Add photos to start. Status dots and lane filters appear once files enter the queue.
+      </p>
+    </section>
+  }
+
+  @if (showProgressBoard()) {
+    <section class="upload-panel__progress-board" aria-label="Upload progress board">
+      <div class="upload-panel__dot-matrix" role="list" aria-label="Upload status matrix">
+        @for (dot of dotItems(); track dot.id) {
+          <button
+            type="button"
+            class="upload-panel__dot upload-panel__dot--{{ dot.statusClass }}"
+            [attr.aria-label]="'Open ' + dot.lane + ' item'"
+            (click)="onDotClick(dot.id)"
+          ></button>
+        }
+      </div>
+
+      <div class="upload-panel__lane-switch" role="tablist" aria-label="Upload lanes">
+        <button
+          type="button"
+          role="tab"
+          class="upload-panel__lane-btn"
+          [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploading'"
+          [attr.aria-selected]="effectiveLane() === 'uploading'"
+          (click)="setSelectedLane('uploading')"
+        >
+          Uploading ({{ laneCounts().uploading }})
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="upload-panel__lane-btn"
+          [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploaded'"
+          [attr.aria-selected]="effectiveLane() === 'uploaded'"
+          (click)="setSelectedLane('uploaded')"
+        >
+          Uploaded ({{ laneCounts().uploaded }})
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="upload-panel__lane-btn"
+          [class.upload-panel__lane-btn--active]="effectiveLane() === 'issues'"
+          [attr.aria-selected]="effectiveLane() === 'issues'"
+          (click)="setSelectedLane('issues')"
+        >
+          Issues ({{ laneCounts().issues }})
+        </button>
+      </div>
+    </section>
+  }
+
   <!-- Per-file progress list -->
-  @if (jobs().length > 0) {
+  @if (laneJobs().length > 0) {
     <ul class="upload-panel__file-list" aria-label="Upload queue">
-      @for (job of jobs(); track trackByJobId($index, job)) {
+      @for (job of laneJobs(); track trackByJobId($index, job)) {
         <li
           class="upload-panel__file-item upload-panel__file-item--{{
             phaseToStatusClass(job.phase)
           }}"
         >
           <button
-            class="upload-panel__dismiss"
+            class="upload-panel__row-action upload-panel__row-action--left"
             type="button"
-            aria-label="Dismiss {{ job.file.name }}"
-            (click)="dismissFile(job.id)"
+            aria-label="Place {{ job.file.name }} on map"
+            title="Place on map"
+            [disabled]="job.phase !== 'missing_data'"
+            (click)="requestPlacement(job.id, job.phase, $event)"
           >
-            <span class="material-icons" aria-hidden="true">close</span>
+            <span class="material-icons" aria-hidden="true">my_location</span>
           </button>
 
-          <div class="upload-panel__file-content">
+          <div class="upload-panel__file-main">
             <!-- Thumbnail preview -->
             @if (job.thumbnailUrl) {
               <img
                 class="upload-panel__thumbnail"
                 [src]="job.thumbnailUrl"
-                [alt]="job.file.name"
+                [alt]="''"
                 aria-hidden="true"
               />
             } @else {
@@ -115,7 +181,7 @@
             }
 
             <div class="upload-panel__file-meta">
-              <span class="upload-panel__file-name" [title]="job.file.name">
+              <span class="upload-panel__file-name" [title]="job.file.name" aria-label="File name">
                 {{ job.file.name }}
               </span>
 
@@ -124,46 +190,26 @@
                   phaseToStatusClass(job.phase)
                 }}"
               >
-                {{ job.statusLabel }}
+                @if (job.phase === 'error' && job.error) {
+                  {{ job.error }}
+                } @else if (job.phase === 'missing_data') {
+                  Missing GPS - click map marker icon to place
+                } @else {
+                  {{ job.statusLabel }}
+                }
               </p>
-
-              <!-- Inline error message -->
-              @if (job.phase === 'error' && job.error) {
-                <p class="upload-panel__file-error" role="alert">{{ job.error }}</p>
-              }
-
-              <!-- Missing-data placement prompt -->
-              @if (job.phase === 'missing_data') {
-                <p class="upload-panel__placement-prompt" role="status">
-                  No GPS data found — click the map to place this image at the correct location.
-                </p>
-              }
-
-              <!-- Progress bar (shown while uploading) -->
-              @if (job.phase === 'uploading' || job.phase === 'saving_record') {
-                <progress
-                  class="upload-panel__progress"
-                  [value]="job.progress"
-                  max="100"
-                  [attr.aria-valuenow]="job.progress"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                ></progress>
-              }
             </div>
           </div>
 
-          <!-- Retry button for failed uploads -->
-          @if (job.phase === 'error') {
-            <button
-              class="upload-panel__retry"
-              type="button"
-              aria-label="Retry uploading {{ job.file.name }}"
-              (click)="retryFile(job.id)"
-            >
-              ↺ Retry
-            </button>
-          }
+          <button
+            class="upload-panel__row-action upload-panel__row-action--right"
+            type="button"
+            aria-label="Dismiss {{ job.file.name }}"
+            title="Dismiss"
+            (click)="dismissFile(job.id)"
+          >
+            <span class="material-icons" aria-hidden="true">close</span>
+          </button>
         </li>
       }
     </ul>

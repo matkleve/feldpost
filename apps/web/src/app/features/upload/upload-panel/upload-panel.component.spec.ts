@@ -26,12 +26,14 @@ import {
 
 function buildFakeUploadManager() {
   const jobsSignal = signal<ReadonlyArray<UploadJob>>([]);
+  const batchesSignal = signal<ReadonlyArray<any>>([]);
   const activeBatchSignal = signal<any>(null);
   const imageUploaded$ = new Subject<ManagerImageUploadedEvent>();
   const missingData$ = new Subject<MissingDataEvent>();
 
   return {
     jobs: jobsSignal.asReadonly(),
+    batches: batchesSignal.asReadonly(),
     activeJobs: signal<ReadonlyArray<UploadJob>>([]).asReadonly(),
     isBusy: signal(false).asReadonly(),
     activeBatch: activeBatchSignal.asReadonly(),
@@ -49,6 +51,7 @@ function buildFakeUploadManager() {
     placeJob: vi.fn(),
     // Helpers for tests to control state
     _jobsSignal: jobsSignal,
+    _batchesSignal: batchesSignal,
     _activeBatchSignal: activeBatchSignal,
     _imageUploaded$: imageUploaded$,
     _missingData$: missingData$,
@@ -245,6 +248,74 @@ describe('UploadPanelComponent', () => {
     });
   });
 
+  describe('M4 progress board and lanes', () => {
+    it('renders progress board and matrix when jobs exist', async () => {
+      const { fixture, fakeManager } = await setup();
+      fakeManager._jobsSignal.set([
+        makeUploadJob({ phase: 'queued', statusLabel: 'Queued' }),
+        makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+      ]);
+      fixture.detectChanges();
+
+      const board = fixture.debugElement.query(By.css('.upload-panel__progress-board'));
+      const dots = fixture.debugElement.queryAll(By.css('.upload-panel__dot'));
+
+      expect(board).not.toBeNull();
+      expect(dots.length).toBe(2);
+    });
+
+    it('shows last upload summary when queue is empty and completed batch exists', async () => {
+      const { fixture, fakeManager } = await setup();
+      fakeManager._jobsSignal.set([]);
+      fakeManager._batchesSignal.set([
+        {
+          id: 'batch-1',
+          label: 'Batch A',
+          totalFiles: 4,
+          completedFiles: 4,
+          skippedFiles: 0,
+          failedFiles: 0,
+          overallProgress: 100,
+          status: 'complete',
+          startedAt: new Date(),
+          finishedAt: new Date(),
+        },
+      ]);
+      fixture.detectChanges();
+
+      const lastUpload = fixture.debugElement.query(By.css('.upload-panel__last-upload'));
+      expect(lastUpload).not.toBeNull();
+      expect(lastUpload.nativeElement.textContent).toContain('Last upload');
+      expect(lastUpload.nativeElement.textContent).toContain('Batch · 4 photos');
+    });
+
+    it('shows idle empty state when no jobs and no completed batch exist', async () => {
+      const { fixture, fakeManager } = await setup();
+      fakeManager._jobsSignal.set([]);
+      fakeManager._batchesSignal.set([]);
+      fixture.detectChanges();
+
+      const empty = fixture.debugElement.query(By.css('.upload-panel__empty'));
+      expect(empty).not.toBeNull();
+      expect(empty.nativeElement.textContent).toContain('No uploads yet');
+    });
+
+    it('selects issues lane when clicking lane switch', async () => {
+      const { fixture, component, fakeManager } = await setup();
+      fakeManager._jobsSignal.set([
+        makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+        makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'Denied' }),
+      ]);
+      fixture.detectChanges();
+
+      const buttons = fixture.debugElement.queryAll(By.css('.upload-panel__lane-btn'));
+      (buttons[2].nativeElement as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(component.effectiveLane()).toBe('issues');
+    });
+  });
+
   describe('dismissFile() and retryFile()', () => {
     it('dismissFile calls uploadManager.dismissJob', async () => {
       const { component, fakeManager } = await setup();
@@ -305,45 +376,98 @@ describe('UploadPanelComponent', () => {
       component.placeFile('job-1', { lat: 48.2, lng: 16.37 });
       expect(fakeManager.placeJob).toHaveBeenCalledWith('job-1', { lat: 48.2, lng: 16.37 });
     });
+
+    it('requestPlacement emits when job is missing_data', async () => {
+      const { component } = await setup();
+      const emitSpy = vi.spyOn(component.placementRequested, 'emit');
+      const preventDefault = vi.fn();
+      const stopPropagation = vi.fn();
+
+      component.requestPlacement('job-1', 'missing_data', {
+        preventDefault,
+        stopPropagation,
+      } as unknown as MouseEvent);
+
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(stopPropagation).toHaveBeenCalledTimes(1);
+      expect(emitSpy).toHaveBeenCalledWith('job-1');
+    });
+
+    it('requestPlacement does not emit for non-missing_data phases', async () => {
+      const { component } = await setup();
+      const emitSpy = vi.spyOn(component.placementRequested, 'emit');
+
+      component.requestPlacement('job-1', 'uploading', {
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      } as unknown as MouseEvent);
+
+      expect(emitSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('missing_data prompt', () => {
-    it('renders placement prompt text for missing_data jobs', async () => {
+    it('renders compact missing_data status text for missing_data jobs', async () => {
       const { fixture, fakeManager } = await setup();
       fakeManager._jobsSignal.set([
         makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
       ]);
       fixture.detectChanges();
 
-      const prompt = fixture.debugElement.query(By.css('.upload-panel__placement-prompt'));
-      expect(prompt).not.toBeNull();
-      expect(prompt.nativeElement.textContent).toContain('No GPS data found');
+      const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
+      expect(status).not.toBeNull();
+      expect(status.nativeElement.textContent).toContain('Missing GPS');
     });
 
-    it('does not render placement prompt for completed jobs', async () => {
+    it('enables left placement action for missing_data jobs', async () => {
+      const { fixture, fakeManager } = await setup();
+      fakeManager._jobsSignal.set([
+        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
+      ]);
+      fixture.componentInstance.setSelectedLane('issues');
+      fixture.detectChanges();
+
+      const placementButtons = fixture.debugElement.queryAll(
+        By.css('.upload-panel__row-action--left'),
+      );
+      expect((placementButtons[0].nativeElement as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('disables left placement action for non-missing_data rows', async () => {
+      const { fixture, fakeManager } = await setup();
+      fakeManager._jobsSignal.set([
+        makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+      ]);
+      fixture.detectChanges();
+
+      const placementButton = fixture.debugElement.query(By.css('.upload-panel__row-action--left'));
+      expect((placementButton.nativeElement as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('does not render missing_data status text for completed jobs', async () => {
       const { fixture, fakeManager } = await setup();
       fakeManager._jobsSignal.set([makeUploadJob({ phase: 'complete', statusLabel: 'Uploaded' })]);
       fixture.detectChanges();
 
-      const prompt = fixture.debugElement.query(By.css('.upload-panel__placement-prompt'));
-      expect(prompt).toBeNull();
+      const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
+      expect(status.nativeElement.textContent).not.toContain('Missing GPS');
     });
   });
 
   describe('error display', () => {
-    it('renders inline error for error-phase jobs', async () => {
+    it('renders error text in compact status line for error-phase jobs', async () => {
       const { fixture, fakeManager } = await setup();
       fakeManager._jobsSignal.set([
         makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'File too large' }),
       ]);
       fixture.detectChanges();
 
-      const errorEl = fixture.debugElement.query(By.css('.upload-panel__file-error'));
-      expect(errorEl).not.toBeNull();
-      expect(errorEl.nativeElement.textContent).toContain('File too large');
+      const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
+      expect(status).not.toBeNull();
+      expect(status.nativeElement.textContent).toContain('File too large');
     });
 
-    it('renders retry button for error jobs', async () => {
+    it('does not render retry button in compact row mode', async () => {
       const { fixture, fakeManager } = await setup();
       fakeManager._jobsSignal.set([
         makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'Failed' }),
@@ -351,7 +475,10 @@ describe('UploadPanelComponent', () => {
       fixture.detectChanges();
 
       const retry = fixture.debugElement.query(By.css('.upload-panel__retry'));
-      expect(retry).not.toBeNull();
+      expect(retry).toBeNull();
+
+      const dismiss = fixture.debugElement.query(By.css('.upload-panel__row-action--right'));
+      expect(dismiss).not.toBeNull();
     });
   });
 

@@ -154,13 +154,13 @@ flowchart LR
 | Field                     | Source                                                                                      | Type                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
 | Projects                  | `supabase.from('projects').select('id,name,color_key,archived_at,created_at,updated_at')`   | `Project[]`                             |
-| Image counts              | RPC or aggregated query by `project_id` from `images`                                       | `Record<string, number>`                |
+| Image counts              | RPC or aggregated query by `project_id` from `image_projects`                               | `Record<string, number>`                |
 | Last activity             | Max `images.captured_at` per project                                                        | `Record<string, string>`                |
 | Primary city              | Most frequent `images.city` value per project (tie: lexicographic)                          | `string \| null`                        |
 | Primary district          | Most frequent `images.district` value per project (tie: lexicographic)                      | `string \| null`                        |
 | Active scope set          | Workspace project scope state (project IDs)                                                 | `Set<string>`                           |
 | View preference           | User preference store (profile preferences)                                                 | `'list' \| 'cards'`                     |
-| Search matches by project | RPC/search service: image-level query joined with project IDs, grouped by `project_id`      | `Record<string, number>`                |
+| Search matches by project | RPC/search service: image-level query joined with `image_projects`, grouped by `project_id` | `Record<string, number>`                |
 | Search fields             | `images.title`, `images.address_label`, custom metadata key/value pairs (`metadata_values`) | `string` query against normalized index |
 
 `color_key` accepts semantic keys (`clay`, `accent`, `success`, `warning`) and temporary generated brand-hue keys in the format `brand-hue-###` (0-359) used by the one-click random color action.
