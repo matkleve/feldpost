@@ -19,13 +19,15 @@ Search remains progressive and non-blocking: typing feedback first, DB and recen
 
 ## Actions
 
-| #   | Trigger                     | System Response                             | Phase              |
-| --- | --------------------------- | ------------------------------------------- | ------------------ |
-| 1   | Debounced query             | Build context snapshot and run strict stage | `typing`           |
-| 2   | Strict retrieval returns    | Emit partial ranked DB/recents output       | `results-partial`  |
-| 3   | Geocoder returns or fails   | Append geocoder results or preserve partial | `results-complete` |
-| 4   | Strict quality insufficient | Escalate fallback widening stage            | `results-complete` |
-| 5   | Commit candidate            | Persist recency and update priors           | commit path        |
+| #   | Trigger                     | System Response                                                | Phase              |
+| --- | --------------------------- | -------------------------------------------------------------- | ------------------ |
+| 1   | Debounced query             | Build context snapshot and run strict stage                    | `typing`           |
+| 2   | Strict retrieval returns    | Emit partial ranked DB/recents output                          | `results-partial`  |
+| 3   | Geocoder returns or fails   | Append geocoder results or preserve partial                    | `results-complete` |
+| 3a  | Geocoder returns `401` once | Refresh auth session, retry geocoder once                      | `results-complete` |
+| 3b  | Retry still `401`           | Sign out, redirect to login, preserve partial until route swap | `results-complete` |
+| 4   | Strict quality insufficient | Escalate fallback widening stage                               | `results-complete` |
+| 5   | Commit candidate            | Persist recency and update priors                              | commit path        |
 
 ### Pipeline Overview
 
@@ -53,6 +55,7 @@ sequenceDiagram
     participant ORCH as SearchOrchestrator
     participant DB as DB Resolvers
     participant GEO as Geocoder Resolver
+    participant AUTH as AuthService
 
     UI->>ORCH: query + context
     ORCH-->>UI: typing phase
@@ -61,7 +64,20 @@ sequenceDiagram
         DB-->>ORCH: db candidates
     and Geocoder
         ORCH->>GEO: fetch geocoder candidates
-        GEO-->>ORCH: geocoder candidates or timeout
+        alt geocoder 401 Invalid JWT
+            GEO-->>ORCH: 401
+            ORCH->>AUTH: refreshSession()
+            alt refresh succeeds
+                AUTH-->>ORCH: fresh session
+                ORCH->>GEO: retry geocoder once
+                GEO-->>ORCH: geocoder candidates or timeout
+            else refresh fails
+                AUTH-->>ORCH: refresh failed
+                ORCH->>AUTH: signOut()
+            end
+        else geocoder success/timeout/non-401 error
+            GEO-->>ORCH: geocoder candidates or timeout
+        end
     end
     ORCH-->>UI: results-partial (DB/recents)
     ORCH-->>UI: results-complete (with geocoder if available)
@@ -206,14 +222,15 @@ export interface SearchQueryContextV2 {
 
 ## State
 
-| Name                       | Type                                  | Default     | Controls                    |
-| -------------------------- | ------------------------------------- | ----------- | --------------------------- |
-| `phase`                    | `'typing' \| 'partial' \| 'complete'` | `'typing'`  | Progressive rendering stage |
-| `geoStatus`                | `'loading' \| 'loaded' \| 'error'`    | `'loading'` | Geocoder visibility         |
-| `fallbackStage`            | `0 \| 1 \| 2 \| 3`                    | `0`         | Widening stage              |
-| `contextVersion`           | `number`                              | `0`         | Snapshot freshness          |
-| `stableRankingFingerprint` | `string`                              | `''`        | Stability assertions        |
-| `cacheTtlMs`               | `number`                              | `300000`    | Search cache lifetime       |
+| Name                       | Type                                  | Default     | Controls                                |
+| -------------------------- | ------------------------------------- | ----------- | --------------------------------------- |
+| `phase`                    | `'typing' \| 'partial' \| 'complete'` | `'typing'`  | Progressive rendering stage             |
+| `geoStatus`                | `'loading' \| 'loaded' \| 'error'`    | `'loading'` | Geocoder visibility                     |
+| `geoAuthRecoveryAttempted` | `boolean`                             | `false`     | Single geocoder auth-refresh retry gate |
+| `fallbackStage`            | `0 \| 1 \| 2 \| 3`                    | `0`         | Widening stage                          |
+| `contextVersion`           | `number`                              | `0`         | Snapshot freshness                      |
+| `stableRankingFingerprint` | `string`                              | `''`        | Stability assertions                    |
+| `cacheTtlMs`               | `number`                              | `300000`    | Search cache lifetime                   |
 
 ## File Map
 
@@ -228,6 +245,7 @@ export interface SearchQueryContextV2 {
 - `SearchOrchestratorService` owns phase emission and final ordering.
 - `SearchBarService` handles recents persistence and retrieval adapters.
 - `GeocodingService` proxies all external geocoder access via edge function.
+- `AuthService` performs session refresh and controlled sign-out when geocoder returns persistent `401`.
 - `MapShellComponent` supplies live context signals via query context snapshot.
 
 ### Inputs / Outputs
@@ -245,6 +263,8 @@ None.
 - `images` table: address candidate retrieval.
 - `projects` and `saved_groups`: content candidate retrieval.
 - Edge function `geocode`: forward geocoder retrieval with bias params.
+- Supabase Auth: `refreshSession()` on first geocoder `401`, then single retry.
+- Supabase Auth: `signOut()` when retry also returns `401` or refresh fails.
 
 ### Sequence: Strict Then Widened Retrieval
 
@@ -397,6 +417,8 @@ Suggestion row rule:
 
 - [x] Typing/partial/complete phases remain non-blocking.
 - [x] Geocoder timeout or error never suppresses DB partial output.
+- [ ] Geocoder `401` triggers exactly one silent auth refresh and exactly one retry (no retry loop).
+- [ ] Geocoder `401` with failed refresh or failed retry triggers controlled sign-out without requiring manual storage clearing.
 - [ ] Latency and stability quality gates pass before full rollout.
 
 ## Rollout Plan Contract
