@@ -1,202 +1,230 @@
 <main class="projects-page">
   <section class="projects-main-zone">
     <section class="projects-rail">
-    <header class="projects-header">
-      <div class="projects-header__title-wrap">
-        <h1 class="projects-header__title">Projects</h1>
-        <p class="projects-header__count">{{ projectCountLabel() }}</p>
-      </div>
+      <header class="projects-header">
+        <div class="projects-header__title-wrap">
+          <h1 class="projects-header__title">Projects</h1>
+          <p class="projects-header__count">{{ projectCountLabel() }}</p>
+        </div>
 
-      <section class="projects-search-surface" aria-label="Project search">
-        <ss-search-bar mode="projects" (queryChanged)="onSearchChanged($event)" (clearRequested)="onSearchChanged('')" />
-      </section>
+        <section class="projects-search-surface" aria-label="Project search">
+          <ss-search-bar
+            mode="projects"
+            (queryChanged)="onSearchChanged($event)"
+            (clearRequested)="onSearchChanged('')"
+          />
+        </section>
 
-      <div class="projects-header__actions">
-        <button
-          class="projects-header__new"
-          type="button"
-          [disabled]="creatingProject()"
-          (click)="onNewProject()"
-          aria-label="New project"
-          title="New project"
-        >
-          <span class="material-icons" aria-hidden="true">add</span>
-        </button>
-      </div>
-    </header>
+        <div class="projects-header__actions">
+          <button
+            class="projects-header__new"
+            type="button"
+            [disabled]="creatingProject()"
+            (click)="onNewProject()"
+            aria-label="New project"
+            title="New project"
+          >
+            <span class="material-icons" aria-hidden="true">add</span>
+          </button>
+        </div>
+      </header>
 
       <section class="projects-toolbar">
-      <div class="projects-toolbar-controls" role="toolbar" aria-label="Project controls">
-        <button
-          type="button"
-          class="toolbar-btn"
-          [class.toolbar-btn--active]="hasGrouping()"
-          [class.toolbar-btn--open]="activeToolbarDropdown() === 'grouping'"
-          [attr.aria-expanded]="activeToolbarDropdown() === 'grouping'"
-          [attr.aria-haspopup]="true"
-          (click)="toggleToolbarDropdown('grouping', $event); $event.stopPropagation()"
-        >
-          <span class="toolbar-btn__label">Grouping</span>
-          @if (hasGrouping()) {
-            <span class="toolbar-btn__dot" aria-hidden="true"></span>
-          }
-          <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
-        </button>
+        <div class="projects-toolbar-controls" role="toolbar" aria-label="Project controls">
+          <button
+            type="button"
+            class="toolbar-btn"
+            [class.toolbar-btn--active]="hasGrouping()"
+            [class.toolbar-btn--open]="activeToolbarDropdown() === 'grouping'"
+            [attr.aria-expanded]="activeToolbarDropdown() === 'grouping'"
+            [attr.aria-haspopup]="true"
+            (click)="toggleToolbarDropdown('grouping', $event); $event.stopPropagation()"
+          >
+            <span class="toolbar-btn__label">Grouping</span>
+            @if (hasGrouping()) {
+              <span class="toolbar-btn__dot" aria-hidden="true"></span>
+            }
+            <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
+          </button>
 
-        <button
-          type="button"
-          class="toolbar-btn"
-          [class.toolbar-btn--active]="hasFilters()"
-          [class.toolbar-btn--open]="activeToolbarDropdown() === 'filter'"
-          [attr.aria-expanded]="activeToolbarDropdown() === 'filter'"
-          [attr.aria-haspopup]="true"
-          (click)="toggleToolbarDropdown('filter', $event); $event.stopPropagation()"
-        >
-          <span class="toolbar-btn__label">Filter</span>
-          @if (hasFilters()) {
-            <span class="toolbar-btn__dot" aria-hidden="true"></span>
-          }
-          <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
-        </button>
+          <button
+            type="button"
+            class="toolbar-btn"
+            [class.toolbar-btn--active]="hasFilters()"
+            [class.toolbar-btn--open]="activeToolbarDropdown() === 'filter'"
+            [attr.aria-expanded]="activeToolbarDropdown() === 'filter'"
+            [attr.aria-haspopup]="true"
+            (click)="toggleToolbarDropdown('filter', $event); $event.stopPropagation()"
+          >
+            <span class="toolbar-btn__label">Filter</span>
+            @if (hasFilters()) {
+              <span class="toolbar-btn__dot" aria-hidden="true"></span>
+            }
+            <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
+          </button>
 
-        <button
-          type="button"
-          class="toolbar-btn"
-          [class.toolbar-btn--active]="hasCustomSort()"
-          [class.toolbar-btn--open]="activeToolbarDropdown() === 'sort'"
-          [attr.aria-expanded]="activeToolbarDropdown() === 'sort'"
-          [attr.aria-haspopup]="true"
-          (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
-        >
-          <span class="toolbar-btn__label">Sort</span>
-          @if (hasCustomSort()) {
-            <span class="toolbar-btn__dot" aria-hidden="true"></span>
-          }
-          <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            class="toolbar-btn"
+            [class.toolbar-btn--active]="hasCustomSort()"
+            [class.toolbar-btn--open]="activeToolbarDropdown() === 'sort'"
+            [attr.aria-expanded]="activeToolbarDropdown() === 'sort'"
+            [attr.aria-haspopup]="true"
+            (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
+          >
+            <span class="toolbar-btn__label">Sort</span>
+            @if (hasCustomSort()) {
+              <span class="toolbar-btn__dot" aria-hidden="true"></span>
+            }
+            <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
+          </button>
+        </div>
 
-      <app-projects-view-toggle [viewMode]="viewMode()" (viewModeChange)="onViewModeChange($event)" />
-    </section>
-
-    @if (activeToolbarDropdown()) {
-      <div
-        class="projects-toolbar-dropdown"
-        [style.top.px]="toolbarDropdownTop()"
-        [style.left.px]="toolbarDropdownLeft()"
-        (click)="$event.stopPropagation()"
-      >
-        @switch (activeToolbarDropdown()) {
-          @case ('grouping') {
-            <app-grouping-dropdown
-              [activeGroupings]="activeGroupings()"
-              [availableProperties]="availableGroupings()"
-              (groupingsChanged)="onGroupingsChanged($event.active, $event.available)"
-              (dragStarted)="onDragStarted()"
-              (dragEnded)="onDragEnded()"
-            />
-          }
-          @case ('filter') {
-            <app-filter-dropdown />
-          }
-          @case ('sort') {
-            <app-sort-dropdown (sortChanged)="onSortChanged($event)" />
-          }
-        }
-      </div>
-    }
-
-      @if (loading()) {
-      <section class="projects-loading" role="status" aria-label="Loading projects">
-        <div class="projects-loading__row"></div>
-        <div class="projects-loading__row"></div>
-        <div class="projects-loading__row"></div>
+        <app-projects-view-toggle
+          [viewMode]="viewMode()"
+          (viewModeChange)="onViewModeChange($event)"
+        />
       </section>
-      } @else if (showEmptyState()) {
-      <section class="projects-empty ui-container" aria-label="No projects found">
-        <h2>No projects match your filters</h2>
-        <p>Try another search or reset your status filter.</p>
-      </section>
-      } @else {
-      @if (viewMode() === 'list') {
-        <section class="projects-list ui-container" aria-label="Projects list">
-          @for (project of visibleProjects(); track project.id) {
-            <article class="project-row ui-item" (click)="openWorkspace(project.id)">
-              <span class="project-row__color" [style.background]="colorTokenFor(project.colorKey)"></span>
 
-              <div class="project-row__content">
-                @if (editingProjectId() === project.id) {
-                  <input
-                    #renameInput
-                    class="project-row__rename"
-                    [value]="project.name"
-                    aria-label="Project name"
-                    (click)="$event.stopPropagation()"
-                    (blur)="confirmRename(project.id, renameInput.value)"
-                    (keydown)="onRenameInputKeydown($event, project.id, renameInput.value)"
-                  />
-                } @else {
-                  <h3 class="project-row__name">{{ project.name }}</h3>
-                }
-
-                <p class="project-row__meta">
-                  @if (searchTerm().trim()) {
-                    {{ project.matchingImageCount }} results · {{ project.totalImageCount }} photos ·
-                    {{ formatRelativeDate(project.lastActivity) }}
-                  } @else {
-                    {{ project.totalImageCount }} photos · {{ formatRelativeDate(project.lastActivity) }}
-                  }
-                </p>
-              </div>
-
-              <div class="project-row__actions" (click)="$event.stopPropagation()">
-                <button type="button" class="project-row__action project-row__action--primary" (click)="$event.stopPropagation(); openWorkspace(project.id)">
-                  Open in workspace
-                </button>
-                <button type="button" class="project-row__action" (click)="$event.stopPropagation(); startRename(project.id)">
-                  Rename
-                </button>
-                <button type="button" class="project-row__action" (click)="$event.stopPropagation(); toggleColorPicker(project.id)">
-                  Color
-                </button>
-                <button type="button" class="project-row__action project-row__action--danger" (click)="$event.stopPropagation(); askArchive(project.id)">
-                  Archive
-                </button>
-              </div>
-
-              @if (coloringProjectId() === project.id) {
-                <div class="project-row__picker" (click)="$event.stopPropagation()">
-                  <app-project-color-picker
-                    [selectedColor]="project.colorKey"
-                    (colorSelected)="onColorSelected(project.id, $event)"
-                  />
-                </div>
-              }
-            </article>
-          }
-        </section>
-      } @else {
-        <section class="projects-cards" aria-label="Projects card grid">
-          @for (project of visibleProjects(); track project.id) {
-            <app-project-card
-              [project]="project"
-              [showMatchCount]="searchTerm().trim().length > 0"
-              [colorToken]="colorTokenFor(project.colorKey)"
-              (open)="openWorkspace($event)"
-              (rename)="startRename($event)"
-              (color)="toggleColorPicker($event)"
-              (archive)="askArchive($event)"
-            />
-
-            @if (coloringProjectId() === project.id) {
-              <app-project-color-picker
-                [selectedColor]="project.colorKey"
-                (colorSelected)="onColorSelected(project.id, $event)"
+      @if (activeToolbarDropdown()) {
+        <div
+          class="projects-toolbar-dropdown"
+          [style.top.px]="toolbarDropdownTop()"
+          [style.left.px]="toolbarDropdownLeft()"
+          (click)="$event.stopPropagation()"
+        >
+          @switch (activeToolbarDropdown()) {
+            @case ('grouping') {
+              <app-grouping-dropdown
+                [activeGroupings]="activeGroupings()"
+                [availableProperties]="availableGroupings()"
+                (groupingsChanged)="onGroupingsChanged($event.active, $event.available)"
+                (dragStarted)="onDragStarted()"
+                (dragEnded)="onDragEnded()"
               />
             }
+            @case ('filter') {
+              <app-filter-dropdown />
+            }
+            @case ('sort') {
+              <app-sort-dropdown (sortChanged)="onSortChanged($event)" />
+            }
           }
-        </section>
+        </div>
       }
+
+      @if (loading()) {
+        <section class="projects-loading" role="status" aria-label="Loading projects">
+          <div class="projects-loading__row"></div>
+          <div class="projects-loading__row"></div>
+          <div class="projects-loading__row"></div>
+        </section>
+      } @else if (showEmptyState()) {
+        <section class="projects-empty ui-container" aria-label="No projects found">
+          <h2>No projects match your filters</h2>
+          <p>Try another search or reset your status filter.</p>
+        </section>
+      } @else {
+        @if (viewMode() === 'list') {
+          <section class="projects-list ui-container" aria-label="Projects list">
+            @for (project of visibleProjects(); track project.id) {
+              <article class="project-row ui-item" (click)="openWorkspace(project.id)">
+                <span
+                  class="project-row__color"
+                  [style.background]="colorTokenFor(project.colorKey)"
+                ></span>
+
+                <div class="project-row__content">
+                  @if (editingProjectId() === project.id) {
+                    <input
+                      #renameInput
+                      class="project-row__rename"
+                      [value]="project.name"
+                      aria-label="Project name"
+                      (click)="$event.stopPropagation()"
+                      (blur)="confirmRename(project.id, renameInput.value)"
+                      (keydown)="onRenameInputKeydown($event, project.id, renameInput.value)"
+                    />
+                  } @else {
+                    <h3 class="project-row__name">{{ project.name }}</h3>
+                  }
+
+                  <p class="project-row__meta">
+                    @if (searchTerm().trim()) {
+                      {{ project.matchingImageCount }} results ·
+                      {{ project.totalImageCount }} photos ·
+                      {{ formatRelativeDate(project.lastActivity) }}
+                    } @else {
+                      {{ project.totalImageCount }} photos ·
+                      {{ formatRelativeDate(project.lastActivity) }}
+                    }
+                  </p>
+                </div>
+
+                <div class="project-row__actions" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="project-row__action project-row__action--primary"
+                    (click)="$event.stopPropagation(); openWorkspace(project.id)"
+                  >
+                    Open in workspace
+                  </button>
+                  <button
+                    type="button"
+                    class="project-row__action"
+                    (click)="$event.stopPropagation(); startRename(project.id)"
+                  >
+                    Rename
+                  </button>
+                  <button
+                    type="button"
+                    class="project-row__action"
+                    (click)="$event.stopPropagation(); toggleColorPicker(project.id)"
+                  >
+                    Color
+                  </button>
+                  <button
+                    type="button"
+                    class="project-row__action project-row__action--danger"
+                    (click)="$event.stopPropagation(); askArchive(project.id)"
+                  >
+                    Archive
+                  </button>
+                </div>
+
+                @if (coloringProjectId() === project.id) {
+                  <div class="project-row__picker" (click)="$event.stopPropagation()">
+                    <app-project-color-picker
+                      [selectedColor]="project.colorKey"
+                      (colorSelected)="onColorSelected(project.id, $event)"
+                    />
+                  </div>
+                }
+              </article>
+            }
+          </section>
+        } @else {
+          <section class="projects-cards" aria-label="Projects card grid">
+            @for (project of visibleProjects(); track project.id) {
+              <app-project-card
+                [project]="project"
+                [showMatchCount]="searchTerm().trim().length > 0"
+                [colorToken]="colorTokenFor(project.colorKey)"
+                (open)="openWorkspace($event)"
+                (rename)="startRename($event)"
+                (color)="toggleColorPicker($event)"
+                (archive)="askArchive($event)"
+              />
+
+              @if (coloringProjectId() === project.id) {
+                <app-project-color-picker
+                  [selectedColor]="project.colorKey"
+                  (colorSelected)="onColorSelected(project.id, $event)"
+                />
+              }
+            }
+          </section>
+        }
       }
     </section>
   </section>
@@ -212,7 +240,11 @@
       />
     }
 
-    <section class="projects-workspace" #workspacePaneHost [style.width.px]="isMobile() ? null : workspacePaneWidth()">
+    <section
+      class="projects-workspace"
+      #workspacePaneHost
+      [style.width.px]="isMobile() ? null : workspacePaneWidth()"
+    >
       <app-workspace-pane
         [detailImageId]="detailImageId()"
         (closed)="closeWorkspacePane()"
