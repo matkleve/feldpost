@@ -4,6 +4,10 @@ import { join } from "node:path";
 const repoRoot = process.cwd();
 const csvPath = join(repoRoot, "docs", "i18n", "translation-workbench.csv");
 const force = process.argv.includes("--force");
+const langArg = process.argv.find((arg) => arg.startsWith("--lang="));
+const targetLanguage = langArg
+  ? langArg.slice("--lang=".length).trim().toLowerCase()
+  : "de";
 
 function parseCsv(text) {
   const rows = [];
@@ -96,7 +100,7 @@ function restorePlaceholders(input, placeholders) {
 
 const translationCache = new Map();
 
-async function translateEnToDe(value) {
+async function translateFromEn(value, targetLang) {
   const trimmed = value.trim();
   if (!trimmed || !/[A-Za-z]/.test(trimmed)) return value;
 
@@ -110,7 +114,7 @@ async function translateEnToDe(value) {
 
   const { protectedText, placeholders } = protectPlaceholders(core);
   const query = encodeURIComponent(protectedText);
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=de&dt=t&q=${query}`;
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${encodeURIComponent(targetLang)}&dt=t&q=${query}`;
 
   const response = await fetch(url);
   if (!response.ok) {
@@ -141,11 +145,11 @@ async function main() {
   });
 
   const enIdx = normalizedHeader.indexOf("en");
-  const deIdx = normalizedHeader.indexOf("de");
+  const targetIdx = normalizedHeader.indexOf(targetLanguage);
 
-  if (enIdx === -1 || deIdx === -1) {
+  if (enIdx === -1 || targetIdx === -1) {
     throw new Error(
-      "Could not find en/de columns in translation-workbench.csv",
+      `Could not find en/${targetLanguage} columns in translation-workbench.csv`,
     );
   }
 
@@ -154,21 +158,21 @@ async function main() {
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i];
     const en = (row[enIdx] ?? "").trim();
-    const de = (row[deIdx] ?? "").trim();
+    const currentTarget = (row[targetIdx] ?? "").trim();
 
     if (!en) continue;
-    if (!force && de && de !== en) continue;
+    if (!force && currentTarget && currentTarget !== en) continue;
 
-    const translated = await translateEnToDe(en);
-    if (translated !== de) {
-      row[deIdx] = translated;
+    const translated = await translateFromEn(en, targetLanguage);
+    if (translated !== currentTarget) {
+      row[targetIdx] = translated;
       changed++;
     }
   }
 
   writeFileSync(csvPath, toCsv(rows), "utf8");
   console.log(
-    `Updated de translations with Google Translate: ${changed} (force=${force})`,
+    `Updated ${targetLanguage} translations with Google Translate: ${changed} (force=${force})`,
   );
 }
 

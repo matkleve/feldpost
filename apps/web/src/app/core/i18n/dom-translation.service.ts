@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, effect, inject } from '@angular/core';
 import { I18nService } from './i18n.service';
+import type { LanguageCode } from './translation-catalog';
 
 @Injectable({ providedIn: 'root' })
 export class DomTranslationService {
@@ -50,7 +51,7 @@ export class DomTranslationService {
     });
   }
 
-  private translateSubtree(root: ParentNode | null, language: 'en' | 'de'): void {
+  private translateSubtree(root: ParentNode | null, language: LanguageCode): void {
     if (!root) return;
 
     const walker = this.documentRef.createTreeWalker(root, NodeFilter.SHOW_ALL);
@@ -67,7 +68,7 @@ export class DomTranslationService {
     }
   }
 
-  private translateTextNode(node: Text, language: 'en' | 'de'): void {
+  private translateTextNode(node: Text, language: LanguageCode): void {
     const parent = node.parentElement;
     if (parent && this.isIgnoredElement(parent)) {
       return;
@@ -86,7 +87,7 @@ export class DomTranslationService {
     }
   }
 
-  private translateElementAttributes(element: Element, language: 'en' | 'de'): void {
+  private translateElementAttributes(element: Element, language: LanguageCode): void {
     if (this.isIgnoredElement(element)) {
       return;
     }
@@ -115,7 +116,7 @@ export class DomTranslationService {
     }
   }
 
-  private translatePreservingWhitespace(value: string, language: 'en' | 'de'): string {
+  private translatePreservingWhitespace(value: string, language: LanguageCode): string {
     if (language === 'en') return value;
 
     const leading = value.match(/^\s*/)?.[0] ?? '';

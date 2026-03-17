@@ -383,6 +383,21 @@
   cursor: pointer;
 }
 
+.settings-overlay__account-page-button {
+  min-height: 2.75rem;
+  border: var(--settings-stroke-width) solid
+    color-mix(in srgb, var(--color-clay) 36%, var(--color-border));
+  border-radius: var(--container-radius-control);
+  background: color-mix(in srgb, var(--color-clay) 8%, var(--color-bg-surface));
+  color: var(--color-clay);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-overlay__account-page-button:hover {
+  background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
+}
+
 .settings-overlay__logout-button:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-danger) 14%, var(--color-bg-surface));
 }

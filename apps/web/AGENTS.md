@@ -37,3 +37,14 @@ src/app/
 - `npm run build` — production build
 - `npm run test` — Vitest test suite
 - `npm run lint` — ESLint
+
+## i18n Is Required
+
+When implementing components or changing UI copy:
+
+- Register every user-visible string in `docs/i18n/translation-workbench.csv` with useful `context` for translators.
+- Avoid direct untranslated literals in templates unless they are already mapped through the i18n pipeline.
+- After text changes, regenerate SQL with `node scripts/import-i18n-csv-to-sql.mjs` and include `supabase/seed_i18n.sql` updates.
+- Keep language button labels in native form (`English`, `Deutsch`, `Italiano`).
+
+No feature is considered complete if translator-required data is missing from the DB seed pipeline.

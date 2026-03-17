@@ -60,7 +60,9 @@
       <div class="settings-overlay__column-divider" aria-hidden="true"></div>
 
       <div class="settings-overlay__detail" aria-live="polite">
-        @if (loadState() === 'loading') {
+        @if (selectedSectionId() === 'account') {
+          <app-account />
+        } @else if (loadState() === 'loading') {
           <div class="settings-overlay__state settings-overlay__state--loading">
             <span class="material-icons" aria-hidden="true">sync</span>
             <h3>{{ t('settings.overlay.loading.title', 'Loading settings') }}</h3>
@@ -120,6 +122,15 @@
                       (click)="setLanguage('de')"
                     >
                       {{ t('settings.overlay.general.language.option.de', 'Deutsch') }}
+                    </button>
+                    <button
+                      type="button"
+                      [class.settings-overlay__segmented--active]="
+                        settingsModel().language === 'it'
+                      "
+                      (click)="setLanguage('it')"
+                    >
+                      {{ t('settings.overlay.general.language.option.it', 'Italiano') }}
                     </button>
                   </div>
                 </div>
@@ -463,83 +474,6 @@
                     [class.settings-overlay__toggle--on]="settingsModel().telemetryEnabled"
                   ></span>
                 </button>
-              </section>
-            }
-
-            @case ('account') {
-              <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>{{ t('settings.overlay.account.title', 'Account') }}</h3>
-                <p>
-                  {{
-                    t(
-                      'settings.overlay.account.description',
-                      'Signed-in identity and workspace session context.'
-                    )
-                  }}
-                </p>
-
-                <div class="settings-overlay__identity">
-                  <span class="material-icons" aria-hidden="true">account_circle</span>
-                  <div>
-                    <strong>{{ userDisplayName() }}</strong>
-                    <p>{{ userEmail() }}</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  class="settings-overlay__logout-button"
-                  [disabled]="logoutPending()"
-                  (click)="openLogoutConfirm()"
-                >
-                  {{ t('settings.overlay.account.logout.action', 'Logout') }}
-                </button>
-
-                @if (logoutConfirmOpen()) {
-                  <div
-                    class="settings-overlay__logout-confirm"
-                    role="alertdialog"
-                    aria-modal="false"
-                  >
-                    <strong>{{
-                      t('settings.overlay.account.logout.confirmTitle', 'Logout now?')
-                    }}</strong>
-                    <p>
-                      {{
-                        t(
-                          'settings.overlay.account.logout.confirmDescription',
-                          'This ends your current Feldpost session on this device.'
-                        )
-                      }}
-                    </p>
-                    <div class="settings-overlay__logout-actions">
-                      <button
-                        type="button"
-                        class="settings-overlay__ghost-button"
-                        [disabled]="logoutPending()"
-                        (click)="cancelLogoutConfirm()"
-                      >
-                        {{ t('settings.overlay.account.logout.cancel', 'Cancel') }}
-                      </button>
-                      <button
-                        type="button"
-                        class="settings-overlay__logout-button settings-overlay__logout-button--confirm"
-                        [disabled]="logoutPending()"
-                        (click)="confirmLogout()"
-                      >
-                        {{
-                          logoutPending()
-                            ? t('settings.overlay.account.logout.pending', 'Logging out...')
-                            : t('settings.overlay.account.logout.confirm', 'Confirm logout')
-                        }}
-                      </button>
-                    </div>
-                  </div>
-                }
-
-                @if (logoutError(); as logoutErrorMessage) {
-                  <p class="settings-overlay__logout-error">{{ logoutErrorMessage }}</p>
-                }
               </section>
             }
 

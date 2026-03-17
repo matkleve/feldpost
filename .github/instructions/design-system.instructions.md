@@ -22,3 +22,4 @@ applyTo: "**/*.component.html"
 - Implement ALL listed actions — do not skip any
 - Use `@if`, `@for`, `@switch` control flow (not `*ngIf`, `*ngFor`)
 - Always provide loading, error, and empty states
+- Register all new/changed visible strings in `docs/i18n/translation-workbench.csv` with translator context.

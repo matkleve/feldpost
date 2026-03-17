@@ -19,6 +19,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { parseTimeInput } from '../../../shared/parse-time-input';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 export interface DateSaveEvent {
   date: string | null; // YYYY-MM-DD or null
@@ -40,6 +41,7 @@ export interface CalendarDay {
   styleUrl: './captured-date-editor.component.scss',
 })
 export class CapturedDateEditorComponent implements OnInit, OnDestroy {
+  private readonly i18nService = inject(I18nService);
   private readonly elRef = inject(ElementRef);
 
   // ── Inputs ─────────────────────────────────────────────────────────────────
@@ -72,7 +74,7 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
 
   readonly monthLabel = computed(() => {
     const date = new Date(this.viewYear(), this.viewMonth(), 1);
-    return date.toLocaleDateString('de-AT', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString(this.i18nService.locale(), { month: 'short', year: 'numeric' });
   });
 
   readonly formattedDate = computed(() => {

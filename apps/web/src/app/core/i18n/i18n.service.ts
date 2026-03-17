@@ -101,6 +101,97 @@ const HEURISTIC_DE_PHRASE_MAP: Record<string, string> = {
   'We sent a password reset link to':
     'Wir haben einen Link zum Zurücksetzen des Passworts an folgende Adresse gesendet:',
   'Welcome back to Feldpost': 'Willkommen zurück bei Feldpost',
+  'Date captured': 'Aufnahmedatum',
+  'Date uploaded': 'Upload-Datum',
+  Name: 'Name',
+  Distance: 'Entfernung',
+  Address: 'Adresse',
+  City: 'Stadt',
+  District: 'Bezirk',
+  Street: 'Straße',
+  Country: 'Land',
+  Project: 'Projekt',
+  Date: 'Datum',
+  Year: 'Jahr',
+  Month: 'Monat',
+  User: 'Nutzer',
+  'Unknown date': 'Unbekanntes Datum',
+  Unnamed: 'Unbenannt',
+  'Unknown distance': 'Unbekannte Entfernung',
+  'No project': 'Kein Projekt',
+  'Unknown year': 'Unbekanntes Jahr',
+  'Unknown month': 'Unbekannter Monat',
+  'Unknown city': 'Unbekannte Stadt',
+  'Unknown district': 'Unbekannter Bezirk',
+  'Unknown street': 'Unbekannte Straße',
+  'Unknown country': 'Unbekanntes Land',
+  'Unknown address': 'Unbekannte Adresse',
+  'Unknown user': 'Unbekannter Nutzer',
+  No: 'Kein',
+};
+
+const HEURISTIC_IT_PHRASE_MAP: Record<string, string> = {
+  'Add a filter': 'Aggiungi un filtro',
+  'No filters applied': 'Nessun filtro attivo',
+  'Remove filter': 'Rimuovi filtro',
+  Where: 'Dove',
+  And: 'E',
+  Or: 'O',
+  Property: 'Proprieta',
+  Operator: 'Operatore',
+  'Value...': 'Valore...',
+  'Value…': 'Valore…',
+  'Sign in': 'Accedi',
+  'Create account': 'Crea account',
+  'Forgot password?': 'Password dimenticata?',
+  'Back to sign in': "Torna all'accesso",
+  'Check your email': 'Controlla la tua email',
+  'Email is required.': "L'email e obbligatoria.",
+  'Enter a valid email address.': 'Inserisci un indirizzo email valido.',
+  "Enter your email and we'll send you a reset link.":
+    'Inserisci la tua email e ti invieremo un link di reimpostazione.',
+  'No uploads yet': 'Nessun caricamento ancora',
+  'No projects found': 'Nessun progetto trovato',
+  'No projects match your filters': 'Nessun progetto corrisponde ai tuoi filtri',
+  'Loading...': 'Caricamento...',
+  'Loading…': 'Caricamento…',
+  'Map style': 'Stile mappa',
+  'Photo map': 'Mappa foto',
+  'Historic map': 'Mappa storica',
+  'Street map': 'Mappa stradale',
+  'Back to gallery': 'Torna alla galleria',
+  'Add to project': 'Aggiungi al progetto',
+  'Delete image': 'Elimina immagine',
+  'Copy coordinates': 'Copia coordinate',
+  'Place on map': 'Posiziona sulla mappa',
+  Logout: 'Disconnetti',
+  'Date captured': 'Data di acquisizione',
+  'Date uploaded': 'Data di caricamento',
+  Name: 'Nome',
+  Distance: 'Distanza',
+  Address: 'Indirizzo',
+  City: 'Citta',
+  District: 'Distretto',
+  Street: 'Via',
+  Country: 'Paese',
+  Project: 'Progetto',
+  Date: 'Data',
+  Year: 'Anno',
+  Month: 'Mese',
+  User: 'Utente',
+  'Unknown date': 'Data sconosciuta',
+  Unnamed: 'Senza nome',
+  'Unknown distance': 'Distanza sconosciuta',
+  'No project': 'Nessun progetto',
+  'Unknown year': 'Anno sconosciuto',
+  'Unknown month': 'Mese sconosciuto',
+  'Unknown city': 'Citta sconosciuta',
+  'Unknown district': 'Distretto sconosciuto',
+  'Unknown street': 'Via sconosciuta',
+  'Unknown country': 'Paese sconosciuto',
+  'Unknown address': 'Indirizzo sconosciuto',
+  'Unknown user': 'Utente sconosciuto',
+  No: 'Nessun',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -109,10 +200,20 @@ export class I18nService {
   private readonly runtimeDictionaries = signal<Record<LanguageCode, RuntimeLanguageDictionary>>({
     en: { byKey: {}, byOriginal: {} },
     de: { byKey: {}, byOriginal: {} },
+    it: { byKey: {}, byOriginal: {} },
   });
 
   readonly language = this.languageSignal.asReadonly();
-  readonly locale = computed(() => (this.languageSignal() === 'de' ? 'de-AT' : 'en-GB'));
+  readonly locale = computed(() => {
+    switch (this.languageSignal()) {
+      case 'de':
+        return 'de-AT';
+      case 'it':
+        return 'it-IT';
+      default:
+        return 'en-GB';
+    }
+  });
 
   constructor() {
     this.applyDocumentLanguage(this.languageSignal());
@@ -130,7 +231,14 @@ export class I18nService {
 
     const entry = TRANSLATION_BY_KEY[key];
     if (!entry) return fallback || key;
-    return this.languageSignal() === 'de' ? entry.de : entry.en;
+    switch (this.languageSignal()) {
+      case 'de':
+        return entry.de;
+      case 'it':
+        return entry.it ?? entry.en;
+      default:
+        return entry.en;
+    }
   }
 
   translateOriginal(original: string, fallback = ''): string {
@@ -142,9 +250,19 @@ export class I18nService {
       if (this.languageSignal() === 'de') {
         return this.heuristicTranslateToGerman(original);
       }
+      if (this.languageSignal() === 'it') {
+        return this.heuristicTranslateToItalian(original);
+      }
       return fallback || original;
     }
-    return this.languageSignal() === 'de' ? entry.de : entry.en;
+    switch (this.languageSignal()) {
+      case 'de':
+        return entry.de;
+      case 'it':
+        return entry.it ?? entry.en;
+      default:
+        return entry.en;
+    }
   }
 
   setRuntimeTranslations(
@@ -181,14 +299,23 @@ export class I18nService {
     if (typeof window === 'undefined') return 'de';
 
     const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'de') return stored;
+    if (stored === 'en' || stored === 'de' || stored === 'it') return stored;
 
     const browser = navigator.language.toLowerCase();
+    if (browser.startsWith('it')) return 'it';
     return browser.startsWith('en') ? 'en' : 'de';
   }
 
   private heuristicTranslateToGerman(value: string): string {
     const phrase = HEURISTIC_DE_PHRASE_MAP[value];
+    if (phrase) return phrase;
+
+    // Avoid mixed-language fragments from word-by-word fallback.
+    return value;
+  }
+
+  private heuristicTranslateToItalian(value: string): string {
+    const phrase = HEURISTIC_IT_PHRASE_MAP[value];
     if (phrase) return phrase;
 
     // Avoid mixed-language fragments from word-by-word fallback.

@@ -47,7 +47,6 @@ import { ToastService } from '../../../core/toast.service';
 import { ShareSetService } from '../../../core/share-set.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
-import type { WorkspaceImage } from '../../../core/workspace-view.types';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
 import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card.component';
@@ -67,6 +66,21 @@ import {
 import { MapShellState } from './map-shell.state';
 import { DetailZoomHighlightService } from './detail-zoom-highlight.service';
 import { MarkerInteractionService } from './marker-interaction.service';
+import { ViewportMarkerQueryService } from './viewport-marker-query.service';
+import {
+  MapMarkerReconcileFacade,
+  PhotoMarkerState,
+  ReconcileDependencies,
+  ReconcileIncomingRow,
+} from './map-marker-reconcile.facade';
+import { MapMarkerClusterMergeService } from './map-marker-cluster-merge.service';
+import { MapMarkerReuseStrategyService } from './map-marker-reuse-strategy.service';
+import { RadiusSelectionService } from './radius-selection.service';
+import { ZoomTargetMarkerService } from './zoom-target-marker.service';
+import { RadiusCommittedVisual, RadiusVisualsService } from './radius-visuals.service';
+import { RadiusDraftHighlightService } from './radius-draft-highlight.service';
+import { MapContextActionsService } from './map-context-actions.service';
+import { MarkerContextPhotoDeleteService } from './marker-context-photo-delete.service';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapBasemapPreference = 'default' | 'satellite';
@@ -153,6 +167,16 @@ export class MapShellComponent implements OnDestroy {
   private readonly state = inject(MapShellState);
   private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
   private readonly markerInteractionService = inject(MarkerInteractionService);
+  private readonly viewportMarkerQueryService = inject(ViewportMarkerQueryService);
+  private readonly mapMarkerReconcileFacade = inject(MapMarkerReconcileFacade);
+  private readonly mapMarkerClusterMergeService = inject(MapMarkerClusterMergeService);
+  private readonly radiusSelectionService = inject(RadiusSelectionService);
+  private readonly mapMarkerReuseStrategyService = inject(MapMarkerReuseStrategyService);
+  private readonly zoomTargetMarkerService = inject(ZoomTargetMarkerService);
+  private readonly radiusVisualsService = inject(RadiusVisualsService);
+  private readonly radiusDraftHighlightService = inject(RadiusDraftHighlightService);
+  private readonly mapContextActionsService = inject(MapContextActionsService);
+  private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -372,26 +396,7 @@ export class MapShellComponent implements OnDestroy {
   private draftMediaMarkerLeaflet: L.Marker | null = null;
   private readonly uploadedPhotoMarkers = new Map<
     string,
-    {
-      marker: L.Marker;
-      count: number;
-      lat: number;
-      lng: number;
-      thumbnailUrl?: string;
-      thumbnailSourcePath?: string;
-      fallbackLabel?: string;
-      direction?: number;
-      corrected?: boolean;
-      uploading?: boolean;
-      sourceCells?: Array<{ lat: number; lng: number }>;
-      /** DB UUID of the image — set for single-image markers only. */
-      imageId?: string;
-      /** True for markers added via upload before the next viewport query. */
-      optimistic?: boolean;
-      /** True while a signed thumbnail URL is being fetched. */
-      thumbnailLoading?: boolean;
-      /** Epoch ms when the signed thumbnail URL was obtained. */
-      signedAt?: number;
+    PhotoMarkerState & {
       /** Snapshot of the last rendered state for dirty-checking. */
       lastRendered?: {
         count: number;
@@ -437,11 +442,7 @@ export class MapShellComponent implements OnDestroy {
     additive: boolean;
   } | null = null;
   private radiusDraftHighlightedKeys = new Set<string>();
-  private readonly radiusCommittedVisuals: Array<{
-    circle: L.Circle;
-    label: L.Marker;
-    centerDot: L.CircleMarker;
-  }> = [];
+  private readonly radiusCommittedVisuals: RadiusCommittedVisual[] = [];
   private suppressMapClickUntil = 0;
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
@@ -635,7 +636,7 @@ export class MapShellComponent implements OnDestroy {
   async onMapContextCopyGps(): Promise<void> {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
-    const text = `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
+    const text = this.mapContextActionsService.formatGps(coords.lat, coords.lng);
     const copied = await this.copyTextToClipboard(text);
     this.toastService.show({
       message: copied ? 'GPS kopiert.' : text,
@@ -648,7 +649,7 @@ export class MapShellComponent implements OnDestroy {
   onMapContextOpenGoogleMaps(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords || typeof window === 'undefined') return;
-    const url = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
+    const url = this.mapContextActionsService.buildGoogleMapsUrl(coords.lat, coords.lng);
     window.open(url, '_blank', 'noopener,noreferrer');
     this.closeContextMenus();
   }
@@ -721,8 +722,21 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const assigned = await this.assignImagesToProject(imageIds, projectData.id as string);
-    if (!assigned) {
+    const assigned = await this.mapContextActionsService.assignImagesToProject(
+      this.supabaseService.client,
+      imageIds,
+      projectData.id as string,
+    );
+    if (!assigned.ok) {
+      if (assigned.reason === 'empty') {
+        this.toastService.show({
+          message: 'Keine Medien fuer Projektzuweisung gefunden.',
+          type: 'warning',
+          dedupe: true,
+        });
+      } else if (assigned.errorMessage) {
+        this.toastService.show({ message: assigned.errorMessage, type: 'error', dedupe: true });
+      }
       this.closeContextMenus();
       return;
     }
@@ -753,13 +767,25 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const assigned = await this.assignImagesToProject(imageIds, project.id);
-    if (assigned) {
+    const assigned = await this.mapContextActionsService.assignImagesToProject(
+      this.supabaseService.client,
+      imageIds,
+      project.id,
+    );
+    if (assigned.ok) {
       this.toastService.show({
         message: `${imageIds.length} Medien dem Projekt "${project.name}" zugewiesen.`,
         type: 'success',
         dedupe: true,
       });
+    } else if (assigned.reason === 'empty') {
+      this.toastService.show({
+        message: 'Keine Medien fuer Projektzuweisung gefunden.',
+        type: 'warning',
+        dedupe: true,
+      });
+    } else if (assigned.errorMessage) {
+      this.toastService.show({ message: assigned.errorMessage, type: 'error', dedupe: true });
     }
     this.closeContextMenus();
   }
@@ -802,7 +828,11 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const imageIds = await this.resolveMarkerContextImageIds(payload);
+    const imageIds = await this.mapContextActionsService.resolveMarkerContextImageIds(
+      payload,
+      (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
+      this.map?.getZoom() ?? 13,
+    );
     if (imageIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien fuer Projektzuweisung gefunden.',
@@ -813,13 +843,21 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const { error } = await this.supabaseService.client
-      .from('images')
-      .update({ project_id: project.id })
-      .in('id', imageIds);
-
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+    const assigned = await this.mapContextActionsService.assignImagesToProject(
+      this.supabaseService.client,
+      imageIds,
+      project.id,
+    );
+    if (!assigned.ok) {
+      if (assigned.reason === 'empty') {
+        this.toastService.show({
+          message: 'Keine Medien fuer Projektzuweisung gefunden.',
+          type: 'warning',
+          dedupe: true,
+        });
+      } else if (assigned.errorMessage) {
+        this.toastService.show({ message: assigned.errorMessage, type: 'error', dedupe: true });
+      }
       this.closeContextMenus();
       return;
     }
@@ -869,7 +907,7 @@ export class MapShellComponent implements OnDestroy {
   async onMarkerContextCopyGps(): Promise<void> {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
-    const text = `${payload.lat.toFixed(6)}, ${payload.lng.toFixed(6)}`;
+    const text = this.mapContextActionsService.formatGps(payload.lat, payload.lng);
     const copied = await this.copyTextToClipboard(text);
     this.toastService.show({
       message: copied ? 'GPS kopiert.' : text,
@@ -882,7 +920,7 @@ export class MapShellComponent implements OnDestroy {
   onMarkerContextOpenGoogleMaps(): void {
     const payload = this.markerContextMenuPayload();
     if (!payload || typeof window === 'undefined') return;
-    const url = `https://www.google.com/maps?q=${payload.lat},${payload.lng}`;
+    const url = this.mapContextActionsService.buildGoogleMapsUrl(payload.lat, payload.lng);
     window.open(url, '_blank', 'noopener,noreferrer');
     this.closeContextMenus();
   }
@@ -894,45 +932,73 @@ export class MapShellComponent implements OnDestroy {
 
   async onMarkerContextDeletePhoto(): Promise<void> {
     const payload = this.markerContextMenuPayload();
-    if (!payload || payload.count !== 1 || !payload.imageId) return;
+    const target = this.getSingleMarkerContextImageTarget(payload);
+    if (!target || !this.confirmMarkerPhotoDelete()) return;
 
-    const confirmed =
-      typeof window === 'undefined' ||
-      window.confirm(
-        'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
-      );
-    if (!confirmed) return;
-
-    const { error } = await this.supabaseService.client
-      .from('images')
-      .delete()
-      .eq('id', payload.imageId);
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+    const deleted = await this.markerContextPhotoDeleteService.deleteImageById(
+      this.supabaseService.client,
+      target.imageId,
+    );
+    if (!deleted.ok) {
+      this.toastService.show({
+        message: deleted.errorMessage ?? 'Loeschen fehlgeschlagen.',
+        type: 'error',
+        dedupe: true,
+      });
       return;
     }
 
-    const markerState = this.uploadedPhotoMarkers.get(payload.markerKey);
-    if (markerState && this.photoMarkerLayer) {
-      this.cancelMarkerMoveAnimation(markerState.marker);
-      this.photoMarkerLayer.removeLayer(markerState.marker);
-      this.uploadedPhotoMarkers.delete(payload.markerKey);
-    }
-    this.markersByImageId.delete(payload.imageId);
-    if (this.selectedMarkerKey() === payload.markerKey) {
-      this.setSelectedMarker(null);
-    }
-    if (this.selectedMarkerKeys().has(payload.markerKey)) {
-      const next = new Set(this.selectedMarkerKeys());
-      next.delete(payload.markerKey);
-      this.setSelectedMarkerKeys(next);
-    }
-    if (this.detailImageId() === payload.imageId) {
-      this.detailImageId.set(null);
-    }
+    this.removeDeletedPhotoFromMapUi(target.markerKey, target.imageId);
 
     this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
     this.closeContextMenus();
+  }
+
+  private getSingleMarkerContextImageTarget(
+    payload: {
+      markerKey: string;
+      count: number;
+      imageId?: string;
+    } | null,
+  ): { markerKey: string; imageId: string } | null {
+    if (!payload || payload.count !== 1 || !payload.imageId) {
+      return null;
+    }
+    return { markerKey: payload.markerKey, imageId: payload.imageId };
+  }
+
+  private confirmMarkerPhotoDelete(): boolean {
+    return (
+      typeof window === 'undefined' ||
+      window.confirm(
+        'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
+      )
+    );
+  }
+
+  private removeDeletedPhotoFromMapUi(markerKey: string, imageId: string): void {
+    const markerState = this.uploadedPhotoMarkers.get(markerKey);
+    if (markerState && this.photoMarkerLayer) {
+      this.cancelMarkerMoveAnimation(markerState.marker);
+      this.photoMarkerLayer.removeLayer(markerState.marker);
+      this.uploadedPhotoMarkers.delete(markerKey);
+    }
+
+    this.markersByImageId.delete(imageId);
+
+    if (this.selectedMarkerKey() === markerKey) {
+      this.setSelectedMarker(null);
+    }
+
+    if (this.selectedMarkerKeys().has(markerKey)) {
+      const next = new Set(this.selectedMarkerKeys());
+      next.delete(markerKey);
+      this.setSelectedMarkerKeys(next);
+    }
+
+    if (this.detailImageId() === imageId) {
+      this.detailImageId.set(null);
+    }
   }
 
   // ── Workspace pane resize ─────────────────────────────────────────────────
@@ -1009,7 +1075,7 @@ export class MapShellComponent implements OnDestroy {
 
   onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
     this.activeWorkspaceHover = event;
-    const markerKey = this.findMarkerKeyForZoomTarget(event.imageId, event.lat, event.lng, true);
+    const markerKey = this.resolveZoomTargetMarkerKey(event.imageId, event.lat, event.lng, true);
     this.setLinkedHoverMarkerFromWorkspace(markerKey);
   }
 
@@ -1028,7 +1094,7 @@ export class MapShellComponent implements OnDestroy {
       Date.now() - pendingForImage.requestedAt >
         MapShellComponent.DETAIL_LOCATION_WAIT_FOR_SINGLE_MS;
 
-    const markerKey = this.findMarkerKeyForZoomTarget(imageId, lat, lng, allowClusterFallback);
+    const markerKey = this.resolveZoomTargetMarkerKey(imageId, lat, lng, allowClusterFallback);
     if (!markerKey) {
       if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
         setTimeout(
@@ -1111,73 +1177,23 @@ export class MapShellComponent implements OnDestroy {
     );
   }
 
-  private findMarkerKeyForZoomTarget(
+  private resolveZoomTargetMarkerKey(
     imageId: string,
     lat: number,
     lng: number,
     allowClusterFallback: boolean,
   ): string | null {
-    const byImageId = this.markersByImageId.get(imageId);
-    if (byImageId) {
-      const state = this.uploadedPhotoMarkers.get(byImageId);
-      if (state && state.count === 1) {
-        return byImageId;
-      }
-    }
-
-    const exactKey = this.toMarkerKey(lat, lng);
-    const exactState = this.uploadedPhotoMarkers.get(exactKey);
-    if (exactState?.count === 1) {
-      return exactKey;
-    }
-
-    if (!allowClusterFallback) {
-      return null;
-    }
-
-    // Fallback for clustered state: pulse the closest visible cluster marker
-    // when the exact single-image marker is not available.
-    let nearestCluster: { key: string; distanceMeters: number } | null = null;
-    let nearestAny: { key: string; distanceMeters: number } | null = null;
-
-    for (const [key, state] of this.uploadedPhotoMarkers) {
-      const distanceMeters = this.distanceMeters(lat, lng, state.lat, state.lng);
-
-      if (!nearestAny || distanceMeters < nearestAny.distanceMeters) {
-        nearestAny = { key, distanceMeters };
-      }
-
-      if (state.count > 1 && (!nearestCluster || distanceMeters < nearestCluster.distanceMeters)) {
-        nearestCluster = { key, distanceMeters };
-      }
-    }
-
-    if (
-      nearestCluster &&
-      nearestCluster.distanceMeters <= MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS
-    ) {
-      return nearestCluster.key;
-    }
-
-    if (
-      nearestAny &&
-      nearestAny.distanceMeters <= MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS
-    ) {
-      return nearestAny.key;
-    }
-
-    return null;
-  }
-
-  private distanceMeters(latA: number, lngA: number, latB: number, lngB: number): number {
-    if (this.map) {
-      return this.map.distance([latA, lngA], [latB, lngB]);
-    }
-
-    // Fallback path if map is not available in tests.
-    const dx = latA - latB;
-    const dy = lngA - lngB;
-    return Math.sqrt(dx * dx + dy * dy) * 111_320;
+    return this.zoomTargetMarkerService.findMarkerKeyForZoomTarget({
+      imageId,
+      lat,
+      lng,
+      allowClusterFallback,
+      map: this.map,
+      markersByImageId: this.markersByImageId,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      toMarkerKey: (latValue: number, lngValue: number) => this.toMarkerKey(latValue, lngValue),
+      clusterFallbackMaxMeters: MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS,
+    });
   }
 
   // ── Upload panel ──────────────────────────────────────────────────────────
@@ -1912,7 +1928,9 @@ export class MapShellComponent implements OnDestroy {
       interactive: false,
     }).addTo(this.map);
 
-    this.radiusDraftLabel = this.createRadiusLabelMarker(startLatLng, 0, 0).addTo(this.map);
+    this.radiusDraftLabel = this.radiusVisualsService
+      .createLabelMarker(startLatLng, 0, 0)
+      .addTo(this.map);
 
     this.radiusDrawMoveHandler = (moveEvent: L.LeafletMouseEvent) => {
       this.updateRadiusSelectionDraft(moveEvent.latlng);
@@ -1932,13 +1950,20 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const radiusMeters = this.map.distance(this.radiusDrawStartLatLng, currentLatLng);
-    const labelLatLng = this.getRadiusLabelLatLng(this.radiusDrawStartLatLng, currentLatLng);
-    const labelAngleDeg = this.getReadableLineAngleDeg(this.radiusDrawStartLatLng, currentLatLng);
+    const labelLatLng = this.radiusVisualsService.getLabelLatLng(
+      this.radiusDrawStartLatLng,
+      currentLatLng,
+    );
+    const labelAngleDeg = this.radiusVisualsService.getReadableLineAngleDeg(
+      this.map,
+      this.radiusDrawStartLatLng,
+      currentLatLng,
+    );
 
     this.radiusDraftLine?.setLatLngs([this.radiusDrawStartLatLng, currentLatLng]);
     this.radiusDraftCircle?.setRadius(radiusMeters);
     this.radiusDraftLabel?.setLatLng(labelLatLng);
-    this.updateRadiusLabelMarker(this.radiusDraftLabel, radiusMeters, labelAngleDeg);
+    this.radiusVisualsService.updateLabelMarker(this.radiusDraftLabel, radiusMeters, labelAngleDeg);
     this.updateRadiusDraftMarkerHighlights(this.radiusDrawStartLatLng, radiusMeters);
   }
 
@@ -2001,142 +2026,33 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const nextKeys = new Set<string>();
-    for (const [markerKey, markerState] of this.uploadedPhotoMarkers.entries()) {
-      const markerDistance = this.map.distance(center, [markerState.lat, markerState.lng]);
-      if (markerDistance <= radiusMeters) {
-        nextKeys.add(markerKey);
-      }
-    }
-
-    if (
-      this.radiusDraftHighlightedKeys.size === nextKeys.size &&
-      Array.from(this.radiusDraftHighlightedKeys).every((key) => nextKeys.has(key))
-    ) {
-      return;
-    }
-
-    const previousKeys = this.radiusDraftHighlightedKeys;
-    this.radiusDraftHighlightedKeys = nextKeys;
-
-    for (const key of previousKeys) {
-      if (!nextKeys.has(key)) {
-        this.refreshPhotoMarker(key);
-      }
-    }
-
-    for (const key of nextKeys) {
-      if (!previousKeys.has(key)) {
-        this.refreshPhotoMarker(key);
-      }
-    }
+    this.radiusDraftHighlightedKeys = this.radiusDraftHighlightService.updateDraftHighlights({
+      map: this.map,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      currentKeys: this.radiusDraftHighlightedKeys,
+      center,
+      radiusMeters,
+      refreshPhotoMarker: (markerKey: string) => this.refreshPhotoMarker(markerKey),
+    });
   }
 
   private clearRadiusDraftMarkerHighlights(): void {
-    if (this.radiusDraftHighlightedKeys.size === 0) {
-      return;
-    }
-
-    const previousKeys = this.radiusDraftHighlightedKeys;
-    this.radiusDraftHighlightedKeys = new Set<string>();
-    for (const markerKey of previousKeys) {
-      this.refreshPhotoMarker(markerKey);
-    }
+    this.radiusDraftHighlightedKeys = this.radiusDraftHighlightService.clearDraftHighlights(
+      this.radiusDraftHighlightedKeys,
+      (markerKey: string) => this.refreshPhotoMarker(markerKey),
+    );
   }
 
   private clearRadiusSelectionVisuals(): void {
-    for (const visual of this.radiusCommittedVisuals) {
-      visual.circle.remove();
-      visual.label.remove();
-      visual.centerDot.remove();
-    }
-    this.radiusCommittedVisuals.length = 0;
+    this.radiusVisualsService.clearCommittedSelectionVisuals(this.radiusCommittedVisuals);
   }
 
   private addRadiusSelectionVisual(center: L.LatLng, radiusMeters: number, edge: L.LatLng): void {
     if (!this.map) return;
 
-    const labelLatLng = this.getRadiusLabelLatLng(center, edge);
-    const labelAngleDeg = this.getReadableLineAngleDeg(center, edge);
-
-    const circle = L.circle(center, {
-      radius: radiusMeters,
-      color: 'var(--color-clay)',
-      weight: 2,
-      opacity: 0.95,
-      fillColor: 'var(--color-clay)',
-      fillOpacity: 0.1,
-      interactive: false,
-    }).addTo(this.map);
-
-    const centerDot = L.circleMarker(center, {
-      radius: 4,
-      color: 'var(--color-clay)',
-      fillColor: 'var(--color-clay)',
-      fillOpacity: 1,
-      weight: 0,
-      interactive: false,
-    }).addTo(this.map);
-
-    const label = this.createRadiusLabelMarker(labelLatLng, radiusMeters, labelAngleDeg).addTo(
-      this.map,
+    this.radiusCommittedVisuals.push(
+      this.radiusVisualsService.addCommittedSelectionVisual(this.map, center, radiusMeters, edge),
     );
-    this.radiusCommittedVisuals.push({ circle, label, centerDot });
-  }
-
-  private createRadiusLabelMarker(
-    position: L.LatLng,
-    radiusMeters: number,
-    angleDeg: number,
-  ): L.Marker {
-    return L.marker(position, {
-      interactive: false,
-      keyboard: false,
-      icon: L.divIcon({
-        className: 'map-radius-label',
-        html: `<span class="map-radius-label__value" style="--radius-label-rotation:${angleDeg.toFixed(2)}deg">${this.formatRadiusDistance(radiusMeters)}</span>`,
-        iconSize: [0, 0],
-      }),
-    });
-  }
-
-  private updateRadiusLabelMarker(
-    marker: L.Marker | null,
-    radiusMeters: number,
-    angleDeg: number,
-  ): void {
-    const el = marker?.getElement();
-    if (!el) return;
-    const value = el.querySelector('.map-radius-label__value');
-    if (value instanceof HTMLElement) {
-      value.textContent = this.formatRadiusDistance(radiusMeters);
-      value.style.setProperty('--radius-label-rotation', `${angleDeg.toFixed(2)}deg`);
-    }
-  }
-
-  private getRadiusLabelLatLng(start: L.LatLng, end: L.LatLng): L.LatLng {
-    return L.latLng((start.lat + end.lat) / 2, (start.lng + end.lng) / 2);
-  }
-
-  private getReadableLineAngleDeg(start: L.LatLng, end: L.LatLng): number {
-    if (!this.map) return 0;
-
-    const startPoint = this.map.latLngToContainerPoint(start);
-    const endPoint = this.map.latLngToContainerPoint(end);
-    const deltaX = endPoint.x - startPoint.x;
-    const deltaY = endPoint.y - startPoint.y;
-    let angle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
-
-    if (angle > 90) angle -= 180;
-    if (angle < -90) angle += 180;
-    return angle;
-  }
-
-  private formatRadiusDistance(radiusMeters: number): string {
-    if (!Number.isFinite(radiusMeters) || radiusMeters <= 0) return '0 m';
-    if (radiusMeters < 1000) return `${Math.round(radiusMeters)} m`;
-    if (radiusMeters < 10000) return `${(radiusMeters / 1000).toFixed(1)} km`;
-    return `${Math.round(radiusMeters / 1000)} km`;
   }
 
   private async selectRadiusImages(
@@ -2146,31 +2062,21 @@ export class MapShellComponent implements OnDestroy {
   ): Promise<void> {
     if (!this.map) return;
 
-    const cellMap = new Map<string, { lat: number; lng: number }>();
-    const selectedKeys = additive ? new Set(this.selectedMarkerKeys()) : new Set<string>();
+    const result = await this.radiusSelectionService.selectRadiusImages({
+      map: this.map,
+      center,
+      radiusMeters,
+      additive,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      selectedMarkerKeys: this.selectedMarkerKeys(),
+      toMarkerKey: (lat: number, lng: number) => this.toMarkerKey(lat, lng),
+      currentImages: this.workspaceViewService.rawImages(),
+      fetchClusterImages: (cells, zoom) =>
+        this.workspaceViewService.fetchClusterImages(cells, zoom),
+    });
 
-    for (const [markerKey, markerState] of this.uploadedPhotoMarkers.entries()) {
-      const markerDistance = this.map.distance(center, [markerState.lat, markerState.lng]);
-      if (markerDistance > radiusMeters) continue;
-
-      selectedKeys.add(markerKey);
-
-      const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
-      for (const cell of cells) {
-        cellMap.set(this.toMarkerKey(cell.lat, cell.lng), cell);
-      }
-    }
-
-    this.setSelectedMarkerKeys(selectedKeys);
-
-    const zoom = Math.round(this.map.getZoom() ?? 13);
-    const cells = Array.from(cellMap.values());
-    const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
-
-    const merged = additive
-      ? this.mergeWorkspaceImages(this.workspaceViewService.rawImages(), incoming)
-      : incoming;
-    this.workspaceViewService.setActiveSelectionImages(merged);
+    this.setSelectedMarkerKeys(result.selectedMarkerKeys);
+    this.workspaceViewService.setActiveSelectionImages(result.images);
     if (!additive) {
       this.workspaceSelectionService.clearSelection();
     }
@@ -2181,16 +2087,6 @@ export class MapShellComponent implements OnDestroy {
     this.photoPanelOpen.set(true);
     this.detailImageId.set(null);
     this.setSelectedMarker(null);
-  }
-
-  private mergeWorkspaceImages(
-    current: WorkspaceImage[],
-    incoming: WorkspaceImage[],
-  ): WorkspaceImage[] {
-    const byId = new Map<string, WorkspaceImage>();
-    for (const image of current) byId.set(image.id, image);
-    for (const image of incoming) byId.set(image.id, image);
-    return Array.from(byId.values());
   }
 
   private renderOrUpdateUserLocationMarker(coords: [number, number]): void {
@@ -2470,219 +2366,39 @@ export class MapShellComponent implements OnDestroy {
     const controller = new AbortController();
     this.viewportQueryController = controller;
 
-    const bounds = this.map.getBounds();
-    const zoom = this.map.getZoom();
-
-    // 10 % buffer on each edge for pre-fetch.
-    const latPad = (bounds.getNorth() - bounds.getSouth()) * 0.1;
-    const lngPad = (bounds.getEast() - bounds.getWest()) * 0.1;
-
-    const fetchSouth = bounds.getSouth() - latPad;
-    const fetchWest = bounds.getWest() - lngPad;
-    const fetchNorth = bounds.getNorth() + latPad;
-    const fetchEast = bounds.getEast() + lngPad;
-    const roundedZoom = Math.round(zoom);
-
-    const { data, error } = await this.supabaseService.client
-      .rpc('viewport_markers', {
-        min_lat: fetchSouth,
-        min_lng: fetchWest,
-        max_lat: fetchNorth,
-        max_lng: fetchEast,
-        zoom: roundedZoom,
-      })
-      .abortSignal(controller.signal);
+    const result = await this.viewportMarkerQueryService.fetchViewportMarkers<ViewportMarkerRow>(
+      this.supabaseService.client,
+      this.map,
+      controller.signal,
+    );
 
     // If this query was aborted, discard the result.
-    if (controller.signal.aborted) return;
+    if (result.aborted) return;
     this.viewportQueryController = null;
 
     // Cache the fetched bounds so small pans can skip the RPC.
-    this.lastFetchedBounds = L.latLngBounds([fetchSouth, fetchWest], [fetchNorth, fetchEast]);
-    this.lastFetchedZoom = roundedZoom;
+    this.lastFetchedBounds = L.latLngBounds(
+      [result.fetchSouth, result.fetchWest],
+      [result.fetchNorth, result.fetchEast],
+    );
+    this.lastFetchedZoom = result.roundedZoom;
 
-    if (error || !data) {
+    if (result.error || !result.data) {
       this.flushPendingZoomHighlight();
       return;
     }
 
-    const incoming = this.buildIncomingViewportMarkers(data as ViewportMarkerRow[]);
+    const incoming = this.buildIncomingViewportMarkers(result.data);
     const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);
-
-    // --- Add or update markers ---
-    for (const [key, row] of incoming) {
-      const existing = this.uploadedPhotoMarkers.get(key);
-      const count = Number(row.image_count);
-      const direction = row.direction ?? undefined;
-      const corrected =
-        count === 1 &&
-        row.exif_latitude != null &&
-        row.exif_longitude != null &&
-        (row.cluster_lat !== row.exif_latitude || row.cluster_lng !== row.exif_longitude);
-      const thumbnailSourcePath =
-        count === 1 ? (row.thumbnail_path ?? row.storage_path ?? undefined) : undefined;
-      const fallbackLabel = this.buildFallbackLabelFromPath(thumbnailSourcePath);
-
-      if (existing) {
-        // Revoke stale ObjectURL when signed URL takes over from optimistic blob.
-        if (
-          existing.thumbnailUrl &&
-          existing.thumbnailUrl.startsWith('blob:') &&
-          thumbnailSourcePath
-        ) {
-          URL.revokeObjectURL(existing.thumbnailUrl);
-          existing.thumbnailUrl = undefined;
-          existing.signedAt = undefined;
-        }
-        // Update imageId index if it changed (e.g. cluster split to single).
-        const newImageId = count === 1 ? (row.image_id ?? undefined) : undefined;
-        if (existing.imageId !== newImageId) {
-          if (existing.imageId) this.markersByImageId.delete(existing.imageId);
-          if (newImageId) this.markersByImageId.set(newImageId, key);
-          existing.imageId = newImageId;
-        }
-        existing.fallbackLabel = fallbackLabel;
-        // Update if data changed.
-        if (
-          existing.count !== count ||
-          existing.direction !== direction ||
-          existing.corrected !== corrected
-        ) {
-          existing.count = count;
-          existing.direction = direction;
-          existing.corrected = corrected;
-          existing.thumbnailSourcePath = thumbnailSourcePath;
-          existing.fallbackLabel = fallbackLabel;
-          existing.sourceCells = row.sourceCells;
-          existing.optimistic = false;
-          this.refreshPhotoMarker(key);
-        } else {
-          // Always keep sourceCells in sync even if visuals haven't changed.
-          existing.sourceCells = row.sourceCells;
-        }
-        existing.lat = row.cluster_lat;
-        existing.lng = row.cluster_lng;
-        continue;
-      }
-
-      // No exact key match: attempt marker re-use to avoid remove/add popping.
-      const reusableKey = this.findReusableMarkerKey(row, recyclableKeys);
-      if (reusableKey) {
-        const reusableState = this.uploadedPhotoMarkers.get(reusableKey);
-        if (reusableState) {
-          recyclableKeys.delete(reusableKey);
-
-          // Revoke stale ObjectURL when signed URL takes over from optimistic blob.
-          if (
-            reusableState.thumbnailUrl &&
-            reusableState.thumbnailUrl.startsWith('blob:') &&
-            thumbnailSourcePath
-          ) {
-            URL.revokeObjectURL(reusableState.thumbnailUrl);
-            reusableState.thumbnailUrl = undefined;
-            reusableState.signedAt = undefined;
-          }
-
-          const previousImageId = reusableState.imageId;
-          const nextImageId = count === 1 ? (row.image_id ?? undefined) : undefined;
-          if (previousImageId !== nextImageId) {
-            if (previousImageId) this.markersByImageId.delete(previousImageId);
-            if (nextImageId) this.markersByImageId.set(nextImageId, key);
-          } else if (nextImageId) {
-            this.markersByImageId.set(nextImageId, key);
-          }
-
-          // Preserve selection state if the selected marker is being re-keyed.
-          if (this.selectedMarkerKey() === reusableKey) {
-            this.selectedMarkerKey.set(key);
-          }
-
-          const needsVisualRefresh =
-            reusableState.count !== count ||
-            reusableState.direction !== direction ||
-            reusableState.corrected !== corrected ||
-            reusableState.uploading !== undefined ||
-            reusableState.thumbnailSourcePath !== thumbnailSourcePath;
-
-          reusableState.count = count;
-          reusableState.lat = row.cluster_lat;
-          reusableState.lng = row.cluster_lng;
-          reusableState.sourceCells = row.sourceCells;
-          reusableState.direction = direction;
-          reusableState.corrected = corrected;
-          reusableState.thumbnailSourcePath = thumbnailSourcePath;
-          reusableState.fallbackLabel = fallbackLabel;
-          reusableState.imageId = nextImageId;
-          reusableState.optimistic = false;
-
-          this.uploadedPhotoMarkers.delete(reusableKey);
-          this.uploadedPhotoMarkers.set(key, reusableState);
-
-          // Rebind interactions so all handlers resolve the new marker key.
-          this.bindMarkerClickInteraction(key, reusableState.marker);
-          this.bindMarkerContextInteraction(key, reusableState.marker);
-          this.bindMarkerHoverInteraction(key, reusableState.marker);
-          this.animateMarkerPosition(reusableState.marker, row.cluster_lat, row.cluster_lng);
-
-          if (needsVisualRefresh) {
-            this.refreshPhotoMarker(key);
-          }
-
-          continue;
-        }
-      }
-
-      const spawnOrigin = this.findSpawnOriginForIncomingRow(row, recyclableKeys);
-
-      // New marker — add to LayerGroup (not directly to map) for batch ops.
-      const marker = L.marker(
-        spawnOrigin ? [spawnOrigin.lat, spawnOrigin.lng] : [row.cluster_lat, row.cluster_lng],
-        {
-          icon: this.buildPhotoMarkerIcon(key, { count, direction, corrected }),
-        },
-      );
-
-      this.photoMarkerLayer!.addLayer(marker);
-      this.attachMarkerInteractions(key, marker, { fadeIn: !spawnOrigin });
-
-      if (spawnOrigin) {
-        this.animateMarkerPosition(marker, row.cluster_lat, row.cluster_lng);
-      }
-
-      this.uploadedPhotoMarkers.set(key, {
-        marker,
-        count,
-        lat: row.cluster_lat,
-        lng: row.cluster_lng,
-        sourceCells: row.sourceCells,
-        direction,
-        corrected,
-        thumbnailSourcePath,
-        fallbackLabel,
-        imageId: count === 1 ? (row.image_id ?? undefined) : undefined,
-      });
-
-      // Maintain secondary index for single-image markers.
-      if (count === 1 && row.image_id) {
-        this.markersByImageId.set(row.image_id, key);
-      }
-    }
-
-    // Remove outgoing markers that were not re-used.
-    for (const oldKey of recyclableKeys) {
-      const oldState = this.uploadedPhotoMarkers.get(oldKey);
-      if (!oldState) continue;
-
-      this.cancelMarkerMoveAnimation(oldState.marker);
-      this.photoMarkerLayer!.removeLayer(oldState.marker);
-      if (oldState.imageId) {
-        this.markersByImageId.delete(oldState.imageId);
-      }
-      if (this.selectedMarkerKey() === oldKey) {
-        this.selectedMarkerKey.set(null);
-      }
-      this.uploadedPhotoMarkers.delete(oldKey);
-    }
+    this.mapMarkerReconcileFacade.reconcileIncomingViewportMarkers(
+      incoming as Map<string, ReconcileIncomingRow>,
+      recyclableKeys,
+      this.getReconcileDependencies(),
+    );
+    this.mapMarkerReconcileFacade.removeRecyclableMarkers(
+      recyclableKeys,
+      this.getReconcileDependencies(),
+    );
 
     this.pruneStaleSelectedMarkerKeys();
 
@@ -2709,10 +2425,11 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private buildIncomingViewportMarkers(rows: ViewportMarkerRow[]): Map<string, MergedViewportRow> {
-    // Client-side pixel-distance merge: collapse clusters whose on-screen
-    // distance is less than the marker icon width. This fixes the grid
-    // boundary problem where adjacent grid cells produce overlapping markers.
-    const merged = this.mergeOverlappingClusters(rows);
+    const merged = this.mapMarkerClusterMergeService.mergeOverlappingClusters(
+      this.map,
+      rows,
+      PHOTO_MARKER_ICON_SIZE[0],
+    );
 
     // Build the incoming marker set keyed the same way we store them.
     const incoming = new Map<string, MergedViewportRow>();
@@ -2736,6 +2453,44 @@ export class MapShellComponent implements OnDestroy {
       }
     }
     return recyclableKeys;
+  }
+
+  private getReconcileDependencies(): ReconcileDependencies {
+    return {
+      photoMarkerLayer: this.photoMarkerLayer!,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      markersByImageId: this.markersByImageId,
+      selectedMarkerKey: () => this.selectedMarkerKey(),
+      setSelectedMarkerKey: (markerKey: string | null) => this.selectedMarkerKey.set(markerKey),
+      findReusableMarkerKey: (row, keys) =>
+        this.mapMarkerReuseStrategyService.findReusableMarkerKey(
+          this.map,
+          this.markersByImageId,
+          this.uploadedPhotoMarkers,
+          row,
+          keys,
+        ),
+      findSpawnOriginForIncomingRow: (row, keys) =>
+        this.mapMarkerReuseStrategyService.findSpawnOriginForIncomingRow(
+          this.map,
+          this.uploadedPhotoMarkers,
+          row,
+          keys,
+        ),
+      buildFallbackLabelFromPath: (path) => this.buildFallbackLabelFromPath(path),
+      buildPhotoMarkerIcon: (markerKey, override) => this.buildPhotoMarkerIcon(markerKey, override),
+      attachMarkerInteractions: (markerKey, marker, fadeIn) =>
+        this.attachMarkerInteractions(markerKey, marker, { fadeIn }),
+      bindMarkerClickInteraction: (markerKey, marker) =>
+        this.bindMarkerClickInteraction(markerKey, marker),
+      bindMarkerContextInteraction: (markerKey, marker) =>
+        this.bindMarkerContextInteraction(markerKey, marker),
+      bindMarkerHoverInteraction: (markerKey, marker) =>
+        this.bindMarkerHoverInteraction(markerKey, marker),
+      animateMarkerPosition: (marker, lat, lng) => this.animateMarkerPosition(marker, lat, lng),
+      refreshPhotoMarker: (markerKey) => this.refreshPhotoMarker(markerKey),
+      cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+    };
   }
 
   private pruneStaleSelectedMarkerKeys(): void {
@@ -2901,7 +2656,10 @@ export class MapShellComponent implements OnDestroy {
     zoom: number,
   ): Promise<void> {
     const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
-    const merged = this.mergeWorkspaceImages(this.workspaceViewService.rawImages(), incoming);
+    const merged = this.radiusSelectionService.mergeWorkspaceImages(
+      this.workspaceViewService.rawImages(),
+      incoming,
+    );
     this.workspaceViewService.setActiveSelectionImages(merged);
   }
 
@@ -3018,98 +2776,6 @@ export class MapShellComponent implements OnDestroy {
   private persistMapMaterialPreference(value: MapMaterialPreference): void {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(MAP_MATERIAL_STORAGE_KEY, value);
-  }
-
-  /**
-   * Select a recyclable outgoing marker that can represent an incoming row.
-   * Prefer exact single-image identity; otherwise pick the nearest marker of
-   * the same kind (single vs cluster) within a bounded screen distance.
-   */
-  private findReusableMarkerKey(
-    row: { cluster_lat: number; cluster_lng: number; image_count: number; image_id: string | null },
-    recyclableKeys: Set<string>,
-  ): string | null {
-    const count = Number(row.image_count);
-    const incomingIsSingle = count === 1;
-
-    if (incomingIsSingle && row.image_id) {
-      const byImageId = this.markersByImageId.get(row.image_id);
-      if (byImageId && recyclableKeys.has(byImageId)) {
-        return byImageId;
-      }
-    }
-
-    if (!this.map) return null;
-
-    const incomingPoint = this.map.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]);
-    const maxDistancePx = incomingIsSingle ? 120 : 170;
-    const maxDistanceSq = maxDistancePx * maxDistancePx;
-    let bestSameKindKey: string | null = null;
-    let bestSameKindDistanceSq = Number.POSITIVE_INFINITY;
-
-    for (const candidateKey of recyclableKeys) {
-      const candidate = this.uploadedPhotoMarkers.get(candidateKey);
-      if (!candidate) continue;
-
-      const candidateIsSingle = candidate.count === 1;
-      if (candidateIsSingle !== incomingIsSingle) continue;
-
-      const candidatePoint = this.map.latLngToContainerPoint([candidate.lat, candidate.lng]);
-      const dx = incomingPoint.x - candidatePoint.x;
-      const dy = incomingPoint.y - candidatePoint.y;
-      const distSq = dx * dx + dy * dy;
-
-      if (distSq <= maxDistanceSq && distSq < bestSameKindDistanceSq) {
-        bestSameKindDistanceSq = distSq;
-        bestSameKindKey = candidateKey;
-      }
-    }
-
-    return bestSameKindKey;
-  }
-
-  /**
-   * For cluster-split visuals, spawn new child markers at the previous
-   * parent-cluster centroid so they visibly emerge from that cluster.
-   */
-  private findSpawnOriginForIncomingRow(
-    row: { cluster_lat: number; cluster_lng: number; image_count: number },
-    recyclableKeys: Set<string>,
-  ): { lat: number; lng: number } | null {
-    if (!this.map) return null;
-
-    const incomingIsSingle = Number(row.image_count) === 1;
-    // For split: single marker can emerge from outgoing cluster center.
-    // For merge: cluster marker can emerge from outgoing single markers.
-
-    const incomingPoint = this.map.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]);
-    const maxDistancePx = 240;
-    const maxDistanceSq = maxDistancePx * maxDistancePx;
-
-    let best: { lat: number; lng: number } | null = null;
-    let bestDistanceSq = Number.POSITIVE_INFINITY;
-
-    for (const candidateKey of recyclableKeys) {
-      const candidate = this.uploadedPhotoMarkers.get(candidateKey);
-      if (!candidate) continue;
-
-      if (incomingIsSingle) {
-        if (candidate.count <= 1) continue;
-      } else {
-        if (candidate.count !== 1) continue;
-      }
-
-      const candidatePoint = this.map.latLngToContainerPoint([candidate.lat, candidate.lng]);
-      const dx = incomingPoint.x - candidatePoint.x;
-      const dy = incomingPoint.y - candidatePoint.y;
-      const distSq = dx * dx + dy * dy;
-      if (distSq > maxDistanceSq || distSq >= bestDistanceSq) continue;
-
-      bestDistanceSq = distSq;
-      best = { lat: candidate.lat, lng: candidate.lng };
-    }
-
-    return best;
   }
 
   /**
@@ -3267,7 +2933,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const markerKey = this.findMarkerKeyForZoomTarget(
+    const markerKey = this.resolveZoomTargetMarkerKey(
       activeHover.imageId,
       activeHover.lat,
       activeHover.lng,
@@ -3739,162 +3405,11 @@ export class MapShellComponent implements OnDestroy {
     return data.organization_id as string;
   }
 
-  private async assignImagesToProject(imageIds: string[], projectId: string): Promise<boolean> {
-    if (imageIds.length === 0) {
-      this.toastService.show({
-        message: 'Keine Medien fuer Projektzuweisung gefunden.',
-        type: 'warning',
-        dedupe: true,
-      });
-      return false;
-    }
-
-    const { error } = await this.supabaseService.client
-      .from('images')
-      .update({ project_id: projectId })
-      .in('id', imageIds);
-
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
-      return false;
-    }
-
-    return true;
-  }
-
-  private async resolveMarkerContextImageIds(payload: {
-    count: number;
-    imageId?: string;
-    sourceCells: Array<{ lat: number; lng: number }>;
-  }): Promise<string[]> {
-    if (payload.count === 1 && payload.imageId) {
-      return [payload.imageId];
-    }
-
-    const zoom = this.map?.getZoom() ?? 13;
-    const images = await this.workspaceViewService.fetchClusterImages(payload.sourceCells, zoom);
-    return images.map((img) => img.id);
-  }
-
   private offsetLatLngEast(center: L.LatLng, meters: number): L.LatLng {
     const latRad = (center.lat * Math.PI) / 180;
     const metersPerDegreeLng = 111320 * Math.max(Math.cos(latRad), 0.0001);
     const lngOffset = meters / metersPerDegreeLng;
     return L.latLng(center.lat, center.lng + lngOffset);
-  }
-
-  /**
-   * Client-side pixel-distance merge pass.
-   *
-   * Grid-based clustering can leave cluster centers right at cell
-   * boundaries, producing overlapping markers. This greedy merge
-   * converts each cluster to screen-space pixels and collapses any
-   * pair whose distance is less than the marker icon width (+ 20 %
-   * breathing room). Runs in O(n²) on the already-small result set
-   * (≤ 2 000 rows), so sub-millisecond.
-   */
-  private mergeOverlappingClusters<
-    T extends {
-      cluster_lat: number;
-      cluster_lng: number;
-      image_count: number;
-      image_id: string | null;
-      direction: number | null;
-      storage_path: string | null;
-      thumbnail_path: string | null;
-      exif_latitude: number | null;
-      exif_longitude: number | null;
-      created_at: string | null;
-    },
-  >(rows: T[]): Array<T & { sourceCells: Array<{ lat: number; lng: number }> }> {
-    if (!this.map || rows.length === 0)
-      return rows.map((r) => ({ ...r, sourceCells: [{ lat: r.cluster_lat, lng: r.cluster_lng }] }));
-
-    const minDist = PHOTO_MARKER_ICON_SIZE[0] * 1.2; // 64 px + 20 % gap
-    const minDistSq = minDist * minDist;
-
-    // Pre-compute pixel positions once.
-    const points = rows.map((row) =>
-      this.map!.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]),
-    );
-
-    // Bucket points in screen-space cells to avoid O(n^2) scans on dense viewports.
-    const cellSize = minDist;
-    const buckets = new Map<string, number[]>();
-    for (let i = 0; i < points.length; i++) {
-      const cellX = Math.floor(points[i].x / cellSize);
-      const cellY = Math.floor(points[i].y / cellSize);
-      const bucketKey = `${cellX}:${cellY}`;
-      const list = buckets.get(bucketKey);
-      if (list) {
-        list.push(i);
-      } else {
-        buckets.set(bucketKey, [i]);
-      }
-    }
-
-    const consumed = new Set<number>();
-    const result: Array<T & { sourceCells: Array<{ lat: number; lng: number }> }> = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      if (consumed.has(i)) continue;
-
-      const point = points[i];
-      const baseCellX = Math.floor(point.x / cellSize);
-      const baseCellY = Math.floor(point.y / cellSize);
-
-      // Accumulate weighted position + totals for the merge group.
-      let totalCount = Number(rows[i].image_count);
-      let wLat = rows[i].cluster_lat * totalCount;
-      let wLng = rows[i].cluster_lng * totalCount;
-
-      // Track original grid-cell centres so we can query all of them on click.
-      const sourceCells: Array<{ lat: number; lng: number }> = [
-        { lat: rows[i].cluster_lat, lng: rows[i].cluster_lng },
-      ];
-
-      // Compare only with points from the same or neighboring screen buckets.
-      for (let dxCell = -1; dxCell <= 1; dxCell++) {
-        for (let dyCell = -1; dyCell <= 1; dyCell++) {
-          const neighborKey = `${baseCellX + dxCell}:${baseCellY + dyCell}`;
-          const candidates = buckets.get(neighborKey);
-          if (!candidates) continue;
-
-          for (const j of candidates) {
-            if (j <= i || consumed.has(j)) continue;
-            const dx = point.x - points[j].x;
-            const dy = point.y - points[j].y;
-            if (dx * dx + dy * dy < minDistSq) {
-              consumed.add(j);
-              const jCount = Number(rows[j].image_count);
-              wLat += rows[j].cluster_lat * jCount;
-              wLng += rows[j].cluster_lng * jCount;
-              totalCount += jCount;
-              sourceCells.push({ lat: rows[j].cluster_lat, lng: rows[j].cluster_lng });
-            }
-          }
-        }
-      }
-
-      const isSingle = totalCount === 1;
-      result.push({
-        ...rows[i],
-        cluster_lat: wLat / totalCount,
-        cluster_lng: wLng / totalCount,
-        image_count: totalCount,
-        // Preserve single-image fields only when there's truly one image.
-        image_id: isSingle ? rows[i].image_id : null,
-        direction: isSingle ? rows[i].direction : null,
-        storage_path: isSingle ? rows[i].storage_path : null,
-        thumbnail_path: isSingle ? rows[i].thumbnail_path : null,
-        exif_latitude: isSingle ? rows[i].exif_latitude : null,
-        exif_longitude: isSingle ? rows[i].exif_longitude : null,
-        created_at: isSingle ? rows[i].created_at : null,
-        sourceCells,
-      } as T & { sourceCells: Array<{ lat: number; lng: number }> });
-    }
-
-    return result;
   }
 
   /**

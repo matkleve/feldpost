@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { I18nService } from './i18n/i18n.service';
 import type { PropertyDefinition } from './property-registry.types';
 import type { WorkspaceImage } from './workspace-view.types';
 
@@ -169,69 +170,19 @@ const BUILT_IN_FIELD_MAP: Record<string, (img: WorkspaceImage) => string | numbe
   user: (img) => img.userName,
 };
 
-/** Group heading formatters for built-in properties. */
-const BUILT_IN_GROUP_FORMAT: Record<string, (img: WorkspaceImage) => string> = {
-  'date-captured': (img) => {
-    if (!img.capturedAt) return 'Unknown date';
-    return new Date(img.capturedAt).toLocaleDateString('de-AT', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  },
-  'date-uploaded': (img) => {
-    if (!img.createdAt) return 'Unknown date';
-    return new Date(img.createdAt).toLocaleDateString('de-AT', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  },
-  name: (img) => img.storagePath ?? 'Unnamed',
-  distance: () => 'Unknown distance',
-  project: (img) => {
-    if (img.projectNames && img.projectNames.length > 0) {
-      return img.projectNames.length === 1
-        ? img.projectNames[0]
-        : `${img.projectNames[0]} +${img.projectNames.length - 1}`;
-    }
-    return img.projectName ?? 'No project';
-  },
-  date: (img) => {
-    if (!img.capturedAt) return 'Unknown date';
-    return new Date(img.capturedAt).toLocaleDateString('de-AT', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  },
-  year: (img) => {
-    if (!img.capturedAt) return 'Unknown year';
-    return new Date(img.capturedAt).getFullYear().toString();
-  },
-  month: (img) => {
-    if (!img.capturedAt) return 'Unknown month';
-    return new Date(img.capturedAt).toLocaleDateString('de-AT', {
-      year: 'numeric',
-      month: 'long',
-    });
-  },
-  city: (img) => img.city ?? 'Unknown city',
-  district: (img) => img.district ?? 'Unknown district',
-  street: (img) => img.street ?? 'Unknown street',
-  country: (img) => img.country ?? 'Unknown country',
-  address: (img) => img.addressLabel ?? 'Unknown address',
-  user: (img) => img.userName ?? 'Unknown user',
-};
-
 @Injectable({ providedIn: 'root' })
 export class PropertyRegistryService {
+  private readonly i18nService = inject(I18nService);
+
   /** Custom properties loaded from MetadataService. */
   readonly customProperties = signal<PropertyDefinition[]>([]);
 
   /** All available properties: built-in + custom. */
   readonly allProperties = computed<PropertyDefinition[]>(() => [
-    ...BUILT_IN_PROPERTIES,
+    ...BUILT_IN_PROPERTIES.map((property) => ({
+      ...property,
+      label: this.i18nService.translateOriginal(property.label, property.label),
+    })),
     ...this.customProperties(),
   ]);
 
@@ -277,13 +228,15 @@ export class PropertyRegistryService {
    * Returns a formatted string suitable for display as a group heading.
    */
   getGroupValue(img: WorkspaceImage, propertyId: string): string {
-    const formatter = BUILT_IN_GROUP_FORMAT[propertyId];
-    if (formatter) return formatter(img);
+    const builtInValue = this.getBuiltInGroupValue(img, propertyId);
+    if (builtInValue !== null) return builtInValue;
 
     // Custom property — prefix with property label
     const value = this.getCustomPropertyValue(img, propertyId);
     const label = this.getProperty(propertyId)?.label ?? propertyId;
-    if (value == null || value === '') return `No ${label}`;
+    if (value == null || value === '') {
+      return `${this.i18nService.translateOriginal('No', 'No')} ${label}`;
+    }
     return `${label} ${value}`;
   }
 
@@ -337,5 +290,61 @@ export class PropertyRegistryService {
     }
 
     return raw;
+  }
+
+  private getBuiltInGroupValue(img: WorkspaceImage, propertyId: string): string | null {
+    const t = (value: string) => this.i18nService.translateOriginal(value, value);
+
+    switch (propertyId) {
+      case 'date-captured':
+      case 'date':
+        if (!img.capturedAt) return t('Unknown date');
+        return this.i18nService.formatDate(img.capturedAt, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      case 'date-uploaded':
+        if (!img.createdAt) return t('Unknown date');
+        return this.i18nService.formatDate(img.createdAt, {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      case 'name':
+        return img.storagePath ?? t('Unnamed');
+      case 'distance':
+        return t('Unknown distance');
+      case 'project':
+        if (img.projectNames && img.projectNames.length > 0) {
+          return img.projectNames.length === 1
+            ? img.projectNames[0]
+            : `${img.projectNames[0]} +${img.projectNames.length - 1}`;
+        }
+        return img.projectName ?? t('No project');
+      case 'year':
+        if (!img.capturedAt) return t('Unknown year');
+        return new Date(img.capturedAt).getFullYear().toString();
+      case 'month':
+        if (!img.capturedAt) return t('Unknown month');
+        return this.i18nService.formatDate(img.capturedAt, {
+          year: 'numeric',
+          month: 'long',
+        });
+      case 'city':
+        return img.city ?? t('Unknown city');
+      case 'district':
+        return img.district ?? t('Unknown district');
+      case 'street':
+        return img.street ?? t('Unknown street');
+      case 'country':
+        return img.country ?? t('Unknown country');
+      case 'address':
+        return img.addressLabel ?? t('Unknown address');
+      case 'user':
+        return img.userName ?? t('Unknown user');
+      default:
+        return null;
+    }
   }
 }

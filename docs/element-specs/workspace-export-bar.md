@@ -326,6 +326,7 @@ erDiagram
 | `features/map/workspace-pane/workspace-export-bar.component.ts`        | Bottom action bar component                                  |
 | `features/map/workspace-pane/workspace-export-bar.component.html`      | Template for selection and export actions                    |
 | `features/map/workspace-pane/workspace-export-bar.component.scss`      | Bar layout, transitions, responsive behavior                 |
+| `features/map/map-shell/map-shell.component.ts`                        | Host wiring for `?share` URL token resolve and pane opening  |
 | `features/map/workspace-pane/add-to-project-dialog.component.ts`       | Batch add-to-project dialog behavior                         |
 | `features/map/workspace-pane/add-to-project-dialog.component.html`     | Project picker for selected media                            |
 | `features/map/workspace-pane/add-to-project-dialog.component.scss`     | Add-to-project dialog styles                                 |
@@ -342,6 +343,7 @@ erDiagram
 | `features/map/workspace-pane/download-selection-dialog.component.html` | Download dialog template                                     |
 | `features/map/workspace-pane/download-selection-dialog.component.scss` | Download dialog styles                                       |
 | `core/workspace-selection.service.ts`                                  | Selection state, toggles, select all/none, keyboard handling |
+| `core/workspace-view.service.ts`                                       | Ordered image hydration for resolved share-set IDs           |
 | `core/media-bulk-actions.service.ts`                                   | Batch add-to-project, change-address, and delete operations  |
 | `core/share-set.service.ts`                                            | Create/resolve share-set tokens via Supabase                 |
 | `core/zip-export.service.ts`                                           | Fetch signed URLs/files, build ZIP blob, trigger download    |
@@ -378,6 +380,7 @@ sequenceDiagram
 - `WorkspaceSelectionService` is the single source of truth for selected IDs and shortcut handling.
 - `WorkspaceViewService` provides current scope IDs for deterministic `Select all` behavior.
 - `ShareSetService` uses Supabase APIs through service abstraction; components never call Supabase directly.
+- Shared links are resolved from `?share` in `MapShellComponent`, then hydrated into workspace data and selection state.
 - `ZipExportService` resolves signed file URLs and assembles ZIP in browser before download trigger.
 
 ## Acceptance Criteria
@@ -394,7 +397,7 @@ sequenceDiagram
 - [ ] `Select all` targets current workspace scope (active filters/grouping/tab), not entire dataset.
 - [ ] Selection survives sort, filter, grouping, and fullscreen transitions.
 - [x] Share link creation returns a stable tokenized URL for the selected set.
-- [ ] Opening a valid share URL reproduces the same media set ordering and membership.
+- [x] Opening a valid share URL reproduces the same media set ordering and membership.
 - [x] Share URL access is denied outside organization boundaries via RLS/policy checks.
 - [ ] Download dialog pre-fills title with project name when single-project scope is detected.
 - [ ] Download dialog pre-fills `bestLabel + date` for ad-hoc or mixed-project selections.

@@ -24,7 +24,7 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 | 4   | Load fails                                 | Shows error state with retry action                                         | Supabase/service error                |
 | 5   | Clicks Retry                               | Re-runs profile/preference load and returns to loading state                | Retry button in error state           |
 | 6   | Selects section in left list               | Right detail area switches to selected section component                    | `selectedSectionId` signal update     |
-| 7   | Selects `Konto` section                    | Renders identity info and account-session actions (`Logout`)                | account section selection             |
+| 7   | Selects `Konto` section                    | Renders identity, email/password management, password-recovery action, 2FA, and session actions | account section selection             |
 | 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status     | shortcuts section selection           |
 | 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                 | Backdrop click / Escape key           |
 | 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing               | sidebar expansion signal              |
@@ -192,7 +192,7 @@ sequenceDiagram
 - [ ] Click-outside/Escape dismiss closes immediately and discards unsaved changes.
 - [ ] Section list is registry-driven and supports adding new sections without shell edits.
 - [ ] Language/Locale section integration provides English and German switching behavior.
-- [ ] `Konto` section exposes logout as the session action and does not render a local `Close settings` action.
+- [ ] `Konto` section exposes profile identity, email/password management, password recovery, 2FA management, and logout, and does not render a local `Close settings` action.
 - [ ] Profile/preference reads/writes are delegated through `UserProfileService` (Supabase-backed).
 
 ## Settings
@@ -201,7 +201,7 @@ sequenceDiagram
 - **Notifications**: preference defaults for in-app feedback and alerts.
 - **Language / Locale**: UI language and regional formatting defaults.
 - **Search Tuning**: address/place search filters, ranking weights, penalties, and retry behavior.
-- **Account & Session**: profile identity context and session termination controls (logout).
+- **Account & Session**: profile identity, email/password security, password recovery, 2FA setup/management, and session termination controls.
 - **Roles & Permissions**: role-based capability visibility and access constraints.
 - **Data & Storage**: data retention/export/cache/storage defaults.
 - **QR Invite Preferences**: default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites.

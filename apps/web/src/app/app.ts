@@ -11,7 +11,6 @@ import { SettingsPaneService } from './core/settings-pane.service';
 import { UploadNotificationService } from './core/upload-notification.service';
 import { DbTranslationService } from './core/i18n/db-translation.service';
 import { DomTranslationService } from './core/i18n/dom-translation.service';
-import { I18nService } from './core/i18n/i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +26,6 @@ export class App implements OnInit {
   private readonly uploadNotifications = inject(UploadNotificationService);
   private readonly dbTranslationService = inject(DbTranslationService);
   private readonly domTranslationService = inject(DomTranslationService);
-  private readonly i18nService = inject(I18nService);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -48,7 +46,6 @@ export class App implements OnInit {
   ngOnInit(): void {
     // Ensure root-level upload error notifications are active.
     void this.uploadNotifications;
-    this.i18nService.setLanguage('de');
     this.domTranslationService.start();
     void this.dbTranslationService.preload();
 

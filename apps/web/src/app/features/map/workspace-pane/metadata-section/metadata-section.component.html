@@ -25,7 +25,7 @@
         (keydown.enter)="newValueInput.focus()"
       />
       @if (keySuggestions().length > 0) {
-        <div class="add-metadata-suggestions dd-items">
+        <div class="add-metadata-suggestions option-menu-surface dd-items">
           @for (suggestion of keySuggestions(); track suggestion) {
             <button
               class="dd-item"

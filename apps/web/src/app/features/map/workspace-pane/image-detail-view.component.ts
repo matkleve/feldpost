@@ -42,6 +42,7 @@ import { AddressSearchComponent } from './address-search/address-search.componen
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
 import { DetailActionsComponent } from './detail-actions/detail-actions.component';
 import { ClickOutsideDirective } from '../../../shared/click-outside.directive';
+import { I18nService } from '../../../core/i18n/i18n.service';
 export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
 
 interface MediaContextRow {
@@ -73,6 +74,7 @@ interface MediaContextRow {
   },
 })
 export class ImageDetailViewComponent implements OnDestroy {
+  private readonly i18nService = inject(I18nService);
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -165,8 +167,9 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (!img) return null;
     if (!img.captured_at) return null;
     const ts = img.captured_at;
+    const locale = this.i18nService.locale();
     if (img.has_time) {
-      return new Date(ts).toLocaleString('de-AT', {
+      return new Date(ts).toLocaleString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -175,7 +178,7 @@ export class ImageDetailViewComponent implements OnDestroy {
         hour12: false,
       });
     } else {
-      return new Date(ts).toLocaleDateString('de-AT', {
+      return new Date(ts).toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -186,7 +189,7 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly uploadDate = computed(() => {
     const img = this.image();
     if (!img) return null;
-    return new Date(img.created_at).toLocaleString('de-AT', {
+    return new Date(img.created_at).toLocaleString(this.i18nService.locale(), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

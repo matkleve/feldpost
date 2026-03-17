@@ -1,0 +1,186 @@
+<section class="account-page ui-container" aria-label="Account page">
+  @if (loading()) {
+    <div class="account-page__state" aria-live="polite">
+      <span class="material-icons" aria-hidden="true">sync</span>
+      <p>Lade Kontoeinstellungen...</p>
+    </div>
+  } @else {
+    <header class="account-card account-card--identity ui-container ui-container--compact">
+      <div class="account-card__avatar" aria-hidden="true">
+        {{ displayName().slice(0, 1).toUpperCase() }}
+      </div>
+      <div class="account-card__identity-copy">
+        <h1>{{ displayName() }}</h1>
+        <p>{{ userEmail() || 'Keine E-Mail verfügbar' }}</p>
+      </div>
+      <div class="account-card__badges">
+        <span class="account-chip">{{ roleBadgeLabel() }}</span>
+        <span class="account-chip">{{ assuranceLevel() ?? 'aal1' }}</span>
+      </div>
+    </header>
+
+    <section class="account-card ui-container ui-container--compact">
+      <h2>Profil</h2>
+      <p>Aktualisiere deinen sichtbaren Namen.</p>
+      <label class="account-field">
+        <span>Anzeigename</span>
+        <input
+          type="text"
+          [value]="pendingDisplayName()"
+          (input)="pendingDisplayName.set($any($event.target).value)"
+        />
+      </label>
+      <button type="button" class="account-btn account-btn--primary" (click)="saveDisplayName()" [disabled]="savingProfile()">
+        {{ savingProfile() ? 'Speichern...' : 'Namen speichern' }}
+      </button>
+    </section>
+
+    <section class="account-card ui-container ui-container--compact">
+      <h2>Anmeldung</h2>
+      <p>E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.</p>
+
+      <label class="account-field">
+        <span>Neue E-Mail</span>
+        <input
+          type="email"
+          [value]="pendingEmail()"
+          (input)="pendingEmail.set($any($event.target).value)"
+        />
+      </label>
+      <button type="button" class="account-btn" (click)="updateEmail()" [disabled]="updatingEmail()">
+        {{ updatingEmail() ? 'Aktualisiere...' : 'E-Mail ändern' }}
+      </button>
+
+      <div class="account-grid">
+        <label class="account-field">
+          <span>Aktuelles Passwort</span>
+          <input
+            type="password"
+            [value]="currentPassword()"
+            (input)="currentPassword.set($any($event.target).value)"
+          />
+        </label>
+        <label class="account-field">
+          <span>Neues Passwort</span>
+          <input
+            type="password"
+            [value]="nextPassword()"
+            (input)="nextPassword.set($any($event.target).value)"
+          />
+        </label>
+        <label class="account-field">
+          <span>Neues Passwort bestätigen</span>
+          <input
+            type="password"
+            [value]="confirmPassword()"
+            (input)="confirmPassword.set($any($event.target).value)"
+          />
+        </label>
+      </div>
+
+      <div class="account-actions">
+        <button type="button" class="account-btn" (click)="updatePassword()" [disabled]="updatingPassword()">
+          {{ updatingPassword() ? 'Aktualisiere...' : 'Passwort ändern' }}
+        </button>
+        <button type="button" class="account-btn account-btn--ghost" (click)="sendPasswordReset()" [disabled]="sendingReset()">
+          {{ sendingReset() ? 'Sende...' : 'Passwort vergessen' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="account-card ui-container ui-container--compact">
+      <h2>2FA</h2>
+      <p>Aktive Faktoren und TOTP-Setup.</p>
+
+      <div class="account-factor-list" role="list">
+        @if (mfaFactors().length === 0) {
+          <p class="account-muted">Noch keine 2FA-Faktoren vorhanden.</p>
+        } @else {
+          @for (factor of mfaFactors(); track factor.id) {
+            <div class="account-factor" role="listitem">
+              <div>
+                <strong>{{ factor.friendlyName }}</strong>
+                <small>{{ factor.factorType }} · {{ factor.status }}</small>
+              </div>
+              <button type="button" class="account-btn account-btn--ghost" (click)="removeFactor(factor.id)" [disabled]="mfaBusy()">
+                Entfernen
+              </button>
+            </div>
+          }
+        }
+      </div>
+
+      <button type="button" class="account-btn" (click)="startTotpEnrollment()" [disabled]="mfaBusy()">
+        {{ mfaBusy() ? 'Lädt...' : 'TOTP einrichten' }}
+      </button>
+
+      @if (mfaEnrollFactorId()) {
+        <div class="account-enroll">
+          @if (asQrDataUrl(mfaQrCode()); as qrDataUrl) {
+            <img [src]="qrDataUrl" alt="2FA QR code" />
+          }
+          <p>Secret: {{ mfaSecret() }}</p>
+          <label class="account-field">
+            <span>6-stelligen Code eingeben</span>
+            <input type="text" [value]="mfaCode()" (input)="mfaCode.set($any($event.target).value)" />
+          </label>
+          <button type="button" class="account-btn" (click)="verifyTotpEnrollment()" [disabled]="mfaBusy()">
+            {{ mfaBusy() ? 'Prüfe...' : '2FA bestätigen' }}
+          </button>
+        </div>
+      }
+    </section>
+
+    <section class="account-card ui-container ui-container--compact">
+      <h2>Sitzung</h2>
+      <p>Beende deine aktuelle Sitzung sicher.</p>
+      <button type="button" class="account-btn account-btn--danger" (click)="openLogoutConfirm()">
+        Logout
+      </button>
+    </section>
+
+    <section class="account-card account-card--danger ui-container ui-container--compact">
+      <h2>Konto löschen</h2>
+      <p>Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.</p>
+      <button type="button" class="account-btn account-btn--danger" (click)="openDeleteConfirm()">
+        Konto löschen
+      </button>
+    </section>
+  }
+</section>
+
+@if (logoutConfirmOpen()) {
+  <app-confirm-dialog
+    [title]="'Logout bestätigen'"
+    [message]="'Möchtest du die aktuelle Sitzung wirklich beenden?'"
+    [confirmLabel]="'Logout'"
+    [cancelLabel]="'Abbrechen'"
+    [danger]="true"
+    (cancelled)="closeLogoutConfirm()"
+    (confirmed)="confirmLogout()"
+  />
+}
+
+@if (deleteConfirmOpen()) {
+  <div class="account-delete-overlay" role="dialog" aria-modal="true" aria-label="Konto löschen bestätigen">
+    <div class="account-delete-dialog ui-container ui-container--compact">
+      <h3>Konto löschen</h3>
+      <p>Bitte gib DELETE ein, um die Löschung zu bestätigen.</p>
+      <label class="account-field">
+        <span>Bestätigung</span>
+        <input type="text" [value]="deletePhrase()" (input)="deletePhrase.set($any($event.target).value)" />
+      </label>
+      <div class="account-actions">
+        <button type="button" class="account-btn account-btn--ghost" (click)="closeDeleteConfirm()">Abbrechen</button>
+        <button
+          type="button"
+          class="account-btn account-btn--danger"
+          [disabled]="!canConfirmDelete() || deletingAccount()"
+          (click)="confirmDeleteAccount()"
+        >
+          {{ deletingAccount() ? 'Lösche...' : 'Endgültig löschen' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

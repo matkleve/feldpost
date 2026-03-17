@@ -13,6 +13,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { LanguageCode } from '../../core/i18n/translation-catalog';
 import { SettingsPaneService } from '../../core/settings-pane.service';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
+import { AccountComponent } from '../account/account.component';
 
 type SettingsLoadState = 'loading' | 'error' | 'populated';
 
@@ -52,7 +53,7 @@ interface SettingsModel {
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
-  imports: [InviteManagementSectionComponent],
+  imports: [InviteManagementSectionComponent, AccountComponent],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -130,9 +131,6 @@ export class SettingsOverlayComponent {
   readonly selectedSectionId = signal<string>('general');
   readonly loadState = signal<SettingsLoadState>('loading');
   readonly lastError = signal<string | null>(null);
-  readonly logoutConfirmOpen = signal(false);
-  readonly logoutPending = signal(false);
-  readonly logoutError = signal<string | null>(null);
   readonly inviteSectionRequest = this.settingsPaneService.inviteSectionRequest;
 
   readonly settingsModel = signal<SettingsModel>({
@@ -148,29 +146,6 @@ export class SettingsOverlayComponent {
     searchRadiusKm: 2,
     cacheRetentionDays: 30,
     telemetryEnabled: false,
-  });
-
-  readonly userDisplayName = computed(() => {
-    const user = this.authService.user();
-    const fullName = user?.user_metadata?.['full_name'];
-
-    if (typeof fullName === 'string' && fullName.trim().length > 0) {
-      return fullName.trim();
-    }
-
-    const email = user?.email;
-    if (typeof email === 'string' && email.length > 0) {
-      return email;
-    }
-
-    return this.t('settings.overlay.account.unknownUser', 'Unknown user');
-  });
-
-  readonly userEmail = computed(() => {
-    const email = this.authService.user()?.email;
-    return typeof email === 'string' && email.length > 0
-      ? email
-      : this.t('settings.overlay.account.noEmail', 'No email available');
   });
 
   constructor() {
@@ -204,17 +179,11 @@ export class SettingsOverlayComponent {
   }
 
   requestClose(): void {
-    this.logoutConfirmOpen.set(false);
-    this.logoutError.set(null);
     this.openChange.emit(false);
   }
 
   selectSection(sectionId: string): void {
     this.selectedSectionId.set(sectionId);
-    if (sectionId !== 'account') {
-      this.logoutConfirmOpen.set(false);
-      this.logoutError.set(null);
-    }
     if (
       sectionId === 'general' ||
       sectionId === 'appearance' ||
@@ -231,46 +200,6 @@ export class SettingsOverlayComponent {
 
   retryLoad(): void {
     this.startLoad();
-  }
-
-  openLogoutConfirm(): void {
-    if (this.logoutPending()) {
-      return;
-    }
-
-    this.logoutError.set(null);
-    this.logoutConfirmOpen.set(true);
-  }
-
-  cancelLogoutConfirm(): void {
-    if (this.logoutPending()) {
-      return;
-    }
-
-    this.logoutConfirmOpen.set(false);
-  }
-
-  async confirmLogout(): Promise<void> {
-    if (this.logoutPending()) {
-      return;
-    }
-
-    this.logoutPending.set(true);
-    this.logoutError.set(null);
-
-    try {
-      await this.authService.signOut();
-      this.logoutConfirmOpen.set(false);
-      this.requestClose();
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : this.t('settings.overlay.account.logout.error', 'Logout failed. Please try again.');
-      this.logoutError.set(message);
-    } finally {
-      this.logoutPending.set(false);
-    }
   }
 
   updatePosition(): void {

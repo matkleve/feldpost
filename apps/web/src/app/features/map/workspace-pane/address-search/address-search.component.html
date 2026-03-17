@@ -5,7 +5,7 @@
       #addressSearchInput
       class="address-search__input"
       type="text"
-      placeholder="Search address…"
+      placeholder="Search address..."
       aria-label="Search for an address"
       [value]="query()"
       (input)="onInput(addressSearchInput.value)"
@@ -23,8 +23,9 @@
       </button>
     }
   </div>
+
   @if (suggestions().length > 0) {
-    <div class="address-search__results dd-items">
+    <div class="address-search__results option-menu-surface dd-items">
       @for (suggestion of suggestions(); track suggestion.addressLabel) {
         <button class="dd-item" type="button" (click)="apply(suggestion)">
           <span class="material-icons dd-item__icon" aria-hidden="true">place</span>
@@ -33,12 +34,13 @@
       }
     </div>
   }
+
   @if (loading()) {
-    <div class="address-search__loading">Searching…</div>
+    <div class="address-search__loading">Searching...</div>
   }
 } @else {
   <button class="address-search__trigger dd-item dd-item--muted" type="button" (click)="open()">
     <span class="material-icons dd-item__icon" aria-hidden="true">search</span>
-    <span class="dd-item__label">{{ currentAddress() || 'Search address…' }}</span>
+    <span class="dd-item__label">{{ currentAddress() || 'Search address...' }}</span>
   </button>
 }

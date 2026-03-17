@@ -1,0 +1,227 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.account-page {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--spacing-4);
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.account-page__state {
+  min-height: 14rem;
+  display: grid;
+  place-content: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-secondary);
+}
+
+.account-card {
+  --ui-container-gap: var(--spacing-3);
+
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+.account-card h2 {
+  font-size: 1.05rem;
+  color: var(--color-text-primary);
+}
+
+.account-card > p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.account-card--identity {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.account-card__avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-clay) 18%, var(--color-bg-surface));
+  color: var(--color-clay);
+}
+
+.account-card__identity-copy h1 {
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+}
+
+.account-card__identity-copy p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.account-card__badges {
+  display: flex;
+  gap: var(--spacing-1);
+  align-items: center;
+}
+
+.account-chip {
+  min-height: 1.75rem;
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.account-field {
+  display: grid;
+  gap: var(--spacing-1);
+}
+
+.account-field span {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.account-field input {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-control);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding: 0 var(--spacing-2);
+}
+
+.account-grid {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.account-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.account-btn {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-control);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding: 0.45rem var(--spacing-3);
+  cursor: pointer;
+}
+
+.account-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
+  background: color-mix(in srgb, var(--color-clay) 7%, var(--color-bg-surface));
+}
+
+.account-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.account-btn--primary {
+  border-color: color-mix(in srgb, var(--color-clay) 52%, var(--color-border));
+  background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
+}
+
+.account-btn--ghost {
+  background: transparent;
+}
+
+.account-btn--danger {
+  border-color: color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg-surface));
+}
+
+.account-card--danger {
+  border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
+}
+
+.account-factor-list {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.account-factor {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-control);
+  padding: var(--spacing-2);
+}
+
+.account-factor strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.account-factor small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.account-muted {
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.account-enroll {
+  display: grid;
+  gap: var(--spacing-2);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--container-radius-control);
+  padding: var(--spacing-2);
+}
+
+.account-enroll img {
+  width: 10rem;
+  height: 10rem;
+  object-fit: contain;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.account-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: color-mix(in srgb, var(--color-bg-base) 50%, transparent);
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-3);
+}
+
+.account-delete-dialog {
+  width: min(26rem, 100%);
+  background: var(--color-bg-elevated);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+}
+
+@media (max-width: 48rem) {
+  .account-page {
+    padding: var(--spacing-3);
+  }
+
+  .account-card--identity {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+}

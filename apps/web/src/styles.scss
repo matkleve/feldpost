@@ -534,9 +534,10 @@ router-outlet + * {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
+  box-sizing: border-box;
   height: 1.75rem;
   padding-inline: var(--spacing-2);
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text-secondary);
@@ -546,21 +547,32 @@ router-outlet + * {
   white-space: nowrap;
   transition:
     background 120ms ease-out,
-    color 120ms ease-out;
+    color 120ms ease-out,
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 14%, transparent);
+    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-clay) 35%, var(--color-border));
     color: var(--color-clay);
+  }
+
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 16%, transparent);
+    outline: none;
   }
 }
 
 .toolbar-btn--active {
-  background: color-mix(in srgb, var(--color-clay) 14%, transparent);
+  background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 40%, var(--color-border));
   color: var(--color-clay);
 }
 
 .toolbar-btn--open {
   background: color-mix(in srgb, var(--color-clay) 18%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 50%, var(--color-border));
   color: var(--color-clay);
 }
 

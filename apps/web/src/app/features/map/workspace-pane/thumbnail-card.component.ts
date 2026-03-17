@@ -1,6 +1,7 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import type { ThumbnailSizePreset, WorkspaceImage } from '../../../core/workspace-view.types';
 import { PHOTO_PLACEHOLDER_ICON, PHOTO_NO_PHOTO_ICON } from '../../../core/photo-load.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 export interface ThumbnailCardInteraction {
   imageId: string;
@@ -102,6 +103,7 @@ export interface ThumbnailCardHoverEvent {
   },
 })
 export class ThumbnailCardComponent {
+  private readonly i18nService = inject(I18nService);
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   readonly image = input.required<WorkspaceImage>();
@@ -134,7 +136,7 @@ export class ThumbnailCardComponent {
     const input = this.image().capturedAt ?? this.image().createdAt;
     const date = new Date(input);
     if (Number.isNaN(date.getTime())) return 'Unbekannt';
-    return new Intl.DateTimeFormat('de-AT', {
+    return new Intl.DateTimeFormat(this.i18nService.locale(), {
       day: '2-digit',
       month: '2-digit',
       year: '2-digit',

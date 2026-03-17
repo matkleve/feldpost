@@ -1,4 +1,4 @@
-﻿export type LanguageCode = 'en' | 'de';
+﻿export type LanguageCode = 'en' | 'de' | 'it';
 
 export interface TranslationEntry {
   key: string;
@@ -6,6 +6,7 @@ export interface TranslationEntry {
   context: string;
   en: string;
   de: string;
+  it?: string;
 }
 
 // Canonical translation table: preserve `original` and `context` for safe review.
@@ -183,14 +184,24 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'English',
     context: 'Language option button text.',
     en: 'English',
-    de: 'Englisch',
+    de: 'English',
+    it: 'English',
   },
   {
     key: 'settings.overlay.general.language.option.de',
     original: 'Deutsch',
     context: 'Language option button text (German native name).',
-    en: 'German',
+    en: 'Deutsch',
     de: 'Deutsch',
+    it: 'Deutsch',
+  },
+  {
+    key: 'settings.overlay.general.language.option.it',
+    original: 'Italiano',
+    context: 'Language option button text (Italian native name).',
+    en: 'Italiano',
+    de: 'Italiano',
+    it: 'Italiano',
   },
   {
     key: 'settings.overlay.general.title',

@@ -1,4 +1,10 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  statSync,
+} from "node:fs";
 import { join, relative } from "node:path";
 
 const repoRoot = process.cwd();
@@ -72,6 +78,7 @@ function loadExistingTranslations() {
   const originalIdx = header.indexOf("original");
   const enIdx = header.indexOf("en");
   const deIdx = header.indexOf("de");
+  const itIdx = header.indexOf("it");
 
   if (originalIdx === -1 || enIdx === -1 || deIdx === -1) return;
 
@@ -83,6 +90,7 @@ function loadExistingTranslations() {
     existingTranslationsByOriginal.set(original.toLowerCase(), {
       en: (row[enIdx] ?? "").trim(),
       de: (row[deIdx] ?? "").trim(),
+      it: itIdx === -1 ? "" : (row[itIdx] ?? "").trim(),
     });
   }
 }
@@ -123,6 +131,7 @@ function addEntry(original, context) {
       context,
       en: existing?.en || normalized,
       de: existing?.de || normalized,
+      it: existing?.it || normalized,
     });
   }
 }
@@ -182,7 +191,7 @@ const rows = [...textEntries.values()]
     key: `auto.${String(index + 1).padStart(4, "0")}.${keyify(entry.original) || "text"}`,
   }));
 
-const header = ["key", "original", "context", "en", "de"];
+const header = ["key", "original", "context", "en", "de", "it"];
 const lines = [header.join(",")];
 for (const row of rows) {
   lines.push(
@@ -192,6 +201,7 @@ for (const row of rows) {
       csvEscape(row.context),
       csvEscape(row.en),
       csvEscape(row.de),
+      csvEscape(row.it),
     ].join(","),
   );
 }

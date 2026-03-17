@@ -32,3 +32,10 @@ applyTo: "**/*.component.ts"
 - Use `@if`, `@for`, `@switch` control flow (not `*ngIf`, `*ngFor`)
 
 - Always provide loading, error, and empty states
+
+## i18n Workflow (mandatory)
+
+- For every new or changed user-facing text, add/update entries in `docs/i18n/translation-workbench.csv` with meaningful context.
+- Include inline template strings from `.component.ts` as well, not only `.component.html` text.
+- After text updates, regenerate `supabase/seed_i18n.sql` via `node scripts/import-i18n-csv-to-sql.mjs`.
+- Treat DB translation data (`app_texts`, `app_text_translations`) as required deliverables for component changes.

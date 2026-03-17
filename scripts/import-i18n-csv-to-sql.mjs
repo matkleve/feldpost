@@ -73,10 +73,15 @@ const originalIdx = header.indexOf("original");
 const contextIdx = header.indexOf("context");
 const enIdx = header.indexOf("en");
 const deIdx = header.indexOf("de");
+const itIdx = header.indexOf("it");
 
-if ([keyIdx, originalIdx, contextIdx, enIdx, deIdx].some((idx) => idx === -1)) {
+if (
+  [keyIdx, originalIdx, contextIdx, enIdx, deIdx, itIdx].some(
+    (idx) => idx === -1,
+  )
+) {
   throw new Error(
-    "translation-workbench.csv must contain key, original, context, en, de columns.",
+    "translation-workbench.csv must contain key, original, context, en, de, it columns.",
   );
 }
 
@@ -94,6 +99,7 @@ for (const row of body) {
   const context = (row[contextIdx] ?? "").trim();
   const en = (row[enIdx] ?? "").trim();
   const de = (row[deIdx] ?? "").trim();
+  const it = (row[itIdx] ?? "").trim();
 
   if (!key || !original) continue;
 
@@ -126,6 +132,19 @@ for (const row of body) {
     "insert into public.app_text_translations (app_text_id, lang, translated_text, status)",
   );
   lines.push(`select t.id, 'de', '${escapeSql(de || original)}', 'published'`);
+  lines.push("from public.app_texts t");
+  lines.push(`where t.organization_id is null and t.key = '${escapeSql(key)}'`);
+  lines.push("on conflict (app_text_id, lang) do update set");
+  lines.push("  translated_text = excluded.translated_text,");
+  lines.push("  status = 'published';");
+  lines.push("");
+
+  lines.push(
+    "insert into public.app_text_translations (app_text_id, lang, translated_text, status)",
+  );
+  lines.push(
+    `select t.id, 'it', '${escapeSql(it || en || original)}', 'published'`,
+  );
   lines.push("from public.app_texts t");
   lines.push(`where t.organization_id is null and t.key = '${escapeSql(key)}'`);
   lines.push("on conflict (app_text_id, lang) do update set");

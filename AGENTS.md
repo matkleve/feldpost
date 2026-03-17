@@ -71,3 +71,17 @@ Non-negotiable rules: `docs/design/constitution.md`
 ## Settings Overlay Convention
 
 For any feature that introduces user-configurable behavior, add an optional `## Settings` section to that feature's element spec in `docs/element-specs/`. Use concise bullets in the form `- **Section**: what it configures`. The settings inventory is centralized in `docs/settings-registry.md` and must stay in sync with all spec `## Settings` sections via `node scripts/lint-specs.mjs`. When adding a new configurable feature, update the spec first and then run the linter (or `--fix`) to refresh/validate the registry.
+
+## Mandatory i18n Workflow
+
+When creating or changing UI components, all user-facing text must be added to the translation pipeline with context. Do not ship hardcoded UI strings without i18n registration.
+
+Required steps for any new/changed visible text:
+
+1. Add/update text in `docs/i18n/translation-workbench.csv` with meaningful `context`.
+2. Ensure extraction covers both `.component.html` and inline `template` strings in `.component.ts`.
+3. Regenerate SQL translations via `node scripts/import-i18n-csv-to-sql.mjs`.
+4. Commit updated `supabase/seed_i18n.sql` together with code changes.
+5. If new language content is needed, keep `en/de/it` columns populated (no mixed-language fragments).
+
+Translation data in DB (`app_texts` + `app_text_translations`) is part of the feature definition, not an optional follow-up.

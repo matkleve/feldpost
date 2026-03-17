@@ -37,3 +37,12 @@ apps/web/src/app/   → Angular components, services, routing
 supabase/           → Migrations, RLS policies, edge functions
 docs/               → Element specs, design tokens, glossary
 ```
+
+## i18n Delivery Requirement
+
+For every UI text introduced or changed in components/templates:
+
+- Add the text to `docs/i18n/translation-workbench.csv` with clear translator context.
+- Ensure translation extraction includes inline templates as well as `.html` templates.
+- Regenerate SQL via `node scripts/import-i18n-csv-to-sql.mjs` and include `supabase/seed_i18n.sql` in the same change.
+- Treat `app_texts` / `app_text_translations` data as required feature output, not optional cleanup.
