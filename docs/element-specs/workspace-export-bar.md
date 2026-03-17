@@ -21,34 +21,34 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 
 ## Actions & Interactions
 
-| #   | User Action                                           | System Response                                                                 | Triggers                            |
-| --- | ----------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- |
-| 1   | Hovers media tile                                     | Reveals top-left checkbox affordance                                            | Pointer hover/focus                 |
-| 2   | Clicks checkbox                                       | Toggles selection state for media ID                                            | `selectedMediaIds` update           |
-| 3   | Ctrl/Cmd + clicks media tile                          | Toggles selection without entering detail view                                  | Modifier + click handler            |
-| 4   | Selects first item                                    | Export bar animates in from bottom                                              | `selectedMediaIds.size` from 0 to 1 |
-| 5   | Clicks `Select all`                                   | Selects all currently scoped items (filtered/grouped result set, not whole DB)  | `selectAllInScope()`                |
-| 6   | Clicks `Select none`                                  | Clears selection, bar animates out                                              | `clearSelection()`                  |
-| 7   | Clicks `Add to project`                               | Opens project picker dialog scoped to current organization                      | `addToProjectDialogOpen = true`     |
-| 8   | Confirms add to existing project                      | Upserts project memberships for all selected media IDs                           | `bulkAddToProject(ids, projectId)`  |
-| 9   | Clicks `Change address`                               | Opens bulk address editor with preview count                                     | `changeAddressDialogOpen = true`    |
-| 10  | Confirms address change                               | Updates selected media rows with normalized address value                        | `bulkChangeAddress(ids, address)`   |
-| 11  | Clicks `Delete`                                       | Opens destructive confirmation with selected count                               | `deleteDialogOpen = true`           |
+| #   | User Action                                           | System Response                                                                   | Triggers                            |
+| --- | ----------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------- |
+| 1   | Hovers media tile                                     | Reveals top-left checkbox affordance                                              | Pointer hover/focus                 |
+| 2   | Clicks checkbox                                       | Toggles selection state for media ID                                              | `selectedMediaIds` update           |
+| 3   | Ctrl/Cmd + clicks media tile                          | Toggles selection without entering detail view                                    | Modifier + click handler            |
+| 4   | Selects first item                                    | Export bar animates in from bottom                                                | `selectedMediaIds.size` from 0 to 1 |
+| 5   | Clicks `Select all`                                   | Selects all currently scoped items (filtered/grouped result set, not whole DB)    | `selectAllInScope()`                |
+| 6   | Clicks `Select none`                                  | Clears selection, bar animates out                                                | `clearSelection()`                  |
+| 7   | Clicks `Add to project`                               | Opens project picker dialog scoped to current organization                        | `addToProjectDialogOpen = true`     |
+| 8   | Confirms add to existing project                      | Upserts project memberships for all selected media IDs                            | `bulkAddToProject(ids, projectId)`  |
+| 9   | Clicks `Change address`                               | Opens bulk address editor with preview count                                      | `changeAddressDialogOpen = true`    |
+| 10  | Confirms address change                               | Updates selected media rows with normalized address value                         | `bulkChangeAddress(ids, address)`   |
+| 11  | Clicks `Delete`                                       | Opens destructive confirmation with selected count                                | `deleteDialogOpen = true`           |
 | 12  | Confirms deletion                                     | Deletes selected media rows and related storage references, then clears selection | `bulkDeleteMedia(ids)`              |
-| 13  | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                            | `shareDialogOpen = true`            |
-| 14  | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs     | `createShareSetToken(ids)`          |
-| 15  | Clicks `Copy link`                                    | Writes resolved URL to clipboard and shows toast                                | `navigator.clipboard.writeText`     |
-| 16  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                  | `navigator.share`                   |
-| 17  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                             | `downloadDialogOpen = true`         |
-| 18  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                         | `startZipExport()`                  |
-| 19  | Edits filename/title                                  | Validates and normalizes safe filename                                          | `exportTitle` validation            |
-| 20  | Presses `Ctrl/Cmd + A` while workspace has focus      | Selects all items in current scope                                              | keyboard selection shortcut         |
-| 21  | Presses `Escape` while export bar is active           | Clears selection and closes bar                                                 | keyboard cancel shortcut            |
-| 22  | Changes sorting/filtering/grouping while items chosen | Keeps selected IDs by identity; selected count includes hidden-but-selected IDs | resilient selection state           |
-| 23  | Opens shared link URL                                 | Resolves token to exact media ID set and renders same set in workspace context  | token resolve flow                  |
-| 24  | Opens shared link from unauthorized org               | Shows access denied state; no media payload returned                            | RLS + org checks                    |
-| 25  | Opens expired shared link                             | Shows expired-link state with retry/request guidance                            | token TTL validation                |
-| 26  | Export encounters partial fetch failures              | Shows recoverable error with retry and "download available only" fallback       | ZIP error path                      |
+| 13  | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                              | `shareDialogOpen = true`            |
+| 14  | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs       | `createShareSetToken(ids)`          |
+| 15  | Clicks `Copy link`                                    | Writes resolved URL to clipboard and shows toast                                  | `navigator.clipboard.writeText`     |
+| 16  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                    | `navigator.share`                   |
+| 17  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                               | `downloadDialogOpen = true`         |
+| 18  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                           | `startZipExport()`                  |
+| 19  | Edits filename/title                                  | Validates and normalizes safe filename                                            | `exportTitle` validation            |
+| 20  | Presses `Ctrl/Cmd + A` while workspace has focus      | Selects all items in current scope                                                | keyboard selection shortcut         |
+| 21  | Presses `Escape` while export bar is active           | Clears selection and closes bar                                                   | keyboard cancel shortcut            |
+| 22  | Changes sorting/filtering/grouping while items chosen | Keeps selected IDs by identity; selected count includes hidden-but-selected IDs   | resilient selection state           |
+| 23  | Opens shared link URL                                 | Resolves token to exact media ID set and renders same set in workspace context    | token resolve flow                  |
+| 24  | Opens shared link from unauthorized org               | Shows access denied state; no media payload returned                              | RLS + org checks                    |
+| 25  | Opens expired shared link                             | Shows expired-link state with retry/request guidance                              | token TTL validation                |
+| 26  | Export encounters partial fetch failures              | Shows recoverable error with retry and "download available only" fallback         | ZIP error path                      |
 
 ## Component Hierarchy
 
@@ -118,18 +118,18 @@ flowchart LR
 
 ### Schema / Query Notes
 
-| Field / Artifact      | Source                                   | Type            | Notes                                                      |
-| --------------------- | ---------------------------------------- | --------------- | ---------------------------------------------------------- |
-| Selected IDs          | `WorkspaceSelectionService`              | `Set<string>`   | Canonical identity source for export actions               |
-| Selection scope IDs   | `WorkspaceViewService.groupedSections()` | `string[]`      | Used by `Select all` for current filtered/grouped scope    |
-| Project membership    | `MediaBulkActionsService.bulkAddToProject` | mutation result | Upserts selected IDs into `image_projects` for a project   |
-| Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected images address fields in one batch         |
-| Bulk delete mutation  | `MediaBulkActionsService.bulkDeleteMedia` | mutation result | Deletes selected media records with storage cleanup         |
-| Share token           | `ShareSetService`                        | `string`        | URL-safe token, high entropy, deterministic mapping policy |
-| Share-set fingerprint | Backend function                         | `string`        | Hash of sorted media IDs + org context for dedup/lookup    |
-| Share-set rows        | `share_sets`, `share_set_items`          | relational rows | New schema to persist stable shared groups                 |
-| Export title default  | `ProjectService` + media metadata        | `string`        | Project name or heuristic `bestLabel + yyyy-mm-dd`         |
-| ZIP blob              | `ZipExportService`                       | `Blob`          | Mixed media archive download                               |
+| Field / Artifact      | Source                                      | Type            | Notes                                                      |
+| --------------------- | ------------------------------------------- | --------------- | ---------------------------------------------------------- |
+| Selected IDs          | `WorkspaceSelectionService`                 | `Set<string>`   | Canonical identity source for export actions               |
+| Selection scope IDs   | `WorkspaceViewService.groupedSections()`    | `string[]`      | Used by `Select all` for current filtered/grouped scope    |
+| Project membership    | `MediaBulkActionsService.bulkAddToProject`  | mutation result | Upserts selected IDs into `image_projects` for a project   |
+| Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected images address fields in one batch        |
+| Bulk delete mutation  | `MediaBulkActionsService.bulkDeleteMedia`   | mutation result | Deletes selected media records with storage cleanup        |
+| Share token           | `ShareSetService`                           | `string`        | URL-safe token, high entropy, deterministic mapping policy |
+| Share-set fingerprint | Backend function                            | `string`        | Hash of sorted media IDs + org context for dedup/lookup    |
+| Share-set rows        | `share_sets`, `share_set_items`             | relational rows | New schema to persist stable shared groups                 |
+| Export title default  | `ProjectService` + media metadata           | `string`        | Project name or heuristic `bestLabel + yyyy-mm-dd`         |
+| ZIP blob              | `ZipExportService`                          | `Blob`          | Mixed media archive download                               |
 
 ### SQL Contract (Share Sets)
 
@@ -295,24 +295,24 @@ erDiagram
 
 ## State
 
-| Name                    | Type                                                       | Default              | Controls                                         |
-| ----------------------- | ---------------------------------------------------------- | -------------------- | ------------------------------------------------ |
-| `selectedMediaIds`      | `WritableSignal<Set<string>>`                              | empty set            | Current selection identity set                   |
-| `lastAnchorId`          | `WritableSignal<string \| null>`                           | `null`               | Optional anchor for future Shift-range selection |
-| `exportBarVisible`      | `Signal<boolean>`                                          | `false`              | Derived from `selectedMediaIds.size > 0`         |
-| `addToProjectDialogOpen` | `WritableSignal<boolean>`                                  | `false`              | Add-to-project dialog visibility                 |
-| `changeAddressDialogOpen` | `WritableSignal<boolean>`                                  | `false`              | Change-address dialog visibility                 |
-| `deleteDialogOpen`      | `WritableSignal<boolean>`                                  | `false`              | Delete confirmation dialog visibility            |
-| `bulkActionStatus`      | `WritableSignal<'idle' \| 'running' \| 'error'>`          | `'idle'`             | Batch curation action lifecycle state            |
-| `busyBulkAction`        | `WritableSignal<'add-project' \| 'change-address' \| 'delete' \| null>` | `null` | Prevents duplicate destructive/slow actions      |
-| `shareDialogOpen`       | `WritableSignal<boolean>`                                  | `false`              | Share dialog visibility                          |
-| `downloadDialogOpen`    | `WritableSignal<boolean>`                                  | `false`              | Download dialog visibility                       |
-| `shareUrl`              | `WritableSignal<string \| null>`                           | `null`               | Generated/loaded share URL                       |
-| `isGeneratingShareLink` | `WritableSignal<boolean>`                                  | `false`              | Share link generation in progress                |
-| `exportTitle`           | `WritableSignal<string>`                                   | `''`                 | User-editable ZIP title                          |
-| `zipProgress`           | `WritableSignal<number>`                                   | `0`                  | ZIP generation progress percent                  |
-| `zipStatus`             | `WritableSignal<'idle' \| 'running' \| 'done' \| 'error'>` | `'idle'`             | ZIP export lifecycle state                       |
-| `selectionSourceScope`  | `WritableSignal<'active-selection' \| 'saved-group'>`      | `'active-selection'` | Which workspace context defines `Select all`     |
+| Name                      | Type                                                                    | Default              | Controls                                         |
+| ------------------------- | ----------------------------------------------------------------------- | -------------------- | ------------------------------------------------ |
+| `selectedMediaIds`        | `WritableSignal<Set<string>>`                                           | empty set            | Current selection identity set                   |
+| `lastAnchorId`            | `WritableSignal<string \| null>`                                        | `null`               | Optional anchor for future Shift-range selection |
+| `exportBarVisible`        | `Signal<boolean>`                                                       | `false`              | Derived from `selectedMediaIds.size > 0`         |
+| `addToProjectDialogOpen`  | `WritableSignal<boolean>`                                               | `false`              | Add-to-project dialog visibility                 |
+| `changeAddressDialogOpen` | `WritableSignal<boolean>`                                               | `false`              | Change-address dialog visibility                 |
+| `deleteDialogOpen`        | `WritableSignal<boolean>`                                               | `false`              | Delete confirmation dialog visibility            |
+| `bulkActionStatus`        | `WritableSignal<'idle' \| 'running' \| 'error'>`                        | `'idle'`             | Batch curation action lifecycle state            |
+| `busyBulkAction`          | `WritableSignal<'add-project' \| 'change-address' \| 'delete' \| null>` | `null`               | Prevents duplicate destructive/slow actions      |
+| `shareDialogOpen`         | `WritableSignal<boolean>`                                               | `false`              | Share dialog visibility                          |
+| `downloadDialogOpen`      | `WritableSignal<boolean>`                                               | `false`              | Download dialog visibility                       |
+| `shareUrl`                | `WritableSignal<string \| null>`                                        | `null`               | Generated/loaded share URL                       |
+| `isGeneratingShareLink`   | `WritableSignal<boolean>`                                               | `false`              | Share link generation in progress                |
+| `exportTitle`             | `WritableSignal<string>`                                                | `''`                 | User-editable ZIP title                          |
+| `zipProgress`             | `WritableSignal<number>`                                                | `0`                  | ZIP generation progress percent                  |
+| `zipStatus`               | `WritableSignal<'idle' \| 'running' \| 'done' \| 'error'>`              | `'idle'`             | ZIP export lifecycle state                       |
+| `selectionSourceScope`    | `WritableSignal<'active-selection' \| 'saved-group'>`                   | `'active-selection'` | Which workspace context defines `Select all`     |
 
 ## Settings
 
