@@ -612,13 +612,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onRadiusContextCreateProjectFromSelection(): Promise<void> {
-    const project = await this.promptProjectSelection();
-    if (!project) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const imageIds = this.workspaceViewService.rawImages().map((img) => img.id);
+    const imageIds = this.getActiveSelectionImageIds();
     if (imageIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien in Radius-Auswahl verfuegbar.',
@@ -629,19 +623,47 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const { error } = await this.supabaseService.client
-      .from('images')
-      .update({ project_id: project.id })
-      .in('id', imageIds);
+    const projectName = this.promptProjectNameFromRadius();
+    if (!projectName) {
+      this.closeContextMenus();
+      return;
+    }
 
-    if (error) {
-      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+    const organizationId = await this.resolveOrganizationIdForImage(imageIds[0]);
+    if (!organizationId) {
+      this.toastService.show({
+        message: 'Projekt konnte nicht erstellt werden (Organisation unbekannt).',
+        type: 'error',
+        dedupe: true,
+      });
+      this.closeContextMenus();
+      return;
+    }
+
+    const { data: projectData, error: projectError } = await this.supabaseService.client
+      .from('projects')
+      .insert({ name: projectName, organization_id: organizationId })
+      .select('id,name')
+      .single();
+
+    if (projectError || !projectData) {
+      this.toastService.show({
+        message: projectError?.message ?? 'Projekt konnte nicht erstellt werden.',
+        type: 'error',
+        dedupe: true,
+      });
+      this.closeContextMenus();
+      return;
+    }
+
+    const assigned = await this.assignImagesToProject(imageIds, projectData.id as string);
+    if (!assigned) {
       this.closeContextMenus();
       return;
     }
 
     this.toastService.show({
-      message: `${imageIds.length} Medien dem Projekt "${project.name}" zugewiesen.`,
+      message: `Projekt "${(projectData.name as string) ?? projectName}" erstellt und ${imageIds.length} Medien zugewiesen.`,
       type: 'success',
       dedupe: true,
     });
@@ -649,7 +671,32 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onRadiusContextAssignToProject(): Promise<void> {
-    await this.onRadiusContextCreateProjectFromSelection();
+    const imageIds = this.getActiveSelectionImageIds();
+    if (imageIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Medien in Radius-Auswahl verfuegbar.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.closeContextMenus();
+      return;
+    }
+
+    const project = await this.promptProjectSelection();
+    if (!project) {
+      this.closeContextMenus();
+      return;
+    }
+
+    const assigned = await this.assignImagesToProject(imageIds, project.id);
+    if (assigned) {
+      this.toastService.show({
+        message: `${imageIds.length} Medien dem Projekt "${project.name}" zugewiesen.`,
+        type: 'success',
+        dedupe: true,
+      });
+    }
+    this.closeContextMenus();
   }
 
   get markerContextIsSingle(): boolean {
@@ -3183,6 +3230,61 @@ export class MapShellComponent implements OnDestroy {
       id: selected.id as string,
       name: (selected.name as string) ?? 'Projekt',
     };
+  }
+
+  private promptProjectNameFromRadius(): string | null {
+    if (typeof window === 'undefined') {
+      return 'Neues Radius Projekt';
+    }
+
+    const value = window.prompt('Name fuer neues Projekt aus Radius:');
+    const name = value?.trim();
+    if (!name) {
+      return null;
+    }
+    return name;
+  }
+
+  private getActiveSelectionImageIds(): string[] {
+    const unique = new Set(this.workspaceViewService.rawImages().map((img) => img.id));
+    return Array.from(unique);
+  }
+
+  private async resolveOrganizationIdForImage(imageId: string): Promise<string | null> {
+    const { data, error } = await this.supabaseService.client
+      .from('images')
+      .select('organization_id')
+      .eq('id', imageId)
+      .single();
+
+    if (error || !data?.organization_id) {
+      return null;
+    }
+
+    return data.organization_id as string;
+  }
+
+  private async assignImagesToProject(imageIds: string[], projectId: string): Promise<boolean> {
+    if (imageIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Medien fuer Projektzuweisung gefunden.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return false;
+    }
+
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({ project_id: projectId })
+      .in('id', imageIds);
+
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+      return false;
+    }
+
+    return true;
   }
 
   private async resolveMarkerContextImageIds(payload: {

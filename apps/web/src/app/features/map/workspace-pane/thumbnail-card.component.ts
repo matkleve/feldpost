@@ -52,7 +52,10 @@ export interface ThumbnailCardInteraction {
 
         @if (viewMode() === 'row') {
           <div class="thumbnail-card__meta" aria-hidden="true">
-            <p class="thumbnail-card__title">{{ displayName() }}</p>
+            <div class="thumbnail-card__meta-head">
+              <p class="thumbnail-card__title">{{ displayName() }}</p>
+              <p class="thumbnail-card__date">{{ capturedLabel() }}</p>
+            </div>
             <p class="thumbnail-card__subtitle">{{ subtitle() }}</p>
           </div>
         }
@@ -94,10 +97,23 @@ export class ThumbnailCardComponent {
   });
   readonly subtitle = computed(() => {
     const project = this.image().projectName;
-    if (project) return project;
     const city = this.image().city;
+    if (project && city) return `${project} · ${city}`;
+    if (project) return project;
     if (city) return city;
     return 'Photo';
+  });
+  readonly capturedLabel = computed(() => {
+    const input = this.image().capturedAt ?? this.image().createdAt;
+    const date = new Date(input);
+    if (Number.isNaN(date.getTime())) return 'Unbekannt';
+    return new Intl.DateTimeFormat('de-AT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
   });
   /** True while the <img> element is still loading from network. */
   readonly imgLoading = signal(true);

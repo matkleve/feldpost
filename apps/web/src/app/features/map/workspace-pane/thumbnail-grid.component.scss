@@ -45,6 +45,11 @@
   justify-content: center;
 }
 
+.thumbnail-grid--small .thumbnail-grid__cards.thumbnail-grid__cards--start,
+.thumbnail-grid--medium .thumbnail-grid__cards.thumbnail-grid__cards--start {
+  justify-content: start;
+}
+
 .thumbnail-grid__empty {
   text-align: center;
   color: var(--color-text-secondary);

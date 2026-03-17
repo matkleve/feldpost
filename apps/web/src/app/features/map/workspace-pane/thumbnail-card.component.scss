@@ -25,7 +25,7 @@
 
 .thumbnail-card--row {
   aspect-ratio: auto;
-  min-block-size: 4.75rem;
+  min-block-size: 3.75rem;
 }
 
 .thumbnail-card--large {
@@ -48,10 +48,10 @@
 
 .thumbnail-card--row .thumbnail-card__main {
   display: grid;
-  grid-template-columns: 4.75rem minmax(0, 1fr);
+  grid-template-columns: 3rem minmax(0, 1fr);
   align-items: center;
   gap: var(--spacing-2);
-  padding: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) var(--spacing-1);
 }
 
 .thumbnail-card__media {
@@ -62,9 +62,20 @@
 }
 
 .thumbnail-card--row .thumbnail-card__media {
-  inline-size: 4.75rem;
-  block-size: 4.75rem;
+  inline-size: 3rem;
+  block-size: 3rem;
   border-radius: calc(var(--radius-md) - 2px);
+}
+
+.thumbnail-card--row .thumbnail-card__select {
+  top: 0.25rem;
+  left: 0.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.thumbnail-card--row .thumbnail-card__select .material-icons {
+  font-size: 0.8rem;
 }
 
 .thumbnail-card__select {
@@ -129,6 +140,13 @@
   min-inline-size: 0;
 }
 
+.thumbnail-card__meta-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--spacing-2);
+}
+
 .thumbnail-card__title,
 .thumbnail-card__subtitle {
   margin: 0;
@@ -138,14 +156,24 @@
 }
 
 .thumbnail-card__title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.25;
   color: var(--color-text-primary);
 }
 
 .thumbnail-card__subtitle {
-  margin-top: 0.125rem;
-  font-size: 0.75rem;
+  margin-top: 0.05rem;
+  font-size: 0.6875rem;
+  line-height: 1.25;
   color: var(--color-text-secondary);
+}
+
+.thumbnail-card__date {
+  margin: 0;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .thumbnail-card__img--loaded {
