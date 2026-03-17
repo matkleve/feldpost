@@ -5,7 +5,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 
 | Section | Source Spec | What it configures |
 |---------|-------------|--------------------|
-| Account & Profile | settings-overlay.md | profile identity fields and account-level controls. |
+| Account & Session | settings-overlay.md | profile identity context and session termination controls (logout). |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
 | Export & Sharing | workspace-export-bar.md | default share-link expiration, allow token reuse vs forced regeneration, and whether native-share action is enabled on supported devices. |
