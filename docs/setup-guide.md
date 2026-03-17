@@ -93,8 +93,10 @@ See `database-schema.md` for full DDL.
 
 The trigger on `auth.users` must:
 
-- Create a `profiles` row with `organization_id` set to the default org.
-- Assign the `user` role in `user_roles`.
+- Require `raw_user_meta_data.invite_token_hash` and validate it against an active `qr_invites` row.
+- Create a `profiles` row with `organization_id` from the invite.
+- Assign role from `qr_invites.target_role` (`clerk`/`worker`, fallback `user`).
+- Mark invite row as `accepted` with `accepted_user_id` and `accepted_at`.
 
 See `user-lifecycle.md` §1.
 
@@ -118,7 +120,7 @@ Then apply policies from `security-boundaries.md` §3.
 
 ```sql
 -- Roles
-INSERT INTO roles (name) VALUES ('admin'), ('user'), ('viewer');
+INSERT INTO roles (name) VALUES ('admin'), ('user'), ('viewer'), ('clerk'), ('worker');
 
 -- Default organization (required before any user can register)
 INSERT INTO organizations (name) VALUES ('Default Organization');
@@ -259,8 +261,9 @@ Failing to ship dark mode for a component is treated as a defect (see D9).
 
 - [ ] `SELECT PostGIS_Version();` returns a version string.
 - [ ] `organizations` table contains at least one row.
-- [ ] Registration creates both `auth.users` and `profiles` (with `organization_id` set).
-- [ ] New users get default role `user`.
+- [ ] Registration without invite is rejected.
+- [ ] Registration with valid invite creates both `auth.users` and `profiles` (with invite `organization_id`).
+- [ ] New invited users get role from invite target role.
 - [ ] Upload stores files in `images/{org_id}/{user_id}/{uuid}.jpg`.
 - [ ] Thumbnails are generated and stored at `.../{uuid}_thumb.jpg`.
 - [ ] Image records persist EXIF and corrected coordinate fields separately.
