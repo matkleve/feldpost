@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import * as L from 'leaflet';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { WorkspaceImage } from '../../../core/workspace-view.types';
 
@@ -10,6 +11,51 @@ export interface AssignImagesToProjectResult {
 
 @Injectable({ providedIn: 'root' })
 export class MapContextActionsService {
+  clampContextMenuPosition(x: number, y: number): { x: number; y: number } {
+    if (typeof window === 'undefined') {
+      return { x, y };
+    }
+
+    const menuWidth = 240;
+    const menuHeight = 280;
+    const margin = 8;
+    return {
+      x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),
+      y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
+    };
+  }
+
+  async copyTextToClipboard(text: string): Promise<boolean> {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+      return false;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  resolveMarkerContextMenuPosition(
+    markerState: { lat: number; lng: number },
+    sourceEvent: MouseEvent | PointerEvent | undefined,
+    map: L.Map | undefined,
+  ): { x: number; y: number } {
+    let x = sourceEvent?.clientX;
+    let y = sourceEvent?.clientY;
+
+    if ((x == null || y == null) && map) {
+      const point = map.latLngToContainerPoint([markerState.lat, markerState.lng]);
+      const containerRect = map.getContainer().getBoundingClientRect();
+      x = containerRect.left + point.x;
+      y = containerRect.top + point.y;
+    }
+
+    return this.clampContextMenuPosition(x ?? 0, y ?? 0);
+  }
+
   formatGps(lat: number, lng: number): string {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
   }

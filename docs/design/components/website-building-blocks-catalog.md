@@ -116,20 +116,20 @@ Use this file to:
 
 ## UI Primitive Inventory (Mapping)
 
-| Primitive block | Canonical contract | Primary implementation files | Current state | Theme readiness |
-| --- | --- | --- | --- | --- |
-| Global token foundation | Global CSS custom properties in one source | `apps/web/src/styles.scss`, `docs/design/tokens.md` | present | medium |
-| Dropdown shell/anchoring | Shared shell + panel classes | `apps/web/src/app/shared/dropdown-shell.component.ts`, `apps/web/src/app/shared/standard-dropdown.component.ts` | present | medium |
-| Toolbar option dropdowns | Shared menu surface + dropdown shell | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.html`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts` | present | medium |
-| Map context menus | Option menu surface primitives | `apps/web/src/app/features/map/map-shell/map-shell.component.html`, `apps/web/src/app/features/map/map-shell/map-shell.component.scss` | partial | low |
-| Detail context menu | Option menu surface + contextual actions | `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html`, `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.scss` | partial | low |
-| Search suggestions panel (integrated exception) | Integrated search + suggestion panel pattern | `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html`, `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.scss` | partial | low |
-| Metadata suggestion menu | Option menu surface in inline form flow | `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html`, `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.scss` | partial | low |
-| Settings form sections | Settings-specific composition, currently feature-local | `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`, `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` | partial | low |
-| Dialog shell (confirm/input/select) | Shared modal primitives | `apps/web/src/app/shared/confirm-dialog/confirm-dialog.component.ts`, `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`, `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts` | present | medium |
-| Chips and compact selector rows | Shared chip behavior + row semantics | `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.ts`, `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.scss`, `apps/web/src/app/features/projects/projects-view-toggle.component.ts` | partial | medium |
-| Slider control | Shared slider primitive | `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.ts`, `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.scss` | present | medium |
-| Color selector popover | Feature-specific option picker | `apps/web/src/app/features/projects/project-color-picker.component.ts` | partial | low |
+| Primitive block                                 | Canonical contract                                     | Primary implementation files                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Current state | Theme readiness |
+| ----------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------------- |
+| Global token foundation                         | Global CSS custom properties in one source             | `apps/web/src/styles.scss`, `docs/design/tokens.md`                                                                                                                                                                                                                                                                                                                                                                                                                                             | present       | medium          |
+| Dropdown shell/anchoring                        | Shared shell + panel classes                           | `apps/web/src/app/shared/dropdown-shell.component.ts`, `apps/web/src/app/shared/standard-dropdown.component.ts`                                                                                                                                                                                                                                                                                                                                                                                 | present       | medium          |
+| Toolbar option dropdowns                        | Shared menu surface + dropdown shell                   | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.html`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts`, `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts` | present       | medium          |
+| Map context menus                               | Option menu surface primitives                         | `apps/web/src/app/features/map/map-shell/map-shell.component.html`, `apps/web/src/app/features/map/map-shell/map-shell.component.scss`                                                                                                                                                                                                                                                                                                                                                          | partial       | low             |
+| Detail context menu                             | Option menu surface + contextual actions               | `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html`, `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.scss`                                                                                                                                                                                                                                                                                                                                | partial       | low             |
+| Search suggestions panel (integrated exception) | Integrated search + suggestion panel pattern           | `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html`, `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.scss`                                                                                                                                                                                                                                                                                                        | partial       | low             |
+| Metadata suggestion menu                        | Option menu surface in inline form flow                | `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html`, `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.scss`                                                                                                                                                                                                                                                                                                | partial       | low             |
+| Settings form sections                          | Settings-specific composition, currently feature-local | `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`, `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`                                                                                                                                                                                                                                                                                                                                      | partial       | low             |
+| Dialog shell (confirm/input/select)             | Shared modal primitives                                | `apps/web/src/app/shared/confirm-dialog/confirm-dialog.component.ts`, `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`, `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts`                                                                                                                                                                                                                                                            | present       | medium          |
+| Chips and compact selector rows                 | Shared chip behavior + row semantics                   | `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.ts`, `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.scss`, `apps/web/src/app/features/projects/projects-view-toggle.component.ts`                                                                                                                                                                                                                                                                    | partial       | medium          |
+| Slider control                                  | Shared slider primitive                                | `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.ts`, `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.scss`                                                                                                                                                                                                                                                                                                                                            | present       | medium          |
+| Color selector popover                          | Feature-specific option picker                         | `apps/web/src/app/features/projects/project-color-picker.component.ts`                                                                                                                                                                                                                                                                                                                                                                                                                          | partial       | low             |
 
 Notes:
 
@@ -159,6 +159,7 @@ Goal: allow new themes by remapping semantic aliases, not by editing each compon
 Introduce and migrate to role aliases so primitives can be themed independently from raw palette tokens:
 
 1. Action controls
+
 - `--action-bg-default`
 - `--action-bg-hover`
 - `--action-bg-active`
@@ -168,6 +169,7 @@ Introduce and migrate to role aliases so primitives can be themed independently 
 - `--action-text-active`
 
 2. Menu and option surfaces
+
 - `--menu-surface-bg`
 - `--menu-surface-border`
 - `--menu-item-bg-hover`
@@ -176,6 +178,7 @@ Introduce and migrate to role aliases so primitives can be themed independently 
 - `--menu-item-text-active`
 
 3. Form controls
+
 - `--field-bg`
 - `--field-border`
 - `--field-border-focus`
@@ -183,12 +186,14 @@ Introduce and migrate to role aliases so primitives can be themed independently 
 - `--field-text`
 
 4. Settings sections and cards
+
 - `--section-bg`
 - `--section-border`
 - `--section-title`
 - `--section-text`
 
 5. Feedback states
+
 - `--state-success-bg`
 - `--state-warning-bg`
 - `--state-danger-bg`

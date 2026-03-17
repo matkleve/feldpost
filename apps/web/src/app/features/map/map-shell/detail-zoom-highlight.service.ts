@@ -38,12 +38,7 @@ export class DetailZoomHighlightService {
     );
   }
 
-  scheduleRetry(
-    attempt: number,
-    maxRetries: number,
-    retryMs: number,
-    retryFn: () => void,
-  ): void {
+  scheduleRetry(attempt: number, maxRetries: number, retryMs: number, retryFn: () => void): void {
     if (attempt >= maxRetries) {
       return;
     }

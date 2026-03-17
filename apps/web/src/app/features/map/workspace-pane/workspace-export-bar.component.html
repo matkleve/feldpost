@@ -1,17 +1,20 @@
-<section class="workspace-export" aria-label="Workspace export actions">
+<section
+  class="workspace-export"
+  [attr.aria-label]="t('workspace.export.aria.actions', 'Workspace export actions')"
+>
   <div class="workspace-export__summary">
     <strong>{{ selectionService.selectedCount() }}</strong>
-    <span>selected</span>
+    <span>{{ t('workspace.export.summary.selected', 'selected') }}</span>
   </div>
 
   <div class="workspace-export__actions">
     <button type="button" class="workspace-export__btn" (click)="selectAll()">
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">done_all</span>
-      <span>Select all</span>
+      <span>{{ t('workspace.export.action.selectAll', 'Select all') }}</span>
     </button>
     <button type="button" class="workspace-export__btn" (click)="selectNone()">
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">deselect</span>
-      <span>Select none</span>
+      <span>{{ t('workspace.export.action.selectNone', 'Select none') }}</span>
     </button>
     <button
       type="button"
@@ -20,11 +23,11 @@
       (click)="shareLink()"
     >
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">share</span>
-      <span>Share</span>
+      <span>{{ t('workspace.export.action.share', 'Share') }}</span>
     </button>
     <button type="button" class="workspace-export__btn" [disabled]="pending()" (click)="copyLink()">
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">content_copy</span>
-      <span>Link kopieren</span>
+      <span>{{ t('workspace.export.action.copyLink', 'Link kopieren') }}</span>
     </button>
     <button
       type="button"
@@ -33,7 +36,7 @@
       (click)="openZipDialog()"
     >
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">download</span>
-      <span>Download ZIP</span>
+      <span>{{ t('workspace.export.action.downloadZip', 'Download ZIP') }}</span>
     </button>
   </div>
 </section>
@@ -44,10 +47,10 @@
     class="workspace-export__dialog"
     role="dialog"
     aria-modal="true"
-    aria-label="Download ZIP"
+    [attr.aria-label]="t('workspace.export.dialog.aria', 'Download ZIP')"
   >
-    <h3>Download selection</h3>
-    <label for="zip-title">Title</label>
+    <h3>{{ t('workspace.export.dialog.title', 'Download selection') }}</h3>
+    <label for="zip-title">{{ t('workspace.export.dialog.field.title', 'Title') }}</label>
     <input
       id="zip-title"
       type="text"
@@ -67,7 +70,7 @@
         [disabled]="pending()"
         (click)="closeZipDialog()"
       >
-        Cancel
+        {{ t('workspace.export.dialog.cancel', 'Cancel') }}
       </button>
       <button
         type="button"
@@ -75,7 +78,11 @@
         [disabled]="pending()"
         (click)="downloadZip()"
       >
-        {{ pending() ? 'Preparing...' : 'Download' }}
+        {{
+          pending()
+            ? t('workspace.export.dialog.pending', 'Preparing...')
+            : t('workspace.export.dialog.confirm', 'Download')
+        }}
       </button>
     </div>
   </section>

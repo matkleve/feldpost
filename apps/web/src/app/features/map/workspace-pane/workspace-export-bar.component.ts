@@ -4,6 +4,7 @@ import { WorkspaceSelectionService } from '../../../core/workspace-selection.ser
 import { ShareSetService } from '../../../core/share-set.service';
 import { ZipExportService } from '../../../core/zip-export.service';
 import { ToastService } from '../../../core/toast.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-workspace-export-bar',
@@ -15,9 +16,11 @@ export class WorkspaceExportBarComponent {
   readonly images = input.required<WorkspaceImage[]>();
 
   protected readonly selectionService = inject(WorkspaceSelectionService);
+  private readonly i18nService = inject(I18nService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly zipExportService = inject(ZipExportService);
   private readonly toastService = inject(ToastService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly pending = signal(false);
   readonly zipDialogOpen = signal(false);
@@ -49,8 +52,8 @@ export class WorkspaceExportBarComponent {
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
         await navigator.share({
-          title: 'Workspace export',
-          text: 'Shared media selection',
+          title: this.t('workspace.export.share.title', 'Workspace export'),
+          text: this.t('workspace.export.share.text', 'Shared media selection'),
           url,
         });
       } catch {
@@ -79,7 +82,10 @@ export class WorkspaceExportBarComponent {
   async downloadZip(): Promise<void> {
     const selectedImages = this.selectedImages();
     if (selectedImages.length === 0) {
-      this.toastService.show({ message: 'No images selected.', type: 'error' });
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'error',
+      });
       return;
     }
 
@@ -92,10 +98,16 @@ export class WorkspaceExportBarComponent {
           this.zipProgress.set(progress);
         },
       );
-      this.toastService.show({ message: 'ZIP download started.', type: 'success' });
+      this.toastService.show({
+        message: this.t('workspace.export.success.zipStarted', 'ZIP download started.'),
+        type: 'success',
+      });
       this.zipDialogOpen.set(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'ZIP export failed.';
+      const message =
+        error instanceof Error
+          ? error.message
+          : this.t('workspace.export.error.zipFailed', 'ZIP export failed.');
       this.toastService.show({ message, type: 'error' });
     } finally {
       this.pending.set(false);
@@ -105,7 +117,10 @@ export class WorkspaceExportBarComponent {
   private async createShareLink(copyToClipboard: boolean): Promise<string | null> {
     const selectedIds = Array.from(this.selectionService.selectedMediaIds());
     if (selectedIds.length === 0) {
-      this.toastService.show({ message: 'No images selected.', type: 'error' });
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'error',
+      });
       return null;
     }
 
@@ -117,10 +132,20 @@ export class WorkspaceExportBarComponent {
 
       if (copyToClipboard) {
         if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-          this.toastService.show({ message: 'Clipboard is not available.', type: 'error' });
+          this.toastService.show({
+            message: this.t(
+              'workspace.export.error.clipboardUnavailable',
+              'Clipboard is not available.',
+            ),
+            type: 'error',
+          });
         } else {
           await navigator.clipboard.writeText(url);
-          this.toastService.show({ message: 'Share link copied.', type: 'success', dedupe: true });
+          this.toastService.show({
+            message: this.t('workspace.export.success.linkCopied', 'Share link copied.'),
+            type: 'success',
+            dedupe: true,
+          });
         }
       }
 
@@ -128,10 +153,16 @@ export class WorkspaceExportBarComponent {
     } catch (error) {
       const message =
         error instanceof Error && error.message.toLowerCase().includes('column reference')
-          ? 'Freigabelink konnte nicht erstellt werden.'
+          ? this.t(
+              'workspace.export.error.linkCreateFailed',
+              'Freigabelink konnte nicht erstellt werden.',
+            )
           : error instanceof Error
             ? error.message
-            : 'Freigabelink konnte nicht erstellt werden.';
+            : this.t(
+                'workspace.export.error.linkCreateFailed',
+                'Freigabelink konnte nicht erstellt werden.',
+              );
       this.toastService.show({ message, type: 'error' });
       return null;
     } finally {

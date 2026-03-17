@@ -1,4 +1,5 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-detail-actions',
@@ -7,6 +8,9 @@ import { Component, input, output } from '@angular/core';
   styleUrl: './detail-actions.component.scss',
 })
 export class DetailActionsComponent {
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
   readonly hasCoordinates = input(false);
 
   readonly zoomToLocation = output<void>();

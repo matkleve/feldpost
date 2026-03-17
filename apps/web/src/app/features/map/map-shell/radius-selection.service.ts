@@ -8,8 +8,32 @@ interface RadiusMarkerState {
   sourceCells?: Array<{ lat: number; lng: number }>;
 }
 
+interface RadiusCommittedVisualLike {
+  circle: L.Circle;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RadiusSelectionService {
+  hasCommittedSelection(visuals: RadiusCommittedVisualLike[]): boolean {
+    return visuals.length > 0;
+  }
+
+  isInsideAnyCommittedRadius(
+    map: L.Map | undefined,
+    visuals: RadiusCommittedVisualLike[],
+    position: L.LatLng,
+  ): boolean {
+    if (!map) {
+      return false;
+    }
+
+    return visuals.some((visual) => {
+      const center = visual.circle.getLatLng();
+      const radiusMeters = visual.circle.getRadius();
+      return map.distance(center, position) <= radiusMeters;
+    });
+  }
+
   async selectRadiusImages(params: {
     map: L.Map;
     center: L.LatLng;

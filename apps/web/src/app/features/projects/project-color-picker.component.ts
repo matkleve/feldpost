@@ -36,7 +36,7 @@ import type { ProjectColorKey } from '../../core/projects/projects.types';
         inline-size: 1rem;
         block-size: 1rem;
         border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--color-border-strong) 64%, var(--color-border));
+        border: 1px solid var(--field-border);
       }
     `,
   ],

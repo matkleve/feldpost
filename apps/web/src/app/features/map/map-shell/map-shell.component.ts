@@ -44,7 +44,6 @@ import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
-import { ShareSetService } from '../../../core/share-set.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
@@ -90,6 +89,8 @@ import {
   MapPreferencesService,
 } from './map-preferences.service';
 import { MapBasemapLayerService } from './map-basemap-layer.service';
+import { MapFocusPayloadService } from './map-focus-payload.service';
+import { ShareTokenSelectionService } from './share-token-selection.service';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo' | 'historic';
@@ -182,7 +183,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly shareSetService = inject(ShareSetService);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly state = inject(MapShellState);
   private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
@@ -202,6 +202,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
   private readonly mapPreferencesService = inject(MapPreferencesService);
   private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
+  private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
+  private readonly shareTokenSelectionService = inject(ShareTokenSelectionService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -209,7 +211,7 @@ export class MapShellComponent implements OnDestroy {
   /** Reference to the UploadPanelComponent child (for placeFile calls). */
   private readonly uploadPanelChild = viewChild(UploadPanelComponent);
   private readonly pendingMapFocus = signal<{ imageId: string; lat: number; lng: number } | null>(
-    this.readMapFocusPayload(),
+    this.mapFocusPayloadService.readMapFocusPayload(this.router),
   );
 
   /**
@@ -703,7 +705,7 @@ export class MapShellComponent implements OnDestroy {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
     const text = this.mapContextActionsService.formatGps(coords.lat, coords.lng);
-    const copied = await this.copyTextToClipboard(text);
+    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
     this.toastService.show({
       message: copied ? 'GPS kopiert.' : text,
       type: copied ? 'success' : 'info',
@@ -1003,7 +1005,7 @@ export class MapShellComponent implements OnDestroy {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
     const text = this.mapContextActionsService.formatGps(payload.lat, payload.lng);
-    const copied = await this.copyTextToClipboard(text);
+    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
     this.toastService.show({
       message: copied ? 'GPS kopiert.' : text,
       type: copied ? 'success' : 'info',
@@ -1636,41 +1638,6 @@ export class MapShellComponent implements OnDestroy {
     this.activeHistoricLabelTileLayer = result.activeHistoricLabelTileLayer;
   }
 
-  private readMapFocusPayload(): { imageId: string; lat: number; lng: number } | null {
-    const candidate = this.readMapFocusCandidate();
-    if (!candidate) {
-      return null;
-    }
-
-    const payload = candidate as Partial<{ imageId: string; lat: number; lng: number }>;
-    if (!this.isMapFocusPayload(payload)) {
-      return null;
-    }
-
-    return { imageId: payload.imageId, lat: payload.lat, lng: payload.lng };
-  }
-
-  private readMapFocusCandidate(): unknown {
-    const fromNavigation = this.router.getCurrentNavigation()?.extras?.state?.['mapFocus'];
-    const fromHistory =
-      typeof window !== 'undefined' ? (window.history.state?.['mapFocus'] as unknown) : null;
-    const candidate = fromNavigation ?? fromHistory;
-    if (!candidate || typeof candidate !== 'object') {
-      return null;
-    }
-    return candidate;
-  }
-
-  private isMapFocusPayload(
-    payload: Partial<{ imageId: string; lat: number; lng: number }>,
-  ): payload is { imageId: string; lat: number; lng: number } {
-    return (
-      typeof payload.imageId === 'string' &&
-      typeof payload.lat === 'number' &&
-      typeof payload.lng === 'number'
-    );
-  }
-
   private applyPendingMapFocus(): void {
     if (!this.map) {
       return;
@@ -1691,16 +1658,14 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.shareTokenResolved = true;
-    const shareToken = this.route.snapshot.queryParamMap.get('share')?.trim() ?? '';
+    const shareToken = this.shareTokenSelectionService.readShareTokenFromRoute(this.route.snapshot);
     if (!shareToken) {
       return;
     }
 
+    const result = await this.shareTokenSelectionService.loadSelectionFromShareToken(shareToken);
     try {
-      const resolvedItems = await this.shareSetService.resolveShareSet(shareToken);
-      const orderedIds = resolvedItems.map((item) => item.imageId);
-
-      if (orderedIds.length === 0) {
+      if (result.status === 'invalid') {
         this.toastService.show({
           message: 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
           type: 'warning',
@@ -1709,8 +1674,7 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      const images = await this.workspaceViewService.loadImagesByIdsOrdered(orderedIds);
-      if (images.length === 0) {
+      if (result.status === 'no-images') {
         this.toastService.show({
           message: 'Freigabelink enthaelt keine verfuegbaren Medien.',
           type: 'warning',
@@ -1719,12 +1683,14 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      this.workspaceViewService.clearActiveSelectionAndSettings();
-      this.workspaceViewService.setActiveSelectionImages(images);
-
-      const loadedIds = new Set(images.map((image) => image.id));
-      const selectionIds = orderedIds.filter((id) => loadedIds.has(id));
-      this.workspaceSelectionService.selectAllInScope(selectionIds);
+      if (result.status === 'error') {
+        this.toastService.show({
+          message: 'Freigabelink konnte nicht aufgeloest werden.',
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
 
       this.detailImageId.set(null);
       this.setSelectedMarker(null);
@@ -1737,14 +1703,8 @@ export class MapShellComponent implements OnDestroy {
       this.photoPanelOpen.set(true);
 
       this.toastService.show({
-        message: `${selectionIds.length} Medien aus Freigabelink geladen.`,
+        message: `${result.selectionIds.length} Medien aus Freigabelink geladen.`,
         type: 'success',
-        dedupe: true,
-      });
-    } catch {
-      this.toastService.show({
-        message: 'Freigabelink konnte nicht aufgeloest werden.',
-        type: 'error',
         dedupe: true,
       });
     } finally {
@@ -1800,7 +1760,9 @@ export class MapShellComponent implements OnDestroy {
 
     const hasMarkerSelection =
       this.selectedMarkerKey() !== null || this.selectedMarkerKeys().size > 0;
-    const hasRadiusSelection = this.hasActiveRadiusSelection();
+    const hasRadiusSelection = this.radiusSelectionService.hasCommittedSelection(
+      this.radiusCommittedVisuals,
+    );
     const hasWorkspaceSelection = this.workspaceViewService.selectionActive();
     return hasMarkerSelection || hasRadiusSelection || hasWorkspaceSelection;
   }
@@ -1945,8 +1907,14 @@ export class MapShellComponent implements OnDestroy {
     clientX: number,
     clientY: number,
   ): void {
-    if (this.hasActiveRadiusSelection()) {
-      if (this.isInsideAnyCommittedRadius(latlng)) {
+    if (this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals)) {
+      if (
+        this.radiusSelectionService.isInsideAnyCommittedRadius(
+          this.map,
+          this.radiusCommittedVisuals,
+          latlng,
+        )
+      ) {
         this.openRadiusContextMenuAt(latlng, clientX, clientY);
         return;
       }
@@ -3265,7 +3233,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private openMapContextMenuAt(latlng: L.LatLng, clientX: number, clientY: number): void {
-    const position = this.clampContextMenuPosition(clientX, clientY);
+    const position = this.mapContextActionsService.clampContextMenuPosition(clientX, clientY);
     this.radiusContextMenuOpen.set(false);
     this.markerContextMenuOpen.set(false);
     this.mapContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
@@ -3275,7 +3243,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private openRadiusContextMenuAt(latlng: L.LatLng, clientX: number, clientY: number): void {
-    const position = this.clampContextMenuPosition(clientX, clientY);
+    const position = this.mapContextActionsService.clampContextMenuPosition(clientX, clientY);
     this.mapContextMenuOpen.set(false);
     this.markerContextMenuOpen.set(false);
     this.radiusContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
@@ -3287,18 +3255,11 @@ export class MapShellComponent implements OnDestroy {
   private openMarkerContextMenu(markerKey: string, sourceEvent?: MouseEvent | PointerEvent): void {
     const state = this.uploadedPhotoMarkers.get(markerKey);
     if (!state) return;
-
-    let x = sourceEvent?.clientX;
-    let y = sourceEvent?.clientY;
-
-    if ((x == null || y == null) && this.map) {
-      const point = this.map.latLngToContainerPoint([state.lat, state.lng]);
-      const containerRect = this.map.getContainer().getBoundingClientRect();
-      x = containerRect.left + point.x;
-      y = containerRect.top + point.y;
-    }
-
-    const position = this.clampContextMenuPosition(x ?? 0, y ?? 0);
+    const position = this.mapContextActionsService.resolveMarkerContextMenuPosition(
+      state,
+      sourceEvent,
+      this.map,
+    );
 
     this.mapContextMenuOpen.set(false);
     this.radiusContextMenuOpen.set(false);
@@ -3315,22 +3276,6 @@ export class MapShellComponent implements OnDestroy {
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
-  private hasActiveRadiusSelection(): boolean {
-    return this.radiusCommittedVisuals.length > 0;
-  }
-
-  private isInsideAnyCommittedRadius(position: L.LatLng): boolean {
-    if (!this.map) {
-      return false;
-    }
-
-    return this.radiusCommittedVisuals.some((visual) => {
-      const center = visual.circle.getLatLng();
-      const radiusMeters = visual.circle.getRadius();
-      return this.map!.distance(center, position) <= radiusMeters;
-    });
-  }
-
   private clearActiveRadiusSelection(): void {
     this.clearRadiusSelectionVisuals();
     this.setSelectedMarker(null);
@@ -3340,40 +3285,13 @@ export class MapShellComponent implements OnDestroy {
     this.workspaceSelectionService.clearSelection();
   }
 
-  private clampContextMenuPosition(x: number, y: number): { x: number; y: number } {
-    if (typeof window === 'undefined') {
-      return { x, y };
-    }
-
-    const menuWidth = 240;
-    const menuHeight = 280;
-    const margin = 8;
-    return {
-      x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),
-      y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
-    };
-  }
-
-  private async copyTextToClipboard(text: string): Promise<boolean> {
-    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-      return false;
-    }
-
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   private async copyAddressFromCoords(lat: number, lng: number): Promise<boolean> {
     const reverse = await this.geocodingService.reverse(lat, lng);
     const address = reverse?.addressLabel?.trim();
     if (!address) {
       return false;
     }
-    return this.copyTextToClipboard(address);
+    return this.mapContextActionsService.copyTextToClipboard(address);
   }
 
   private async promptProjectSelection(): Promise<{ id: string; name: string } | null> {

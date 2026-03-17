@@ -134,6 +134,43 @@
   --interactive-transition-standard:
     border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
+
+  // Component-role aliases (Theme Contract layer C)
+  // Action controls
+  --action-bg-default: transparent;
+  --action-bg-hover: var(--interactive-surface-hover);
+  --action-bg-active: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --action-border-default: color-mix(in srgb, var(--color-clay) 35%, var(--color-border));
+  --action-border-active: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
+  --action-text-default: var(--color-text-secondary);
+  --action-text-active: var(--color-clay);
+
+  // Menu and option surfaces
+  --menu-surface-bg: var(--color-bg-elevated);
+  --menu-surface-border: var(--interactive-border-muted);
+  --menu-item-bg-hover: color-mix(in srgb, var(--color-clay) 8%, transparent);
+  --menu-item-bg-active: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --menu-item-text: var(--color-text-primary);
+  --menu-item-text-active: var(--color-clay);
+
+  // Form controls
+  --field-bg: var(--color-bg-surface);
+  --field-border: var(--color-border-strong);
+  --field-border-focus: var(--color-primary);
+  --field-placeholder: var(--color-text-disabled);
+  --field-text: var(--color-text-primary);
+
+  // Settings sections and cards
+  --section-bg: var(--color-bg-surface);
+  --section-border: var(--interactive-border-muted);
+  --section-title: var(--color-text-primary);
+  --section-text: var(--color-text-secondary);
+
+  // Feedback states
+  --state-success-bg: color-mix(in srgb, var(--color-success) 12%, transparent);
+  --state-warning-bg: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  --state-danger-bg: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  --state-info-bg: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
 // ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
@@ -348,7 +385,7 @@ router-outlet + * {
   display: flex;
   align-items: center;
   padding: var(--spacing-1) var(--spacing-1) var(--spacing-1) var(--spacing-3);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--menu-surface-border);
 }
 
 .dd-search__input {
@@ -358,11 +395,11 @@ router-outlet + * {
   outline: none;
   background: transparent;
   font-size: 0.8125rem;
-  color: var(--color-text-primary);
+  color: var(--field-text);
   padding: var(--spacing-1) 0;
 
   &::placeholder {
-    color: var(--color-text-disabled);
+    color: var(--field-placeholder);
   }
 }
 
@@ -376,7 +413,7 @@ router-outlet + * {
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--action-text-default);
   cursor: pointer;
   padding: 0;
 
@@ -385,8 +422,8 @@ router-outlet + * {
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 12%, transparent);
-    color: var(--color-text-primary);
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
   }
 }
 
@@ -405,17 +442,17 @@ router-outlet + * {
   border-radius: var(--radius-sm);
   background: transparent;
   font-size: 0.8125rem;
-  color: var(--color-text-primary);
+  color: var(--menu-item-text);
   cursor: pointer;
   transition: background 80ms ease-out;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    background: var(--menu-item-bg-hover);
   }
 }
 
 .dd-item--active {
-  color: var(--color-clay);
+  color: var(--menu-item-text-active);
 }
 
 .dd-item--muted {
@@ -483,7 +520,7 @@ router-outlet + * {
   border-radius: var(--radius-sm);
   background: transparent;
   font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  color: var(--action-text-default);
   cursor: pointer;
   transition: var(--interactive-transition-standard);
 
@@ -492,8 +529,8 @@ router-outlet + * {
   }
 
   &:hover {
-    background: var(--interactive-surface-hover);
-    color: var(--color-text-primary);
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
   }
 }
 
@@ -507,7 +544,7 @@ router-outlet + * {
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--action-text-default);
   cursor: pointer;
   transition: var(--interactive-transition-standard);
 
@@ -516,8 +553,8 @@ router-outlet + * {
   }
 
   &:hover {
-    background: var(--interactive-surface-hover);
-    color: var(--color-clay);
+    background: var(--action-bg-hover);
+    color: var(--action-text-active);
   }
 }
 
@@ -546,8 +583,8 @@ router-outlet + * {
   padding-inline: var(--spacing-2);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text-secondary);
+  background: var(--action-bg-default);
+  color: var(--action-text-default);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -555,28 +592,28 @@ router-outlet + * {
   transition: var(--interactive-transition-standard);
 
   &:hover {
-    background: var(--interactive-surface-hover);
-    border-color: color-mix(in srgb, var(--color-clay) 35%, var(--color-border));
-    color: var(--color-clay);
+    background: var(--action-bg-hover);
+    border-color: var(--action-border-default);
+    color: var(--action-text-active);
   }
 
   &:focus-visible {
-    border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
+    border-color: var(--action-border-active);
     box-shadow: var(--interactive-focus-ring);
     outline: none;
   }
 }
 
 .toolbar-btn--active {
-  background: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  border-color: color-mix(in srgb, var(--color-clay) 40%, var(--color-border));
-  color: var(--color-clay);
+  background: var(--action-bg-active);
+  border-color: var(--action-border-default);
+  color: var(--action-text-active);
 }
 
 .toolbar-btn--open {
-  background: color-mix(in srgb, var(--color-clay) 18%, transparent);
-  border-color: color-mix(in srgb, var(--color-clay) 50%, var(--color-border));
-  color: var(--color-clay);
+  background: color-mix(in srgb, var(--action-bg-active) 80%, var(--action-bg-hover));
+  border-color: var(--action-border-active);
+  color: var(--action-text-active);
 }
 
 .toolbar-btn__chevron {
@@ -601,8 +638,8 @@ router-outlet + * {
 }
 
 .option-menu-surface {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--interactive-border-muted);
+  background: var(--menu-surface-bg);
+  border: 1px solid var(--menu-surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--elevation-dropdown);
   overflow: hidden;
@@ -616,10 +653,10 @@ router-outlet + * {
 
 .option-menu-header {
   padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--interactive-border-muted);
+  border-bottom: 1px solid var(--menu-surface-border);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--section-text);
 }
 
 // ── Shared icon ghost button primitives ─────────────────────────────────────
