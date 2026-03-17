@@ -5,28 +5,47 @@
   @if (panelMode() === 'error') {
     <div class="invite-section__state invite-section__state--error" role="alert">
       <span class="material-icons" aria-hidden="true">warning</span>
-      <h3>Invite unavailable</h3>
+      <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
-      <button type="button" class="invite-section__ghost" (click)="retry()">Try again</button>
+      <button type="button" class="invite-section__ghost" (click)="retry()">
+        {{ t('settings.inviteManagement.errorState.retry', 'Try again') }}
+      </button>
     </div>
   } @else {
     <header class="invite-section__header ui-item">
       <div class="invite-section__title-wrap ui-item-label">
-        <h3 id="invite-section-title">Invite Management</h3>
-        <p>Share a role-scoped one-time invite to your organization.</p>
+        <h3 id="invite-section-title">
+          {{ t('settings.inviteManagement.title', 'Invite Management') }}
+        </h3>
+        <p>
+          {{
+            t(
+              'settings.inviteManagement.subtitle',
+              'Share a role-scoped one-time invite to your organization.'
+            )
+          }}
+        </p>
       </div>
       @if (activeInvite(); as invite) {
         <span class="invite-section__status-chip" [attr.data-status]="invite.status">
           <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
           <span>{{ statusLabel() }}</span>
         </span>
-        <p class="invite-section__expires">Expires: {{ invite.expiresAt | date: 'short' }}</p>
+        <p class="invite-section__expires">
+          {{ t('settings.inviteManagement.expiresLabel', 'Expires:') }}
+          {{ invite.expiresAt | date: 'short' }}
+        </p>
       }
     </header>
 
     <div class="invite-section__stack">
-      <section class="invite-section__role-block" aria-label="Role picker">
-        <label class="invite-section__label" for="invite-role-select">Target role</label>
+      <section
+        class="invite-section__role-block"
+        [attr.aria-label]="t('settings.inviteManagement.aria.rolePicker', 'Role picker')"
+      >
+        <label class="invite-section__label" for="invite-role-select">
+          {{ t('settings.inviteManagement.targetRole.label', 'Target role') }}
+        </label>
         <div class="invite-section__role-row">
           <select
             #roleSelect
@@ -36,8 +55,12 @@
             [disabled]="isRegenerateDisabled()"
             (change)="onRoleChange($event)"
           >
-            <option value="worker">Worker</option>
-            <option value="clerk">Clerk</option>
+            <option value="worker">
+              {{ t('settings.inviteManagement.targetRole.option.worker', 'Worker') }}
+            </option>
+            <option value="clerk">
+              {{ t('settings.inviteManagement.targetRole.option.clerk', 'Clerk') }}
+            </option>
           </select>
           <button
             type="button"
@@ -45,7 +68,7 @@
             [disabled]="isRegenerateDisabled()"
             (click)="onRegenerate()"
           >
-            Regenerate
+            {{ t('settings.inviteManagement.action.regenerate', 'Regenerate') }}
           </button>
           <button
             type="button"
@@ -53,36 +76,50 @@
             [disabled]="activeInvite()?.status !== 'active'"
             (click)="onRevoke()"
           >
-            Revoke
+            {{ t('settings.inviteManagement.action.revoke', 'Revoke') }}
           </button>
         </div>
       </section>
 
-      <section class="invite-section__qr-block" aria-label="QR preview">
+      <section
+        class="invite-section__qr-block"
+        [attr.aria-label]="t('settings.inviteManagement.aria.qrPreview', 'QR preview')"
+      >
         <div class="invite-section__qr-frame">
           @if (qrLoading() || !activeInvite()) {
-            <span class="invite-section__qr-spinner" aria-label="Loading QR code"></span>
+            <span
+              class="invite-section__qr-spinner"
+              [attr.aria-label]="t('settings.inviteManagement.aria.loadingQr', 'Loading QR code')"
+            ></span>
           }
           <canvas
             #qrCanvas
             class="invite-section__qr-canvas"
             [class.invite-section__qr-canvas--visible]="qrVisible()"
-            aria-label="Invite QR code"
+            [attr.aria-label]="t('settings.inviteManagement.aria.inviteQr', 'Invite QR code')"
           ></canvas>
         </div>
-        <p class="invite-section__link-label">Invite link</p>
+        <p class="invite-section__link-label">
+          {{ t('settings.inviteManagement.link.label', 'Invite link') }}
+        </p>
         <p class="invite-section__link-preview">
-          {{ activeInvite()?.inviteUrl ?? 'Generating link...' }}
+          {{
+            activeInvite()?.inviteUrl ??
+              t('settings.inviteManagement.link.generating', 'Generating link...')
+          }}
         </p>
       </section>
 
-      <section class="invite-section__share-block" aria-label="Share actions">
+      <section
+        class="invite-section__share-block"
+        [attr.aria-label]="t('settings.inviteManagement.aria.shareActions', 'Share actions')"
+      >
         <div class="invite-section__share-row">
           <button
             type="button"
             class="invite-section__icon-button"
-            aria-label="Copy invite link"
-            title="Copy invite link"
+            [attr.aria-label]="t('settings.inviteManagement.share.copy.aria', 'Copy invite link')"
+            [attr.title]="t('settings.inviteManagement.share.copy.title', 'Copy invite link')"
             [disabled]="isShareDisabled()"
             (click)="onCopyLink()"
           >
@@ -91,8 +128,10 @@
           <button
             type="button"
             class="invite-section__icon-button"
-            aria-label="Share invite via email"
-            title="Share via email"
+            [attr.aria-label]="
+              t('settings.inviteManagement.share.email.aria', 'Share invite via email')
+            "
+            [attr.title]="t('settings.inviteManagement.share.email.title', 'Share via email')"
             [disabled]="isShareDisabled()"
             (click)="onShareEmail()"
           >
@@ -101,8 +140,10 @@
           <button
             type="button"
             class="invite-section__icon-button"
-            aria-label="Share invite via WhatsApp"
-            title="Share via WhatsApp"
+            [attr.aria-label]="
+              t('settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp')
+            "
+            [attr.title]="t('settings.inviteManagement.share.whatsapp.title', 'Share via WhatsApp')"
             [disabled]="isShareDisabled()"
             (click)="onShareWhatsApp()"
           >

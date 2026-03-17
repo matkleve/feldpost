@@ -4,47 +4,55 @@
       class="auth-map-frame"
       src="https://www.openstreetmap.org/export/embed.html?bbox=8.46%2C47.34%2C8.62%2C47.43&amp;layer=mapnik&amp;marker=47.3769%2C8.5417"
       tabindex="-1"
-      title="Decorative city map background"
+      [attr.title]="t('auth.login.mapBackground.title', 'Decorative city map background')"
     ></iframe>
   </div>
   <div class="auth-map-overlay" aria-hidden="true"></div>
   <div class="auth-card">
-    <h1 class="auth-title">Sign in</h1>
-    <p class="auth-subtitle">Welcome back to Feldpost</p>
+    <h1 class="auth-title">{{ t('auth.login.title', 'Sign in') }}</h1>
+    <p class="auth-subtitle">{{ t('auth.login.subtitle', 'Welcome back to Feldpost') }}</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <!-- Email -->
       <div class="field">
-        <label for="email">Email</label>
+        <label for="email">{{ t('auth.login.field.email.label', 'Email') }}</label>
         <input
           id="email"
           type="email"
           formControlName="email"
           autocomplete="email"
-          placeholder="you@example.com"
+          [attr.placeholder]="t('auth.login.field.email.placeholder', 'you@example.com')"
         />
         @if (form.controls.email.touched && form.controls.email.hasError('required')) {
-          <span class="field-error">Email is required.</span>
+          <span class="field-error">{{
+            t('auth.login.field.email.error.required', 'Email is required.')
+          }}</span>
         } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
-          <span class="field-error">Enter a valid email address.</span>
+          <span class="field-error">{{
+            t('auth.login.field.email.error.invalid', 'Enter a valid email address.')
+          }}</span>
         }
       </div>
 
       <!-- Password -->
       <div class="field">
         <label for="password">
-          Password
-          <a routerLink="/auth/reset-password" class="forgot-link">Forgot password?</a>
+          {{ t('auth.login.field.password.label', 'Password') }}
+          <a routerLink="/auth/reset-password" class="forgot-link">{{
+            t('auth.login.action.forgotPassword', 'Forgot password?')
+          }}</a>
         </label>
         <input
           id="password"
           type="password"
           formControlName="password"
           autocomplete="current-password"
-          placeholder="••••••••"
+          [attr.placeholder]="t('auth.login.field.password.placeholder', '••••••••')"
         />
         @if (form.controls.password.touched && form.controls.password.hasError('required')) {
-          <span class="field-error">Password is required.</span>
+          <span class="field-error">{{
+            t('auth.login.field.password.error.required', 'Password is required.')
+          }}</span>
         }
       </div>
 
@@ -56,13 +64,16 @@
       <!-- Submit -->
       <button type="submit" class="btn-primary" [disabled]="loading()">
         @if (loading()) {
-          Signing in…
+          {{ t('auth.login.action.signingIn', 'Signing in…') }}
         } @else {
-          Sign in
+          {{ t('auth.login.action.signIn', 'Sign in') }}
         }
       </button>
     </form>
 
-    <p class="auth-footer">Don't have an account? <a routerLink="/auth/register">Create one</a></p>
+    <p class="auth-footer">
+      {{ t('auth.login.footer.noAccount', "Don't have an account?") }}
+      <a routerLink="/auth/register">{{ t('auth.login.footer.createOne', 'Create one') }}</a>
+    </p>
   </div>
 </div>

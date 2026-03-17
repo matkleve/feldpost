@@ -13,41 +13,45 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
-    selector: 'app-reset-password',
-    imports: [ReactiveFormsModule, RouterLink],
-    templateUrl: './reset-password.component.html',
-    styleUrl: './reset-password.component.scss',
+  selector: 'app-reset-password',
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent {
-    private readonly fb = inject(FormBuilder);
-    private readonly auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly i18nService = inject(I18nService);
 
-    protected readonly form = this.fb.nonNullable.group({
-        email: ['', [Validators.required, Validators.email]],
-    });
+  protected readonly t = this.i18nService.t.bind(this.i18nService);
 
-    protected readonly loading = signal(false);
-    protected readonly errorMessage = signal<string | null>(null);
-    protected readonly success = signal(false);
+  protected readonly form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
 
-    protected async submit(): Promise<void> {
-        if (this.form.invalid) return;
+  protected readonly loading = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly success = signal(false);
 
-        this.loading.set(true);
-        this.errorMessage.set(null);
+  protected async submit(): Promise<void> {
+    if (this.form.invalid) return;
 
-        const { email } = this.form.getRawValue();
-        const { error } = await this.auth.resetPasswordForEmail(email);
+    this.loading.set(true);
+    this.errorMessage.set(null);
 
-        if (error) {
-            this.errorMessage.set(error.message);
-            this.loading.set(false);
-            return;
-        }
+    const { email } = this.form.getRawValue();
+    const { error } = await this.auth.resetPasswordForEmail(email);
 
-        this.success.set(true);
-        this.loading.set(false);
+    if (error) {
+      this.errorMessage.set(error.message);
+      this.loading.set(false);
+      return;
     }
+
+    this.success.set(true);
+    this.loading.set(false);
+  }
 }

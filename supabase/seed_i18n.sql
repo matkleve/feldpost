@@ -15285,4 +15285,3445 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.mapBackground.title', 'Decorative city map background', 'en', 'apps/web/src/app/features/auth/login/login.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Decorative city map background', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.mapBackground.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dekorativer Stadtplan-Hintergrund', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.mapBackground.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sfondo decorativo mappa citta', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.mapBackground.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.title', 'Sign in', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sign in', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anmelden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accedi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.subtitle', 'Welcome back to Feldpost', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Welcome back to Feldpost', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Willkommen zurueck bei Feldpost', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Bentornato su Feldpost', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.email.label', 'Email', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.email.placeholder', 'you@example.com', 'en', 'apps/web/src/app/features/auth/login/login.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'you@example.com', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'du@beispiel.de', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'tu@esempio.com', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.email.error.required', 'Email is required.', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email obbligatoria.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.email.error.invalid', 'Enter a valid email address.', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter a valid email address.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gib eine gueltige E-Mail-Adresse ein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci un indirizzo email valido.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.password.label', 'Password', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.action.forgotPassword', 'Forgot password?', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Forgot password?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.forgotPassword'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort vergessen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.forgotPassword'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Password dimenticata?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.forgotPassword'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.password.placeholder', '••••••••', 'en', 'apps/web/src/app/features/auth/login/login.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.field.password.error.required', 'Password is required.', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Password obbligatoria.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.field.password.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.action.signingIn', 'Signing in…', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Signing in…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.signingIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anmeldung laeuft…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.signingIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accesso in corso…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.signingIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.action.signIn', 'Sign in', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sign in', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.signIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anmelden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.signIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accedi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.action.signIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.footer.noAccount', 'Don''t have an account?', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Don''t have an account?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.footer.noAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch kein Konto?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.footer.noAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non hai un account?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.footer.noAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.login.footer.createOne', 'Create one', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create one', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.footer.createOne'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erstelle eines', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.footer.createOne'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Creane uno', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.login.footer.createOne'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.mapBackground.title', 'Decorative city map background', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Decorative city map background', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.mapBackground.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dekorativer Stadtplan-Hintergrund', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.mapBackground.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sfondo decorativo mappa citta', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.mapBackground.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.success.title', 'Check your email', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Check your email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pruefe deine E-Mail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Controlla la tua email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.success.message.prefix', 'We sent a confirmation link to', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'We sent a confirmation link to', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.message.prefix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wir haben einen Bestaetigungslink gesendet an', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.message.prefix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Abbiamo inviato un link di conferma a', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.message.prefix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.success.message.suffix', '. Click it to activate your account.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '. Click it to activate your account.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.message.suffix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '. Klicke darauf um dein Konto zu aktivieren.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.message.suffix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '. Fai clic per attivare il tuo account.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.message.suffix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.success.backToSignIn', 'Back to sign in', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Back to sign in', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zurueck zur Anmeldung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Torna all''accesso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.success.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.title', 'Create account', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Konto erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.subtitle', 'Start documenting your sites', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Start documenting your sites', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Starte mit der Dokumentation deiner Standorte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inizia a documentare i tuoi siti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.form.aria', 'Create account form', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create account form', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.form.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Formular Konto erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.form.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modulo creazione account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.form.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.fullName.label', 'Full name', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Full name', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Vollstaendiger Name', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nome completo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.fullName.placeholder', 'Jane Smith', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Jane Smith', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Max Mustermann', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Mario Rossi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.fullName.error.required', 'Full name is required.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Full name is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Vollstaendiger Name ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Il nome completo e obbligatorio.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.fullName.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.email.label', 'Email', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.email.placeholder', 'you@example.com', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'you@example.com', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'du@beispiel.de', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'tu@esempio.com', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.email.error.required', 'Email is required.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email obbligatoria.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.email.error.invalid', 'Enter a valid email address.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter a valid email address.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gib eine gueltige E-Mail-Adresse ein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci un indirizzo email valido.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.inviteCode.label', 'Invite code', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite code', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungscode', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Codice invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.inviteCode.placeholder', 'Paste invite code from QR link', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Paste invite code from QR link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungscode aus QR-Link einfuegen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Incolla il codice invito dal link QR', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.inviteCode.error.required', 'Invite code is required.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite code is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungscode ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Il codice invito e obbligatorio.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.inviteCode.error.pattern', 'Invite code must be a 48-character hex value.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite code must be a 48-character hex value.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungscode muss ein 48-stelliger Hex-Wert sein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Il codice invito deve essere un valore esadecimale di 48 caratteri.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.inviteCode.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.password.label', 'Password', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.password.placeholder', 'Min. 12 incl. upper/lower number symbol', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Min. 12 incl. upper/lower number symbol', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mind. 12 Zeichen inkl. Gross/Klein Zahl Symbol', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Min. 12 con maiusc/minusc numero simbolo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.password.error.minlength', 'Password must be at least 12 characters.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password must be at least 12 characters.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.error.minlength'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort muss mindestens 12 Zeichen haben.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.error.minlength'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La password deve avere almeno 12 caratteri.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.error.minlength'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.password.error.pattern', 'Password must include uppercase lowercase number and symbol.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password must include uppercase lowercase number and symbol.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort muss Grossbuchstaben Kleinbuchstaben Zahl und Symbol enthalten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La password deve includere maiuscola minuscola numero e simbolo.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.password.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.confirmPassword.label', 'Confirm password', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort bestaetigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.confirmPassword.placeholder', '••••••••', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.field.confirmPassword.error.mismatch', 'Passwords do not match.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Passwords do not match.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.error.mismatch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwoerter stimmen nicht ueberein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.error.mismatch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Le password non corrispondono.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.field.confirmPassword.error.mismatch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.action.creatingAccount', 'Creating account…', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Creating account…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.action.creatingAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Konto wird erstellt…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.action.creatingAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Creazione account in corso…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.action.creatingAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.action.createAccount', 'Create account', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.action.createAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Konto erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.action.createAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea account', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.action.createAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.footer.alreadyHaveAccount', 'Already have an account?', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Already have an account?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.footer.alreadyHaveAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hast du bereits ein Konto?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.footer.alreadyHaveAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Hai gia un account?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.footer.alreadyHaveAccount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.register.footer.signIn', 'Sign in', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sign in', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.footer.signIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anmelden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.footer.signIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accedi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.register.footer.signIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.success.title', 'Check your email', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Check your email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pruefe deine E-Mail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Controlla la tua email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.success.message.prefix', 'We sent a password reset link to', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'We sent a password reset link to', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.message.prefix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wir haben einen Link zum Zuruecksetzen gesendet an', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.message.prefix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Abbiamo inviato un link di reimpostazione password a', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.message.prefix'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.success.backToSignIn', 'Back to sign in', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Back to sign in', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zurueck zur Anmeldung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Torna all''accesso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.success.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.title', 'Reset password', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reset password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort zuruecksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Reimposta password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.subtitle', 'Enter your email and we''ll send you a reset link.', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter your email and we''ll send you a reset link.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gib deine E-Mail ein und wir senden dir einen Reset-Link.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci la tua email e ti invieremo un link di reimpostazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.field.email.label', 'Email', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.field.email.placeholder', 'you@example.com', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'you@example.com', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'du@beispiel.de', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'tu@esempio.com', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.field.email.error.required', 'Email is required.', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email is required.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail ist erforderlich.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email obbligatoria.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.field.email.error.invalid', 'Enter a valid email address.', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter a valid email address.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gib eine gueltige E-Mail-Adresse ein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci un indirizzo email valido.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.field.email.error.invalid'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.action.sending', 'Sending…', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sending…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.action.sending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird gesendet…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.action.sending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Invio in corso…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.action.sending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.action.sendResetLink', 'Send reset link', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Send reset link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.action.sendResetLink'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Reset-Link senden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.action.sendResetLink'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Invia link di reimpostazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.action.sendResetLink'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.resetPassword.footer.backToSignIn', 'Back to sign in', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Back to sign in', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.footer.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zurueck zur Anmeldung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.footer.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Torna all''accesso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.resetPassword.footer.backToSignIn'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.title', 'Set new password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Set new password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neues Passwort setzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Imposta nuova password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.subtitle', 'Choose a strong password for your account.', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose a strong password for your account.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Waehle ein sicheres Passwort fuer dein Konto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli una password sicura per il tuo account.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.password.label', 'New password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'New password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neues Passwort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nuova password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.password.placeholder', 'Min. 12 incl. upper/lower number symbol', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Min. 12 incl. upper/lower number symbol', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mind. 12 Zeichen inkl. Gross/Klein Zahl Symbol', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Min. 12 con maiusc/minusc numero simbolo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.password.error.minlength', 'Password must be at least 12 characters.', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password must be at least 12 characters.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.minlength'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort muss mindestens 12 Zeichen haben.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.minlength'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La password deve avere almeno 12 caratteri.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.minlength'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.password.error.pattern', 'Password must include uppercase lowercase number and symbol.', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Password must include uppercase lowercase number and symbol.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort muss Grossbuchstaben Kleinbuchstaben Zahl und Symbol enthalten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La password deve includere maiuscola minuscola numero e simbolo.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.password.error.pattern'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.confirmPassword.label', 'Confirm new password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm new password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neues Passwort bestaetigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma nuova password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.confirmPassword.placeholder', '••••••••', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '••••••••', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.field.confirmPassword.error.mismatch', 'Passwords do not match.', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Passwords do not match.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.error.mismatch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwoerter stimmen nicht ueberein.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.error.mismatch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Le password non corrispondono.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.field.confirmPassword.error.mismatch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.action.updating', 'Updating…', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Updating…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.action.updating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird aktualisiert…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.action.updating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiornamento in corso…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.action.updating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auth.updatePassword.action.updatePassword', 'Update password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Update password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.action.updatePassword'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Passwort aktualisieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.action.updatePassword'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiorna password', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auth.updatePassword.action.updatePassword'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.error.revoke', 'Unable to revoke invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts fallback-error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unable to revoke invite.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.revoke'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung konnte nicht widerrufen werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.revoke'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile revocare l''invito.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.revoke'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.email.subject', 'Join my organization', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts share-email-subject')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Join my organization', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.subject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Trete meiner Organisation bei', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.subject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Unisciti alla mia organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.subject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.email.body', 'Use this invite link: {inviteUrl}', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts share-email-body')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Use this invite link: {inviteUrl}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Verwende diesen Einladungslink: {inviteUrl}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Usa questo link di invito: {inviteUrl}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.native.title', 'Organization invite', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts native-share-title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organization invite', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.native.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisationseinladung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.native.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Invito all''organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.native.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.native.text', 'Use this invite link to join.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts native-share-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Use this invite link to join.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.native.text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nutze diesen Einladungslink zum Beitreten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.native.text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Usa questo link di invito per unirti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.native.text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.whatsapp.text', 'Join my organization: {inviteUrl}', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts share-whatsapp-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Join my organization: {inviteUrl}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Trete meiner Organisation bei: {inviteUrl}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Unisciti alla mia organizzazione: {inviteUrl}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.text'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.status.active', 'Active', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts status-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktiv', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Attivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.status.expired', 'Expired', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts status-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Expired', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.expired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abgelaufen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.expired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scaduto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.expired'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.status.revoked', 'Revoked', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts status-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Revoked', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.revoked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Widerrufen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.revoked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Revocato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.revoked'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.status.accepted', 'Accepted', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts status-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Accepted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.accepted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Angenommen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.accepted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accettato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.accepted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.status.pending', 'Pending', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts status-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Pending', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.pending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausstehend', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.pending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In attesa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.status.pending'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.error.create', 'Unable to create invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts fallback-error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unable to create invite.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.create'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung konnte nicht erstellt werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.create'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile creare l''invito.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.create'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.error.regenerate', 'Unable to regenerate invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts fallback-error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unable to regenerate invite.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.regenerate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung konnte nicht neu erstellt werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.regenerate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile rigenerare l''invito.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.regenerate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.error.renderQr', 'Unable to render QR code.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts fallback-error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unable to render QR code.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.renderQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QR-Code konnte nicht gerendert werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.renderQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile visualizzare il codice QR.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.renderQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.error.share', 'Unable to share invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts fallback-error')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Unable to share invite.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.share'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung konnte nicht geteilt werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.share'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile condividere l''invito.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.error.share'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.errorState.title', 'Invite unavailable', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite unavailable', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung nicht verfuegbar', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Invito non disponibile', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.errorState.retry', 'Try again', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html button-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Try again', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erneut versuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.errorState.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.title', 'Invite Management', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html section-title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite Management', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungsverwaltung', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Gestione degli inviti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.subtitle', 'Share a role-scoped one-time invite to your organization.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html section-subtitle')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share a role-scoped one-time invite to your organization.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Teile eine rollenbezogene Einmaleinladung fuer deine Organisation.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi un invito monouso con ambito ruolo per la tua organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.expiresLabel', 'Expires:', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-prefix')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Expires:', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.expiresLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Laeuft ab:', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.expiresLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scade:', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.expiresLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.aria.rolePicker', 'Role picker', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Role picker', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.rolePicker'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rollenauswahl', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.rolePicker'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Selettore ruolo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.rolePicker'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.targetRole.label', 'Target role', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html label-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Target role', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zielrolle', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ruolo di destinazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.targetRole.option.worker', 'Worker', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html option-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Worker', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.option.worker'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Arbeiter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.option.worker'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Operaio', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.option.worker'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.targetRole.option.clerk', 'Clerk', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html option-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Clerk', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.option.clerk'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sachbearbeiter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.option.clerk'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impiegato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.targetRole.option.clerk'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.action.regenerate', 'Regenerate', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html button-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Regenerate', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.action.regenerate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Neu erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.action.regenerate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rigenera', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.action.regenerate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.action.revoke', 'Revoke', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html button-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Revoke', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.action.revoke'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Widerrufen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.action.revoke'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Revoca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.action.revoke'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.aria.qrPreview', 'QR preview', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'QR preview', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.qrPreview'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QR-Vorschau', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.qrPreview'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Anteprima QR', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.qrPreview'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.aria.loadingQr', 'Loading QR code', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading QR code', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.loadingQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QR-Code wird geladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.loadingQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento codice QR', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.loadingQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.aria.inviteQr', 'Invite QR code', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite QR code', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.inviteQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungs-QR-Code', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.inviteQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Codice QR invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.inviteQr'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.link.label', 'Invite link', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Invite link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.link.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslink', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.link.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Link invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.link.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.link.generating', 'Generating link...', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Generating link...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.link.generating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link wird erstellt...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.link.generating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Generazione link...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.link.generating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.aria.shareActions', 'Share actions', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share actions', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.shareActions'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Teilen-Aktionen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.shareActions'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Azioni di condivisione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.aria.shareActions'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.copy.aria', 'Copy invite link', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy invite link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.copy.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslink kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.copy.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia link invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.copy.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.copy.title', 'Copy invite link', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy invite link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.copy.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladungslink kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.copy.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia link invito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.copy.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.email.aria', 'Share invite via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share invite via email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung per E-Mail teilen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi invito via email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.email.title', 'Share via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share via email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Per E-Mail teilen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi via email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.email.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share invite via WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Einladung per WhatsApp teilen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi invito via WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'settings.inviteManagement.share.whatsapp.title', 'Share via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share via WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Per WhatsApp teilen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi via WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'settings.inviteManagement.share.whatsapp.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.viewToggle.aria.group', 'View mode', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'View mode', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.aria.group'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ansichtsmodus', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.aria.group'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modalita visualizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.aria.group'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.viewToggle.list.aria', 'List view', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'List view', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.list.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Listenansicht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.list.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Vista elenco', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.list.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.viewToggle.list.title', 'List view', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'List view', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.list.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Listenansicht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.list.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Vista elenco', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.list.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.viewToggle.cards.aria', 'Card view', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Card view', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.cards.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kartenansicht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.cards.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Vista schede', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.cards.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.viewToggle.cards.title', 'Card view', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Card view', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.cards.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kartenansicht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.cards.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Vista schede', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.viewToggle.cards.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

@@ -21,6 +21,7 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -38,6 +39,9 @@ export class UpdatePasswordComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly i18nService = inject(I18nService);
+
+  protected readonly t = this.i18nService.t.bind(this.i18nService);
 
   protected readonly form = this.fb.nonNullable.group(
     {

@@ -80,11 +80,13 @@
 
   @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
     <div
+      #mapContextMenu
       class="map-context-menu option-menu-surface"
       [style.left.px]="mapMenuPos.x"
       [style.top.px]="mapMenuPos.y"
       role="menu"
       [attr.aria-label]="t('map.shell.contextMenu.map.aria', 'Map context menu')"
+      (keydown)="onContextMenuKeydown($event, 'map')"
     >
       <div class="dd-items">
         <button
@@ -145,11 +147,13 @@
 
   @if (radiusContextMenuOpen() && radiusContextMenuPosition(); as radiusMenuPos) {
     <div
+      #radiusContextMenu
       class="map-context-menu option-menu-surface"
       [style.left.px]="radiusMenuPos.x"
       [style.top.px]="radiusMenuPos.y"
       role="menu"
       [attr.aria-label]="t('map.shell.contextMenu.radius.aria', 'Radius context menu')"
+      (keydown)="onContextMenuKeydown($event, 'radius')"
     >
       <div class="map-context-menu__header option-menu-header">
         {{ t('map.shell.contextMenu.radius.header', 'Radius Auswahl') }}
@@ -185,11 +189,13 @@
   @if (markerContextMenuOpen() && markerContextMenuPosition(); as markerMenuPos) {
     @if (markerContextMenuPayload(); as markerMenu) {
       <div
+        #markerContextMenu
         class="map-context-menu option-menu-surface"
         [style.left.px]="markerMenuPos.x"
         [style.top.px]="markerMenuPos.y"
         role="menu"
         [attr.aria-label]="t('map.shell.contextMenu.marker.aria', 'Marker context menu')"
+        (keydown)="onContextMenuKeydown($event, 'marker')"
       >
         <div class="map-context-menu__header option-menu-header">
           @if (markerContextIsSingle) {

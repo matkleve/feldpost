@@ -20,6 +20,7 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 /** Custom validator: both password fields must match. */
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -38,6 +39,9 @@ export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly i18nService = inject(I18nService);
+
+  protected readonly t = this.i18nService.t.bind(this.i18nService);
 
   protected readonly form = this.fb.nonNullable.group(
     {

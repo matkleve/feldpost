@@ -103,6 +103,7 @@ import {
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo' | 'historic';
+type ContextMenuKind = 'map' | 'radius' | 'marker';
 type MapViewOption = {
   mode: MapViewMode;
   ariaKey: string;
@@ -237,6 +238,11 @@ export class MapShellComponent implements OnDestroy {
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
+  private readonly mapContextMenuRef = viewChild<ElementRef<HTMLDivElement>>('mapContextMenu');
+  private readonly radiusContextMenuRef =
+    viewChild<ElementRef<HTMLDivElement>>('radiusContextMenu');
+  private readonly markerContextMenuRef =
+    viewChild<ElementRef<HTMLDivElement>>('markerContextMenu');
 
   /** Reference to the UploadPanelComponent child (for placeFile calls). */
   private readonly uploadPanelChild = viewChild(UploadPanelComponent);
@@ -697,6 +703,47 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuOpen.set(false);
     this.radiusContextMenuOpen.set(false);
     this.markerContextMenuOpen.set(false);
+  }
+
+  onContextMenuKeydown(event: KeyboardEvent, menuKind: ContextMenuKind): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeContextMenus();
+      return;
+    }
+
+    if (
+      event.key !== 'ArrowDown' &&
+      event.key !== 'ArrowUp' &&
+      event.key !== 'Home' &&
+      event.key !== 'End'
+    ) {
+      return;
+    }
+
+    const items = this.getContextMenuItems(menuKind);
+    if (items.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.key === 'Home') {
+      items[0]?.focus();
+      return;
+    }
+
+    if (event.key === 'End') {
+      items[items.length - 1]?.focus();
+      return;
+    }
+
+    const activeIndex = items.findIndex((item) => item === document.activeElement);
+    const fallbackIndex = event.key === 'ArrowDown' ? -1 : 0;
+    const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
+    const delta = event.key === 'ArrowDown' ? 1 : -1;
+    const nextIndex = (currentIndex + delta + items.length) % items.length;
+    items[nextIndex]?.focus();
   }
 
   private asRadiusInteractionHost(): MapRadiusInteractionHost {
@@ -2621,6 +2668,7 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
     this.mapContextMenuPosition.set(position);
     this.mapContextMenuOpen.set(true);
+    queueMicrotask(() => this.focusFirstContextMenuItem('map'));
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
@@ -2631,6 +2679,7 @@ export class MapShellComponent implements OnDestroy {
     this.radiusContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
     this.radiusContextMenuPosition.set(position);
     this.radiusContextMenuOpen.set(true);
+    queueMicrotask(() => this.focusFirstContextMenuItem('radius'));
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
@@ -2655,7 +2704,34 @@ export class MapShellComponent implements OnDestroy {
       sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
     });
     this.markerContextMenuOpen.set(true);
+    queueMicrotask(() => this.focusFirstContextMenuItem('marker'));
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private focusFirstContextMenuItem(menuKind: ContextMenuKind): void {
+    const firstItem = this.getContextMenuItems(menuKind)[0];
+    firstItem?.focus();
+  }
+
+  private getContextMenuItems(menuKind: ContextMenuKind): HTMLButtonElement[] {
+    const menuEl = this.resolveContextMenuElement(menuKind);
+    if (!menuEl) {
+      return [];
+    }
+
+    return Array.from(menuEl.querySelectorAll<HTMLButtonElement>('.dd-item'));
+  }
+
+  private resolveContextMenuElement(menuKind: ContextMenuKind): HTMLDivElement | null {
+    if (menuKind === 'map') {
+      return this.mapContextMenuRef()?.nativeElement ?? null;
+    }
+
+    if (menuKind === 'radius') {
+      return this.radiusContextMenuRef()?.nativeElement ?? null;
+    }
+
+    return this.markerContextMenuRef()?.nativeElement ?? null;
   }
 
   private clearActiveRadiusSelection(): void {
