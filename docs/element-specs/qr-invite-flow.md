@@ -18,20 +18,20 @@ The feature appears as a dedicated section in Settings Overlay and as a command 
 
 ## Actions
 
-| #   | User Action                                 | System Response                                                       | Triggers                              |
-| --- | ------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------- |
-| 1   | Opens Invite Management section             | Immediately creates a new active invite draft and renders QR preview  | section selection in settings overlay |
-| 2   | Commits `/image` command `Create QR Invite` | Opens Invite Management and pre-focuses role picker                   | search commit action `run-command`    |
-| 3   | Changes target role (Clerk or Worker)       | Regenerates invite token and QR payload for the selected role         | role dropdown change                  |
-| 4   | Clicks `Regenerate`                         | Revokes current active draft and creates a fresh one                  | regenerate action                     |
-| 5   | Clicks `Copy Link`                          | Copies one-time invite URL to clipboard and logs share channel        | clipboard write + share event insert  |
-| 6   | Clicks `Share via Email`                    | Opens device/app share intent with invite URL and logs share channel  | web share or mailto fallback          |
-| 7   | Clicks `Share via WhatsApp`                 | Opens WhatsApp share URL with invite URL and logs share channel       | external deep link                    |
-| 8   | Invited user scans QR                       | Join flow validates token and marks invite as accepted once completed | invite accept endpoint/RPC            |
-| 9   | Invite reaches expiration                   | UI changes state to expired and disables share controls               | now() > expires_at                    |
-| 10  | Creator clicks `Revoke`                     | Invite state becomes revoked and further acceptance is blocked        | update invite status                  |
-| 11  | Non-allowed role attempts invite creation   | UI shows permission-denied message; no invite row created             | RLS insert deny                       |
-| 12  | Network/create error on auto-generation     | Shows retry state with actionable `Try again` button                  | service error                         |
+| #   | User Action                                 | System Response                                                                                                                         | Triggers                              |
+| --- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| 1   | Opens Invite Management section             | Immediately creates a new active invite draft and renders QR preview                                                                    | section selection in settings overlay |
+| 2   | Commits `/image` command `Create QR Invite` | Opens Invite Management and pre-focuses role picker                                                                                     | search commit action `run-command`    |
+| 3   | Changes target role (Clerk or Worker)       | Regenerates invite token and QR payload for the selected role                                                                           | role dropdown change                  |
+| 4   | Clicks `Regenerate`                         | Revokes current active draft and creates a fresh one                                                                                    | regenerate action                     |
+| 5   | Clicks `Copy Link`                          | Copies one-time invite URL to clipboard and logs share channel                                                                          | clipboard write + share event insert  |
+| 6   | Clicks `Share via Email`                    | Opens device/app share intent with invite URL and logs share channel                                                                    | web share or mailto fallback          |
+| 7   | Clicks `Share via WhatsApp`                 | Opens WhatsApp share URL with invite URL and logs share channel                                                                         | external deep link                    |
+| 8   | Invited user scans QR                       | Opens `/auth/register?invite=<token>` with prefilled invite code; join flow validates token and marks invite as accepted once completed | route query prefill + auth trigger    |
+| 9   | Invite reaches expiration                   | UI changes state to expired and disables share controls                                                                                 | now() > expires_at                    |
+| 10  | Creator clicks `Revoke`                     | Invite state becomes revoked and further acceptance is blocked                                                                          | update invite status                  |
+| 11  | Non-allowed role attempts invite creation   | UI shows permission-denied message; no invite row created                                                                               | RLS insert deny                       |
+| 12  | Network/create error on auto-generation     | Shows retry state with actionable `Try again` button                                                                                    | service error                         |
 
 ```mermaid
 sequenceDiagram
@@ -198,7 +198,7 @@ flowchart LR
 [x] Share actions include copy link, email share, and WhatsApp share.
 [x] Every share action writes an `invite_share_events` row.
 [x] Invite states include `active`, `expired`, `revoked`, `accepted` and are reflected in UI.
-[ ] Revoked or expired invites cannot be accepted.
+[x] Revoked or expired invites cannot be accepted.
 [x] RLS prevents viewers and out-of-org users from creating invites.
 [x] Clerk users can create clerk/worker invites.
 
