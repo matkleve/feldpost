@@ -21,6 +21,7 @@ import {
   ImageUploadedEvent as ManagerImageUploadedEvent,
   MissingDataEvent,
 } from '../../../core/upload-manager.service';
+import { WorkspaceViewService } from '../../../core/workspace-view.service';
 
 // ── Fake UploadManagerService ──────────────────────────────────────────────────
 
@@ -76,10 +77,16 @@ function makeUploadJob(overrides: Partial<UploadJob> = {}): UploadJob {
 
 async function setup() {
   const fakeManager = buildFakeUploadManager();
+  const fakeWorkspaceView = {
+    selectedProjectIds: signal<Set<string>>(new Set()).asReadonly(),
+  };
 
   await TestBed.configureTestingModule({
     imports: [UploadPanelComponent],
-    providers: [{ provide: UploadManagerService, useValue: fakeManager }],
+    providers: [
+      { provide: UploadManagerService, useValue: fakeManager },
+      { provide: WorkspaceViewService, useValue: fakeWorkspaceView },
+    ],
   }).compileComponents();
 
   const fixture = TestBed.createComponent(UploadPanelComponent);
@@ -129,6 +136,8 @@ describe('UploadPanelComponent', () => {
       expect(input.accept).toContain('image/jpeg');
       expect(input.accept).toContain('image/png');
       expect(input.accept).toContain('image/heic');
+      expect(input.accept).toContain('video/mp4');
+      expect(input.accept).toContain('application/pdf');
     });
 
     it('file input has multiple attribute', async () => {
@@ -236,7 +245,7 @@ describe('UploadPanelComponent', () => {
 
       component.onDrop(event);
 
-      expect(fakeManager.submit).toHaveBeenCalledWith([file]);
+      expect(fakeManager.submit).toHaveBeenCalledWith([file], { projectId: undefined });
     });
   });
 
@@ -304,7 +313,7 @@ describe('UploadPanelComponent', () => {
       const lastUpload = fixture.debugElement.query(By.css('.upload-panel__last-upload'));
       expect(lastUpload).not.toBeNull();
       expect(lastUpload.nativeElement.textContent).toContain('Last upload');
-      expect(lastUpload.nativeElement.textContent).toContain('Batch · 4 photos');
+      expect(lastUpload.nativeElement.textContent).toContain('Batch · 4 files');
     });
 
     it('shows idle empty state when no jobs and no completed batch exist', async () => {
@@ -357,7 +366,7 @@ describe('UploadPanelComponent', () => {
 
       component.onCaptureInputChange(event);
 
-      expect(fakeManager.submit).toHaveBeenCalledWith([file]);
+      expect(fakeManager.submit).toHaveBeenCalledWith([file], { projectId: undefined });
       expect(input.value).toBe('');
     });
 
@@ -387,7 +396,7 @@ describe('UploadPanelComponent', () => {
 
       component.onFolderInputChange({ target: input } as unknown as Event);
 
-      expect(fakeManager.submit).toHaveBeenCalledWith(files);
+      expect(fakeManager.submit).toHaveBeenCalledWith(files, { projectId: undefined });
       expect(input.value).toBe('');
     });
 

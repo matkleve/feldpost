@@ -323,6 +323,65 @@ describe('ImageDetailViewComponent', () => {
       component.projectOptions.set([{ id: 'proj-001', label: 'Alpha' }]);
       expect(component.projectName()).toBe('');
     });
+
+    it('projectName prefers explicit primary project label for multi-membership', () => {
+      const { component } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.projectOptions.set([
+        { id: 'proj-001', label: 'Project Alpha' },
+        { id: 'proj-002', label: 'Project Beta' },
+      ]);
+      component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
+      component.primaryProjectId.set('proj-002');
+
+      expect(component.projectName()).toBe('Project Beta +1');
+    });
+  });
+
+  // ── primary project selection ───────────────────────────────────────────
+
+  describe('setPrimaryProject', () => {
+    it('updates primary project for no-gps media and persists legacy project_id', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
+      component.mediaLocationStatus.set('no_gps');
+
+      await component.setPrimaryProject('proj-002');
+
+      expect(component.primaryProjectId()).toBe('proj-002');
+      expect(component.image()!.project_id).toBe('proj-002');
+      expect(fake.updateFn).toHaveBeenCalledWith({ project_id: 'proj-002' });
+    });
+
+    it('does not update primary project for gps media', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
+      component.primaryProjectId.set('proj-001');
+      component.mediaLocationStatus.set('gps');
+      fake.updateFn.mockClear();
+
+      await component.setPrimaryProject('proj-002');
+
+      expect(component.primaryProjectId()).toBe('proj-001');
+      expect(component.image()!.project_id).toBe('proj-001');
+      expect(fake.updateFn).not.toHaveBeenCalled();
+    });
+
+    it('ignores primary selection for non-member projects', async () => {
+      const { component, fake } = setup();
+      component.image.set({ ...MOCK_IMAGE });
+      component.selectedProjectIds.set(new Set(['proj-001']));
+      component.primaryProjectId.set('proj-001');
+      component.mediaLocationStatus.set('no_gps');
+      fake.updateFn.mockClear();
+
+      await component.setPrimaryProject('proj-002');
+
+      expect(component.primaryProjectId()).toBe('proj-001');
+      expect(fake.updateFn).not.toHaveBeenCalled();
+    });
   });
 
   // ── saveImageField (IE-1, IE-2, IE-3, IE-7) ────────────────────────────

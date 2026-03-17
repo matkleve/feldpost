@@ -13,6 +13,7 @@ import {
 import { CapturedDateEditorComponent, DateSaveEvent } from './captured-date-editor.component';
 import { SupabaseService } from '../../../core/supabase.service';
 import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload.service';
+import { ProjectsService } from '../../../core/projects/projects.service';
 import {
   UploadManagerService,
   ImageReplacedEvent,
@@ -40,7 +41,16 @@ import {
 import { AddressSearchComponent } from './address-search/address-search.component';
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
 import { DetailActionsComponent } from './detail-actions/detail-actions.component';
+import { ClickOutsideDirective } from '../../../shared/click-outside.directive';
 export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
+
+interface MediaContextRow {
+  id: string;
+  primary_project_id: string | null;
+  media_type: string | null;
+  mime_type: string | null;
+  location_status: string | null;
+}
 
 @Component({
   selector: 'app-image-detail-view',
@@ -53,6 +63,7 @@ export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
     AddressSearchComponent,
     MetadataSectionComponent,
     DetailActionsComponent,
+    ClickOutsideDirective,
   ],
   templateUrl: './image-detail-view.component.html',
   styleUrl: './image-detail-view.component.scss',
@@ -70,6 +81,7 @@ export class ImageDetailViewComponent implements OnDestroy {
   private readonly workspaceView = inject(WorkspaceViewService);
   private readonly photoLoad = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
+  private readonly projectsService = inject(ProjectsService);
 
   readonly imageId = input<string | null>(null);
   readonly closed = output<void>();
@@ -84,6 +96,11 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly saving = signal(false);
   readonly projectOptions = signal<SelectOption[]>([]);
   readonly selectedProjectIds = signal<Set<string>>(new Set());
+  readonly primaryProjectId = signal<string | null>(null);
+  readonly mediaItemId = signal<string | null>(null);
+  readonly mediaType = signal<string | null>(null);
+  readonly mediaMimeType = signal<string | null>(null);
+  readonly mediaLocationStatus = signal<string | null>(null);
   readonly projectSearch = signal('');
   readonly editingField = signal<string | null>(null);
   readonly fullResUrl = signal<string | null>(null);
@@ -178,9 +195,21 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   readonly projectName = computed(() => {
     const selected = this.selectedProjectLabels();
-    if (selected.length === 0) return '';
-    if (selected.length === 1) return selected[0];
-    return `${selected[0]} +${selected.length - 1}`;
+    const selectedIds = this.selectedProjectIds();
+    if (selected.length === 0) {
+      const img = this.image();
+      if (!img?.project_id) return '';
+      return this.projectOptions().find((option) => option.id === img.project_id)?.label ?? '';
+    }
+
+    const primaryId = this.primaryProjectId();
+    const primaryLabel =
+      primaryId && selectedIds.has(primaryId)
+        ? (this.projectOptions().find((option) => option.id === primaryId)?.label ?? selected[0])
+        : selected[0];
+
+    if (selected.length === 1) return primaryLabel;
+    return `${primaryLabel} +${selected.length - 1}`;
   });
 
   readonly selectedProjectLabels = computed(() => {
@@ -201,11 +230,50 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly projectCanCreate = computed(() => {
     const term = this.projectSearch().trim();
     if (!term) return false;
+    if (!this.canAssignMultipleProjects() && this.selectedProjectIds().size > 0) return false;
     const exists = this.projectOptions().some(
       (option) => option.label.toLowerCase() === term.toLowerCase(),
     );
     return !exists;
   });
+
+  readonly isGpsAssignmentLocked = computed(() => {
+    if (this.mediaType() === 'document') {
+      return true;
+    }
+
+    const mime = this.mediaMimeType();
+    if (!mime) {
+      return false;
+    }
+
+    return (
+      mime === 'application/pdf' ||
+      mime === 'image/tiff' ||
+      mime === 'application/msword' ||
+      mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
+  });
+
+  readonly canAssignMultipleProjects = computed(() => {
+    const locationStatus = this.mediaLocationStatus();
+    if (locationStatus === 'no_gps' || locationStatus === 'unresolved') {
+      return false;
+    }
+
+    const img = this.image();
+    if (!img) {
+      return true;
+    }
+
+    if (img.location_unresolved) {
+      return false;
+    }
+
+    return img.latitude != null && img.longitude != null;
+  });
+
+  readonly primarySelectorVisible = computed(() => !this.canAssignMultipleProjects());
 
   readonly fullAddress = computed(() => {
     const img = this.image();
@@ -307,6 +375,11 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.image.set(null);
     this.metadata.set([]);
     this.selectedProjectIds.set(new Set());
+    this.primaryProjectId.set(null);
+    this.mediaItemId.set(null);
+    this.mediaType.set(null);
+    this.mediaMimeType.set(null);
+    this.mediaLocationStatus.set(null);
     this.projectSearch.set('');
     this.fullResPreloaded.set(false);
     this.fullResUrl.set(null);
@@ -378,25 +451,69 @@ export class ImageDetailViewComponent implements OnDestroy {
     imageId: string,
     fallbackProjectId: string | null,
   ): Promise<void> {
-    const { data, error } = await this.supabaseService.client
-      .from('image_projects')
-      .select('project_id')
-      .eq('image_id', imageId);
+    const mediaContext = await this.loadMediaContext(imageId);
+    const memberships = new Set<string>();
+    let resolvedPrimaryProjectId: string | null = mediaContext?.primary_project_id ?? null;
 
-    if (error || !Array.isArray(data)) {
-      const fallback = new Set<string>();
-      if (fallbackProjectId) fallback.add(fallbackProjectId);
-      this.selectedProjectIds.set(fallback);
-      return;
+    if (mediaContext?.id) {
+      const mediaMemberships = await this.projectsService.loadMediaProjectMemberships(
+        mediaContext.id,
+      );
+      for (const projectId of mediaMemberships) {
+        memberships.add(projectId);
+      }
+      if (mediaContext.primary_project_id) {
+        memberships.add(mediaContext.primary_project_id);
+      }
+    } else {
+      const { data, error } = await this.supabaseService.client
+        .from('image_projects')
+        .select('project_id')
+        .eq('image_id', imageId);
+
+      if (!error && Array.isArray(data)) {
+        for (const row of data as Array<{ project_id: string }>) {
+          memberships.add(row.project_id);
+        }
+      }
     }
 
-    const memberships = new Set<string>(
-      (data as Array<{ project_id: string }>).map((row) => row.project_id),
-    );
     if (memberships.size === 0 && fallbackProjectId) {
       memberships.add(fallbackProjectId);
     }
+
+    if (!resolvedPrimaryProjectId && fallbackProjectId && memberships.has(fallbackProjectId)) {
+      resolvedPrimaryProjectId = fallbackProjectId;
+    }
+
+    if (!resolvedPrimaryProjectId && memberships.size > 0) {
+      resolvedPrimaryProjectId = [...memberships][0] ?? null;
+    }
+
     this.selectedProjectIds.set(memberships);
+    this.primaryProjectId.set(resolvedPrimaryProjectId);
+  }
+
+  private async loadMediaContext(imageId: string): Promise<MediaContextRow | null> {
+    const response = await this.supabaseService.client
+      .from('media_items')
+      .select('id,primary_project_id,media_type,mime_type,location_status')
+      .eq('source_image_id', imageId);
+
+    if (response.error || !Array.isArray(response.data) || response.data.length === 0) {
+      this.mediaItemId.set(null);
+      this.mediaType.set(null);
+      this.mediaMimeType.set(null);
+      this.mediaLocationStatus.set(null);
+      return null;
+    }
+
+    const row = response.data[0] as MediaContextRow;
+    this.mediaItemId.set(row.id);
+    this.mediaType.set(row.media_type ?? null);
+    this.mediaMimeType.set(row.mime_type ?? null);
+    this.mediaLocationStatus.set(row.location_status ?? null);
+    return row;
   }
 
   private async persistProjectMemberships(previous: Set<string>): Promise<void> {
@@ -409,58 +526,206 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     const toInsert = nextIds.filter((id) => !previous.has(id));
     const toDelete = prevIds.filter((id) => !next.has(id));
+    const requestedPrimaryProjectId = this.primaryProjectId();
+    const primaryProjectId =
+      requestedPrimaryProjectId && next.has(requestedPrimaryProjectId)
+        ? requestedPrimaryProjectId
+        : (nextIds[0] ?? null);
 
-    if (toInsert.length > 0) {
-      const insertPayload = toInsert.map((projectId) => ({
-        image_id: img.id,
-        project_id: projectId,
-      }));
-      const { error } = await this.supabaseService.client
-        .from('image_projects')
-        .upsert(insertPayload, { onConflict: 'image_id,project_id' });
-      if (error) {
-        this.selectedProjectIds.set(previous);
-        return;
-      }
-    }
-
-    if (toDelete.length > 0) {
-      const { error } = await this.supabaseService.client
-        .from('image_projects')
-        .delete()
-        .eq('image_id', img.id)
-        .in('project_id', toDelete);
-      if (error) {
-        this.selectedProjectIds.set(previous);
-        return;
-      }
-    }
-
-    const primaryProjectId = nextIds[0] ?? null;
-    const { error: syncError } = await this.supabaseService.client
-      .from('images')
-      .update({ project_id: primaryProjectId })
-      .eq('id', img.id);
-
-    if (syncError) {
+    if (nextIds.length === 0) {
       this.selectedProjectIds.set(previous);
+      this.toastService.show({
+        message: 'At least one project is required.',
+        type: 'warning',
+        dedupe: true,
+      });
       return;
     }
 
+    if (!this.canAssignMultipleProjects() && nextIds.length > 1) {
+      this.selectedProjectIds.set(previous);
+      this.toastService.show({
+        message: 'No-GPS media can only belong to one project.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    const mediaItemId = this.mediaItemId();
+    if (!mediaItemId) {
+      if (toInsert.length > 0) {
+        const insertPayload = toInsert.map((projectId) => ({
+          image_id: img.id,
+          project_id: projectId,
+        }));
+        const { error } = await this.supabaseService.client
+          .from('image_projects')
+          .upsert(insertPayload, { onConflict: 'image_id,project_id' });
+        if (error) {
+          this.selectedProjectIds.set(previous);
+          return;
+        }
+      }
+
+      if (toDelete.length > 0) {
+        const { error } = await this.supabaseService.client
+          .from('image_projects')
+          .delete()
+          .eq('image_id', img.id)
+          .in('project_id', toDelete);
+        if (error) {
+          this.selectedProjectIds.set(previous);
+          return;
+        }
+      }
+
+      const { error: syncError } = await this.supabaseService.client
+        .from('images')
+        .update({ project_id: primaryProjectId })
+        .eq('id', img.id);
+
+      if (syncError) {
+        this.selectedProjectIds.set(previous);
+        return;
+      }
+
+      this.primaryProjectId.set(primaryProjectId);
+      this.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
+      return;
+    }
+
+    for (const projectId of toInsert) {
+      const ok = await this.projectsService.addMediaToProject(mediaItemId, projectId);
+      if (!ok) {
+        this.selectedProjectIds.set(previous);
+        this.toastService.show({
+          message: 'Could not update project memberships.',
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
+    }
+
+    for (const projectId of toDelete) {
+      const ok = await this.projectsService.removeMediaFromProject(mediaItemId, projectId);
+      if (!ok) {
+        this.selectedProjectIds.set(previous);
+        this.toastService.show({
+          message: 'Could not update project memberships.',
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
+    }
+
+    if (primaryProjectId) {
+      const ok = await this.projectsService.setMediaPrimaryProject(mediaItemId, primaryProjectId);
+      if (!ok) {
+        this.selectedProjectIds.set(previous);
+        this.toastService.show({
+          message: 'Could not set primary project.',
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
+    }
+
+    this.primaryProjectId.set(primaryProjectId);
     this.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
   }
 
   async toggleProjectMembership(projectId: string): Promise<void> {
     const previous = new Set(this.selectedProjectIds());
     const next = new Set(previous);
+    const removing = next.has(projectId);
+
+    if (removing && previous.size === 1) {
+      this.toastService.show({
+        message: 'At least one project is required.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    if (!removing && !this.canAssignMultipleProjects() && previous.size > 0) {
+      this.toastService.show({
+        message: 'No-GPS media can only belong to one project.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
     if (next.has(projectId)) {
       next.delete(projectId);
     } else {
       next.add(projectId);
     }
 
+    const currentPrimaryProjectId = this.primaryProjectId();
+    if (!currentPrimaryProjectId || !next.has(currentPrimaryProjectId)) {
+      this.primaryProjectId.set([...next][0] ?? null);
+    }
+
     this.selectedProjectIds.set(next);
     await this.persistProjectMemberships(previous);
+  }
+
+  isPrimaryProject(projectId: string): boolean {
+    return this.primaryProjectId() === projectId;
+  }
+
+  async setPrimaryProject(projectId: string): Promise<void> {
+    if (!this.primarySelectorVisible()) {
+      return;
+    }
+
+    if (!this.selectedProjectIds().has(projectId)) {
+      return;
+    }
+
+    if (this.primaryProjectId() === projectId) {
+      return;
+    }
+
+    const previousPrimary = this.primaryProjectId();
+    this.primaryProjectId.set(projectId);
+
+    const mediaItemId = this.mediaItemId();
+    if (mediaItemId) {
+      const ok = await this.projectsService.setMediaPrimaryProject(mediaItemId, projectId);
+      if (!ok) {
+        this.primaryProjectId.set(previousPrimary);
+        this.toastService.show({
+          message: 'Could not set primary project.',
+          type: 'error',
+          dedupe: true,
+        });
+        return;
+      }
+    } else {
+      const img = this.image();
+      if (!img) {
+        return;
+      }
+
+      const { error } = await this.supabaseService.client
+        .from('images')
+        .update({ project_id: projectId })
+        .eq('id', img.id);
+
+      if (error) {
+        this.primaryProjectId.set(previousPrimary);
+        return;
+      }
+    }
+
+    this.image.update((prev) => (prev ? { ...prev, project_id: projectId } : prev));
   }
 
   setProjectSearch(value: string): void {
@@ -473,6 +738,15 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     const img = this.image();
     if (!img?.organization_id) return;
+
+    if (!this.canAssignMultipleProjects() && this.selectedProjectIds().size > 0) {
+      this.toastService.show({
+        message: 'No-GPS media can only belong to one project.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
 
     const existing = this.projectOptions().find(
       (option) => option.label.toLowerCase() === name.toLowerCase(),

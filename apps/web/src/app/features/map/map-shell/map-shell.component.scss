@@ -12,9 +12,9 @@
   background: var(--color-bg-base);
 }
 
-// ── Basemap switch button — top-left of map zone ────────────────────────────
+// ── Map style switch (street/photo/historic) — top-left of map zone ─────────
 
-.map-basemap-switch {
+.map-style-switch {
   --touch-target-base: 2.75rem; // ~44px desktop
   --touch-target-mobile: 3rem; // ~48px mobile
 
@@ -22,136 +22,53 @@
   top: var(--spacing-3);
   left: var(--spacing-3);
   z-index: var(--z-upload-button);
-  min-height: var(--touch-target-base);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
-  color: var(--color-text-primary);
   box-shadow: var(--elevation-overlay);
   display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: 0.375rem var(--spacing-2);
-  cursor: pointer;
-  transition:
-    background 120ms ease-out,
-    color 120ms ease-out,
-    border-color 120ms ease-out;
+  padding: 0.2rem;
+  gap: 0.15rem;
 
-  &:hover {
-    background: var(--color-bg-elevated);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  &__track {
-    width: 2.1rem;
-    height: 1.25rem;
+  &__option {
+    min-height: var(--touch-target-base);
+    border: none;
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--color-text-secondary) 30%, transparent);
-    border: 1px solid var(--color-border-strong);
-    display: inline-flex;
-    align-items: center;
-    padding-inline: 0.125rem;
-    transition: background 120ms ease-out;
-  }
-
-  &__thumb {
-    width: 0.875rem;
-    height: 0.875rem;
-    border-radius: var(--radius-full);
-    background: var(--color-bg-surface);
-    box-shadow: var(--elevation-subtle);
-    transform: translateX(0);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.74rem;
+    font-weight: 650;
+    letter-spacing: 0.012em;
+    padding: 0.375rem 0.7rem;
+    cursor: pointer;
     transition:
-      transform 120ms ease-out,
-      background 120ms ease-out;
-  }
+      background 120ms ease-out,
+      color 120ms ease-out,
+      transform 120ms ease-out;
 
-  &__label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: 0.01em;
-    min-width: 2.4rem;
-    text-align: left;
-  }
-
-  &--satellite {
-    border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
-    color: var(--color-clay);
-
-    .map-basemap-switch__track {
-      background: color-mix(in srgb, var(--color-clay) 35%, transparent);
+    &:hover {
+      background: color-mix(in srgb, var(--color-bg-elevated) 70%, transparent);
+      color: var(--color-text-primary);
     }
 
-    .map-basemap-switch__thumb {
-      transform: translateX(0.8rem);
-      background: var(--color-clay);
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 1px;
+    }
+
+    &--active {
+      background: color-mix(in srgb, var(--color-clay) 16%, var(--color-bg-surface));
+      color: var(--color-clay);
+      box-shadow: var(--elevation-subtle);
+      transform: translateY(-1px);
     }
   }
 
   @media (max-width: 767px) {
-    min-height: var(--touch-target-mobile);
-  }
-}
-
-.map-material-toggle {
-  --touch-target-base: 2.75rem; // ~44px desktop
-  --touch-target-mobile: 3rem; // ~48px mobile
-
-  position: absolute;
-  top: calc(var(--spacing-3) + 3.125rem);
-  left: var(--spacing-3);
-  z-index: var(--z-upload-button);
-  min-height: var(--touch-target-base);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
-  color: var(--color-text-primary);
-  box-shadow: var(--elevation-overlay);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: 0.375rem var(--spacing-2);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition:
-    background 120ms ease-out,
-    color 120ms ease-out,
-    border-color 120ms ease-out,
-    opacity 120ms ease-out;
-
-  .material-icons {
-    font-size: 0.95rem;
-  }
-
-  &:hover:not(:disabled) {
-    background: var(--color-bg-elevated);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
-
-  &--active {
-    border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
-    color: var(--color-clay);
-    background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
-  }
-
-  &--disabled {
-    opacity: 0.55;
-  }
-
-  @media (max-width: 767px) {
-    min-height: var(--touch-target-mobile);
+    &__option {
+      min-height: var(--touch-target-mobile);
+      padding-inline: 0.6rem;
+    }
   }
 }
 
@@ -274,6 +191,8 @@
   width: 100%;
   height: 100%;
   z-index: var(--z-map);
+  position: relative;
+  isolation: isolate;
 
   &--placing {
     cursor: crosshair !important;
@@ -284,13 +203,80 @@
   }
 }
 
-// Applies only to raster tiles so markers and overlays stay crisp.
-:host ::ng-deep .map-container--analog-material .leaflet-tile-pane {
-  filter: sepia(0.78) saturate(0.5) hue-rotate(-14deg) contrast(0.9) brightness(1.04);
+// Applies only to historic base tiles; labels are handled in a separate pane.
+:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane {
+  filter: sepia(0.78) saturate(0.82) hue-rotate(-26deg) contrast(1.2) brightness(0.9)
+    grayscale(0.04);
+  position: relative;
+  background: color-mix(
+    in srgb,
+    var(--color-clay) 10%,
+    color-mix(in srgb, var(--color-text-secondary) 8%, var(--color-bg-base))
+  );
 }
 
-:host ::ng-deep .map-container--analog-material .leaflet-tile {
-  opacity: 0.92;
+:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane .leaflet-tile {
+  opacity: 0.97;
+  mix-blend-mode: normal;
+}
+
+// Parchment grain and edge aging, constrained to tile pane.
+:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane::before {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  pointer-events: none;
+  z-index: 430;
+  background:
+    radial-gradient(
+      150% 95% at 18% 8%,
+      color-mix(in srgb, var(--color-clay) 22%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      120% 80% at 85% 92%,
+      color-mix(in srgb, var(--color-text-secondary) 22%, transparent) 0%,
+      transparent 68%
+    ),
+    repeating-linear-gradient(
+      31deg,
+      color-mix(in srgb, var(--color-text-primary) 6%, transparent) 0 2px,
+      transparent 2px 5px
+    );
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+}
+
+:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 431;
+  background:
+    radial-gradient(
+      circle at center,
+      transparent 64%,
+      color-mix(in srgb, var(--color-text-primary) 34%, transparent) 100%
+    ),
+    linear-gradient(
+      8deg,
+      color-mix(in srgb, var(--color-clay) 16%, transparent) 0%,
+      transparent 38%,
+      color-mix(in srgb, var(--color-text-secondary) 18%, transparent) 100%
+    );
+  opacity: 0.28;
+  mix-blend-mode: multiply;
+}
+
+:host ::ng-deep .map-container--analog-material .leaflet-historic-label-pane {
+  filter: sepia(0.42) saturate(0.8) hue-rotate(-20deg) contrast(1.34) brightness(0.84);
+  opacity: 0.96;
+}
+
+:host ::ng-deep .map-container--analog-material .leaflet-historic-label-pane .leaflet-tile {
+  opacity: 0.98;
+  mix-blend-mode: multiply;
 }
 
 :host ::ng-deep .map-user-location-marker {

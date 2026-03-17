@@ -16,6 +16,10 @@ export class FolderScanService {
     'image/heic',
     'image/heif',
     'image/tiff',
+    'video/mp4',
+    'video/quicktime',
+    'video/webm',
+    'application/pdf',
   ]);
 
   private static readonly SUPPORTED_EXTENSIONS = new Set([
@@ -27,6 +31,10 @@ export class FolderScanService {
     '.heif',
     '.tiff',
     '.tif',
+    '.mp4',
+    '.mov',
+    '.webm',
+    '.pdf',
   ]);
 
   /** Whether the File System Access API is available (Chromium only). */

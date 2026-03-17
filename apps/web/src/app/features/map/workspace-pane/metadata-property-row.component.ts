@@ -111,10 +111,11 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
         border-radius: var(--radius-sm);
         background: transparent;
         color: var(--color-text-secondary);
-        opacity: 1;
-        pointer-events: auto;
+        opacity: 0;
+        pointer-events: none;
         cursor: pointer;
         transition:
+          opacity 120ms ease-out,
           color 120ms ease-out,
           background 120ms ease-out;
       }
@@ -132,7 +133,10 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
       }
 
       .meta-row:hover .detail-row-action,
-      .meta-row:focus-within .detail-row-action {
+      .meta-row:focus-within .detail-row-action,
+      .meta-row--editing .detail-row-action {
+        opacity: 1;
+        pointer-events: auto;
         color: var(--color-clay);
       }
 
@@ -144,6 +148,13 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
       .detail-row-action--danger:hover {
         color: var(--color-danger);
         background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+      }
+
+      @media (hover: none) {
+        .detail-row-action {
+          opacity: 1;
+          pointer-events: auto;
+        }
       }
 
       .meta-row__input {

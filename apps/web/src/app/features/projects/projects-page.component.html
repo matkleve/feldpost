@@ -406,15 +406,35 @@
       <app-workspace-pane
         [title]="workspacePaneTitle()"
         [titleEditable]="workspaceTitleEditable()"
+        [titleEditEnabled]="!!selectedProjectId()"
         [titleEditValue]="workspaceTitleEditValue()"
+        [projectColorToken]="selectedProjectColorToken()"
+        [colorPickerEnabled]="!!selectedProjectColorKey()"
+        [colorPickerOpen]="coloringProjectId() === selectedProjectId()"
         [detailImageId]="detailImageId()"
         (titleEditValueChange)="onWorkspaceTitleChanged($event)"
         (titleSubmitRequested)="onWorkspaceTitleSubmit($event)"
+        (titleEditRequested)="startWorkspaceTitleEdit()"
+        (colorPickerRequested)="toggleWorkspaceColorPicker()"
         (closed)="closeWorkspacePane()"
         (detailClosed)="onDetailClosed()"
         (detailRequested)="onDetailRequested($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
       />
+
+      @if (selectedProjectColorKey() && coloringProjectId() === selectedProjectId()) {
+        <div
+          class="projects-workspace__picker"
+          appClickOutside
+          (clickOutside)="onOutsideInteraction()"
+          (click)="$event.stopPropagation()"
+        >
+          <app-project-color-picker
+            [selectedColor]="selectedProjectColorKey()!"
+            (colorSelected)="onWorkspaceColorSelected($event)"
+          />
+        </div>
+      }
     </section>
   }
 

@@ -15,56 +15,43 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-  <button
-    class="map-basemap-switch"
-    [class.map-basemap-switch--satellite]="mapBasemap() === 'satellite'"
-    type="button"
-    role="switch"
-    [attr.aria-checked]="mapBasemap() === 'satellite'"
-    [attr.aria-label]="
-      mapBasemap() === 'satellite'
-        ? 'Photo map enabled. Switch to street map'
-        : 'Street map enabled. Switch to photo map'
-    "
-    [title]="
-      mapBasemap() === 'satellite'
-        ? 'Photo map enabled. Switch to street map'
-        : 'Street map enabled. Switch to photo map'
-    "
-    (click)="toggleMapBasemap()"
-  >
-    <span class="map-basemap-switch__track" aria-hidden="true">
-      <span class="map-basemap-switch__thumb"></span>
-    </span>
-    <span class="map-basemap-switch__label" aria-hidden="true">
-      {{ mapBasemap() === 'satellite' ? 'Photo' : 'Map' }}
-    </span>
-  </button>
+  <div class="map-style-switch" role="group" aria-label="Map style">
+    <button
+      class="map-style-switch__option"
+      type="button"
+      [class.map-style-switch__option--active]="mapViewMode() === 'street'"
+      [attr.aria-pressed]="mapViewMode() === 'street'"
+      aria-label="Street map"
+      title="Street map"
+      (click)="setMapViewMode('street')"
+    >
+      Street
+    </button>
 
-  <button
-    class="map-material-toggle"
-    type="button"
-    [attr.aria-pressed]="analogMaterialActive()"
-    [attr.aria-label]="
-      analogMaterialActive()
-        ? 'Analog map material enabled. Switch to standard map material'
-        : 'Enable analog map material'
-    "
-    [title]="
-      mapMaterialOptionEnabled()
-        ? analogMaterialActive()
-          ? 'Analog map material enabled. Switch to standard map material'
-          : 'Enable analog map material'
-        : 'Analog map material is only available in street map mode'
-    "
-    [disabled]="!mapMaterialOptionEnabled()"
-    [class.map-material-toggle--active]="analogMaterialActive()"
-    [class.map-material-toggle--disabled]="!mapMaterialOptionEnabled()"
-    (click)="toggleMapMaterial()"
-  >
-    <span class="material-icons" aria-hidden="true">history_edu</span>
-    <span>Analog</span>
-  </button>
+    <button
+      class="map-style-switch__option"
+      type="button"
+      [class.map-style-switch__option--active]="mapViewMode() === 'photo'"
+      [attr.aria-pressed]="mapViewMode() === 'photo'"
+      aria-label="Photo map"
+      title="Photo map"
+      (click)="setMapViewMode('photo')"
+    >
+      Photo
+    </button>
+
+    <button
+      class="map-style-switch__option"
+      type="button"
+      [class.map-style-switch__option--active]="mapViewMode() === 'historic'"
+      [attr.aria-pressed]="mapViewMode() === 'historic'"
+      aria-label="Historic map"
+      title="Historic map"
+      (click)="setMapViewMode('historic')"
+    >
+      Historic
+    </button>
+  </div>
 
   <!-- Upload button — top-right of map zone, visually over map -->
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">

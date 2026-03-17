@@ -14,21 +14,92 @@
   background: transparent;
 }
 
+.pane-header__leading {
+  position: absolute;
+  inset-inline-start: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+}
+
+.pane-header__color-btn {
+  position: relative;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-border-strong) 70%, var(--color-border));
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-bg-surface) 94%, var(--color-bg-base));
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.pane-header__color-btn:hover,
+.pane-header__color-btn:focus-visible,
+.pane-header__color-btn[aria-expanded='true'] {
+  border-color: var(--color-clay);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 18%, transparent);
+}
+
+.pane-header__color-swatch {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 999px;
+}
+
+.pane-header__color-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #fff;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.pane-header__title-btn {
+  max-width: calc(100% - 6rem);
+  min-height: 2rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pane-header__title-btn:hover .pane-header__title,
+.pane-header__title-btn:focus-visible .pane-header__title {
+  color: var(--color-clay);
+}
+
 .pane-header__title {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 1.0625rem;
+  line-height: 1.2;
   color: var(--color-text-primary);
   text-align: center;
-  max-width: calc(100% - 3rem);
+  max-width: calc(100% - 6rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pane-header__title-input {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   color: var(--color-text-primary);
   text-align: center;
-  width: min(24rem, calc(100% - 3rem));
-  min-height: 2rem;
+  width: min(30rem, calc(100% - 6rem));
+  min-height: 2.25rem;
   padding: 0.25rem 0.75rem;
   border: 1px solid color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
   border-radius: var(--radius-sm);

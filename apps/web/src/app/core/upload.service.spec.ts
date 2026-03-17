@@ -75,6 +75,10 @@ function buildFakeSupabase(
     }),
   };
 
+  const mediaItemsInsertChain = {
+    insert: vi.fn().mockResolvedValue({ error: null }),
+  };
+
   const storageFromChain = {
     upload: vi.fn().mockResolvedValue(storageUploadResult),
     createSignedUrl: vi.fn().mockResolvedValue(signedUrlResult),
@@ -83,11 +87,13 @@ function buildFakeSupabase(
   return {
     _profileChain: profileChain,
     _imagesInsertChain: imagesInsertChain,
+    _mediaItemsInsertChain: mediaItemsInsertChain,
     _storageFromChain: storageFromChain,
     client: {
       from: vi.fn().mockImplementation((table: string) => {
         if (table === 'profiles') return profileChain;
         if (table === 'images') return imagesInsertChain;
+        if (table === 'media_items') return mediaItemsInsertChain;
         return {};
       }),
       rpc: vi.fn().mockResolvedValue({ data: 1, error: null }),
@@ -212,12 +218,34 @@ describe('UploadService', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('ALLOWED_MIME_TYPES covers jpeg, png, heic, heif, webp', () => {
+    it('accepts MP4 files', () => {
+      const { service } = setup();
+      const file = makeFile('clip.mp4', 'video/mp4', 4096);
+
+      const result = service.validateFile(file);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('accepts PDF files', () => {
+      const { service } = setup();
+      const file = makeFile('report.pdf', 'application/pdf', 4096);
+
+      const result = service.validateFile(file);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('ALLOWED_MIME_TYPES covers image, video, and document types', () => {
       expect(ALLOWED_MIME_TYPES.has('image/jpeg')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('image/png')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('image/heic')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('image/heif')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('image/webp')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('video/mp4')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('video/quicktime')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('video/webm')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('application/pdf')).toBe(true);
     });
   });
 
@@ -549,23 +577,23 @@ describe('UploadService', () => {
       expect(fakeGeocoding.reverse).toHaveBeenCalledWith(47.3769, 8.5417);
     });
 
-it('updates the DB row with resolved address fields via RPC', async () => {
-            const { service, fakeSupabase, fakeGeocoding } = setup();
+    it('updates the DB row with resolved address fields via RPC', async () => {
+      const { service, fakeSupabase, fakeGeocoding } = setup();
 
-            await service.uploadFile(makeFile());
-            await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
+      await service.uploadFile(makeFile());
+      await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
-            const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
-                (c: string[]) => c[0] === 'bulk_update_image_addresses',
-            )!;
-            expect(rpcCall).toBeDefined();
-            expect(rpcCall[1]).toMatchObject({
-                p_image_ids: ['img-uuid'],
-                p_address_label: 'Burgstraße 7, 8001 Zürich, Switzerland',
-                p_city: 'Zürich',
-                p_district: 'Altstadt',
-                p_street: 'Burgstraße 7',
-                p_country: 'Switzerland',
+      const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
+        (c: string[]) => c[0] === 'bulk_update_image_addresses',
+      )!;
+      expect(rpcCall).toBeDefined();
+      expect(rpcCall[1]).toMatchObject({
+        p_image_ids: ['img-uuid'],
+        p_address_label: 'Burgstraße 7, 8001 Zürich, Switzerland',
+        p_city: 'Zürich',
+        p_district: 'Altstadt',
+        p_street: 'Burgstraße 7',
+        p_country: 'Switzerland',
       });
     });
 
@@ -622,6 +650,27 @@ it('updates the DB row with resolved address fields via RPC', async () => {
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
       expect(fakeGeocoding.reverse).toHaveBeenCalledWith(48.8566, 2.3522);
+    });
+
+    it('stores project_id in legacy images row when upload has project context', async () => {
+      const { service, fakeSupabase } = setup();
+
+      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+
+      const insertCall = fakeSupabase._imagesInsertChain.insert.mock.calls[0][0];
+      expect(insertCall.project_id).toBe('proj-001');
+    });
+
+    it('creates media_items shadow row when upload has project context', async () => {
+      const { service, fakeSupabase } = setup();
+
+      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+
+      const mediaInsertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
+      expect(mediaInsertCall.primary_project_id).toBe('proj-001');
+      expect(mediaInsertCall.media_type).toBe('photo');
+      expect(mediaInsertCall.location_status).toBe('gps');
+      expect(mediaInsertCall.source_image_id).toBe('img-uuid');
     });
   });
 });
