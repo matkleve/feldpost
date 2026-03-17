@@ -114,7 +114,7 @@ stateDiagram-v2
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`                        | Overlay styling, dividers, and two-column layout                  |
 | `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`                           | Registry token and section registration contract                  |
 | `apps/web/src/app/features/settings-overlay/settings-section-outlet.component.ts`                   | Dynamic section host component                                    |
-| `apps/web/src/app/features/settings-overlay/sections/account-settings-section.component.ts`         | Account/session section implementation with logout flow           |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                          | Overlay shell including account/session section logout flow       |
 | `apps/web/src/app/features/settings-overlay/sections/theme-settings-section.component.ts`           | Theme section implementation                                      |
 | `apps/web/src/app/features/settings-overlay/sections/language-locale-settings-section.component.ts` | Language/locale section implementation                            |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.spec.ts`                     | Overlay behavior tests (open/load/error/retry/dismiss/reposition) |

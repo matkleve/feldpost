@@ -480,6 +480,55 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     de: 'Einstellungen schließen',
   },
   {
+    key: 'settings.overlay.account.logout.action',
+    original: 'Logout',
+    context: 'Primary action button label to open account logout confirmation.',
+    en: 'Logout',
+    de: 'Abmelden',
+  },
+  {
+    key: 'settings.overlay.account.logout.confirmTitle',
+    original: 'Logout now?',
+    context: 'Heading text in account logout confirmation dialog.',
+    en: 'Logout now?',
+    de: 'Jetzt abmelden?',
+  },
+  {
+    key: 'settings.overlay.account.logout.confirmDescription',
+    original: 'This ends your current Feldpost session on this device.',
+    context: 'Description text in account logout confirmation dialog.',
+    en: 'This ends your current Feldpost session on this device.',
+    de: 'Dadurch wird deine aktuelle Feldpost-Sitzung auf diesem Gerät beendet.',
+  },
+  {
+    key: 'settings.overlay.account.logout.cancel',
+    original: 'Cancel',
+    context: 'Secondary button label to cancel account logout confirmation.',
+    en: 'Cancel',
+    de: 'Abbrechen',
+  },
+  {
+    key: 'settings.overlay.account.logout.pending',
+    original: 'Logging out...',
+    context: 'Pending button label while account logout is in progress.',
+    en: 'Logging out...',
+    de: 'Abmeldung läuft...',
+  },
+  {
+    key: 'settings.overlay.account.logout.confirm',
+    original: 'Confirm logout',
+    context: 'Primary confirmation button label for account logout.',
+    en: 'Confirm logout',
+    de: 'Abmeldung bestätigen',
+  },
+  {
+    key: 'settings.overlay.account.logout.error',
+    original: 'Logout failed. Please try again.',
+    context: 'Error message shown when account logout fails.',
+    en: 'Logout failed. Please try again.',
+    de: 'Abmeldung fehlgeschlagen. Bitte versuche es erneut.',
+  },
+  {
     key: 'settings.overlay.account.unknownUser',
     original: 'Unknown user',
     context: 'Fallback account name when no profile name/email is available.',
@@ -545,6 +594,3 @@ export const TRANSLATION_BY_ORIGINAL: Readonly<Record<string, TranslationEntry>>
     return acc;
   }, {}),
 );
-
-
-

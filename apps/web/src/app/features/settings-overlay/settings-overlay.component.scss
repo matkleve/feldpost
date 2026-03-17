@@ -365,6 +365,60 @@
   background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
 }
 
+.settings-overlay__logout-button {
+  min-height: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
+  border-radius: var(--container-radius-control);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-bg-surface));
+  color: var(--color-danger);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-overlay__logout-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 14%, var(--color-bg-surface));
+}
+
+.settings-overlay__logout-button:disabled,
+.settings-overlay__ghost-button:disabled {
+  opacity: 0.66;
+  cursor: not-allowed;
+}
+
+.settings-overlay__logout-button--confirm {
+  min-width: 9.75rem;
+}
+
+.settings-overlay__logout-confirm {
+  display: grid;
+  gap: var(--spacing-2);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+  border-radius: var(--container-radius-control);
+  padding: var(--spacing-3);
+  background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-elevated));
+}
+
+.settings-overlay__logout-confirm strong {
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+}
+
+.settings-overlay__logout-confirm p {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.settings-overlay__logout-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.settings-overlay__logout-error {
+  color: var(--color-danger);
+  font-size: 0.8125rem;
+}
+
 @media (max-width: 63.9375rem) {
   .settings-overlay {
     width: min(46rem, calc(100vw - (var(--container-inset) * 2)));

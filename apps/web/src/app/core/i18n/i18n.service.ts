@@ -57,6 +57,13 @@ const HEURISTIC_DE_PHRASE_MAP: Record<string, string> = {
   'Search Tuning': 'Such-Optimierung',
   'Data and Privacy': 'Daten und Datenschutz',
   'Invite Management': 'Einladungsverwaltung',
+  Logout: 'Abmelden',
+  'Logout now?': 'Jetzt abmelden?',
+  'Confirm logout': 'Abmeldung bestätigen',
+  'Logging out...': 'Abmeldung läuft...',
+  'Logout failed. Please try again.': 'Abmeldung fehlgeschlagen. Bitte versuche es erneut.',
+  'This ends your current Feldpost session on this device.':
+    'Dadurch wird deine aktuelle Feldpost-Sitzung auf diesem Gerät beendet.',
   '. Click it to activate your account.': '. Klicke darauf, um dein Konto zu aktivieren.',
   'Add files to start. Status dots and lane filters appear once files enter the queue.':
     'Füge Dateien hinzu, um zu starten. Statuspunkte und Spurfilter erscheinen, sobald Dateien in die Warteschlange gelangen.',

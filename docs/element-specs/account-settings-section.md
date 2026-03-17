@@ -109,14 +109,14 @@ sequenceDiagram
 
 ## File Map
 
-| File                                                                                          | Purpose                                                     |
-| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `apps/web/src/app/features/settings-overlay/sections/account-settings-section.component.ts`   | standalone account section host with logout state handling  |
-| `apps/web/src/app/features/settings-overlay/sections/account-settings-section.component.html` | template for identity card, logout button, and confirmation |
-| `apps/web/src/app/features/settings-overlay/sections/account-settings-section.component.scss` | scoped styles for account row and critical logout action    |
-| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`                     | section registration entry for `account`                    |
-| `apps/web/src/app/core/auth/auth.service.ts`                                                  | sign-out boundary and session state                         |
-| `apps/web/src/app/core/user-profile.service.ts`                                               | display-name lookup for identity row                        |
+| File                                                                         | Purpose                                                       |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`   | account section logout state handling inside overlay shell    |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.html` | account section template with identity row and logout confirm |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` | account action styling and confirmation/error states          |
+| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`    | section registration entry for `account`                      |
+| `apps/web/src/app/core/auth/auth.service.ts`                                 | sign-out boundary and session state                           |
+| `apps/web/src/app/core/user-profile.service.ts`                              | display-name lookup for identity row                          |
 
 ## Wiring
 

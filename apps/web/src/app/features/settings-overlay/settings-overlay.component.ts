@@ -130,6 +130,9 @@ export class SettingsOverlayComponent {
   readonly selectedSectionId = signal<string>('general');
   readonly loadState = signal<SettingsLoadState>('loading');
   readonly lastError = signal<string | null>(null);
+  readonly logoutConfirmOpen = signal(false);
+  readonly logoutPending = signal(false);
+  readonly logoutError = signal<string | null>(null);
   readonly inviteSectionRequest = this.settingsPaneService.inviteSectionRequest;
 
   readonly settingsModel = signal<SettingsModel>({
@@ -201,11 +204,17 @@ export class SettingsOverlayComponent {
   }
 
   requestClose(): void {
+    this.logoutConfirmOpen.set(false);
+    this.logoutError.set(null);
     this.openChange.emit(false);
   }
 
   selectSection(sectionId: string): void {
     this.selectedSectionId.set(sectionId);
+    if (sectionId !== 'account') {
+      this.logoutConfirmOpen.set(false);
+      this.logoutError.set(null);
+    }
     if (
       sectionId === 'general' ||
       sectionId === 'appearance' ||
@@ -222,6 +231,46 @@ export class SettingsOverlayComponent {
 
   retryLoad(): void {
     this.startLoad();
+  }
+
+  openLogoutConfirm(): void {
+    if (this.logoutPending()) {
+      return;
+    }
+
+    this.logoutError.set(null);
+    this.logoutConfirmOpen.set(true);
+  }
+
+  cancelLogoutConfirm(): void {
+    if (this.logoutPending()) {
+      return;
+    }
+
+    this.logoutConfirmOpen.set(false);
+  }
+
+  async confirmLogout(): Promise<void> {
+    if (this.logoutPending()) {
+      return;
+    }
+
+    this.logoutPending.set(true);
+    this.logoutError.set(null);
+
+    try {
+      await this.authService.signOut();
+      this.logoutConfirmOpen.set(false);
+      this.requestClose();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : this.t('settings.overlay.account.logout.error', 'Logout failed. Please try again.');
+      this.logoutError.set(message);
+    } finally {
+      this.logoutPending.set(false);
+    }
   }
 
   updatePosition(): void {

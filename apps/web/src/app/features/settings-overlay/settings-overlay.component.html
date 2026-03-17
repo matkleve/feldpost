@@ -488,11 +488,58 @@
 
                 <button
                   type="button"
-                  class="settings-overlay__ghost-button"
-                  (click)="requestClose()"
+                  class="settings-overlay__logout-button"
+                  [disabled]="logoutPending()"
+                  (click)="openLogoutConfirm()"
                 >
-                  {{ t('settings.overlay.account.close', 'Close settings') }}
+                  {{ t('settings.overlay.account.logout.action', 'Logout') }}
                 </button>
+
+                @if (logoutConfirmOpen()) {
+                  <div
+                    class="settings-overlay__logout-confirm"
+                    role="alertdialog"
+                    aria-modal="false"
+                  >
+                    <strong>{{
+                      t('settings.overlay.account.logout.confirmTitle', 'Logout now?')
+                    }}</strong>
+                    <p>
+                      {{
+                        t(
+                          'settings.overlay.account.logout.confirmDescription',
+                          'This ends your current Feldpost session on this device.'
+                        )
+                      }}
+                    </p>
+                    <div class="settings-overlay__logout-actions">
+                      <button
+                        type="button"
+                        class="settings-overlay__ghost-button"
+                        [disabled]="logoutPending()"
+                        (click)="cancelLogoutConfirm()"
+                      >
+                        {{ t('settings.overlay.account.logout.cancel', 'Cancel') }}
+                      </button>
+                      <button
+                        type="button"
+                        class="settings-overlay__logout-button settings-overlay__logout-button--confirm"
+                        [disabled]="logoutPending()"
+                        (click)="confirmLogout()"
+                      >
+                        {{
+                          logoutPending()
+                            ? t('settings.overlay.account.logout.pending', 'Logging out...')
+                            : t('settings.overlay.account.logout.confirm', 'Confirm logout')
+                        }}
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                @if (logoutError(); as logoutErrorMessage) {
+                  <p class="settings-overlay__logout-error">{{ logoutErrorMessage }}</p>
+                }
               </section>
             }
 
