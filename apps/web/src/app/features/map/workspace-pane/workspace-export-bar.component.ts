@@ -126,7 +126,12 @@ export class WorkspaceExportBarComponent {
 
       return url;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Share link failed.';
+      const message =
+        error instanceof Error && error.message.toLowerCase().includes('column reference')
+          ? 'Freigabelink konnte nicht erstellt werden.'
+          : error instanceof Error
+            ? error.message
+            : 'Freigabelink konnte nicht erstellt werden.';
       this.toastService.show({ message, type: 'error' });
       return null;
     } finally {

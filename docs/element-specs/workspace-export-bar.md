@@ -382,22 +382,22 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] Hovering a media card reveals a top-left selection checkbox without shifting layout.
-- [ ] Checkbox click toggles selection state and never opens detail view.
-- [ ] Ctrl-click (Windows/Linux) and Cmd-click (macOS) toggle selection on media cards.
+- [x] Hovering a media card reveals a top-left selection checkbox without shifting layout.
+- [x] Checkbox click toggles selection state and never opens detail view.
+- [x] Ctrl-click (Windows/Linux) and Cmd-click (macOS) toggle selection on media cards.
 - [ ] First selection opens export bar with transition; zero selection closes it.
-- [ ] Export bar always includes `Select none` and `Select all` actions.
+- [x] Export bar always includes `Select none` and `Select all` actions.
 - [ ] Export bar includes `Add to project`, `Change address`, and `Delete` actions for selected media.
 - [ ] `Add to project` applies to every currently selected ID and reports per-item failures non-destructively.
 - [ ] `Change address` updates every selected media row and refreshes both grid labels and marker tooltip/address surfaces.
 - [ ] `Delete` requires explicit confirmation and removes all selected media while clearing stale selection IDs.
 - [ ] `Select all` targets current workspace scope (active filters/grouping/tab), not entire dataset.
 - [ ] Selection survives sort, filter, grouping, and fullscreen transitions.
-- [ ] Share link creation returns a stable tokenized URL for the selected set.
+- [x] Share link creation returns a stable tokenized URL for the selected set.
 - [ ] Opening a valid share URL reproduces the same media set ordering and membership.
-- [ ] Share URL access is denied outside organization boundaries via RLS/policy checks.
+- [x] Share URL access is denied outside organization boundaries via RLS/policy checks.
 - [ ] Download dialog pre-fills title with project name when single-project scope is detected.
 - [ ] Download dialog pre-fills `bestLabel + date` for ad-hoc or mixed-project selections.
-- [ ] ZIP export includes mixed media (images, PDFs, supported files) and starts a browser download.
-- [ ] Copy link uses Clipboard API in secure contexts and shows success/error feedback.
-- [ ] Native share action uses Web Share API only when feature support and activation constraints are met.
+- [x] ZIP export includes mixed media (images, PDFs, supported files) and starts a browser download.
+- [x] Copy link uses Clipboard API in secure contexts and shows success/error feedback.
+- [x] Native share action uses Web Share API only when feature support and activation constraints are met.

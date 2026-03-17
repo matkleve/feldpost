@@ -1,6 +1,7 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { SupabaseService } from '../../../../core/supabase.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
+import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
 
 interface Project {
   id: string;
@@ -11,22 +12,16 @@ interface Project {
 @Component({
   selector: 'app-projects-dropdown',
   template: `
-    <div class="projects-dropdown">
-      <div class="dd-search">
-        <input
-          class="dd-search__input"
-          type="text"
-          placeholder="Search projects…"
-          [value]="searchTerm()"
-          (input)="searchTerm.set($any($event.target).value)"
-        />
-        @if (searchTerm()) {
-          <button class="dd-search__action" (click)="searchTerm.set('')" aria-label="Clear search">
-            <span class="material-icons">close</span>
-          </button>
-        }
-      </div>
-      <div class="dd-items projects-list">
+    <app-standard-dropdown
+      class="projects-dropdown"
+      [searchTerm]="searchTerm()"
+      searchPlaceholder="Search projects…"
+      actionLabel="New project"
+      (searchTermChange)="searchTerm.set($event)"
+      (clearRequested)="searchTerm.set('')"
+      (actionRequested)="isCreating.set(true)"
+    >
+      <div dropdown-items class="projects-list">
         <label class="dd-item projects-row--all">
           <input
             type="checkbox"
@@ -50,13 +45,10 @@ interface Project {
           </label>
         }
       </div>
-      <button class="dd-action-row" (click)="isCreating.set(true)">
-        <span class="material-icons">add</span>
-        New project
-      </button>
-    </div>
+    </app-standard-dropdown>
   `,
   styleUrl: './projects-dropdown.component.scss',
+  imports: [StandardDropdownComponent],
 })
 export class ProjectsDropdownComponent {
   private readonly supabase = inject(SupabaseService);

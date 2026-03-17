@@ -7,15 +7,24 @@ export interface ThumbnailCardInteraction {
   additive: boolean;
 }
 
+export interface ThumbnailCardHoverEvent {
+  imageId: string;
+  lat: number;
+  lng: number;
+}
+
 @Component({
   selector: 'app-thumbnail-card',
   template: `
     <article
       class="thumbnail-card"
       [class.thumbnail-card--selected]="selected()"
+      [class.thumbnail-card--linked-hover]="linkedHovered()"
       [class.thumbnail-card--row]="viewMode() === 'row'"
       [class.thumbnail-card--medium]="viewMode() === 'medium'"
       [class.thumbnail-card--large]="viewMode() === 'large'"
+      (mouseenter)="onHoverStart()"
+      (mouseleave)="onHoverEnd()"
     >
       <button
         class="thumbnail-card__main"
@@ -98,8 +107,11 @@ export class ThumbnailCardComponent {
   readonly image = input.required<WorkspaceImage>();
   readonly viewMode = input<ThumbnailSizePreset>('medium');
   readonly selected = input(false);
+  readonly linkedHovered = input(false);
   readonly clicked = output<string>();
   readonly selectionToggled = output<ThumbnailCardInteraction>();
+  readonly hoverStarted = output<ThumbnailCardHoverEvent>();
+  readonly hoverEnded = output<string>();
   readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
   readonly hasCoordinates = computed(
     () => Number.isFinite(this.image().latitude) && Number.isFinite(this.image().longitude),
@@ -179,5 +191,18 @@ export class ThumbnailCardComponent {
   onImgError(): void {
     this.imgLoading.set(false);
     this.imgErrored.set(true);
+  }
+
+  onHoverStart(): void {
+    if (!this.hasCoordinates()) return;
+    this.hoverStarted.emit({
+      imageId: this.image().id,
+      lat: this.image().latitude,
+      lng: this.image().longitude,
+    });
+  }
+
+  onHoverEnd(): void {
+    this.hoverEnded.emit(this.image().id);
   }
 }

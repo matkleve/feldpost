@@ -6,6 +6,7 @@ import { ImageDetailViewComponent } from './image-detail-view.component';
 import { WorkspaceExportBarComponent } from './workspace-export-bar.component';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { ThumbnailCardHoverEvent } from './thumbnail-card.component';
 
 @Component({
   selector: 'app-workspace-pane',
@@ -32,6 +33,7 @@ export class WorkspacePaneComponent {
   readonly projectColorToken = input<string | null>(null);
   readonly colorPickerEnabled = input(false);
   readonly colorPickerOpen = input(false);
+  readonly linkedHoveredImageIds = input<Set<string>>(new Set());
 
   // ── Outputs to MapShell ──────────────────────────────────────────────────
   readonly closed = output<void>();
@@ -42,6 +44,8 @@ export class WorkspacePaneComponent {
   readonly titleSubmitRequested = output<string>();
   readonly titleEditRequested = output<void>();
   readonly colorPickerRequested = output<void>();
+  readonly workspaceItemHoverStarted = output<ThumbnailCardHoverEvent>();
+  readonly workspaceItemHoverEnded = output<string>();
 
   // ── Internal state ───────────────────────────────────────────────────────
   readonly activeTabId = signal<string>('selection');
@@ -85,5 +89,13 @@ export class WorkspacePaneComponent {
 
   onColorPickerRequest(): void {
     this.colorPickerRequested.emit();
+  }
+
+  onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
+    this.workspaceItemHoverStarted.emit(event);
+  }
+
+  onWorkspaceItemHoverEnded(imageId: string): void {
+    this.workspaceItemHoverEnded.emit(imageId);
   }
 }

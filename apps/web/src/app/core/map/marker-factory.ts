@@ -5,6 +5,7 @@ export interface PhotoMarkerHtmlOptions {
   thumbnailUrl?: string;
   fallbackLabel?: string;
   selected?: boolean;
+  linkedHover?: boolean;
   corrected?: boolean;
   uploading?: boolean;
   bearing?: number | null;
@@ -61,6 +62,7 @@ function buildMarkerClasses(
   }
 
   if (options.selected) classes.push('map-photo-marker--selected');
+  if (options.linkedHover) classes.push('map-photo-marker--linked-hover');
   if (options.bearing != null) classes.push('map-photo-marker--has-bearing');
 
   return classes.join(' ');

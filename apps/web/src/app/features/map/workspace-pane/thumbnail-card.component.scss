@@ -39,6 +39,17 @@
   box-shadow: var(--shadow-md);
 }
 
+.thumbnail-card--linked-hover {
+  border-color: color-mix(in srgb, var(--color-clay) 78%, var(--color-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
+}
+
+.thumbnail-card--selected.thumbnail-card--linked-hover {
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
+}
+
 .thumbnail-card__main {
   width: 100%;
   height: 100%;

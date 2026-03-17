@@ -20,6 +20,7 @@ import { Component, ElementRef, HostListener, inject, input, output } from '@ang
         display: block;
         max-width: calc(100vw - 1rem);
         max-height: min(24rem, calc(100vh - 6rem));
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         background: var(--color-bg-elevated);

@@ -369,9 +369,12 @@
   <app-workspace-pane
     [style.width.px]="workspacePaneWidth()"
     [detailImageId]="detailImageId()"
+    [linkedHoveredImageIds]="linkedHoveredWorkspaceImageIds()"
     (closed)="closeWorkspacePane()"
     (detailClosed)="closeDetailView()"
     (detailRequested)="openDetailView($event)"
     (zoomToLocationRequested)="onZoomToLocation($event)"
+    (workspaceItemHoverStarted)="onWorkspaceItemHoverStarted($event)"
+    (workspaceItemHoverEnded)="onWorkspaceItemHoverEnded($event)"
   />
 }

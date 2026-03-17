@@ -11,47 +11,76 @@ Use it as the single source of truth before implementing or refactoring controls
 ## Hard Invariants
 
 1. Functional parity is mandatory.
+
 - Refactors must not remove or change user-visible behavior.
 - Existing keyboard, pointer, drag/drop, and reset flows must remain intact.
 
 2. Reactive parity is mandatory.
+
 - Components must remain compatible with signal-based and observable-based parent flows.
 - Input/output behavior and payload semantics must stay stable unless an explicit migration is approved.
 
 3. Accessibility is mandatory.
+
 - Keep semantic controls, visible focus, aria labels, and target-size requirements.
 
 ## Core Visual Doctrine
 
 1. Calm over chrome.
+
 - Prefer structure from spacing, hierarchy, and typography.
 - Avoid decorative container borders.
 
 2. Action-first emphasis.
+
 - Visual emphasis belongs to controls that can be acted on.
 - Secondary surfaces should stay quiet.
 
 3. Guided attention.
+
 - Use accent where the UI should guide the user.
 - Hover/focus states should lead attention with subtle warm highlight.
+
+## User-Approved Reference Elements
+
+The following existing elements are explicit positive references and should guide standardization decisions:
+
+- Sort Dropdown
+- Grouping Dropdown
+- Snap Size Slider
+- New Photos zoom button style (thin-line treatment)
+
+Translate these references into reusable standards:
+
+- Thin, readable strokes over heavy chrome
+- Clear but compact radius hierarchy
+- Accent used for guidance and focus, not decoration
 
 ## Border Policy (Canonical)
 
 Apply borders only where they communicate direct affordance.
 
 Border allowed:
+
 - Interactive controls: button, select, input, toggle, segmented controls.
 - Explicitly actionable chips.
 
 Border usually not allowed:
+
 - Passive containers and section wrappers.
 - Header wrappers and grouping shells.
 - Read-only previews and static information blocks.
 
+Context note from user feedback:
+
+- Settings surfaces should avoid stacked container borders; visual separation should come from spacing, type hierarchy, and subtle surface contrast first.
+
 Exception rule:
+
 - Add a non-control border only when required for clarity in dense data layouts and document the reason in the component spec.
 
 Default stroke:
+
 - 1.5px for interactive controls.
 
 ## Radius Policy
@@ -67,11 +96,13 @@ Radius is hierarchical, not uniform.
 Use accent intentionally, not decoratively.
 
 Accent is preferred for:
+
 - Active state
 - Focus-leading hover states
 - High-attention guided actions
 
 Avoid accent for:
+
 - Default passive surfaces
 - Non-interactive background decoration
 

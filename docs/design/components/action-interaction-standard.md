@@ -32,19 +32,23 @@ This first draft prioritizes the user-selected categories:
 Every UI standardization refactor must pass these invariants:
 
 1. Public component API compatibility
+
 - Keep existing inputs and outputs stable unless migration is explicitly planned.
 - Keep output event semantics stable (same trigger moments and payload meaning).
 
 2. Interaction behavior compatibility
+
 - Keep keyboard behavior (Enter, Escape, tab flow) and pointer behavior unchanged.
 - Keep drag/drop capabilities where currently present.
 - Keep empty/loading/error states and reset/clear actions.
 
 3. Data/reaction compatibility
+
 - Components must continue to work when parent state is signal-driven.
 - Components must continue to work when parent state is observable-driven.
 
 4. Accessibility compatibility
+
 - Preserve aria labels, button semantics, focus visibility, and target sizes.
 
 ## Reactive Contract (Signals + Observables)
@@ -171,14 +175,17 @@ Reference components:
 ## Migration Plan (Wave 1)
 
 1. Dropdown standard first
+
 - Unify row geometry, search header behavior, reset affordance, empty states.
 - Keep existing output payloads stable.
 
 2. Toolbar and button standard second
+
 - Normalize thin-border button variants and active states across toolbars.
 - Reduce nested borders where visual weight is too high.
 
 3. Toggle and chips third
+
 - Unify spacing, active/hover states, and event signatures.
 
 ## Verification Checklist per Refactor

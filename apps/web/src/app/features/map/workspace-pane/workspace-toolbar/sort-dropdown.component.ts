@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { SortConfig } from '../../../../core/workspace-view.types';
+import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
 
 export type SortDropdownOption = {
   id: string;
@@ -13,26 +14,27 @@ export type SortDropdownOption = {
 @Component({
   selector: 'app-sort-dropdown',
   template: `
-    <div class="sort-dropdown">
-      <div class="dd-search">
-        <input
-          class="dd-search__input"
-          type="text"
-          placeholder="Search properties…"
-          [value]="searchTerm()"
-          (input)="searchTerm.set($any($event.target).value)"
-        />
-        @if (searchTerm()) {
-          <button class="dd-search__action" (click)="searchTerm.set('')" aria-label="Clear search">
-            <span class="material-icons">close</span>
-          </button>
-        } @else if (hasCustomSort()) {
-          <button class="dd-search__action" (click)="resetSort()" aria-label="Reset to default">
-            <span class="material-icons">restart_alt</span>
-          </button>
-        }
-      </div>
-      <div class="dd-items">
+    <app-standard-dropdown
+      class="sort-dropdown"
+      [searchTerm]="searchTerm()"
+      searchPlaceholder="Search properties…"
+      [showDefaultClearAction]="false"
+      (searchTermChange)="searchTerm.set($event)"
+      (clearRequested)="searchTerm.set('')"
+    >
+      @if (searchTerm() || hasCustomSort()) {
+        <button
+          dropdown-search-action
+          class="dd-search__action"
+          type="button"
+          (click)="onSearchActionClick()"
+          [attr.aria-label]="searchActionAriaLabel()"
+        >
+          <span class="material-icons" aria-hidden="true">{{ searchActionIcon() }}</span>
+        </button>
+      }
+
+      <div dropdown-items>
         @if (groupedOptions().length > 0) {
           <div class="dd-section-label">Sorted by grouping</div>
           @for (opt of groupedOptions(); track opt.id) {
@@ -83,9 +85,10 @@ export type SortDropdownOption = {
           <div class="dd-empty">No matching properties</div>
         }
       </div>
-    </div>
+    </app-standard-dropdown>
   `,
   styleUrl: './sort-dropdown.component.scss',
+  imports: [StandardDropdownComponent],
 })
 export class SortDropdownComponent {
   private readonly viewService = inject(WorkspaceViewService);
@@ -145,6 +148,11 @@ export class SortDropdownComponent {
     const defaults = this.defaultSorts();
     return !this.areSortsEqual(sorts, defaults);
   });
+
+  readonly searchActionIcon = computed(() => (this.searchTerm() ? 'close' : 'restart_alt'));
+  readonly searchActionAriaLabel = computed(() =>
+    this.searchTerm() ? 'Clear search' : 'Reset to default',
+  );
 
   constructor() {
     effect(() => {
@@ -207,6 +215,17 @@ export class SortDropdownComponent {
     const defaultSorts = [...this.defaultSorts()];
     this.activeSorts.set(defaultSorts);
     this.sortChanged.emit(defaultSorts);
+  }
+
+  onSearchActionClick(): void {
+    if (this.searchTerm()) {
+      this.searchTerm.set('');
+      return;
+    }
+
+    if (this.hasCustomSort()) {
+      this.resetSort();
+    }
   }
 
   private areSortsEqual(left: SortConfig[], right: SortConfig[]): boolean {

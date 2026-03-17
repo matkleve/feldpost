@@ -32,11 +32,13 @@ describe('marker-factory', () => {
     const html = buildPhotoMarkerHtml({
       count: 1,
       thumbnailUrl: 'https://example.com/thumb.jpg',
+      linkedHover: true,
       corrected: true,
       uploading: true,
       bearing: 90,
     });
 
+    expect(html).toContain('map-photo-marker--linked-hover');
     expect(html).toContain('map-photo-marker__correction-dot');
     expect(html).toContain('map-photo-marker__pending-ring');
     expect(html).toContain('map-photo-marker__direction-cone');

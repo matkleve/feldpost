@@ -11,6 +11,8 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Export & Sharing | workspace-export-bar.md | default share-link expiration, allow token reuse vs forced regeneration, and whether native-share action is enabled on supported devices. |
 | File Type Visibility | project-mixed-media-pre-spec.md | default selected media families in map/workspace/project views. |
 | Fullscreen Project Mode | project-mixed-media-pre-spec.md | default entry behavior for project detail (inline pane vs fullscreen). |
+| Interaction & Shortcuts | settings-overlay.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
+| Interaction & Shortcuts | shortcut-reference-settings.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
 | Invite Management | qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
 | Invite Management | settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
 | Language / Locale | language-locale-settings.md | UI language switch between English and German plus regional formatting defaults. |

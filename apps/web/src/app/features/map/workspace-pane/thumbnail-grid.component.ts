@@ -5,6 +5,7 @@ import {
   OnDestroy,
   afterNextRender,
   computed,
+  input,
   inject,
   output,
   signal,
@@ -14,7 +15,11 @@ import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { FilterService } from '../../../core/filter.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
-import { ThumbnailCardComponent, ThumbnailCardInteraction } from './thumbnail-card.component';
+import {
+  ThumbnailCardComponent,
+  ThumbnailCardHoverEvent,
+  ThumbnailCardInteraction,
+} from './thumbnail-card.component';
 import { GroupHeaderComponent } from './group-header.component';
 
 /** Flat renderable item — either a group header or a grid of images. */
@@ -79,9 +84,12 @@ type RenderItem =
                     [image]="img"
                     [viewMode]="viewService.thumbnailSizePreset()"
                     [selected]="selectionService.isSelected(img.id)"
+                    [linkedHovered]="isLinkedHovered(img.id)"
                     (clicked)="thumbnailClicked.emit($event)"
                     (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
                     (selectionToggled)="onSelectionToggled($event)"
+                    (hoverStarted)="hoverStarted.emit($event)"
+                    (hoverEnded)="hoverEnded.emit($event)"
                   />
                 }
               </div>
@@ -98,9 +106,12 @@ type RenderItem =
               [image]="img"
               [viewMode]="viewService.thumbnailSizePreset()"
               [selected]="selectionService.isSelected(img.id)"
+              [linkedHovered]="isLinkedHovered(img.id)"
               (clicked)="thumbnailClicked.emit($event)"
               (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
               (selectionToggled)="onSelectionToggled($event)"
+              (hoverStarted)="hoverStarted.emit($event)"
+              (hoverEnded)="hoverEnded.emit($event)"
             />
           }
         </div>
@@ -128,8 +139,11 @@ export class ThumbnailGridComponent implements OnDestroy {
     }
   });
 
+  readonly linkedHoveredImageIds = input<Set<string>>(new Set());
   readonly thumbnailClicked = output<string>();
   readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly hoverStarted = output<ThumbnailCardHoverEvent>();
+  readonly hoverEnded = output<string>();
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -239,6 +253,10 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   onSelectionToggled(event: ThumbnailCardInteraction): void {
     this.selectionService.toggle(event.imageId, { additive: event.additive });
+  }
+
+  isLinkedHovered(imageId: string): boolean {
+    return this.linkedHoveredImageIds().has(imageId);
   }
 
   /** Batch-sign thumbnails for currently visible images after a debounce. */

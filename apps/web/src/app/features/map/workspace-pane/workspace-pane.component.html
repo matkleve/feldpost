@@ -24,8 +24,11 @@
   } @else {
     <app-workspace-toolbar />
     <app-thumbnail-grid
+      [linkedHoveredImageIds]="linkedHoveredImageIds()"
       (thumbnailClicked)="onThumbnailClick($event)"
       (zoomToLocationRequested)="onZoomToLocation($event)"
+      (hoverStarted)="onWorkspaceItemHoverStarted($event)"
+      (hoverEnded)="onWorkspaceItemHoverEnded($event)"
     />
 
     @if (selectionService.selectedCount() > 0) {

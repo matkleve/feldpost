@@ -49,6 +49,7 @@ import { SearchQueryContext } from '../../../core/search/search.models';
 import type { WorkspaceImage } from '../../../core/workspace-view.types';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
+import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card.component';
 import { SettingsPaneService } from '../../../core/settings-pane.service';
 import {
   ProjectSelectDialogComponent,
@@ -102,6 +103,8 @@ export class MapShellComponent implements OnDestroy {
   private static readonly DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES = 50;
   private static readonly DETAIL_LOCATION_RENDER_SETTLE_MS = 180;
   private static readonly DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS = 260;
+  private static readonly DETAIL_LOCATION_WAIT_FOR_SINGLE_MS = 2800;
+  private static readonly DETAIL_LOCATION_IDLE_FALLBACK_MS = 1400;
   private static readonly DETAIL_LOCATION_PENDING_TTL_MS = 12000;
   private static readonly MARKER_MOVE_DURATION_MS = 320;
   private static readonly RADIUS_SELECTION_MIN_METERS = 10;
@@ -294,6 +297,7 @@ export class MapShellComponent implements OnDestroy {
   });
   readonly selectedMarkerKey = signal<string | null>(null);
   readonly selectedMarkerKeys = signal<Set<string>>(new Set());
+  readonly linkedHoveredWorkspaceImageIds = signal<Set<string>>(new Set());
   readonly mapContextMenuOpen = signal(false);
   readonly mapContextMenuPosition = signal<{ x: number; y: number } | null>(null);
   readonly mapContextMenuCoords = signal<{ lat: number; lng: number } | null>(null);
@@ -382,6 +386,7 @@ export class MapShellComponent implements OnDestroy {
         corrected?: boolean;
         uploading?: boolean;
         selected: boolean;
+        linkedHover: boolean;
         zoomLevel: PhotoMarkerZoomLevel;
       };
     }
@@ -481,14 +486,16 @@ export class MapShellComponent implements OnDestroy {
   private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
   private gpsTrackingTimer: ReturnType<typeof setInterval> | null = null;
   private lastMapMoveAt = 0;
-  private pendingZoomHighlight:
-    | {
-        imageId: string;
-        lat: number;
-        lng: number;
-        requestedAt: number;
-      }
-    | null = null;
+  private lastMapIdleAt = 0;
+  private activeWorkspaceHover: ThumbnailCardHoverEvent | null = null;
+  private linkedHoverMarkerFromWorkspaceKey: string | null = null;
+  private linkedHoverMarkerFromMapKey: string | null = null;
+  private pendingZoomHighlight: {
+    imageId: string;
+    lat: number;
+    lng: number;
+    requestedAt: number;
+  } | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -976,22 +983,34 @@ export class MapShellComponent implements OnDestroy {
       animate: false,
     });
 
-    this.highlightZoomTargetMarker(event.imageId, event.lat, event.lng);
+    this.waitForMapIdleThenFlushZoomHighlight();
 
-    // Re-apply shortly after recenter in case marker instances were reconciled.
-    setTimeout(
-      () => this.highlightZoomTargetMarker(event.imageId, event.lat, event.lng),
-      140,
-    );
+    // Safety flush while waiting for marker query / reconciliation.
+    setTimeout(() => this.flushPendingZoomHighlight(), 140);
   }
 
-  private highlightZoomTargetMarker(
-    imageId: string,
-    lat: number,
-    lng: number,
-    attempt = 0,
-  ): void {
-    const markerKey = this.findMarkerKeyForZoomTarget(imageId, lat, lng);
+  onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
+    this.activeWorkspaceHover = event;
+    const markerKey = this.findMarkerKeyForZoomTarget(event.imageId, event.lat, event.lng, true);
+    this.setLinkedHoverMarkerFromWorkspace(markerKey);
+  }
+
+  onWorkspaceItemHoverEnded(imageId: string): void {
+    if (this.activeWorkspaceHover?.imageId === imageId) {
+      this.activeWorkspaceHover = null;
+    }
+    this.setLinkedHoverMarkerFromWorkspace(null);
+  }
+
+  private highlightZoomTargetMarker(imageId: string, lat: number, lng: number, attempt = 0): void {
+    const pendingForImage =
+      this.pendingZoomHighlight?.imageId === imageId ? this.pendingZoomHighlight : null;
+    const allowClusterFallback =
+      !pendingForImage ||
+      Date.now() - pendingForImage.requestedAt >
+        MapShellComponent.DETAIL_LOCATION_WAIT_FOR_SINGLE_MS;
+
+    const markerKey = this.findMarkerKeyForZoomTarget(imageId, lat, lng, allowClusterFallback);
     if (!markerKey) {
       if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
         setTimeout(
@@ -1002,9 +1021,12 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const markerElement = this.uploadedPhotoMarkers.get(markerKey)?.marker.getElement();
-    const markerVisual = markerElement?.querySelector('.map-photo-marker') as HTMLElement | null;
-    if (!markerVisual || !this.isZoomHighlightRenderReady(markerVisual)) {
+    const waitingForIdle =
+      !!pendingForImage &&
+      this.lastMapIdleAt < pendingForImage.requestedAt &&
+      Date.now() - pendingForImage.requestedAt < MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS;
+
+    if (waitingForIdle) {
       if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
         setTimeout(
           () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
@@ -1014,7 +1036,21 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.startZoomMarkerSpotlight(markerVisual);
+    const markerElement = this.uploadedPhotoMarkers.get(markerKey)?.marker.getElement();
+    const markerWrapper = markerElement?.querySelector(
+      '.map-photo-marker-wrapper',
+    ) as HTMLElement | null;
+    if (!markerWrapper || !this.isZoomHighlightRenderReady(markerWrapper)) {
+      if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
+        setTimeout(
+          () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
+          MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_RETRY_MS,
+        );
+      }
+      return;
+    }
+
+    this.startZoomMarkerSpotlight(markerWrapper);
     if (this.pendingZoomHighlight?.imageId === imageId) {
       this.pendingZoomHighlight = null;
     }
@@ -1032,45 +1068,76 @@ export class MapShellComponent implements OnDestroy {
     this.highlightZoomTargetMarker(pending.imageId, pending.lat, pending.lng);
   }
 
-  private isZoomHighlightRenderReady(markerVisual: HTMLElement): boolean {
+  private waitForMapIdleThenFlushZoomHighlight(): void {
+    if (!this.map) return;
+
+    let flushed = false;
+    const flushOnce = () => {
+      if (flushed) return;
+      flushed = true;
+      this.flushPendingZoomHighlight();
+    };
+
+    this.map.once('idle', flushOnce);
+    setTimeout(flushOnce, MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS);
+  }
+
+  private isZoomHighlightRenderReady(markerElement: HTMLElement): boolean {
     if (Date.now() - this.lastMapMoveAt < MapShellComponent.DETAIL_LOCATION_RENDER_SETTLE_MS) {
       return false;
     }
 
-    if (!markerVisual.isConnected) {
+    if (!markerElement.isConnected) {
       return false;
     }
 
-    const rect = markerVisual.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
+    const rect = markerElement.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return false;
+    }
+
+    return markerElement.classList.contains('map-photo-marker-wrapper');
   }
 
-  private startZoomMarkerSpotlight(markerVisual: HTMLElement): void {
+  private startZoomMarkerSpotlight(markerElement: HTMLElement): void {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        if (!markerVisual.isConnected) {
+        if (!markerElement.isConnected) {
           return;
         }
-        markerVisual.classList.remove('map-photo-marker--spotlight');
-        void markerVisual.offsetWidth;
-        markerVisual.classList.add('map-photo-marker--spotlight');
+        markerElement.classList.remove('map-photo-marker-wrapper--spotlight');
+        void markerElement.offsetWidth;
+        markerElement.classList.add('map-photo-marker-wrapper--spotlight');
         setTimeout(
-          () => markerVisual.classList.remove('map-photo-marker--spotlight'),
+          () => markerElement.classList.remove('map-photo-marker-wrapper--spotlight'),
           MapShellComponent.DETAIL_LOCATION_MARKER_PULSE_MS,
         );
       });
     });
   }
 
-  private findMarkerKeyForZoomTarget(imageId: string, lat: number, lng: number): string | null {
+  private findMarkerKeyForZoomTarget(
+    imageId: string,
+    lat: number,
+    lng: number,
+    allowClusterFallback: boolean,
+  ): string | null {
     const byImageId = this.markersByImageId.get(imageId);
-    if (byImageId && this.uploadedPhotoMarkers.has(byImageId)) {
-      return byImageId;
+    if (byImageId) {
+      const state = this.uploadedPhotoMarkers.get(byImageId);
+      if (state && state.count === 1) {
+        return byImageId;
+      }
     }
 
     const exactKey = this.toMarkerKey(lat, lng);
-    if (this.uploadedPhotoMarkers.has(exactKey)) {
+    const exactState = this.uploadedPhotoMarkers.get(exactKey);
+    if (exactState?.count === 1) {
       return exactKey;
+    }
+
+    if (!allowClusterFallback) {
+      return null;
     }
 
     // Fallback for clustered state: pulse the closest visible cluster marker
@@ -1320,6 +1387,11 @@ export class MapShellComponent implements OnDestroy {
       this.lastMapMoveAt = Date.now();
       this.handleMoveEnd();
       this.updateSearchViewportBounds();
+    });
+
+    this.map.on('idle', () => {
+      this.lastMapIdleAt = Date.now();
+      this.flushPendingZoomHighlight();
     });
   }
 
@@ -2513,8 +2585,10 @@ export class MapShellComponent implements OnDestroy {
           this.uploadedPhotoMarkers.delete(reusableKey);
           this.uploadedPhotoMarkers.set(key, reusableState);
 
-          // Rebind click handler so interaction resolves the new marker key.
+          // Rebind interactions so all handlers resolve the new marker key.
           this.bindMarkerClickInteraction(key, reusableState.marker);
+          this.bindMarkerContextInteraction(key, reusableState.marker);
+          this.bindMarkerHoverInteraction(key, reusableState.marker);
           this.animateMarkerPosition(reusableState.marker, row.cluster_lat, row.cluster_lng);
 
           if (needsVisualRefresh) {
@@ -2601,6 +2675,15 @@ export class MapShellComponent implements OnDestroy {
     // If a zoom target was requested while this area was still loading,
     // try highlighting now that markers are reconciled.
     this.flushPendingZoomHighlight();
+    this.refreshActiveWorkspaceHoverLink();
+
+    if (
+      this.linkedHoverMarkerFromMapKey &&
+      !this.uploadedPhotoMarkers.has(this.linkedHoverMarkerFromMapKey)
+    ) {
+      this.setLinkedHoverMarkerFromMap(null);
+      this.linkedHoveredWorkspaceImageIds.set(new Set());
+    }
   }
 
   private buildPhotoMarkerIcon(
@@ -2634,6 +2717,7 @@ export class MapShellComponent implements OnDestroy {
         fallbackLabel,
         bearing: direction,
         selected: this.isMarkerSelected(markerKey),
+        linkedHover: this.isMarkerLinkedHovered(markerKey),
         corrected,
         uploading,
         loading,
@@ -2697,6 +2781,7 @@ export class MapShellComponent implements OnDestroy {
     const shouldFadeIn = options?.fadeIn ?? true;
     this.bindMarkerClickInteraction(markerKey, marker);
     this.bindMarkerContextInteraction(markerKey, marker);
+    this.bindMarkerHoverInteraction(markerKey, marker);
     // Attach long-press handler for touch direction cone after element is in DOM.
     marker.once('add', () => {
       const el = marker.getElement();
@@ -2737,6 +2822,24 @@ export class MapShellComponent implements OnDestroy {
       event.originalEvent.stopPropagation();
       this.pendingSecondaryPress = null;
       this.openMarkerContextMenu(markerKey, event.originalEvent);
+    });
+  }
+
+  private bindMarkerHoverInteraction(markerKey: string, marker: L.Marker): void {
+    marker.off('mouseover');
+    marker.off('mouseout');
+
+    marker.on('mouseover', () => {
+      this.setLinkedHoverMarkerFromMap(markerKey);
+      this.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
+    });
+
+    marker.on('mouseout', () => {
+      if (this.linkedHoverMarkerFromMapKey !== markerKey) {
+        return;
+      }
+      this.setLinkedHoverMarkerFromMap(null);
+      this.linkedHoveredWorkspaceImageIds.set(new Set());
     });
   }
 
@@ -3045,6 +3148,81 @@ export class MapShellComponent implements OnDestroy {
     );
   }
 
+  private isMarkerLinkedHovered(markerKey: string): boolean {
+    return (
+      markerKey === this.linkedHoverMarkerFromWorkspaceKey ||
+      markerKey === this.linkedHoverMarkerFromMapKey
+    );
+  }
+
+  private setLinkedHoverMarkerFromWorkspace(markerKey: string | null): void {
+    const previous = this.linkedHoverMarkerFromWorkspaceKey;
+    if (previous === markerKey) return;
+
+    this.linkedHoverMarkerFromWorkspaceKey = markerKey;
+
+    if (previous) this.refreshPhotoMarker(previous);
+    if (markerKey) this.refreshPhotoMarker(markerKey);
+  }
+
+  private setLinkedHoverMarkerFromMap(markerKey: string | null): void {
+    const previous = this.linkedHoverMarkerFromMapKey;
+    if (previous === markerKey) return;
+
+    this.linkedHoverMarkerFromMapKey = markerKey;
+
+    if (previous) this.refreshPhotoMarker(previous);
+    if (markerKey) this.refreshPhotoMarker(markerKey);
+  }
+
+  private setLinkedHoveredWorkspaceImageIdsForMarker(markerKey: string | null): void {
+    if (!markerKey) {
+      this.linkedHoveredWorkspaceImageIds.set(new Set());
+      return;
+    }
+
+    const markerState = this.uploadedPhotoMarkers.get(markerKey);
+    if (!markerState) {
+      this.linkedHoveredWorkspaceImageIds.set(new Set());
+      return;
+    }
+
+    if (markerState.count === 1 && markerState.imageId) {
+      this.linkedHoveredWorkspaceImageIds.set(new Set([markerState.imageId]));
+      return;
+    }
+
+    const sourceCells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
+    const sourceKeys = new Set(sourceCells.map((cell) => this.toMarkerKey(cell.lat, cell.lng)));
+    const matchedIds = new Set<string>();
+
+    for (const image of this.workspaceViewService.rawImages()) {
+      if (!Number.isFinite(image.latitude) || !Number.isFinite(image.longitude)) continue;
+      const imageKey = this.toMarkerKey(image.latitude, image.longitude);
+      if (sourceKeys.has(imageKey)) {
+        matchedIds.add(image.id);
+      }
+    }
+
+    this.linkedHoveredWorkspaceImageIds.set(matchedIds);
+  }
+
+  private refreshActiveWorkspaceHoverLink(): void {
+    const activeHover = this.activeWorkspaceHover;
+    if (!activeHover) {
+      this.setLinkedHoverMarkerFromWorkspace(null);
+      return;
+    }
+
+    const markerKey = this.findMarkerKeyForZoomTarget(
+      activeHover.imageId,
+      activeHover.lat,
+      activeHover.lng,
+      true,
+    );
+    this.setLinkedHoverMarkerFromWorkspace(markerKey);
+  }
+
   /**
    * Debounced handler for the Leaflet `moveend` event.
    * Fires a viewport query on every moveend (pan or zoom) so the
@@ -3161,6 +3339,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const selected = this.isMarkerSelected(markerKey);
+    const linkedHover = this.isMarkerLinkedHovered(markerKey);
     const zoomLevel = this.getPhotoMarkerZoomLevel();
     const last = markerState.lastRendered;
 
@@ -3175,6 +3354,7 @@ export class MapShellComponent implements OnDestroy {
       last.corrected === markerState.corrected &&
       last.uploading === markerState.uploading &&
       last.selected === selected &&
+      last.linkedHover === linkedHover &&
       last.zoomLevel === zoomLevel
     ) {
       return;
@@ -3189,6 +3369,7 @@ export class MapShellComponent implements OnDestroy {
       corrected: markerState.corrected,
       uploading: markerState.uploading,
       selected,
+      linkedHover,
       zoomLevel,
     };
 
@@ -3202,6 +3383,7 @@ export class MapShellComponent implements OnDestroy {
         fallbackLabel: markerState.fallbackLabel ?? this.getMarkerFallbackLabel(markerState),
         bearing: markerState.direction,
         selected,
+        linkedHover,
         corrected: markerState.corrected,
         uploading: markerState.uploading,
         loading: markerState.thumbnailLoading,

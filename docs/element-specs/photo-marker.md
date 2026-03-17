@@ -21,17 +21,20 @@ The marker body geometry is derived from the shared media token system: `--photo
 
 ## Actions & Interactions
 
-| #   | User Action                        | System Response                                                                       | Triggers                                       |
-| --- | ---------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 1   | Clicks single marker               | Adds image to Active Selection, opens Workspace Pane                                  | Selection state                                |
-| 2   | Ctrl+clicks marker (desktop)       | Adds image to Active Selection without clearing previous selection                    | Multi-select                                   |
-| 2b  | Long-press + tap marker (mobile)   | Mobile equivalent of Ctrl+click multi-select                                          | Multi-select                                   |
-| 3   | Clicks cluster marker              | Fetches all images in cluster, loads them into Active Selection, opens Workspace Pane | `SelectionService`, `workspacePaneOpen` → true |
-| 4   | Hovers single marker (desktop)     | Shows Direction Cone (if bearing available)                                           | CSS `:hover`                                   |
-| 5   | Long-presses single marker (touch) | Shows Direction Cone (if bearing available)                                           | Touch fallback                                 |
-| 6   | Right-clicks marker (desktop)      | Opens context menu (view detail, edit location, manage projects)                      | Context menu                                   |
-| 6b  | Long-press marker (mobile)         | Mobile equivalent of right-click context menu                                         | Context menu                                   |
-| 7   | Drags marker in correction mode    | Moves marker to new position, stores corrected coordinates                            | Correction flow                                |
+| #   | User Action                            | System Response                                                                                                                                                | Triggers                                       |
+| --- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 1   | Clicks single marker                   | Adds image to Active Selection, opens Workspace Pane                                                                                                           | Selection state                                |
+| 2   | Ctrl+clicks marker (desktop)           | Adds image to Active Selection without clearing previous selection                                                                                             | Multi-select                                   |
+| 2b  | Long-press + tap marker (mobile)       | Mobile equivalent of Ctrl+click multi-select                                                                                                                   | Multi-select                                   |
+| 3   | Clicks cluster marker                  | Fetches all images in cluster, loads them into Active Selection, opens Workspace Pane                                                                          | `SelectionService`, `workspacePaneOpen` → true |
+| 4   | Hovers single marker (desktop)         | Shows Direction Cone (if bearing available)                                                                                                                    | CSS `:hover`                                   |
+| 5   | Long-presses single marker (touch)     | Shows Direction Cone (if bearing available)                                                                                                                    | Touch fallback                                 |
+| 6   | Right-clicks marker (desktop)          | Opens context menu (view detail, edit location, manage projects)                                                                                               | Context menu                                   |
+| 6b  | Long-press marker (mobile)             | Mobile equivalent of right-click context menu                                                                                                                  | Context menu                                   |
+| 7   | Drags marker in correction mode        | Moves marker to new position, stores corrected coordinates                                                                                                     | Correction flow                                |
+| 8   | Detail view requests zoom to image     | Map recenters at detail zoom, then marker spotlight runs after marker DOM is ready; if single marker is clustered, nearest cluster receives spotlight fallback | Deferred spotlight lifecycle in Map Shell      |
+| 9   | Hovers matching item in Workspace Pane | Marker enters linked-hover highlight (secondary emphasis) while hover is active                                                                                | Cross-surface hover link                       |
+| 10  | Hovers marker on map                   | Matching Workspace Pane item enters linked-hover state                                                                                                         | Cross-surface hover link                       |
 
 ## Component Hierarchy
 
@@ -123,13 +126,55 @@ The Map Shell never calls Supabase Storage directly for marker thumbnails. All s
 
 Markers are stateless DOM elements. State is held in services or the map shell and reflected through CSS classes on the marker HTML.
 
-| Name                | Type                       | Default | Controls                                                                                                                                                                                                                                                                                                                  |
-| ------------------- | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `selectedMarkerKey` | `string \| null`           | `null`  | Which single marker renders the selected ring                                                                                                                                                                                                                                                                             |
-| `markerZoomLevel`   | `'far' \| 'mid' \| 'near'` | `'mid'` | Which zoom modifier class is applied                                                                                                                                                                                                                                                                                      |
-| `isCorrected`       | `boolean`                  | `false` | Whether the correction dot renders                                                                                                                                                                                                                                                                                        |
-| `isUploading`       | `boolean`                  | `false` | Whether the pending ring renders. Driven by `UploadManagerService.jobPhaseChanged$`: set to `true` when a job targeting this marker's coordinates enters `uploading` phase; reset to `false` when the job reaches `complete` or `error`. During batch uploads, multiple markers may show the pending ring simultaneously. |
-| `bearing`           | `number \| null`           | `null`  | Whether the Direction Cone can render                                                                                                                                                                                                                                                                                     |
+| Name                   | Type                       | Default | Controls                                                                                                                                                                                                                                                                                                                  |
+| ---------------------- | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `selectedMarkerKey`    | `string \| null`           | `null`  | Which single marker renders the selected ring                                                                                                                                                                                                                                                                             |
+| `markerZoomLevel`      | `'far' \| 'mid' \| 'near'` | `'mid'` | Which zoom modifier class is applied                                                                                                                                                                                                                                                                                      |
+| `isCorrected`          | `boolean`                  | `false` | Whether the correction dot renders                                                                                                                                                                                                                                                                                        |
+| `isUploading`          | `boolean`                  | `false` | Whether the pending ring renders. Driven by `UploadManagerService.jobPhaseChanged$`: set to `true` when a job targeting this marker's coordinates enters `uploading` phase; reset to `false` when the job reaches `complete` or `error`. During batch uploads, multiple markers may show the pending ring simultaneously. |
+| `bearing`              | `number \| null`           | `null`  | Whether the Direction Cone can render                                                                                                                                                                                                                                                                                     |
+| `linkedHoverMarkerKey` | `string \| null`           | `null`  | Secondary cross-surface highlight from Workspace Pane hover (or map hover reflection)                                                                                                                                                                                                                                     |
+| `spotlightMarkerKey`   | `string \| null`           | `null`  | Transient zoom spotlight target; emits one outgoing ring animation, then returns to previous visual state                                                                                                                                                                                                                 |
+
+### Marker Visual Priority
+
+1. Base marker (`none`)
+2. Selected marker (`selected`) — persistent
+3. Linked hover (`linked-hover`) — while pointer is over corresponding item/marker
+4. Spotlight (`spotlight`) — one-shot emphasis pulse for zoom-to-location
+
+`spotlight` can be layered on top of `selected` so already selected markers can still receive extra emphasis.
+
+### Marker Interaction State Machine
+
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+
+  Idle --> Selected: marker selected
+  Selected --> Idle: selection cleared
+
+  Idle --> LinkedHover: workspace-item hover / marker hover-link
+  Selected --> SelectedLinkedHover: workspace-item hover / marker hover-link
+  LinkedHover --> Idle: hover leave
+  SelectedLinkedHover --> Selected: hover leave
+
+  Idle --> Spotlight: zoom spotlight trigger
+  Selected --> SelectedSpotlight: zoom spotlight trigger
+  LinkedHover --> SpotlightLinkedHover: zoom spotlight trigger
+  SelectedLinkedHover --> SelectedSpotlightLinkedHover: zoom spotlight trigger
+
+  Spotlight --> Idle: pulse done
+  SelectedSpotlight --> Selected: pulse done
+  SpotlightLinkedHover --> LinkedHover: pulse done
+  SelectedSpotlightLinkedHover --> SelectedLinkedHover: pulse done
+
+  note right of Spotlight
+    Spotlight is transient.
+    No persistent glowing border
+    after pulse ends.
+  end note
+```
 
 ## Viewport-Driven Marker Lifecycle
 
@@ -338,6 +383,9 @@ sequenceDiagram
 - The Map Shell passes `corrected` and `uploading` flags to `buildPhotoMarkerHtml()` when building or refreshing marker icons. `corrected` is derived from comparing current coordinates to EXIF originals. `uploading` is set during the upload lifecycle and cleared on completion or error.
 - The Map Shell includes the `direction` column in the initial-load and viewport queries so that bearing-based direction cones render for all markers, not only freshly uploaded ones.
 - Marker click handling opens the Workspace Pane for both single markers and cluster markers. Single marker click selects one image; cluster marker click fetches all image IDs for the cluster cell, populates Active Selection with those IDs, and signals the Workspace Pane to open. The map never zooms or re-centers on cluster click.
+- Zoom-to-location intent from Image Detail View recenters map at detail zoom and starts a deferred spotlight. Spotlight starts only when marker DOM is render-ready; pending requests are re-flushed after viewport marker reconciliation.
+- If the exact image marker is unavailable due to clustering, spotlight falls back to the nearest eligible cluster marker.
+- Cross-surface hover-link wiring is bidirectional: Workspace Pane hover highlights marker; map marker hover highlights the matching workspace item.
 - Hover direction cones are driven by CSS `:hover` on desktop. Touch long-press direction cones require a Leaflet pointer-event listener (~500 ms threshold) that toggles a `data-long-pressed` attribute or class.
 - The Map Shell subscribes to `UploadManagerService.imageReplaced$` to update marker thumbnails when a photo is replaced in the detail view. On event, it looks up the marker via `markersByImageId`, reads the blob URL from `PhotoLoadService` cache, rebuilds the DivIcon, and calls `marker.setIcon()`.
 - The Map Shell subscribes to `UploadManagerService.imageAttached$` to update markers when a photo is attached to a photoless row. Same lookup and rebuild flow as `imageReplaced$`, reading the blob URL from `PhotoLoadService`.
@@ -360,6 +408,12 @@ sequenceDiagram
 
 - [x] Click selects image and opens workspace pane — `handlePhotoMarkerClick()` calls `setSelectedMarker()` + `photoPanelOpen.set(true)`
 - [x] Selected markers have a clear visual state — `.map-photo-marker--selected` applies accent ring + `scale(1.05)`
+- [ ] Linked hover state exists as a secondary emphasis independent from selection (`linked-hover` class/signal)
+- [ ] Zoom spotlight is transient: one outgoing pulse only, no persistent glow when pulse completes
+- [ ] Zoom spotlight executes after render-ready (marker exists, visible, map movement settled)
+- [ ] If target image is clustered, nearest cluster marker receives spotlight fallback
+- [ ] Hovering a workspace item highlights the corresponding map marker
+- [ ] Hovering a map marker highlights the corresponding workspace item
 - [ ] Ctrl+click adds to Active Selection without clearing previous selection (blocked — requires `SelectionService`)
 - [ ] Long-press + tap provides mobile equivalent of multi-select (blocked — requires `SelectionService`)
 - [ ] Right-click opens context menu (view detail, edit location, manage projects) — see `photo-marker-context-menu.md`

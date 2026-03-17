@@ -50,6 +50,9 @@ When one or more media items are selected, a bottom-aligned Workspace Export Bar
 | 12  | Uses export bar actions                       | Opens curation/share/download dialogs and executes batch actions for selected media                                                    | Workspace export wiring                            |
 | 13  | Opens pane from `Media Marker hier erstellen` | Workspace opens with draft media-marker selected and upload prompt focused                                                             | `draftMediaMarker != null`                         |
 | 14  | Dismisses draft pane without uploading media  | Pane closes draft flow and signals map to remove ephemeral marker                                                                      | `draftMediaMarker.uploadCount === 0`               |
+| 15  | Hovers media item in workspace list/grid      | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer    | `hoveredWorkspaceImageId`                          |
+| 16  | Hovers marker on map                          | Matching workspace media item receives linked-hover highlight state                                                                    | `hoveredMarkerImageId` / cluster hover payload     |
+| 17  | Leaves hover (either side)                    | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                          | hover clear events                                 |
 
 ### Interaction Flowchart
 
@@ -106,19 +109,22 @@ BottomSheet                                ← fixed bottom, full width
 
 ## State
 
-| Name                    | Type                                                                          | Default       | Controls                                                                                                         |
-| ----------------------- | ----------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `isOpen`                | `boolean`                                                                     | `false`       | Pane visibility                                                                                                  |
-| `width`                 | `number`                                                                      | `320`         | Desktop pane width in px                                                                                         |
-| `activeTabId`           | `string`                                                                      | `'selection'` | Which group tab is active                                                                                        |
-| `detailImageId`         | `string \| null`                                                              | `null`        | If set, show detail view instead of grid                                                                         |
-| `activeClusterImageIds` | `string[] \| null`                                                            | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
-| `mobileSnapPoint`       | `'minimized' \| 'half' \| 'full'`                                             | `'minimized'` | Mobile bottom sheet position                                                                                     |
-| `isFullscreen`          | `boolean`                                                                     | `false`       | Fullscreen workspace mode (desktop right→left full-width canvas)                                                 |
-| `restoreWidth`          | `number \| null`                                                              | `null`        | Stored desktop width to restore after fullscreen                                                                 |
-| `restoreSnapPoint`      | `'minimized' \| 'half' \| 'full' \| null`                                     | `null`        | Stored mobile snap point to restore after fullscreen                                                             |
-| `selectedMediaIds`      | `Set<string>`                                                                 | empty set     | Current media selection that drives Workspace Export Bar visibility and actions                                  |
-| `draftMediaMarker`      | `{ markerId: string; lat: number; lng: number; uploadCount: number } \| null` | `null`        | Active draft marker context created by map context menu action                                                   |
+| Name                      | Type                                                                          | Default       | Controls                                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `isOpen`                  | `boolean`                                                                     | `false`       | Pane visibility                                                                                                  |
+| `width`                   | `number`                                                                      | `320`         | Desktop pane width in px                                                                                         |
+| `activeTabId`             | `string`                                                                      | `'selection'` | Which group tab is active                                                                                        |
+| `detailImageId`           | `string \| null`                                                              | `null`        | If set, show detail view instead of grid                                                                         |
+| `activeClusterImageIds`   | `string[] \| null`                                                            | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
+| `mobileSnapPoint`         | `'minimized' \| 'half' \| 'full'`                                             | `'minimized'` | Mobile bottom sheet position                                                                                     |
+| `isFullscreen`            | `boolean`                                                                     | `false`       | Fullscreen workspace mode (desktop right→left full-width canvas)                                                 |
+| `restoreWidth`            | `number \| null`                                                              | `null`        | Stored desktop width to restore after fullscreen                                                                 |
+| `restoreSnapPoint`        | `'minimized' \| 'half' \| 'full' \| null`                                     | `null`        | Stored mobile snap point to restore after fullscreen                                                             |
+| `selectedMediaIds`        | `Set<string>`                                                                 | empty set     | Current media selection that drives Workspace Export Bar visibility and actions                                  |
+| `draftMediaMarker`        | `{ markerId: string; lat: number; lng: number; uploadCount: number } \| null` | `null`        | Active draft marker context created by map context menu action                                                   |
+| `hoveredWorkspaceImageId` | `string \| null`                                                              | `null`        | Current workspace item under pointer for map-linked hover highlight                                              |
+| `hoveredMarkerImageId`    | `string \| null`                                                              | `null`        | Current map marker image reference mirrored into workspace linked-hover                                          |
+| `hoveredMarkerClusterKey` | `string \| null`                                                              | `null`        | Current hovered cluster marker key used to highlight all matching workspace items                                |
 
 ## File Map
 
@@ -154,6 +160,33 @@ sequenceDiagram
   Pane->>View: keep active selection context
   User->>Pane: Exit fullscreen (Esc/button)
   Pane-->>Shell: restore width/snap
+```
+
+### Hover Link Flow (Map ↔ Workspace)
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Pane as WorkspacePaneComponent
+  participant Shell as MapShellComponent
+  participant Markers as PhotoMarker Layer
+
+  User->>Pane: Hover workspace item
+  Pane-->>Shell: hoverWorkspaceImage(imageId)
+  Shell->>Markers: apply linked-hover marker class
+
+  User->>Markers: Hover marker
+  Markers-->>Shell: markerHover(imageId or clusterKey)
+  Shell-->>Pane: set hoveredMarkerImageId/clusterKey
+  Pane->>Pane: render linked-hover item state
+
+  User->>Pane: Pointer leave
+  Pane-->>Shell: clearWorkspaceHover()
+  Shell->>Markers: remove linked-hover marker class
+
+  User->>Markers: Pointer leave
+  Markers-->>Shell: clearMarkerHover()
+  Shell-->>Pane: clear hovered marker state
 ```
 
 - Imported in `MapShellComponent` template, placed after Map Zone
@@ -198,6 +231,10 @@ flowchart LR
 - [ ] Selection and export state persist through fullscreen toggle transitions
 - [ ] If pane is opened from `Media Marker hier erstellen`, upload prompt is focused for the draft marker context
 - [ ] If draft pane is dismissed with zero uploads, pane clears draft context and marker is removed from map
+- [ ] Hovering a workspace item applies linked-hover marker highlight on the map
+- [ ] Hovering a marker applies linked-hover item highlight in the workspace list/grid
+- [ ] Linked-hover is additive to selected state (selected + extra emphasis can coexist)
+- [ ] Clearing hover removes linked-hover only; selected state remains intact
 - [ ] Cluster click opens pane with Active Selection tab active
 - [ ] Active Selection tab shows all images that belong to the clicked cluster
 - [ ] Pane header shows image count when cluster content is loaded (e.g., "12 photos")
