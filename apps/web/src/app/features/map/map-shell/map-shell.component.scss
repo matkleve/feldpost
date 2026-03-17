@@ -185,6 +185,31 @@
   overflow: hidden;
 }
 
+.map-context-menu {
+  position: fixed;
+  z-index: 80;
+  width: 14rem;
+  max-width: calc(100vw - 1rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--elevation-dropdown);
+  overflow: hidden;
+
+  .dd-items {
+    max-height: min(18rem, 52vh);
+    overflow-y: auto;
+  }
+
+  &__header {
+    padding: var(--spacing-2) var(--spacing-3);
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+}
+
 // ── Leaflet container ─────────────────────────────────────────────────────────
 
 .map-container {

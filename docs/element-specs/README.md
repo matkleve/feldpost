@@ -185,6 +185,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 ### Map Markers
 
 - ✅ `photo-marker.md` — Photo Marker (square thumbnail marker + cluster)
+- ✅ `photo-marker-context-menu.md` — Photo Marker Context Menu (right-click/long-press marker actions)
 - ✅ `user-location-marker.md` — GPS user location marker
 
 ### Upload
@@ -220,6 +221,9 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `gps-button.md` — GPS Button (center on user location)
 - ✅ `theme-toggle.md` — Theme Toggle (light / dark / system)
 - ✅ `radius-selection.md` — Radius Selection (right-click-drag circle)
+- ✅ `map-context-menu.md` — Map Context Menu (short right-click actions on empty map)
+- ✅ `map-secondary-click-system.md` — Secondary-click precedence and unified map/marker/radius context menu system
+- ✅ `media-marker-draft-flow.md` — Media Marker Draft Flow (create from map context menu, persist on upload, remove on empty dismiss)
 
 ### Pages
 
@@ -233,6 +237,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
 - ✅ `language-locale-settings.md` — Language & Locale Settings (English/German switch with persistence and formatting context)
+- ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
 
 ### Planned / Missing Specs
 

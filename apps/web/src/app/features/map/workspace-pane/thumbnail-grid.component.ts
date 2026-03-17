@@ -1,17 +1,20 @@
 import {
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   afterNextRender,
   computed,
   inject,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { FilterService } from '../../../core/filter.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
-import { ThumbnailCardComponent } from './thumbnail-card.component';
+import { ThumbnailCardComponent, ThumbnailCardInteraction } from './thumbnail-card.component';
 import { GroupHeaderComponent } from './group-header.component';
 
 /** Flat renderable item — either a group header or a grid of images. */
@@ -22,7 +25,16 @@ type RenderItem =
 @Component({
   selector: 'app-thumbnail-grid',
   template: `
-    <div class="thumbnail-grid" #scrollContainer (scroll)="onScroll()">
+    <div
+      class="thumbnail-grid"
+      [class.thumbnail-grid--row]="viewService.thumbnailSizePreset() === 'row'"
+      [class.thumbnail-grid--small]="viewService.thumbnailSizePreset() === 'small'"
+      [class.thumbnail-grid--medium]="viewService.thumbnailSizePreset() === 'medium'"
+      [class.thumbnail-grid--large]="viewService.thumbnailSizePreset() === 'large'"
+      #scrollContainer
+      (scroll)="onScroll()"
+      [style.--thumbnail-grid-card-size.px]="thumbnailCardSizePx()"
+    >
       @if (viewService.isLoading()) {
         <div class="thumbnail-grid__skeleton">
           @for (i of skeletonCards; track i) {
@@ -58,18 +70,36 @@ type RenderItem =
                 (toggle)="viewService.toggleGroupCollapsed(item.heading)"
               />
             } @else {
-              <div class="thumbnail-grid__cards">
+              <div
+                class="thumbnail-grid__cards"
+                [class.thumbnail-grid__cards--start]="isUnderfilled(item.images.length)"
+              >
                 @for (img of item.images; track img.id) {
-                  <app-thumbnail-card [image]="img" (clicked)="thumbnailClicked.emit($event)" />
+                  <app-thumbnail-card
+                    [image]="img"
+                    [viewMode]="viewService.thumbnailSizePreset()"
+                    [selected]="selectionService.isSelected(img.id)"
+                    (clicked)="thumbnailClicked.emit($event)"
+                    (selectionToggled)="onSelectionToggled($event)"
+                  />
                 }
               </div>
             }
           }
         }
       } @else {
-        <div class="thumbnail-grid__cards">
+        <div
+          class="thumbnail-grid__cards"
+          [class.thumbnail-grid__cards--start]="isUnderfilled(flatImages().length)"
+        >
           @for (img of flatImages(); track img.id) {
-            <app-thumbnail-card [image]="img" (clicked)="thumbnailClicked.emit($event)" />
+            <app-thumbnail-card
+              [image]="img"
+              [viewMode]="viewService.thumbnailSizePreset()"
+              [selected]="selectionService.isSelected(img.id)"
+              (clicked)="thumbnailClicked.emit($event)"
+              (selectionToggled)="onSelectionToggled($event)"
+            />
           }
         </div>
       }
@@ -80,12 +110,27 @@ type RenderItem =
 })
 export class ThumbnailGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
+  protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
+
+  readonly thumbnailCardSizePx = computed(() => {
+    switch (this.viewService.thumbnailSizePreset()) {
+      case 'row':
+        return 96;
+      case 'small':
+        return 96;
+      case 'large':
+        return 160;
+      default:
+        return 128;
+    }
+  });
 
   readonly thumbnailClicked = output<string>();
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
+  readonly maxColumns = signal(1);
 
   readonly sections = computed(() => this.viewService.groupedSections());
 
@@ -128,6 +173,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   constructor() {
     afterNextRender(() => {
       this.scheduleThumbnailSigning();
+      this.updateMaxColumns();
     });
   }
 
@@ -135,6 +181,12 @@ export class ThumbnailGridComponent implements OnDestroy {
     if (this.signBatchTimer) {
       clearTimeout(this.signBatchTimer);
     }
+  }
+
+  isUnderfilled(itemCount: number): boolean {
+    if (this.viewService.thumbnailSizePreset() === 'row') return false;
+    if (this.viewService.thumbnailSizePreset() === 'large') return false;
+    return itemCount > 0 && itemCount < this.maxColumns();
   }
 
   isCollapsed(heading: string): boolean {
@@ -177,6 +229,15 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.scheduleThumbnailSigning();
   }
 
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateMaxColumns();
+  }
+
+  onSelectionToggled(event: ThumbnailCardInteraction): void {
+    this.selectionService.toggle(event.imageId, { additive: event.additive });
+  }
+
   /** Batch-sign thumbnails for currently visible images after a debounce. */
   private scheduleThumbnailSigning(): void {
     if (this.signBatchTimer) clearTimeout(this.signBatchTimer);
@@ -202,5 +263,23 @@ export class ThumbnailGridComponent implements OnDestroy {
       }
     }
     return result;
+  }
+
+  private updateMaxColumns(): void {
+    const host = this.scrollContainerRef()?.nativeElement;
+    if (!host) return;
+
+    const measured = host.clientWidth;
+    if (measured <= 0) {
+      this.maxColumns.set(1);
+      return;
+    }
+
+    const styles = getComputedStyle(host);
+    const gapValue = styles.getPropertyValue('--spacing-2').trim();
+    const gap = Number.parseFloat(gapValue || '8') || 8;
+    const cardWidth = this.thumbnailCardSizePx();
+    const columns = Math.max(1, Math.floor((measured + gap) / (cardWidth + gap)));
+    this.maxColumns.set(columns);
   }
 }

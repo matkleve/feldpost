@@ -63,3 +63,6 @@ export interface FilterRule {
   operator: string;
   value: string;
 }
+
+/** Discrete thumbnail size presets used by snap-slider controls. */
+export type ThumbnailSizePreset = 'row' | 'small' | 'medium' | 'large';

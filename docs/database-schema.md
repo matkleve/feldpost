@@ -488,7 +488,55 @@ RLS: Users can only access their own groups (see `security-boundaries.md`).
 
 ---
 
-## 11. Coordinate Correction History
+## 11. Share Set Tables (Export Links)
+
+Table: `share_sets`
+
+Purpose: Persist stable, tokenized media selections for export/share links within an organization scope.
+
+Columns:
+
+- `id` (uuid, primary key, default `gen_random_uuid()`)
+- `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
+- `created_by` (uuid, references `auth.users(id)` ON DELETE SET NULL)
+- `token_hash` (text, not null, unique) — SHA-256 (or equivalent) hash of opaque token; raw token is never stored.
+- `token_prefix` (text, not null) — short diagnostic prefix for support/debug without exposing full token.
+- `fingerprint` (text, not null) — deterministic hash of normalized media ID set for reuse semantics.
+- `expires_at` (timestamptz, nullable) — link validity window end.
+- `revoked_at` (timestamptz, nullable) — immediate invalidation marker.
+- `created_at` (timestamptz, not null, default `now()`)
+
+Indexes / Constraints:
+
+- `UNIQUE (token_hash)`
+- Partial unique index `(organization_id, fingerprint)` where `revoked_at IS NULL` for active-set reuse
+- Lookup index `(organization_id, token_hash)` where `revoked_at IS NULL`
+
+Table: `share_set_items`
+
+Purpose: Ordered membership mapping between a share set and its media items.
+
+Columns:
+
+- `share_set_id` (uuid, not null, references `share_sets(id)` ON DELETE CASCADE)
+- `image_id` (uuid, not null, references `images(id)` ON DELETE CASCADE)
+- `item_order` (int, not null) — deterministic display/export order.
+- `created_at` (timestamptz, not null, default `now()`)
+
+Primary Key: (`share_set_id`, `image_id`)
+
+Index:
+
+- `(share_set_id, item_order)` for ordered resolution
+
+RLS:
+
+- `share_sets`: org-scoped read for authenticated users; creator/admin write controls.
+- `share_set_items`: access inherits from parent `share_sets` policy checks.
+
+---
+
+## 12. Coordinate Correction History
 
 Table: `coordinate_corrections`
 
@@ -509,7 +557,7 @@ This table is append-only. A trigger on `images` captures the previous effective
 
 ---
 
-## 12. Foreign Key Cascade Summary
+## 13. Foreign Key Cascade Summary
 
 ### Cascade Flow Diagram
 
@@ -520,18 +568,22 @@ flowchart TD
         U -->|CASCADE| UR[user_roles]
         U -->|CASCADE| I[images]
         U -->|CASCADE| SG[saved_groups]
+        U -->|SET NULL| SS[share_sets.created_by]
         U -->|CASCADE| CC[coordinate_corrections]
         U -->|SET NULL| PR[projects.created_by]
         U -->|SET NULL| MK[metadata_keys.created_by]
         I -->|CASCADE| IM[image_metadata]
         I -->|CASCADE| CC2[coordinate_corrections]
         I -->|CASCADE| SGI[saved_group_images]
+        I -->|CASCADE| SSI[share_set_items]
         SG -->|CASCADE| SGI2[saved_group_images]
+        SS -->|CASCADE| SSI2[share_set_items]
     end
 
     subgraph "DELETE organizations"
         O[organizations] -->|CASCADE| PR2[projects]
         O -->|CASCADE| I2[images]
+        O -->|CASCADE| SS2[share_sets]
         O -->|CASCADE| MK2[metadata_keys]
         O -.->|RESTRICT| P2[profiles — blocked if members exist]
     end
@@ -554,9 +606,11 @@ flowchart TD
 | `auth.users`    | `coordinate_corrections` | `corrected_by`    | CASCADE   | Audit trail tied to user                      |
 | `auth.users`    | `projects`               | `created_by`      | SET NULL  | Project survives; authorship becomes unknown  |
 | `auth.users`    | `metadata_keys`          | `created_by`      | SET NULL  | Key survives; creator becomes unknown         |
+| `auth.users`    | `share_sets`             | `created_by`      | SET NULL  | Shared set survives user deletion             |
 | `organizations` | `profiles`               | `organization_id` | RESTRICT  | Cannot delete org with active users           |
 | `organizations` | `projects`               | `organization_id` | CASCADE   | Org deletion removes all projects             |
 | `organizations` | `images`                 | `organization_id` | CASCADE   | Org deletion removes all images               |
+| `organizations` | `share_sets`             | `organization_id` | CASCADE   | Org deletion removes all shared export sets   |
 | `organizations` | `metadata_keys`          | `organization_id` | CASCADE   | Org deletion removes all metadata keys        |
 | `roles`         | `user_roles`             | `role_id`         | CASCADE   | Removing a role unassigns it                  |
 | `images`        | `image_projects`         | `image_id`        | CASCADE   | Deleting image removes memberships            |
@@ -565,6 +619,8 @@ flowchart TD
 | `images`        | `coordinate_corrections` | `image_id`        | CASCADE   | History is image-scoped                       |
 | `images`        | `saved_group_images`     | `image_id`        | CASCADE   | Deleting image removes it from groups         |
 | `saved_groups`  | `saved_group_images`     | `group_id`        | CASCADE   | Deleting group removes memberships            |
+| `images`        | `share_set_items`        | `image_id`        | CASCADE   | Deleting image removes it from shared sets    |
+| `share_sets`    | `share_set_items`        | `share_set_id`    | CASCADE   | Deleting/revoking set removes memberships     |
 | `metadata_keys` | `image_metadata`         | `metadata_key_id` | CASCADE   | Removing a key removes all values             |
 
 **Key design decisions:**

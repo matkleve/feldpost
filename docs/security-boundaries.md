@@ -169,6 +169,23 @@ Note: `images.organization_id` is denormalized from `profiles.organization_id` f
   - **SELECT**: Readable by the image owner and admins (audit trail).
   - **UPDATE / DELETE**: Not allowed (append-only audit log).
 
+### 3.8 Share Sets (Export Links)
+
+- `share_sets`:
+  - **SELECT**: Authenticated users within same org (`organization_id = user_org_id()`), and only if not revoked and not expired.
+  - **INSERT**: Creator must be `auth.uid()`, org must match `user_org_id()`, viewers cannot create.
+  - **UPDATE / DELETE**: Creator or org admin only.
+- `share_set_items`:
+  - **SELECT**: Allowed only if parent `share_sets` row is visible under the same constraints.
+  - **INSERT / DELETE**: Creator or org admin through parent set ownership.
+
+Token security rules:
+
+- Raw share token is never stored; only hash (`token_hash`) is persisted.
+- Resolve flow hashes incoming token server-side and compares against `token_hash`.
+- Revoked or expired sets return no media rows.
+- Cross-org token usage always returns denied/empty result.
+
 ### Role Check Logic (Conceptual)
 
 ```sql

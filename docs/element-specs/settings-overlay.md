@@ -24,8 +24,10 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 | 4   | Load fails                                 | Shows error state with retry action                                         | Supabase/service error                |
 | 5   | Clicks Retry                               | Re-runs profile/preference load and returns to loading state                | Retry button in error state           |
 | 6   | Selects section in left list               | Right detail area switches to selected section component                    | `selectedSectionId` signal update     |
-| 7   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                 | Backdrop click / Escape key           |
-| 8   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing               | sidebar expansion signal              |
+| 7   | Selects `Konto` section                    | Renders identity info and account-session actions (`Logout`)                | account section selection             |
+| 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status     | shortcuts section selection           |
+| 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                 | Backdrop click / Escape key           |
+| 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing               | sidebar expansion signal              |
 
 ```mermaid
 flowchart TD
@@ -113,7 +115,7 @@ stateDiagram-v2
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`                        | Overlay styling, dividers, and two-column layout                  |
 | `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`                           | Registry token and section registration contract                  |
 | `apps/web/src/app/features/settings-overlay/settings-section-outlet.component.ts`                   | Dynamic section host component                                    |
-| `apps/web/src/app/features/settings-overlay/sections/profile-settings-section.component.ts`         | Account/Profile section implementation                            |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`                          | Overlay shell including account/session section logout flow       |
 | `apps/web/src/app/features/settings-overlay/sections/theme-settings-section.component.ts`           | Theme section implementation                                      |
 | `apps/web/src/app/features/settings-overlay/sections/language-locale-settings-section.component.ts` | Language/locale section implementation                            |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.spec.ts`                     | Overlay behavior tests (open/load/error/retry/dismiss/reposition) |
@@ -190,6 +192,7 @@ sequenceDiagram
 - [ ] Click-outside/Escape dismiss closes immediately and discards unsaved changes.
 - [ ] Section list is registry-driven and supports adding new sections without shell edits.
 - [ ] Language/Locale section integration provides English and German switching behavior.
+- [ ] `Konto` section exposes logout as the session action and does not render a local `Close settings` action.
 - [ ] Profile/preference reads/writes are delegated through `UserProfileService` (Supabase-backed).
 
 ## Settings
@@ -198,7 +201,7 @@ sequenceDiagram
 - **Notifications**: preference defaults for in-app feedback and alerts.
 - **Language / Locale**: UI language and regional formatting defaults.
 - **Search Tuning**: address/place search filters, ranking weights, penalties, and retry behavior.
-- **Account & Profile**: profile identity fields and account-level controls.
+- **Account & Session**: profile identity context and session termination controls (logout).
 - **Roles & Permissions**: role-based capability visibility and access constraints.
 - **Data & Storage**: data retention/export/cache/storage defaults.
 - **QR Invite Preferences**: default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites.
@@ -206,3 +209,4 @@ sequenceDiagram
 - **Custom Properties**: organization metadata key configuration defaults.
 - **Map Preferences**: map tile and map-behavior defaults.
 - **Workspace Sort Defaults**: default sorting and ordering preferences.
+- **Interaction & Shortcuts**: grouped keyboard shortcut reference by category, including implementation status visibility.

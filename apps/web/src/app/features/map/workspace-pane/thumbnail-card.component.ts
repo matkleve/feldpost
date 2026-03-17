@@ -1,41 +1,79 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import type { WorkspaceImage } from '../../../core/workspace-view.types';
+import type { ThumbnailSizePreset, WorkspaceImage } from '../../../core/workspace-view.types';
 import { PHOTO_PLACEHOLDER_ICON, PHOTO_NO_PHOTO_ICON } from '../../../core/photo-load.service';
+
+export interface ThumbnailCardInteraction {
+  imageId: string;
+  additive: boolean;
+}
 
 @Component({
   selector: 'app-thumbnail-card',
   template: `
-    <button
+    <article
       class="thumbnail-card"
-      type="button"
-      [attr.aria-label]="'View image ' + image().storagePath"
-      (click)="clicked.emit(image().id)"
+      [class.thumbnail-card--selected]="selected()"
+      [class.thumbnail-card--row]="viewMode() === 'row'"
+      [class.thumbnail-card--medium]="viewMode() === 'medium'"
+      [class.thumbnail-card--large]="viewMode() === 'large'"
     >
-      @if (image().signedThumbnailUrl) {
-        <img
-          class="thumbnail-card__img"
-          [class.thumbnail-card__img--loaded]="!imgLoading()"
-          [src]="image().signedThumbnailUrl"
-          [alt]="'Photo thumbnail'"
-          loading="lazy"
-          (load)="onImgLoad()"
-          (error)="onImgError()"
-        />
-      }
-      @if (!imageReady()) {
-        <div
-          class="thumbnail-card__placeholder"
-          [class.thumbnail-card__placeholder--loading]="isLoading()"
-          [class.thumbnail-card__placeholder--no-photo]="!isLoading()"
-        >
-          <span
-            class="thumbnail-card__placeholder-icon"
-            [class.thumbnail-card__placeholder-icon--no-photo]="!isLoading()"
-            aria-hidden="true"
-          ></span>
+      <button
+        class="thumbnail-card__main"
+        type="button"
+        [attr.aria-label]="'View image ' + image().storagePath"
+        (click)="onCardClick($event)"
+      >
+        <div class="thumbnail-card__media">
+          @if (image().signedThumbnailUrl) {
+            <img
+              class="thumbnail-card__img"
+              [class.thumbnail-card__img--loaded]="!imgLoading()"
+              [src]="image().signedThumbnailUrl"
+              [alt]="'Photo thumbnail'"
+              loading="lazy"
+              (load)="onImgLoad()"
+              (error)="onImgError()"
+            />
+          }
+          @if (!imageReady()) {
+            <div
+              class="thumbnail-card__placeholder"
+              [class.thumbnail-card__placeholder--loading]="isLoading()"
+              [class.thumbnail-card__placeholder--no-photo]="!isLoading()"
+            >
+              <span
+                class="thumbnail-card__placeholder-icon"
+                [class.thumbnail-card__placeholder-icon--no-photo]="!isLoading()"
+                aria-hidden="true"
+              ></span>
+            </div>
+          }
         </div>
-      }
-    </button>
+
+        @if (viewMode() === 'row') {
+          <div class="thumbnail-card__meta" aria-hidden="true">
+            <div class="thumbnail-card__meta-head">
+              <p class="thumbnail-card__title">{{ displayName() }}</p>
+              <p class="thumbnail-card__date">{{ capturedLabel() }}</p>
+            </div>
+            <p class="thumbnail-card__subtitle">{{ subtitle() }}</p>
+          </div>
+        }
+      </button>
+
+      <button
+        class="thumbnail-card__select"
+        type="button"
+        [class.thumbnail-card__select--active]="selected()"
+        [attr.aria-pressed]="selected()"
+        aria-label="Toggle selection"
+        (click)="onSelectClick($event)"
+      >
+        @if (selected()) {
+          <span class="material-icons" aria-hidden="true">check</span>
+        }
+      </button>
+    </article>
   `,
   styleUrl: './thumbnail-card.component.scss',
   host: {
@@ -47,7 +85,36 @@ export class ThumbnailCardComponent {
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   readonly image = input.required<WorkspaceImage>();
+  readonly viewMode = input<ThumbnailSizePreset>('medium');
+  readonly selected = input(false);
   readonly clicked = output<string>();
+  readonly selectionToggled = output<ThumbnailCardInteraction>();
+  readonly displayName = computed(() => {
+    const storagePath = this.image().storagePath;
+    if (!storagePath) return 'Image';
+    const parts = storagePath.split('/');
+    return parts[parts.length - 1] || storagePath;
+  });
+  readonly subtitle = computed(() => {
+    const project = this.image().projectName;
+    const city = this.image().city;
+    if (project && city) return `${project} · ${city}`;
+    if (project) return project;
+    if (city) return city;
+    return 'Photo';
+  });
+  readonly capturedLabel = computed(() => {
+    const input = this.image().capturedAt ?? this.image().createdAt;
+    const date = new Date(input);
+    if (Number.isNaN(date.getTime())) return 'Unbekannt';
+    return new Intl.DateTimeFormat('de-AT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  });
   /** True while the <img> element is still loading from network. */
   readonly imgLoading = signal(true);
   /** True when the <img> errored (broken URL). */
@@ -62,6 +129,23 @@ export class ThumbnailCardComponent {
   readonly imageReady = computed(
     () => !!this.image().signedThumbnailUrl && !this.imgLoading() && !this.imgErrored(),
   );
+
+  onCardClick(event: MouseEvent): void {
+    if (event.ctrlKey || event.metaKey) {
+      this.selectionToggled.emit({ imageId: this.image().id, additive: true });
+      return;
+    }
+
+    this.clicked.emit(this.image().id);
+  }
+
+  onSelectClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectionToggled.emit({
+      imageId: this.image().id,
+      additive: !!(event.ctrlKey || event.metaKey),
+    });
+  }
 
   onImgLoad(): void {
     this.imgLoading.set(false);

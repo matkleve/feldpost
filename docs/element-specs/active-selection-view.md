@@ -3,6 +3,7 @@
 > **Blueprint:** (pending — implement after foundation services are built)
 > **Use cases:** [use-cases/workspace-view.md](../use-cases/workspace-view.md)
 > **Architecture:** [workspace-view-system.md](workspace-view-system.md) (data pipeline, service contracts, RPC)
+> **Export interactions:** [workspace-export-bar.md](workspace-export-bar.md), [use-cases/workspace-export.md](../use-cases/workspace-export.md)
 
 ## What It Is
 
@@ -48,6 +49,11 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 | 12  | New cluster/radius selection on map      | Replaces current Active Selection images, resets to unfiltered state                                     | `rawImages` replaced         |
 | 13  | Closes workspace pane                    | Active Selection cleared, all toolbar state reset                                                        | `rawImages` cleared          |
 | 14  | Hovers a thumbnail card                  | Reveals quiet actions: checkbox (multi-select), add-to-group, more (⋯)                                   | Quiet Actions pattern        |
+| 15  | Checks one or more thumbnail checkboxes  | Selection set updates and Workspace Export Bar appears with selected count and actions                   | `selectedMediaIds.size > 0`  |
+| 16  | Clicks `Add to project` in export bar    | Opens bulk project picker and assigns all selected media to target project(s)                            | Bulk curation action         |
+| 17  | Clicks `Change address` in export bar    | Opens bulk address editor and updates address fields for all selected media                              | Bulk curation action         |
+| 18  | Clicks `Delete` in export bar            | Opens destructive confirmation and deletes all selected media on confirm                                 | Bulk curation action         |
+| 19  | Clicks "Select none" in export bar       | Clears current selection and hides Workspace Export Bar                                                  | `selectedMediaIds.size = 0`  |
 
 ## Component Hierarchy
 
@@ -65,6 +71,7 @@ ActiveSelectionView                        ← content area within WorkspacePane
 │
 ├── [no grouping] ThumbnailGrid            ← virtual-scrolled flat grid (see thumbnail-grid spec)
 │   └── ThumbnailCard × N                  ← 128×128 each (see thumbnail-card spec)
+│       └── SelectionCheckbox              ← top-left on hover/focus, always visible when selected
 │
 └── [grouping active] GroupedContent       ← virtual scroll with interleaved headers + grids
     └── GroupedSection × N                 ← one per group
@@ -75,6 +82,8 @@ ActiveSelectionView                        ← content area within WorkspacePane
         │   └── .ui-spacer
         ├── ThumbnailGrid                  ← grid of this section's images
         └── [nested] GroupedSection × N    ← multi-level grouping (indented 1.5rem per level)
+
+    [selectedMediaIds.size > 0] WorkspaceExportBar  ← bottom action surface for share/copy/download
 ```
 
 ## Data

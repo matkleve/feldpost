@@ -7,9 +7,11 @@ The right-side panel that shows image groups, thumbnails, and detail views. It's
 **Related docs:**
 
 - Interaction scenarios: [use-cases/map-shell.md](../use-cases/map-shell.md) (IS-2, IS-3, IS-4)
+- Map context scenarios: [use-cases/map-context-menu.md](../use-cases/map-context-menu.md) (MCM-2, MCM-3, MCM-4)
+- Export scenarios: [use-cases/workspace-export.md](../use-cases/workspace-export.md)
 - Implementation blueprint: [implementation-blueprints/workspace-pane.md](../implementation-blueprints/workspace-pane.md)
 - Parent spec: [map-shell](map-shell.md)
-- Child specs: [drag-divider](drag-divider.md), [group-tab-bar](group-tab-bar.md), [active-selection-view](active-selection-view.md), [thumbnail-grid](thumbnail-grid.md), [image-detail-view](image-detail-view.md)
+- Child specs: [drag-divider](drag-divider.md), [group-tab-bar](group-tab-bar.md), [active-selection-view](active-selection-view.md), [thumbnail-grid](thumbnail-grid.md), [image-detail-view](image-detail-view.md), [workspace-export-bar](workspace-export-bar.md)
 - Product use cases: UC1 (Technician on Site) §6–7, UC2 (Clerk Preparing a Quote) §6–10
 
 ## What It Looks Like
@@ -17,6 +19,8 @@ The right-side panel that shows image groups, thumbnails, and detail views. It's
 **Desktop:** 320px wide by default, resizable 280–640px via Drag Divider. Uses the shared `.ui-container` panel shell so the workspace aligns with the same outer radius and panel padding language as other app surfaces. `--color-bg-surface` background. Slides in from the right edge when opened. Contains Group Tab Bar at top, content area below (thumbnail grid or image detail).
 
 Pane header includes a Notion-like fullscreen toggle button at top-right. Fullscreen mode expands the workspace pane from right to left until it spans the full content width (edge-to-edge workspace canvas). Divider resize affordances are hidden while active.
+
+When one or more media items are selected, a bottom-aligned Workspace Export Bar appears inside the pane content stack. The bar spans full pane width and provides bulk selection, curation, and export actions (select all, select none, add to project, change address, delete, share link, copy link, download ZIP) without leaving the pane context.
 
 **Mobile:** Bottom Sheet with drag handle. Three snap points: minimized (64px, shows handle + group name), half-screen (50vh, shows thumbnails), full-screen (100vh, shows detail). Map stays interactive in minimized and half-screen states.
 
@@ -41,6 +45,11 @@ Pane header includes a Notion-like fullscreen toggle button at top-right. Fullsc
 | 7   | Selects a group tab                           | Content switches to that group's thumbnails                                                                                            | Active tab change                                  |
 | 8   | Clicks fullscreen button in pane header       | Workspace enters fullscreen mode (desktop: expands pane right→left to full content width; mobile: snaps to full and locks)             | `isFullscreen` → true                              |
 | 9   | Clicks fullscreen button again or presses Esc | Workspace exits fullscreen and restores prior width/snap                                                                               | `isFullscreen` → false                             |
+| 10  | Selects one or more media items               | Workspace Export Bar animates in at pane bottom                                                                                        | `selectedMediaIds.size > 0`                        |
+| 11  | Clears last selected item                     | Workspace Export Bar animates out                                                                                                      | `selectedMediaIds.size === 0`                      |
+| 12  | Uses export bar actions                       | Opens curation/share/download dialogs and executes batch actions for selected media                                                    | Workspace export wiring                            |
+| 13  | Opens pane from `Media Marker hier erstellen` | Workspace opens with draft media-marker selected and upload prompt focused                                                             | `draftMediaMarker != null`                         |
+| 14  | Dismisses draft pane without uploading media  | Pane closes draft flow and signals map to remove ephemeral marker                                                                      | `draftMediaMarker.uploadCount === 0`               |
 
 ### Interaction Flowchart
 
@@ -83,6 +92,7 @@ WorkspacePane                              ← `.ui-container` right panel (desk
 └── ContentArea                            ← switches between:
     ├── ThumbnailGrid                      ← default view (see thumbnail-grid spec)
     └── [detail selected] ImageDetailView  ← replaces grid (see image-detail-view spec)
+└── [selected > 0] WorkspaceExportBar      ← bottom action surface (see workspace-export-bar spec)
 ```
 
 ### Bottom Sheet (mobile variant)
@@ -96,17 +106,19 @@ BottomSheet                                ← fixed bottom, full width
 
 ## State
 
-| Name                    | Type                                      | Default       | Controls                                                                                                         |
-| ----------------------- | ----------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `isOpen`                | `boolean`                                 | `false`       | Pane visibility                                                                                                  |
-| `width`                 | `number`                                  | `320`         | Desktop pane width in px                                                                                         |
-| `activeTabId`           | `string`                                  | `'selection'` | Which group tab is active                                                                                        |
-| `detailImageId`         | `string \| null`                          | `null`        | If set, show detail view instead of grid                                                                         |
-| `activeClusterImageIds` | `string[] \| null`                        | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
-| `mobileSnapPoint`       | `'minimized' \| 'half' \| 'full'`         | `'minimized'` | Mobile bottom sheet position                                                                                     |
-| `isFullscreen`          | `boolean`                                 | `false`       | Fullscreen workspace mode (desktop right→left full-width canvas)                                                 |
-| `restoreWidth`          | `number \| null`                          | `null`        | Stored desktop width to restore after fullscreen                                                                 |
-| `restoreSnapPoint`      | `'minimized' \| 'half' \| 'full' \| null` | `null`        | Stored mobile snap point to restore after fullscreen                                                             |
+| Name                    | Type                                                                          | Default       | Controls                                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `isOpen`                | `boolean`                                                                     | `false`       | Pane visibility                                                                                                  |
+| `width`                 | `number`                                                                      | `320`         | Desktop pane width in px                                                                                         |
+| `activeTabId`           | `string`                                                                      | `'selection'` | Which group tab is active                                                                                        |
+| `detailImageId`         | `string \| null`                                                              | `null`        | If set, show detail view instead of grid                                                                         |
+| `activeClusterImageIds` | `string[] \| null`                                                            | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
+| `mobileSnapPoint`       | `'minimized' \| 'half' \| 'full'`                                             | `'minimized'` | Mobile bottom sheet position                                                                                     |
+| `isFullscreen`          | `boolean`                                                                     | `false`       | Fullscreen workspace mode (desktop right→left full-width canvas)                                                 |
+| `restoreWidth`          | `number \| null`                                                              | `null`        | Stored desktop width to restore after fullscreen                                                                 |
+| `restoreSnapPoint`      | `'minimized' \| 'half' \| 'full' \| null`                                     | `null`        | Stored mobile snap point to restore after fullscreen                                                             |
+| `selectedMediaIds`      | `Set<string>`                                                                 | empty set     | Current media selection that drives Workspace Export Bar visibility and actions                                  |
+| `draftMediaMarker`      | `{ markerId: string; lat: number; lng: number; uploadCount: number } \| null` | `null`        | Active draft marker context created by map context menu action                                                   |
 
 ## File Map
 
@@ -127,9 +139,15 @@ sequenceDiagram
   participant Shell as MapShellComponent
   participant Pane as WorkspacePaneComponent
   participant View as WorkspaceViewService
+  participant Sel as WorkspaceSelectionService
+  participant Export as WorkspaceExportBarComponent
 
   User->>Shell: Open workspace
   Shell->>Pane: isOpen=true, width=320
+  User->>Pane: Select one media item
+  Pane->>Sel: toggleSelection(mediaId)
+  Sel-->>Export: selectedCount=1
+  Export-->>Pane: bottom export bar visible
   User->>Pane: Toggle fullscreen
   Pane->>Pane: cache restoreWidth
   Pane-->>Shell: width=100% (right→left)
@@ -175,6 +193,11 @@ flowchart LR
 - [ ] Fullscreen mode expands workspace pane right→left until it spans full content width and disables divider drag while active
 - [ ] Exiting fullscreen restores prior desktop width or mobile snap point
 - [ ] `Esc` exits fullscreen before other pane-level escape behavior
+- [ ] Workspace Export Bar appears whenever at least one media item is selected
+- [ ] Workspace Export Bar hides when selection count returns to zero
+- [ ] Selection and export state persist through fullscreen toggle transitions
+- [ ] If pane is opened from `Media Marker hier erstellen`, upload prompt is focused for the draft marker context
+- [ ] If draft pane is dismissed with zero uploads, pane clears draft context and marker is removed from map
 - [ ] Cluster click opens pane with Active Selection tab active
 - [ ] Active Selection tab shows all images that belong to the clicked cluster
 - [ ] Pane header shows image count when cluster content is loaded (e.g., "12 photos")

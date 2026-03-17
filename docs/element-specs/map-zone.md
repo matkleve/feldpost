@@ -46,9 +46,14 @@ MapZone                                    ← div, flex-1, relative, overflow-h
 
 ```mermaid
 flowchart LR
-  UI[Map Shell / Map Zone UI] --> MA[MapAdapter]
+  U[User Input] --> UI[Map Shell / Map Zone UI]
+  UI --> MA[MapAdapter]
   MA --> TP1[(Default Tile Provider)]
   MA --> TP2[(Satellite Tile Provider)]
+  MA --> GR[Gesture Router]
+  GR --> MCM[Map Context Menu]
+  GR --> PMCM[Photo Marker Context Menu]
+  GR --> RS[Radius Selection]
   UI --> LS[(Local Persistence)]
   LS --> UI
 ```
@@ -83,11 +88,24 @@ sequenceDiagram
   participant MS as MapShellComponent
   participant MA as MapAdapter
   participant LS as LocalStorage
+  participant GR as Gesture Router
 
   U->>MS: Tap Basemap Switch Button
   MS->>MS: mapBasemap = nextState
   MS->>MA: setBaseLayer(mapBasemap)
   MS->>LS: persist mapBasemap
+
+  U->>MA: Secondary press in map zone
+  MA->>GR: pointer intent + target metadata
+  alt target = marker
+    GR->>MS: open marker context menu
+  else target = empty map and drag >= 8px
+    GR->>MS: start/continue radius selection
+  else target = empty map and second right-click handshake matches
+    GR->>MS: allow native browser context menu (skip preventDefault)
+  else target = empty map and no drag
+    GR->>MS: open map context menu
+  end
 ```
 
 - Basemap switch button emits an intent handled by `MapShellComponent`

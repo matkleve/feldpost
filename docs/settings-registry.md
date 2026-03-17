@@ -5,9 +5,10 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 
 | Section | Source Spec | What it configures |
 |---------|-------------|--------------------|
-| Account & Profile | settings-overlay.md | profile identity fields and account-level controls. |
+| Account & Session | settings-overlay.md | profile identity context and session termination controls (logout). |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
+| Export & Sharing | workspace-export-bar.md | default share-link expiration, allow token reuse vs forced regeneration, and whether native-share action is enabled on supported devices. |
 | File Type Visibility | project-mixed-media-pre-spec.md | default selected media families in map/workspace/project views. |
 | Fullscreen Project Mode | project-mixed-media-pre-spec.md | default entry behavior for project detail (inline pane vs fullscreen). |
 | Invite Management | qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
@@ -27,5 +28,6 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Search Tuning | search-tuning-settings.md | address and place search filters, weights, penalties, and retry thresholds. |
 | Search Tuning | settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |
 | Section Rules | project-mixed-media-pre-spec.md | max sections per project, empty-section auto-collapse, and deletion confirmation mode. |
+| Selection Bulk Actions | workspace-export-bar.md | default delete confirmation behavior, whether address-change requires non-empty validation, and which project targets are shown first (recent vs alphabetical). |
 | Theme | settings-overlay.md | active theme mode and persistence behavior. |
 | Workspace Sort Defaults | settings-overlay.md | default sorting and ordering preferences. |

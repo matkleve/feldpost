@@ -9,9 +9,12 @@ import type {
   GroupedSection,
   SortConfig,
   PropertyRef,
+  ThumbnailSizePreset,
 } from './workspace-view.types';
 
 const DEFAULT_SORTS: SortConfig[] = [{ key: 'date-captured', direction: 'desc' }];
+const THUMBNAIL_SIZE_PRESET_STORAGE_KEY = 'sitesnap.settings.workspace.thumbnailSizePreset';
+const THUMBNAIL_SIZE_PRESETS: readonly ThumbnailSizePreset[] = ['row', 'small', 'medium', 'large'];
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceViewService {
@@ -27,6 +30,7 @@ export class WorkspaceViewService {
   readonly selectedProjectIds = signal<Set<string>>(new Set());
   readonly activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
   readonly activeGroupings = signal<PropertyRef[]>([]);
+  readonly thumbnailSizePreset = signal<ThumbnailSizePreset>(this.readThumbnailSizePreset());
   readonly collapsedGroups = signal<Set<string>>(new Set());
   readonly isLoading = signal(false);
   /** True once a marker click triggers a load — distinguishes "no selection" from "empty result". */
@@ -170,6 +174,25 @@ export class WorkspaceViewService {
   ): Promise<WorkspaceImage[]> {
     if (cells.length === 0) return [];
 
+    if (cells.length > 1) {
+      const { data, error } = await this.supabase.client.rpc('cluster_images_multi', {
+        p_cells: cells,
+        p_zoom: zoom,
+      });
+
+      if (!error && Array.isArray(data)) {
+        const seen = new Set<string>();
+        const images: WorkspaceImage[] = [];
+        for (const row of data as RawClusterRow[]) {
+          if (seen.has(row.image_id)) continue;
+          seen.add(row.image_id);
+          images.push(mapClusterRow(row));
+        }
+        return images;
+      }
+      // Fallback to per-cell RPCs if the batch RPC is unavailable.
+    }
+
     const results = await Promise.all(
       cells.map((cell) =>
         this.supabase.client.rpc('cluster_images', {
@@ -238,6 +261,11 @@ export class WorkspaceViewService {
       }
       return next;
     });
+  }
+
+  setThumbnailSizePreset(preset: ThumbnailSizePreset): void {
+    this.thumbnailSizePreset.set(preset);
+    this.persistThumbnailSizePreset(preset);
   }
 
   /** Batch-sign thumbnail URLs for a set of images. */
@@ -406,6 +434,21 @@ export class WorkspaceViewService {
     }
 
     return sections;
+  }
+
+  private readThumbnailSizePreset(): ThumbnailSizePreset {
+    if (typeof window === 'undefined') return 'medium';
+    const raw = window.localStorage.getItem(THUMBNAIL_SIZE_PRESET_STORAGE_KEY);
+    if (!raw) return 'medium';
+    if (raw === 'hero') return 'large';
+    return THUMBNAIL_SIZE_PRESETS.includes(raw as ThumbnailSizePreset)
+      ? (raw as ThumbnailSizePreset)
+      : 'medium';
+  }
+
+  private persistThumbnailSizePreset(preset: ThumbnailSizePreset): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(THUMBNAIL_SIZE_PRESET_STORAGE_KEY, preset);
   }
 }
 
