@@ -28,5 +28,6 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Search Tuning | search-tuning-settings.md | address and place search filters, weights, penalties, and retry thresholds. |
 | Search Tuning | settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |
 | Section Rules | project-mixed-media-pre-spec.md | max sections per project, empty-section auto-collapse, and deletion confirmation mode. |
+| Selection Bulk Actions | workspace-export-bar.md | default delete confirmation behavior, whether address-change requires non-empty validation, and which project targets are shown first (recent vs alphabetical). |
 | Theme | settings-overlay.md | active theme mode and persistence behavior. |
 | Workspace Sort Defaults | settings-overlay.md | default sorting and ordering preferences. |

@@ -18,12 +18,13 @@ Grid of 128×128px thumbnail cards, auto-filling the available width (typically 
 
 ## Actions
 
-| #   | User Action        | System Response                                            | Triggers            |
-| --- | ------------------ | ---------------------------------------------------------- | ------------------- |
-| 1   | Scrolls the grid   | More thumbnails load via virtual scrolling                 | Viewport update     |
-| 2   | Clicks a thumbnail | Opens Image Detail View (replaces grid)                    | `detailImageId` set |
-| 3   | Changes sort order | Grid reorders (Date↓, Date↑, Distance, Name)               | `sortOrder` changes |
-| 4   | Hovers a thumbnail | Reveals Thumbnail Card actions (checkbox, add to group, ⋯) | Quiet Actions       |
+| #   | User Action                    | System Response                                                                                                                       | Triggers                    |
+| --- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| 1   | Scrolls the grid               | More thumbnails load via virtual scrolling                                                                                            | Viewport update             |
+| 2   | Clicks a thumbnail             | Opens Image Detail View (replaces grid)                                                                                               | `detailImageId` set         |
+| 3   | Changes sort order             | Grid reorders (Date↓, Date↑, Distance, Name)                                                                                          | `sortOrder` changes         |
+| 4   | Hovers a thumbnail             | Reveals Thumbnail Card actions (checkbox, add to group, ⋯)                                                                            | Quiet Actions               |
+| 5   | Selects one or more thumbnails | Shows Workspace Export Bar with bulk actions for the selected set (`Add to project`, `Change address`, `Delete`, plus export actions) | `selectedMediaIds.size > 0` |
 
 ## Component Hierarchy
 
@@ -32,6 +33,7 @@ ThumbnailGrid                              ← scrollable container, virtual scr
 ├── SortingControls                        ← segmented control: Date↓ | Date↑ | Distance | Name
 ├── GridContainer                          ← CSS grid, auto-fill 128px columns, gap-2
 │   └── ThumbnailCard × N                  ← 128×128 each (see thumbnail-card spec)
+├── [selected > 0] WorkspaceExportBar      ← bulk actions for current selection (see workspace-export-bar spec)
 └── [empty] EmptyState
     ├── "This group is empty"
     ├── "Add images from the map"
@@ -134,4 +136,5 @@ sequenceDiagram
 - [ ] Sorting controls change order immediately
 - [ ] Click on card opens Image Detail View
 - [ ] Hover reveals card actions (Quiet Actions pattern)
+- [ ] Selecting thumbnails opens Workspace Export Bar with `Add to project`, `Change address`, and `Delete` actions for the selected set
 - [ ] Empty state with guidance text and "Go to map" button

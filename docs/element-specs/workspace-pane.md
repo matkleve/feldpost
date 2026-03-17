@@ -19,7 +19,7 @@ The right-side panel that shows image groups, thumbnails, and detail views. It's
 
 Pane header includes a Notion-like fullscreen toggle button at top-right. Fullscreen mode expands the workspace pane from right to left until it spans the full content width (edge-to-edge workspace canvas). Divider resize affordances are hidden while active.
 
-When one or more media items are selected, a bottom-aligned Workspace Export Bar appears inside the pane content stack. The bar spans full pane width and provides bulk selection and export actions (select all, select none, share link, copy link, download ZIP) without leaving the pane context.
+When one or more media items are selected, a bottom-aligned Workspace Export Bar appears inside the pane content stack. The bar spans full pane width and provides bulk selection, curation, and export actions (select all, select none, add to project, change address, delete, share link, copy link, download ZIP) without leaving the pane context.
 
 **Mobile:** Bottom Sheet with drag handle. Three snap points: minimized (64px, shows handle + group name), half-screen (50vh, shows thumbnails), full-screen (100vh, shows detail). Map stays interactive in minimized and half-screen states.
 
@@ -46,7 +46,7 @@ When one or more media items are selected, a bottom-aligned Workspace Export Bar
 | 9   | Clicks fullscreen button again or presses Esc | Workspace exits fullscreen and restores prior width/snap                                                                               | `isFullscreen` → false                             |
 | 10  | Selects one or more media items               | Workspace Export Bar animates in at pane bottom                                                                                        | `selectedMediaIds.size > 0`                        |
 | 11  | Clears last selected item                     | Workspace Export Bar animates out                                                                                                      | `selectedMediaIds.size === 0`                      |
-| 12  | Uses export bar actions                       | Opens share/download dialogs and executes batch export actions                                                                         | Workspace export wiring                            |
+| 12  | Uses export bar actions                       | Opens curation/share/download dialogs and executes batch actions for selected media                                                    | Workspace export wiring                            |
 
 ### Interaction Flowchart
 

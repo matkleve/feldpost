@@ -68,6 +68,12 @@
 .thumbnail-card__select--active {
   background: var(--color-clay);
   border-color: var(--color-clay);
+  color: var(--color-text-inverse, #fff);
+}
+
+.thumbnail-card__select .material-icons {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .thumbnail-card__img {

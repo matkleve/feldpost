@@ -5,11 +5,11 @@
 
 ## What It Is
 
-The Workspace Export Bar is a bottom action surface in the Workspace Pane that appears when at least one media item is selected. It enables batch actions for the current selection: select all/none, share as stable link, copy link, and download as ZIP.
+The Workspace Export Bar is a bottom action surface in the Workspace Pane that appears when at least one media item is selected. It enables batch actions for the current selection across three areas: selection controls (select all/none), curation actions (add to project, change address, delete), and export actions (share as stable link, copy link, download as ZIP).
 
 ## What It Looks Like
 
-The bar is anchored to the bottom edge of the Workspace Pane content area and spans full pane width. Height is 3.5rem (56px) minimum touch target, with horizontal padding 0.75rem (12px) and control gap 0.5rem. Background uses `--color-bg-elevated`, top border `1px` in `--color-border-subtle`, and a soft shadow token used by elevated overlays. It enters with a vertical translate and opacity transition from `docs/design/motion.md` timing tokens. Primary actions are left-to-right: selection controls, count summary, share/download actions.
+The bar is anchored to the bottom edge of the Workspace Pane content area and spans full pane width. Height is 3.5rem (56px) minimum touch target, with horizontal padding 0.75rem (12px) and control gap 0.5rem. Background uses `--color-bg-elevated`, top border `1px` in `--color-border-subtle`, and a soft shadow token used by elevated overlays. It enters with a vertical translate and opacity transition from `docs/design/motion.md` timing tokens. Primary actions are left-to-right: selection controls, count summary, curation actions, then export actions.
 
 Each media card in the thumbnail grid shows a quiet checkbox affordance at top-left on hover/focus, and always-visible when selected. On desktop, multi-select follows common patterns: checkbox click, Ctrl-click on Windows/Linux, Cmd-click on macOS; Shift-range selection is optional but reserved in state model.
 
@@ -29,20 +29,26 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 | 4   | Selects first item                                    | Export bar animates in from bottom                                              | `selectedMediaIds.size` from 0 to 1 |
 | 5   | Clicks `Select all`                                   | Selects all currently scoped items (filtered/grouped result set, not whole DB)  | `selectAllInScope()`                |
 | 6   | Clicks `Select none`                                  | Clears selection, bar animates out                                              | `clearSelection()`                  |
-| 7   | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                            | `shareDialogOpen = true`            |
-| 8   | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs     | `createShareSetToken(ids)`          |
-| 9   | Clicks `Copy link`                                    | Writes resolved URL to clipboard and shows toast                                | `navigator.clipboard.writeText`     |
-| 10  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                  | `navigator.share`                   |
-| 11  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                             | `downloadDialogOpen = true`         |
-| 12  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                         | `startZipExport()`                  |
-| 13  | Edits filename/title                                  | Validates and normalizes safe filename                                          | `exportTitle` validation            |
-| 14  | Presses `Ctrl/Cmd + A` while workspace has focus      | Selects all items in current scope                                              | keyboard selection shortcut         |
-| 15  | Presses `Escape` while export bar is active           | Clears selection and closes bar                                                 | keyboard cancel shortcut            |
-| 16  | Changes sorting/filtering/grouping while items chosen | Keeps selected IDs by identity; selected count includes hidden-but-selected IDs | resilient selection state           |
-| 17  | Opens shared link URL                                 | Resolves token to exact media ID set and renders same set in workspace context  | token resolve flow                  |
-| 18  | Opens shared link from unauthorized org               | Shows access denied state; no media payload returned                            | RLS + org checks                    |
-| 19  | Opens expired shared link                             | Shows expired-link state with retry/request guidance                            | token TTL validation                |
-| 20  | Export encounters partial fetch failures              | Shows recoverable error with retry and "download available only" fallback       | ZIP error path                      |
+| 7   | Clicks `Add to project`                               | Opens project picker dialog scoped to current organization                      | `addToProjectDialogOpen = true`     |
+| 8   | Confirms add to existing project                      | Upserts project memberships for all selected media IDs                           | `bulkAddToProject(ids, projectId)`  |
+| 9   | Clicks `Change address`                               | Opens bulk address editor with preview count                                     | `changeAddressDialogOpen = true`    |
+| 10  | Confirms address change                               | Updates selected media rows with normalized address value                        | `bulkChangeAddress(ids, address)`   |
+| 11  | Clicks `Delete`                                       | Opens destructive confirmation with selected count                               | `deleteDialogOpen = true`           |
+| 12  | Confirms deletion                                     | Deletes selected media rows and related storage references, then clears selection | `bulkDeleteMedia(ids)`              |
+| 13  | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                            | `shareDialogOpen = true`            |
+| 14  | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs     | `createShareSetToken(ids)`          |
+| 15  | Clicks `Copy link`                                    | Writes resolved URL to clipboard and shows toast                                | `navigator.clipboard.writeText`     |
+| 16  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                  | `navigator.share`                   |
+| 17  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                             | `downloadDialogOpen = true`         |
+| 18  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                         | `startZipExport()`                  |
+| 19  | Edits filename/title                                  | Validates and normalizes safe filename                                          | `exportTitle` validation            |
+| 20  | Presses `Ctrl/Cmd + A` while workspace has focus      | Selects all items in current scope                                              | keyboard selection shortcut         |
+| 21  | Presses `Escape` while export bar is active           | Clears selection and closes bar                                                 | keyboard cancel shortcut            |
+| 22  | Changes sorting/filtering/grouping while items chosen | Keeps selected IDs by identity; selected count includes hidden-but-selected IDs | resilient selection state           |
+| 23  | Opens shared link URL                                 | Resolves token to exact media ID set and renders same set in workspace context  | token resolve flow                  |
+| 24  | Opens shared link from unauthorized org               | Shows access denied state; no media payload returned                            | RLS + org checks                    |
+| 25  | Opens expired shared link                             | Shows expired-link state with retry/request guidance                            | token TTL validation                |
+| 26  | Export encounters partial fetch failures              | Shows recoverable error with retry and "download available only" fallback       | ZIP error path                      |
 
 ## Component Hierarchy
 
@@ -58,11 +64,27 @@ WorkspacePane
 │   │   └── Button: Select all
 │   ├── SelectionSummary
 │   │   └── Label: "X selected"
+│   ├── CurationActions
+│   │   ├── Button: Add to project
+│   │   ├── Button: Change address
+│   │   └── Button: Delete (danger)
 │   ├── ExportActions
 │   │   ├── Button: Share link
 │   │   ├── Button: Copy link
 │   │   └── Button: Download ZIP
 │   └── [mobile+supported] Button: Native Share
+├── [addToProjectDialogOpen] AddToProjectDialog
+│   ├── ProjectSearch
+│   ├── ProjectList
+│   └── Confirm/CancelButtons
+├── [changeAddressDialogOpen] ChangeAddressDialog
+│   ├── AddressInput
+│   ├── SelectionScopeSummary
+│   └── Confirm/CancelButtons
+├── [deleteDialogOpen] DeleteSelectionDialog
+│   ├── WarningCopy
+│   ├── SelectionScopeSummary
+│   └── Confirm/CancelButtons
 ├── [shareDialogOpen] ShareSelectionDialog
 │   ├── ScopeSummary
 │   ├── LinkField
@@ -82,11 +104,15 @@ WorkspacePane
 ```mermaid
 flowchart LR
   UI[WorkspaceExportBar UI] --> WS[WorkspaceSelectionService]
+  UI --> MB[MediaBulkActionsService]
+  MB --> DBI[(images, image_projects)]
   WS --> SS[ShareSetService]
   SS --> DB[(share_sets, share_set_items)]
   WS --> ZE[ZipExportService]
   ZE --> ST[(Supabase Storage)]
+  MB --> ST
   SS --> UI
+  MB --> UI
   ZE --> UI
 ```
 
@@ -96,6 +122,9 @@ flowchart LR
 | --------------------- | ---------------------------------------- | --------------- | ---------------------------------------------------------- |
 | Selected IDs          | `WorkspaceSelectionService`              | `Set<string>`   | Canonical identity source for export actions               |
 | Selection scope IDs   | `WorkspaceViewService.groupedSections()` | `string[]`      | Used by `Select all` for current filtered/grouped scope    |
+| Project membership    | `MediaBulkActionsService.bulkAddToProject` | mutation result | Upserts selected IDs into `image_projects` for a project   |
+| Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected images address fields in one batch         |
+| Bulk delete mutation  | `MediaBulkActionsService.bulkDeleteMedia` | mutation result | Deletes selected media records with storage cleanup         |
 | Share token           | `ShareSetService`                        | `string`        | URL-safe token, high entropy, deterministic mapping policy |
 | Share-set fingerprint | Backend function                         | `string`        | Hash of sorted media IDs + org context for dedup/lookup    |
 | Share-set rows        | `share_sets`, `share_set_items`          | relational rows | New schema to persist stable shared groups                 |
@@ -271,6 +300,11 @@ erDiagram
 | `selectedMediaIds`      | `WritableSignal<Set<string>>`                              | empty set            | Current selection identity set                   |
 | `lastAnchorId`          | `WritableSignal<string \| null>`                           | `null`               | Optional anchor for future Shift-range selection |
 | `exportBarVisible`      | `Signal<boolean>`                                          | `false`              | Derived from `selectedMediaIds.size > 0`         |
+| `addToProjectDialogOpen` | `WritableSignal<boolean>`                                  | `false`              | Add-to-project dialog visibility                 |
+| `changeAddressDialogOpen` | `WritableSignal<boolean>`                                  | `false`              | Change-address dialog visibility                 |
+| `deleteDialogOpen`      | `WritableSignal<boolean>`                                  | `false`              | Delete confirmation dialog visibility            |
+| `bulkActionStatus`      | `WritableSignal<'idle' \| 'running' \| 'error'>`          | `'idle'`             | Batch curation action lifecycle state            |
+| `busyBulkAction`        | `WritableSignal<'add-project' \| 'change-address' \| 'delete' \| null>` | `null` | Prevents duplicate destructive/slow actions      |
 | `shareDialogOpen`       | `WritableSignal<boolean>`                                  | `false`              | Share dialog visibility                          |
 | `downloadDialogOpen`    | `WritableSignal<boolean>`                                  | `false`              | Download dialog visibility                       |
 | `shareUrl`              | `WritableSignal<string \| null>`                           | `null`               | Generated/loaded share URL                       |
@@ -283,6 +317,7 @@ erDiagram
 ## Settings
 
 - **Export & Sharing**: default share-link expiration, allow token reuse vs forced regeneration, and whether native-share action is enabled on supported devices.
+- **Selection Bulk Actions**: default delete confirmation behavior, whether address-change requires non-empty validation, and which project targets are shown first (recent vs alphabetical).
 
 ## File Map
 
@@ -291,6 +326,15 @@ erDiagram
 | `features/map/workspace-pane/workspace-export-bar.component.ts`        | Bottom action bar component                                  |
 | `features/map/workspace-pane/workspace-export-bar.component.html`      | Template for selection and export actions                    |
 | `features/map/workspace-pane/workspace-export-bar.component.scss`      | Bar layout, transitions, responsive behavior                 |
+| `features/map/workspace-pane/add-to-project-dialog.component.ts`       | Batch add-to-project dialog behavior                         |
+| `features/map/workspace-pane/add-to-project-dialog.component.html`     | Project picker for selected media                            |
+| `features/map/workspace-pane/add-to-project-dialog.component.scss`     | Add-to-project dialog styles                                 |
+| `features/map/workspace-pane/change-address-dialog.component.ts`       | Batch change-address dialog behavior                         |
+| `features/map/workspace-pane/change-address-dialog.component.html`     | Address editor for selected media                            |
+| `features/map/workspace-pane/change-address-dialog.component.scss`     | Change-address dialog styles                                 |
+| `features/map/workspace-pane/delete-selection-dialog.component.ts`     | Batch delete confirmation dialog behavior                    |
+| `features/map/workspace-pane/delete-selection-dialog.component.html`   | Destructive confirmation content                             |
+| `features/map/workspace-pane/delete-selection-dialog.component.scss`   | Delete dialog styles                                         |
 | `features/map/workspace-pane/share-selection-dialog.component.ts`      | Share-link dialog component                                  |
 | `features/map/workspace-pane/share-selection-dialog.component.html`    | Share dialog template                                        |
 | `features/map/workspace-pane/share-selection-dialog.component.scss`    | Share dialog styles                                          |
@@ -298,6 +342,7 @@ erDiagram
 | `features/map/workspace-pane/download-selection-dialog.component.html` | Download dialog template                                     |
 | `features/map/workspace-pane/download-selection-dialog.component.scss` | Download dialog styles                                       |
 | `core/workspace-selection.service.ts`                                  | Selection state, toggles, select all/none, keyboard handling |
+| `core/media-bulk-actions.service.ts`                                   | Batch add-to-project, change-address, and delete operations  |
 | `core/share-set.service.ts`                                            | Create/resolve share-set tokens via Supabase                 |
 | `core/zip-export.service.ts`                                           | Fetch signed URLs/files, build ZIP blob, trigger download    |
 | `supabase/migrations/20260318090000_share_sets.sql`                    | `share_sets` + `share_set_items` tables, indexes, RLS, RPC   |
@@ -342,6 +387,10 @@ sequenceDiagram
 - [ ] Ctrl-click (Windows/Linux) and Cmd-click (macOS) toggle selection on media cards.
 - [ ] First selection opens export bar with transition; zero selection closes it.
 - [ ] Export bar always includes `Select none` and `Select all` actions.
+- [ ] Export bar includes `Add to project`, `Change address`, and `Delete` actions for selected media.
+- [ ] `Add to project` applies to every currently selected ID and reports per-item failures non-destructively.
+- [ ] `Change address` updates every selected media row and refreshes both grid labels and marker tooltip/address surfaces.
+- [ ] `Delete` requires explicit confirmation and removes all selected media while clearing stale selection IDs.
 - [ ] `Select all` targets current workspace scope (active filters/grouping/tab), not entire dataset.
 - [ ] Selection survives sort, filter, grouping, and fullscreen transitions.
 - [ ] Share link creation returns a stable tokenized URL for the selected set.

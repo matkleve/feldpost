@@ -50,7 +50,10 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 | 13  | Closes workspace pane                    | Active Selection cleared, all toolbar state reset                                                        | `rawImages` cleared          |
 | 14  | Hovers a thumbnail card                  | Reveals quiet actions: checkbox (multi-select), add-to-group, more (⋯)                                   | Quiet Actions pattern        |
 | 15  | Checks one or more thumbnail checkboxes  | Selection set updates and Workspace Export Bar appears with selected count and actions                   | `selectedMediaIds.size > 0`  |
-| 16  | Clicks "Select none" in export bar       | Clears current selection and hides Workspace Export Bar                                                  | `selectedMediaIds.size = 0`  |
+| 16  | Clicks `Add to project` in export bar     | Opens bulk project picker and assigns all selected media to target project(s)                            | Bulk curation action         |
+| 17  | Clicks `Change address` in export bar     | Opens bulk address editor and updates address fields for all selected media                              | Bulk curation action         |
+| 18  | Clicks `Delete` in export bar             | Opens destructive confirmation and deletes all selected media on confirm                                 | Bulk curation action         |
+| 19  | Clicks "Select none" in export bar       | Clears current selection and hides Workspace Export Bar                                                  | `selectedMediaIds.size = 0`  |
 
 ## Component Hierarchy
 
