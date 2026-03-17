@@ -717,13 +717,13 @@ describe('MapShellComponent', () => {
     ).not.toBeNull();
   });
 
-  it('onZoomToLocation() flies quickly to a tighter detail zoom', () => {
+  it('onZoomToLocation() centers map to tighter detail zoom without animation', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
     const mapStub = {
-      flyTo: vi.fn(),
-      once: vi.fn(),
+      invalidateSize: vi.fn(),
+      setView: vi.fn(),
       remove: vi.fn(),
     };
     (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
@@ -734,10 +734,10 @@ describe('MapShellComponent', () => {
       lng: 16.3738,
     });
 
-    expect(mapStub.flyTo).toHaveBeenCalledWith([48.2082, 16.3738], 21, {
-      duration: 0.35,
+    expect(mapStub.invalidateSize).toHaveBeenCalledTimes(1);
+    expect(mapStub.setView).toHaveBeenCalledWith([48.2082, 16.3738], 21, {
+      animate: false,
     });
-    expect(mapStub.once).toHaveBeenCalledWith('moveend', expect.any(Function));
   });
 
   it('searchQueryContext includes centroid from active selection images', () => {

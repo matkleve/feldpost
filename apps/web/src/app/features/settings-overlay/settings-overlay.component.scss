@@ -5,6 +5,9 @@
   --settings-overlay-left-width: clamp(17rem, 24vw, 21rem);
   /* Uses the existing narrow-rail step (25rem) and caps near 30rem on desktop. */
   --settings-overlay-right-width: clamp(25rem, 40vw, 30rem);
+  --settings-stroke-width: 1.5px;
+  --settings-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
+  --settings-hover-focus: color-mix(in srgb, var(--color-clay) 12%, transparent);
 }
 
 .settings-overlay {
@@ -20,7 +23,7 @@
   max-height: var(--settings-overlay-height);
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
   box-shadow: var(--elevation-dropdown);
   backdrop-filter: blur(14px) saturate(1.08);
@@ -37,7 +40,7 @@
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
   color: var(--color-text-secondary);
@@ -46,7 +49,8 @@
 
 .settings-overlay__close:hover {
   color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+  background: var(--settings-hover-focus);
 }
 
 .settings-overlay__lead-divider {
@@ -118,11 +122,11 @@
 }
 
 .settings-overlay__section-item:hover {
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  background: var(--settings-hover-focus);
 }
 
 .settings-overlay__section-item--active {
-  border-color: color-mix(in srgb, var(--color-clay) 34%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
   background: color-mix(in srgb, var(--color-clay) 12%, transparent);
 }
 
@@ -165,7 +169,7 @@
 .settings-overlay__detail-card {
   --ui-container-gap: var(--spacing-3);
 
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   background: var(--color-bg-elevated);
 }
 
@@ -200,7 +204,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   border-radius: var(--radius-full);
   padding: 0.15rem;
 }
@@ -219,6 +223,7 @@
 
 .settings-overlay__segmented button:hover {
   color: var(--color-text-primary);
+  background: var(--settings-hover-focus);
 }
 
 .settings-overlay__segmented button.settings-overlay__segmented--active {
@@ -231,15 +236,16 @@
   grid-template-columns: minmax(0, 1fr) auto;
 
   width: 100%;
-  border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-bg-surface) 82%, transparent);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent);
   text-align: left;
   color: var(--color-text-primary);
   cursor: pointer;
 }
 
 .settings-overlay__toggle-row:hover {
-  border-color: color-mix(in srgb, var(--color-border-strong) 80%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
+  background: var(--settings-hover-focus);
 }
 
 .settings-overlay__toggle-row .ui-item-label {
@@ -288,7 +294,7 @@
 
 .settings-overlay__select {
   min-height: 2.5rem;
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   border-radius: var(--container-radius-control);
   background: var(--color-bg-surface);
   color: var(--color-text-primary);
@@ -305,7 +311,7 @@
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: var(--spacing-3);
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   border-radius: var(--container-radius-control);
   padding: var(--spacing-3);
 }
@@ -353,7 +359,7 @@
 .settings-overlay__ghost-button {
   align-self: center;
   min-height: 2.5rem;
-  border: 1px solid var(--color-border);
+  border: var(--settings-stroke-width) solid var(--settings-border-muted);
   border-radius: var(--container-radius-control);
   background: transparent;
   color: var(--color-text-primary);
@@ -362,12 +368,14 @@
 }
 
 .settings-overlay__ghost-button:hover {
-  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
+  background: var(--settings-hover-focus);
 }
 
 .settings-overlay__logout-button {
   min-height: 2.75rem;
-  border: 1px solid color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
+  border: var(--settings-stroke-width) solid
+    color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
   border-radius: var(--container-radius-control);
   background: color-mix(in srgb, var(--color-danger) 7%, var(--color-bg-surface));
   color: var(--color-danger);
@@ -392,7 +400,8 @@
 .settings-overlay__logout-confirm {
   display: grid;
   gap: var(--spacing-2);
-  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+  border: var(--settings-stroke-width) solid
+    color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
   border-radius: var(--container-radius-control);
   padding: var(--spacing-3);
   background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-elevated));

@@ -97,7 +97,12 @@ export class MapShellComponent implements OnDestroy {
   private static readonly GPS_RECENTER_MIN_ZOOM = 16;
   private static readonly PLACEMENT_CLICK_GUARD_MS = 220;
   private static readonly DETAIL_LOCATION_FOCUS_ZOOM = 21;
-  private static readonly DETAIL_LOCATION_FLY_DURATION_S = 0.35;
+  private static readonly DETAIL_LOCATION_MARKER_PULSE_MS = 1500;
+  private static readonly DETAIL_LOCATION_HIGHLIGHT_RETRY_MS = 120;
+  private static readonly DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES = 50;
+  private static readonly DETAIL_LOCATION_RENDER_SETTLE_MS = 180;
+  private static readonly DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS = 260;
+  private static readonly DETAIL_LOCATION_PENDING_TTL_MS = 12000;
   private static readonly MARKER_MOVE_DURATION_MS = 320;
   private static readonly RADIUS_SELECTION_MIN_METERS = 10;
   private static readonly RADIUS_CLICK_GUARD_MS = 220;
@@ -476,6 +481,14 @@ export class MapShellComponent implements OnDestroy {
   private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
   private gpsTrackingTimer: ReturnType<typeof setInterval> | null = null;
   private lastMapMoveAt = 0;
+  private pendingZoomHighlight:
+    | {
+        imageId: string;
+        lat: number;
+        lng: number;
+        requestedAt: number;
+      }
+    | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -948,20 +961,161 @@ export class MapShellComponent implements OnDestroy {
    */
   onZoomToLocation(event: { imageId: string; lat: number; lng: number }): void {
     if (!this.map) return;
-    this.map.flyTo([event.lat, event.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM, {
-      duration: MapShellComponent.DETAIL_LOCATION_FLY_DURATION_S,
+
+    this.pendingZoomHighlight = {
+      imageId: event.imageId,
+      lat: event.lat,
+      lng: event.lng,
+      requestedAt: Date.now(),
+    };
+
+    // Keep Leaflet dimensions in sync with the currently visible map area
+    // before calculating the fly-to center.
+    this.map.invalidateSize();
+    this.map.setView([event.lat, event.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM, {
+      animate: false,
     });
 
-    // Pulse the marker after the fly animation completes
-    this.map.once('moveend', () => {
-      const markerKey = this.markersByImageId.get(event.imageId);
-      const state = markerKey ? this.uploadedPhotoMarkers.get(markerKey) : undefined;
-      const el = state?.marker?.getElement();
-      if (el) {
-        el.classList.add('marker-pulse');
-        setTimeout(() => el.classList.remove('marker-pulse'), 1500);
+    this.highlightZoomTargetMarker(event.imageId, event.lat, event.lng);
+
+    // Re-apply shortly after recenter in case marker instances were reconciled.
+    setTimeout(
+      () => this.highlightZoomTargetMarker(event.imageId, event.lat, event.lng),
+      140,
+    );
+  }
+
+  private highlightZoomTargetMarker(
+    imageId: string,
+    lat: number,
+    lng: number,
+    attempt = 0,
+  ): void {
+    const markerKey = this.findMarkerKeyForZoomTarget(imageId, lat, lng);
+    if (!markerKey) {
+      if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
+        setTimeout(
+          () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
+          MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_RETRY_MS,
+        );
       }
+      return;
+    }
+
+    const markerElement = this.uploadedPhotoMarkers.get(markerKey)?.marker.getElement();
+    const markerVisual = markerElement?.querySelector('.map-photo-marker') as HTMLElement | null;
+    if (!markerVisual || !this.isZoomHighlightRenderReady(markerVisual)) {
+      if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
+        setTimeout(
+          () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
+          MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_RETRY_MS,
+        );
+      }
+      return;
+    }
+
+    this.startZoomMarkerSpotlight(markerVisual);
+    if (this.pendingZoomHighlight?.imageId === imageId) {
+      this.pendingZoomHighlight = null;
+    }
+  }
+
+  private flushPendingZoomHighlight(): void {
+    const pending = this.pendingZoomHighlight;
+    if (!pending) return;
+
+    if (Date.now() - pending.requestedAt > MapShellComponent.DETAIL_LOCATION_PENDING_TTL_MS) {
+      this.pendingZoomHighlight = null;
+      return;
+    }
+
+    this.highlightZoomTargetMarker(pending.imageId, pending.lat, pending.lng);
+  }
+
+  private isZoomHighlightRenderReady(markerVisual: HTMLElement): boolean {
+    if (Date.now() - this.lastMapMoveAt < MapShellComponent.DETAIL_LOCATION_RENDER_SETTLE_MS) {
+      return false;
+    }
+
+    if (!markerVisual.isConnected) {
+      return false;
+    }
+
+    const rect = markerVisual.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  private startZoomMarkerSpotlight(markerVisual: HTMLElement): void {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!markerVisual.isConnected) {
+          return;
+        }
+        markerVisual.classList.remove('map-photo-marker--spotlight');
+        void markerVisual.offsetWidth;
+        markerVisual.classList.add('map-photo-marker--spotlight');
+        setTimeout(
+          () => markerVisual.classList.remove('map-photo-marker--spotlight'),
+          MapShellComponent.DETAIL_LOCATION_MARKER_PULSE_MS,
+        );
+      });
     });
+  }
+
+  private findMarkerKeyForZoomTarget(imageId: string, lat: number, lng: number): string | null {
+    const byImageId = this.markersByImageId.get(imageId);
+    if (byImageId && this.uploadedPhotoMarkers.has(byImageId)) {
+      return byImageId;
+    }
+
+    const exactKey = this.toMarkerKey(lat, lng);
+    if (this.uploadedPhotoMarkers.has(exactKey)) {
+      return exactKey;
+    }
+
+    // Fallback for clustered state: pulse the closest visible cluster marker
+    // when the exact single-image marker is not available.
+    let nearestCluster: { key: string; distanceMeters: number } | null = null;
+    let nearestAny: { key: string; distanceMeters: number } | null = null;
+
+    for (const [key, state] of this.uploadedPhotoMarkers) {
+      const distanceMeters = this.distanceMeters(lat, lng, state.lat, state.lng);
+
+      if (!nearestAny || distanceMeters < nearestAny.distanceMeters) {
+        nearestAny = { key, distanceMeters };
+      }
+
+      if (state.count > 1 && (!nearestCluster || distanceMeters < nearestCluster.distanceMeters)) {
+        nearestCluster = { key, distanceMeters };
+      }
+    }
+
+    if (
+      nearestCluster &&
+      nearestCluster.distanceMeters <= MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS
+    ) {
+      return nearestCluster.key;
+    }
+
+    if (
+      nearestAny &&
+      nearestAny.distanceMeters <= MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS
+    ) {
+      return nearestAny.key;
+    }
+
+    return null;
+  }
+
+  private distanceMeters(latA: number, lngA: number, latB: number, lngB: number): number {
+    if (this.map) {
+      return this.map.distance([latA, lngA], [latB, lngB]);
+    }
+
+    // Fallback path if map is not available in tests.
+    const dx = latA - latB;
+    const dy = lngA - lngB;
+    return Math.sqrt(dx * dx + dy * dy) * 111_320;
   }
 
   // ── Upload panel ──────────────────────────────────────────────────────────
@@ -2208,7 +2362,10 @@ export class MapShellComponent implements OnDestroy {
     this.lastFetchedBounds = L.latLngBounds([fetchSouth, fetchWest], [fetchNorth, fetchEast]);
     this.lastFetchedZoom = roundedZoom;
 
-    if (error || !data) return;
+    if (error || !data) {
+      this.flushPendingZoomHighlight();
+      return;
+    }
 
     type ViewportRow = {
       cluster_lat: number;
@@ -2440,6 +2597,10 @@ export class MapShellComponent implements OnDestroy {
 
     // Lazy-load thumbnails for all single-image markers in viewport.
     this.maybeLoadThumbnails();
+
+    // If a zoom target was requested while this area was still loading,
+    // try highlighting now that markers are reconciled.
+    this.flushPendingZoomHighlight();
   }
 
   private buildPhotoMarkerIcon(
