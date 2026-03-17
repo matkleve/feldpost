@@ -1,7 +1,11 @@
 <!-- Workspace Pane — right panel (desktop), bottom sheet (mobile, future) -->
-<div class="workspace-pane ui-container" role="region" aria-label="Workspace pane">
+<div
+  class="workspace-pane ui-container"
+  role="region"
+  [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
+>
   <app-pane-header
-    [title]="title()"
+    [title]="resolvedTitle()"
     [editable]="titleEditable()"
     [editEnabled]="titleEditEnabled()"
     [editValue]="titleEditValue()"

@@ -82,10 +82,16 @@ import { RadiusDraftHighlightService } from './radius-draft-highlight.service';
 import { MapContextActionsService } from './map-context-actions.service';
 import { MarkerContextPhotoDeleteService } from './marker-context-photo-delete.service';
 import { PhotoMarkerIconStateService } from './photo-marker-icon-state.service';
+import { MarkerSelectionSyncService } from './marker-selection-sync.service';
+import { MarkerMotionService } from './marker-motion.service';
+import {
+  MapBasemapPreference,
+  MapMaterialPreference,
+  MapPreferencesService,
+} from './map-preferences.service';
+import { MapBasemapLayerService } from './map-basemap-layer.service';
 
 type MarkerMotionPreference = 'off' | 'smooth';
-type MapBasemapPreference = 'default' | 'satellite';
-type MapMaterialPreference = 'default' | 'analog';
 type MapViewMode = 'street' | 'photo' | 'historic';
 
 type ViewportMarkerRow = {
@@ -192,6 +198,10 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
+  private readonly markerMotionService = inject(MarkerMotionService);
+  private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
+  private readonly mapPreferencesService = inject(MapPreferencesService);
+  private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -319,8 +329,12 @@ export class MapShellComponent implements OnDestroy {
   readonly gpsLocating = signal(false);
   /** True when GPS tracking mode is enabled via the toggle button. */
   readonly gpsTrackingActive = signal(false);
-  readonly mapBasemap = signal<MapBasemapPreference>(this.readMapBasemapPreference());
-  readonly mapMaterial = signal<MapMaterialPreference>(this.readMapMaterialPreference());
+  readonly mapBasemap = signal<MapBasemapPreference>(
+    this.mapPreferencesService.readBasemapPreference(MAP_BASEMAP_STORAGE_KEY),
+  );
+  readonly mapMaterial = signal<MapMaterialPreference>(
+    this.mapPreferencesService.readMaterialPreference(MAP_MATERIAL_STORAGE_KEY),
+  );
   readonly analogMaterialActive = computed(
     () => this.mapBasemap() === 'default' && this.mapMaterial() === 'analog',
   );
@@ -482,7 +496,6 @@ export class MapShellComponent implements OnDestroy {
    * handling upload manager events (replace, attach).
    */
   private readonly markersByImageId = new Map<string, string>();
-  private readonly markerMoveAnimationRaf = new WeakMap<L.Marker, number>();
   private readonly markerMotionPreference = signal<MarkerMotionPreference>('smooth');
   private readonly markerMotionEventHandler = (event: Event): void => {
     const detail = (event as CustomEvent<{ markerMotion?: MarkerMotionPreference }>).detail;
@@ -491,7 +504,9 @@ export class MapShellComponent implements OnDestroy {
       this.markerMotionPreference.set(candidate);
       return;
     }
-    this.markerMotionPreference.set(this.readMarkerMotionPreference());
+    this.markerMotionPreference.set(
+      this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
+    );
   };
   private readonly mapContainerContextMenuHandler = (event: MouseEvent): void => {
     if (event.button !== 2) {
@@ -532,7 +547,9 @@ export class MapShellComponent implements OnDestroy {
 
   constructor() {
     afterNextRender(() => {
-      this.markerMotionPreference.set(this.readMarkerMotionPreference());
+      this.markerMotionPreference.set(
+        this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
+      );
       window.addEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
       this.initMap();
       this.subscribeToUploadManagerEvents();
@@ -1165,8 +1182,14 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private highlightZoomTargetMarker(imageId: string, lat: number, lng: number, attempt = 0): void {
-    const pendingForImage = this.getPendingZoomHighlightForImage(imageId);
-    const allowClusterFallback = this.shouldAllowZoomClusterFallback(pendingForImage);
+    const pendingForImage = this.detailZoomHighlightService.getPendingForImage(
+      this.pendingZoomHighlight,
+      imageId,
+    );
+    const allowClusterFallback = this.detailZoomHighlightService.shouldAllowClusterFallback(
+      pendingForImage,
+      MapShellComponent.DETAIL_LOCATION_WAIT_FOR_SINGLE_MS,
+    );
 
     const markerKey = this.resolveZoomTargetMarkerKey(imageId, lat, lng, allowClusterFallback);
     if (!markerKey) {
@@ -1174,7 +1197,13 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    if (this.shouldWaitForMapIdle(pendingForImage)) {
+    if (
+      this.detailZoomHighlightService.shouldWaitForMapIdle(
+        pendingForImage,
+        this.lastMapIdleAt,
+        MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS,
+      )
+    ) {
       this.scheduleZoomHighlightRetry(imageId, lat, lng, attempt);
       return;
     }
@@ -1189,51 +1218,24 @@ export class MapShellComponent implements OnDestroy {
     this.clearPendingZoomHighlightForImage(imageId);
   }
 
-  private getPendingZoomHighlightForImage(imageId: string): {
-    imageId: string;
-    lat: number;
-    lng: number;
-    requestedAt: number;
-  } | null {
-    return this.pendingZoomHighlight?.imageId === imageId ? this.pendingZoomHighlight : null;
-  }
-
-  private shouldAllowZoomClusterFallback(pendingForImage: { requestedAt: number } | null): boolean {
-    return (
-      !pendingForImage ||
-      Date.now() - pendingForImage.requestedAt >
-        MapShellComponent.DETAIL_LOCATION_WAIT_FOR_SINGLE_MS
-    );
-  }
-
-  private shouldWaitForMapIdle(pendingForImage: { requestedAt: number } | null): boolean {
-    return !!(
-      pendingForImage &&
-      this.lastMapIdleAt < pendingForImage.requestedAt &&
-      Date.now() - pendingForImage.requestedAt < MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS
-    );
-  }
-
   private scheduleZoomHighlightRetry(
     imageId: string,
     lat: number,
     lng: number,
     attempt: number,
   ): void {
-    if (attempt >= MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
-      return;
-    }
-
-    setTimeout(
-      () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
+    this.detailZoomHighlightService.scheduleRetry(
+      attempt,
+      MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES,
       MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_RETRY_MS,
+      () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
     );
   }
 
   private resolveZoomHighlightMarkerWrapper(markerKey: string): HTMLElement | null {
-    const markerElement = this.uploadedPhotoMarkers.get(markerKey)?.marker.getElement() as
-      | HTMLElement
-      | null;
+    const markerElement = this.uploadedPhotoMarkers
+      .get(markerKey)
+      ?.marker.getElement() as HTMLElement | null;
     return this.detailZoomHighlightService.resolveMarkerWrapper(markerElement);
   }
 
@@ -1390,9 +1392,9 @@ export class MapShellComponent implements OnDestroy {
     this.mapBasemap.set(next);
     if (next === 'satellite') {
       this.mapMaterial.set('default');
-      this.persistMapMaterialPreference('default');
+      this.mapPreferencesService.persistMaterialPreference(MAP_MATERIAL_STORAGE_KEY, 'default');
     }
-    this.persistMapBasemapPreference(next);
+    this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, next);
     this.applyMapBasemapLayer();
   }
 
@@ -1400,10 +1402,10 @@ export class MapShellComponent implements OnDestroy {
     const next: MapMaterialPreference = this.mapMaterial() === 'default' ? 'analog' : 'default';
     if (this.mapBasemap() === 'satellite') {
       this.mapBasemap.set('default');
-      this.persistMapBasemapPreference('default');
+      this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, 'default');
     }
     this.mapMaterial.set(next);
-    this.persistMapMaterialPreference(next);
+    this.mapPreferencesService.persistMaterialPreference(MAP_MATERIAL_STORAGE_KEY, next);
     this.applyMapBasemapLayer();
   }
 
@@ -1421,8 +1423,11 @@ export class MapShellComponent implements OnDestroy {
       this.mapMaterial.set('default');
     }
 
-    this.persistMapBasemapPreference(this.mapBasemap());
-    this.persistMapMaterialPreference(this.mapMaterial());
+    this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, this.mapBasemap());
+    this.mapPreferencesService.persistMaterialPreference(
+      MAP_MATERIAL_STORAGE_KEY,
+      this.mapMaterial(),
+    );
 
     if (this.mapBasemap() !== previousBasemap || mode === 'historic' || mode === 'street') {
       this.applyMapBasemapLayer();
@@ -1618,74 +1623,17 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private applyMapBasemapLayer(): void {
-    if (!this.map) {
-      return;
-    }
-
-    if (this.activeBaseTileLayer) {
-      this.map.removeLayer(this.activeBaseTileLayer);
-    }
-
-    if (this.activeHistoricLabelTileLayer) {
-      this.map.removeLayer(this.activeHistoricLabelTileLayer);
-      this.activeHistoricLabelTileLayer = null;
-    }
-
-    this.activeBaseTileLayer = this.createMapBasemapLayer(this.mapBasemap());
-    this.activeBaseTileLayer.addTo(this.map);
-
-    if (this.mapBasemap() === 'default' && this.mapMaterial() === 'analog') {
-      this.activeHistoricLabelTileLayer = this.createHistoricLabelLayer();
-      this.activeHistoricLabelTileLayer.addTo(this.map);
-    }
-  }
-
-  private createMapBasemapLayer(mode: MapBasemapPreference): L.TileLayer {
-    if (mode === 'satellite') {
-      return L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        {
-          maxNativeZoom: 19,
-          maxZoom: 22,
-          attribution: 'Tiles &copy; Esri',
-        },
-      );
-    }
-
-    if (this.mapMaterial() === 'analog') {
-      // Historic mode: split base and labels to preserve street readability.
-      return L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
-        {
-          pane: HISTORIC_BASE_PANE,
-          maxNativeZoom: 19,
-          maxZoom: 22,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        },
-      );
-    }
-
-    // CartoDB Positron — clean, uncluttered light tile (design.md §3.1).
-    return L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxNativeZoom: 19,
-      maxZoom: 22,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    const result = this.mapBasemapLayerService.applyBasemapLayer({
+      map: this.map,
+      activeBaseTileLayer: this.activeBaseTileLayer,
+      activeHistoricLabelTileLayer: this.activeHistoricLabelTileLayer,
+      basemap: this.mapBasemap(),
+      material: this.mapMaterial(),
+      historicBasePane: HISTORIC_BASE_PANE,
+      historicLabelPane: HISTORIC_LABEL_PANE,
     });
-  }
-
-  private createHistoricLabelLayer(): L.TileLayer {
-    return L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
-      {
-        pane: HISTORIC_LABEL_PANE,
-        maxNativeZoom: 19,
-        maxZoom: 22,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      },
-    );
+    this.activeBaseTileLayer = result.activeBaseTileLayer;
+    this.activeHistoricLabelTileLayer = result.activeHistoricLabelTileLayer;
   }
 
   private readMapFocusPayload(): { imageId: string; lat: number; lng: number } | null {
@@ -2876,23 +2824,7 @@ export class MapShellComponent implements OnDestroy {
     ) {
       return;
     }
-
-    el.classList.remove('map-photo-marker-wrapper--fade-in');
-    el.classList.add('map-photo-marker-wrapper--fade-prep');
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        if (!el.isConnected) return;
-        el.classList.add('map-photo-marker-wrapper--fade-in');
-        el.classList.remove('map-photo-marker-wrapper--fade-prep');
-      });
-    });
-
-    window.setTimeout(() => {
-      if (el.isConnected) {
-        el.classList.remove('map-photo-marker-wrapper--fade-in');
-      }
-    }, 300);
+    this.markerInteractionService.triggerFadeIn(el, 300);
   }
 
   /**
@@ -2901,86 +2833,17 @@ export class MapShellComponent implements OnDestroy {
    * can be retargeted cleanly without visual popping.
    */
   private animateMarkerPosition(marker: L.Marker, lat: number, lng: number): void {
-    if (this.markerMotionPreference() === 'off') {
-      this.cancelMarkerMoveAnimation(marker);
-      marker.setLatLng([lat, lng]);
-      return;
-    }
-
-    const from = marker.getLatLng();
-    const to = L.latLng(lat, lng);
-
-    if (!Number.isFinite(from.lat) || !Number.isFinite(from.lng)) {
-      marker.setLatLng(to);
-      return;
-    }
-
-    const latDelta = to.lat - from.lat;
-    const lngDelta = to.lng - from.lng;
-    if (Math.abs(latDelta) < 1e-9 && Math.abs(lngDelta) < 1e-9) {
-      marker.setLatLng(to);
-      return;
-    }
-
-    this.cancelMarkerMoveAnimation(marker);
-
-    const start = performance.now();
-    const durationMs = MapShellComponent.MARKER_MOVE_DURATION_MS;
-    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-
-    const step = (now: number): void => {
-      const t = Math.min((now - start) / durationMs, 1);
-      const eased = easeOutCubic(t);
-
-      marker.setLatLng([from.lat + latDelta * eased, from.lng + lngDelta * eased]);
-
-      if (t < 1) {
-        const rafId = window.requestAnimationFrame(step);
-        this.markerMoveAnimationRaf.set(marker, rafId);
-        return;
-      }
-
-      this.markerMoveAnimationRaf.delete(marker);
-      marker.setLatLng(to);
-    };
-
-    const rafId = window.requestAnimationFrame(step);
-    this.markerMoveAnimationRaf.set(marker, rafId);
+    this.markerMotionService.animateMarkerPosition(
+      marker,
+      lat,
+      lng,
+      this.markerMotionPreference(),
+      MapShellComponent.MARKER_MOVE_DURATION_MS,
+    );
   }
 
   private cancelMarkerMoveAnimation(marker: L.Marker): void {
-    const rafId = this.markerMoveAnimationRaf.get(marker);
-    if (rafId == null) return;
-    window.cancelAnimationFrame(rafId);
-    this.markerMoveAnimationRaf.delete(marker);
-  }
-
-  private readMarkerMotionPreference(): MarkerMotionPreference {
-    if (typeof window === 'undefined') return 'smooth';
-    const stored = window.localStorage.getItem(MAP_MARKER_MOTION_STORAGE_KEY);
-    return stored === 'off' ? 'off' : 'smooth';
-  }
-
-  private readMapBasemapPreference(): MapBasemapPreference {
-    if (typeof window === 'undefined') return 'default';
-    const stored = window.localStorage.getItem(MAP_BASEMAP_STORAGE_KEY);
-    return stored === 'satellite' ? 'satellite' : 'default';
-  }
-
-  private persistMapBasemapPreference(value: MapBasemapPreference): void {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(MAP_BASEMAP_STORAGE_KEY, value);
-  }
-
-  private readMapMaterialPreference(): MapMaterialPreference {
-    if (typeof window === 'undefined') return 'default';
-    const stored = window.localStorage.getItem(MAP_MATERIAL_STORAGE_KEY);
-    return stored === 'analog' ? 'analog' : 'default';
-  }
-
-  private persistMapMaterialPreference(value: MapMaterialPreference): void {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(MAP_MATERIAL_STORAGE_KEY, value);
+    this.markerMotionService.cancelMarkerMoveAnimation(marker);
   }
 
   /**
@@ -2989,35 +2852,17 @@ export class MapShellComponent implements OnDestroy {
    * cone is visible on touch devices (mirrors the desktop `:hover` affordance).
    */
   private attachLongPressHandler(el: HTMLElement, markerKey: string): void {
-    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
-
-    el.addEventListener(
-      'pointerdown',
+    this.markerInteractionService.attachLongPress(
+      el,
+      MapShellComponent.MARKER_LONG_PRESS_MS,
       (event: PointerEvent) => {
-        if (event.pointerType && event.pointerType !== 'touch') {
-          return;
-        }
-        longPressTimer = setTimeout(() => {
-          el.classList.add('map-photo-marker--long-pressed');
-          this.openMarkerContextMenu(markerKey, event);
-        }, MapShellComponent.MARKER_LONG_PRESS_MS);
+        el.classList.add('map-photo-marker--long-pressed');
+        this.openMarkerContextMenu(markerKey, event);
       },
-      { passive: true },
     );
 
-    const cancelLongPress = () => {
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        longPressTimer = null;
-      }
-    };
-
-    el.addEventListener('pointerup', cancelLongPress, { passive: true });
-    el.addEventListener('pointercancel', cancelLongPress, { passive: true });
-    el.addEventListener('pointermove', cancelLongPress, { passive: true });
     // Dismiss on tap/click.
     el.addEventListener('click', () => {
-      cancelLongPress();
       el.classList.remove('map-photo-marker--long-pressed');
     });
   }
@@ -3042,26 +2887,14 @@ export class MapShellComponent implements OnDestroy {
   private setSelectedMarkerKeys(nextKeys: Set<string>): void {
     const previousKeys = this.selectedMarkerKeys();
 
-    if (
-      previousKeys.size === nextKeys.size &&
-      Array.from(previousKeys).every((key) => nextKeys.has(key))
-    ) {
+    if (this.markerSelectionSyncService.areSameKeySet(previousKeys, nextKeys)) {
       return;
     }
 
     this.selectedMarkerKeys.set(nextKeys);
-
-    for (const markerKey of previousKeys) {
-      if (!nextKeys.has(markerKey)) {
-        this.refreshPhotoMarker(markerKey);
-      }
-    }
-
-    for (const markerKey of nextKeys) {
-      if (!previousKeys.has(markerKey)) {
-        this.refreshPhotoMarker(markerKey);
-      }
-    }
+    this.markerSelectionSyncService.refreshChangedKeySet(previousKeys, nextKeys, (markerKey) =>
+      this.refreshPhotoMarker(markerKey),
+    );
   }
 
   private isMarkerSelected(markerKey: string): boolean {
@@ -3081,22 +2914,24 @@ export class MapShellComponent implements OnDestroy {
 
   private setLinkedHoverMarkerFromWorkspace(markerKey: string | null): void {
     const previous = this.linkedHoverMarkerFromWorkspaceKey;
-    if (previous === markerKey) return;
-
+    const changed = this.markerSelectionSyncService.applySingleMarkerChange(
+      previous,
+      markerKey,
+      (key) => this.refreshPhotoMarker(key),
+    );
+    if (!changed) return;
     this.linkedHoverMarkerFromWorkspaceKey = markerKey;
-
-    if (previous) this.refreshPhotoMarker(previous);
-    if (markerKey) this.refreshPhotoMarker(markerKey);
   }
 
   private setLinkedHoverMarkerFromMap(markerKey: string | null): void {
     const previous = this.linkedHoverMarkerFromMapKey;
-    if (previous === markerKey) return;
-
+    const changed = this.markerSelectionSyncService.applySingleMarkerChange(
+      previous,
+      markerKey,
+      (key) => this.refreshPhotoMarker(key),
+    );
+    if (!changed) return;
     this.linkedHoverMarkerFromMapKey = markerKey;
-
-    if (previous) this.refreshPhotoMarker(previous);
-    if (markerKey) this.refreshPhotoMarker(markerKey);
   }
 
   private setLinkedHoveredWorkspaceImageIdsForMarker(markerKey: string | null): void {
@@ -3106,28 +2941,11 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    if (!markerState) {
-      this.linkedHoveredWorkspaceImageIds.set(new Set());
-      return;
-    }
-
-    if (markerState.count === 1 && markerState.imageId) {
-      this.linkedHoveredWorkspaceImageIds.set(new Set([markerState.imageId]));
-      return;
-    }
-
-    const sourceCells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
-    const sourceKeys = new Set(sourceCells.map((cell) => this.toMarkerKey(cell.lat, cell.lng)));
-    const matchedIds = new Set<string>();
-
-    for (const image of this.workspaceViewService.rawImages()) {
-      if (!Number.isFinite(image.latitude) || !Number.isFinite(image.longitude)) continue;
-      const imageKey = this.toMarkerKey(image.latitude, image.longitude);
-      if (sourceKeys.has(imageKey)) {
-        matchedIds.add(image.id);
-      }
-    }
-
+    const matchedIds = this.markerSelectionSyncService.buildLinkedWorkspaceImageIds(
+      markerState,
+      this.workspaceViewService.rawImages(),
+      (lat, lng) => this.toMarkerKey(lat, lng),
+    );
     this.linkedHoveredWorkspaceImageIds.set(matchedIds);
   }
 
@@ -3189,7 +3007,9 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const mapZoom = Math.round(this.map.getZoom() ?? 0);
-    return this.lastFetchedZoom === mapZoom && this.lastFetchedBounds.contains(this.map.getBounds());
+    return (
+      this.lastFetchedZoom === mapZoom && this.lastFetchedBounds.contains(this.map.getBounds())
+    );
   }
 
   /**

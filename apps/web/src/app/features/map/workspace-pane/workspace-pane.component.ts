@@ -7,6 +7,7 @@ import { WorkspaceExportBarComponent } from './workspace-export-bar.component';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import { ThumbnailCardHoverEvent } from './thumbnail-card.component';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-workspace-pane',
@@ -21,12 +22,14 @@ import { ThumbnailCardHoverEvent } from './thumbnail-card.component';
   styleUrl: './workspace-pane.component.scss',
 })
 export class WorkspacePaneComponent {
+  private readonly i18nService = inject(I18nService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   protected readonly selectionService = inject(WorkspaceSelectionService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   // ── Inputs from MapShell ──────────────────────────────────────────────────
   readonly detailImageId = input<string | null>(null);
-  readonly title = input('Workspace');
+  readonly title = input('');
   readonly titleEditable = input(false);
   readonly titleEditEnabled = input(false);
   readonly titleEditValue = input('');
@@ -53,6 +56,9 @@ export class WorkspacePaneComponent {
     this.workspaceViewService.rawImages().map((img) => img.id),
   );
   readonly exportScopeImages = computed(() => this.workspaceViewService.rawImages());
+  readonly resolvedTitle = computed(
+    () => this.title() || this.t('workspace.pane.title', 'Workspace'),
+  );
 
   // ── Methods ──────────────────────────────────────────────────────────────
   close(): void {

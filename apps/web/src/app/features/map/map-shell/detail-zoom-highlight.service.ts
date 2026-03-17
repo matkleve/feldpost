@@ -1,8 +1,55 @@
 import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
 
+export interface PendingZoomHighlightLike {
+  imageId: string;
+  lat: number;
+  lng: number;
+  requestedAt: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DetailZoomHighlightService {
+  getPendingForImage(
+    pendingZoomHighlight: PendingZoomHighlightLike | null,
+    imageId: string,
+  ): PendingZoomHighlightLike | null {
+    return pendingZoomHighlight?.imageId === imageId ? pendingZoomHighlight : null;
+  }
+
+  shouldAllowClusterFallback(
+    pendingForImage: { requestedAt: number } | null,
+    waitForSingleMs: number,
+    now = Date.now(),
+  ): boolean {
+    return !pendingForImage || now - pendingForImage.requestedAt > waitForSingleMs;
+  }
+
+  shouldWaitForMapIdle(
+    pendingForImage: { requestedAt: number } | null,
+    lastMapIdleAt: number,
+    idleFallbackMs: number,
+    now = Date.now(),
+  ): boolean {
+    return !!(
+      pendingForImage &&
+      lastMapIdleAt < pendingForImage.requestedAt &&
+      now - pendingForImage.requestedAt < idleFallbackMs
+    );
+  }
+
+  scheduleRetry(
+    attempt: number,
+    maxRetries: number,
+    retryMs: number,
+    retryFn: () => void,
+  ): void {
+    if (attempt >= maxRetries) {
+      return;
+    }
+    setTimeout(retryFn, retryMs);
+  }
+
   resolveMarkerWrapper(markerElement: HTMLElement | null): HTMLElement | null {
     if (!markerElement) {
       return null;

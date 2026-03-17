@@ -256,20 +256,23 @@ export class I18nService {
   }
 
   translateOriginal(original: string, fallback = ''): string {
-    const runtime = this.runtimeDictionaries()[this.languageSignal()].byOriginal[original];
-    if (runtime) return runtime;
+    const language = this.languageSignal();
+    if (language === 'it') {
+      const runtime = this.runtimeDictionaries()[language].byOriginal[original];
+      if (runtime) return runtime;
+    }
 
     const entry = TRANSLATION_BY_ORIGINAL[original];
     if (!entry) {
-      if (this.languageSignal() === 'de') {
+      if (language === 'de') {
         return this.heuristicTranslateToGerman(original);
       }
-      if (this.languageSignal() === 'it') {
+      if (language === 'it') {
         return this.heuristicTranslateToItalian(original);
       }
       return fallback || original;
     }
-    switch (this.languageSignal()) {
+    switch (language) {
       case 'de':
         return entry.de;
       case 'it':

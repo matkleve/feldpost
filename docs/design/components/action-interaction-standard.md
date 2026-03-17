@@ -172,6 +172,65 @@ Reference components:
 - apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts
 - apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts
 
+## Option-Opener A11y Checklist (Required)
+
+Applies to all controls that open selectable options: dropdowns, context menus, filter/sort/group panels, popovers with options.
+
+1. Trigger semantics
+
+- Use a real interactive trigger (`button` preferred).
+- Do not use plain `div`/`span` click handlers as the primary trigger.
+
+2. Trigger ARIA state
+
+- Set `aria-expanded` to reflect open/closed state.
+- Set `aria-haspopup` according to popup type (`menu`, `listbox`, or `dialog` where applicable).
+- Use `aria-controls` when a stable controlled popup id is available.
+
+3. Open behavior (keyboard)
+
+- Enter and Space open the popup from the trigger.
+- ArrowDown opens and moves to first option when pattern supports directional navigation.
+- ArrowUp may open and move to last option where this improves efficiency.
+
+4. Focus management
+
+- On open, move focus to the first actionable item (or selected item when that is the stronger context).
+- On close (Escape, outside click, selection complete), return focus to the originating trigger.
+- Keep focus visibly apparent in all states.
+
+5. In-popup keyboard behavior
+
+- Escape closes popup.
+- Arrow keys navigate option rows in menu/list patterns.
+- Enter/Space activate the focused option where applicable.
+- Tab behavior must be intentional and consistent per popup type.
+
+6. Popup semantics
+
+- Use role semantics that match behavior (`menu` + `menuitem`, `listbox` + `option`, or dialog semantics).
+- Do not mix unrelated role models within one popup.
+
+7. Pointer and touch behavior
+
+- Outside click/tap closes non-modal popups.
+- Trigger and option targets meet minimum target size requirements.
+
+8. State communication
+
+- Selected and active states must be programmatically detectable (ARIA state or native semantic equivalent).
+- Disabled options must be exposed as disabled semantically, not just visually.
+
+9. Exception handling
+
+- Integrated controls (example: combined search bar + suggestion panel) may keep their integrated behavior.
+- Even for exceptions, preserve equivalent keyboard and focus guarantees.
+
+10. Regression checks
+
+- Validate with keyboard-only flow and screen reader smoke test.
+- Validate no behavior regressions against existing payload/output semantics.
+
 ## Migration Plan (Wave 1)
 
 1. Dropdown standard first

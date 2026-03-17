@@ -1,5 +1,9 @@
-<div class="workspace-toolbar" role="toolbar" aria-label="Workspace controls">
-  @for (btn of buttons; track btn.id) {
+<div
+  class="workspace-toolbar"
+  role="toolbar"
+  [attr.aria-label]="t('workspace.toolbar.aria.controls', 'Workspace controls')"
+>
+  @for (btn of buttons(); track btn.id) {
     <button
       class="toolbar-btn"
       [class.toolbar-btn--active]="btn.active()"
@@ -17,7 +21,7 @@
 
   <div class="workspace-toolbar__size-control">
     <app-snap-size-slider
-      [options]="thumbnailSizeOptions"
+      [options]="thumbnailSizeOptions()"
       [value]="thumbnailSizePreset()"
       (valueChange)="onThumbnailSizeChanged($event)"
     />

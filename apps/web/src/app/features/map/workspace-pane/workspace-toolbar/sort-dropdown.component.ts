@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { SortConfig } from '../../../../core/workspace-view.types';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
@@ -17,7 +18,7 @@ export type SortDropdownOption = {
     <app-standard-dropdown
       class="sort-dropdown"
       [searchTerm]="searchTerm()"
-      searchPlaceholder="Search properties…"
+      [searchPlaceholder]="t('workspace.sort.search.placeholder', 'Search properties…')"
       [showDefaultClearAction]="false"
       (searchTermChange)="searchTerm.set($event)"
       (clearRequested)="searchTerm.set('')"
@@ -36,7 +37,9 @@ export type SortDropdownOption = {
 
       <div dropdown-items>
         @if (groupedOptions().length > 0) {
-          <div class="dd-section-label">Sorted by grouping</div>
+          <div class="dd-section-label">
+            {{ t('workspace.sort.section.groupedBy', 'Sorted by grouping') }}
+          </div>
           @for (opt of groupedOptions(); track opt.id) {
             <button
               class="dd-item dd-item--active"
@@ -50,7 +53,9 @@ export type SortDropdownOption = {
                 tabindex="0"
                 (click)="toggleSort(opt.id); $event.stopPropagation()"
                 (keydown.enter)="toggleSort(opt.id); $event.stopPropagation()"
-                [attr.aria-label]="'Sort ' + getDirectionLabel(opt.id)"
+                [attr.aria-label]="
+                  t('workspace.sort.direction.ariaPrefix', 'Sort ') + getDirectionLabel(opt.id)
+                "
               >
                 <span class="sort-direction__state-current">{{ getDirectionSymbol(opt.id) }}</span>
                 <span class="sort-direction__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
@@ -74,7 +79,9 @@ export type SortDropdownOption = {
               tabindex="0"
               (click)="toggleSort(opt.id); $event.stopPropagation()"
               (keydown.enter)="toggleSort(opt.id); $event.stopPropagation()"
-              [attr.aria-label]="'Sort ' + getDirectionLabel(opt.id)"
+              [attr.aria-label]="
+                t('workspace.sort.direction.ariaPrefix', 'Sort ') + getDirectionLabel(opt.id)
+              "
             >
               <span class="sort-direction__state-current">{{ getDirectionSymbol(opt.id) }}</span>
               <span class="sort-direction__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
@@ -82,7 +89,9 @@ export type SortDropdownOption = {
           </button>
         }
         @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
-          <div class="dd-empty">No matching properties</div>
+          <div class="dd-empty">
+            {{ t('workspace.sort.empty.noMatchingProperties', 'No matching properties') }}
+          </div>
         }
       </div>
     </app-standard-dropdown>
@@ -92,7 +101,9 @@ export type SortDropdownOption = {
 })
 export class SortDropdownComponent {
   private readonly viewService = inject(WorkspaceViewService);
+  private readonly i18nService = inject(I18nService);
   private readonly registry = inject(PropertyRegistryService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly optionsInput = input<SortDropdownOption[] | null>(null);
   readonly groupingIdsInput = input<string[] | null>(null);
@@ -151,7 +162,9 @@ export class SortDropdownComponent {
 
   readonly searchActionIcon = computed(() => (this.searchTerm() ? 'close' : 'restart_alt'));
   readonly searchActionAriaLabel = computed(() =>
-    this.searchTerm() ? 'Clear search' : 'Reset to default',
+    this.searchTerm()
+      ? this.t('workspace.sort.search.clear', 'Clear search')
+      : this.t('workspace.sort.search.resetDefault', 'Reset to default'),
   );
 
   constructor() {
@@ -186,8 +199,10 @@ export class SortDropdownComponent {
 
   getDirectionLabel(id: string): string {
     const sort = this.activeSorts().find((s) => s.key === id);
-    if (!sort) return 'inactive';
-    return sort.direction === 'asc' ? 'ascending' : 'descending';
+    if (!sort) return this.t('workspace.sort.direction.inactive', 'inactive');
+    return sort.direction === 'asc'
+      ? this.t('workspace.sort.direction.ascending', 'ascending')
+      : this.t('workspace.sort.direction.descending', 'descending');
   }
 
   /** Toggle sort: all items cycle deactivated → ascending → descending → deactivated. */

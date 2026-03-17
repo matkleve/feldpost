@@ -6,11 +6,11 @@
            expands right on hover to show icon + label (150 ms ease-out).
   Mobile:  full-width bottom tab bar (unchanged behaviour).
 -->
-<nav class="sidebar" aria-label="Main navigation">
+<nav class="sidebar" [attr.aria-label]="t('nav.aria.main', 'Main navigation')">
   <!-- Desktop sidebar panel -->
   <div class="sidebar__panel ui-container">
     <ul class="nav__list" role="list">
-      @for (item of navItems; track item.route) {
+      @for (item of navItems(); track item.route) {
         <li class="sidebar__item">
           @if (item.disabled) {
             <span
@@ -18,7 +18,7 @@
               role="link"
               aria-disabled="true"
               tabindex="-1"
-              [title]="'Coming soon: ' + item.label"
+              [title]="t('nav.disabled.titlePrefix', 'Coming soon: ') + item.label"
               [attr.aria-describedby]="'nav-disabled-tip'"
             >
               <span class="nav__media ui-item-media" aria-hidden="true">
@@ -51,8 +51,8 @@
           type="button"
           class="nav__link nav__account-link ui-item"
           [class.nav__link--active]="settingsOverlayOpen()"
-          title="Settings"
-          aria-label="Open settings overlay"
+          [title]="t('nav.settings.title', 'Settings')"
+          [attr.aria-label]="t('nav.settings.openAria', 'Open settings overlay')"
           aria-haspopup="dialog"
           [attr.aria-expanded]="settingsOverlayOpen()"
           (click)="toggleSettingsOverlay()"
@@ -66,11 +66,15 @@
               }
             </span>
           </span>
-          <span class="nav__label nav__account-name ui-item-label">Settings</span>
+          <span class="nav__label nav__account-name ui-item-label">{{
+            t('nav.settings.label', 'Settings')
+          }}</span>
         </button>
       </li>
     </ul>
   </div>
 
-  <span id="nav-disabled-tip" class="nav__sr-only">This feature is coming soon.</span>
+  <span id="nav-disabled-tip" class="nav__sr-only">{{
+    t('nav.disabled.srHint', 'This feature is coming soon.')
+  }}</span>
 </nav>

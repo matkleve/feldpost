@@ -5,6 +5,7 @@ import { SortDropdownComponent } from './sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { FilterService } from '../../../../core/filter.service';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type {
   PropertyRef,
@@ -18,13 +19,6 @@ import {
 } from '../../../../shared/snap-size-slider/snap-size-slider.component';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
-
-const THUMBNAIL_SIZE_OPTIONS: ReadonlyArray<SnapSizeSliderOption> = [
-  { value: 'row', label: 'Zeilen', icon: 'view_headline' },
-  { value: 'small', label: 'Klein', icon: 'grid_view' },
-  { value: 'medium', label: 'Mittel', icon: 'apps' },
-  { value: 'large', label: 'Gross', icon: 'view_agenda' },
-];
 
 @Component({
   selector: 'app-workspace-toolbar',
@@ -42,10 +36,33 @@ const THUMBNAIL_SIZE_OPTIONS: ReadonlyArray<SnapSizeSliderOption> = [
 export class WorkspaceToolbarComponent {
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
+  private readonly i18nService = inject(I18nService);
   private readonly registry = inject(PropertyRegistryService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly thumbnailSizeOptions = THUMBNAIL_SIZE_OPTIONS;
+  readonly thumbnailSizeOptions = computed<ReadonlyArray<SnapSizeSliderOption>>(() => [
+    {
+      value: 'row',
+      label: this.t('workspace.toolbar.size.row', 'Rows'),
+      icon: 'view_headline',
+    },
+    {
+      value: 'small',
+      label: this.t('workspace.toolbar.size.small', 'Small'),
+      icon: 'grid_view',
+    },
+    {
+      value: 'medium',
+      label: this.t('workspace.toolbar.size.medium', 'Medium'),
+      icon: 'apps',
+    },
+    {
+      value: 'large',
+      label: this.t('workspace.toolbar.size.large', 'Large'),
+      icon: 'view_agenda',
+    },
+  ]);
   readonly thumbnailSizePreset = computed(() => this.viewService.thumbnailSizePreset());
 
   // Dropdown position (fixed, computed from button rect)
@@ -71,12 +88,28 @@ export class WorkspaceToolbarComponent {
   });
   readonly hasProject = computed(() => this.viewService.selectedProjectIds().size > 0);
 
-  readonly buttons = [
-    { id: 'grouping' as const, label: 'Grouping', active: this.hasGrouping },
-    { id: 'filter' as const, label: 'Filter', active: this.hasFilters },
-    { id: 'sort' as const, label: 'Sort', active: this.hasCustomSort },
-    { id: 'projects' as const, label: 'Projects', active: this.hasProject },
-  ];
+  readonly buttons = computed(() => [
+    {
+      id: 'grouping' as const,
+      label: this.t('workspace.toolbar.button.grouping', 'Grouping'),
+      active: this.hasGrouping,
+    },
+    {
+      id: 'filter' as const,
+      label: this.t('workspace.toolbar.button.filter', 'Filter'),
+      active: this.hasFilters,
+    },
+    {
+      id: 'sort' as const,
+      label: this.t('workspace.toolbar.button.sort', 'Sort'),
+      active: this.hasCustomSort,
+    },
+    {
+      id: 'projects' as const,
+      label: this.t('workspace.toolbar.button.projects', 'Projects'),
+      active: this.hasProject,
+    },
+  ]);
 
   // Guard: skip click-outside detection during CDK drag operations
   readonly isDragging = signal(false);

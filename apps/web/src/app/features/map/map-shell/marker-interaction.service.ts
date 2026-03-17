@@ -44,4 +44,56 @@ export class MarkerInteractionService {
     marker.on('mouseover', handlers.onEnter);
     marker.on('mouseout', handlers.onLeave);
   }
+
+  attachLongPress(
+    element: HTMLElement,
+    longPressMs: number,
+    onLongPress: (event: PointerEvent) => void,
+  ): void {
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+    element.addEventListener(
+      'pointerdown',
+      (event: PointerEvent) => {
+        if (event.pointerType && event.pointerType !== 'touch') {
+          return;
+        }
+        longPressTimer = setTimeout(() => {
+          onLongPress(event);
+        }, longPressMs);
+      },
+      { passive: true },
+    );
+
+    const cancelLongPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    element.addEventListener('pointerup', cancelLongPress, { passive: true });
+    element.addEventListener('pointercancel', cancelLongPress, { passive: true });
+    element.addEventListener('pointermove', cancelLongPress, { passive: true });
+    element.addEventListener('click', cancelLongPress);
+  }
+
+  triggerFadeIn(element: HTMLElement, durationMs: number): void {
+    element.classList.remove('map-photo-marker-wrapper--fade-in');
+    element.classList.add('map-photo-marker-wrapper--fade-prep');
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        if (!element.isConnected) return;
+        element.classList.add('map-photo-marker-wrapper--fade-in');
+        element.classList.remove('map-photo-marker-wrapper--fade-prep');
+      });
+    });
+
+    window.setTimeout(() => {
+      if (element.isConnected) {
+        element.classList.remove('map-photo-marker-wrapper--fade-in');
+      }
+    }, durationMs);
+  }
 }

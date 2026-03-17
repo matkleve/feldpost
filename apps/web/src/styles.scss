@@ -132,9 +132,7 @@
   --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);
   --interactive-focus-ring: 0 0 0 2px color-mix(in srgb, var(--color-clay) 16%, transparent);
   --interactive-transition-standard:
-    border-color 120ms ease-out,
-    background 120ms ease-out,
-    color 120ms ease-out,
+    border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
 }
 

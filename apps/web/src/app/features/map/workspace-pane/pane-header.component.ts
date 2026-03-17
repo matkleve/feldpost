@@ -1,4 +1,5 @@
-import { Component, ElementRef, effect, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, effect, inject, input, output, viewChild } from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-pane-header',
@@ -9,7 +10,7 @@ import { Component, ElementRef, effect, input, output, viewChild } from '@angula
           <button
             type="button"
             class="pane-header__color-btn"
-            aria-label="Change project color"
+            [attr.aria-label]="t('workspace.pane.color.aria', 'Change project color')"
             [attr.aria-expanded]="colorPickerOpen()"
             (click)="requestColorPicker()"
           >
@@ -28,7 +29,7 @@ import { Component, ElementRef, effect, input, output, viewChild } from '@angula
           class="pane-header__title-input"
           type="text"
           [value]="editValue()"
-          aria-label="Project title"
+          [attr.aria-label]="t('workspace.pane.projectTitle.aria', 'Project title')"
           (input)="onEditInput(titleInput.value)"
           (keydown.enter)="onEditSubmit(titleInput.value)"
           (blur)="onEditSubmit(titleInput.value)"
@@ -38,8 +39,8 @@ import { Component, ElementRef, effect, input, output, viewChild } from '@angula
           <button
             type="button"
             class="pane-header__title-btn"
-            aria-label="Rename project"
-            title="Rename project"
+            [attr.aria-label]="t('workspace.pane.rename.aria', 'Rename project')"
+            [title]="t('workspace.pane.rename.title', 'Rename project')"
             (click)="requestEdit()"
           >
             <span class="pane-header__title">{{ title() }}</span>
@@ -52,8 +53,8 @@ import { Component, ElementRef, effect, input, output, viewChild } from '@angula
       <button
         class="pane-header__close-btn"
         type="button"
-        aria-label="Close workspace pane"
-        title="Close workspace pane"
+        [attr.aria-label]="t('workspace.pane.close.aria', 'Close workspace pane')"
+        [title]="t('workspace.pane.close.title', 'Close workspace pane')"
         (click)="close.emit()"
       >
         <span class="material-icons" aria-hidden="true">close</span>
@@ -63,7 +64,10 @@ import { Component, ElementRef, effect, input, output, viewChild } from '@angula
   styleUrl: './pane-header.component.scss',
 })
 export class PaneHeaderComponent {
-  readonly title = input('Workspace');
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
+  readonly title = input('');
   readonly editable = input(false);
   readonly editEnabled = input(false);
   readonly editValue = input('');

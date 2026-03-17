@@ -1,4 +1,5 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SupabaseService } from '../../../../core/supabase.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
@@ -15,8 +16,8 @@ interface Project {
     <app-standard-dropdown
       class="projects-dropdown"
       [searchTerm]="searchTerm()"
-      searchPlaceholder="Search projects…"
-      actionLabel="New project"
+      [searchPlaceholder]="t('workspace.projects.search.placeholder', 'Search projects…')"
+      [actionLabel]="t('workspace.projects.action.new', 'New project')"
       (searchTermChange)="searchTerm.set($event)"
       (clearRequested)="searchTerm.set('')"
       (actionRequested)="isCreating.set(true)"
@@ -30,7 +31,7 @@ interface Project {
             [indeterminate]="someSelected()"
             (change)="toggleAll()"
           />
-          <span class="dd-item__label">All projects</span>
+          <span class="dd-item__label">{{ t('workspace.projects.all', 'All projects') }}</span>
         </label>
         @for (project of filteredProjects(); track project.id) {
           <label class="dd-item">
@@ -51,8 +52,10 @@ interface Project {
   imports: [StandardDropdownComponent],
 })
 export class ProjectsDropdownComponent {
+  private readonly i18nService = inject(I18nService);
   private readonly supabase = inject(SupabaseService);
   private readonly viewService = inject(WorkspaceViewService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly projects = signal<Project[]>([]);
   readonly searchTerm = signal('');

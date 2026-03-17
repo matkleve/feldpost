@@ -20,6 +20,7 @@
 import { Component, HostListener, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane.service';
 
 export interface NavItem {
@@ -39,15 +40,17 @@ export interface NavItem {
 })
 export class NavComponent {
   private readonly authService = inject(AuthService);
+  private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   /** Nav items in display order. Items with disabled: true are visually greyed
    *  out and non-interactive — reserved for future features. */
-  navItems: NavItem[] = [
-    { icon: 'map', label: 'Map', route: '/' },
-    { icon: 'photo_camera', label: 'Photos', route: '/photos' },
-    { icon: 'folder', label: 'Projects', route: '/projects' },
-  ];
+  readonly navItems = computed<NavItem[]>(() => [
+    { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
+    { icon: 'photo_camera', label: this.t('nav.item.photos', 'Photos'), route: '/photos' },
+    { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
+  ]);
 
   readonly settingsOverlayOpen = this.settingsPaneService.open;
 

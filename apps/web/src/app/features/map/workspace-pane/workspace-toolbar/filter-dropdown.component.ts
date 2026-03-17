@@ -1,5 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { FilterService } from '../../../../core/filter.service';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyType } from '../../../../core/property-registry.types';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
@@ -31,25 +32,27 @@ function operatorsForType(type: PropertyType | undefined): string[] {
     <app-standard-dropdown
       class="filter-dropdown"
       [showSearch]="false"
-      actionLabel="Add a filter"
+      [actionLabel]="t('workspace.filter.action.add', 'Add a filter')"
       (actionRequested)="filterService.addRule()"
     >
       <div dropdown-items>
         @if (filterService.rules().length === 0) {
-          <div class="dd-empty">No filters applied</div>
+          <div class="dd-empty">{{ t('workspace.filter.empty', 'No filters applied') }}</div>
         } @else {
           <div class="filter-rules">
             @for (rule of filterService.rules(); track rule.id; let i = $index) {
               <div class="filter-rule">
                 <button class="filter-rule__conj" (click)="toggleConjunction(rule.id)">
-                  {{ i === 0 ? 'Where' : rule.conjunction === 'and' ? 'And' : 'Or' }}
+                  {{ conjunctionLabel(i, rule.conjunction) }}
                 </button>
                 <select
                   class="filter-rule__select"
                   [value]="rule.property"
                   (change)="updateProperty(rule.id, $any($event.target).value)"
                 >
-                  <option value="" disabled>Property</option>
+                  <option value="" disabled>
+                    {{ t('workspace.filter.property', 'Property') }}
+                  </option>
                   @for (prop of propertyOptions(); track prop.id) {
                     <option [value]="prop.id">{{ prop.label }}</option>
                   }
@@ -59,22 +62,24 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   [value]="rule.operator"
                   (change)="updateOperator(rule.id, $any($event.target).value)"
                 >
-                  <option value="" disabled>Operator</option>
+                  <option value="" disabled>
+                    {{ t('workspace.filter.operator', 'Operator') }}
+                  </option>
                   @for (op of getOperatorsForRule(rule.property); track op) {
-                    <option [value]="op">{{ op }}</option>
+                    <option [value]="op">{{ operatorLabel(op) }}</option>
                   }
                 </select>
                 <input
                   class="filter-rule__value"
                   [type]="getInputType(rule.property)"
-                  placeholder="Value…"
+                  [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
                   [value]="rule.value"
                   (input)="updateValue(rule.id, $any($event.target).value)"
                 />
                 <button
                   class="filter-rule__remove icon-btn-ghost icon-btn-ghost--danger"
                   (click)="removeRule(rule.id)"
-                  aria-label="Remove filter"
+                  [attr.aria-label]="t('workspace.filter.remove.aria', 'Remove filter')"
                 >
                   <span class="material-icons">close</span>
                 </button>
@@ -90,7 +95,9 @@ function operatorsForType(type: PropertyType | undefined): string[] {
 })
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);
+  private readonly i18nService = inject(I18nService);
   private readonly registry = inject(PropertyRegistryService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly propertyOptionsInput = input<FilterDropdownPropertyOption[] | null>(null);
 
@@ -107,6 +114,35 @@ export class FilterDropdownComponent {
 
   removeRule(id: string): void {
     this.filterService.removeRule(id);
+  }
+
+  conjunctionLabel(index: number, conjunction: string): string {
+    if (index === 0) {
+      return this.t('workspace.filter.conjunction.where', 'Where');
+    }
+
+    return conjunction === 'and'
+      ? this.t('workspace.filter.conjunction.and', 'And')
+      : this.t('workspace.filter.conjunction.or', 'Or');
+  }
+
+  operatorLabel(operator: string): string {
+    switch (operator) {
+      case 'contains':
+        return this.t('workspace.filter.operator.contains', 'contains');
+      case 'equals':
+        return this.t('workspace.filter.operator.equals', 'equals');
+      case 'is':
+        return this.t('workspace.filter.operator.is', 'is');
+      case 'is not':
+        return this.t('workspace.filter.operator.isNot', 'is not');
+      case 'before':
+        return this.t('workspace.filter.operator.before', 'before');
+      case 'after':
+        return this.t('workspace.filter.operator.after', 'after');
+      default:
+        return operator;
+    }
   }
 
   toggleConjunction(id: string): void {

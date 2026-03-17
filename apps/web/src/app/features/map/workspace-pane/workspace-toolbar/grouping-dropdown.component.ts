@@ -1,4 +1,4 @@
-import { Component, input, signal, output } from '@angular/core';
+import { Component, inject, input, signal, output } from '@angular/core';
 import {
   CdkDropList,
   CdkDrag,
@@ -8,6 +8,7 @@ import {
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 
 export interface GroupingProperty {
   id: string;
@@ -22,9 +23,15 @@ export interface GroupingProperty {
       <div dropdown-items cdkDropListGroup>
         <div class="grouping-section">
           <div class="grouping-section__header">
-            <span class="dd-section-label">Grouped by</span>
+            <span class="dd-section-label">{{
+              t('workspace.grouping.section.groupedBy', 'Grouped by')
+            }}</span>
             @if (activeGroupings().length > 0) {
-              <button class="dd-reset-btn" (click)="clearGroupings()" aria-label="Reset grouping">
+              <button
+                class="dd-reset-btn"
+                (click)="clearGroupings()"
+                [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
+              >
                 <span class="material-icons">restart_alt</span>
               </button>
             }
@@ -41,7 +48,11 @@ export interface GroupingProperty {
           >
             @if (activeGroupings().length === 0) {
               <div class="grouping-empty-slot">
-                {{ isDragging() ? 'Drop here to group' : 'No grouping applied' }}
+                {{
+                  isDragging()
+                    ? t('workspace.grouping.empty.dragging', 'Drop here to group')
+                    : t('workspace.grouping.empty.default', 'No grouping applied')
+                }}
               </div>
             }
             @for (prop of activeGroupings(); track prop.id) {
@@ -65,7 +76,9 @@ export interface GroupingProperty {
         </div>
         <div class="dd-divider"></div>
         <div class="grouping-section">
-          <span class="dd-section-label">Available</span>
+          <span class="dd-section-label">{{
+            t('workspace.grouping.section.available', 'Available')
+          }}</span>
           <div
             cdkDropList
             #availableList="cdkDropList"
@@ -100,6 +113,9 @@ export interface GroupingProperty {
   imports: [StandardDropdownComponent, CdkDropList, CdkDrag, CdkDragHandle],
 })
 export class GroupingDropdownComponent {
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
   // State owned by parent (WorkspaceToolbarComponent) — passed in as inputs
   readonly activeGroupings = input<GroupingProperty[]>([]);
   readonly availableProperties = input<GroupingProperty[]>([]);
