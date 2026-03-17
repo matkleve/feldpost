@@ -54,7 +54,7 @@ export class MarkerSelectionSyncService {
 
   buildLinkedWorkspaceImageIds(
     markerState: MarkerStateLike | undefined,
-    rawImages: WorkspaceImageLike[],
+    rawImages: ReadonlyArray<WorkspaceImageLike>,
     toMarkerKey: (lat: number, lng: number) => string,
   ): Set<string> {
     if (!markerState) {

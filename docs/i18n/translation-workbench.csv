@@ -461,3 +461,34 @@ auto.0459.workspace_sort_section_groupedby,workspace.sort.section.groupedBy,apps
 auto.0460.z_b_radius_auswahl_nord,z. B. Radius Auswahl Nord,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:placeholder,z. B. Radius Auswahl Nord,z. B. Radius Auswahl Nord,z. B. Raggio Auswahl Nord
 auto.0461.zoom_to_location,Zoom to location,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal,Zoom to location,Auf Standort zoomen,Zoom sulla posizione
 auto.0462.zu_projekt_zuweisen,Zu Projekt zuweisen...,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Zu Projekt zuweisen...,Zu Projekt zuweisen...,Assegna al progetto...
+map.searchBar.placeholder.search,"Search address, project, group…",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"Search address, project, group…","Suche nach Adresse, Projekt, Gruppe…","Cerca indirizzo, progetto, gruppo…"
+map.searchBar.placeholder.example.denishgasse,"Denisgasse 46, Vienna",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"Denisgasse 46, Vienna","Denisgasse 46, Wien","Denisgasse 46, Vienna"
+map.searchBar.placeholder.example.coordsDecimal,"48.2082, 16.3738",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"48.2082, 16.3738","48.2082, 16.3738","48.2082, 16.3738"
+map.searchBar.placeholder.example.mapsUrl,maps.google.com/…,apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,maps.google.com/…,maps.google.com/…,maps.google.com/…
+map.searchBar.placeholder.example.project,Project Alpha,apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,Project Alpha,Projekt Alpha,Progetto Alpha
+map.searchBar.placeholder.example.schoenbrunnerAllee,Schönbrunner Allee 6,apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,Schönbrunner Allee 6,Schönbrunner Allee 6,Schönbrunner Allee 6
+map.searchBar.placeholder.example.coordsDms,"48°12'30""N 16°22'23""E",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"48°12'30""N 16°22'23""E","48°12'30""N 16°22'23""E","48°12'30""N 16°22'23""E"
+map.searchBar.clear.aria,Clear search,apps/web/src/app/features/map/search-bar/search-bar.component.html attr:aria-label,Clear search,Suche leeren,Cancella ricerca
+map.searchBar.section.recentSearches,Recent searches,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Recent searches,Letzte Suchen,Ricerche recenti
+map.searchBar.empty.noRecents,No recent searches yet.,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,No recent searches yet.,Noch keine letzten Suchen.,Nessuna ricerca recente.
+map.searchBar.section.addresses,Addresses,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Addresses,Adressen,Indirizzi
+map.searchBar.section.projectsAndGroups,Projects & Groups,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Projects & Groups,Projekte und Gruppen,Progetti e gruppi
+map.searchBar.section.commands,Commands,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Commands,Befehle,Comandi
+map.searchBar.section.places,Places,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Places,Orte,Luoghi
+map.searchBar.empty.noAddressFound,No address found for {query},apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,No address found for {query},Keine Adresse gefunden fuer {query},Nessun indirizzo trovato per {query}
+map.searchBar.empty.tryDifferentAddress,Try a different address or pin manually.,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Try a different address or pin manually.,Versuche eine andere Adresse oder setze den Pin manuell.,Prova un indirizzo diverso o inserisci il pin manualmente.
+map.searchBar.action.dropPin,Drop pin,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Drop pin,Pin setzen,Inserisci pin
+map.searchBar.liveRegion.resultsAvailable,{count} results available for {query}.,apps/web/src/app/features/map/search-bar/search-bar.component.ts live-region-text,{count} results available for {query}.,{count} Ergebnisse verfuegbar fuer {query}. ,{count} risultati disponibili per {query}.
+map.searchBar.liveRegion.noAddressFound,No address found for {query}.,apps/web/src/app/features/map/search-bar/search-bar.component.ts live-region-text,No address found for {query}.,Keine Adresse gefunden fuer {query}.,Nessun indirizzo trovato per {query}.
+map.searchBar.meta.addressPhoto.single,1 photo,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,1 photo,1 Foto,1 foto
+map.searchBar.meta.addressPhoto.multi,{count} photos,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,{count} photos,{count} Fotos,{count} foto
+map.searchBar.meta.externalResult,External result,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,External result,Externes Ergebnis,Risultato esterno
+map.searchBar.meta.recentSearch,Recent search,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,Recent search,Letzte Suche,Ricerca recente
+map.searchBar.meta.content.project,Project,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,Project,Projekt,Progetto
+map.searchBar.meta.content.group,Saved group,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,Saved group,Gespeicherte Gruppe,Gruppo salvato
+map.searchBar.meta.content.metadata,Metadata,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,Metadata,Metadaten,Metadati
+map.searchBar.meta.content.photo,Photo,apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label,Photo,Foto,Foto
+map.searchBar.command.createQrInvite,Create QR Invite,apps/web/src/app/core/search/search-orchestrator.service.ts command-label,Create QR Invite,QR-Einladung erstellen,Crea invito QR
+map.searchBar.command.uploadPhotos,Upload photos,apps/web/src/app/core/search/search-orchestrator.service.ts command-label,Upload photos,Fotos hochladen,Carica foto
+map.searchBar.command.clearFilters,Clear filters,apps/web/src/app/core/search/search-orchestrator.service.ts command-label,Clear filters,Filter loeschen,Cancella filtri
+map.searchBar.command.goToMyLocation,Go to my location,apps/web/src/app/core/search/search-orchestrator.service.ts command-label,Go to my location,Zu meinem Standort,Vai alla mia posizione

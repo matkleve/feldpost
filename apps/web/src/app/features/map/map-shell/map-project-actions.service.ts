@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ProjectSelectOption } from '../../../shared/project-select-dialog/project-select-dialog.component';
+import { MapContextActionsService } from './map-context-actions.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 export interface CreateProjectFromImageResult {
   ok: boolean;
@@ -21,24 +23,172 @@ export interface ProjectAssignmentResultLike {
   errorMessage?: string;
 }
 
+export interface ProjectActionToast {
+  message: string;
+  type: 'success' | 'warning' | 'error';
+}
+
+export interface ProjectActionResult {
+  ok: boolean;
+  toast: ProjectActionToast;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MapProjectActionsService {
+  constructor(
+    private readonly mapContextActionsService: MapContextActionsService,
+    private readonly i18nService: I18nService,
+  ) {}
+
+  private t(key: string, fallback = ''): string {
+    return this.i18nService.t(key, fallback);
+  }
+
+  getNoRadiusSelectionWarningToast(): ProjectActionToast {
+    return {
+      message: this.t(
+        'map.shell.toast.noMediaInRadiusSelection',
+        'Keine Medien in Radius-Auswahl verfuegbar.',
+      ),
+      type: 'warning',
+    };
+  }
+
   getAssignmentFailureMessage(result: ProjectAssignmentResultLike): string | null {
     if (result.ok) {
       return null;
     }
 
     if (result.reason === 'empty') {
-      return 'Keine Medien fuer Projektzuweisung gefunden.';
+      return this.t(
+        'map.shell.toast.noMediaForProjectAssignment',
+        'Keine Medien fuer Projektzuweisung gefunden.',
+      );
     }
 
-    return result.errorMessage ?? 'Projektzuweisung fehlgeschlagen.';
+    return (
+      result.errorMessage ??
+      this.t('map.shell.toast.projectAssignmentFailed', 'Projektzuweisung fehlgeschlagen.')
+    );
   }
 
   formatProjectAssignmentSuccess(projectName: string, imageCount: number): string {
     return imageCount === 1
-      ? `Zum Projekt "${projectName}" zugewiesen.`
-      : `${imageCount} Medien dem Projekt "${projectName}" zugewiesen.`;
+      ? this.t(
+          'map.shell.toast.projectAssigned.single',
+          'Zum Projekt "{project}" zugewiesen.',
+        ).replace('{project}', projectName)
+      : this.t(
+          'map.shell.toast.projectAssigned.multi',
+          '{count} Medien dem Projekt "{project}" zugewiesen.',
+        )
+          .replace('{count}', String(imageCount))
+          .replace('{project}', projectName);
+  }
+
+  async assignSelectionToProject(params: {
+    client: SupabaseClient;
+    imageIds: string[];
+    projectId: string;
+    projectName: string;
+  }): Promise<ProjectActionResult> {
+    const assigned = await this.mapContextActionsService.assignImagesToProject(
+      params.client,
+      params.imageIds,
+      params.projectId,
+    );
+    const assignFailureMessage = this.getAssignmentFailureMessage(assigned);
+
+    if (assignFailureMessage) {
+      return {
+        ok: false,
+        toast: {
+          message: assignFailureMessage,
+          type: assigned.reason === 'empty' ? 'warning' : 'error',
+        },
+      };
+    }
+
+    return {
+      ok: true,
+      toast: {
+        message: this.formatProjectAssignmentSuccess(params.projectName, params.imageIds.length),
+        type: 'success',
+      },
+    };
+  }
+
+  async createProjectFromSelection(params: {
+    client: SupabaseClient;
+    projectName: string;
+    imageIds: string[];
+  }): Promise<ProjectActionResult> {
+    if (params.imageIds.length === 0) {
+      return {
+        ok: false,
+        toast: this.getNoRadiusSelectionWarningToast(),
+      };
+    }
+
+    const created = await this.createProjectFromFirstImage({
+      client: params.client,
+      projectName: params.projectName,
+      firstImageId: params.imageIds[0],
+    });
+
+    if (!created.ok || !created.project) {
+      if (created.reason === 'organization-missing') {
+        return {
+          ok: false,
+          toast: {
+            message: this.t(
+              'map.shell.toast.projectCreateOrganizationUnknown',
+              'Projekt konnte nicht erstellt werden (Organisation unbekannt).',
+            ),
+            type: 'error',
+          },
+        };
+      }
+
+      return {
+        ok: false,
+        toast: {
+          message:
+            created.errorMessage ??
+            this.t('map.shell.toast.projectCreateFailed', 'Projekt konnte nicht erstellt werden.'),
+          type: 'error',
+        },
+      };
+    }
+
+    const assigned = await this.mapContextActionsService.assignImagesToProject(
+      params.client,
+      params.imageIds,
+      created.project.id,
+    );
+    const assignFailureMessage = this.getAssignmentFailureMessage(assigned);
+    if (assignFailureMessage) {
+      return {
+        ok: false,
+        toast: {
+          message: assignFailureMessage,
+          type: assigned.reason === 'empty' ? 'warning' : 'error',
+        },
+      };
+    }
+
+    return {
+      ok: true,
+      toast: {
+        message: this.t(
+          'map.shell.toast.projectCreatedAndAssigned',
+          'Projekt "{project}" erstellt und {count} Medien zugewiesen.',
+        )
+          .replace('{project}', created.project.name)
+          .replace('{count}', String(params.imageIds.length)),
+        type: 'success',
+      },
+    };
   }
 
   async loadProjectOptions(client: SupabaseClient): Promise<LoadProjectOptionsResult> {
@@ -56,7 +206,7 @@ export class MapProjectActionsService {
 
     const options = data.map((project) => ({
       id: project.id as string,
-      name: (project.name as string) ?? 'Projekt',
+      name: (project.name as string) ?? this.t('map.shell.value.projectFallback', 'Projekt'),
     }));
 
     return {

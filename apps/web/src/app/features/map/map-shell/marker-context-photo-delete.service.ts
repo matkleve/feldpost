@@ -23,13 +23,8 @@ export class MarkerContextPhotoDeleteService {
     return { markerKey: payload.markerKey, imageId: payload.imageId };
   }
 
-  confirmPhotoDelete(): boolean {
-    return (
-      typeof window === 'undefined' ||
-      window.confirm(
-        'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
-      )
-    );
+  confirmPhotoDelete(confirmMessage: string): boolean {
+    return typeof window === 'undefined' || window.confirm(confirmMessage);
   }
 
   async deleteImageById(client: SupabaseClient, imageId: string): Promise<DeleteImageByIdResult> {

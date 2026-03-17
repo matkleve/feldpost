@@ -1,5 +1,7 @@
 <section class="account-page ui-container" [attr.aria-label]="tr('Account page')">
-  <header class="account-card account-card--identity ui-container ui-container--compact">
+  <header
+    class="account-card account-card--identity ui-container ui-container--compact ui-section-card"
+  >
     <div class="account-card__avatar" aria-hidden="true">
       @if (loading()) {
         <span class="account-skeleton account-skeleton--avatar"></span>
@@ -27,7 +29,7 @@
     </div>
   </header>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section class="account-card ui-container ui-container--compact ui-section-card">
     <h2>{{ tr('Profil') }}</h2>
     <p>{{ tr('Aktualisiere deinen sichtbaren Namen.') }}</p>
     <label class="account-field">
@@ -49,7 +51,7 @@
     </button>
   </section>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section class="account-card ui-container ui-container--compact ui-section-card">
     <h2>{{ tr('Anmeldung') }}</h2>
     <p>{{ tr('E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.') }}</p>
 
@@ -121,7 +123,7 @@
     </div>
   </section>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section class="account-card ui-container ui-container--compact ui-section-card">
     <h2>{{ tr('2FA') }}</h2>
     <p>{{ tr('Aktive Faktoren und TOTP-Setup.') }}</p>
 
@@ -182,7 +184,7 @@
     }
   </section>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section class="account-card ui-container ui-container--compact ui-section-card">
     <h2>{{ tr('Sitzung') }}</h2>
     <p>{{ tr('Beende deine aktuelle Sitzung sicher.') }}</p>
     <button
@@ -195,7 +197,9 @@
     </button>
   </section>
 
-  <section class="account-card account-card--danger ui-container ui-container--compact">
+  <section
+    class="account-card account-card--danger ui-container ui-container--compact ui-section-card"
+  >
     <h2>{{ tr('Konto löschen') }}</h2>
     <p>{{ tr('Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.') }}</p>
     <button
@@ -228,7 +232,7 @@
     aria-modal="true"
     [attr.aria-label]="tr('Konto löschen bestätigen')"
   >
-    <div class="account-delete-dialog ui-container ui-container--compact">
+    <div class="account-delete-dialog ui-container ui-container--compact ui-section-card">
       <h3>{{ tr('Konto löschen') }}</h3>
       <p>{{ tr('Bitte gib DELETE ein, um die Löschung zu bestätigen.') }}</p>
       <label class="account-field">

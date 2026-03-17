@@ -67,6 +67,7 @@
 
       <button
         class="detail-actions-btn"
+        #detailActionsButton
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
         [attr.title]="t('workspace.imageDetail.action.more.title', 'More actions')"
@@ -79,27 +80,32 @@
 
       @if (showContextMenu()) {
         <div
-          class="detail-context-menu option-menu-surface dd-items"
+          #detailContextMenu
+          class="detail-context-menu option-menu-surface"
           role="menu"
-          (keydown.escape)="closeContextMenu()"
+          [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
+          (keydown)="onDetailContextMenuKeydown($event)"
         >
-          <button
-            class="dd-item dd-item--danger"
-            type="button"
-            role="menuitem"
-            (click)="confirmDelete()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-            <span class="dd-item__label">{{
-              t('workspace.imageDetail.action.delete', 'Delete image')
-            }}</span>
-          </button>
-          <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinates()">
-            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">{{
-              t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-            }}</span>
-          </button>
+          <div class="dd-items">
+            <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinates()">
+              <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+              <span class="dd-item__label">{{
+                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
+              }}</span>
+            </button>
+            <div class="dd-divider" aria-hidden="true"></div>
+            <button
+              class="dd-item dd-item--danger"
+              type="button"
+              role="menuitem"
+              (click)="confirmDelete()"
+            >
+              <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
+              <span class="dd-item__label">{{
+                t('workspace.imageDetail.action.delete', 'Delete image')
+              }}</span>
+            </button>
+          </div>
         </div>
         <div
           class="detail-context-menu-overlay"

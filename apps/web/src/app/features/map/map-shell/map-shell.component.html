@@ -13,42 +13,24 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-  <div class="map-style-switch" role="group" aria-label="Map style">
-    <button
-      class="map-style-switch__option"
-      type="button"
-      [class.map-style-switch__option--active]="mapViewMode() === 'street'"
-      [attr.aria-pressed]="mapViewMode() === 'street'"
-      aria-label="Street map"
-      title="Street map"
-      (click)="setMapViewMode('street')"
-    >
-      Street
-    </button>
-
-    <button
-      class="map-style-switch__option"
-      type="button"
-      [class.map-style-switch__option--active]="mapViewMode() === 'photo'"
-      [attr.aria-pressed]="mapViewMode() === 'photo'"
-      aria-label="Photo map"
-      title="Photo map"
-      (click)="setMapViewMode('photo')"
-    >
-      Photo
-    </button>
-
-    <button
-      class="map-style-switch__option"
-      type="button"
-      [class.map-style-switch__option--active]="mapViewMode() === 'historic'"
-      [attr.aria-pressed]="mapViewMode() === 'historic'"
-      aria-label="Historic map"
-      title="Historic map"
-      (click)="setMapViewMode('historic')"
-    >
-      Historic
-    </button>
+  <div
+    class="map-style-switch ui-segmented"
+    role="group"
+    [attr.aria-label]="t('map.shell.mapStyle.aria', 'Map style')"
+  >
+    @for (option of mapViewOptions; track option.mode) {
+      <button
+        class="ui-segmented__button"
+        type="button"
+        [class.ui-segmented__button--active]="mapViewMode() === option.mode"
+        [attr.aria-pressed]="mapViewMode() === option.mode"
+        [attr.aria-label]="t(option.ariaKey, option.ariaFallback)"
+        [attr.title]="t(option.titleKey, option.titleFallback)"
+        (click)="setMapViewMode(option.mode)"
+      >
+        {{ t(option.labelKey, option.labelFallback) }}
+      </button>
+    }
   </div>
 
   <!-- Upload button — top-right of map zone, visually over map -->
@@ -57,8 +39,8 @@
     <button
       class="map-upload-btn"
       type="button"
-      aria-label="Upload images"
-      title="Upload images"
+      [attr.aria-label]="t('map.shell.uploadButton.aria', 'Upload images')"
+      [attr.title]="t('map.shell.uploadButton.title', 'Upload images')"
       [class.map-upload-btn--active]="uploadPanelOpen()"
       (click)="toggleUploadPanel()"
     >
@@ -93,7 +75,7 @@
     class="map-container"
     [class.map-container--placing]="placementActive() || searchPlacementActive()"
     [class.map-container--analog-material]="analogMaterialActive()"
-    aria-label="Site map"
+    [attr.aria-label]="t('map.shell.siteMap.aria', 'Site map')"
   ></div>
 
   @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
@@ -102,7 +84,7 @@
       [style.left.px]="mapMenuPos.x"
       [style.top.px]="mapMenuPos.y"
       role="menu"
-      aria-label="Map context menu"
+      [attr.aria-label]="t('map.shell.contextMenu.map.aria', 'Map context menu')"
     >
       <div class="dd-items">
         <button
@@ -112,11 +94,15 @@
           (click)="onMapContextCreateMarkerHere()"
         >
           <span class="material-icons dd-item__icon" aria-hidden="true">add_location</span>
-          <span class="dd-item__label">Media Marker hier erstellen</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.map.createMarker', 'Media Marker hier erstellen')
+          }}</span>
         </button>
         <button class="dd-item" type="button" role="menuitem" (click)="onMapContextZoomHouseHere()">
           <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
-          <span class="dd-item__label">Hierhin zoomen (Hausnaehe)</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.zoomHouse', 'Hierhin zoomen (Hausnaehe)')
+          }}</span>
         </button>
         <button
           class="dd-item"
@@ -125,15 +111,21 @@
           (click)="onMapContextZoomStreetHere()"
         >
           <span class="material-icons dd-item__icon" aria-hidden="true">zoom_in</span>
-          <span class="dd-item__label">Hierhin zoomen (Strassennaehe)</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.zoomStreet', 'Hierhin zoomen (Strassennaehe)')
+          }}</span>
         </button>
         <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCopyAddress()">
           <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">Adresse kopieren</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.copyAddress', 'Adresse kopieren')
+          }}</span>
         </button>
         <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCopyGps()">
           <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">GPS kopieren</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.copyGps', 'GPS kopieren')
+          }}</span>
         </button>
         <div class="dd-divider" aria-hidden="true"></div>
         <button
@@ -143,7 +135,9 @@
           (click)="onMapContextOpenGoogleMaps()"
         >
           <span class="material-icons dd-item__icon" aria-hidden="true">open_in_new</span>
-          <span class="dd-item__label">In Google Maps oeffnen</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.openGoogleMaps', 'In Google Maps oeffnen')
+          }}</span>
         </button>
       </div>
     </div>
@@ -155,9 +149,11 @@
       [style.left.px]="radiusMenuPos.x"
       [style.top.px]="radiusMenuPos.y"
       role="menu"
-      aria-label="Radius context menu"
+      [attr.aria-label]="t('map.shell.contextMenu.radius.aria', 'Radius context menu')"
     >
-      <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
+      <div class="map-context-menu__header option-menu-header">
+        {{ t('map.shell.contextMenu.radius.header', 'Radius Auswahl') }}
+      </div>
 
       <div class="dd-items">
         <button
@@ -167,7 +163,9 @@
           (click)="onRadiusContextCreateProjectFromSelection()"
         >
           <span class="material-icons dd-item__icon" aria-hidden="true">folder</span>
-          <span class="dd-item__label">Neues Projekt aus Radius</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.radius.createProject', 'Neues Projekt aus Radius')
+          }}</span>
         </button>
         <button
           class="dd-item"
@@ -176,7 +174,9 @@
           (click)="onRadiusContextAssignToProject()"
         >
           <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
-          <span class="dd-item__label">Zu Projekt zuweisen...</span>
+          <span class="dd-item__label">{{
+            t('map.shell.contextMenu.radius.assignToProject', 'Zu Projekt zuweisen...')
+          }}</span>
         </button>
       </div>
     </div>
@@ -189,13 +189,18 @@
         [style.left.px]="markerMenuPos.x"
         [style.top.px]="markerMenuPos.y"
         role="menu"
-        aria-label="Marker context menu"
+        [attr.aria-label]="t('map.shell.contextMenu.marker.aria', 'Marker context menu')"
       >
         <div class="map-context-menu__header option-menu-header">
           @if (markerContextIsSingle) {
-            Foto Marker
+            {{ t('map.shell.contextMenu.marker.header.single', 'Foto Marker') }}
           } @else {
-            {{ markerMenu.count }} Fotos an dieser Stelle
+            {{
+              t(
+                'map.shell.contextMenu.marker.header.multi',
+                '{count} Fotos an dieser Stelle'
+              ).replace('{count}', markerMenu.count.toString())
+            }}
           }
         </div>
 
@@ -210,7 +215,11 @@
               {{ markerContextIsSingle ? 'open_in_new' : 'grid_view' }}
             </span>
             <span class="dd-item__label">
-              {{ markerContextIsSingle ? 'Details oeffnen' : 'Auswahl oeffnen' }}
+              {{
+                markerContextIsSingle
+                  ? t('map.shell.contextMenu.marker.openDetails', 'Details oeffnen')
+                  : t('map.shell.contextMenu.marker.openSelection', 'Auswahl oeffnen')
+              }}
             </span>
           </button>
           <button
@@ -220,7 +229,9 @@
             (click)="onMarkerContextZoomHouse()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
-            <span class="dd-item__label">Hierhin zoomen (Hausnaehe)</span>
+            <span class="dd-item__label">{{
+              t('map.shell.contextMenu.zoomHouse', 'Hierhin zoomen (Hausnaehe)')
+            }}</span>
           </button>
           <button
             class="dd-item"
@@ -229,7 +240,9 @@
             (click)="onMarkerContextZoomStreet()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">zoom_in</span>
-            <span class="dd-item__label">Hierhin zoomen (Strassennaehe)</span>
+            <span class="dd-item__label">{{
+              t('map.shell.contextMenu.zoomStreet', 'Hierhin zoomen (Strassennaehe)')
+            }}</span>
           </button>
           <button
             class="dd-item"
@@ -238,7 +251,9 @@
             (click)="onMarkerContextAssignToProject()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
-            <span class="dd-item__label">Projekt hinzufuegen...</span>
+            <span class="dd-item__label">{{
+              t('map.shell.contextMenu.marker.addProject', 'Projekt hinzufuegen...')
+            }}</span>
           </button>
           <button
             class="dd-item"
@@ -247,11 +262,15 @@
             (click)="onMarkerContextCopyAddress()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">Adresse kopieren</span>
+            <span class="dd-item__label">{{
+              t('map.shell.contextMenu.copyAddress', 'Adresse kopieren')
+            }}</span>
           </button>
           <button class="dd-item" type="button" role="menuitem" (click)="onMarkerContextCopyGps()">
             <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">GPS kopieren</span>
+            <span class="dd-item__label">{{
+              t('map.shell.contextMenu.copyGps', 'GPS kopieren')
+            }}</span>
           </button>
           <button
             class="dd-item"
@@ -260,7 +279,9 @@
             (click)="onMarkerContextOpenGoogleMaps()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">open_in_new</span>
-            <span class="dd-item__label">In Google Maps oeffnen</span>
+            <span class="dd-item__label">{{
+              t('map.shell.contextMenu.openGoogleMaps', 'In Google Maps oeffnen')
+            }}</span>
           </button>
           @if (markerContextIsSingle) {
             <div class="dd-divider" aria-hidden="true"></div>
@@ -271,7 +292,9 @@
               (click)="onMarkerContextDeletePhoto()"
             >
               <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-              <span class="dd-item__label">Foto loeschen</span>
+              <span class="dd-item__label">{{
+                t('map.shell.contextMenu.marker.deletePhoto', 'Foto loeschen')
+              }}</span>
             </button>
           }
         </div>
@@ -293,17 +316,17 @@
     type="button"
     [attr.aria-label]="
       gpsLocating()
-        ? 'Finding my location'
+        ? t('map.shell.gps.finding', 'Finding my location')
         : gpsTrackingActive()
-          ? 'Stop GPS tracking'
-          : 'Go to my location'
+          ? t('map.shell.gps.stopTracking', 'Stop GPS tracking')
+          : t('map.shell.gps.goToLocation', 'Go to my location')
     "
     [title]="
       gpsLocating()
-        ? 'Finding my location'
+        ? t('map.shell.gps.finding', 'Finding my location')
         : gpsTrackingActive()
-          ? 'Stop GPS tracking'
-          : 'Go to my location'
+          ? t('map.shell.gps.stopTracking', 'Stop GPS tracking')
+          : t('map.shell.gps.goToLocation', 'Go to my location')
     "
     [attr.aria-pressed]="gpsTrackingActive()"
     [class.map-gps-btn--locating]="gpsLocating()"
@@ -321,9 +344,13 @@
   @if (placementActive() || searchPlacementActive()) {
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
-      {{ placementActive() ? 'Click the map to place the image' : 'Click the map to drop a pin' }}
+      {{
+        placementActive()
+          ? t('map.shell.placement.placeImage', 'Click the map to place the image')
+          : t('map.shell.placement.dropPin', 'Click the map to drop a pin')
+      }}
       <button class="map-placement-banner__cancel" type="button" (click)="cancelPlacement()">
-        Cancel
+        {{ t('map.shell.placement.cancel', 'Cancel') }}
       </button>
     </div>
   }
@@ -334,8 +361,8 @@
       [message]="projectSelectionDialogMessage()"
       [options]="projectSelectionDialogOptions()"
       [selectedId]="projectSelectionDialogSelectedId()"
-      confirmLabel="Auswaehlen"
-      cancelLabel="Abbrechen"
+      [confirmLabel]="t('map.shell.dialog.projectSelect.confirm', 'Auswaehlen')"
+      [cancelLabel]="t('map.shell.dialog.cancel', 'Abbrechen')"
       (selectedIdChange)="onProjectSelectionDialogSelected($event)"
       (confirmed)="onProjectSelectionDialogConfirmed($event)"
       (cancelled)="onProjectSelectionDialogCancelled()"
@@ -346,10 +373,10 @@
     <app-text-input-dialog
       [title]="projectNameDialogTitle()"
       [message]="projectNameDialogMessage()"
-      placeholder="z. B. Radius Auswahl Nord"
+      [placeholder]="t('map.shell.dialog.projectName.placeholder', 'z. B. Radius Auswahl Nord')"
       [initialValue]="projectNameDialogInitialValue()"
-      confirmLabel="Projekt erstellen"
-      cancelLabel="Abbrechen"
+      [confirmLabel]="t('map.shell.dialog.projectName.confirm', 'Projekt erstellen')"
+      [cancelLabel]="t('map.shell.dialog.cancel', 'Abbrechen')"
       (confirmed)="onProjectNameDialogConfirmed($event)"
       (cancelled)="onProjectNameDialogCancelled()"
     />

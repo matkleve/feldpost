@@ -42,7 +42,7 @@ import {
 } from '../../../core/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
-import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
+import { PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
@@ -53,7 +53,6 @@ import { SettingsPaneService } from '../../../core/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import {
-  buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
   PHOTO_MARKER_ICON_SIZE,
   PHOTO_MARKER_POPUP_ANCHOR,
@@ -77,7 +76,6 @@ import { RadiusCommittedVisual, RadiusVisualsService } from './radius-visuals.se
 import { RadiusDraftHighlightService } from './radius-draft-highlight.service';
 import { MapContextActionsService } from './map-context-actions.service';
 import { MarkerContextPhotoDeleteService } from './marker-context-photo-delete.service';
-import { PhotoMarkerIconStateService } from './photo-marker-icon-state.service';
 import { MarkerSelectionSyncService } from './marker-selection-sync.service';
 import { MarkerMotionService } from './marker-motion.service';
 import {
@@ -93,9 +91,27 @@ import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferre
 import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
+import { MapProjectContextOrchestratorService } from './map-project-context-orchestrator.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { PhotoMarkerRenderService } from './photo-marker-render.service';
+import { PhotoMarkerSelectionService } from './photo-marker-selection.service';
+import { PhotoMarkerThumbnailService } from './photo-marker-thumbnail.service';
+import {
+  MapRadiusInteractionHost,
+  MapRadiusInteractionService,
+} from './map-radius-interaction.service';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo' | 'historic';
+type MapViewOption = {
+  mode: MapViewMode;
+  ariaKey: string;
+  ariaFallback: string;
+  titleKey: string;
+  titleFallback: string;
+  labelKey: string;
+  labelFallback: string;
+};
 
 type ViewportMarkerRow = {
   cluster_lat: number;
@@ -181,7 +197,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
-  private readonly photoLoadService = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -199,7 +214,10 @@ export class MapShellComponent implements OnDestroy {
   private readonly radiusDraftHighlightService = inject(RadiusDraftHighlightService);
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
-  private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
+  private readonly photoMarkerRenderService = inject(PhotoMarkerRenderService);
+  private readonly photoMarkerSelectionService = inject(PhotoMarkerSelectionService);
+  private readonly photoMarkerThumbnailService = inject(PhotoMarkerThumbnailService);
+  private readonly mapRadiusInteractionService = inject(MapRadiusInteractionService);
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
   private readonly mapPreferencesService = inject(MapPreferencesService);
@@ -211,6 +229,11 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
+  private readonly mapProjectContextOrchestratorService = inject(
+    MapProjectContextOrchestratorService,
+  );
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -353,6 +376,35 @@ export class MapShellComponent implements OnDestroy {
     }
     return this.mapMaterial() === 'analog' ? 'historic' : 'street';
   });
+  readonly mapViewOptions: ReadonlyArray<MapViewOption> = [
+    {
+      mode: 'street',
+      ariaKey: 'map.shell.mapStyle.street.aria',
+      ariaFallback: 'Street map',
+      titleKey: 'map.shell.mapStyle.street.title',
+      titleFallback: 'Street map',
+      labelKey: 'map.shell.mapStyle.street.label',
+      labelFallback: 'Street',
+    },
+    {
+      mode: 'photo',
+      ariaKey: 'map.shell.mapStyle.photo.aria',
+      ariaFallback: 'Photo map',
+      titleKey: 'map.shell.mapStyle.photo.title',
+      titleFallback: 'Photo map',
+      labelKey: 'map.shell.mapStyle.photo.label',
+      labelFallback: 'Photo',
+    },
+    {
+      mode: 'historic',
+      ariaKey: 'map.shell.mapStyle.historic.aria',
+      ariaFallback: 'Historic map',
+      titleKey: 'map.shell.mapStyle.historic.title',
+      titleFallback: 'Historic map',
+      labelKey: 'map.shell.mapStyle.historic.label',
+      labelFallback: 'Historic',
+    },
+  ];
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -647,6 +699,30 @@ export class MapShellComponent implements OnDestroy {
     this.markerContextMenuOpen.set(false);
   }
 
+  private asRadiusInteractionHost(): MapRadiusInteractionHost {
+    return this as unknown as MapRadiusInteractionHost;
+  }
+
+  private hasCommittedRadiusSelection(): boolean {
+    return this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals);
+  }
+
+  private isInsideCommittedRadius(latlng: L.LatLng): boolean {
+    return this.radiusSelectionService.isInsideAnyCommittedRadius(
+      this.map,
+      this.radiusCommittedVisuals,
+      latlng,
+    );
+  }
+
+  private isPlacementActive(): boolean {
+    return this.placementActive();
+  }
+
+  private isSearchPlacementActive(): boolean {
+    return this.searchPlacementActive();
+  }
+
   onMapContextCreateMarkerHere(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
@@ -666,7 +742,10 @@ export class MapShellComponent implements OnDestroy {
     this.uploadPanelPinned.set(true);
     this.map?.getContainer().classList.remove('map-container--placing');
     this.toastService.show({
-      message: 'Media Marker erstellt. Upload starten.',
+      message: this.t(
+        'map.shell.toast.mediaMarkerCreated',
+        'Media Marker erstellt. Upload starten.',
+      ),
       type: 'success',
       dedupe: true,
     });
@@ -732,115 +811,26 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onRadiusContextCreateProjectFromSelection(): Promise<void> {
-    const imageIds = this.mapProjectActionsService.getActiveSelectionImageIds(
-      this.workspaceViewService.rawImages(),
-    );
-    if (imageIds.length === 0) {
-      this.toastService.show({
-        message: 'Keine Medien in Radius-Auswahl verfuegbar.',
-        type: 'warning',
-        dedupe: true,
+    const toast =
+      await this.mapProjectContextOrchestratorService.handleRadiusCreateProjectFromSelection({
+        rawImages: this.workspaceViewService.rawImages(),
+        client: this.supabaseService.client,
+        signals: this.state,
       });
-      this.closeContextMenus();
-      return;
+    if (toast) {
+      this.toastService.show({ ...toast, dedupe: true });
     }
-
-    const projectName = await this.promptProjectNameFromRadius();
-    if (!projectName) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const created = await this.mapProjectActionsService.createProjectFromFirstImage({
-      client: this.supabaseService.client,
-      projectName,
-      firstImageId: imageIds[0],
-    });
-    if (!created.ok || !created.project) {
-      if (created.reason === 'organization-missing') {
-        this.toastService.show({
-          message: 'Projekt konnte nicht erstellt werden (Organisation unbekannt).',
-          type: 'error',
-          dedupe: true,
-        });
-      } else {
-        this.toastService.show({
-          message: created.errorMessage ?? 'Projekt konnte nicht erstellt werden.',
-          type: 'error',
-          dedupe: true,
-        });
-      }
-      this.closeContextMenus();
-      return;
-    }
-
-    const assigned = await this.mapContextActionsService.assignImagesToProject(
-      this.supabaseService.client,
-      imageIds,
-      created.project.id,
-    );
-    const assignFailureMessage =
-      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
-    if (assignFailureMessage) {
-      this.toastService.show({
-        message: assignFailureMessage,
-        type: assigned.reason === 'empty' ? 'warning' : 'error',
-        dedupe: true,
-      });
-      this.closeContextMenus();
-      return;
-    }
-
-    this.toastService.show({
-      message: `Projekt "${created.project.name}" erstellt und ${imageIds.length} Medien zugewiesen.`,
-      type: 'success',
-      dedupe: true,
-    });
     this.closeContextMenus();
   }
 
   async onRadiusContextAssignToProject(): Promise<void> {
-    const imageIds = this.mapProjectActionsService.getActiveSelectionImageIds(
-      this.workspaceViewService.rawImages(),
-    );
-    if (imageIds.length === 0) {
-      this.toastService.show({
-        message: 'Keine Medien in Radius-Auswahl verfuegbar.',
-        type: 'warning',
-        dedupe: true,
-      });
-      this.closeContextMenus();
-      return;
-    }
-
-    const project = await this.promptProjectSelection();
-    if (!project) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const assigned = await this.mapContextActionsService.assignImagesToProject(
-      this.supabaseService.client,
-      imageIds,
-      project.id,
-    );
-    const assignFailureMessage =
-      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
-    if (!assignFailureMessage) {
-      this.toastService.show({
-        message: this.mapProjectActionsService.formatProjectAssignmentSuccess(
-          project.name,
-          imageIds.length,
-        ),
-        type: 'success',
-        dedupe: true,
-      });
-    } else {
-      this.toastService.show({
-        message: assignFailureMessage,
-        type: assigned.reason === 'empty' ? 'warning' : 'error',
-        dedupe: true,
-      });
+    const toast = await this.mapProjectContextOrchestratorService.handleRadiusAssignToProject({
+      rawImages: this.workspaceViewService.rawImages(),
+      client: this.supabaseService.client,
+      signals: this.state,
+    });
+    if (toast) {
+      this.toastService.show({ ...toast, dedupe: true });
     }
     this.closeContextMenus();
   }
@@ -866,7 +856,10 @@ export class MapShellComponent implements OnDestroy {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
     this.toastService.show({
-      message: 'Marker verschieben folgt im nächsten Schritt.',
+      message: this.t(
+        'map.shell.toast.markerMoveNextStep',
+        'Marker verschieben folgt im naechsten Schritt.',
+      ),
       type: 'info',
       dedupe: true,
     });
@@ -877,107 +870,51 @@ export class MapShellComponent implements OnDestroy {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
 
-    const project = await this.promptProjectSelection();
-    if (!project) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const imageIds = await this.mapContextActionsService.resolveMarkerContextImageIds(
+    const toast = await this.mapProjectContextOrchestratorService.handleMarkerAssignToProject({
       payload,
-      (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.map?.getZoom() ?? 13,
-    );
-    if (imageIds.length === 0) {
-      this.toastService.show({
-        message: 'Keine Medien fuer Projektzuweisung gefunden.',
-        type: 'warning',
-        dedupe: true,
-      });
-      this.closeContextMenus();
-      return;
-    }
-
-    const assigned = await this.mapContextActionsService.assignImagesToProject(
-      this.supabaseService.client,
-      imageIds,
-      project.id,
-    );
-    const assignFailureMessage =
-      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
-    if (assignFailureMessage) {
-      this.toastService.show({
-        message: assignFailureMessage,
-        type: assigned.reason === 'empty' ? 'warning' : 'error',
-        dedupe: true,
-      });
-      this.closeContextMenus();
-      return;
-    }
-
-    this.toastService.show({
-      message: this.mapProjectActionsService.formatProjectAssignmentSuccess(
-        project.name,
-        imageIds.length,
-      ),
-      type: 'success',
-      dedupe: true,
+      zoom: this.map?.getZoom() ?? 13,
+      client: this.supabaseService.client,
+      signals: this.state,
+      fetchClusterImages: (cells, zoom) =>
+        this.workspaceViewService.fetchClusterImages(cells, zoom),
     });
+    if (toast) {
+      this.toastService.show({ ...toast, dedupe: true });
+    }
     this.closeContextMenus();
   }
 
   onMarkerContextZoomHouse(): void {
     const payload = this.markerContextMenuPayload();
-    if (!payload || !this.map) return;
-    this.map.setView([payload.lat, payload.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
-    this.closeContextMenus();
+    if (!payload) return;
+    this.zoomContextTo(payload.lat, payload.lng, MapShellComponent.HOUSE_PROXIMITY_ZOOM);
   }
 
   onMarkerContextZoomStreet(): void {
     const payload = this.markerContextMenuPayload();
-    if (!payload || !this.map) return;
-    this.map.setView([payload.lat, payload.lng], MapShellComponent.STREET_PROXIMITY_ZOOM);
-    this.closeContextMenus();
+    if (!payload) return;
+    this.zoomContextTo(payload.lat, payload.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
   }
 
   async onMarkerContextCopyAddress(): Promise<void> {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
 
-    const copied = await this.mapContextActionsService.copyAddressFromCoords(
-      payload.lat,
-      payload.lng,
-    );
-    if (copied) {
-      this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
-    } else {
-      this.toastService.show({
-        message: 'Adresse konnte nicht aufgeloest werden.',
-        type: 'warning',
-        dedupe: true,
-      });
-    }
+    await this.copyAddressWithFeedback(payload.lat, payload.lng);
     this.closeContextMenus();
   }
 
   async onMarkerContextCopyGps(): Promise<void> {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
-    const text = this.mapContextActionsService.formatGps(payload.lat, payload.lng);
-    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
-    this.toastService.show({
-      message: copied ? 'GPS kopiert.' : text,
-      type: copied ? 'success' : 'info',
-      dedupe: true,
-    });
+    await this.copyGpsWithFeedback(payload.lat, payload.lng);
     this.closeContextMenus();
   }
 
   onMarkerContextOpenGoogleMaps(): void {
     const payload = this.markerContextMenuPayload();
-    if (!payload || typeof window === 'undefined') return;
-    const url = this.mapContextActionsService.buildGoogleMapsUrl(payload.lat, payload.lng);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (!payload) return;
+    this.openGoogleMapsForCoords(payload.lat, payload.lng);
     this.closeContextMenus();
   }
 
@@ -989,7 +926,16 @@ export class MapShellComponent implements OnDestroy {
   async onMarkerContextDeletePhoto(): Promise<void> {
     const payload = this.markerContextMenuPayload();
     const target = this.markerContextPhotoDeleteService.getSingleImageTarget(payload);
-    if (!target || !this.markerContextPhotoDeleteService.confirmPhotoDelete()) return;
+    if (
+      !target ||
+      !this.markerContextPhotoDeleteService.confirmPhotoDelete(
+        this.t(
+          'map.shell.marker.deleteConfirm',
+          'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
+        ),
+      )
+    )
+      return;
 
     const deleted = await this.markerContextPhotoDeleteService.deleteImageById(
       this.supabaseService.client,
@@ -997,7 +943,9 @@ export class MapShellComponent implements OnDestroy {
     );
     if (!deleted.ok) {
       this.toastService.show({
-        message: deleted.errorMessage ?? 'Loeschen fehlgeschlagen.',
+        message:
+          deleted.errorMessage ??
+          this.t('map.shell.toast.deleteFailed', 'Loeschen fehlgeschlagen.'),
         type: 'error',
         dedupe: true,
       });
@@ -1019,8 +967,54 @@ export class MapShellComponent implements OnDestroy {
       setDetailImageId: (imageId) => this.detailImageId.set(imageId),
     });
 
-    this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
+    this.toastService.show({
+      message: this.t('map.shell.toast.photoDeleted', 'Foto geloescht.'),
+      type: 'success',
+      dedupe: true,
+    });
     this.closeContextMenus();
+  }
+
+  private zoomContextTo(lat: number, lng: number, zoomLevel: number): void {
+    if (!this.map) return;
+    this.map.setView([lat, lng], zoomLevel);
+    this.closeContextMenus();
+  }
+
+  private async copyAddressWithFeedback(lat: number, lng: number): Promise<void> {
+    const copied = await this.mapContextActionsService.copyAddressFromCoords(lat, lng);
+    this.toastService.show(
+      copied
+        ? {
+            message: this.t('map.shell.toast.addressCopied', 'Adresse kopiert.'),
+            type: 'success',
+            dedupe: true,
+          }
+        : {
+            message: this.t(
+              'map.shell.toast.addressResolveFailed',
+              'Adresse konnte nicht aufgeloest werden.',
+            ),
+            type: 'warning',
+            dedupe: true,
+          },
+    );
+  }
+
+  private async copyGpsWithFeedback(lat: number, lng: number): Promise<void> {
+    const text = this.mapContextActionsService.formatGps(lat, lng);
+    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
+    this.toastService.show({
+      message: copied ? this.t('map.shell.toast.gpsCopied', 'GPS kopiert.') : text,
+      type: copied ? 'success' : 'info',
+      dedupe: true,
+    });
+  }
+
+  private openGoogleMapsForCoords(lat: number, lng: number): void {
+    if (typeof window === 'undefined') return;
+    const url = this.mapContextActionsService.buildGoogleMapsUrl(lat, lng);
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   // ── Workspace pane resize ─────────────────────────────────────────────────
@@ -1547,7 +1541,10 @@ export class MapShellComponent implements OnDestroy {
     try {
       if (result.status === 'invalid') {
         this.toastService.show({
-          message: 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
+          message: this.t(
+            'map.shell.toast.shareLinkInvalid',
+            'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
+          ),
           type: 'warning',
           dedupe: true,
         });
@@ -1556,7 +1553,10 @@ export class MapShellComponent implements OnDestroy {
 
       if (result.status === 'no-images') {
         this.toastService.show({
-          message: 'Freigabelink enthaelt keine verfuegbaren Medien.',
+          message: this.t(
+            'map.shell.toast.shareLinkNoImages',
+            'Freigabelink enthaelt keine verfuegbaren Medien.',
+          ),
           type: 'warning',
           dedupe: true,
         });
@@ -1565,7 +1565,10 @@ export class MapShellComponent implements OnDestroy {
 
       if (result.status === 'error') {
         this.toastService.show({
-          message: 'Freigabelink konnte nicht aufgeloest werden.',
+          message: this.t(
+            'map.shell.toast.shareLinkResolveFailed',
+            'Freigabelink konnte nicht aufgeloest werden.',
+          ),
           type: 'error',
           dedupe: true,
         });
@@ -1583,7 +1586,10 @@ export class MapShellComponent implements OnDestroy {
       this.photoPanelOpen.set(true);
 
       this.toastService.show({
-        message: `${result.selectionIds.length} Medien aus Freigabelink geladen.`,
+        message: this.t(
+          'map.shell.toast.shareLinkLoaded',
+          '{count} Medien aus Freigabelink geladen.',
+        ).replace('{count}', String(result.selectionIds.length)),
         type: 'success',
         dedupe: true,
       });
@@ -1706,80 +1712,33 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private handleMapMouseDown(event: L.LeafletMouseEvent): void {
-    if (event.originalEvent.button !== 2) {
-      return;
-    }
-
-    event.originalEvent.preventDefault();
-    if (!this.map || this.placementActive() || this.searchPlacementActive()) {
-      return;
-    }
-
-    this.pendingSecondaryPress = {
-      startPoint: this.map.mouseEventToContainerPoint(event.originalEvent),
-      startLatLng: event.latlng,
-      startClientX: event.originalEvent.clientX,
-      startClientY: event.originalEvent.clientY,
-      additive: !!(event.originalEvent.ctrlKey || event.originalEvent.metaKey),
-    };
-    this.closeContextMenus();
+    this.mapRadiusInteractionService.handleMapMouseDown(this.asRadiusInteractionHost(), event);
   }
 
   private handleMapMouseMove(event: L.LeafletMouseEvent): void {
-    if (!this.map || !this.pendingSecondaryPress || this.radiusDrawActive) {
-      return;
-    }
-
-    const currentPoint = this.map.mouseEventToContainerPoint(event.originalEvent);
-    const dx = currentPoint.x - this.pendingSecondaryPress.startPoint.x;
-    const dy = currentPoint.y - this.pendingSecondaryPress.startPoint.y;
-    const movedPx = Math.hypot(dx, dy);
-
-    if (movedPx < MapShellComponent.CONTEXT_MENU_DRAG_THRESHOLD_PX) {
-      return;
-    }
-
-    const { startLatLng, additive } = this.pendingSecondaryPress;
-    this.pendingSecondaryPress = null;
-    this.startRadiusSelectionDraw(startLatLng, additive);
-    this.updateRadiusSelectionDraft(event.latlng);
+    this.mapRadiusInteractionService.handleMapMouseMove(
+      this.asRadiusInteractionHost(),
+      event,
+      MapShellComponent.CONTEXT_MENU_DRAG_THRESHOLD_PX,
+      MapShellComponent.RADIUS_CLICK_GUARD_MS,
+      MapShellComponent.RADIUS_SELECTION_MIN_METERS,
+    );
   }
 
   private handleMapMouseUp(event: L.LeafletMouseEvent): void {
-    if (event.originalEvent.button !== 2) {
-      return;
-    }
-
-    event.originalEvent.preventDefault();
-
-    // Short secondary click should open the context menu. Radius drawing already
-    // clears pendingSecondaryPress during mousemove once drag threshold is crossed.
-    if (!this.pendingSecondaryPress || this.radiusDrawActive) {
-      return;
-    }
-
-    const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
-    this.pendingSecondaryPress = null;
-    this.openContextMenuForShortSecondaryClick(startLatLng, startClientX, startClientY);
+    this.mapRadiusInteractionService.handleMapMouseUp(
+      this.asRadiusInteractionHost(),
+      event,
+      MapShellComponent.RADIUS_CLICK_GUARD_MS,
+    );
   }
 
   private handleMapContextMenu(event: L.LeafletMouseEvent): void {
-    if (this.consumeNativeContextMenuBypass()) {
-      return;
-    }
-
-    event.originalEvent.preventDefault();
-    event.originalEvent.stopPropagation();
-
-    // Mouse-up opens the menu for short right-click interactions. Keep this as a
-    // fallback for platforms where only contextmenu is emitted.
-    if (this.radiusDrawActive || !this.pendingSecondaryPress) {
-      return;
-    }
-
-    const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
-    this.pendingSecondaryPress = null;
-    this.openContextMenuForShortSecondaryClick(startLatLng, startClientX, startClientY);
+    this.mapRadiusInteractionService.handleMapContextMenu(
+      this.asRadiusInteractionHost(),
+      event,
+      MapShellComponent.RADIUS_CLICK_GUARD_MS,
+    );
   }
 
   private openContextMenuForShortSecondaryClick(
@@ -1809,163 +1768,25 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private shouldAllowNativeContextMenu(event: MouseEvent): boolean {
-    const now = Date.now();
-    const currentPos = { x: event.clientX, y: event.clientY };
-    const previousAt = this.lastSecondaryContextClickAt;
-    const previousPos = this.lastSecondaryContextClickPos;
-
-    const withinTime =
-      previousAt !== null && now - previousAt <= MapShellComponent.CONTEXT_MENU_NATIVE_HANDSHAKE_MS;
-    const withinDistance =
-      previousPos !== null &&
-      Math.hypot(currentPos.x - previousPos.x, currentPos.y - previousPos.y) <=
-        MapShellComponent.CONTEXT_MENU_NATIVE_HANDSHAKE_PX;
-
-    const allowNative = withinTime && withinDistance;
-
-    if (allowNative) {
-      this.lastSecondaryContextClickAt = null;
-      this.lastSecondaryContextClickPos = null;
-      return true;
-    }
-
-    this.lastSecondaryContextClickAt = now;
-    this.lastSecondaryContextClickPos = currentPos;
-    return false;
+    return this.mapRadiusInteractionService.shouldAllowNativeContextMenu(
+      this.asRadiusInteractionHost(),
+      event,
+      MapShellComponent.CONTEXT_MENU_NATIVE_HANDSHAKE_MS,
+      MapShellComponent.CONTEXT_MENU_NATIVE_HANDSHAKE_PX,
+    );
   }
 
   private consumeNativeContextMenuBypass(): boolean {
-    if (Date.now() > this.nativeContextMenuBypassUntil) {
-      this.nativeContextMenuBypassUntil = 0;
-      return false;
-    }
-
-    this.nativeContextMenuBypassUntil = 0;
-    return true;
-  }
-
-  private startRadiusSelectionDraw(startLatLng: L.LatLng, additive: boolean): void {
-    if (!this.map || this.placementActive() || this.searchPlacementActive()) {
-      return;
-    }
-
-    this.cancelRadiusDrawing();
-    this.closeContextMenus();
-
-    this.radiusDrawActive = true;
-    this.radiusDrawAdditive = additive;
-    this.radiusDrawStartLatLng = startLatLng;
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
-
-    this.radiusDraftLine = L.polyline([startLatLng, startLatLng], {
-      color: 'var(--color-clay)',
-      weight: 2,
-      opacity: 0.95,
-      dashArray: '6 4',
-      interactive: false,
-    }).addTo(this.map);
-
-    this.radiusDraftCircle = L.circle(startLatLng, {
-      radius: 1,
-      color: 'var(--color-clay)',
-      weight: 2,
-      opacity: 0.95,
-      fillColor: 'var(--color-clay)',
-      fillOpacity: 0.1,
-      interactive: false,
-    }).addTo(this.map);
-
-    this.radiusDraftLabel = this.radiusVisualsService
-      .createLabelMarker(startLatLng, 0, 0)
-      .addTo(this.map);
-
-    this.radiusDrawMoveHandler = (moveEvent: L.LeafletMouseEvent) => {
-      this.updateRadiusSelectionDraft(moveEvent.latlng);
-    };
-
-    this.radiusDrawMouseUpHandler = (upEvent: L.LeafletMouseEvent) => {
-      void this.commitRadiusSelection(upEvent.latlng);
-    };
-
-    this.map.on('mousemove', this.radiusDrawMoveHandler);
-    this.map.on('mouseup', this.radiusDrawMouseUpHandler);
-  }
-
-  private updateRadiusSelectionDraft(currentLatLng: L.LatLng): void {
-    if (!this.map || !this.radiusDrawStartLatLng) {
-      return;
-    }
-
-    const radiusMeters = this.map.distance(this.radiusDrawStartLatLng, currentLatLng);
-    const labelLatLng = this.radiusVisualsService.getLabelLatLng(
-      this.radiusDrawStartLatLng,
-      currentLatLng,
+    return this.mapRadiusInteractionService.consumeNativeContextMenuBypass(
+      this.asRadiusInteractionHost(),
     );
-    const labelAngleDeg = this.radiusVisualsService.getReadableLineAngleDeg(
-      this.map,
-      this.radiusDrawStartLatLng,
-      currentLatLng,
-    );
-
-    this.radiusDraftLine?.setLatLngs([this.radiusDrawStartLatLng, currentLatLng]);
-    this.radiusDraftCircle?.setRadius(radiusMeters);
-    this.radiusDraftLabel?.setLatLng(labelLatLng);
-    this.radiusVisualsService.updateLabelMarker(this.radiusDraftLabel, radiusMeters, labelAngleDeg);
-    this.updateRadiusDraftMarkerHighlights(this.radiusDrawStartLatLng, radiusMeters);
-  }
-
-  private async commitRadiusSelection(endLatLng: L.LatLng): Promise<void> {
-    if (!this.map || !this.radiusDrawStartLatLng) {
-      this.cancelRadiusDrawing();
-      return;
-    }
-
-    const center = this.radiusDrawStartLatLng;
-    const radiusMeters = this.map.distance(center, endLatLng);
-    const additive = this.radiusDrawAdditive;
-
-    this.cancelRadiusDrawing(true);
-
-    if (radiusMeters < MapShellComponent.RADIUS_SELECTION_MIN_METERS) {
-      this.clearRadiusDraftMarkerHighlights();
-      return;
-    }
-
-    if (!additive) {
-      this.clearRadiusSelectionVisuals();
-    }
-
-    this.addRadiusSelectionVisual(center, radiusMeters, endLatLng);
-    await this.selectRadiusImages(center, radiusMeters, additive);
-    this.clearRadiusDraftMarkerHighlights();
-    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
   private cancelRadiusDrawing(preserveDraftHighlights = false): void {
-    if (this.map && this.radiusDrawMoveHandler) {
-      this.map.off('mousemove', this.radiusDrawMoveHandler);
-    }
-
-    if (this.map && this.radiusDrawMouseUpHandler) {
-      this.map.off('mouseup', this.radiusDrawMouseUpHandler);
-    }
-
-    this.radiusDrawMoveHandler = null;
-    this.radiusDrawMouseUpHandler = null;
-    this.radiusDrawActive = false;
-    this.radiusDrawAdditive = false;
-    this.radiusDrawStartLatLng = null;
-
-    this.radiusDraftLine?.remove();
-    this.radiusDraftLine = null;
-    this.radiusDraftCircle?.remove();
-    this.radiusDraftCircle = null;
-    this.radiusDraftLabel?.remove();
-    this.radiusDraftLabel = null;
-
-    if (!preserveDraftHighlights) {
-      this.clearRadiusDraftMarkerHighlights();
-    }
+    this.mapRadiusInteractionService.cancelRadiusDrawing(
+      this.asRadiusInteractionHost(),
+      preserveDraftHighlights,
+    );
   }
 
   private updateRadiusDraftMarkerHighlights(center: L.LatLng, radiusMeters: number): void {
@@ -2148,17 +1969,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private buildDraftMediaMarkerIcon(): L.DivIcon {
-    return L.divIcon({
-      className: 'map-photo-marker-wrapper',
-      html: buildPhotoMarkerHtml({
-        count: 1,
-        selected: true,
-        zoomLevel: this.getPhotoMarkerZoomLevel(),
-      }),
-      iconSize: PHOTO_MARKER_ICON_SIZE,
-      iconAnchor: PHOTO_MARKER_ICON_ANCHOR,
-      popupAnchor: PHOTO_MARKER_POPUP_ANCHOR,
-    });
+    return this.photoMarkerRenderService.buildDraftMediaMarkerIcon(this.getPhotoMarkerZoomLevel());
   }
 
   private removeDraftMediaMarker(): void {
@@ -2448,7 +2259,8 @@ export class MapShellComponent implements OnDestroy {
           row,
           keys,
         ),
-      buildFallbackLabelFromPath: (path) => this.buildFallbackLabelFromPath(path),
+      buildFallbackLabelFromPath: (path) =>
+        this.photoMarkerRenderService.buildFallbackLabelFromPath(path),
       buildPhotoMarkerIcon: (markerKey, override) => this.buildPhotoMarkerIcon(markerKey, override),
       attachMarkerInteractions: (markerKey, marker, fadeIn) =>
         this.attachMarkerInteractions(markerKey, marker, { fadeIn }),
@@ -2491,63 +2303,35 @@ export class MapShellComponent implements OnDestroy {
     }>,
   ): L.DivIcon {
     const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    const fallbackLabel =
-      override?.fallbackLabel ??
-      markerState?.fallbackLabel ??
-      this.getMarkerFallbackLabel(markerState);
-    const iconState = this.photoMarkerIconStateService.resolveIconState(
+    return this.photoMarkerRenderService.buildPhotoMarkerIcon({
       markerState,
       override,
-      fallbackLabel,
-    );
-
-    return L.divIcon({
-      className: 'map-photo-marker-wrapper',
-      html: buildPhotoMarkerHtml({
-        count: iconState.count,
-        thumbnailUrl: iconState.thumbnailUrl,
-        fallbackLabel: iconState.fallbackLabel,
-        bearing: iconState.direction,
-        selected: this.isMarkerSelected(markerKey),
-        linkedHover: this.isMarkerLinkedHovered(markerKey),
-        corrected: iconState.corrected,
-        uploading: iconState.uploading,
-        loading: iconState.loading,
-        zoomLevel: this.getPhotoMarkerZoomLevel(),
-      }),
-      iconSize: PHOTO_MARKER_ICON_SIZE,
-      iconAnchor: PHOTO_MARKER_ICON_ANCHOR,
-      popupAnchor: PHOTO_MARKER_POPUP_ANCHOR,
+      selected: this.isMarkerSelected(markerKey),
+      linkedHover: this.isMarkerLinkedHovered(markerKey),
+      zoomLevel: this.getPhotoMarkerZoomLevel(),
     });
   }
 
   private handlePhotoMarkerClick(markerKey: string, clickEvent?: L.LeafletMouseEvent): void {
-    const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    if (!markerState) {
-      return;
-    }
-
-    // Always open pane and mark marker selected.
-    this.setSelectedMarker(markerKey);
-    this.ensurePhotoPanelOpen();
-
-    // Load images at this marker's grid position(s) into the workspace view.
-    const zoom = Math.round(this.map?.getZoom() ?? 13);
-    const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
-    const additive = this.isAdditiveMarkerSelection(clickEvent);
-
-    if (additive) {
-      this.handleAdditiveMarkerSelection(markerKey, cells, zoom);
-      return;
-    }
-
-    this.handleExclusiveMarkerSelection(
+    this.photoMarkerSelectionService.handlePhotoMarkerClick({
       markerKey,
-      markerState.count,
-      markerState.imageId,
-      cells,
-      zoom,
-    );
+      clickEvent,
+      markerState: this.uploadedPhotoMarkers.get(markerKey),
+      currentZoom: Math.round(this.map?.getZoom() ?? 13),
+      selectedMarkerKeys: this.selectedMarkerKeys(),
+      ensurePhotoPanelOpen: () => this.ensurePhotoPanelOpen(),
+      setSelectedMarker: (nextMarkerKey) => this.setSelectedMarker(nextMarkerKey),
+      setSelectedMarkerKeys: (keys) => this.setSelectedMarkerKeys(keys),
+      setDetailImageId: (imageId) => this.detailImageId.set(imageId),
+      clearWorkspaceSelection: () => this.workspaceSelectionService.clearSelection(),
+      openDetailView: (imageId) => this.openDetailView(imageId),
+      loadMultiClusterImages: (cells, zoom) => {
+        void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
+      },
+      addMarkerCellsToSelection: (cells, zoom) => {
+        void this.addMarkerCellsToSelection(cells, zoom);
+      },
+    });
   }
 
   private ensurePhotoPanelOpen(): void {
@@ -2557,63 +2341,38 @@ export class MapShellComponent implements OnDestroy {
     this.photoPanelOpen.set(true);
   }
 
-  private isAdditiveMarkerSelection(clickEvent?: L.LeafletMouseEvent): boolean {
-    return !!(clickEvent?.originalEvent.ctrlKey || clickEvent?.originalEvent.metaKey);
-  }
-
-  private handleAdditiveMarkerSelection(
-    markerKey: string,
-    cells: Array<{ lat: number; lng: number }>,
-    zoom: number,
-  ): void {
-    // Ctrl/Meta-click appends marker results to the current active selection.
-    const selectedKeys = new Set(this.selectedMarkerKeys());
-    selectedKeys.add(markerKey);
-    this.setSelectedMarkerKeys(selectedKeys);
-    void this.addMarkerCellsToSelection(cells, zoom);
-    this.detailImageId.set(null);
-  }
-
-  private handleExclusiveMarkerSelection(
-    markerKey: string,
-    markerCount: number,
-    imageId: string | undefined,
-    cells: Array<{ lat: number; lng: number }>,
-    zoom: number,
-  ): void {
-    this.workspaceSelectionService.clearSelection();
-    this.setSelectedMarkerKeys(new Set([markerKey]));
-    void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
-
-    // Single-image marker: also jump directly to detail view.
-    if (markerCount === 1 && imageId) {
-      this.openDetailView(imageId);
-      return;
-    }
-
-    // Cluster click: ensure detail view is dismissed so thumbnail grid shows.
-    this.detailImageId.set(null);
-  }
-
   /** Attach click + touch long-press interactions consistently for each new marker. */
   private attachMarkerInteractions(
     markerKey: string,
     marker: L.Marker,
     options?: { fadeIn?: boolean },
   ): void {
-    const shouldFadeIn = options?.fadeIn ?? true;
-    this.bindMarkerClickInteraction(markerKey, marker);
-    this.bindMarkerContextInteraction(markerKey, marker);
-    this.bindMarkerHoverInteraction(markerKey, marker);
-    // Attach long-press handler for touch direction cone after element is in DOM.
-    marker.once('add', () => {
-      const el = marker.getElement();
-      if (el) {
-        this.attachLongPressHandler(el, markerKey);
-        if (shouldFadeIn) {
-          this.triggerMarkerFadeIn(el);
+    this.photoMarkerSelectionService.attachMarkerInteractions({
+      markerKey,
+      marker,
+      longPressMs: MapShellComponent.MARKER_LONG_PRESS_MS,
+      shouldFadeIn: options?.fadeIn ?? true,
+      isMotionOff: this.markerMotionPreference() === 'off',
+      prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      onClick: (event) => this.handlePhotoMarkerClick(markerKey, event),
+      onShouldBypassContextMenu: () => this.consumeNativeContextMenuBypass(),
+      onSecondaryReset: () => {
+        this.pendingSecondaryPress = null;
+      },
+      onOpenContextMenu: (event) => {
+        this.openMarkerContextMenu(markerKey, event);
+      },
+      onHoverEnter: () => {
+        this.setLinkedHoverMarkerFromMap(markerKey);
+        this.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
+      },
+      onHoverLeave: () => {
+        if (this.linkedHoverMarkerFromMapKey !== markerKey) {
+          return;
         }
-      }
+        this.setLinkedHoverMarkerFromMap(null);
+        this.linkedHoveredWorkspaceImageIds.set(new Set());
+      },
     });
   }
 
@@ -2657,22 +2416,11 @@ export class MapShellComponent implements OnDestroy {
     zoom: number,
   ): Promise<void> {
     const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
-    const merged = this.radiusSelectionService.mergeWorkspaceImages(
-      this.workspaceViewService.rawImages(),
-      incoming,
-    );
+    const merged = this.photoMarkerSelectionService.mergeMarkerCellsIntoSelection({
+      currentImages: this.workspaceViewService.rawImages(),
+      incomingImages: incoming,
+    });
     this.workspaceViewService.setActiveSelectionImages(merged);
-  }
-
-  /** Fade in newly added marker elements for smoother cluster reconciliation. */
-  private triggerMarkerFadeIn(el: HTMLElement): void {
-    if (
-      this.markerMotionPreference() === 'off' ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      return;
-    }
-    this.markerInteractionService.triggerFadeIn(el, 300);
   }
 
   /**
@@ -2694,55 +2442,24 @@ export class MapShellComponent implements OnDestroy {
     this.markerMotionService.cancelMarkerMoveAnimation(marker);
   }
 
-  /**
-   * Attach a 500 ms long-press handler to a marker element.
-   * On long press, toggles `.map-photo-marker--long-pressed` so the direction
-   * cone is visible on touch devices (mirrors the desktop `:hover` affordance).
-   */
-  private attachLongPressHandler(el: HTMLElement, markerKey: string): void {
-    this.markerInteractionService.attachLongPress(
-      el,
-      MapShellComponent.MARKER_LONG_PRESS_MS,
-      (event: PointerEvent) => {
-        el.classList.add('map-photo-marker--long-pressed');
-        this.openMarkerContextMenu(markerKey, event);
-      },
-    );
-
-    // Dismiss on tap/click.
-    el.addEventListener('click', () => {
-      el.classList.remove('map-photo-marker--long-pressed');
-    });
-  }
-
   private setSelectedMarker(markerKey: string | null): void {
     const previousMarkerKey = this.selectedMarkerKey();
-    if (previousMarkerKey === markerKey) {
-      return;
-    }
-
-    this.selectedMarkerKey.set(markerKey);
-
-    if (previousMarkerKey) {
-      this.refreshPhotoMarker(previousMarkerKey);
-    }
-
-    if (markerKey) {
-      this.refreshPhotoMarker(markerKey);
-    }
+    this.photoMarkerSelectionService.setSelectedMarker({
+      previousMarkerKey,
+      nextMarkerKey: markerKey,
+      applyNext: () => this.selectedMarkerKey.set(markerKey),
+      refreshPhotoMarker: (nextMarkerKey) => this.refreshPhotoMarker(nextMarkerKey),
+    });
   }
 
   private setSelectedMarkerKeys(nextKeys: Set<string>): void {
     const previousKeys = this.selectedMarkerKeys();
-
-    if (this.markerSelectionSyncService.areSameKeySet(previousKeys, nextKeys)) {
-      return;
-    }
-
-    this.selectedMarkerKeys.set(nextKeys);
-    this.markerSelectionSyncService.refreshChangedKeySet(previousKeys, nextKeys, (markerKey) =>
-      this.refreshPhotoMarker(markerKey),
-    );
+    this.photoMarkerSelectionService.setSelectedMarkerKeys({
+      previousKeys,
+      nextKeys,
+      applyNext: () => this.selectedMarkerKeys.set(nextKeys),
+      refreshPhotoMarker: (markerKey) => this.refreshPhotoMarker(markerKey),
+    });
   }
 
   private isMarkerSelected(markerKey: string): boolean {
@@ -2762,38 +2479,37 @@ export class MapShellComponent implements OnDestroy {
 
   private setLinkedHoverMarkerFromWorkspace(markerKey: string | null): void {
     const previous = this.linkedHoverMarkerFromWorkspaceKey;
-    const changed = this.markerSelectionSyncService.applySingleMarkerChange(
-      previous,
-      markerKey,
-      (key) => this.refreshPhotoMarker(key),
-    );
+    const changed = this.photoMarkerSelectionService.setLinkedHoverMarker({
+      previousMarkerKey: previous,
+      nextMarkerKey: markerKey,
+      applyNext: () => {
+        this.linkedHoverMarkerFromWorkspaceKey = markerKey;
+      },
+      refreshPhotoMarker: (key) => this.refreshPhotoMarker(key),
+    });
     if (!changed) return;
-    this.linkedHoverMarkerFromWorkspaceKey = markerKey;
   }
 
   private setLinkedHoverMarkerFromMap(markerKey: string | null): void {
     const previous = this.linkedHoverMarkerFromMapKey;
-    const changed = this.markerSelectionSyncService.applySingleMarkerChange(
-      previous,
-      markerKey,
-      (key) => this.refreshPhotoMarker(key),
-    );
+    const changed = this.photoMarkerSelectionService.setLinkedHoverMarker({
+      previousMarkerKey: previous,
+      nextMarkerKey: markerKey,
+      applyNext: () => {
+        this.linkedHoverMarkerFromMapKey = markerKey;
+      },
+      refreshPhotoMarker: (key) => this.refreshPhotoMarker(key),
+    });
     if (!changed) return;
-    this.linkedHoverMarkerFromMapKey = markerKey;
   }
 
   private setLinkedHoveredWorkspaceImageIdsForMarker(markerKey: string | null): void {
-    if (!markerKey) {
-      this.linkedHoveredWorkspaceImageIds.set(new Set());
-      return;
-    }
-
-    const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    const matchedIds = this.markerSelectionSyncService.buildLinkedWorkspaceImageIds(
-      markerState,
-      this.workspaceViewService.rawImages(),
-      (lat, lng) => this.toMarkerKey(lat, lng),
-    );
+    const matchedIds = this.photoMarkerSelectionService.buildLinkedWorkspaceImageIds({
+      markerKey,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      workspaceImages: this.workspaceViewService.rawImages(),
+      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
     this.linkedHoveredWorkspaceImageIds.set(matchedIds);
   }
 
@@ -2867,235 +2583,21 @@ export class MapShellComponent implements OnDestroy {
    * refreshes URLs older than 50 minutes.
    */
   private maybeLoadThumbnails(): void {
-    if (!this.map) return;
-
-    const bounds = this.map.getBounds();
-    const staleThreshold = 50 * 60 * 1000; // 50 minutes
-
-    this.photoLoadService.invalidateStale(staleThreshold);
-
-    for (const [key, state] of this.uploadedPhotoMarkers) {
-      if (!this.isSingleMarkerInBounds(state, bounds)) continue;
-      this.clearStaleThumbnailIfNeeded(state, staleThreshold);
-      this.scheduleThumbnailLoadIfNeeded(key, state);
-    }
-  }
-
-  private isSingleMarkerInBounds(
-    state: { count: number; lat: number; lng: number },
-    bounds: L.LatLngBounds,
-  ): boolean {
-    return state.count === 1 && bounds.contains([state.lat, state.lng]);
-  }
-
-  private clearStaleThumbnailIfNeeded(
-    state: { thumbnailUrl?: string; signedAt?: number },
-    staleThreshold: number,
-  ): void {
-    if (!state.thumbnailUrl || !state.signedAt) {
-      return;
-    }
-    if (Date.now() - state.signedAt <= staleThreshold) {
-      return;
-    }
-
-    // Proactively clear stale URLs so they get re-signed.
-    state.thumbnailUrl = undefined;
-    state.signedAt = undefined;
-  }
-
-  private scheduleThumbnailLoadIfNeeded(
-    key: string,
-    state: {
-      thumbnailSourcePath?: string;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      signedAt?: number;
-    },
-  ): void {
-    if (state.thumbnailUrl || !state.thumbnailSourcePath || state.thumbnailLoading) {
-      return;
-    }
-    void this.lazyLoadThumbnail(key, state);
-  }
-
-  /**
-   * Fetch a signed thumbnail URL for one marker with server-side
-   * image transformation (80×80 cover). Updates the marker icon
-   * once the URL is available, or leaves the placeholder on error.
-   */
-  private async lazyLoadThumbnail(
-    key: string,
-    state: {
-      thumbnailSourcePath?: string;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      signedAt?: number;
-    },
-  ): Promise<void> {
-    if (!state.thumbnailSourcePath || state.thumbnailUrl || state.thumbnailLoading) return;
-
-    state.thumbnailLoading = true;
-    this.refreshPhotoMarker(key);
-
-    const result = await this.photoLoadService.getSignedUrl(state.thumbnailSourcePath, 'marker');
-
-    if (result.url) {
-      const loaded = await this.photoLoadService.preload(result.url);
-      state.thumbnailLoading = false;
-      if (loaded) {
-        state.thumbnailUrl = result.url;
-        state.signedAt = Date.now();
-      }
-    } else {
-      state.thumbnailLoading = false;
-    }
-    // On error or preload failure: thumbnailUrl stays undefined → placeholder remains visible.
-    this.refreshPhotoMarker(key);
+    this.photoMarkerThumbnailService.maybeLoadThumbnails({
+      map: this.map,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      refreshPhotoMarker: (markerKey) => this.refreshPhotoMarker(markerKey),
+    });
   }
 
   private refreshPhotoMarker(markerKey: string): void {
     const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    if (!markerState) {
-      return;
-    }
-
-    const snapshot = this.buildMarkerRenderSnapshot(markerKey, markerState);
-
-    // Skip DOM update when nothing visual has changed.
-    if (this.hasSameMarkerRender(markerState.lastRendered, snapshot)) {
-      return;
-    }
-
-    markerState.lastRendered = snapshot;
-    this.renderPhotoMarker(markerKey, markerState, snapshot);
-  }
-
-  private buildMarkerRenderSnapshot(
-    markerKey: string,
-    markerState: {
-      count: number;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      fallbackLabel?: string;
-      direction?: number;
-      corrected?: boolean;
-      uploading?: boolean;
-    },
-  ): MarkerRenderSnapshot {
-    return {
-      count: markerState.count,
-      thumbnailUrl: markerState.thumbnailUrl,
-      thumbnailLoading: markerState.thumbnailLoading,
-      fallbackLabel: markerState.fallbackLabel,
-      direction: markerState.direction,
-      corrected: markerState.corrected,
-      uploading: markerState.uploading,
+    this.photoMarkerRenderService.refreshPhotoMarker({
+      markerState,
       selected: this.isMarkerSelected(markerKey),
       linkedHover: this.isMarkerLinkedHovered(markerKey),
       zoomLevel: this.getPhotoMarkerZoomLevel(),
-    };
-  }
-
-  private hasSameMarkerRender(
-    previous: MarkerRenderSnapshot | undefined,
-    next: MarkerRenderSnapshot,
-  ): boolean {
-    if (!previous) {
-      return false;
-    }
-
-    const checks = [
-      previous.count === next.count,
-      previous.thumbnailUrl === next.thumbnailUrl,
-      previous.thumbnailLoading === next.thumbnailLoading,
-      previous.fallbackLabel === next.fallbackLabel,
-      previous.direction === next.direction,
-      previous.corrected === next.corrected,
-      previous.uploading === next.uploading,
-      previous.selected === next.selected,
-      previous.linkedHover === next.linkedHover,
-      previous.zoomLevel === next.zoomLevel,
-    ];
-
-    return checks.every(Boolean);
-  }
-
-  private renderPhotoMarker(
-    markerKey: string,
-    markerState: {
-      marker: L.Marker;
-      count: number;
-      thumbnailUrl?: string;
-      thumbnailLoading?: boolean;
-      fallbackLabel?: string;
-      direction?: number;
-      corrected?: boolean;
-      uploading?: boolean;
-      thumbnailSourcePath?: string;
-    },
-    snapshot: MarkerRenderSnapshot,
-  ): void {
-    const markerElement = markerState.marker.getElement();
-
-    // Direct innerHTML swap instead of setIcon() — avoids destroying
-    // and recreating the entire DOM subtree for every update.
-    if (markerElement) {
-      markerElement.innerHTML = buildPhotoMarkerHtml({
-        count: markerState.count,
-        thumbnailUrl: markerState.thumbnailUrl,
-        fallbackLabel: markerState.fallbackLabel ?? this.getMarkerFallbackLabel(markerState),
-        bearing: markerState.direction,
-        selected: snapshot.selected,
-        linkedHover: snapshot.linkedHover,
-        corrected: markerState.corrected,
-        uploading: markerState.uploading,
-        loading: markerState.thumbnailLoading,
-        zoomLevel: snapshot.zoomLevel,
-      });
-      return;
-    }
-
-    // Fallback if element not yet in DOM.
-    markerState.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
-  }
-
-  private getMarkerFallbackLabel(
-    state:
-      | {
-          count: number;
-          thumbnailSourcePath?: string;
-          fallbackLabel?: string;
-        }
-      | undefined,
-  ): string | undefined {
-    if (!state || state.count !== 1) return undefined;
-    if (state.fallbackLabel) return state.fallbackLabel;
-    return this.buildFallbackLabelFromPath(state.thumbnailSourcePath);
-  }
-
-  private buildFallbackLabelFromPath(path: string | undefined): string | undefined {
-    if (!path) return undefined;
-
-    const ext = path.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'pdf':
-        return 'PDF';
-      case 'doc':
-        return 'DOC';
-      case 'docx':
-        return 'DOCX';
-      case 'xls':
-        return 'XLS';
-      case 'xlsx':
-        return 'XLSX';
-      case 'ppt':
-        return 'PPT';
-      case 'pptx':
-        return 'PPTX';
-      default:
-        return undefined;
-    }
+    });
   }
 
   private getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
@@ -3163,37 +2665,6 @@ export class MapShellComponent implements OnDestroy {
     this.detailImageId.set(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
-  }
-
-  private async promptProjectSelection(): Promise<{ id: string; name: string } | null> {
-    const projects = await this.mapProjectActionsService.loadProjectOptions(
-      this.supabaseService.client,
-    );
-
-    if (!projects.ok) {
-      this.toastService.show({
-        message: 'Keine Projekte verfuegbar.',
-        type: 'warning',
-        dedupe: true,
-      });
-      return null;
-    }
-
-    return this.mapProjectDialogService.openProjectSelectionDialog(
-      this.state,
-      projects.options,
-      'Projekt auswaehlen',
-      'Waehle ein bestehendes Projekt fuer die Zuweisung aus.',
-    );
-  }
-
-  private async promptProjectNameFromRadius(): Promise<string | null> {
-    return this.mapProjectDialogService.openProjectNameDialog(
-      this.state,
-      'Name fuer neues Projekt aus Radius',
-      'Neues Radius Projekt',
-      'Gib einen Projektnamen ein.',
-    );
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {

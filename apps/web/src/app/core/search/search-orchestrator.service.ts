@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Observable,
   catchError,
@@ -30,6 +30,7 @@ import {
 } from './search.models';
 import { buildFallbackQueries, normalizeSearchQuery } from './search-query';
 import { isInViewport } from './search-bar-helpers';
+import { I18nService } from '../i18n/i18n.service';
 
 type DbAddressResolver = (
   query: string,
@@ -63,6 +64,8 @@ const FALLBACK_SCORE_IMPROVEMENT_MIN = 0.05;
 
 @Injectable({ providedIn: 'root' })
 export class SearchOrchestratorService {
+  private readonly i18nService = inject(I18nService);
+
   private readonly options: SearchOrchestratorOptions = {
     ...DEFAULT_SEARCH_ORCHESTRATOR_OPTIONS,
   };
@@ -70,6 +73,10 @@ export class SearchOrchestratorService {
   private readonly cache = new Map<string, CachedResult>();
   private readonly recentSearches: SearchRecentCandidate[] = [];
   private adapters: SearchSourceAdapters = {};
+
+  private t(key: string, fallback = ''): string {
+    return this.i18nService.t(key, fallback);
+  }
 
   configureSources(adapters: SearchSourceAdapters): void {
     this.adapters = { ...this.adapters, ...adapters };
@@ -210,7 +217,7 @@ export class SearchOrchestratorService {
   private buildFocusedEmptyResult(query: string): SearchResultSet {
     const recentSection: SearchSection = {
       family: 'recent',
-      title: 'Recent searches',
+      title: this.t('map.searchBar.section.recentSearches', 'Recent searches'),
       items: this.getRecentSearches(5),
     };
 
@@ -264,11 +271,19 @@ export class SearchOrchestratorService {
     this.annotateCandidates(rankedDbContent, context, 'db-content');
     this.annotateCandidates(rankedGeocoder, context, 'geocoder');
 
-    sections.push({ family: 'db-address', title: 'Addresses', items: rankedDbAddress });
-    sections.push({ family: 'db-content', title: 'Projects & Groups', items: rankedDbContent });
+    sections.push({
+      family: 'db-address',
+      title: this.t('map.searchBar.section.addresses', 'Addresses'),
+      items: rankedDbAddress,
+    });
+    sections.push({
+      family: 'db-content',
+      title: this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
+      items: rankedDbContent,
+    });
     sections.push({
       family: 'geocoder',
-      title: 'Places',
+      title: this.t('map.searchBar.section.places', 'Places'),
       items: rankedGeocoder,
       loading: options?.geocoderLoading ?? false,
     });
@@ -277,7 +292,7 @@ export class SearchOrchestratorService {
     if (commandMode) {
       sections.push({
         family: 'command',
-        title: 'Commands',
+        title: this.t('map.searchBar.section.commands', 'Commands'),
         items: this.buildCommandItems(query, context),
       });
     }
@@ -294,7 +309,7 @@ export class SearchOrchestratorService {
       items.push({
         id: 'cmd-create-qr-invite',
         family: 'command',
-        label: 'Create QR Invite',
+        label: this.t('map.searchBar.command.createQrInvite', 'Create QR Invite'),
         command: 'create-qr-invite',
       });
       return items;
@@ -317,15 +332,23 @@ export class SearchOrchestratorService {
       }
     };
 
-    pushIfMatch('cmd-upload', 'Upload photos', 'upload');
+    pushIfMatch(
+      'cmd-upload',
+      this.t('map.searchBar.command.uploadPhotos', 'Upload photos'),
+      'upload',
+    );
     pushIfMatch(
       'cmd-clear-filters',
-      'Clear filters',
+      this.t('map.searchBar.command.clearFilters', 'Clear filters'),
       'clear-filters',
       undefined,
       (context.activeFilterCount ?? 0) > 0,
     );
-    pushIfMatch('cmd-go-location', 'Go to my location', 'go-to-location');
+    pushIfMatch(
+      'cmd-go-location',
+      this.t('map.searchBar.command.goToMyLocation', 'Go to my location'),
+      'go-to-location',
+    );
 
     return items;
   }

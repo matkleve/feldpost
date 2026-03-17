@@ -43,7 +43,7 @@
       <button
         class="search-bar__clear"
         type="button"
-        aria-label="Clear search"
+        [attr.aria-label]="t('map.searchBar.clear.aria', 'Clear search')"
         (mousedown)="$event.preventDefault()"
         (click)="onClearClick()"
       >
@@ -65,10 +65,14 @@
     >
       <div class="search-bar__dropdown-content">
         @if (showingRecentSearches()) {
-          <div class="search-bar__section-label" role="presentation">Recent searches</div>
+          <div class="search-bar__section-label" role="presentation">
+            {{ t('map.searchBar.section.recentSearches', 'Recent searches') }}
+          </div>
 
           @if (recentSearches().length === 0) {
-            <div class="search-bar__empty-copy" role="presentation">No recent searches yet.</div>
+            <div class="search-bar__empty-copy" role="presentation">
+              {{ t('map.searchBar.empty.noRecents', 'No recent searches yet.') }}
+            </div>
           } @else {
             @for (candidate of recentSearches(); track candidate.id; let index = $index) {
               <ss-search-dropdown-item
@@ -92,7 +96,9 @@
           }
 
           @if (sections().dbAddress.items.length > 0) {
-            <div class="search-bar__section-label" role="presentation">Addresses</div>
+            <div class="search-bar__section-label" role="presentation">
+              {{ t('map.searchBar.section.addresses', 'Addresses') }}
+            </div>
             @for (candidate of sections().dbAddress.items; track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
@@ -104,7 +110,9 @@
           }
 
           @if (sections().dbContent.items.length > 0) {
-            <div class="search-bar__section-label" role="presentation">Projects &amp; Groups</div>
+            <div class="search-bar__section-label" role="presentation">
+              {{ t('map.searchBar.section.projectsAndGroups', 'Projects &amp; Groups') }}
+            </div>
             @for (candidate of sections().dbContent.items; track candidate.id; let index = $index) {
               <ss-search-dropdown-item
                 [candidate]="candidate"
@@ -117,7 +125,9 @@
 
           @if (commandSection(); as commands) {
             @if (commands.items.length > 0) {
-              <div class="search-bar__section-label" role="presentation">Commands</div>
+              <div class="search-bar__section-label" role="presentation">
+                {{ t('map.searchBar.section.commands', 'Commands') }}
+              </div>
               @for (candidate of commands.items; track candidate.id; let index = $index) {
                 <ss-search-dropdown-item
                   [candidate]="candidate"
@@ -134,7 +144,9 @@
           }
 
           @if (sections().geocoder.items.length > 0 || geocoderLoading()) {
-            <div class="search-bar__section-label" role="presentation">Places</div>
+            <div class="search-bar__section-label" role="presentation">
+              {{ t('map.searchBar.section.places', 'Places') }}
+            </div>
 
             @if (geocoderLoading()) {
               <div class="search-bar__skeleton-list" aria-hidden="true">
@@ -175,15 +187,22 @@
 
           @if (showingEmptyState()) {
             <div class="search-bar__empty-state" role="presentation">
-              <p class="search-bar__empty-title">No address found for {{ query().trim() }}</p>
-              <p class="search-bar__empty-copy">Try a different address or pin manually.</p>
+              <p class="search-bar__empty-title">{{ noAddressFoundText() }}</p>
+              <p class="search-bar__empty-copy">
+                {{
+                  t(
+                    'map.searchBar.empty.tryDifferentAddress',
+                    'Try a different address or pin manually.'
+                  )
+                }}
+              </p>
               <button
                 class="search-bar__ghost-action"
                 type="button"
                 (mousedown)="$event.preventDefault()"
                 (click)="onDropPinClick()"
               >
-                Drop pin
+                {{ t('map.searchBar.action.dropPin', 'Drop pin') }}
               </button>
             </div>
           }

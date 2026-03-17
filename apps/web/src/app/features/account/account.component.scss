@@ -21,9 +21,6 @@
 
 .account-card {
   --ui-container-gap: var(--spacing-3);
-
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-elevated);
 }
 
 .account-card h2 {
@@ -74,11 +71,12 @@
   min-height: 1.75rem;
   padding: 0 var(--spacing-2);
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--menu-surface-border);
   display: inline-flex;
   align-items: center;
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
+  color: var(--section-text);
+  background: color-mix(in srgb, var(--section-bg) 88%, transparent);
 }
 
 .account-skeleton {
@@ -150,11 +148,17 @@
 
 .account-field input {
   min-height: 2.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--field-border);
   border-radius: var(--container-radius-control);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
+  background: var(--field-bg);
+  color: var(--field-text);
   padding: 0 var(--spacing-2);
+
+  &:focus-visible {
+    border-color: var(--field-border-focus);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
 }
 
 .account-grid {
@@ -170,17 +174,24 @@
 
 .account-btn {
   min-height: 2.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--action-border-default);
   border-radius: var(--container-radius-control);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
+  background: var(--action-bg-default);
+  color: var(--action-text-default);
   padding: 0.45rem var(--spacing-3);
   cursor: pointer;
+
+  &:focus-visible {
+    border-color: var(--action-border-active);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
 }
 
 .account-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
-  background: color-mix(in srgb, var(--color-clay) 7%, var(--color-bg-surface));
+  border-color: var(--action-border-active);
+  background: var(--action-bg-hover);
+  color: var(--menu-item-text);
 }
 
 .account-btn:disabled {
@@ -189,18 +200,20 @@
 }
 
 .account-btn--primary {
-  border-color: color-mix(in srgb, var(--color-clay) 52%, var(--color-border));
-  background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
+  border-color: var(--action-border-active);
+  background: var(--action-bg-active);
+  color: var(--action-text-active);
 }
 
 .account-btn--ghost {
   background: transparent;
+  color: var(--menu-item-text);
 }
 
 .account-btn--danger {
   border-color: color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
   color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg-surface));
+  background: var(--state-danger-bg);
 }
 
 .account-card--danger {
@@ -217,8 +230,9 @@
   justify-content: space-between;
   gap: var(--spacing-2);
   align-items: center;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--section-border);
   border-radius: var(--container-radius-control);
+  background: color-mix(in srgb, var(--section-bg) 88%, transparent);
   padding: var(--spacing-2);
 }
 
@@ -242,8 +256,9 @@
 .account-enroll {
   display: grid;
   gap: var(--spacing-2);
-  border: 1px dashed var(--color-border);
+  border: 1px dashed var(--section-border);
   border-radius: var(--container-radius-control);
+  background: color-mix(in srgb, var(--section-bg) 82%, transparent);
   padding: var(--spacing-2);
 }
 
@@ -251,8 +266,8 @@
   width: 10rem;
   height: 10rem;
   object-fit: contain;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
+  background: var(--field-bg);
+  border: 1px solid var(--field-border);
   border-radius: var(--radius-md);
 }
 
@@ -268,7 +283,6 @@
 
 .account-delete-dialog {
   width: min(26rem, 100%);
-  background: var(--color-bg-elevated);
   border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
 }
 

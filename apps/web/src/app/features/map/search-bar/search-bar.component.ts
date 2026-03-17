@@ -20,6 +20,7 @@ import { SearchDropdownItemComponent } from './search-dropdown-item.component';
 import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
 import { SearchBarService, GhostTrieEntry } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import {
   SearchCandidate,
   SearchQueryContext,
@@ -32,14 +33,20 @@ import {
 const MAX_RECENT_SEARCHES = 8;
 const MAX_RECENT_MATCHES_WHILE_TYPING = 2;
 
-const PLACEHOLDER_EXAMPLES = [
-  'Search address, project, group…',
-  'Denisgasse 46, Vienna',
-  '48.2082, 16.3738',
-  'maps.google.com/…',
-  'Project Alpha',
-  'Schönbrunner Allee 6',
-  '48°12\'30"N 16°22\'23"E',
+const PLACEHOLDER_EXAMPLES: ReadonlyArray<{ key: string; fallback: string }> = [
+  { key: 'map.searchBar.placeholder.search', fallback: 'Search address, project, group…' },
+  { key: 'map.searchBar.placeholder.example.denishgasse', fallback: 'Denisgasse 46, Vienna' },
+  { key: 'map.searchBar.placeholder.example.coordsDecimal', fallback: '48.2082, 16.3738' },
+  { key: 'map.searchBar.placeholder.example.mapsUrl', fallback: 'maps.google.com/…' },
+  { key: 'map.searchBar.placeholder.example.project', fallback: 'Project Alpha' },
+  {
+    key: 'map.searchBar.placeholder.example.schoenbrunnerAllee',
+    fallback: 'Schönbrunner Allee 6',
+  },
+  {
+    key: 'map.searchBar.placeholder.example.coordsDms',
+    fallback: '48°12\'30"N 16°22\'23"E',
+  },
 ];
 const PLACEHOLDER_INTERVAL_MS = 4000;
 const PLACEHOLDER_FADE_MS = 300;
@@ -67,6 +74,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private readonly searchBarService = inject(SearchBarService);
   private readonly searchOrchestrator = inject(SearchOrchestratorService);
   private readonly geocodingService = inject(GeocodingService);
+  private readonly i18nService = inject(I18nService);
+
+  readonly t = this.i18nService.t.bind(this.i18nService);
 
   private readonly queryChanges = new BehaviorSubject<string>('');
   private readonly contextChanges = new BehaviorSubject<SearchQueryContext>({});
@@ -88,7 +98,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   readonly state = signal<SearchState>('idle');
   readonly query = signal('');
   readonly dropdownOpen = signal(false);
-  readonly placeholderText = signal(PLACEHOLDER_EXAMPLES[0]);
+  readonly placeholderText = signal(
+    this.t(PLACEHOLDER_EXAMPLES[0].key, PLACEHOLDER_EXAMPLES[0].fallback),
+  );
   readonly placeholderFading = signal(false);
   readonly activeIndex = signal(-1);
   readonly sections = signal<SearchSectionsState>(this.createEmptySections());
@@ -156,6 +168,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.rebuildGhostTrie();
   });
 
+  private readonly languageSyncEffect: EffectRef = effect(() => {
+    this.i18nService.language();
+    this.syncLocalizedSearchUiText();
+  });
+
   ngOnInit(): void {
     this.recentSearches.set(
       this.searchBarService.loadRecentSearches().slice(0, MAX_RECENT_SEARCHES),
@@ -178,6 +195,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.contextSyncEffect.destroy();
+    this.languageSyncEffect.destroy();
     this.stopPlaceholderRotation();
   }
 
@@ -412,13 +430,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     const dbAddressSection =
       result.sections.find((section) => section.family === 'db-address') ??
-      this.createSection('db-address', 'Addresses');
+      this.createSection('db-address', this.t('map.searchBar.section.addresses', 'Addresses'));
     const dbContentSection =
       result.sections.find((section) => section.family === 'db-content') ??
-      this.createSection('db-content', 'Projects & Groups');
+      this.createSection(
+        'db-content',
+        this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
+      );
     const geocoderSection =
       result.sections.find((section) => section.family === 'geocoder') ??
-      this.createSection('geocoder', 'Places');
+      this.createSection('geocoder', this.t('map.searchBar.section.places', 'Places'));
     const commandSection = result.sections.find((section) => section.family === 'command') ?? null;
 
     this.sections.set({
@@ -437,12 +458,36 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     if (result.state === 'results-complete') {
       const resultCount = this.selectableItems().length;
+      const query = this.query().trim();
       this.liveRegionText.set(
         resultCount > 0
-          ? `${resultCount} results available for ${this.query().trim()}.`
-          : `No address found for ${this.query().trim()}.`,
+          ? this.formatPlaceholders(
+              this.t(
+                'map.searchBar.liveRegion.resultsAvailable',
+                `${resultCount} results available for ${query}.`,
+              ),
+              {
+                count: resultCount,
+                query,
+              },
+            )
+          : this.formatPlaceholders(
+              this.t('map.searchBar.liveRegion.noAddressFound', `No address found for ${query}.`),
+              {
+                query,
+              },
+            ),
       );
     }
+  }
+
+  noAddressFoundText(): string {
+    return this.formatPlaceholders(
+      this.t('map.searchBar.empty.noAddressFound', 'No address found for {query}'),
+      {
+        query: this.query().trim(),
+      },
+    );
   }
 
   private moveActiveIndex(direction: 1 | -1): void {
@@ -554,9 +599,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private createEmptySections(): SearchSectionsState {
     return {
-      dbAddress: this.createSection('db-address', 'Addresses'),
-      dbContent: this.createSection('db-content', 'Projects & Groups'),
-      geocoder: this.createSection('geocoder', 'Places'),
+      dbAddress: this.createSection(
+        'db-address',
+        this.t('map.searchBar.section.addresses', 'Addresses'),
+      ),
+      dbContent: this.createSection(
+        'db-content',
+        this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
+      ),
+      geocoder: this.createSection('geocoder', this.t('map.searchBar.section.places', 'Places')),
     };
   }
 
@@ -564,8 +615,47 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     return { family, title, items: [] };
   }
 
+  private syncLocalizedSearchUiText(): void {
+    const placeholder = PLACEHOLDER_EXAMPLES[this.placeholderIndex] ?? PLACEHOLDER_EXAMPLES[0];
+    this.placeholderText.set(this.t(placeholder.key, placeholder.fallback));
+
+    const localizedSections: SearchSectionsState = {
+      dbAddress: {
+        ...this.sections().dbAddress,
+        title: this.t('map.searchBar.section.addresses', 'Addresses'),
+      },
+      dbContent: {
+        ...this.sections().dbContent,
+        title: this.t('map.searchBar.section.projectsAndGroups', 'Projects & Groups'),
+      },
+      geocoder: {
+        ...this.sections().geocoder,
+        title: this.t('map.searchBar.section.places', 'Places'),
+      },
+    };
+    this.sections.set(localizedSections);
+
+    const commandSection = this.commandSection();
+    if (commandSection) {
+      this.commandSection.set({
+        ...commandSection,
+        title: this.t('map.searchBar.section.commands', 'Commands'),
+      });
+    }
+  }
+
   private normalizeLabel(value: string): string {
     return value.trim().toLowerCase();
+  }
+
+  private formatPlaceholders(
+    text: string,
+    values: Record<string, string | number | null | undefined>,
+  ): string {
+    return text.replace(/\{(\w+)\}/g, (_, token: string) => {
+      const value = values[token];
+      return value === undefined || value === null ? '' : String(value);
+    });
   }
 
   private reverseGeocodeAndUpdateLabel(lat: number, lng: number): void {
@@ -614,7 +704,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.placeholderFading.set(true);
       setTimeout(() => {
         this.placeholderIndex = (this.placeholderIndex + 1) % PLACEHOLDER_EXAMPLES.length;
-        this.placeholderText.set(PLACEHOLDER_EXAMPLES[this.placeholderIndex]);
+        const placeholder = PLACEHOLDER_EXAMPLES[this.placeholderIndex];
+        this.placeholderText.set(this.t(placeholder.key, placeholder.fallback));
         this.placeholderFading.set(false);
       }, PLACEHOLDER_FADE_MS);
     }, PLACEHOLDER_INTERVAL_MS);

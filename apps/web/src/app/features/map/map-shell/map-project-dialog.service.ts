@@ -1,7 +1,7 @@
 import { Injectable, WritableSignal } from '@angular/core';
 import type { ProjectSelectOption } from '../../../shared/project-select-dialog/project-select-dialog.component';
 
-interface ProjectDialogSignals {
+export interface ProjectDialogSignals {
   projectSelectionDialogOpen: WritableSignal<boolean>;
   projectSelectionDialogTitle: WritableSignal<string>;
   projectSelectionDialogMessage: WritableSignal<string>;

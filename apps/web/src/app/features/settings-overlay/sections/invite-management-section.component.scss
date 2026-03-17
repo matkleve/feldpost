@@ -7,9 +7,7 @@
 
 .invite-section {
   --ui-container-gap: var(--spacing-4);
-  /* Border concept: surface/content containers are borderless; only actionable controls get borders. */
-  border: 0;
-  background: var(--color-bg-elevated);
+  background: var(--section-bg);
 }
 
 .invite-section__header {

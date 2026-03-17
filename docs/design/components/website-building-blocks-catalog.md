@@ -211,5 +211,56 @@ Introduce and migrate to role aliases so primitives can be themed independently 
 
 1. Migrate remaining low-readiness menu surfaces (map context and detail context edge cases) to strict Layer C role aliases only.
 2. Roll out shared settings/form primitives to additional account/invite subflows beyond current section shell.
-3. Add minimal UI regression matrix (menus, toolbars, settings, dialogs) plus keyboard/focus smoke checks.
-4. Add visual-theme verification pass (light/dark + one new custom theme profile) for all medium-readiness primitives.
+3. Maintain and execute the baseline UI regression matrix in `docs/design/components/theme-regression-matrix.md` (menus, toolbars, settings, dialogs) plus keyboard/focus smoke checks.
+4. Add visual-theme verification pass (light/dark + one new custom theme profile) for all medium-readiness primitives and record outcomes in the regression matrix.
+
+## Project-Wide Migration Backlog (Wave Plan)
+
+This backlog is the execution order for standardization across the whole product, not per-component hotfixes.
+
+### Priority Scoring
+
+- Priority is based on: `user visibility x interaction risk x inconsistency debt`.
+- Effort buckets: `S` (<= 0.5 day), `M` (1-2 days), `L` (3+ days).
+- Risk buckets: `low`, `medium`, `high`.
+
+### Wave A (Highest ROI, low regression risk)
+
+| Cluster                     | Scope                                                                            | Readiness   | Effort | Risk   | Why first                                                      |
+| --------------------------- | -------------------------------------------------------------------------------- | ----------- | ------ | ------ | -------------------------------------------------------------- |
+| Menu surfaces               | `option-menu-surface`, `dd-item`, map/detail context edge cases                  | partial/low | M      | medium | Highest reuse and most visible interaction consistency gap     |
+| Segmented + toggle controls | `ui-segmented`, `ui-toggle-row`, `ui-toggle-switch` across map/settings/projects | partial     | M      | low    | Shared primitive exists; remaining work is adoption and polish |
+| Select and field controls   | `ui-select-control`, `ui-field-row`, label/value alignment                       | partial     | M      | low    | Fixes cross-page form consistency quickly                      |
+
+### Wave B (Form/system coherence)
+
+| Cluster                        | Scope                                                   | Readiness | Effort | Risk   | Entry condition                    |
+| ------------------------------ | ------------------------------------------------------- | --------- | ------ | ------ | ---------------------------------- |
+| Settings and account sections  | section cards, spacing, semantic text/border aliases    | partial   | M      | low    | Wave A primitives stable           |
+| Workspace/detail metadata rows | key-value rows, inline editors, compact chips           | partial   | M      | medium | Menu and field contracts finalized |
+| Validation and feedback states | inline error/warning/success semantics per field/action | partial   | M      | medium | Common field contracts deployed    |
+
+### Wave C (Complex interaction surfaces)
+
+| Cluster                          | Scope                                                                | Readiness | Effort | Risk   | Entry condition                           |
+| -------------------------------- | -------------------------------------------------------------------- | --------- | ------ | ------ | ----------------------------------------- |
+| Map shell interaction surfaces   | map-specific overlays, marker/radius context behavior styling parity | low       | L      | high   | Wave A/B complete + keyboard checks green |
+| Upload and queue row consistency | queue item actions, compact controls, status visuals                 | partial   | M      | medium | Shared action primitives stabilized       |
+| Project-specific pickers         | color picker and feature-local popovers to shared shell rules        | partial   | M      | medium | Popover/menu contract finalized           |
+
+### Per-Wave Definition of Done
+
+1. No new feature-local visual primitives introduced for covered scope.
+2. All touched controls use Layer C aliases (`action/menu/field/section/state`).
+3. `npm run build` passes.
+4. `docs/design/components/theme-regression-matrix.md` updated from `TODO` to `OK` or `BUG(<id>)` for affected rows.
+5. Keyboard smoke checks pass for affected controls.
+
+### Suggested Execution Order (Next 6 PRs)
+
+1. Map/detail context menu parity and alias cleanup.
+2. Segmented and toggle normalization in map/settings/projects surfaces.
+3. Select + field row normalization in settings/account/invite forms.
+4. Workspace metadata and inline editor unification.
+5. Feedback/validation state token alignment.
+6. Map shell complex overlays and upload queue consolidation.

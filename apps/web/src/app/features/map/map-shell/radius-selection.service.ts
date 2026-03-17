@@ -42,7 +42,7 @@ export class RadiusSelectionService {
     uploadedPhotoMarkers: Map<string, RadiusMarkerState>;
     selectedMarkerKeys: Set<string>;
     toMarkerKey: (lat: number, lng: number) => string;
-    currentImages: WorkspaceImage[];
+    currentImages: ReadonlyArray<WorkspaceImage>;
     fetchClusterImages: (
       cells: Array<{ lat: number; lng: number }>,
       zoom: number,
@@ -83,7 +83,10 @@ export class RadiusSelectionService {
     };
   }
 
-  mergeWorkspaceImages(current: WorkspaceImage[], incoming: WorkspaceImage[]): WorkspaceImage[] {
+  mergeWorkspaceImages(
+    current: ReadonlyArray<WorkspaceImage>,
+    incoming: ReadonlyArray<WorkspaceImage>,
+  ): WorkspaceImage[] {
     const byId = new Map<string, WorkspaceImage>();
     for (const image of current) byId.set(image.id, image);
     for (const image of incoming) byId.set(image.id, image);

@@ -13,6 +13,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
     selector: 'app-login',
@@ -24,6 +25,9 @@ export class LoginComponent {
     private readonly fb = inject(FormBuilder);
     private readonly auth = inject(AuthService);
     private readonly router = inject(Router);
+    private readonly i18nService = inject(I18nService);
+
+    protected readonly t = this.i18nService.t.bind(this.i18nService);
 
     // Form definition — both fields required; email must be valid format
     protected readonly form = this.fb.nonNullable.group({

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { SearchCandidate } from '../../../core/search/search.models';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'ss-search-dropdown-item',
@@ -105,6 +106,9 @@ import { SearchCandidate } from '../../../core/search/search.models';
   ],
 })
 export class SearchDropdownItemComponent {
+  private readonly i18nService = inject(I18nService);
+
+  readonly t = this.i18nService.t.bind(this.i18nService);
   readonly candidate = input.required<SearchCandidate>();
   readonly active = input(false);
   readonly optionId = input.required<string>();
@@ -145,14 +149,30 @@ export class SearchDropdownItemComponent {
     switch (candidate.family) {
       case 'db-address':
         return typeof candidate.imageCount === 'number'
-          ? `${candidate.imageCount} ${candidate.imageCount === 1 ? 'photo' : 'photos'}`
+          ? candidate.imageCount === 1
+            ? this.t('map.searchBar.meta.addressPhoto.single', '1 photo')
+            : this.t('map.searchBar.meta.addressPhoto.multi', '{count} photos').replace(
+                '{count}',
+                String(candidate.imageCount),
+              )
           : '';
       case 'db-content':
-        return candidate.subtitle ?? '';
+        switch (candidate.contentType) {
+          case 'group':
+            return this.t('map.searchBar.meta.content.group', 'Saved group');
+          case 'project':
+            return this.t('map.searchBar.meta.content.project', 'Project');
+          case 'metadata':
+            return this.t('map.searchBar.meta.content.metadata', 'Metadata');
+          case 'photo':
+            return this.t('map.searchBar.meta.content.photo', 'Photo');
+          default:
+            return candidate.subtitle ?? '';
+        }
       case 'geocoder':
-        return 'External result';
+        return this.t('map.searchBar.meta.externalResult', 'External result');
       case 'recent':
-        return 'Recent search';
+        return this.t('map.searchBar.meta.recentSearch', 'Recent search');
       default:
         return '';
     }

@@ -14324,4 +14324,965 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.search', 'Search address, project, group…', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search address, project, group…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Suche nach Adresse, Projekt, Gruppe…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca indirizzo, progetto, gruppo…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.example.denishgasse', 'Denisgasse 46, Vienna', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Denisgasse 46, Vienna', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.denishgasse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Denisgasse 46, Wien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.denishgasse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Denisgasse 46, Vienna', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.denishgasse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.example.coordsDecimal', '48.2082, 16.3738', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '48.2082, 16.3738', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDecimal'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '48.2082, 16.3738', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDecimal'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '48.2082, 16.3738', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDecimal'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.example.mapsUrl', 'maps.google.com/…', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'maps.google.com/…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.mapsUrl'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'maps.google.com/…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.mapsUrl'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'maps.google.com/…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.mapsUrl'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.example.project', 'Project Alpha', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project Alpha', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.project'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt Alpha', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.project'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetto Alpha', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.project'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.example.schoenbrunnerAllee', 'Schönbrunner Allee 6', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Schönbrunner Allee 6', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.schoenbrunnerAllee'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Schönbrunner Allee 6', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.schoenbrunnerAllee'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Schönbrunner Allee 6', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.schoenbrunnerAllee'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.placeholder.example.coordsDms', '48°12''30"N 16°22''23"E', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '48°12''30"N 16°22''23"E', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '48°12''30"N 16°22''23"E', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '48°12''30"N 16°22''23"E', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.placeholder.example.coordsDms'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.clear.aria', 'Clear search', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Clear search', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.clear.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Suche leeren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.clear.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cancella ricerca', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.clear.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.recentSearches', 'Recent searches', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Recent searches', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.recentSearches'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Letzte Suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.recentSearches'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricerche recenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.recentSearches'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.empty.noRecents', 'No recent searches yet.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No recent searches yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.noRecents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Noch keine letzten Suchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.noRecents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna ricerca recente.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.noRecents'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.addresses', 'Addresses', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Addresses', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.addresses'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.addresses'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indirizzi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.addresses'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.projectsAndGroups', 'Projects & Groups', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Projects & Groups', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.projectsAndGroups'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte und Gruppen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.projectsAndGroups'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetti e gruppi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.projectsAndGroups'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.commands', 'Commands', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Commands', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.commands'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Befehle', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.commands'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Comandi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.commands'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.section.places', 'Places', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Places', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.places'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Orte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.places'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Luoghi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.section.places'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.empty.noAddressFound', 'No address found for {query}', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No address found for {query}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.noAddressFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Adresse gefunden fuer {query}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.noAddressFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun indirizzo trovato per {query}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.noAddressFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.empty.tryDifferentAddress', 'Try a different address or pin manually.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Try a different address or pin manually.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.tryDifferentAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Versuche eine andere Adresse oder setze den Pin manuell.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.tryDifferentAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Prova un indirizzo diverso o inserisci il pin manualmente.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.empty.tryDifferentAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.action.dropPin', 'Drop pin', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Drop pin', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.action.dropPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pin setzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.action.dropPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci pin', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.action.dropPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.liveRegion.resultsAvailable', '{count} results available for {query}.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts live-region-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} results available for {query}.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.liveRegion.resultsAvailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Ergebnisse verfuegbar fuer {query}.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.liveRegion.resultsAvailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} risultati disponibili per {query}.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.liveRegion.resultsAvailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.liveRegion.noAddressFound', 'No address found for {query}.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.ts live-region-text')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No address found for {query}.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.liveRegion.noAddressFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Adresse gefunden fuer {query}.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.liveRegion.noAddressFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun indirizzo trovato per {query}.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.liveRegion.noAddressFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.addressPhoto.single', '1 photo', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '1 photo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.addressPhoto.single'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '1 Foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.addressPhoto.single'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '1 foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.addressPhoto.single'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.addressPhoto.multi', '{count} photos', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} photos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.addressPhoto.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Fotos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.addressPhoto.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.addressPhoto.multi'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.externalResult', 'External result', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'External result', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.externalResult'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Externes Ergebnis', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.externalResult'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risultato esterno', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.externalResult'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.recentSearch', 'Recent search', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Recent search', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.recentSearch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Letzte Suche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.recentSearch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricerca recente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.recentSearch'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.content.project', 'Project', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.project'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.project'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.project'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.content.group', 'Saved group', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Saved group', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.group'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gespeicherte Gruppe', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.group'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Gruppo salvato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.group'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.content.metadata', 'Metadata', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Metadata', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.metadata'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Metadaten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.metadata'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Metadati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.metadata'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.meta.content.photo', 'Photo', 'en', 'apps/web/src/app/features/map/search-bar/search-dropdown-item.component.ts meta-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Photo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.photo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.photo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.meta.content.photo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.command.createQrInvite', 'Create QR Invite', 'en', 'apps/web/src/app/core/search/search-orchestrator.service.ts command-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Create QR Invite', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.createQrInvite'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'QR-Einladung erstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.createQrInvite'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Crea invito QR', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.createQrInvite'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.command.uploadPhotos', 'Upload photos', 'en', 'apps/web/src/app/core/search/search-orchestrator.service.ts command-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload photos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.uploadPhotos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fotos hochladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.uploadPhotos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Carica foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.uploadPhotos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.command.clearFilters', 'Clear filters', 'en', 'apps/web/src/app/core/search/search-orchestrator.service.ts command-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Clear filters', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.clearFilters'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Filter loeschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.clearFilters'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cancella filtri', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.clearFilters'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.searchBar.command.goToMyLocation', 'Go to my location', 'en', 'apps/web/src/app/core/search/search-orchestrator.service.ts command-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Go to my location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.goToMyLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zu meinem Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.goToMyLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Vai alla mia posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.searchBar.command.goToMyLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

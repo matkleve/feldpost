@@ -140,6 +140,8 @@ export class ImageDetailViewComponent implements OnDestroy {
   });
   readonly replaceError = signal<string | null>(null);
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
+  readonly detailActionsButton = viewChild<ElementRef<HTMLButtonElement>>('detailActionsButton');
+  readonly detailContextMenuRef = viewChild<ElementRef<HTMLDivElement>>('detailContextMenu');
   readonly editDate = signal('');
   readonly editTime = signal('');
 
@@ -1163,11 +1165,61 @@ export class ImageDetailViewComponent implements OnDestroy {
   }
 
   toggleContextMenu(): void {
-    this.showContextMenu.update((v) => !v);
+    const next = !this.showContextMenu();
+    this.showContextMenu.set(next);
+
+    if (next) {
+      queueMicrotask(() => this.focusFirstDetailContextMenuItem());
+    }
   }
 
-  closeContextMenu(): void {
+  closeContextMenu(restoreTriggerFocus = false): void {
     this.showContextMenu.set(false);
+
+    if (restoreTriggerFocus) {
+      queueMicrotask(() => this.detailActionsButton()?.nativeElement.focus());
+    }
+  }
+
+  onDetailContextMenuKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeContextMenu(true);
+      return;
+    }
+
+    if (
+      event.key !== 'ArrowDown' &&
+      event.key !== 'ArrowUp' &&
+      event.key !== 'Home' &&
+      event.key !== 'End'
+    ) {
+      return;
+    }
+
+    const items = this.getDetailContextMenuItems();
+    if (items.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.key === 'Home') {
+      items[0]?.focus();
+      return;
+    }
+
+    if (event.key === 'End') {
+      items[items.length - 1]?.focus();
+      return;
+    }
+
+    const activeIndex = items.findIndex((item) => item === document.activeElement);
+    const fallbackIndex = event.key === 'ArrowDown' ? -1 : 0;
+    const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
+    const delta = event.key === 'ArrowDown' ? 1 : -1;
+    const nextIndex = (currentIndex + delta + items.length) % items.length;
+    items[nextIndex]?.focus();
   }
 
   copyCoordinates(): void {
@@ -1183,6 +1235,20 @@ export class ImageDetailViewComponent implements OnDestroy {
       duration: 2000,
     });
     this.showContextMenu.set(false);
+  }
+
+  private focusFirstDetailContextMenuItem(): void {
+    const firstItem = this.getDetailContextMenuItems()[0];
+    firstItem?.focus();
+  }
+
+  private getDetailContextMenuItems(): HTMLButtonElement[] {
+    const menuEl = this.detailContextMenuRef()?.nativeElement;
+    if (!menuEl) {
+      return [];
+    }
+
+    return Array.from(menuEl.querySelectorAll<HTMLButtonElement>('.dd-item'));
   }
 
   openCapturedAtEditor(): void {
