@@ -18,12 +18,12 @@ import { GeocodingService } from './geocoding.service';
 
 // ── Mock exifr ─────────────────────────────────────────────────────────────────
 // Prevent any real EXIF / file parsing in the test environment.
-vi.mock('exifr', () => ({
+vi.mock('exifr/dist/lite.esm.js', () => ({
   gps: vi.fn(),
   parse: vi.fn(),
 }));
 
-import * as exifr from 'exifr';
+import * as exifr from 'exifr/dist/lite.esm.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

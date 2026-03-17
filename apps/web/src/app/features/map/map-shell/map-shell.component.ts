@@ -686,6 +686,47 @@ export class MapShellComponent implements OnDestroy {
     this.zoomContextTo(coords.lat, coords.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
   }
 
+  private zoomContextTo(lat: number, lng: number, zoomLevel: number): void {
+    if (!this.map) {
+      return;
+    }
+
+    this.map.setView([lat, lng], zoomLevel);
+  }
+
+  private async copyAddressWithFeedback(lat: number, lng: number): Promise<void> {
+    const copied = await this.mapContextActionsService.copyAddressFromCoords(lat, lng);
+    if (copied) {
+      this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
+      return;
+    }
+
+    this.toastService.show({
+      message: 'Adresse konnte nicht aufgeloest werden.',
+      type: 'warning',
+      dedupe: true,
+    });
+  }
+
+  private async copyGpsWithFeedback(lat: number, lng: number): Promise<void> {
+    const text = this.mapContextActionsService.formatGps(lat, lng);
+    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
+    this.toastService.show({
+      message: copied ? 'GPS kopiert.' : text,
+      type: copied ? 'success' : 'info',
+      dedupe: true,
+    });
+  }
+
+  private openGoogleMapsForCoords(lat: number, lng: number): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const url = this.mapContextActionsService.buildGoogleMapsUrl(lat, lng);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
   async onMapContextCopyAddress(): Promise<void> {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
