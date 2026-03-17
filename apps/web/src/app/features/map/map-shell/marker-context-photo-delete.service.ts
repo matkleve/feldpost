@@ -26,7 +26,9 @@ export class MarkerContextPhotoDeleteService {
   confirmPhotoDelete(): boolean {
     return (
       typeof window === 'undefined' ||
-      window.confirm('Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.')
+      window.confirm(
+        'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
+      )
     );
   }
 

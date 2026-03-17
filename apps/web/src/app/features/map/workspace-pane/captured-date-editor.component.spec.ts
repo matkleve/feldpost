@@ -114,8 +114,8 @@ describe('CapturedDateEditorComponent', () => {
 
     it('starts with Monday', () => {
       const { component } = setup({ initialDate: '2026-03-10' });
-      expect(component.weekdays[0]).toBe('Mo');
-      expect(component.weekdays[6]).toBe('Su');
+      expect(component.weekdays()[0]).toBe('Mo');
+      expect(component.weekdays()[6]).toBe('Su');
     });
 
     it('marks today correctly', () => {

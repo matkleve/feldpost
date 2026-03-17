@@ -34,7 +34,10 @@ import { I18nService } from '../../../core/i18n/i18n.service';
           (blur)="commitEdit($event)"
         />
       } @else {
-        <span class="meta-row__value" [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')">
+        <span
+          class="meta-row__value"
+          [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')"
+        >
           {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}
         </span>
       }

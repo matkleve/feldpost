@@ -2483,37 +2483,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0080b.sandstone', 'Sandstone', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Sandstone', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0080b.sandstone'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Sandstein', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0080b.sandstone'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Arenaria', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0080b.sandstone'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0081.data_and_privacy', 'Data and Privacy', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -8249,7 +8218,38 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0266.saved_groups_coming_in_m_ui7', 'Saved groups — coming in M-UI7.', 'en', 'apps/web/src/app/features/groups/groups.component.ts inline-template text-node')
+values (null, 'auto.0266.sandstone', 'Sandstone', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sandstone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0266.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sandstein', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0266.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Arenaria', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0266.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0267.saved_groups_coming_in_m_ui7', 'Saved groups — coming in M-UI7.', 'en', 'apps/web/src/app/features/groups/groups.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8258,7 +8258,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Saved groups — coming in M-UI7.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0266.saved_groups_coming_in_m_ui7'
+where t.organization_id is null and t.key = 'auto.0267.saved_groups_coming_in_m_ui7'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8266,7 +8266,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Saved groups — coming in M-UI7.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0266.saved_groups_coming_in_m_ui7'
+where t.organization_id is null and t.key = 'auto.0267.saved_groups_coming_in_m_ui7'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8274,13 +8274,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Gruppi salvati: disponibili in M-UI7.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0266.saved_groups_coming_in_m_ui7'
+where t.organization_id is null and t.key = 'auto.0267.saved_groups_coming_in_m_ui7'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0267.search_address', 'Search address...', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0268.search_address', 'Search address...', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8289,7 +8289,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Search address...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0267.search_address'
+where t.organization_id is null and t.key = 'auto.0268.search_address'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8297,7 +8297,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Search address...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0267.search_address'
+where t.organization_id is null and t.key = 'auto.0268.search_address'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8305,13 +8305,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Cerca indirizzo...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0267.search_address'
+where t.organization_id is null and t.key = 'auto.0268.search_address'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0268.search_bias', 'Search bias', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0269.search_bias', 'Search bias', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8320,7 +8320,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Search bias', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0268.search_bias'
+where t.organization_id is null and t.key = 'auto.0269.search_bias'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8328,7 +8328,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Search bias', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0268.search_bias'
+where t.organization_id is null and t.key = 'auto.0269.search_bias'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8336,13 +8336,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Distorsioni di ricerca', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0268.search_bias'
+where t.organization_id is null and t.key = 'auto.0269.search_bias'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0269.search_tuning', 'Search Tuning', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0270.search_tuning', 'Search Tuning', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8351,7 +8351,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Search Tuning', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0269.search_tuning'
+where t.organization_id is null and t.key = 'auto.0270.search_tuning'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8359,7 +8359,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Search Tuning', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0269.search_tuning'
+where t.organization_id is null and t.key = 'auto.0270.search_tuning'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8367,13 +8367,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Cerca sintonizzazione', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0269.search_tuning'
+where t.organization_id is null and t.key = 'auto.0270.search_tuning'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0270.searching', 'Searching...', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0271.searching', 'Searching...', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8382,7 +8382,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Searching...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0270.searching'
+where t.organization_id is null and t.key = 'auto.0271.searching'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8390,7 +8390,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Searching...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0270.searching'
+where t.organization_id is null and t.key = 'auto.0271.searching'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8398,13 +8398,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Ricerca...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0270.searching'
+where t.organization_id is null and t.key = 'auto.0271.searching'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0271.secret', 'Secret:', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0272.secret', 'Secret:', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8413,7 +8413,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Secret:', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0271.secret'
+where t.organization_id is null and t.key = 'auto.0272.secret'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8421,7 +8421,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Secret:', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0271.secret'
+where t.organization_id is null and t.key = 'auto.0272.secret'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8429,13 +8429,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Secret:', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0271.secret'
+where t.organization_id is null and t.key = 'auto.0272.secret'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0272.select_a_marker_on_the_map_to_see_photos', 'Select a marker on the map to see photos.', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
+values (null, 'auto.0273.select_a_marker_on_the_map_to_see_photos', 'Select a marker on the map to see photos.', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8444,7 +8444,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Select a marker on the map to see photos.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0272.select_a_marker_on_the_map_to_see_photos'
+where t.organization_id is null and t.key = 'auto.0273.select_a_marker_on_the_map_to_see_photos'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8452,7 +8452,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Select a marker on the map to see photos.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0272.select_a_marker_on_the_map_to_see_photos'
+where t.organization_id is null and t.key = 'auto.0273.select_a_marker_on_the_map_to_see_photos'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8460,13 +8460,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Seleziona un indicatore sulla mappa per vedere le foto.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0272.select_a_marker_on_the_map_to_see_photos'
+where t.organization_id is null and t.key = 'auto.0273.select_a_marker_on_the_map_to_see_photos'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0273.select_all', 'Select all', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0274.select_all', 'Select all', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8475,7 +8475,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Select all', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0273.select_all'
+where t.organization_id is null and t.key = 'auto.0274.select_all'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8483,7 +8483,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Select all', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0273.select_all'
+where t.organization_id is null and t.key = 'auto.0274.select_all'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8491,13 +8491,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Seleziona tutto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0273.select_all'
+where t.organization_id is null and t.key = 'auto.0274.select_all'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0274.select_an_option_or_create_one', 'Select an option or create one', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0275.select_an_option_or_create_one', 'Select an option or create one', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8506,7 +8506,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Select an option or create one', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0274.select_an_option_or_create_one'
+where t.organization_id is null and t.key = 'auto.0275.select_an_option_or_create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8514,7 +8514,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Wähle eine Option oder erstelle eine', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0274.select_an_option_or_create_one'
+where t.organization_id is null and t.key = 'auto.0275.select_an_option_or_create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8522,13 +8522,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Seleziona un''opzione o creane una', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0274.select_an_option_or_create_one'
+where t.organization_id is null and t.key = 'auto.0275.select_an_option_or_create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0275.select_none', 'Select none', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0276.select_none', 'Select none', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8537,7 +8537,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Select none', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0275.select_none'
+where t.organization_id is null and t.key = 'auto.0276.select_none'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8545,7 +8545,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Select none', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0275.select_none'
+where t.organization_id is null and t.key = 'auto.0276.select_none'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8553,13 +8553,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Seleziona nessuno', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0275.select_none'
+where t.organization_id is null and t.key = 'auto.0276.select_none'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0276.select_project_or_create_one', 'Select project or create one', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
+values (null, 'auto.0277.select_project_or_create_one', 'Select project or create one', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8568,7 +8568,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Select project or create one', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0276.select_project_or_create_one'
+where t.organization_id is null and t.key = 'auto.0277.select_project_or_create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8576,7 +8576,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Projekt auswählen oder eines erstellen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0276.select_project_or_create_one'
+where t.organization_id is null and t.key = 'auto.0277.select_project_or_create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8584,13 +8584,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Seleziona il progetto o creane uno', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0276.select_project_or_create_one'
+where t.organization_id is null and t.key = 'auto.0277.select_project_or_create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0277.selected', 'selected', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0278.selected', 'selected', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8599,7 +8599,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'selected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0277.selected'
+where t.organization_id is null and t.key = 'auto.0278.selected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8607,7 +8607,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'selected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0277.selected'
+where t.organization_id is null and t.key = 'auto.0278.selected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8615,13 +8615,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'selected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0277.selected'
+where t.organization_id is null and t.key = 'auto.0278.selected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0278.send_anonymous_performance_and_crash_diagnostics', 'Send anonymous performance and crash diagnostics.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0279.send_anonymous_performance_and_crash_diagnostics', 'Send anonymous performance and crash diagnostics.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8630,7 +8630,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Send anonymous performance and crash diagnostics.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0278.send_anonymous_performance_and_crash_diagnostics'
+where t.organization_id is null and t.key = 'auto.0279.send_anonymous_performance_and_crash_diagnostics'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8638,7 +8638,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Send anonymous performance and crash diagnostics.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0278.send_anonymous_performance_and_crash_diagnostics'
+where t.organization_id is null and t.key = 'auto.0279.send_anonymous_performance_and_crash_diagnostics'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8646,13 +8646,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Invia prestazioni anonime e diagnostica degli arresti anomali.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0278.send_anonymous_performance_and_crash_diagnostics'
+where t.organization_id is null and t.key = 'auto.0279.send_anonymous_performance_and_crash_diagnostics'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0279.sende', 'Sende...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0280.sende', 'Sende...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8661,7 +8661,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Sende...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0279.sende'
+where t.organization_id is null and t.key = 'auto.0280.sende'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8669,7 +8669,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Sende...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0279.sende'
+where t.organization_id is null and t.key = 'auto.0280.sende'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8677,13 +8677,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Invia...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0279.sende'
+where t.organization_id is null and t.key = 'auto.0280.sende'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0280.set_new_password', 'Set new password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
+values (null, 'auto.0281.set_new_password', 'Set new password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8692,7 +8692,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Set new password', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0280.set_new_password'
+where t.organization_id is null and t.key = 'auto.0281.set_new_password'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8700,7 +8700,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Neues Passwort festlegen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0280.set_new_password'
+where t.organization_id is null and t.key = 'auto.0281.set_new_password'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8708,13 +8708,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Imposta una nuova password', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0280.set_new_password'
+where t.organization_id is null and t.key = 'auto.0281.set_new_password'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0281.settings', 'Settings', 'en', 'apps/web/src/app/features/nav/nav.component.html interpolation-literal')
+values (null, 'auto.0282.settings', 'Settings', 'en', 'apps/web/src/app/features/nav/nav.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8723,7 +8723,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Settings', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0281.settings'
+where t.organization_id is null and t.key = 'auto.0282.settings'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8731,7 +8731,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Einstellungen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0281.settings'
+where t.organization_id is null and t.key = 'auto.0282.settings'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8739,13 +8739,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Impostazioni', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0281.settings'
+where t.organization_id is null and t.key = 'auto.0282.settings'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0282.settings_overlay_appearance_description', 'settings.overlay.appearance.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0283.settings_overlay_appearance_description', 'settings.overlay.appearance.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8754,7 +8754,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.appearance.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0282.settings_overlay_appearance_description'
+where t.organization_id is null and t.key = 'auto.0283.settings_overlay_appearance_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8762,7 +8762,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.appearance.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0282.settings_overlay_appearance_description'
+where t.organization_id is null and t.key = 'auto.0283.settings_overlay_appearance_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8770,13 +8770,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.appearance.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0282.settings_overlay_appearance_description'
+where t.organization_id is null and t.key = 'auto.0283.settings_overlay_appearance_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0283.settings_overlay_appearance_thememode_label', 'settings.overlay.appearance.themeMode.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0284.settings_overlay_appearance_thememode_label', 'settings.overlay.appearance.themeMode.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8785,7 +8785,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.appearance.themeMode.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0283.settings_overlay_appearance_thememode_label'
+where t.organization_id is null and t.key = 'auto.0284.settings_overlay_appearance_thememode_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8793,7 +8793,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.appearance.themeMode.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0283.settings_overlay_appearance_thememode_label'
+where t.organization_id is null and t.key = 'auto.0284.settings_overlay_appearance_thememode_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8801,13 +8801,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.appearance.themeMode.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0283.settings_overlay_appearance_thememode_label'
+where t.organization_id is null and t.key = 'auto.0284.settings_overlay_appearance_thememode_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0284.settings_overlay_appearance_thememode_option_dark', 'settings.overlay.appearance.themeMode.option.dark', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0285.settings_overlay_appearance_thememode_option_dark', 'settings.overlay.appearance.themeMode.option.dark', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8816,7 +8816,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.appearance.themeMode.option.dark', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0284.settings_overlay_appearance_thememode_option_dark'
+where t.organization_id is null and t.key = 'auto.0285.settings_overlay_appearance_thememode_option_dark'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8824,7 +8824,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.appearance.themeMode.option.dark', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0284.settings_overlay_appearance_thememode_option_dark'
+where t.organization_id is null and t.key = 'auto.0285.settings_overlay_appearance_thememode_option_dark'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8832,13 +8832,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.appearance.themeMode.option.dark', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0284.settings_overlay_appearance_thememode_option_dark'
+where t.organization_id is null and t.key = 'auto.0285.settings_overlay_appearance_thememode_option_dark'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0285.settings_overlay_appearance_thememode_option_light', 'settings.overlay.appearance.themeMode.option.light', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0286.settings_overlay_appearance_thememode_option_light', 'settings.overlay.appearance.themeMode.option.light', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8847,7 +8847,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.appearance.themeMode.option.light', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0285.settings_overlay_appearance_thememode_option_light'
+where t.organization_id is null and t.key = 'auto.0286.settings_overlay_appearance_thememode_option_light'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8855,7 +8855,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.appearance.themeMode.option.light', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0285.settings_overlay_appearance_thememode_option_light'
+where t.organization_id is null and t.key = 'auto.0286.settings_overlay_appearance_thememode_option_light'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8863,13 +8863,44 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'impostazioni.overlay.aspetto.themeMode.opzione.luce', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0285.settings_overlay_appearance_thememode_option_light'
+where t.organization_id is null and t.key = 'auto.0286.settings_overlay_appearance_thememode_option_light'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0286.settings_overlay_appearance_thememode_option_system', 'settings.overlay.appearance.themeMode.option.system', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0287.settings_overlay_appearance_thememode_option_sandstone', 'settings.overlay.appearance.themeMode.option.sandstone', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'settings.overlay.appearance.themeMode.option.sandstone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0287.settings_overlay_appearance_thememode_option_sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'settings.overlay.appearance.themeMode.option.sandstone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0287.settings_overlay_appearance_thememode_option_sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'settings.overlay.appearance.themeMode.option.sandstone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'auto.0287.settings_overlay_appearance_thememode_option_sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'auto.0288.settings_overlay_appearance_thememode_option_system', 'settings.overlay.appearance.themeMode.option.system', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8878,7 +8909,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.appearance.themeMode.option.system', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0286.settings_overlay_appearance_thememode_option_system'
+where t.organization_id is null and t.key = 'auto.0288.settings_overlay_appearance_thememode_option_system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8886,7 +8917,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.appearance.themeMode.option.system', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0286.settings_overlay_appearance_thememode_option_system'
+where t.organization_id is null and t.key = 'auto.0288.settings_overlay_appearance_thememode_option_system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8894,13 +8925,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.appearance.themeMode.option.system', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0286.settings_overlay_appearance_thememode_option_system'
+where t.organization_id is null and t.key = 'auto.0288.settings_overlay_appearance_thememode_option_system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0287.settings_overlay_appearance_title', 'settings.overlay.appearance.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0289.settings_overlay_appearance_title', 'settings.overlay.appearance.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8909,7 +8940,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.appearance.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0287.settings_overlay_appearance_title'
+where t.organization_id is null and t.key = 'auto.0289.settings_overlay_appearance_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8917,7 +8948,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.appearance.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0287.settings_overlay_appearance_title'
+where t.organization_id is null and t.key = 'auto.0289.settings_overlay_appearance_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8925,13 +8956,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'impostazioni.overlay.aspetto.titolo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0287.settings_overlay_appearance_title'
+where t.organization_id is null and t.key = 'auto.0289.settings_overlay_appearance_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0288.settings_overlay_data_cacheretention_label', 'settings.overlay.data.cacheRetention.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0290.settings_overlay_data_cacheretention_label', 'settings.overlay.data.cacheRetention.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8940,7 +8971,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.data.cacheRetention.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0288.settings_overlay_data_cacheretention_label'
+where t.organization_id is null and t.key = 'auto.0290.settings_overlay_data_cacheretention_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8948,7 +8979,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.data.cacheRetention.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0288.settings_overlay_data_cacheretention_label'
+where t.organization_id is null and t.key = 'auto.0290.settings_overlay_data_cacheretention_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8956,13 +8987,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.data.cacheRetention.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0288.settings_overlay_data_cacheretention_label'
+where t.organization_id is null and t.key = 'auto.0290.settings_overlay_data_cacheretention_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0289.settings_overlay_data_description', 'settings.overlay.data.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0291.settings_overlay_data_description', 'settings.overlay.data.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8971,7 +9002,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.data.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0289.settings_overlay_data_description'
+where t.organization_id is null and t.key = 'auto.0291.settings_overlay_data_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8979,7 +9010,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.data.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0289.settings_overlay_data_description'
+where t.organization_id is null and t.key = 'auto.0291.settings_overlay_data_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8987,13 +9018,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.data.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0289.settings_overlay_data_description'
+where t.organization_id is null and t.key = 'auto.0291.settings_overlay_data_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0290.settings_overlay_data_telemetry_description', 'settings.overlay.data.telemetry.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0292.settings_overlay_data_telemetry_description', 'settings.overlay.data.telemetry.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9002,7 +9033,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.data.telemetry.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0290.settings_overlay_data_telemetry_description'
+where t.organization_id is null and t.key = 'auto.0292.settings_overlay_data_telemetry_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9010,7 +9041,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.data.telemetry.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0290.settings_overlay_data_telemetry_description'
+where t.organization_id is null and t.key = 'auto.0292.settings_overlay_data_telemetry_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9018,13 +9049,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.data.telemetry.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0290.settings_overlay_data_telemetry_description'
+where t.organization_id is null and t.key = 'auto.0292.settings_overlay_data_telemetry_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0291.settings_overlay_data_telemetry_title', 'settings.overlay.data.telemetry.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0293.settings_overlay_data_telemetry_title', 'settings.overlay.data.telemetry.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9033,7 +9064,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.data.telemetry.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0291.settings_overlay_data_telemetry_title'
+where t.organization_id is null and t.key = 'auto.0293.settings_overlay_data_telemetry_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9041,7 +9072,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.data.telemetry.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0291.settings_overlay_data_telemetry_title'
+where t.organization_id is null and t.key = 'auto.0293.settings_overlay_data_telemetry_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9049,13 +9080,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.data.telemetry.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0291.settings_overlay_data_telemetry_title'
+where t.organization_id is null and t.key = 'auto.0293.settings_overlay_data_telemetry_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0292.settings_overlay_data_title', 'settings.overlay.data.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0294.settings_overlay_data_title', 'settings.overlay.data.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9064,7 +9095,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.data.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0292.settings_overlay_data_title'
+where t.organization_id is null and t.key = 'auto.0294.settings_overlay_data_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9072,7 +9103,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.data.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0292.settings_overlay_data_title'
+where t.organization_id is null and t.key = 'auto.0294.settings_overlay_data_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9080,13 +9111,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.data.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0292.settings_overlay_data_title'
+where t.organization_id is null and t.key = 'auto.0294.settings_overlay_data_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0293.settings_overlay_general_density_label', 'settings.overlay.general.density.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0295.settings_overlay_general_density_label', 'settings.overlay.general.density.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9095,7 +9126,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.general.density.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0293.settings_overlay_general_density_label'
+where t.organization_id is null and t.key = 'auto.0295.settings_overlay_general_density_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9103,7 +9134,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.general.density.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0293.settings_overlay_general_density_label'
+where t.organization_id is null and t.key = 'auto.0295.settings_overlay_general_density_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9111,13 +9142,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.general.density.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0293.settings_overlay_general_density_label'
+where t.organization_id is null and t.key = 'auto.0295.settings_overlay_general_density_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0294.settings_overlay_general_density_option_comfortable', 'settings.overlay.general.density.option.comfortable', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0296.settings_overlay_general_density_option_comfortable', 'settings.overlay.general.density.option.comfortable', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9126,7 +9157,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.general.density.option.comfortable', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0294.settings_overlay_general_density_option_comfortable'
+where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_density_option_comfortable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9134,7 +9165,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.general.density.option.comfortable', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0294.settings_overlay_general_density_option_comfortable'
+where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_density_option_comfortable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9142,13 +9173,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'impostazioni.overlay.generale.densità.opzione.comodo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0294.settings_overlay_general_density_option_comfortable'
+where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_density_option_comfortable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0295.settings_overlay_general_density_option_compact', 'settings.overlay.general.density.option.compact', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0297.settings_overlay_general_density_option_compact', 'settings.overlay.general.density.option.compact', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9157,7 +9188,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.general.density.option.compact', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0295.settings_overlay_general_density_option_compact'
+where t.organization_id is null and t.key = 'auto.0297.settings_overlay_general_density_option_compact'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9165,7 +9196,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.general.density.option.compact', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0295.settings_overlay_general_density_option_compact'
+where t.organization_id is null and t.key = 'auto.0297.settings_overlay_general_density_option_compact'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9173,13 +9204,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.general.density.option.compact', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0295.settings_overlay_general_density_option_compact'
+where t.organization_id is null and t.key = 'auto.0297.settings_overlay_general_density_option_compact'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0296.settings_overlay_general_description', 'settings.overlay.general.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0298.settings_overlay_general_description', 'settings.overlay.general.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9188,7 +9219,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.general.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_description'
+where t.organization_id is null and t.key = 'auto.0298.settings_overlay_general_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9196,7 +9227,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.general.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_description'
+where t.organization_id is null and t.key = 'auto.0298.settings_overlay_general_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9204,13 +9235,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.general.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0296.settings_overlay_general_description'
+where t.organization_id is null and t.key = 'auto.0298.settings_overlay_general_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0297.settings_overlay_general_language_label', 'settings.overlay.general.language.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0299.settings_overlay_general_language_label', 'settings.overlay.general.language.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9219,7 +9250,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.general.language.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0297.settings_overlay_general_language_label'
+where t.organization_id is null and t.key = 'auto.0299.settings_overlay_general_language_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9227,7 +9258,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.general.language.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0297.settings_overlay_general_language_label'
+where t.organization_id is null and t.key = 'auto.0299.settings_overlay_general_language_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9235,13 +9266,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.general.lingual.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0297.settings_overlay_general_language_label'
+where t.organization_id is null and t.key = 'auto.0299.settings_overlay_general_language_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0298.settings_overlay_general_title', 'settings.overlay.general.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0300.settings_overlay_general_title', 'settings.overlay.general.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9250,7 +9281,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.general.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0298.settings_overlay_general_title'
+where t.organization_id is null and t.key = 'auto.0300.settings_overlay_general_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9258,7 +9289,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.general.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0298.settings_overlay_general_title'
+where t.organization_id is null and t.key = 'auto.0300.settings_overlay_general_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9266,13 +9297,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.general.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0298.settings_overlay_general_title'
+where t.organization_id is null and t.key = 'auto.0300.settings_overlay_general_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0299.settings_overlay_kicker', 'settings.overlay.kicker', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0301.settings_overlay_kicker', 'settings.overlay.kicker', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9281,7 +9312,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.kicker', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0299.settings_overlay_kicker'
+where t.organization_id is null and t.key = 'auto.0301.settings_overlay_kicker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9289,7 +9320,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.kicker', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0299.settings_overlay_kicker'
+where t.organization_id is null and t.key = 'auto.0301.settings_overlay_kicker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9297,13 +9328,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.kicker', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0299.settings_overlay_kicker'
+where t.organization_id is null and t.key = 'auto.0301.settings_overlay_kicker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0300.settings_overlay_map_autolocate_description', 'settings.overlay.map.autoLocate.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0302.settings_overlay_map_autolocate_description', 'settings.overlay.map.autoLocate.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9312,7 +9343,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.autoLocate.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0300.settings_overlay_map_autolocate_description'
+where t.organization_id is null and t.key = 'auto.0302.settings_overlay_map_autolocate_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9320,7 +9351,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.autoLocate.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0300.settings_overlay_map_autolocate_description'
+where t.organization_id is null and t.key = 'auto.0302.settings_overlay_map_autolocate_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9328,13 +9359,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.autoLocate.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0300.settings_overlay_map_autolocate_description'
+where t.organization_id is null and t.key = 'auto.0302.settings_overlay_map_autolocate_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0301.settings_overlay_map_autolocate_title', 'settings.overlay.map.autoLocate.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0303.settings_overlay_map_autolocate_title', 'settings.overlay.map.autoLocate.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9343,7 +9374,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.autoLocate.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0301.settings_overlay_map_autolocate_title'
+where t.organization_id is null and t.key = 'auto.0303.settings_overlay_map_autolocate_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9351,7 +9382,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.autoLocate.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0301.settings_overlay_map_autolocate_title'
+where t.organization_id is null and t.key = 'auto.0303.settings_overlay_map_autolocate_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9359,13 +9390,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.autoLocate.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0301.settings_overlay_map_autolocate_title'
+where t.organization_id is null and t.key = 'auto.0303.settings_overlay_map_autolocate_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0302.settings_overlay_map_description', 'settings.overlay.map.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0304.settings_overlay_map_description', 'settings.overlay.map.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9374,7 +9405,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0302.settings_overlay_map_description'
+where t.organization_id is null and t.key = 'auto.0304.settings_overlay_map_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9382,7 +9413,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0302.settings_overlay_map_description'
+where t.organization_id is null and t.key = 'auto.0304.settings_overlay_map_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9390,13 +9421,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0302.settings_overlay_map_description'
+where t.organization_id is null and t.key = 'auto.0304.settings_overlay_map_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0303.settings_overlay_map_gridoverlay_description', 'settings.overlay.map.gridOverlay.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0305.settings_overlay_map_gridoverlay_description', 'settings.overlay.map.gridOverlay.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9405,7 +9436,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.gridOverlay.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0303.settings_overlay_map_gridoverlay_description'
+where t.organization_id is null and t.key = 'auto.0305.settings_overlay_map_gridoverlay_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9413,7 +9444,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.gridOverlay.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0303.settings_overlay_map_gridoverlay_description'
+where t.organization_id is null and t.key = 'auto.0305.settings_overlay_map_gridoverlay_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9421,13 +9452,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.gridOverlay.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0303.settings_overlay_map_gridoverlay_description'
+where t.organization_id is null and t.key = 'auto.0305.settings_overlay_map_gridoverlay_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0304.settings_overlay_map_gridoverlay_title', 'settings.overlay.map.gridOverlay.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0306.settings_overlay_map_gridoverlay_title', 'settings.overlay.map.gridOverlay.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9436,7 +9467,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.gridOverlay.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0304.settings_overlay_map_gridoverlay_title'
+where t.organization_id is null and t.key = 'auto.0306.settings_overlay_map_gridoverlay_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9444,7 +9475,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.gridOverlay.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0304.settings_overlay_map_gridoverlay_title'
+where t.organization_id is null and t.key = 'auto.0306.settings_overlay_map_gridoverlay_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9452,13 +9483,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.gridOverlay.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0304.settings_overlay_map_gridoverlay_title'
+where t.organization_id is null and t.key = 'auto.0306.settings_overlay_map_gridoverlay_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0305.settings_overlay_map_markermotion_label', 'settings.overlay.map.markerMotion.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0307.settings_overlay_map_markermotion_label', 'settings.overlay.map.markerMotion.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9467,7 +9498,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.markerMotion.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0305.settings_overlay_map_markermotion_label'
+where t.organization_id is null and t.key = 'auto.0307.settings_overlay_map_markermotion_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9475,7 +9506,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.markerMotion.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0305.settings_overlay_map_markermotion_label'
+where t.organization_id is null and t.key = 'auto.0307.settings_overlay_map_markermotion_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9483,13 +9514,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.markerMotion.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0305.settings_overlay_map_markermotion_label'
+where t.organization_id is null and t.key = 'auto.0307.settings_overlay_map_markermotion_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0306.settings_overlay_map_markermotion_option_off', 'settings.overlay.map.markerMotion.option.off', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0308.settings_overlay_map_markermotion_option_off', 'settings.overlay.map.markerMotion.option.off', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9498,7 +9529,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.markerMotion.option.off', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0306.settings_overlay_map_markermotion_option_off'
+where t.organization_id is null and t.key = 'auto.0308.settings_overlay_map_markermotion_option_off'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9506,7 +9537,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.markerMotion.option.off', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0306.settings_overlay_map_markermotion_option_off'
+where t.organization_id is null and t.key = 'auto.0308.settings_overlay_map_markermotion_option_off'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9514,13 +9545,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.markerMotion.option.off', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0306.settings_overlay_map_markermotion_option_off'
+where t.organization_id is null and t.key = 'auto.0308.settings_overlay_map_markermotion_option_off'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0307.settings_overlay_map_markermotion_option_smooth', 'settings.overlay.map.markerMotion.option.smooth', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0309.settings_overlay_map_markermotion_option_smooth', 'settings.overlay.map.markerMotion.option.smooth', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9529,7 +9560,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.markerMotion.option.smooth', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0307.settings_overlay_map_markermotion_option_smooth'
+where t.organization_id is null and t.key = 'auto.0309.settings_overlay_map_markermotion_option_smooth'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9537,7 +9568,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.markerMotion.option.smooth', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0307.settings_overlay_map_markermotion_option_smooth'
+where t.organization_id is null and t.key = 'auto.0309.settings_overlay_map_markermotion_option_smooth'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9545,13 +9576,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.markerMotion.option.smooth', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0307.settings_overlay_map_markermotion_option_smooth'
+where t.organization_id is null and t.key = 'auto.0309.settings_overlay_map_markermotion_option_smooth'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0308.settings_overlay_map_title', 'settings.overlay.map.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0310.settings_overlay_map_title', 'settings.overlay.map.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9560,7 +9591,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.map.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0308.settings_overlay_map_title'
+where t.organization_id is null and t.key = 'auto.0310.settings_overlay_map_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9568,7 +9599,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.map.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0308.settings_overlay_map_title'
+where t.organization_id is null and t.key = 'auto.0310.settings_overlay_map_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9576,13 +9607,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.map.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0308.settings_overlay_map_title'
+where t.organization_id is null and t.key = 'auto.0310.settings_overlay_map_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0309.settings_overlay_notifications_description', 'settings.overlay.notifications.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0311.settings_overlay_notifications_description', 'settings.overlay.notifications.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9591,7 +9622,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.notifications.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0309.settings_overlay_notifications_description'
+where t.organization_id is null and t.key = 'auto.0311.settings_overlay_notifications_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9599,7 +9630,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.notifications.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0309.settings_overlay_notifications_description'
+where t.organization_id is null and t.key = 'auto.0311.settings_overlay_notifications_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9607,13 +9638,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.notifications.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0309.settings_overlay_notifications_description'
+where t.organization_id is null and t.key = 'auto.0311.settings_overlay_notifications_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0310.settings_overlay_notifications_inapp_description', 'settings.overlay.notifications.inApp.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0312.settings_overlay_notifications_inapp_description', 'settings.overlay.notifications.inApp.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9622,7 +9653,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.notifications.inApp.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0310.settings_overlay_notifications_inapp_description'
+where t.organization_id is null and t.key = 'auto.0312.settings_overlay_notifications_inapp_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9630,7 +9661,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.notifications.inApp.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0310.settings_overlay_notifications_inapp_description'
+where t.organization_id is null and t.key = 'auto.0312.settings_overlay_notifications_inapp_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9638,13 +9669,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.notifications.inApp.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0310.settings_overlay_notifications_inapp_description'
+where t.organization_id is null and t.key = 'auto.0312.settings_overlay_notifications_inapp_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0311.settings_overlay_notifications_inapp_title', 'settings.overlay.notifications.inApp.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0313.settings_overlay_notifications_inapp_title', 'settings.overlay.notifications.inApp.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9653,7 +9684,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.notifications.inApp.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0311.settings_overlay_notifications_inapp_title'
+where t.organization_id is null and t.key = 'auto.0313.settings_overlay_notifications_inapp_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9661,7 +9692,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.notifications.inApp.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0311.settings_overlay_notifications_inapp_title'
+where t.organization_id is null and t.key = 'auto.0313.settings_overlay_notifications_inapp_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9669,13 +9700,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.notifications.inApp.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0311.settings_overlay_notifications_inapp_title'
+where t.organization_id is null and t.key = 'auto.0313.settings_overlay_notifications_inapp_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0312.settings_overlay_notifications_title', 'settings.overlay.notifications.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0314.settings_overlay_notifications_title', 'settings.overlay.notifications.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9684,7 +9715,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.notifications.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0312.settings_overlay_notifications_title'
+where t.organization_id is null and t.key = 'auto.0314.settings_overlay_notifications_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9692,7 +9723,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.notifications.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0312.settings_overlay_notifications_title'
+where t.organization_id is null and t.key = 'auto.0314.settings_overlay_notifications_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9700,13 +9731,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.notifications.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0312.settings_overlay_notifications_title'
+where t.organization_id is null and t.key = 'auto.0314.settings_overlay_notifications_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0313.settings_overlay_notifications_uploadfailure_description', 'settings.overlay.notifications.uploadFailure.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0315.settings_overlay_notifications_uploadfailure_description', 'settings.overlay.notifications.uploadFailure.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9715,7 +9746,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.notifications.uploadFailure.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0313.settings_overlay_notifications_uploadfailure_description'
+where t.organization_id is null and t.key = 'auto.0315.settings_overlay_notifications_uploadfailure_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9723,7 +9754,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.notifications.uploadFailure.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0313.settings_overlay_notifications_uploadfailure_description'
+where t.organization_id is null and t.key = 'auto.0315.settings_overlay_notifications_uploadfailure_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9731,13 +9762,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.notifications.uploadFailure.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0313.settings_overlay_notifications_uploadfailure_description'
+where t.organization_id is null and t.key = 'auto.0315.settings_overlay_notifications_uploadfailure_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0314.settings_overlay_notifications_uploadfailure_title', 'settings.overlay.notifications.uploadFailure.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0316.settings_overlay_notifications_uploadfailure_title', 'settings.overlay.notifications.uploadFailure.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9746,7 +9777,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.notifications.uploadFailure.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0314.settings_overlay_notifications_uploadfailure_title'
+where t.organization_id is null and t.key = 'auto.0316.settings_overlay_notifications_uploadfailure_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9754,7 +9785,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.notifications.uploadFailure.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0314.settings_overlay_notifications_uploadfailure_title'
+where t.organization_id is null and t.key = 'auto.0316.settings_overlay_notifications_uploadfailure_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9762,13 +9793,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.notifications.uploadFailure.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0314.settings_overlay_notifications_uploadfailure_title'
+where t.organization_id is null and t.key = 'auto.0316.settings_overlay_notifications_uploadfailure_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0315.settings_overlay_search_bias_label', 'settings.overlay.search.bias.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0317.settings_overlay_search_bias_label', 'settings.overlay.search.bias.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9777,7 +9808,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.bias.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0315.settings_overlay_search_bias_label'
+where t.organization_id is null and t.key = 'auto.0317.settings_overlay_search_bias_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9785,7 +9816,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.bias.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0315.settings_overlay_search_bias_label'
+where t.organization_id is null and t.key = 'auto.0317.settings_overlay_search_bias_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9793,13 +9824,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.bias.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0315.settings_overlay_search_bias_label'
+where t.organization_id is null and t.key = 'auto.0317.settings_overlay_search_bias_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0316.settings_overlay_search_bias_option_addressfirst', 'settings.overlay.search.bias.option.addressFirst', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0318.settings_overlay_search_bias_option_addressfirst', 'settings.overlay.search.bias.option.addressFirst', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9808,7 +9839,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.bias.option.addressFirst', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0316.settings_overlay_search_bias_option_addressfirst'
+where t.organization_id is null and t.key = 'auto.0318.settings_overlay_search_bias_option_addressfirst'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9816,7 +9847,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.bias.option.addressFirst', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0316.settings_overlay_search_bias_option_addressfirst'
+where t.organization_id is null and t.key = 'auto.0318.settings_overlay_search_bias_option_addressfirst'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9824,13 +9855,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.bias.option.addressFirst', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0316.settings_overlay_search_bias_option_addressfirst'
+where t.organization_id is null and t.key = 'auto.0318.settings_overlay_search_bias_option_addressfirst'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0317.settings_overlay_search_bias_option_balanced', 'settings.overlay.search.bias.option.balanced', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0319.settings_overlay_search_bias_option_balanced', 'settings.overlay.search.bias.option.balanced', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9839,7 +9870,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.bias.option.balanced', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0317.settings_overlay_search_bias_option_balanced'
+where t.organization_id is null and t.key = 'auto.0319.settings_overlay_search_bias_option_balanced'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9847,7 +9878,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.bias.option.balanced', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0317.settings_overlay_search_bias_option_balanced'
+where t.organization_id is null and t.key = 'auto.0319.settings_overlay_search_bias_option_balanced'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9855,13 +9886,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.bias.option.balanced', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0317.settings_overlay_search_bias_option_balanced'
+where t.organization_id is null and t.key = 'auto.0319.settings_overlay_search_bias_option_balanced'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0318.settings_overlay_search_bias_option_placefirst', 'settings.overlay.search.bias.option.placeFirst', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0320.settings_overlay_search_bias_option_placefirst', 'settings.overlay.search.bias.option.placeFirst', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9870,7 +9901,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.bias.option.placeFirst', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0318.settings_overlay_search_bias_option_placefirst'
+where t.organization_id is null and t.key = 'auto.0320.settings_overlay_search_bias_option_placefirst'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9878,7 +9909,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.bias.option.placeFirst', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0318.settings_overlay_search_bias_option_placefirst'
+where t.organization_id is null and t.key = 'auto.0320.settings_overlay_search_bias_option_placefirst'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9886,13 +9917,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.bias.option.placeFirst', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0318.settings_overlay_search_bias_option_placefirst'
+where t.organization_id is null and t.key = 'auto.0320.settings_overlay_search_bias_option_placefirst'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0319.settings_overlay_search_description', 'settings.overlay.search.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0321.settings_overlay_search_description', 'settings.overlay.search.description', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9901,7 +9932,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0319.settings_overlay_search_description'
+where t.organization_id is null and t.key = 'auto.0321.settings_overlay_search_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9909,7 +9940,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0319.settings_overlay_search_description'
+where t.organization_id is null and t.key = 'auto.0321.settings_overlay_search_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9917,13 +9948,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.description', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0319.settings_overlay_search_description'
+where t.organization_id is null and t.key = 'auto.0321.settings_overlay_search_description'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0320.settings_overlay_search_radius_label', 'settings.overlay.search.radius.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0322.settings_overlay_search_radius_label', 'settings.overlay.search.radius.label', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9932,7 +9963,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.radius.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0320.settings_overlay_search_radius_label'
+where t.organization_id is null and t.key = 'auto.0322.settings_overlay_search_radius_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9940,7 +9971,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.radius.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0320.settings_overlay_search_radius_label'
+where t.organization_id is null and t.key = 'auto.0322.settings_overlay_search_radius_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9948,13 +9979,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.radius.label', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0320.settings_overlay_search_radius_label'
+where t.organization_id is null and t.key = 'auto.0322.settings_overlay_search_radius_label'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0321.settings_overlay_search_title', 'settings.overlay.search.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0323.settings_overlay_search_title', 'settings.overlay.search.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9963,7 +9994,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.search.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0321.settings_overlay_search_title'
+where t.organization_id is null and t.key = 'auto.0323.settings_overlay_search_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9971,7 +10002,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.search.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0321.settings_overlay_search_title'
+where t.organization_id is null and t.key = 'auto.0323.settings_overlay_search_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -9979,13 +10010,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'settings.overlay.search.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0321.settings_overlay_search_title'
+where t.organization_id is null and t.key = 'auto.0323.settings_overlay_search_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0322.settings_overlay_subtitle', 'settings.overlay.subtitle', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0324.settings_overlay_subtitle', 'settings.overlay.subtitle', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9994,7 +10025,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.subtitle', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0322.settings_overlay_subtitle'
+where t.organization_id is null and t.key = 'auto.0324.settings_overlay_subtitle'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10002,7 +10033,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.subtitle', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0322.settings_overlay_subtitle'
+where t.organization_id is null and t.key = 'auto.0324.settings_overlay_subtitle'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10010,13 +10041,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'impostazioni.overlay.sottotitolo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0322.settings_overlay_subtitle'
+where t.organization_id is null and t.key = 'auto.0324.settings_overlay_subtitle'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0323.settings_overlay_title', 'settings.overlay.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0325.settings_overlay_title', 'settings.overlay.title', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10025,7 +10056,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'settings.overlay.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0323.settings_overlay_title'
+where t.organization_id is null and t.key = 'auto.0325.settings_overlay_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10033,7 +10064,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'settings.overlay.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0323.settings_overlay_title'
+where t.organization_id is null and t.key = 'auto.0325.settings_overlay_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10041,13 +10072,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'impostazioni.overlay.titolo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0323.settings_overlay_title'
+where t.organization_id is null and t.key = 'auto.0325.settings_overlay_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0324.share', 'Share', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0326.share', 'Share', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10056,7 +10087,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0324.share'
+where t.organization_id is null and t.key = 'auto.0326.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10064,7 +10095,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0324.share'
+where t.organization_id is null and t.key = 'auto.0326.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10072,13 +10103,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividere', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0324.share'
+where t.organization_id is null and t.key = 'auto.0326.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0325.share_a_role_scoped_one_time_invite_to_your_organization', 'Share a role-scoped one-time invite to your organization.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+values (null, 'auto.0327.share_a_role_scoped_one_time_invite_to_your_organization', 'Share a role-scoped one-time invite to your organization.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10087,7 +10118,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share a role-scoped one-time invite to your organization.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0325.share_a_role_scoped_one_time_invite_to_your_organization'
+where t.organization_id is null and t.key = 'auto.0327.share_a_role_scoped_one_time_invite_to_your_organization'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10095,7 +10126,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Teile eine rollenbezogene Einmal-Einladung mit deiner Organisation.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0325.share_a_role_scoped_one_time_invite_to_your_organization'
+where t.organization_id is null and t.key = 'auto.0327.share_a_role_scoped_one_time_invite_to_your_organization'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10103,13 +10134,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividi un invito una tantum con ambito ruolo nella tua organizzazione.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0325.share_a_role_scoped_one_time_invite_to_your_organization'
+where t.organization_id is null and t.key = 'auto.0327.share_a_role_scoped_one_time_invite_to_your_organization'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0326.share_actions', 'Share actions', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+values (null, 'auto.0328.share_actions', 'Share actions', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10118,7 +10149,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share actions', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0326.share_actions'
+where t.organization_id is null and t.key = 'auto.0328.share_actions'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10126,7 +10157,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Aktionen teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0326.share_actions'
+where t.organization_id is null and t.key = 'auto.0328.share_actions'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10134,13 +10165,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividi azioni', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0326.share_actions'
+where t.organization_id is null and t.key = 'auto.0328.share_actions'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0327.share_invite_via_email', 'Share invite via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+values (null, 'auto.0329.share_invite_via_email', 'Share invite via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10149,7 +10180,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share invite via email', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0327.share_invite_via_email'
+where t.organization_id is null and t.key = 'auto.0329.share_invite_via_email'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10157,7 +10188,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Einladung per E-Mail teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0327.share_invite_via_email'
+where t.organization_id is null and t.key = 'auto.0329.share_invite_via_email'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10165,13 +10196,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividi l''invito tramite e-mail', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0327.share_invite_via_email'
+where t.organization_id is null and t.key = 'auto.0329.share_invite_via_email'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0328.share_invite_via_whatsapp', 'Share invite via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
+values (null, 'auto.0330.share_invite_via_whatsapp', 'Share invite via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10180,7 +10211,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share invite via WhatsApp', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0328.share_invite_via_whatsapp'
+where t.organization_id is null and t.key = 'auto.0330.share_invite_via_whatsapp'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10188,7 +10219,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Einladung per WhatsApp teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0328.share_invite_via_whatsapp'
+where t.organization_id is null and t.key = 'auto.0330.share_invite_via_whatsapp'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10196,13 +10227,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividi l''invito tramite WhatsApp', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0328.share_invite_via_whatsapp'
+where t.organization_id is null and t.key = 'auto.0330.share_invite_via_whatsapp'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0329.share_via_email', 'Share via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
+values (null, 'auto.0331.share_via_email', 'Share via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10211,7 +10242,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share via email', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0329.share_via_email'
+where t.organization_id is null and t.key = 'auto.0331.share_via_email'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10219,7 +10250,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Per E-Mail teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0329.share_via_email'
+where t.organization_id is null and t.key = 'auto.0331.share_via_email'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10227,13 +10258,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividi tramite e-mail', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0329.share_via_email'
+where t.organization_id is null and t.key = 'auto.0331.share_via_email'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0330.share_via_whatsapp', 'Share via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
+values (null, 'auto.0332.share_via_whatsapp', 'Share via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10242,7 +10273,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Share via WhatsApp', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0330.share_via_whatsapp'
+where t.organization_id is null and t.key = 'auto.0332.share_via_whatsapp'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10250,7 +10281,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Über WhatsApp teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0330.share_via_whatsapp'
+where t.organization_id is null and t.key = 'auto.0332.share_via_whatsapp'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10258,13 +10289,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Condividi tramite WhatsApp', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0330.share_via_whatsapp'
+where t.organization_id is null and t.key = 'auto.0332.share_via_whatsapp'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0331.short', 'short', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html interpolation-literal')
+values (null, 'auto.0333.short', 'short', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10273,7 +10304,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'short', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0331.short'
+where t.organization_id is null and t.key = 'auto.0333.short'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10281,7 +10312,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'short', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0331.short'
+where t.organization_id is null and t.key = 'auto.0333.short'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10289,13 +10320,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'corto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0331.short'
+where t.organization_id is null and t.key = 'auto.0333.short'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0332.show_subtle_grid_alignment_lines_on_high_zoom_levels', 'Show subtle grid alignment lines on high zoom levels.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0334.show_subtle_grid_alignment_lines_on_high_zoom_levels', 'Show subtle grid alignment lines on high zoom levels.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10304,7 +10335,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Show subtle grid alignment lines on high zoom levels.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0332.show_subtle_grid_alignment_lines_on_high_zoom_levels'
+where t.organization_id is null and t.key = 'auto.0334.show_subtle_grid_alignment_lines_on_high_zoom_levels'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10312,7 +10343,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Show subtle grid alignment lines on high zoom levels.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0332.show_subtle_grid_alignment_lines_on_high_zoom_levels'
+where t.organization_id is null and t.key = 'auto.0334.show_subtle_grid_alignment_lines_on_high_zoom_levels'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10320,13 +10351,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Mostra sottili linee di allineamento della griglia a livelli di zoom elevati.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0332.show_subtle_grid_alignment_lines_on_high_zoom_levels'
+where t.organization_id is null and t.key = 'auto.0334.show_subtle_grid_alignment_lines_on_high_zoom_levels'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0333.show_success_and_warning_notices_for_actions', 'Show success and warning notices for actions.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0335.show_success_and_warning_notices_for_actions', 'Show success and warning notices for actions.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10335,7 +10366,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Show success and warning notices for actions.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0333.show_success_and_warning_notices_for_actions'
+where t.organization_id is null and t.key = 'auto.0335.show_success_and_warning_notices_for_actions'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10343,7 +10374,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Show success and warning notices for actions.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0333.show_success_and_warning_notices_for_actions'
+where t.organization_id is null and t.key = 'auto.0335.show_success_and_warning_notices_for_actions'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10351,13 +10382,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Mostra avvisi di successo e di avviso per le azioni.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0333.show_success_and_warning_notices_for_actions'
+where t.organization_id is null and t.key = 'auto.0335.show_success_and_warning_notices_for_actions'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0334.sign_in', 'Sign in', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+values (null, 'auto.0336.sign_in', 'Sign in', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10366,7 +10397,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Sign in', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0334.sign_in'
+where t.organization_id is null and t.key = 'auto.0336.sign_in'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10374,7 +10405,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Anmelden', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0334.sign_in'
+where t.organization_id is null and t.key = 'auto.0336.sign_in'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10382,13 +10413,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Registrazione', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0334.sign_in'
+where t.organization_id is null and t.key = 'auto.0336.sign_in'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0335.site_map', 'Site map', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
+values (null, 'auto.0337.site_map', 'Site map', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10397,7 +10428,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Site map', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0335.site_map'
+where t.organization_id is null and t.key = 'auto.0337.site_map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10405,7 +10436,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Baustellenkarte', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0335.site_map'
+where t.organization_id is null and t.key = 'auto.0337.site_map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10413,13 +10444,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Mappa del sito', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0335.site_map'
+where t.organization_id is null and t.key = 'auto.0337.site_map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0336.sitzung', 'Sitzung', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0338.sitzung', 'Sitzung', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10428,7 +10459,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Sitzung', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0336.sitzung'
+where t.organization_id is null and t.key = 'auto.0338.sitzung'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10436,7 +10467,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Sitzung', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0336.sitzung'
+where t.organization_id is null and t.key = 'auto.0338.sitzung'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10444,13 +10475,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Sessione', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0336.sitzung'
+where t.organization_id is null and t.key = 'auto.0338.sitzung'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0337.smooth', 'Smooth', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0339.smooth', 'Smooth', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10459,7 +10490,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Smooth', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0337.smooth'
+where t.organization_id is null and t.key = 'auto.0339.smooth'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10467,7 +10498,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Smooth', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0337.smooth'
+where t.organization_id is null and t.key = 'auto.0339.smooth'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10475,13 +10506,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Liscio', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0337.smooth'
+where t.organization_id is null and t.key = 'auto.0339.smooth'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0338.sort', 'Sort', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
+values (null, 'auto.0340.sort', 'Sort', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10490,7 +10521,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Sort', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0338.sort'
+where t.organization_id is null and t.key = 'auto.0340.sort'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10498,7 +10529,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Sortieren', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0338.sort'
+where t.organization_id is null and t.key = 'auto.0340.sort'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10506,13 +10537,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Ordinare', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0338.sort'
+where t.organization_id is null and t.key = 'auto.0340.sort'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0339.sorted_by_grouping', 'Sorted by grouping', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0341.sorted_by_grouping', 'Sorted by grouping', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10521,7 +10552,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Sorted by grouping', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0339.sorted_by_grouping'
+where t.organization_id is null and t.key = 'auto.0341.sorted_by_grouping'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10529,7 +10560,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Sorted by grouping', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0339.sorted_by_grouping'
+where t.organization_id is null and t.key = 'auto.0341.sorted_by_grouping'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10537,13 +10568,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Ordinati per raggruppamento', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0339.sorted_by_grouping'
+where t.organization_id is null and t.key = 'auto.0341.sorted_by_grouping'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0340.speichern', 'Speichern...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0342.speichern', 'Speichern...', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10552,7 +10583,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Speichern...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0340.speichern'
+where t.organization_id is null and t.key = 'auto.0342.speichern'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10560,7 +10591,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Speichern...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0340.speichern'
+where t.organization_id is null and t.key = 'auto.0342.speichern'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10568,13 +10599,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Salva...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0340.speichern'
+where t.organization_id is null and t.key = 'auto.0342.speichern'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0341.star', 'star', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0343.star', 'star', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10583,7 +10614,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'star', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0341.star'
+where t.organization_id is null and t.key = 'auto.0343.star'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10591,7 +10622,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'star', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0341.star'
+where t.organization_id is null and t.key = 'auto.0343.star'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10599,13 +10630,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'stella', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0341.star'
+where t.organization_id is null and t.key = 'auto.0343.star'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0342.start_documenting_your_sites', 'Start documenting your sites', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+values (null, 'auto.0344.start_documenting_your_sites', 'Start documenting your sites', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10614,7 +10645,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Start documenting your sites', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0342.start_documenting_your_sites'
+where t.organization_id is null and t.key = 'auto.0344.start_documenting_your_sites'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10622,7 +10653,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Beginne mit der Dokumentation deiner Baustellen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0342.start_documenting_your_sites'
+where t.organization_id is null and t.key = 'auto.0344.start_documenting_your_sites'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10630,13 +10661,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Inizia a documentare i tuoi siti', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0342.start_documenting_your_sites'
+where t.organization_id is null and t.key = 'auto.0344.start_documenting_your_sites'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0343.stop_gps_tracking', 'Stop GPS tracking', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html bound-attr:title')
+values (null, 'auto.0345.stop_gps_tracking', 'Stop GPS tracking', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10645,7 +10676,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Stop GPS tracking', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0343.stop_gps_tracking'
+where t.organization_id is null and t.key = 'auto.0345.stop_gps_tracking'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10653,7 +10684,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Stop GPS tracking', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0343.stop_gps_tracking'
+where t.organization_id is null and t.key = 'auto.0345.stop_gps_tracking'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10661,13 +10692,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Interrompi il tracciamento GPS', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0343.stop_gps_tracking'
+where t.organization_id is null and t.key = 'auto.0345.stop_gps_tracking'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0344.street', 'Street', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
+values (null, 'auto.0346.street', 'Street', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10676,7 +10707,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Street', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0344.street'
+where t.organization_id is null and t.key = 'auto.0346.street'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10684,7 +10715,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Straße', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0344.street'
+where t.organization_id is null and t.key = 'auto.0346.street'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10692,13 +10723,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Strada', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0344.street'
+where t.organization_id is null and t.key = 'auto.0346.street'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0345.street_map', 'Street map', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
+values (null, 'auto.0347.street_map', 'Street map', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10707,7 +10738,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Street map', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0345.street_map'
+where t.organization_id is null and t.key = 'auto.0347.street_map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10715,7 +10746,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Stadtplan', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0345.street_map'
+where t.organization_id is null and t.key = 'auto.0347.street_map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10723,13 +10754,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Mappa stradale', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0345.street_map'
+where t.organization_id is null and t.key = 'auto.0347.street_map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0346.system', 'System', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0348.system', 'System', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10738,7 +10769,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'System', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0346.system'
+where t.organization_id is null and t.key = 'auto.0348.system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10746,7 +10777,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'System', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0346.system'
+where t.organization_id is null and t.key = 'auto.0348.system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10754,13 +10785,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Sistema', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0346.system'
+where t.organization_id is null and t.key = 'auto.0348.system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0347.take_photo', 'Take photo', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
+values (null, 'auto.0349.take_photo', 'Take photo', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10769,7 +10800,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Take photo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0347.take_photo'
+where t.organization_id is null and t.key = 'auto.0349.take_photo'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10777,7 +10808,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Foto aufnehmen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0347.take_photo'
+where t.organization_id is null and t.key = 'auto.0349.take_photo'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10785,13 +10816,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Scatta una foto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0347.take_photo'
+where t.organization_id is null and t.key = 'auto.0349.take_photo'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0348.target_role', 'Target role', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+values (null, 'auto.0350.target_role', 'Target role', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10800,7 +10831,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Target role', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0348.target_role'
+where t.organization_id is null and t.key = 'auto.0350.target_role'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10808,7 +10839,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Zielrolle', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0348.target_role'
+where t.organization_id is null and t.key = 'auto.0350.target_role'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10816,13 +10847,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Ruolo obiettivo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0348.target_role'
+where t.organization_id is null and t.key = 'auto.0350.target_role'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0349.theme_mode', 'Theme mode', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0351.theme_mode', 'Theme mode', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10831,7 +10862,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Theme mode', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0349.theme_mode'
+where t.organization_id is null and t.key = 'auto.0351.theme_mode'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10839,7 +10870,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Theme mode', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0349.theme_mode'
+where t.organization_id is null and t.key = 'auto.0351.theme_mode'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10847,13 +10878,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Modalità tema', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0349.theme_mode'
+where t.organization_id is null and t.key = 'auto.0351.theme_mode'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0350.this_feature_is_coming_soon', 'This feature is coming soon.', 'en', 'apps/web/src/app/features/nav/nav.component.html interpolation-literal')
+values (null, 'auto.0352.this_feature_is_coming_soon', 'This feature is coming soon.', 'en', 'apps/web/src/app/features/nav/nav.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10862,7 +10893,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'This feature is coming soon.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0350.this_feature_is_coming_soon'
+where t.organization_id is null and t.key = 'auto.0352.this_feature_is_coming_soon'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10870,7 +10901,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Diese Funktion ist bald verfügbar.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0350.this_feature_is_coming_soon'
+where t.organization_id is null and t.key = 'auto.0352.this_feature_is_coming_soon'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10878,13 +10909,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Questa funzionalità sarà presto disponibile.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0350.this_feature_is_coming_soon'
+where t.organization_id is null and t.key = 'auto.0352.this_feature_is_coming_soon'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0351.this_will_permanently_remove_the_image_and_all_its_metadata_this', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:message')
+values (null, 'auto.0353.this_will_permanently_remove_the_image_and_all_its_metadata_this', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10893,7 +10924,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0351.this_will_permanently_remove_the_image_and_all_its_metadata_this'
+where t.organization_id is null and t.key = 'auto.0353.this_will_permanently_remove_the_image_and_all_its_metadata_this'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10901,7 +10932,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0351.this_will_permanently_remove_the_image_and_all_its_metadata_this'
+where t.organization_id is null and t.key = 'auto.0353.this_will_permanently_remove_the_image_and_all_its_metadata_this'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10909,13 +10940,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0351.this_will_permanently_remove_the_image_and_all_its_metadata_this'
+where t.organization_id is null and t.key = 'auto.0353.this_will_permanently_remove_the_image_and_all_its_metadata_this'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0352.title', 'Title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0354.title', 'Title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10924,7 +10955,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0352.title'
+where t.organization_id is null and t.key = 'auto.0354.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10932,7 +10963,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0352.title'
+where t.organization_id is null and t.key = 'auto.0354.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10940,13 +10971,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Titolo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0352.title'
+where t.organization_id is null and t.key = 'auto.0354.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0353.today', 'Today', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0355.today', 'Today', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10955,7 +10986,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Today', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0353.today'
+where t.organization_id is null and t.key = 'auto.0355.today'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10963,7 +10994,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Heute', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0353.today'
+where t.organization_id is null and t.key = 'auto.0355.today'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10971,13 +11002,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Oggi', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0353.today'
+where t.organization_id is null and t.key = 'auto.0355.today'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0354.totp_einrichten', 'TOTP einrichten', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
+values (null, 'auto.0356.totp_einrichten', 'TOTP einrichten', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10986,7 +11017,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'TOTP einrichten', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0354.totp_einrichten'
+where t.organization_id is null and t.key = 'auto.0356.totp_einrichten'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10994,7 +11025,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'TOTP einrichten', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0354.totp_einrichten'
+where t.organization_id is null and t.key = 'auto.0356.totp_einrichten'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11002,13 +11033,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'TOTP arricchito', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0354.totp_einrichten'
+where t.organization_id is null and t.key = 'auto.0356.totp_einrichten'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0355.try_a_different_address_or_pin_manually', 'Try a different address or pin manually.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
+values (null, 'auto.0357.try_a_different_address_or_pin_manually', 'Try a different address or pin manually.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11017,7 +11048,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Try a different address or pin manually.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0355.try_a_different_address_or_pin_manually'
+where t.organization_id is null and t.key = 'auto.0357.try_a_different_address_or_pin_manually'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11025,7 +11056,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Versuche eine andere Adresse oder setze den Pin manuell.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0355.try_a_different_address_or_pin_manually'
+where t.organization_id is null and t.key = 'auto.0357.try_a_different_address_or_pin_manually'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11033,13 +11064,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Prova un indirizzo o un PIN diverso manualmente.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0355.try_a_different_address_or_pin_manually'
+where t.organization_id is null and t.key = 'auto.0357.try_a_different_address_or_pin_manually'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0356.try_again', 'Try again', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+values (null, 'auto.0358.try_again', 'Try again', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11048,7 +11079,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Try again', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0356.try_again'
+where t.organization_id is null and t.key = 'auto.0358.try_again'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11056,7 +11087,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Erneut versuchen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0356.try_again'
+where t.organization_id is null and t.key = 'auto.0358.try_again'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11064,13 +11095,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Riprova', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0356.try_again'
+where t.organization_id is null and t.key = 'auto.0358.try_again'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0357.try_another_search_or_reset_your_status_filter', 'Try another search or reset your status filter.', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
+values (null, 'auto.0359.try_another_search_or_reset_your_status_filter', 'Try another search or reset your status filter.', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11079,7 +11110,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Try another search or reset your status filter.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0357.try_another_search_or_reset_your_status_filter'
+where t.organization_id is null and t.key = 'auto.0359.try_another_search_or_reset_your_status_filter'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11087,7 +11118,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Versuche eine andere Suche oder setze deinen Statusfilter zurück.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0357.try_another_search_or_reset_your_status_filter'
+where t.organization_id is null and t.key = 'auto.0359.try_another_search_or_reset_your_status_filter'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11095,13 +11126,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Prova un''altra ricerca o reimposta il filtro dello stato.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0357.try_another_search_or_reset_your_status_filter'
+where t.organization_id is null and t.key = 'auto.0359.try_another_search_or_reset_your_status_filter'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0358.type', 'Type', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0360.type', 'Type', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11110,7 +11141,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Type', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0358.type'
+where t.organization_id is null and t.key = 'auto.0360.type'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11118,7 +11149,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Type', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0358.type'
+where t.organization_id is null and t.key = 'auto.0360.type'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11126,13 +11157,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Tipo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0358.type'
+where t.organization_id is null and t.key = 'auto.0360.type'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0359.unable_to_create_invite', 'Unable to create invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
+values (null, 'auto.0361.unable_to_create_invite', 'Unable to create invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11141,7 +11172,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Unable to create invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0359.unable_to_create_invite'
+where t.organization_id is null and t.key = 'auto.0361.unable_to_create_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11149,7 +11180,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Unable to create invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0359.unable_to_create_invite'
+where t.organization_id is null and t.key = 'auto.0361.unable_to_create_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11157,13 +11188,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Impossibile creare un invito.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0359.unable_to_create_invite'
+where t.organization_id is null and t.key = 'auto.0361.unable_to_create_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0360.unable_to_regenerate_invite', 'Unable to regenerate invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
+values (null, 'auto.0362.unable_to_regenerate_invite', 'Unable to regenerate invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11172,7 +11203,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Unable to regenerate invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0360.unable_to_regenerate_invite'
+where t.organization_id is null and t.key = 'auto.0362.unable_to_regenerate_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11180,7 +11211,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Unable to regenerate invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0360.unable_to_regenerate_invite'
+where t.organization_id is null and t.key = 'auto.0362.unable_to_regenerate_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11188,13 +11219,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Impossibile rigenerare l''invito.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0360.unable_to_regenerate_invite'
+where t.organization_id is null and t.key = 'auto.0362.unable_to_regenerate_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0361.unable_to_revoke_invite', 'Unable to revoke invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
+values (null, 'auto.0363.unable_to_revoke_invite', 'Unable to revoke invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11203,7 +11234,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Unable to revoke invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0361.unable_to_revoke_invite'
+where t.organization_id is null and t.key = 'auto.0363.unable_to_revoke_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11211,7 +11242,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Unable to revoke invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0361.unable_to_revoke_invite'
+where t.organization_id is null and t.key = 'auto.0363.unable_to_revoke_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11219,13 +11250,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Impossibile revocare l''invito.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0361.unable_to_revoke_invite'
+where t.organization_id is null and t.key = 'auto.0363.unable_to_revoke_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0362.unable_to_share_invite', 'Unable to share invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
+values (null, 'auto.0364.unable_to_share_invite', 'Unable to share invite.', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11234,7 +11265,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Unable to share invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0362.unable_to_share_invite'
+where t.organization_id is null and t.key = 'auto.0364.unable_to_share_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11242,7 +11273,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Unable to share invite.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0362.unable_to_share_invite'
+where t.organization_id is null and t.key = 'auto.0364.unable_to_share_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11250,13 +11281,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Impossibile condividere l''invito.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0362.unable_to_share_invite'
+where t.organization_id is null and t.key = 'auto.0364.unable_to_share_invite'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0363.upload_failure_alerts', 'Upload failure alerts', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0365.upload_failure_alerts', 'Upload failure alerts', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11265,7 +11296,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload failure alerts', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0363.upload_failure_alerts'
+where t.organization_id is null and t.key = 'auto.0365.upload_failure_alerts'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11273,7 +11304,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload failure alerts', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0363.upload_failure_alerts'
+where t.organization_id is null and t.key = 'auto.0365.upload_failure_alerts'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11281,13 +11312,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica avvisi di errore', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0363.upload_failure_alerts'
+where t.organization_id is null and t.key = 'auto.0365.upload_failure_alerts'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0364.upload_files', 'Upload files', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
+values (null, 'auto.0366.upload_files', 'Upload files', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11296,7 +11327,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload files', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0364.upload_files'
+where t.organization_id is null and t.key = 'auto.0366.upload_files'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11304,7 +11335,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Dateien hochladen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0364.upload_files'
+where t.organization_id is null and t.key = 'auto.0366.upload_files'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11312,13 +11343,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica file', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0364.upload_files'
+where t.organization_id is null and t.key = 'auto.0366.upload_files'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0365.upload_folder', 'Upload folder', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
+values (null, 'auto.0367.upload_folder', 'Upload folder', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11327,7 +11358,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload folder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0365.upload_folder'
+where t.organization_id is null and t.key = 'auto.0367.upload_folder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11335,7 +11366,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Ordner hochladen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0365.upload_folder'
+where t.organization_id is null and t.key = 'auto.0367.upload_folder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11343,13 +11374,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica cartella', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0365.upload_folder'
+where t.organization_id is null and t.key = 'auto.0367.upload_folder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0366.upload_idle_state', 'Upload idle state', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
+values (null, 'auto.0368.upload_idle_state', 'Upload idle state', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11358,7 +11389,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload idle state', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0366.upload_idle_state'
+where t.organization_id is null and t.key = 'auto.0368.upload_idle_state'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11366,7 +11397,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload-Ruhezustand', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0366.upload_idle_state'
+where t.organization_id is null and t.key = 'auto.0368.upload_idle_state'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11374,13 +11405,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica lo stato inattivo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0366.upload_idle_state'
+where t.organization_id is null and t.key = 'auto.0368.upload_idle_state'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0367.upload_images', 'Upload images', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
+values (null, 'auto.0369.upload_images', 'Upload images', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11389,7 +11420,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload images', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0367.upload_images'
+where t.organization_id is null and t.key = 'auto.0369.upload_images'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11397,7 +11428,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Bilder hochladen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0367.upload_images'
+where t.organization_id is null and t.key = 'auto.0369.upload_images'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11405,13 +11436,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica immagini', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0367.upload_images'
+where t.organization_id is null and t.key = 'auto.0369.upload_images'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0368.upload_lanes', 'Upload lanes', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
+values (null, 'auto.0370.upload_lanes', 'Upload lanes', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11420,7 +11451,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload lanes', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0368.upload_lanes'
+where t.organization_id is null and t.key = 'auto.0370.upload_lanes'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11428,7 +11459,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload-Spuren', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0368.upload_lanes'
+where t.organization_id is null and t.key = 'auto.0370.upload_lanes'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11436,13 +11467,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica corsie', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0368.upload_lanes'
+where t.organization_id is null and t.key = 'auto.0370.upload_lanes'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0369.upload_photo', 'Upload photo', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0371.upload_photo', 'Upload photo', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11451,7 +11482,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload photo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0369.upload_photo'
+where t.organization_id is null and t.key = 'auto.0371.upload_photo'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11459,7 +11490,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload photo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0369.upload_photo'
+where t.organization_id is null and t.key = 'auto.0371.upload_photo'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11467,13 +11498,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Upload photo', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0369.upload_photo'
+where t.organization_id is null and t.key = 'auto.0371.upload_photo'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0370.upload_progress_board', 'Upload progress board', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
+values (null, 'auto.0372.upload_progress_board', 'Upload progress board', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11482,7 +11513,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload progress board', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0370.upload_progress_board'
+where t.organization_id is null and t.key = 'auto.0372.upload_progress_board'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11490,7 +11521,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload-Fortschritt', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0370.upload_progress_board'
+where t.organization_id is null and t.key = 'auto.0372.upload_progress_board'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11498,13 +11529,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica la scheda dei progressi', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0370.upload_progress_board'
+where t.organization_id is null and t.key = 'auto.0372.upload_progress_board'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0371.upload_queue', 'Upload queue', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
+values (null, 'auto.0373.upload_queue', 'Upload queue', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11513,7 +11544,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload queue', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0371.upload_queue'
+where t.organization_id is null and t.key = 'auto.0373.upload_queue'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11521,7 +11552,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload-Warteschlange', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0371.upload_queue'
+where t.organization_id is null and t.key = 'auto.0373.upload_queue'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11529,13 +11560,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Coda di caricamento', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0371.upload_queue'
+where t.organization_id is null and t.key = 'auto.0373.upload_queue'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0372.upload_status_matrix', 'Upload status matrix', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
+values (null, 'auto.0374.upload_status_matrix', 'Upload status matrix', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11544,7 +11575,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Upload status matrix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0372.upload_status_matrix'
+where t.organization_id is null and t.key = 'auto.0374.upload_status_matrix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11552,7 +11583,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Upload-Statusmatrix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0372.upload_status_matrix'
+where t.organization_id is null and t.key = 'auto.0374.upload_status_matrix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11560,13 +11591,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Carica matrice di stato', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0372.upload_status_matrix'
+where t.organization_id is null and t.key = 'auto.0374.upload_status_matrix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0373.uploaded', 'Uploaded', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0375.uploaded', 'Uploaded', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11575,7 +11606,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Uploaded', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0373.uploaded'
+where t.organization_id is null and t.key = 'auto.0375.uploaded'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11583,7 +11614,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Hochgeladen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0373.uploaded'
+where t.organization_id is null and t.key = 'auto.0375.uploaded'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11591,13 +11622,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Caricato', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0373.uploaded'
+where t.organization_id is null and t.key = 'auto.0375.uploaded'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0374.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces', 'Use the same palette behavior as dropdowns and map surfaces.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0376.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces', 'Use the same palette behavior as dropdowns and map surfaces.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11606,7 +11637,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Use the same palette behavior as dropdowns and map surfaces.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0374.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces'
+where t.organization_id is null and t.key = 'auto.0376.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11614,7 +11645,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Use the same palette behavior as dropdowns and map surfaces.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0374.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces'
+where t.organization_id is null and t.key = 'auto.0376.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11622,13 +11653,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Utilizza lo stesso comportamento della tavolozza dei menu a discesa e delle superfici della mappa.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0374.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces'
+where t.organization_id is null and t.key = 'auto.0376.use_the_same_palette_behavior_as_dropdowns_and_map_surfaces'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0375.value', 'Value', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0377.value', 'Value', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11637,7 +11668,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Value', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0375.value'
+where t.organization_id is null and t.key = 'auto.0377.value'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11645,7 +11676,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Wert', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0375.value'
+where t.organization_id is null and t.key = 'auto.0377.value'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11653,13 +11684,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Valore', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0375.value'
+where t.organization_id is null and t.key = 'auto.0377.value'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0376.value', 'Value…', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
+values (null, 'auto.0378.value', 'Value…', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11668,7 +11699,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Value…', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0376.value'
+where t.organization_id is null and t.key = 'auto.0378.value'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11676,7 +11707,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Value…', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0376.value'
+where t.organization_id is null and t.key = 'auto.0378.value'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11684,13 +11715,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Valore…', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0376.value'
+where t.organization_id is null and t.key = 'auto.0378.value'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0377.view_mode', 'View mode', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts inline-template attr:aria-label')
+values (null, 'auto.0379.view_mode', 'View mode', 'en', 'apps/web/src/app/features/projects/projects-view-toggle.component.ts inline-template attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11699,7 +11730,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'View mode', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0377.view_mode'
+where t.organization_id is null and t.key = 'auto.0379.view_mode'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11707,7 +11738,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'View mode', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0377.view_mode'
+where t.organization_id is null and t.key = 'auto.0379.view_mode'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11715,13 +11746,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Modalità di visualizzazione', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0377.view_mode'
+where t.organization_id is null and t.key = 'auto.0379.view_mode'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0378.we_sent_a_confirmation_link_to', 'We sent a confirmation link to', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
+values (null, 'auto.0380.we_sent_a_confirmation_link_to', 'We sent a confirmation link to', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11730,7 +11761,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'We sent a confirmation link to', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0378.we_sent_a_confirmation_link_to'
+where t.organization_id is null and t.key = 'auto.0380.we_sent_a_confirmation_link_to'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11738,7 +11769,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Wir haben einen Bestätigungslink an folgende Adresse gesendet:', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0378.we_sent_a_confirmation_link_to'
+where t.organization_id is null and t.key = 'auto.0380.we_sent_a_confirmation_link_to'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11746,13 +11777,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Abbiamo inviato un collegamento di conferma a', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0378.we_sent_a_confirmation_link_to'
+where t.organization_id is null and t.key = 'auto.0380.we_sent_a_confirmation_link_to'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0379.we_sent_a_password_reset_link_to', 'We sent a password reset link to', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
+values (null, 'auto.0381.we_sent_a_password_reset_link_to', 'We sent a password reset link to', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11761,7 +11792,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'We sent a password reset link to', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0379.we_sent_a_password_reset_link_to'
+where t.organization_id is null and t.key = 'auto.0381.we_sent_a_password_reset_link_to'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11769,7 +11800,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Wir haben einen Link zum Zurücksetzen des Passworts an folgende Adresse gesendet:', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0379.we_sent_a_password_reset_link_to'
+where t.organization_id is null and t.key = 'auto.0381.we_sent_a_password_reset_link_to'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11777,13 +11808,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Abbiamo inviato un collegamento per la reimpostazione della password a', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0379.we_sent_a_password_reset_link_to'
+where t.organization_id is null and t.key = 'auto.0381.we_sent_a_password_reset_link_to'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0380.welcome_back_to_feldpost', 'Welcome back to Feldpost', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
+values (null, 'auto.0382.welcome_back_to_feldpost', 'Welcome back to Feldpost', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11792,7 +11823,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Welcome back to Feldpost', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0380.welcome_back_to_feldpost'
+where t.organization_id is null and t.key = 'auto.0382.welcome_back_to_feldpost'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11800,7 +11831,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Willkommen zurück bei Feldpost', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0380.welcome_back_to_feldpost'
+where t.organization_id is null and t.key = 'auto.0382.welcome_back_to_feldpost'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11808,13 +11839,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Bentornati a Feldpost', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0380.welcome_back_to_feldpost'
+where t.organization_id is null and t.key = 'auto.0382.welcome_back_to_feldpost'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0381.worker', 'Worker', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
+values (null, 'auto.0383.worker', 'Worker', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11823,7 +11854,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Worker', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0381.worker'
+where t.organization_id is null and t.key = 'auto.0383.worker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11831,7 +11862,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Mitarbeiter', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0381.worker'
+where t.organization_id is null and t.key = 'auto.0383.worker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11839,13 +11870,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Lavoratore', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0381.worker'
+where t.organization_id is null and t.key = 'auto.0383.worker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0382.workspace_preferences', 'Workspace Preferences', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
+values (null, 'auto.0384.workspace_preferences', 'Workspace Preferences', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11854,7 +11885,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Workspace Preferences', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0382.workspace_preferences'
+where t.organization_id is null and t.key = 'auto.0384.workspace_preferences'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11862,7 +11893,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Workspace Preferences', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0382.workspace_preferences'
+where t.organization_id is null and t.key = 'auto.0384.workspace_preferences'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11870,13 +11901,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Preferenze dell''area di lavoro', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0382.workspace_preferences'
+where t.organization_id is null and t.key = 'auto.0384.workspace_preferences'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0383.workspace_addresssearch_loading', 'workspace.addressSearch.loading', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0385.workspace_addresssearch_loading', 'workspace.addressSearch.loading', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11885,7 +11916,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.addressSearch.loading', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0383.workspace_addresssearch_loading'
+where t.organization_id is null and t.key = 'auto.0385.workspace_addresssearch_loading'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11893,7 +11924,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.addressSearch.loading', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0383.workspace_addresssearch_loading'
+where t.organization_id is null and t.key = 'auto.0385.workspace_addresssearch_loading'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11901,13 +11932,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.addressSearch.loading', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0383.workspace_addresssearch_loading'
+where t.organization_id is null and t.key = 'auto.0385.workspace_addresssearch_loading'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0384.workspace_addresssearch_placeholder', 'workspace.addressSearch.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0386.workspace_addresssearch_placeholder', 'workspace.addressSearch.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11916,7 +11947,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.addressSearch.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0384.workspace_addresssearch_placeholder'
+where t.organization_id is null and t.key = 'auto.0386.workspace_addresssearch_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11924,7 +11955,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.addressSearch.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0384.workspace_addresssearch_placeholder'
+where t.organization_id is null and t.key = 'auto.0386.workspace_addresssearch_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11932,13 +11963,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.addressSearch.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0384.workspace_addresssearch_placeholder'
+where t.organization_id is null and t.key = 'auto.0386.workspace_addresssearch_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0385.workspace_captureddate_action_clear', 'workspace.capturedDate.action.clear', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0387.workspace_captureddate_action_clear', 'workspace.capturedDate.action.clear', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11947,7 +11978,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.capturedDate.action.clear', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0385.workspace_captureddate_action_clear'
+where t.organization_id is null and t.key = 'auto.0387.workspace_captureddate_action_clear'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11955,7 +11986,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.capturedDate.action.clear', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0385.workspace_captureddate_action_clear'
+where t.organization_id is null and t.key = 'auto.0387.workspace_captureddate_action_clear'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11963,13 +11994,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.capturedDate.action.clear', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0385.workspace_captureddate_action_clear'
+where t.organization_id is null and t.key = 'auto.0387.workspace_captureddate_action_clear'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0386.workspace_captureddate_action_done', 'workspace.capturedDate.action.done', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0388.workspace_captureddate_action_done', 'workspace.capturedDate.action.done', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11978,7 +12009,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.capturedDate.action.done', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0386.workspace_captureddate_action_done'
+where t.organization_id is null and t.key = 'auto.0388.workspace_captureddate_action_done'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11986,7 +12017,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.capturedDate.action.done', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0386.workspace_captureddate_action_done'
+where t.organization_id is null and t.key = 'auto.0388.workspace_captureddate_action_done'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11994,13 +12025,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.capturedDate.action.done', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0386.workspace_captureddate_action_done'
+where t.organization_id is null and t.key = 'auto.0388.workspace_captureddate_action_done'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0387.workspace_captureddate_action_today', 'workspace.capturedDate.action.today', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0389.workspace_captureddate_action_today', 'workspace.capturedDate.action.today', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12009,7 +12040,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.capturedDate.action.today', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0387.workspace_captureddate_action_today'
+where t.organization_id is null and t.key = 'auto.0389.workspace_captureddate_action_today'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12017,7 +12048,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.capturedDate.action.today', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0387.workspace_captureddate_action_today'
+where t.organization_id is null and t.key = 'auto.0389.workspace_captureddate_action_today'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12025,13 +12056,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.capturedDate.action.today', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0387.workspace_captureddate_action_today'
+where t.organization_id is null and t.key = 'auto.0389.workspace_captureddate_action_today'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0388.workspace_captureddate_placeholder_date', 'workspace.capturedDate.placeholder.date', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
+values (null, 'auto.0390.workspace_captureddate_placeholder_date', 'workspace.capturedDate.placeholder.date', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12040,7 +12071,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.capturedDate.placeholder.date', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0388.workspace_captureddate_placeholder_date'
+where t.organization_id is null and t.key = 'auto.0390.workspace_captureddate_placeholder_date'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12048,7 +12079,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.capturedDate.placeholder.date', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0388.workspace_captureddate_placeholder_date'
+where t.organization_id is null and t.key = 'auto.0390.workspace_captureddate_placeholder_date'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12056,13 +12087,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.capturedDate.placeholder.date', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0388.workspace_captureddate_placeholder_date'
+where t.organization_id is null and t.key = 'auto.0390.workspace_captureddate_placeholder_date'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0389.workspace_captureddate_placeholder_time', 'workspace.capturedDate.placeholder.time', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
+values (null, 'auto.0391.workspace_captureddate_placeholder_time', 'workspace.capturedDate.placeholder.time', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12071,7 +12102,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.capturedDate.placeholder.time', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0389.workspace_captureddate_placeholder_time'
+where t.organization_id is null and t.key = 'auto.0391.workspace_captureddate_placeholder_time'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12079,7 +12110,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.capturedDate.placeholder.time', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0389.workspace_captureddate_placeholder_time'
+where t.organization_id is null and t.key = 'auto.0391.workspace_captureddate_placeholder_time'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12087,13 +12118,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.capturedDate.placeholder.time', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0389.workspace_captureddate_placeholder_time'
+where t.organization_id is null and t.key = 'auto.0391.workspace_captureddate_placeholder_time'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0390.workspace_detailactions_action_addtoproject', 'workspace.detailActions.action.addToProject', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0392.workspace_detailactions_action_addtoproject', 'workspace.detailActions.action.addToProject', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12102,7 +12133,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.detailActions.action.addToProject', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0390.workspace_detailactions_action_addtoproject'
+where t.organization_id is null and t.key = 'auto.0392.workspace_detailactions_action_addtoproject'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12110,7 +12141,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.detailActions.action.addToProject', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0390.workspace_detailactions_action_addtoproject'
+where t.organization_id is null and t.key = 'auto.0392.workspace_detailactions_action_addtoproject'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12118,13 +12149,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.detailActions.action.addToProject', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0390.workspace_detailactions_action_addtoproject'
+where t.organization_id is null and t.key = 'auto.0392.workspace_detailactions_action_addtoproject'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0391.workspace_detailactions_action_copycoordinates', 'workspace.detailActions.action.copyCoordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0393.workspace_detailactions_action_copycoordinates', 'workspace.detailActions.action.copyCoordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12133,7 +12164,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.detailActions.action.copyCoordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0391.workspace_detailactions_action_copycoordinates'
+where t.organization_id is null and t.key = 'auto.0393.workspace_detailactions_action_copycoordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12141,7 +12172,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.detailActions.action.copyCoordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0391.workspace_detailactions_action_copycoordinates'
+where t.organization_id is null and t.key = 'auto.0393.workspace_detailactions_action_copycoordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12149,13 +12180,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.detailActions.action.copyCoordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0391.workspace_detailactions_action_copycoordinates'
+where t.organization_id is null and t.key = 'auto.0393.workspace_detailactions_action_copycoordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0392.workspace_detailactions_action_deleteimage', 'workspace.detailActions.action.deleteImage', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0394.workspace_detailactions_action_deleteimage', 'workspace.detailActions.action.deleteImage', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12164,7 +12195,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.detailActions.action.deleteImage', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0392.workspace_detailactions_action_deleteimage'
+where t.organization_id is null and t.key = 'auto.0394.workspace_detailactions_action_deleteimage'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12172,7 +12203,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.detailActions.action.deleteImage', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0392.workspace_detailactions_action_deleteimage'
+where t.organization_id is null and t.key = 'auto.0394.workspace_detailactions_action_deleteimage'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12180,13 +12211,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.detailActions.action.deleteImage', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0392.workspace_detailactions_action_deleteimage'
+where t.organization_id is null and t.key = 'auto.0394.workspace_detailactions_action_deleteimage'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0393.workspace_detailactions_action_zoomtolocation', 'workspace.detailActions.action.zoomToLocation', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0395.workspace_detailactions_action_zoomtolocation', 'workspace.detailActions.action.zoomToLocation', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12195,7 +12226,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.detailActions.action.zoomToLocation', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0393.workspace_detailactions_action_zoomtolocation'
+where t.organization_id is null and t.key = 'auto.0395.workspace_detailactions_action_zoomtolocation'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12203,7 +12234,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.detailActions.action.zoomToLocation', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0393.workspace_detailactions_action_zoomtolocation'
+where t.organization_id is null and t.key = 'auto.0395.workspace_detailactions_action_zoomtolocation'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12211,13 +12242,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.detailActions.action.zoomToLocation', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0393.workspace_detailactions_action_zoomtolocation'
+where t.organization_id is null and t.key = 'auto.0395.workspace_detailactions_action_zoomtolocation'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0394.workspace_detailactions_section_title', 'workspace.detailActions.section.title', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0396.workspace_detailactions_section_title', 'workspace.detailActions.section.title', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12226,7 +12257,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.detailActions.section.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0394.workspace_detailactions_section_title'
+where t.organization_id is null and t.key = 'auto.0396.workspace_detailactions_section_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12234,7 +12265,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.detailActions.section.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0394.workspace_detailactions_section_title'
+where t.organization_id is null and t.key = 'auto.0396.workspace_detailactions_section_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12242,13 +12273,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.detailActions.section.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0394.workspace_detailactions_section_title'
+where t.organization_id is null and t.key = 'auto.0396.workspace_detailactions_section_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0395.workspace_editablerow_action_editprefix', 'workspace.editableRow.action.editPrefix', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template bound-attr:title')
+values (null, 'auto.0397.workspace_editablerow_action_editprefix', 'workspace.editableRow.action.editPrefix', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12257,7 +12288,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.editableRow.action.editPrefix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0395.workspace_editablerow_action_editprefix'
+where t.organization_id is null and t.key = 'auto.0397.workspace_editablerow_action_editprefix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12265,7 +12296,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.editableRow.action.editPrefix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0395.workspace_editablerow_action_editprefix'
+where t.organization_id is null and t.key = 'auto.0397.workspace_editablerow_action_editprefix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12273,13 +12304,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.editableRow.action.editPrefix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0395.workspace_editablerow_action_editprefix'
+where t.organization_id is null and t.key = 'auto.0397.workspace_editablerow_action_editprefix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0396.workspace_editablerow_option_none', 'workspace.editableRow.option.none', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0398.workspace_editablerow_option_none', 'workspace.editableRow.option.none', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12288,7 +12319,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.editableRow.option.none', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0396.workspace_editablerow_option_none'
+where t.organization_id is null and t.key = 'auto.0398.workspace_editablerow_option_none'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12296,7 +12327,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.editableRow.option.none', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0396.workspace_editablerow_option_none'
+where t.organization_id is null and t.key = 'auto.0398.workspace_editablerow_option_none'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12304,13 +12335,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.editableRow.option.none', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0396.workspace_editablerow_option_none'
+where t.organization_id is null and t.key = 'auto.0398.workspace_editablerow_option_none'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0397.workspace_editablerow_value_empty', 'workspace.editableRow.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0399.workspace_editablerow_value_empty', 'workspace.editableRow.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12319,7 +12350,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.editableRow.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0397.workspace_editablerow_value_empty'
+where t.organization_id is null and t.key = 'auto.0399.workspace_editablerow_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12327,7 +12358,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.editableRow.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0397.workspace_editablerow_value_empty'
+where t.organization_id is null and t.key = 'auto.0399.workspace_editablerow_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12335,13 +12366,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.editableRow.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0397.workspace_editablerow_value_empty'
+where t.organization_id is null and t.key = 'auto.0399.workspace_editablerow_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0398.workspace_export_action_copylink', 'workspace.export.action.copyLink', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0400.workspace_export_action_copylink', 'workspace.export.action.copyLink', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12350,7 +12381,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.action.copyLink', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0398.workspace_export_action_copylink'
+where t.organization_id is null and t.key = 'auto.0400.workspace_export_action_copylink'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12358,7 +12389,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.action.copyLink', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0398.workspace_export_action_copylink'
+where t.organization_id is null and t.key = 'auto.0400.workspace_export_action_copylink'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12366,13 +12397,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.action.copyLink', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0398.workspace_export_action_copylink'
+where t.organization_id is null and t.key = 'auto.0400.workspace_export_action_copylink'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0399.workspace_export_action_downloadzip', 'workspace.export.action.downloadZip', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0401.workspace_export_action_downloadzip', 'workspace.export.action.downloadZip', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12381,7 +12412,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.action.downloadZip', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0399.workspace_export_action_downloadzip'
+where t.organization_id is null and t.key = 'auto.0401.workspace_export_action_downloadzip'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12389,7 +12420,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.action.downloadZip', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0399.workspace_export_action_downloadzip'
+where t.organization_id is null and t.key = 'auto.0401.workspace_export_action_downloadzip'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12397,13 +12428,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.action.downloadZip', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0399.workspace_export_action_downloadzip'
+where t.organization_id is null and t.key = 'auto.0401.workspace_export_action_downloadzip'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0400.workspace_export_action_selectall', 'workspace.export.action.selectAll', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0402.workspace_export_action_selectall', 'workspace.export.action.selectAll', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12412,7 +12443,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.action.selectAll', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0400.workspace_export_action_selectall'
+where t.organization_id is null and t.key = 'auto.0402.workspace_export_action_selectall'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12420,7 +12451,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.action.selectAll', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0400.workspace_export_action_selectall'
+where t.organization_id is null and t.key = 'auto.0402.workspace_export_action_selectall'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12428,13 +12459,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.action.selectAll', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0400.workspace_export_action_selectall'
+where t.organization_id is null and t.key = 'auto.0402.workspace_export_action_selectall'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0401.workspace_export_action_selectnone', 'workspace.export.action.selectNone', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0403.workspace_export_action_selectnone', 'workspace.export.action.selectNone', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12443,7 +12474,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.action.selectNone', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0401.workspace_export_action_selectnone'
+where t.organization_id is null and t.key = 'auto.0403.workspace_export_action_selectnone'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12451,7 +12482,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.action.selectNone', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0401.workspace_export_action_selectnone'
+where t.organization_id is null and t.key = 'auto.0403.workspace_export_action_selectnone'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12459,13 +12490,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.action.selectNone', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0401.workspace_export_action_selectnone'
+where t.organization_id is null and t.key = 'auto.0403.workspace_export_action_selectnone'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0402.workspace_export_action_share', 'workspace.export.action.share', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0404.workspace_export_action_share', 'workspace.export.action.share', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12474,7 +12505,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.action.share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0402.workspace_export_action_share'
+where t.organization_id is null and t.key = 'auto.0404.workspace_export_action_share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12482,7 +12513,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.action.share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0402.workspace_export_action_share'
+where t.organization_id is null and t.key = 'auto.0404.workspace_export_action_share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12490,13 +12521,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.action.share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0402.workspace_export_action_share'
+where t.organization_id is null and t.key = 'auto.0404.workspace_export_action_share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0403.workspace_export_dialog_cancel', 'workspace.export.dialog.cancel', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0405.workspace_export_dialog_cancel', 'workspace.export.dialog.cancel', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12505,7 +12536,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.dialog.cancel', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0403.workspace_export_dialog_cancel'
+where t.organization_id is null and t.key = 'auto.0405.workspace_export_dialog_cancel'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12513,7 +12544,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.dialog.cancel', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0403.workspace_export_dialog_cancel'
+where t.organization_id is null and t.key = 'auto.0405.workspace_export_dialog_cancel'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12521,13 +12552,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.dialog.cancel', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0403.workspace_export_dialog_cancel'
+where t.organization_id is null and t.key = 'auto.0405.workspace_export_dialog_cancel'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0404.workspace_export_dialog_confirm', 'workspace.export.dialog.confirm', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0406.workspace_export_dialog_confirm', 'workspace.export.dialog.confirm', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12536,7 +12567,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.dialog.confirm', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0404.workspace_export_dialog_confirm'
+where t.organization_id is null and t.key = 'auto.0406.workspace_export_dialog_confirm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12544,7 +12575,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.dialog.confirm', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0404.workspace_export_dialog_confirm'
+where t.organization_id is null and t.key = 'auto.0406.workspace_export_dialog_confirm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12552,13 +12583,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.dialog.confirm', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0404.workspace_export_dialog_confirm'
+where t.organization_id is null and t.key = 'auto.0406.workspace_export_dialog_confirm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0405.workspace_export_dialog_field_title', 'workspace.export.dialog.field.title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0407.workspace_export_dialog_field_title', 'workspace.export.dialog.field.title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12567,7 +12598,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.dialog.field.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0405.workspace_export_dialog_field_title'
+where t.organization_id is null and t.key = 'auto.0407.workspace_export_dialog_field_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12575,7 +12606,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.dialog.field.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0405.workspace_export_dialog_field_title'
+where t.organization_id is null and t.key = 'auto.0407.workspace_export_dialog_field_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12583,13 +12614,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.dialog.field.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0405.workspace_export_dialog_field_title'
+where t.organization_id is null and t.key = 'auto.0407.workspace_export_dialog_field_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0406.workspace_export_dialog_pending', 'workspace.export.dialog.pending', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0408.workspace_export_dialog_pending', 'workspace.export.dialog.pending', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12598,7 +12629,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.dialog.pending', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0406.workspace_export_dialog_pending'
+where t.organization_id is null and t.key = 'auto.0408.workspace_export_dialog_pending'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12606,7 +12637,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.dialog.pending', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0406.workspace_export_dialog_pending'
+where t.organization_id is null and t.key = 'auto.0408.workspace_export_dialog_pending'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12614,13 +12645,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.dialog.pending', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0406.workspace_export_dialog_pending'
+where t.organization_id is null and t.key = 'auto.0408.workspace_export_dialog_pending'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0407.workspace_export_dialog_title', 'workspace.export.dialog.title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0409.workspace_export_dialog_title', 'workspace.export.dialog.title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12629,7 +12660,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.dialog.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0407.workspace_export_dialog_title'
+where t.organization_id is null and t.key = 'auto.0409.workspace_export_dialog_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12637,7 +12668,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.dialog.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0407.workspace_export_dialog_title'
+where t.organization_id is null and t.key = 'auto.0409.workspace_export_dialog_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12645,13 +12676,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.dialog.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0407.workspace_export_dialog_title'
+where t.organization_id is null and t.key = 'auto.0409.workspace_export_dialog_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0408.workspace_export_summary_selected', 'workspace.export.summary.selected', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0410.workspace_export_summary_selected', 'workspace.export.summary.selected', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12660,7 +12691,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.export.summary.selected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0408.workspace_export_summary_selected'
+where t.organization_id is null and t.key = 'auto.0410.workspace_export_summary_selected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12668,7 +12699,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.export.summary.selected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0408.workspace_export_summary_selected'
+where t.organization_id is null and t.key = 'auto.0410.workspace_export_summary_selected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12676,13 +12707,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.export.summary.selected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0408.workspace_export_summary_selected'
+where t.organization_id is null and t.key = 'auto.0410.workspace_export_summary_selected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0409.workspace_filter_empty', 'workspace.filter.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0411.workspace_filter_empty', 'workspace.filter.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12691,7 +12722,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.filter.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0409.workspace_filter_empty'
+where t.organization_id is null and t.key = 'auto.0411.workspace_filter_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12699,7 +12730,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.filter.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0409.workspace_filter_empty'
+where t.organization_id is null and t.key = 'auto.0411.workspace_filter_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12707,13 +12738,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.filter.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0409.workspace_filter_empty'
+where t.organization_id is null and t.key = 'auto.0411.workspace_filter_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0410.workspace_filter_operator', 'workspace.filter.operator', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0412.workspace_filter_operator', 'workspace.filter.operator', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12722,7 +12753,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.filter.operator', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0410.workspace_filter_operator'
+where t.organization_id is null and t.key = 'auto.0412.workspace_filter_operator'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12730,7 +12761,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.filter.operator', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0410.workspace_filter_operator'
+where t.organization_id is null and t.key = 'auto.0412.workspace_filter_operator'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12738,13 +12769,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.filter.operator', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0410.workspace_filter_operator'
+where t.organization_id is null and t.key = 'auto.0412.workspace_filter_operator'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0411.workspace_filter_property', 'workspace.filter.property', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0413.workspace_filter_property', 'workspace.filter.property', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12753,7 +12784,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.filter.property', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0411.workspace_filter_property'
+where t.organization_id is null and t.key = 'auto.0413.workspace_filter_property'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12761,7 +12792,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.filter.property', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0411.workspace_filter_property'
+where t.organization_id is null and t.key = 'auto.0413.workspace_filter_property'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12769,13 +12800,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.filter.property', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0411.workspace_filter_property'
+where t.organization_id is null and t.key = 'auto.0413.workspace_filter_property'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0412.workspace_filter_value_placeholder', 'workspace.filter.value.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
+values (null, 'auto.0414.workspace_filter_value_placeholder', 'workspace.filter.value.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12784,7 +12815,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.filter.value.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0412.workspace_filter_value_placeholder'
+where t.organization_id is null and t.key = 'auto.0414.workspace_filter_value_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12792,7 +12823,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.filter.value.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0412.workspace_filter_value_placeholder'
+where t.organization_id is null and t.key = 'auto.0414.workspace_filter_value_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12800,13 +12831,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.filter.value.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0412.workspace_filter_value_placeholder'
+where t.organization_id is null and t.key = 'auto.0414.workspace_filter_value_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0413.workspace_groupheader_count_photos', 'workspace.groupHeader.count.photos', 'en', 'apps/web/src/app/features/map/workspace-pane/group-header.component.ts inline-template interpolation-literal')
+values (null, 'auto.0415.workspace_groupheader_count_photos', 'workspace.groupHeader.count.photos', 'en', 'apps/web/src/app/features/map/workspace-pane/group-header.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12815,7 +12846,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.groupHeader.count.photos', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0413.workspace_groupheader_count_photos'
+where t.organization_id is null and t.key = 'auto.0415.workspace_groupheader_count_photos'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12823,7 +12854,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.groupHeader.count.photos', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0413.workspace_groupheader_count_photos'
+where t.organization_id is null and t.key = 'auto.0415.workspace_groupheader_count_photos'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12831,13 +12862,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.groupHeader.count.photos', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0413.workspace_groupheader_count_photos'
+where t.organization_id is null and t.key = 'auto.0415.workspace_groupheader_count_photos'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0414.workspace_grouping_empty_default', 'workspace.grouping.empty.default', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0416.workspace_grouping_empty_default', 'workspace.grouping.empty.default', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12846,7 +12877,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.grouping.empty.default', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0414.workspace_grouping_empty_default'
+where t.organization_id is null and t.key = 'auto.0416.workspace_grouping_empty_default'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12854,7 +12885,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.grouping.empty.default', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0414.workspace_grouping_empty_default'
+where t.organization_id is null and t.key = 'auto.0416.workspace_grouping_empty_default'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12862,13 +12893,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.grouping.empty.default', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0414.workspace_grouping_empty_default'
+where t.organization_id is null and t.key = 'auto.0416.workspace_grouping_empty_default'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0415.workspace_grouping_empty_dragging', 'workspace.grouping.empty.dragging', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0417.workspace_grouping_empty_dragging', 'workspace.grouping.empty.dragging', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12877,7 +12908,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.grouping.empty.dragging', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0415.workspace_grouping_empty_dragging'
+where t.organization_id is null and t.key = 'auto.0417.workspace_grouping_empty_dragging'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12885,7 +12916,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.grouping.empty.dragging', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0415.workspace_grouping_empty_dragging'
+where t.organization_id is null and t.key = 'auto.0417.workspace_grouping_empty_dragging'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12893,13 +12924,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.grouping.empty.dragging', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0415.workspace_grouping_empty_dragging'
+where t.organization_id is null and t.key = 'auto.0417.workspace_grouping_empty_dragging'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0416.workspace_grouping_section_available', 'workspace.grouping.section.available', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0418.workspace_grouping_section_available', 'workspace.grouping.section.available', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12908,7 +12939,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.grouping.section.available', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0416.workspace_grouping_section_available'
+where t.organization_id is null and t.key = 'auto.0418.workspace_grouping_section_available'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12916,7 +12947,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.grouping.section.available', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0416.workspace_grouping_section_available'
+where t.organization_id is null and t.key = 'auto.0418.workspace_grouping_section_available'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12924,13 +12955,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.grouping.section.available', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0416.workspace_grouping_section_available'
+where t.organization_id is null and t.key = 'auto.0418.workspace_grouping_section_available'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0417.workspace_grouping_section_groupedby', 'workspace.grouping.section.groupedBy', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0419.workspace_grouping_section_groupedby', 'workspace.grouping.section.groupedBy', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12939,7 +12970,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.grouping.section.groupedBy', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0417.workspace_grouping_section_groupedby'
+where t.organization_id is null and t.key = 'auto.0419.workspace_grouping_section_groupedby'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12947,7 +12978,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.grouping.section.groupedBy', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0417.workspace_grouping_section_groupedby'
+where t.organization_id is null and t.key = 'auto.0419.workspace_grouping_section_groupedby'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12955,13 +12986,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.grouping.section.groupedBy', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0417.workspace_grouping_section_groupedby'
+where t.organization_id is null and t.key = 'auto.0419.workspace_grouping_section_groupedby'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0418.workspace_imagedetail_action_copycoordinates', 'workspace.imageDetail.action.copyCoordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0420.workspace_imagedetail_action_copycoordinates', 'workspace.imageDetail.action.copyCoordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12970,7 +13001,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.action.copyCoordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0418.workspace_imagedetail_action_copycoordinates'
+where t.organization_id is null and t.key = 'auto.0420.workspace_imagedetail_action_copycoordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12978,7 +13009,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.action.copyCoordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0418.workspace_imagedetail_action_copycoordinates'
+where t.organization_id is null and t.key = 'auto.0420.workspace_imagedetail_action_copycoordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -12986,13 +13017,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.action.copyCoordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0418.workspace_imagedetail_action_copycoordinates'
+where t.organization_id is null and t.key = 'auto.0420.workspace_imagedetail_action_copycoordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0419.workspace_imagedetail_action_delete', 'workspace.imageDetail.action.delete', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0421.workspace_imagedetail_action_delete', 'workspace.imageDetail.action.delete', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13001,7 +13032,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.action.delete', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0419.workspace_imagedetail_action_delete'
+where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13009,7 +13040,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.action.delete', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0419.workspace_imagedetail_action_delete'
+where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13017,13 +13048,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.action.delete', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0419.workspace_imagedetail_action_delete'
+where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0420.workspace_imagedetail_action_uploadphoto', 'workspace.imageDetail.action.uploadPhoto', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0422.workspace_imagedetail_action_uploadphoto', 'workspace.imageDetail.action.uploadPhoto', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13032,7 +13063,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.action.uploadPhoto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0420.workspace_imagedetail_action_uploadphoto'
+where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadphoto'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13040,7 +13071,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.action.uploadPhoto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0420.workspace_imagedetail_action_uploadphoto'
+where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadphoto'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13048,13 +13079,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.action.uploadPhoto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0420.workspace_imagedetail_action_uploadphoto'
+where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadphoto'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0421.workspace_imagedetail_badge_corrected', 'workspace.imageDetail.badge.corrected', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0423.workspace_imagedetail_badge_corrected', 'workspace.imageDetail.badge.corrected', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13063,7 +13094,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.badge.corrected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_badge_corrected'
+where t.organization_id is null and t.key = 'auto.0423.workspace_imagedetail_badge_corrected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13071,7 +13102,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.badge.corrected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_badge_corrected'
+where t.organization_id is null and t.key = 'auto.0423.workspace_imagedetail_badge_corrected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13079,13 +13110,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.badge.corrected', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_badge_corrected'
+where t.organization_id is null and t.key = 'auto.0423.workspace_imagedetail_badge_corrected'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0422.workspace_imagedetail_correction_originalexif', 'workspace.imageDetail.correction.originalExif', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0424.workspace_imagedetail_correction_originalexif', 'workspace.imageDetail.correction.originalExif', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13094,7 +13125,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.correction.originalExif', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_correction_originalexif'
+where t.organization_id is null and t.key = 'auto.0424.workspace_imagedetail_correction_originalexif'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13102,7 +13133,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.correction.originalExif', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_correction_originalexif'
+where t.organization_id is null and t.key = 'auto.0424.workspace_imagedetail_correction_originalexif'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13110,13 +13141,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.correction.originalExif', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_correction_originalexif'
+where t.organization_id is null and t.key = 'auto.0424.workspace_imagedetail_correction_originalexif'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0423.workspace_imagedetail_deletedialog_confirm', 'workspace.imageDetail.deleteDialog.confirm', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:confirmLabel')
+values (null, 'auto.0425.workspace_imagedetail_deletedialog_confirm', 'workspace.imageDetail.deleteDialog.confirm', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:confirmLabel')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13125,7 +13156,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.deleteDialog.confirm', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0423.workspace_imagedetail_deletedialog_confirm'
+where t.organization_id is null and t.key = 'auto.0425.workspace_imagedetail_deletedialog_confirm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13133,7 +13164,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.deleteDialog.confirm', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0423.workspace_imagedetail_deletedialog_confirm'
+where t.organization_id is null and t.key = 'auto.0425.workspace_imagedetail_deletedialog_confirm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13141,13 +13172,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.deleteDialog.confirm', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0423.workspace_imagedetail_deletedialog_confirm'
+where t.organization_id is null and t.key = 'auto.0425.workspace_imagedetail_deletedialog_confirm'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0424.workspace_imagedetail_deletedialog_message', 'workspace.imageDetail.deleteDialog.message', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:message')
+values (null, 'auto.0426.workspace_imagedetail_deletedialog_message', 'workspace.imageDetail.deleteDialog.message', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13156,7 +13187,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.deleteDialog.message', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0424.workspace_imagedetail_deletedialog_message'
+where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13164,7 +13195,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.deleteDialog.message', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0424.workspace_imagedetail_deletedialog_message'
+where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13172,13 +13203,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.deleteDialog.message', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0424.workspace_imagedetail_deletedialog_message'
+where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0425.workspace_imagedetail_deletedialog_title', 'workspace.imageDetail.deleteDialog.title', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:title')
+values (null, 'auto.0427.workspace_imagedetail_deletedialog_title', 'workspace.imageDetail.deleteDialog.title', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13187,7 +13218,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.deleteDialog.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0425.workspace_imagedetail_deletedialog_title'
+where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13195,7 +13226,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.deleteDialog.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0425.workspace_imagedetail_deletedialog_title'
+where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13203,13 +13234,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.deleteDialog.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0425.workspace_imagedetail_deletedialog_title'
+where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0426.workspace_imagedetail_field_captured', 'workspace.imageDetail.field.captured', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0428.workspace_imagedetail_field_captured', 'workspace.imageDetail.field.captured', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13218,7 +13249,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.captured', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_field_captured'
+where t.organization_id is null and t.key = 'auto.0428.workspace_imagedetail_field_captured'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13226,7 +13257,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.captured', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_field_captured'
+where t.organization_id is null and t.key = 'auto.0428.workspace_imagedetail_field_captured'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13234,13 +13265,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.captured', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_field_captured'
+where t.organization_id is null and t.key = 'auto.0428.workspace_imagedetail_field_captured'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0427.workspace_imagedetail_field_city', 'workspace.imageDetail.field.city', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0429.workspace_imagedetail_field_city', 'workspace.imageDetail.field.city', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13249,7 +13280,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.city', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_field_city'
+where t.organization_id is null and t.key = 'auto.0429.workspace_imagedetail_field_city'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13257,7 +13288,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.city', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_field_city'
+where t.organization_id is null and t.key = 'auto.0429.workspace_imagedetail_field_city'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13265,13 +13296,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.city', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_field_city'
+where t.organization_id is null and t.key = 'auto.0429.workspace_imagedetail_field_city'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0428.workspace_imagedetail_field_coordinates', 'workspace.imageDetail.field.coordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0430.workspace_imagedetail_field_coordinates', 'workspace.imageDetail.field.coordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13280,7 +13311,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.coordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0428.workspace_imagedetail_field_coordinates'
+where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_coordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13288,7 +13319,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.coordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0428.workspace_imagedetail_field_coordinates'
+where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_coordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13296,13 +13327,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.coordinates', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0428.workspace_imagedetail_field_coordinates'
+where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_coordinates'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0429.workspace_imagedetail_field_country', 'workspace.imageDetail.field.country', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0431.workspace_imagedetail_field_country', 'workspace.imageDetail.field.country', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13311,7 +13342,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.country', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0429.workspace_imagedetail_field_country'
+where t.organization_id is null and t.key = 'auto.0431.workspace_imagedetail_field_country'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13319,7 +13350,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.country', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0429.workspace_imagedetail_field_country'
+where t.organization_id is null and t.key = 'auto.0431.workspace_imagedetail_field_country'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13327,13 +13358,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.country', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0429.workspace_imagedetail_field_country'
+where t.organization_id is null and t.key = 'auto.0431.workspace_imagedetail_field_country'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0430.workspace_imagedetail_field_district', 'workspace.imageDetail.field.district', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0432.workspace_imagedetail_field_district', 'workspace.imageDetail.field.district', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13342,7 +13373,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.district', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_district'
+where t.organization_id is null and t.key = 'auto.0432.workspace_imagedetail_field_district'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13350,7 +13381,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.district', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_district'
+where t.organization_id is null and t.key = 'auto.0432.workspace_imagedetail_field_district'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13358,13 +13389,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.district', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0430.workspace_imagedetail_field_district'
+where t.organization_id is null and t.key = 'auto.0432.workspace_imagedetail_field_district'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0431.workspace_imagedetail_field_projects', 'workspace.imageDetail.field.projects', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0433.workspace_imagedetail_field_projects', 'workspace.imageDetail.field.projects', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13373,7 +13404,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.projects', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0431.workspace_imagedetail_field_projects'
+where t.organization_id is null and t.key = 'auto.0433.workspace_imagedetail_field_projects'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13381,7 +13412,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.projects', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0431.workspace_imagedetail_field_projects'
+where t.organization_id is null and t.key = 'auto.0433.workspace_imagedetail_field_projects'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13389,13 +13420,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.projects', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0431.workspace_imagedetail_field_projects'
+where t.organization_id is null and t.key = 'auto.0433.workspace_imagedetail_field_projects'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0432.workspace_imagedetail_field_street', 'workspace.imageDetail.field.street', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0434.workspace_imagedetail_field_street', 'workspace.imageDetail.field.street', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13404,7 +13435,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.street', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0432.workspace_imagedetail_field_street'
+where t.organization_id is null and t.key = 'auto.0434.workspace_imagedetail_field_street'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13412,7 +13443,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.street', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0432.workspace_imagedetail_field_street'
+where t.organization_id is null and t.key = 'auto.0434.workspace_imagedetail_field_street'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13420,13 +13451,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.street', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0432.workspace_imagedetail_field_street'
+where t.organization_id is null and t.key = 'auto.0434.workspace_imagedetail_field_street'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0433.workspace_imagedetail_field_type', 'workspace.imageDetail.field.type', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0435.workspace_imagedetail_field_type', 'workspace.imageDetail.field.type', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13435,7 +13466,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.type', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0433.workspace_imagedetail_field_type'
+where t.organization_id is null and t.key = 'auto.0435.workspace_imagedetail_field_type'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13443,7 +13474,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.type', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0433.workspace_imagedetail_field_type'
+where t.organization_id is null and t.key = 'auto.0435.workspace_imagedetail_field_type'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13451,13 +13482,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.type', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0433.workspace_imagedetail_field_type'
+where t.organization_id is null and t.key = 'auto.0435.workspace_imagedetail_field_type'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0434.workspace_imagedetail_field_uploaded', 'workspace.imageDetail.field.uploaded', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0436.workspace_imagedetail_field_uploaded', 'workspace.imageDetail.field.uploaded', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13466,7 +13497,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.field.uploaded', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0434.workspace_imagedetail_field_uploaded'
+where t.organization_id is null and t.key = 'auto.0436.workspace_imagedetail_field_uploaded'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13474,7 +13505,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.field.uploaded', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0434.workspace_imagedetail_field_uploaded'
+where t.organization_id is null and t.key = 'auto.0436.workspace_imagedetail_field_uploaded'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13482,13 +13513,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.field.uploaded', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0434.workspace_imagedetail_field_uploaded'
+where t.organization_id is null and t.key = 'auto.0436.workspace_imagedetail_field_uploaded'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0435.workspace_imagedetail_imageunavailable', 'workspace.imageDetail.imageUnavailable', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0437.workspace_imagedetail_imageunavailable', 'workspace.imageDetail.imageUnavailable', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13497,7 +13528,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.imageUnavailable', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0435.workspace_imagedetail_imageunavailable'
+where t.organization_id is null and t.key = 'auto.0437.workspace_imagedetail_imageunavailable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13505,7 +13536,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.imageUnavailable', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0435.workspace_imagedetail_imageunavailable'
+where t.organization_id is null and t.key = 'auto.0437.workspace_imagedetail_imageunavailable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13513,13 +13544,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.imageUnavailable', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0435.workspace_imagedetail_imageunavailable'
+where t.organization_id is null and t.key = 'auto.0437.workspace_imagedetail_imageunavailable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0436.workspace_imagedetail_loading_text', 'workspace.imageDetail.loading.text', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0438.workspace_imagedetail_loading_text', 'workspace.imageDetail.loading.text', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13528,7 +13559,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.loading.text', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0436.workspace_imagedetail_loading_text'
+where t.organization_id is null and t.key = 'auto.0438.workspace_imagedetail_loading_text'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13536,7 +13567,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.loading.text', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0436.workspace_imagedetail_loading_text'
+where t.organization_id is null and t.key = 'auto.0438.workspace_imagedetail_loading_text'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13544,13 +13575,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.loading.text', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0436.workspace_imagedetail_loading_text'
+where t.organization_id is null and t.key = 'auto.0438.workspace_imagedetail_loading_text'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0437.workspace_imagedetail_nophotoattached', 'workspace.imageDetail.noPhotoAttached', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0439.workspace_imagedetail_nophotoattached', 'workspace.imageDetail.noPhotoAttached', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13559,7 +13590,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.noPhotoAttached', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0437.workspace_imagedetail_nophotoattached'
+where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nophotoattached'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13567,7 +13598,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.noPhotoAttached', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0437.workspace_imagedetail_nophotoattached'
+where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nophotoattached'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13575,13 +13606,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.noPhotoAttached', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0437.workspace_imagedetail_nophotoattached'
+where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nophotoattached'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0438.workspace_imagedetail_projects_create', 'workspace.imageDetail.projects.create', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0440.workspace_imagedetail_projects_create', 'workspace.imageDetail.projects.create', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13590,7 +13621,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.projects.create', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0438.workspace_imagedetail_projects_create'
+where t.organization_id is null and t.key = 'auto.0440.workspace_imagedetail_projects_create'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13598,7 +13629,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.projects.create', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0438.workspace_imagedetail_projects_create'
+where t.organization_id is null and t.key = 'auto.0440.workspace_imagedetail_projects_create'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13606,13 +13637,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.projects.create', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0438.workspace_imagedetail_projects_create'
+where t.organization_id is null and t.key = 'auto.0440.workspace_imagedetail_projects_create'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0439.workspace_imagedetail_projects_gpsdisabled', 'workspace.imageDetail.projects.gpsDisabled', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0441.workspace_imagedetail_projects_gpsdisabled', 'workspace.imageDetail.projects.gpsDisabled', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13621,7 +13652,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.projects.gpsDisabled', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_projects_gpsdisabled'
+where t.organization_id is null and t.key = 'auto.0441.workspace_imagedetail_projects_gpsdisabled'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13629,7 +13660,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.projects.gpsDisabled', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_projects_gpsdisabled'
+where t.organization_id is null and t.key = 'auto.0441.workspace_imagedetail_projects_gpsdisabled'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13637,13 +13668,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.projects.gpsDisabled', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_projects_gpsdisabled'
+where t.organization_id is null and t.key = 'auto.0441.workspace_imagedetail_projects_gpsdisabled'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0440.workspace_imagedetail_projects_hint', 'workspace.imageDetail.projects.hint', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0442.workspace_imagedetail_projects_hint', 'workspace.imageDetail.projects.hint', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13652,7 +13683,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.projects.hint', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0440.workspace_imagedetail_projects_hint'
+where t.organization_id is null and t.key = 'auto.0442.workspace_imagedetail_projects_hint'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13660,7 +13691,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.projects.hint', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0440.workspace_imagedetail_projects_hint'
+where t.organization_id is null and t.key = 'auto.0442.workspace_imagedetail_projects_hint'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13668,13 +13699,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.projects.hint', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0440.workspace_imagedetail_projects_hint'
+where t.organization_id is null and t.key = 'auto.0442.workspace_imagedetail_projects_hint'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0441.workspace_imagedetail_projects_nogpsnote', 'workspace.imageDetail.projects.noGpsNote', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0443.workspace_imagedetail_projects_nogpsnote', 'workspace.imageDetail.projects.noGpsNote', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13683,7 +13714,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.projects.noGpsNote', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0441.workspace_imagedetail_projects_nogpsnote'
+where t.organization_id is null and t.key = 'auto.0443.workspace_imagedetail_projects_nogpsnote'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13691,7 +13722,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.projects.noGpsNote', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0441.workspace_imagedetail_projects_nogpsnote'
+where t.organization_id is null and t.key = 'auto.0443.workspace_imagedetail_projects_nogpsnote'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13699,13 +13730,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.projects.noGpsNote', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0441.workspace_imagedetail_projects_nogpsnote'
+where t.organization_id is null and t.key = 'auto.0443.workspace_imagedetail_projects_nogpsnote'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0442.workspace_imagedetail_projects_primary', 'workspace.imageDetail.projects.primary', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0444.workspace_imagedetail_projects_primary', 'workspace.imageDetail.projects.primary', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13714,7 +13745,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.projects.primary', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0442.workspace_imagedetail_projects_primary'
+where t.organization_id is null and t.key = 'auto.0444.workspace_imagedetail_projects_primary'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13722,7 +13753,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.projects.primary', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0442.workspace_imagedetail_projects_primary'
+where t.organization_id is null and t.key = 'auto.0444.workspace_imagedetail_projects_primary'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13730,13 +13761,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.projects.primary', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0442.workspace_imagedetail_projects_primary'
+where t.organization_id is null and t.key = 'auto.0444.workspace_imagedetail_projects_primary'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0443.workspace_imagedetail_projects_search_placeholder', 'workspace.imageDetail.projects.search.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
+values (null, 'auto.0445.workspace_imagedetail_projects_search_placeholder', 'workspace.imageDetail.projects.search.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13745,7 +13776,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.projects.search.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0443.workspace_imagedetail_projects_search_placeholder'
+where t.organization_id is null and t.key = 'auto.0445.workspace_imagedetail_projects_search_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13753,7 +13784,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.projects.search.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0443.workspace_imagedetail_projects_search_placeholder'
+where t.organization_id is null and t.key = 'auto.0445.workspace_imagedetail_projects_search_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13761,13 +13792,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.projects.search.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0443.workspace_imagedetail_projects_search_placeholder'
+where t.organization_id is null and t.key = 'auto.0445.workspace_imagedetail_projects_search_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0444.workspace_imagedetail_section_location', 'workspace.imageDetail.section.location', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0446.workspace_imagedetail_section_location', 'workspace.imageDetail.section.location', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13776,7 +13807,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.section.location', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0444.workspace_imagedetail_section_location'
+where t.organization_id is null and t.key = 'auto.0446.workspace_imagedetail_section_location'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13784,7 +13815,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.section.location', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0444.workspace_imagedetail_section_location'
+where t.organization_id is null and t.key = 'auto.0446.workspace_imagedetail_section_location'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13792,13 +13823,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.section.location', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0444.workspace_imagedetail_section_location'
+where t.organization_id is null and t.key = 'auto.0446.workspace_imagedetail_section_location'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0445.workspace_imagedetail_value_empty', 'workspace.imageDetail.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0447.workspace_imagedetail_value_empty', 'workspace.imageDetail.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13807,7 +13838,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0445.workspace_imagedetail_value_empty'
+where t.organization_id is null and t.key = 'auto.0447.workspace_imagedetail_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13815,7 +13846,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0445.workspace_imagedetail_value_empty'
+where t.organization_id is null and t.key = 'auto.0447.workspace_imagedetail_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13823,13 +13854,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0445.workspace_imagedetail_value_empty'
+where t.organization_id is null and t.key = 'auto.0447.workspace_imagedetail_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0446.workspace_imagedetail_value_nogps', 'workspace.imageDetail.value.noGps', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0448.workspace_imagedetail_value_nogps', 'workspace.imageDetail.value.noGps', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13838,7 +13869,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.imageDetail.value.noGps', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0446.workspace_imagedetail_value_nogps'
+where t.organization_id is null and t.key = 'auto.0448.workspace_imagedetail_value_nogps'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13846,7 +13877,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.imageDetail.value.noGps', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0446.workspace_imagedetail_value_nogps'
+where t.organization_id is null and t.key = 'auto.0448.workspace_imagedetail_value_nogps'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13854,13 +13885,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.imageDetail.value.noGps', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0446.workspace_imagedetail_value_nogps'
+where t.organization_id is null and t.key = 'auto.0448.workspace_imagedetail_value_nogps'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0447.workspace_metadata_action_add', 'workspace.metadata.action.add', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0449.workspace_metadata_action_add', 'workspace.metadata.action.add', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13869,7 +13900,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.metadata.action.add', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0447.workspace_metadata_action_add'
+where t.organization_id is null and t.key = 'auto.0449.workspace_metadata_action_add'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13877,7 +13908,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.metadata.action.add', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0447.workspace_metadata_action_add'
+where t.organization_id is null and t.key = 'auto.0449.workspace_metadata_action_add'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13885,13 +13916,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.metadata.action.add', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0447.workspace_metadata_action_add'
+where t.organization_id is null and t.key = 'auto.0449.workspace_metadata_action_add'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0448.workspace_metadata_input_key_placeholder', 'workspace.metadata.input.key.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0450.workspace_metadata_input_key_placeholder', 'workspace.metadata.input.key.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13900,7 +13931,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.metadata.input.key.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0448.workspace_metadata_input_key_placeholder'
+where t.organization_id is null and t.key = 'auto.0450.workspace_metadata_input_key_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13908,7 +13939,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.metadata.input.key.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0448.workspace_metadata_input_key_placeholder'
+where t.organization_id is null and t.key = 'auto.0450.workspace_metadata_input_key_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13916,13 +13947,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.metadata.input.key.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0448.workspace_metadata_input_key_placeholder'
+where t.organization_id is null and t.key = 'auto.0450.workspace_metadata_input_key_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0449.workspace_metadata_input_value_placeholder', 'workspace.metadata.input.value.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0451.workspace_metadata_input_value_placeholder', 'workspace.metadata.input.value.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13931,7 +13962,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.metadata.input.value.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0449.workspace_metadata_input_value_placeholder'
+where t.organization_id is null and t.key = 'auto.0451.workspace_metadata_input_value_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13939,7 +13970,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.metadata.input.value.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0449.workspace_metadata_input_value_placeholder'
+where t.organization_id is null and t.key = 'auto.0451.workspace_metadata_input_value_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13947,13 +13978,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.metadata.input.value.placeholder', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0449.workspace_metadata_input_value_placeholder'
+where t.organization_id is null and t.key = 'auto.0451.workspace_metadata_input_value_placeholder'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0450.workspace_metadata_row_editprefix', 'workspace.metadata.row.editPrefix', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-property-row.component.ts inline-template bound-attr:title')
+values (null, 'auto.0452.workspace_metadata_row_editprefix', 'workspace.metadata.row.editPrefix', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-property-row.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13962,7 +13993,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.metadata.row.editPrefix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0450.workspace_metadata_row_editprefix'
+where t.organization_id is null and t.key = 'auto.0452.workspace_metadata_row_editprefix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13970,7 +14001,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.metadata.row.editPrefix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0450.workspace_metadata_row_editprefix'
+where t.organization_id is null and t.key = 'auto.0452.workspace_metadata_row_editprefix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -13978,13 +14009,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.metadata.row.editPrefix', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0450.workspace_metadata_row_editprefix'
+where t.organization_id is null and t.key = 'auto.0452.workspace_metadata_row_editprefix'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0451.workspace_metadata_row_value_empty', 'workspace.metadata.row.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0453.workspace_metadata_row_value_empty', 'workspace.metadata.row.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -13993,7 +14024,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.metadata.row.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0451.workspace_metadata_row_value_empty'
+where t.organization_id is null and t.key = 'auto.0453.workspace_metadata_row_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14001,7 +14032,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.metadata.row.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0451.workspace_metadata_row_value_empty'
+where t.organization_id is null and t.key = 'auto.0453.workspace_metadata_row_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14009,13 +14040,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.metadata.row.value.empty', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0451.workspace_metadata_row_value_empty'
+where t.organization_id is null and t.key = 'auto.0453.workspace_metadata_row_value_empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0452.workspace_metadata_section_title', 'workspace.metadata.section.title', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0454.workspace_metadata_section_title', 'workspace.metadata.section.title', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14024,7 +14055,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.metadata.section.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0452.workspace_metadata_section_title'
+where t.organization_id is null and t.key = 'auto.0454.workspace_metadata_section_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14032,7 +14063,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.metadata.section.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0452.workspace_metadata_section_title'
+where t.organization_id is null and t.key = 'auto.0454.workspace_metadata_section_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14040,13 +14071,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.metadata.section.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0452.workspace_metadata_section_title'
+where t.organization_id is null and t.key = 'auto.0454.workspace_metadata_section_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0453.workspace_pane_close_title', 'workspace.pane.close.title', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
+values (null, 'auto.0455.workspace_pane_close_title', 'workspace.pane.close.title', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14055,7 +14086,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.pane.close.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0453.workspace_pane_close_title'
+where t.organization_id is null and t.key = 'auto.0455.workspace_pane_close_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14063,7 +14094,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.pane.close.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0453.workspace_pane_close_title'
+where t.organization_id is null and t.key = 'auto.0455.workspace_pane_close_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14071,13 +14102,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.pane.close.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0453.workspace_pane_close_title'
+where t.organization_id is null and t.key = 'auto.0455.workspace_pane_close_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0454.workspace_pane_rename_title', 'workspace.pane.rename.title', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
+values (null, 'auto.0456.workspace_pane_rename_title', 'workspace.pane.rename.title', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14086,7 +14117,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.pane.rename.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0454.workspace_pane_rename_title'
+where t.organization_id is null and t.key = 'auto.0456.workspace_pane_rename_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14094,7 +14125,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.pane.rename.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0454.workspace_pane_rename_title'
+where t.organization_id is null and t.key = 'auto.0456.workspace_pane_rename_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14102,13 +14133,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.pane.rename.title', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0454.workspace_pane_rename_title'
+where t.organization_id is null and t.key = 'auto.0456.workspace_pane_rename_title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0455.workspace_projects_all', 'workspace.projects.all', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0457.workspace_projects_all', 'workspace.projects.all', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14117,7 +14148,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.projects.all', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0455.workspace_projects_all'
+where t.organization_id is null and t.key = 'auto.0457.workspace_projects_all'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14125,7 +14156,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.projects.all', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0455.workspace_projects_all'
+where t.organization_id is null and t.key = 'auto.0457.workspace_projects_all'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14133,13 +14164,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.projects.all', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0455.workspace_projects_all'
+where t.organization_id is null and t.key = 'auto.0457.workspace_projects_all'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0456.workspace_sort_empty_nomatchingproperties', 'workspace.sort.empty.noMatchingProperties', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0458.workspace_sort_empty_nomatchingproperties', 'workspace.sort.empty.noMatchingProperties', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14148,7 +14179,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.sort.empty.noMatchingProperties', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0456.workspace_sort_empty_nomatchingproperties'
+where t.organization_id is null and t.key = 'auto.0458.workspace_sort_empty_nomatchingproperties'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14156,7 +14187,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.sort.empty.noMatchingProperties', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0456.workspace_sort_empty_nomatchingproperties'
+where t.organization_id is null and t.key = 'auto.0458.workspace_sort_empty_nomatchingproperties'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14164,13 +14195,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.sort.empty.noMatchingProperties', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0456.workspace_sort_empty_nomatchingproperties'
+where t.organization_id is null and t.key = 'auto.0458.workspace_sort_empty_nomatchingproperties'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0457.workspace_sort_section_groupedby', 'workspace.sort.section.groupedBy', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0459.workspace_sort_section_groupedby', 'workspace.sort.section.groupedBy', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14179,7 +14210,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'workspace.sort.section.groupedBy', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0457.workspace_sort_section_groupedby'
+where t.organization_id is null and t.key = 'auto.0459.workspace_sort_section_groupedby'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14187,7 +14218,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'workspace.sort.section.groupedBy', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0457.workspace_sort_section_groupedby'
+where t.organization_id is null and t.key = 'auto.0459.workspace_sort_section_groupedby'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14195,13 +14226,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'workspace.sort.section.groupedBy', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0457.workspace_sort_section_groupedby'
+where t.organization_id is null and t.key = 'auto.0459.workspace_sort_section_groupedby'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0458.z_b_radius_auswahl_nord', 'z. B. Radius Auswahl Nord', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:placeholder')
+values (null, 'auto.0460.z_b_radius_auswahl_nord', 'z. B. Radius Auswahl Nord', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14210,7 +14241,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'z. B. Radius Auswahl Nord', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0458.z_b_radius_auswahl_nord'
+where t.organization_id is null and t.key = 'auto.0460.z_b_radius_auswahl_nord'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14218,7 +14249,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'z. B. Radius Auswahl Nord', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0458.z_b_radius_auswahl_nord'
+where t.organization_id is null and t.key = 'auto.0460.z_b_radius_auswahl_nord'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14226,13 +14257,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'z. B. Raggio Auswahl Nord', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0458.z_b_radius_auswahl_nord'
+where t.organization_id is null and t.key = 'auto.0460.z_b_radius_auswahl_nord'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0459.zoom_to_location', 'Zoom to location', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0461.zoom_to_location', 'Zoom to location', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14241,7 +14272,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Zoom to location', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0459.zoom_to_location'
+where t.organization_id is null and t.key = 'auto.0461.zoom_to_location'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14249,7 +14280,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Auf Standort zoomen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0459.zoom_to_location'
+where t.organization_id is null and t.key = 'auto.0461.zoom_to_location'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14257,13 +14288,13 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Zoom sulla posizione', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0459.zoom_to_location'
+where t.organization_id is null and t.key = 'auto.0461.zoom_to_location'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0460.zu_projekt_zuweisen', 'Zu Projekt zuweisen...', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
+values (null, 'auto.0462.zu_projekt_zuweisen', 'Zu Projekt zuweisen...', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14272,7 +14303,7 @@ on conflict (scope_key) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'en', 'Zu Projekt zuweisen...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0460.zu_projekt_zuweisen'
+where t.organization_id is null and t.key = 'auto.0462.zu_projekt_zuweisen'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14280,7 +14311,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'de', 'Zu Projekt zuweisen...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0460.zu_projekt_zuweisen'
+where t.organization_id is null and t.key = 'auto.0462.zu_projekt_zuweisen'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -14288,7 +14319,7 @@ on conflict (app_text_id, lang) do update set
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
 select t.id, 'it', 'Assegna al progetto...', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0460.zu_projekt_zuweisen'
+where t.organization_id is null and t.key = 'auto.0462.zu_projekt_zuweisen'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

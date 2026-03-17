@@ -69,7 +69,15 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
   readonly viewYear = signal(new Date().getFullYear());
   readonly viewMonth = signal(new Date().getMonth());
 
-  readonly weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  readonly weekdays = computed(() => [
+    this.t('workspace.capturedDate.weekday.mon', 'Mo'),
+    this.t('workspace.capturedDate.weekday.tue', 'Tu'),
+    this.t('workspace.capturedDate.weekday.wed', 'We'),
+    this.t('workspace.capturedDate.weekday.thu', 'Th'),
+    this.t('workspace.capturedDate.weekday.fri', 'Fr'),
+    this.t('workspace.capturedDate.weekday.sat', 'Sa'),
+    this.t('workspace.capturedDate.weekday.sun', 'Su'),
+  ]);
 
   // ── Computed ───────────────────────────────────────────────────────────────
 

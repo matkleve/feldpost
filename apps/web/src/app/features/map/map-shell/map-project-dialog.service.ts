@@ -44,7 +44,9 @@ export class MapProjectDialogService {
   }
 
   confirmProjectSelection(signals: ProjectDialogSignals, projectId: string): void {
-    const selected = signals.projectSelectionDialogOptions().find((option) => option.id === projectId);
+    const selected = signals
+      .projectSelectionDialogOptions()
+      .find((option) => option.id === projectId);
     if (!selected) {
       this.resolveProjectSelection(signals, null);
       return;

@@ -30,7 +30,11 @@ export interface ThumbnailCardHoverEvent {
       <button
         class="thumbnail-card__main"
         type="button"
-        [attr.aria-label]="t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') + ' ' + (image().storagePath || displayName())"
+        [attr.aria-label]="
+          t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') +
+          ' ' +
+          (image().storagePath || displayName())
+        "
         (click)="onCardClick($event)"
       >
         <div class="thumbnail-card__media">

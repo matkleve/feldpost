@@ -36,11 +36,15 @@
   }
 
   @if (loading()) {
-    <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
+    <div class="address-search__loading">
+      {{ t('workspace.addressSearch.loading', 'Searching...') }}
+    </div>
   }
 } @else {
   <button class="address-search__trigger dd-item dd-item--muted" type="button" (click)="open()">
     <span class="material-icons dd-item__icon" aria-hidden="true">search</span>
-    <span class="dd-item__label">{{ currentAddress() || t('workspace.addressSearch.placeholder', 'Search address...') }}</span>
+    <span class="dd-item__label">{{
+      currentAddress() || t('workspace.addressSearch.placeholder', 'Search address...')
+    }}</span>
   </button>
 }

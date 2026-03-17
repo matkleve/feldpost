@@ -682,49 +682,29 @@ export class MapShellComponent implements OnDestroy {
 
   onMapContextZoomStreetHere(): void {
     const coords = this.mapContextMenuCoords();
-    if (!coords || !this.map) return;
-    this.map.setView([coords.lat, coords.lng], MapShellComponent.STREET_PROXIMITY_ZOOM);
-    this.closeContextMenus();
+    if (!coords) return;
+    this.zoomContextTo(coords.lat, coords.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
   }
 
   async onMapContextCopyAddress(): Promise<void> {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
 
-    const copied = await this.mapContextActionsService.copyAddressFromCoords(
-      coords.lat,
-      coords.lng,
-    );
-    if (copied) {
-      this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
-    } else {
-      this.toastService.show({
-        message: 'Adresse konnte nicht aufgeloest werden.',
-        type: 'warning',
-        dedupe: true,
-      });
-    }
+    await this.copyAddressWithFeedback(coords.lat, coords.lng);
     this.closeContextMenus();
   }
 
   async onMapContextCopyGps(): Promise<void> {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
-    const text = this.mapContextActionsService.formatGps(coords.lat, coords.lng);
-    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
-    this.toastService.show({
-      message: copied ? 'GPS kopiert.' : text,
-      type: copied ? 'success' : 'info',
-      dedupe: true,
-    });
+    await this.copyGpsWithFeedback(coords.lat, coords.lng);
     this.closeContextMenus();
   }
 
   onMapContextOpenGoogleMaps(): void {
     const coords = this.mapContextMenuCoords();
-    if (!coords || typeof window === 'undefined') return;
-    const url = this.mapContextActionsService.buildGoogleMapsUrl(coords.lat, coords.lng);
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (!coords) return;
+    this.openGoogleMapsForCoords(coords.lat, coords.lng);
     this.closeContextMenus();
   }
 

@@ -36,7 +36,9 @@ export interface SelectOption {
               class="prop-input"
               type="datetime-local"
               [value]="dateInputValue()"
-              [attr.aria-label]="t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
+              [attr.aria-label]="
+                t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+              "
               (keydown.enter)="commitEdit($event)"
               (keydown.escape)="cancelEdit()"
               (blur)="commitEdit($event)"
@@ -46,7 +48,9 @@ export interface SelectOption {
             <select
               #editInput
               class="prop-input prop-input--select"
-              [attr.aria-label]="t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
+              [attr.aria-label]="
+                t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+              "
               (change)="commitSelect($event)"
               (keydown.escape)="cancelEdit()"
               (blur)="commitSelect($event)"
@@ -63,7 +67,9 @@ export interface SelectOption {
               class="prop-input"
               type="text"
               [value]="value()"
-              [attr.aria-label]="t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
+              [attr.aria-label]="
+                t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+              "
               (keydown.enter)="commitEdit($event)"
               (keydown.escape)="cancelEdit()"
               (blur)="commitEdit($event)"
@@ -74,7 +80,11 @@ export interface SelectOption {
         <button
           class="prop-value"
           type="button"
-          [title]="readonly() ? label() : t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
+          [title]="
+            readonly()
+              ? label()
+              : t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+          "
           [disabled]="readonly()"
           (click)="startEdit()"
         >

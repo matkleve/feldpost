@@ -158,7 +158,9 @@ export class ImageDetailViewComponent implements OnDestroy {
     const img = this.image();
     if (!img) return '';
     return (
-      img.address_label ?? img.storage_path?.split('/').pop() ?? this.t('workspace.imageDetail.fallback.file', 'File')
+      img.address_label ??
+      img.storage_path?.split('/').pop() ??
+      this.t('workspace.imageDetail.fallback.file', 'File')
     );
   });
 
@@ -557,7 +559,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (nextIds.length === 0) {
       this.selectedProjectIds.set(previous);
       this.toastService.show({
-        message: this.t('workspace.imageDetail.toast.projectRequired', 'At least one project is required.'),
+        message: this.t(
+          'workspace.imageDetail.toast.projectRequired',
+          'At least one project is required.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -679,7 +684,10 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     if (removing && previous.size === 1) {
       this.toastService.show({
-        message: this.t('workspace.imageDetail.toast.projectRequired', 'At least one project is required.'),
+        message: this.t(
+          'workspace.imageDetail.toast.projectRequired',
+          'At least one project is required.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -897,7 +905,8 @@ export class ImageDetailViewComponent implements OnDestroy {
     const mediaType = this.mediaType();
     if (mediaType === 'image') return this.t('workspace.imageDetail.mediaType.image', 'Image');
     if (mediaType === 'video') return this.t('workspace.imageDetail.mediaType.video', 'Video');
-    if (mediaType === 'document') return this.t('workspace.imageDetail.mediaType.document', 'Document');
+    if (mediaType === 'document')
+      return this.t('workspace.imageDetail.mediaType.document', 'Document');
 
     const path = this.image()?.storage_path;
     const extension = path?.split('.').pop()?.toUpperCase();
@@ -917,8 +926,10 @@ export class ImageDetailViewComponent implements OnDestroy {
   }
 
   private mapMimeTypeToLabel(mimeType: string): string | null {
-    if (mimeType.startsWith('image/')) return this.t('workspace.imageDetail.mediaType.image', 'Image');
-    if (mimeType.startsWith('video/')) return this.t('workspace.imageDetail.mediaType.video', 'Video');
+    if (mimeType.startsWith('image/'))
+      return this.t('workspace.imageDetail.mediaType.image', 'Image');
+    if (mimeType.startsWith('video/'))
+      return this.t('workspace.imageDetail.mediaType.video', 'Video');
 
     switch (mimeType) {
       case 'application/pdf':

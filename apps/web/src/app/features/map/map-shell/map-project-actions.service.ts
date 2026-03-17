@@ -76,7 +76,10 @@ export class MapProjectActionsService {
     projectName: string;
     firstImageId: string;
   }): Promise<CreateProjectFromImageResult> {
-    const organizationId = await this.resolveOrganizationIdForImage(params.client, params.firstImageId);
+    const organizationId = await this.resolveOrganizationIdForImage(
+      params.client,
+      params.firstImageId,
+    );
     if (!organizationId) {
       return { ok: false, reason: 'organization-missing' };
     }

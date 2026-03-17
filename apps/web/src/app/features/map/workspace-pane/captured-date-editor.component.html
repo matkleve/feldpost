@@ -58,7 +58,7 @@
   <!-- Calendar grid -->
   <div class="captured-date-editor__grid">
     <!-- Weekday headers -->
-    @for (day of weekdays; track day) {
+    @for (day of weekdays(); track day) {
       <span class="captured-date-editor__weekday">{{ day }}</span>
     }
     <!-- Day cells -->
