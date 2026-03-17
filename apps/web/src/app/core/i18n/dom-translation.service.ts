@@ -15,6 +15,7 @@ export class DomTranslationService {
   constructor() {
     effect(() => {
       const language = this.i18nService.language();
+      this.i18nService.runtimeRevision();
       if (!this.started) return;
       this.translateSubtree(this.documentRef.body, language);
     });

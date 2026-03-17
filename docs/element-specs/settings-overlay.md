@@ -16,37 +16,37 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 
 ## Actions
 
-| #   | User Action                                | System Response                                                                                 | Triggers                              |
-| --- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------- |
-| 1   | Clicks avatar Settings row                 | Opens overlay instantly, anchors to sidenav right edge + spacing token `md`                     | `NavComponent` overlay open action    |
-| 2   | Overlay opens                              | Starts profile/preference load; shows loading state in detail area                              | `UserProfileService` read request     |
-| 3   | Load succeeds                              | Renders selected section content with populated values                                          | profile + preference payload received |
-| 4   | Load fails                                 | Shows error state with retry action                                                             | Supabase/service error                |
-| 5   | Clicks Retry                               | Re-runs profile/preference load and returns to loading state                                    | Retry button in error state           |
-| 6   | Selects section in left list               | Right detail area switches to selected section component                                        | `selectedSectionId` signal update     |
-| 7   | Selects `Konto` section                    | Renders identity, email/password management, password-recovery action, 2FA, and session actions | account section selection             |
-| 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status                         | shortcuts section selection           |
-| 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                                     | Backdrop click / Escape key           |
-| 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing                                   | sidebar expansion signal              |
+| #   | User Action                                | System Response                                                                                 | Triggers                           |
+| --- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- | ---------------------------------- |
+| 1   | Clicks avatar Settings row                 | Opens overlay instantly, anchors to sidenav right edge + spacing token `md`                     | `NavComponent` overlay open action |
+| 2   | Overlay opens                              | Renders section shell immediately; no global blocking loading screen                            | overlay open signal                |
+| 3   | Selects any local-only section             | Section content appears immediately                                                             | `selectedSectionId` signal update  |
+| 4   | Selects data-backed section (`Konto`)      | Section frame renders immediately; inner controls show placeholders/spinner until data resolves | section-local data request         |
+| 5   | Section-local fetch fails                  | Shows error/retry only inside that section, not for whole overlay                               | section component error state      |
+| 6   | Selects section in left list               | Right detail area switches to selected section component                                        | `selectedSectionId` signal update  |
+| 7   | Selects `Konto` section                    | Renders identity, email/password management, password-recovery action, 2FA, and session actions | account section selection          |
+| 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status                         | shortcuts section selection        |
+| 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                                     | Backdrop click / Escape key        |
+| 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing                                   | sidebar expansion signal           |
 
 ```mermaid
 flowchart TD
     A[User activates avatar Settings row] --> B{Overlay open?}
     B -- No --> C[Create/open CDK overlay]
-    C --> D[Set loading state]
-    D --> E[Fetch profile/preferences]
-    E --> F{Fetch success?}
-    F -- Yes --> G[Render selected section]
-    F -- No --> H[Render error state]
-    H --> I{Retry clicked?}
-    I -- Yes --> D
-    I -- No --> J[Wait for dismiss]
-    G --> K{Section selected?}
-    K -- Yes --> L[Switch detail component]
-    K -- No --> M[Keep current section]
-    L --> N{Dismiss action?}
-    M --> N
+    C --> D[Render shell immediately]
+    D --> E{Section selected?}
+    E -- Local-only --> F[Render section content instantly]
+    E -- Data-backed --> G[Render section skeleton immediately]
+    G --> H[Run section-local fetch]
+    H --> I{Fetch success?}
+    I -- Yes --> J[Hydrate section UI]
+    I -- No --> K[Show section-local error + retry]
+    K --> L{Retry clicked?}
+    L -- Yes --> H
+    L -- No --> M[Keep section visible]
+    F --> N{Dismiss action?}
     J --> N
+    M --> N
     N -- Yes --> O[Close immediately and discard unsaved changes]
 ```
 
@@ -63,10 +63,11 @@ SettingsOverlayHost (CDK OverlayRef; anchored to Nav host)
 │   │   │       └── SettingsSectionListItem × N (.ui-item)
 │   │   ├── InternalDivider
 │   │   └── SettingsSectionDetailColumn (right)
-│   │       ├── [loading] SettingsLoadingState
-│   │       ├── [error] SettingsErrorState (Retry action)
-│   │       └── [populated] SettingsSectionOutlet
+│   │       └── SettingsSectionOutlet
 │   │           └── RegisteredSectionComponent (selected section)
+│   │               ├── [optional] SectionLoadingState (local)
+│   │               ├── [optional] SectionErrorState (local retry)
+│   │               └── SectionContent
 └── Backdrop (outside click dismiss)
 ```
 
@@ -78,14 +79,13 @@ SettingsOverlayHost (CDK OverlayRef; anchored to Nav host)
 | profile           | `UserProfileService.getProfileWithPreferences()` | `UserProfileDto`                             |
 | sectionRegistry   | `SETTINGS_SECTION_REGISTRY` token                | `ReadonlyArray<SettingsSectionRegistration>` |
 | selectedSectionId | overlay-local signal                             | `string`                                     |
-| loadError         | overlay-local signal                             | `string                                      | null` |
+| loadError         | section-local signal (optional)                  | `string                                      | null` |
 
 ## State
 
 | Name              | Type                      | Default                 | Controls                        |
-| ----------------- | ------------------------- | ----------------------- | ------------------------------- | ------------------------------------ | --------------------- |
+| ----------------- | ------------------------- | ----------------------- | ------------------------------- | ------------------------------------ |
 | isOpen            | `boolean`                 | `false`                 | Overlay lifecycle               |
-| loadState         | `'loading'                | 'error'                 | 'populated'`                    | `'loading'` on open                  | Detail area rendering |
 | selectedSectionId | `string`                  | first registry entry id | Active section component        |
 | profile           | `UserProfileDto           | null`                   | `null`                          | Section detail data                  |
 | pendingWriteModel | `Record<string, unknown>` | `{}`                    | Unsaved local edits per section |
@@ -94,16 +94,18 @@ SettingsOverlayHost (CDK OverlayRef; anchored to Nav host)
 ```mermaid
 stateDiagram-v2
     [*] --> Closed
-    Closed --> OpenLoading: open()
-    OpenLoading --> OpenPopulated: fetch success
-    OpenLoading --> OpenError: fetch failure
-    OpenError --> OpenLoading: retry()
-    OpenPopulated --> SectionSelected: selectSection(id)
-    SectionSelected --> OpenPopulated: section stable
-    OpenLoading --> Closed: dismiss()
-    OpenError --> Closed: dismiss()
-    OpenPopulated --> Closed: dismiss()
+    Closed --> OpenReady: open()
+    OpenReady --> SectionSelected: selectSection(id)
+    SectionSelected --> SectionLoading: section has async data
+    SectionLoading --> SectionReady: fetch success
+    SectionLoading --> SectionError: fetch failure
+    SectionError --> SectionLoading: retry()
+    SectionReady --> SectionSelected: section changed
+    OpenReady --> Closed: dismiss()
     SectionSelected --> Closed: dismiss()
+    SectionLoading --> Closed: dismiss()
+    SectionReady --> Closed: dismiss()
+    SectionError --> Closed: dismiss()
 ```
 
 ## File Map
@@ -155,23 +157,19 @@ sequenceDiagram
 
     U->>N: Click avatar Settings row
     N->>O: open(anchorEl)
-    O->>O: set loadState = loading
-    O->>P: getProfileWithPreferences(userId)
+    O-->>U: Render section list + current section immediately
+    U->>O: Select data-backed section (e.g. Konto)
+    O-->>U: Render local placeholders in section
+    O->>P: getProfileWithPreferences(userId) [section-local]
     P->>S: select profile + preferences
-
     alt Success
         S-->>P: profile + preference rows
-        P-->>O: hydrated model
-        O->>O: set loadState = populated
-        O-->>U: Render section list + details
+        P-->>O: hydrated section model
+        O-->>U: Replace placeholders with real content
     else Error
         S-->>P: error
         P-->>O: throw error
-        O->>O: set loadState = error
-        O-->>U: Show error + Retry
-        U->>O: Retry
-        O->>O: set loadState = loading
-        O->>P: getProfileWithPreferences(userId)
+        O-->>U: Show section-local error + Retry
     end
 
     U->>O: Click outside overlay
@@ -187,8 +185,8 @@ sequenceDiagram
 - [ ] Overlay is vertically centered relative to sidenav host element, not viewport.
 - [ ] Overlay has no entrance animation and appears instantly.
 - [ ] Overlay repositions while sidenav transitions between collapsed and expanded width.
-- [ ] Loading, error, populated, and dismissing states are implemented and observable.
-- [ ] Error state includes a Retry action that re-attempts profile fetch.
+- [ ] Overlay detail area renders immediately on open without global blocking loading screen.
+- [ ] Data-backed sections use section-local loading/error/retry UI (no full-overlay lock).
 - [ ] Click-outside/Escape dismiss closes immediately and discards unsaved changes.
 - [ ] Section list is registry-driven and supports adding new sections without shell edits.
 - [ ] Language/Locale section integration provides English and German switching behavior.

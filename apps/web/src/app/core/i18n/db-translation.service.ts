@@ -19,7 +19,6 @@ export class DbTranslationService {
   private readonly supabase = inject(SupabaseService);
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
-  private readonly loadedLanguages = new Set<LanguageCode>();
 
   constructor() {
     effect(() => {
@@ -34,7 +33,6 @@ export class DbTranslationService {
 
   async ensureLoaded(language: LanguageCode): Promise<void> {
     if (!this.authService.user()) return;
-    if (this.loadedLanguages.has(language)) return;
 
     const { data, error } = await this.supabase.client
       .from('app_text_translations')
@@ -62,6 +60,5 @@ export class DbTranslationService {
       .filter((entry): entry is { key: string; original: string; value: string } => entry !== null);
 
     this.i18nService.setRuntimeTranslations(language, runtimeEntries);
-    this.loadedLanguages.add(language);
   }
 }

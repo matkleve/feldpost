@@ -8,14 +8,11 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { AuthService } from '../../core/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { LanguageCode } from '../../core/i18n/translation-catalog';
 import { SettingsPaneService } from '../../core/settings-pane.service';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 import { AccountComponent } from '../account/account.component';
-
-type SettingsLoadState = 'loading' | 'error' | 'populated';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -50,6 +47,8 @@ interface SettingsModel {
   telemetryEnabled: boolean;
 }
 
+type SettingsLoadState = 'loading' | 'error' | 'populated';
+
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
@@ -59,10 +58,8 @@ interface SettingsModel {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsOverlayComponent {
-  private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
-  private hasLoadedOnce = false;
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
@@ -129,7 +126,7 @@ export class SettingsOverlayComponent {
   ]);
 
   readonly selectedSectionId = signal<string>('general');
-  readonly loadState = signal<SettingsLoadState>('loading');
+  readonly loadState = signal<SettingsLoadState>('populated');
   readonly lastError = signal<string | null>(null);
   readonly inviteSectionRequest = this.settingsPaneService.inviteSectionRequest;
 
@@ -150,13 +147,6 @@ export class SettingsOverlayComponent {
 
   constructor() {
     effect(() => {
-      if (this.open() && !this.hasLoadedOnce) {
-        this.startLoad();
-        this.hasLoadedOnce = true;
-      }
-    });
-
-    effect(() => {
       const pendingSection = this.settingsPaneService.selectedSectionId();
       if (pendingSection) {
         this.selectedSectionId.set(pendingSection);
@@ -165,10 +155,7 @@ export class SettingsOverlayComponent {
   }
 
   onOverlayAttach(): void {
-    if (!this.hasLoadedOnce) {
-      this.startLoad();
-      this.hasLoadedOnce = true;
-    }
+    // No-op: section content renders immediately; async loading is section-local.
   }
 
   onEscape(event: KeyboardEvent): void {
@@ -198,12 +185,13 @@ export class SettingsOverlayComponent {
     }
   }
 
-  retryLoad(): void {
-    this.startLoad();
-  }
-
   updatePosition(): void {
     // No-op: overlay is now a fixed pane rendered inside app-nav.
+  }
+
+  retryLoad(): void {
+    this.lastError.set(null);
+    this.loadState.set('populated');
   }
 
   isSectionSelected(sectionId: string): boolean {
@@ -261,30 +249,6 @@ export class SettingsOverlayComponent {
       ...model,
       [settingKey]: !model[settingKey],
     }));
-  }
-
-  private startLoad(): void {
-    this.loadState.set('loading');
-    this.lastError.set(null);
-
-    try {
-      const user = this.authService.user();
-
-      if (!user) {
-        throw new Error(
-          this.t('settings.overlay.error.noSession', 'No authenticated session found.'),
-        );
-      }
-
-      this.loadState.set('populated');
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : this.t('settings.overlay.error.generic', 'Unable to load settings right now.');
-      this.lastError.set(message);
-      this.loadState.set('error');
-    }
   }
 
   private readMarkerMotionPreference(): MarkerMotionPreference {

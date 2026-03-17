@@ -20,6 +20,15 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dial
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccountComponent implements OnInit {
+  private static cachedSnapshot: {
+    fullName: string;
+    roleNames: string[];
+    organizationId: string | null;
+    pendingEmail: string;
+    mfaFactors: MfaFactorViewModel[];
+    assuranceLevel: 'aal1' | 'aal2' | null;
+  } | null = null;
+
   private readonly authService = inject(AuthService);
   private readonly userProfileService = inject(UserProfileService);
   private readonly toastService = inject(ToastService);
@@ -64,6 +73,14 @@ export class AccountComponent implements OnInit {
   readonly canConfirmDelete = computed(() => this.deletePhrase().trim().toUpperCase() === 'DELETE');
 
   async ngOnInit(): Promise<void> {
+    const snapshot = AccountComponent.cachedSnapshot;
+    if (snapshot) {
+      this.applySnapshot(snapshot);
+      this.loading.set(false);
+      void this.reloadAccountData(true);
+      return;
+    }
+
     await this.reloadAccountData();
   }
 
@@ -293,8 +310,10 @@ export class AccountComponent implements OnInit {
     return `data:image/svg+xml;utf8,${encodeURIComponent(qrSvg)}`;
   }
 
-  private async reloadAccountData(): Promise<void> {
-    this.loading.set(true);
+  private async reloadAccountData(silent = false): Promise<void> {
+    if (!silent) {
+      this.loading.set(true);
+    }
 
     const profileResult = await this.userProfileService.getOwnProfile();
     if (profileResult.error) {
@@ -309,7 +328,11 @@ export class AccountComponent implements OnInit {
     this.pendingEmail.set(this.userEmail());
     await this.reloadSecurityState();
 
-    this.loading.set(false);
+    this.cacheSnapshot();
+
+    if (!silent) {
+      this.loading.set(false);
+    }
   }
 
   private async reloadSecurityState(): Promise<void> {
@@ -333,5 +356,33 @@ export class AccountComponent implements OnInit {
 
   private isValidEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  private applySnapshot(snapshot: {
+    fullName: string;
+    roleNames: string[];
+    organizationId: string | null;
+    pendingEmail: string;
+    mfaFactors: MfaFactorViewModel[];
+    assuranceLevel: 'aal1' | 'aal2' | null;
+  }): void {
+    this.fullName.set(snapshot.fullName);
+    this.pendingDisplayName.set(snapshot.fullName);
+    this.roleNames.set(snapshot.roleNames);
+    this.organizationId.set(snapshot.organizationId);
+    this.pendingEmail.set(snapshot.pendingEmail);
+    this.mfaFactors.set(snapshot.mfaFactors);
+    this.assuranceLevel.set(snapshot.assuranceLevel);
+  }
+
+  private cacheSnapshot(): void {
+    AccountComponent.cachedSnapshot = {
+      fullName: this.fullName(),
+      roleNames: [...this.roleNames()],
+      organizationId: this.organizationId(),
+      pendingEmail: this.pendingEmail(),
+      mfaFactors: [...this.mfaFactors()],
+      assuranceLevel: this.assuranceLevel(),
+    };
   }
 }

@@ -197,6 +197,7 @@ const HEURISTIC_IT_PHRASE_MAP: Record<string, string> = {
 @Injectable({ providedIn: 'root' })
 export class I18nService {
   private readonly languageSignal = signal<LanguageCode>(this.readInitialLanguage());
+  private readonly runtimeRevisionSignal = signal(0);
   private readonly runtimeDictionaries = signal<Record<LanguageCode, RuntimeLanguageDictionary>>({
     en: { byKey: {}, byOriginal: {} },
     de: { byKey: {}, byOriginal: {} },
@@ -204,6 +205,7 @@ export class I18nService {
   });
 
   readonly language = this.languageSignal.asReadonly();
+  readonly runtimeRevision = this.runtimeRevisionSignal.asReadonly();
   readonly locale = computed(() => {
     switch (this.languageSignal()) {
       case 'de':
@@ -226,16 +228,22 @@ export class I18nService {
   }
 
   t(key: string, fallback = ''): string {
-    const runtime = this.runtimeDictionaries()[this.languageSignal()].byKey[key];
-    if (runtime) return runtime;
+    const language = this.languageSignal();
+    const runtimeDictionary = this.runtimeDictionaries()[language];
+    const runtimeByKey = runtimeDictionary.byKey[key];
+    if (runtimeByKey) return runtimeByKey;
 
     const entry = TRANSLATION_BY_KEY[key];
     if (!entry) return fallback || key;
-    switch (this.languageSignal()) {
+    switch (language) {
       case 'de':
         return entry.de;
-      case 'it':
-        return entry.it ?? entry.en;
+      case 'it': {
+        if (entry.it) return entry.it;
+        const runtimeByOriginal = runtimeDictionary.byOriginal[entry.original];
+        if (runtimeByOriginal) return runtimeByOriginal;
+        return this.heuristicTranslateToItalian(entry.en);
+      }
       default:
         return entry.en;
     }
@@ -281,6 +289,7 @@ export class I18nService {
       ...current,
       [language]: { byKey, byOriginal },
     }));
+    this.runtimeRevisionSignal.update((value) => value + 1);
   }
 
   formatDate(value: Date | string | number, options?: Intl.DateTimeFormatOptions): string {

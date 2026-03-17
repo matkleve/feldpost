@@ -102,6 +102,19 @@ type ViewportMarkerRow = {
 
 type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number; lng: number }> };
 
+type MarkerRenderSnapshot = {
+  count: number;
+  thumbnailUrl?: string;
+  thumbnailLoading?: boolean;
+  fallbackLabel?: string;
+  direction?: number;
+  corrected?: boolean;
+  uploading?: boolean;
+  selected: boolean;
+  linkedHover: boolean;
+  zoomLevel: PhotoMarkerZoomLevel;
+};
+
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
@@ -1709,8 +1722,12 @@ export class MapShellComponent implements OnDestroy {
     const isPrimaryClick = clickButton === 0;
     const hasMarkerSelection =
       this.selectedMarkerKey() !== null || this.selectedMarkerKeys().size > 0;
+    const hasRadiusSelection = this.hasActiveRadiusSelection();
+    const hasWorkspaceSelection = this.workspaceViewService.selectionActive();
     const allowPrimaryDeselection =
-      isPrimaryClick && hasMarkerSelection && !this.searchPlacementActive();
+      isPrimaryClick &&
+      (hasMarkerSelection || hasRadiusSelection || hasWorkspaceSelection) &&
+      !this.searchPlacementActive();
 
     if (Date.now() < this.suppressMapClickUntil && !allowPrimaryDeselection) {
       return;
@@ -2026,21 +2043,45 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.radiusDraftHighlightedKeys = this.radiusDraftHighlightService.updateDraftHighlights({
+    const previousKeys = this.radiusDraftHighlightedKeys;
+    const nextKeys = this.radiusDraftHighlightService.updateDraftHighlights({
       map: this.map,
       uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      currentKeys: this.radiusDraftHighlightedKeys,
+      currentKeys: previousKeys,
       center,
       radiusMeters,
-      refreshPhotoMarker: (markerKey: string) => this.refreshPhotoMarker(markerKey),
     });
+
+    if (nextKeys === previousKeys) {
+      return;
+    }
+
+    this.radiusDraftHighlightedKeys = nextKeys;
+
+    for (const markerKey of previousKeys) {
+      if (!nextKeys.has(markerKey)) {
+        this.refreshPhotoMarker(markerKey);
+      }
+    }
+
+    for (const markerKey of nextKeys) {
+      if (!previousKeys.has(markerKey)) {
+        this.refreshPhotoMarker(markerKey);
+      }
+    }
   }
 
   private clearRadiusDraftMarkerHighlights(): void {
-    this.radiusDraftHighlightedKeys = this.radiusDraftHighlightService.clearDraftHighlights(
-      this.radiusDraftHighlightedKeys,
-      (markerKey: string) => this.refreshPhotoMarker(markerKey),
-    );
+    const previousKeys = this.radiusDraftHighlightedKeys;
+    const nextKeys = this.radiusDraftHighlightService.clearDraftHighlights(previousKeys);
+    if (nextKeys === previousKeys) {
+      return;
+    }
+
+    this.radiusDraftHighlightedKeys = nextKeys;
+    for (const markerKey of previousKeys) {
+      this.refreshPhotoMarker(markerKey);
+    }
   }
 
   private clearRadiusSelectionVisuals(): void {
@@ -2559,39 +2600,70 @@ export class MapShellComponent implements OnDestroy {
 
     // Always open pane and mark marker selected.
     this.setSelectedMarker(markerKey);
-    if (!this.photoPanelOpen()) {
-      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
-    }
-    this.photoPanelOpen.set(true);
+    this.ensurePhotoPanelOpen();
 
     // Load images at this marker's grid position(s) into the workspace view.
     const zoom = Math.round(this.map?.getZoom() ?? 13);
     const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
-    const additive = !!(clickEvent?.originalEvent.ctrlKey || clickEvent?.originalEvent.metaKey);
+    const additive = this.isAdditiveMarkerSelection(clickEvent);
 
     if (additive) {
-      // Ctrl/Meta-click appends marker results to the current active selection.
-      const selectedKeys = new Set(this.selectedMarkerKeys());
-      selectedKeys.add(markerKey);
-      this.setSelectedMarkerKeys(selectedKeys);
-      void this.addMarkerCellsToSelection(cells, zoom);
-      this.detailImageId.set(null);
+      this.handleAdditiveMarkerSelection(markerKey, cells, zoom);
       return;
     }
 
+    this.handleExclusiveMarkerSelection(
+      markerKey,
+      markerState.count,
+      markerState.imageId,
+      cells,
+      zoom,
+    );
+  }
+
+  private ensurePhotoPanelOpen(): void {
+    if (!this.photoPanelOpen()) {
+      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+    }
+    this.photoPanelOpen.set(true);
+  }
+
+  private isAdditiveMarkerSelection(clickEvent?: L.LeafletMouseEvent): boolean {
+    return !!(clickEvent?.originalEvent.ctrlKey || clickEvent?.originalEvent.metaKey);
+  }
+
+  private handleAdditiveMarkerSelection(
+    markerKey: string,
+    cells: Array<{ lat: number; lng: number }>,
+    zoom: number,
+  ): void {
+    // Ctrl/Meta-click appends marker results to the current active selection.
+    const selectedKeys = new Set(this.selectedMarkerKeys());
+    selectedKeys.add(markerKey);
+    this.setSelectedMarkerKeys(selectedKeys);
+    void this.addMarkerCellsToSelection(cells, zoom);
+    this.detailImageId.set(null);
+  }
+
+  private handleExclusiveMarkerSelection(
+    markerKey: string,
+    markerCount: number,
+    imageId: string | undefined,
+    cells: Array<{ lat: number; lng: number }>,
+    zoom: number,
+  ): void {
     this.workspaceSelectionService.clearSelection();
-
     this.setSelectedMarkerKeys(new Set([markerKey]));
-
     void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
 
     // Single-image marker: also jump directly to detail view.
-    if (markerState.count === 1 && markerState.imageId) {
-      this.openDetailView(markerState.imageId);
-    } else {
-      // Cluster click: ensure detail view is dismissed so thumbnail grid shows.
-      this.detailImageId.set(null);
+    if (markerCount === 1 && imageId) {
+      this.openDetailView(imageId);
+      return;
     }
+
+    // Cluster click: ensure detail view is dismissed so thumbnail grid shows.
+    this.detailImageId.set(null);
   }
 
   /** Attach click + touch long-press interactions consistently for each new marker. */
@@ -2996,24 +3068,53 @@ export class MapShellComponent implements OnDestroy {
     if (!this.map) return;
 
     const bounds = this.map.getBounds();
-    const now = Date.now();
     const staleThreshold = 50 * 60 * 1000; // 50 minutes
 
     this.photoLoadService.invalidateStale(staleThreshold);
 
     for (const [key, state] of this.uploadedPhotoMarkers) {
-      if (state.count !== 1 || !bounds.contains([state.lat, state.lng])) continue;
-
-      // Proactively clear stale URLs so they get re-signed.
-      if (state.thumbnailUrl && state.signedAt && now - state.signedAt > staleThreshold) {
-        state.thumbnailUrl = undefined;
-        state.signedAt = undefined;
-      }
-
-      if (!state.thumbnailUrl && state.thumbnailSourcePath && !state.thumbnailLoading) {
-        void this.lazyLoadThumbnail(key, state);
-      }
+      if (!this.isSingleMarkerInBounds(state, bounds)) continue;
+      this.clearStaleThumbnailIfNeeded(state, staleThreshold);
+      this.scheduleThumbnailLoadIfNeeded(key, state);
     }
+  }
+
+  private isSingleMarkerInBounds(
+    state: { count: number; lat: number; lng: number },
+    bounds: L.LatLngBounds,
+  ): boolean {
+    return state.count === 1 && bounds.contains([state.lat, state.lng]);
+  }
+
+  private clearStaleThumbnailIfNeeded(
+    state: { thumbnailUrl?: string; signedAt?: number },
+    staleThreshold: number,
+  ): void {
+    if (!state.thumbnailUrl || !state.signedAt) {
+      return;
+    }
+    if (Date.now() - state.signedAt <= staleThreshold) {
+      return;
+    }
+
+    // Proactively clear stale URLs so they get re-signed.
+    state.thumbnailUrl = undefined;
+    state.signedAt = undefined;
+  }
+
+  private scheduleThumbnailLoadIfNeeded(
+    key: string,
+    state: {
+      thumbnailSourcePath?: string;
+      thumbnailUrl?: string;
+      thumbnailLoading?: boolean;
+      signedAt?: number;
+    },
+  ): void {
+    if (state.thumbnailUrl || !state.thumbnailSourcePath || state.thumbnailLoading) {
+      return;
+    }
+    void this.lazyLoadThumbnail(key, state);
   }
 
   /**
@@ -3057,29 +3158,30 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const selected = this.isMarkerSelected(markerKey);
-    const linkedHover = this.isMarkerLinkedHovered(markerKey);
-    const zoomLevel = this.getPhotoMarkerZoomLevel();
-    const last = markerState.lastRendered;
+    const snapshot = this.buildMarkerRenderSnapshot(markerKey, markerState);
 
     // Skip DOM update when nothing visual has changed.
-    if (
-      last &&
-      last.count === markerState.count &&
-      last.thumbnailUrl === markerState.thumbnailUrl &&
-      last.thumbnailLoading === markerState.thumbnailLoading &&
-      last.fallbackLabel === markerState.fallbackLabel &&
-      last.direction === markerState.direction &&
-      last.corrected === markerState.corrected &&
-      last.uploading === markerState.uploading &&
-      last.selected === selected &&
-      last.linkedHover === linkedHover &&
-      last.zoomLevel === zoomLevel
-    ) {
+    if (this.hasSameMarkerRender(markerState.lastRendered, snapshot)) {
       return;
     }
 
-    markerState.lastRendered = {
+    markerState.lastRendered = snapshot;
+    this.renderPhotoMarker(markerKey, markerState, snapshot);
+  }
+
+  private buildMarkerRenderSnapshot(
+    markerKey: string,
+    markerState: {
+      count: number;
+      thumbnailUrl?: string;
+      thumbnailLoading?: boolean;
+      fallbackLabel?: string;
+      direction?: number;
+      corrected?: boolean;
+      uploading?: boolean;
+    },
+  ): MarkerRenderSnapshot {
+    return {
       count: markerState.count,
       thumbnailUrl: markerState.thumbnailUrl,
       thumbnailLoading: markerState.thumbnailLoading,
@@ -3087,32 +3189,73 @@ export class MapShellComponent implements OnDestroy {
       direction: markerState.direction,
       corrected: markerState.corrected,
       uploading: markerState.uploading,
-      selected,
-      linkedHover,
-      zoomLevel,
+      selected: this.isMarkerSelected(markerKey),
+      linkedHover: this.isMarkerLinkedHovered(markerKey),
+      zoomLevel: this.getPhotoMarkerZoomLevel(),
     };
+  }
+
+  private hasSameMarkerRender(
+    previous: MarkerRenderSnapshot | undefined,
+    next: MarkerRenderSnapshot,
+  ): boolean {
+    if (!previous) {
+      return false;
+    }
+
+    const checks = [
+      previous.count === next.count,
+      previous.thumbnailUrl === next.thumbnailUrl,
+      previous.thumbnailLoading === next.thumbnailLoading,
+      previous.fallbackLabel === next.fallbackLabel,
+      previous.direction === next.direction,
+      previous.corrected === next.corrected,
+      previous.uploading === next.uploading,
+      previous.selected === next.selected,
+      previous.linkedHover === next.linkedHover,
+      previous.zoomLevel === next.zoomLevel,
+    ];
+
+    return checks.every(Boolean);
+  }
+
+  private renderPhotoMarker(
+    markerKey: string,
+    markerState: {
+      marker: L.Marker;
+      count: number;
+      thumbnailUrl?: string;
+      thumbnailLoading?: boolean;
+      fallbackLabel?: string;
+      direction?: number;
+      corrected?: boolean;
+      uploading?: boolean;
+      thumbnailSourcePath?: string;
+    },
+    snapshot: MarkerRenderSnapshot,
+  ): void {
+    const markerElement = markerState.marker.getElement();
 
     // Direct innerHTML swap instead of setIcon() — avoids destroying
     // and recreating the entire DOM subtree for every update.
-    const el = (markerState.marker as L.Marker).getElement();
-    if (el) {
-      const html = buildPhotoMarkerHtml({
+    if (markerElement) {
+      markerElement.innerHTML = buildPhotoMarkerHtml({
         count: markerState.count,
         thumbnailUrl: markerState.thumbnailUrl,
         fallbackLabel: markerState.fallbackLabel ?? this.getMarkerFallbackLabel(markerState),
         bearing: markerState.direction,
-        selected,
-        linkedHover,
+        selected: snapshot.selected,
+        linkedHover: snapshot.linkedHover,
         corrected: markerState.corrected,
         uploading: markerState.uploading,
         loading: markerState.thumbnailLoading,
-        zoomLevel: this.getPhotoMarkerZoomLevel(),
+        zoomLevel: snapshot.zoomLevel,
       });
-      el.innerHTML = html;
-    } else {
-      // Fallback if element not yet in DOM.
-      markerState.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
+      return;
     }
+
+    // Fallback if element not yet in DOM.
+    markerState.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
   }
 
   private getMarkerFallbackLabel(

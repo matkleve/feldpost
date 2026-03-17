@@ -17,6 +17,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings overlay left column header title.',
     en: 'Workspace Preferences',
     de: 'Arbeitsbereich-Einstellungen',
+    it: 'Preferenze dell\'area di lavoro',
   },
   {
     key: 'settings.overlay.section.general.title',
@@ -24,6 +25,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for general options.',
     en: 'General',
     de: 'Allgemein',
+    it: 'Generale',
   },
   {
     key: 'settings.overlay.section.general.subtitle',
@@ -31,6 +33,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle in left list.',
     en: 'Language, density, and defaults',
     de: 'Sprache, Dichte und Standardwerte',
+    it: 'Lingua, densità e impostazioni predefinite',
   },
   {
     key: 'settings.overlay.section.appearance.title',
@@ -38,6 +41,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for appearance options.',
     en: 'Appearance',
     de: 'Darstellung',
+    it: 'Aspetto',
   },
   {
     key: 'settings.overlay.section.appearance.subtitle',
@@ -45,6 +49,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for appearance options.',
     en: 'Theme and visual behavior',
     de: 'Design und visuelles Verhalten',
+    it: 'Tema e comportamento visivo',
   },
   {
     key: 'settings.overlay.section.notifications.title',
@@ -52,6 +57,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for notification options.',
     en: 'Notifications',
     de: 'Benachrichtigungen',
+    it: 'Notifiche',
   },
   {
     key: 'settings.overlay.section.notifications.subtitle',
@@ -59,6 +65,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for notification options.',
     en: 'In-app status and alerts',
     de: 'Status und Hinweise in der App',
+    it: 'Stato e avvisi in-app',
   },
   {
     key: 'settings.overlay.section.map.title',
@@ -66,6 +73,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for map preferences.',
     en: 'Map Preferences',
     de: 'Karten-Einstellungen',
+    it: 'Preferenze mappa',
   },
   {
     key: 'settings.overlay.section.map.subtitle',
@@ -73,6 +81,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for map preferences.',
     en: 'Map behaviors and helper layers',
     de: 'Kartenverhalten und Hilfsebenen',
+    it: 'Comportamenti della mappa e livelli di supporto',
   },
   {
     key: 'settings.overlay.section.search.title',
@@ -80,6 +89,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for search tuning.',
     en: 'Search Tuning',
     de: 'Such-Optimierung',
+    it: 'Cerca sintonizzazione',
   },
   {
     key: 'settings.overlay.section.search.subtitle',
@@ -87,6 +97,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for search tuning.',
     en: 'Ranking and fallback tuning',
     de: 'Ranking und Fallback-Abstimmung',
+    it: 'Classifica e messa a punto del fallback',
   },
   {
     key: 'settings.overlay.section.data.title',
@@ -94,6 +105,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for data/privacy settings.',
     en: 'Data and Privacy',
     de: 'Daten und Datenschutz',
+    it: 'Dati e Privacy',
   },
   {
     key: 'settings.overlay.section.data.subtitle',
@@ -101,6 +113,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for data/privacy settings.',
     en: 'Retention and telemetry',
     de: 'Aufbewahrung und Telemetrie',
+    it: 'Conservazione e telemetria',
   },
   {
     key: 'settings.overlay.section.account.title',
@@ -108,6 +121,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for account settings.',
     en: 'Account',
     de: 'Konto',
+    it: 'Account',
   },
   {
     key: 'settings.overlay.section.account.subtitle',
@@ -115,6 +129,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for account settings.',
     en: 'Identity and sign-in context',
     de: 'Identität und Anmeldekontext',
+    it: 'Identità e contesto di accesso',
   },
   {
     key: 'settings.overlay.section.invites.title',
@@ -122,6 +137,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation label for invite management.',
     en: 'Invite Management',
     de: 'Einladungsverwaltung',
+    it: 'Gestione degli inviti',
   },
   {
     key: 'settings.overlay.section.invites.subtitle',
@@ -129,6 +145,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Settings section navigation subtitle for invite management.',
     en: 'Role-scoped QR and share links',
     de: 'Rollenbezogene QR- und Freigabe-Links',
+    it: 'QR con ambito ruolo e collegamenti di condivisione',
   },
   {
     key: 'settings.overlay.aria.dialog',
@@ -136,6 +153,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'ARIA label for the settings overlay dialog.',
     en: 'Settings',
     de: 'Einstellungen',
+    it: 'Impostazioni',
   },
   {
     key: 'settings.overlay.aria.close',
@@ -143,6 +161,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'ARIA label for the overlay close button.',
     en: 'Close settings overlay',
     de: 'Einstellungs-Overlay schließen',
+    it: 'Chiudi la sovrapposizione delle impostazioni',
   },
   {
     key: 'settings.overlay.aria.sections',
@@ -150,6 +169,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'ARIA label for the settings section list.',
     en: 'Settings sections',
     de: 'Einstellungsbereiche',
+    it: 'Sezioni Impostazioni',
   },
   {
     key: 'settings.overlay.kicker',
@@ -157,6 +177,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Small header text in settings sidebar.',
     en: 'Settings',
     de: 'Einstellungen',
+    it: 'Impostazioni',
   },
   {
     key: 'settings.overlay.subtitle',
@@ -164,6 +185,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Subtitle under settings overlay heading.',
     en: 'iOS-style section navigation with Feldpost controls.',
     de: 'iOS-artige Bereichsnavigation mit Feldpost-Steuerelementen.',
+    it: 'Navigazione delle sezioni in stile iOS con controlli Feldpost.',
   },
   {
     key: 'settings.overlay.loading.description',
@@ -171,6 +193,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Body text in loading state.',
     en: 'We are preparing your configuration profile.',
     de: 'Wir bereiten dein Konfigurationsprofil vor.',
+    it: 'Stiamo preparando il tuo profilo di configurazione.',
   },
   {
     key: 'settings.overlay.general.language.label',
@@ -178,6 +201,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for selecting interface language.',
     en: 'Language',
     de: 'Sprache',
+    it: 'Lingua',
   },
   {
     key: 'settings.overlay.general.language.option.en',
@@ -209,6 +233,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'General settings detail section heading.',
     en: 'General',
     de: 'Allgemein',
+    it: 'Generale',
   },
   {
     key: 'settings.overlay.general.description',
@@ -216,6 +241,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'General settings detail section description.',
     en: 'Control base language and content density for workspace surfaces.',
     de: 'Steuere Basissprache und Darstellungsdichte für Arbeitsbereichsoberflächen.',
+    it: 'Controlla la lingua di base e la densità dei contenuti per le superfici dell\'area di lavoro.',
   },
   {
     key: 'settings.overlay.general.density.label',
@@ -223,6 +249,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for interface density selector.',
     en: 'Density',
     de: 'Dichte',
+    it: 'Densità',
   },
   {
     key: 'settings.overlay.general.density.option.compact',
@@ -230,6 +257,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Density option label.',
     en: 'Compact',
     de: 'Kompakt',
+    it: 'Compatto',
   },
   {
     key: 'settings.overlay.general.density.option.comfortable',
@@ -237,6 +265,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Density option label.',
     en: 'Comfortable',
     de: 'Komfortabel',
+    it: 'Comodo',
   },
   {
     key: 'settings.overlay.appearance.title',
@@ -244,6 +273,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Appearance detail section heading.',
     en: 'Appearance',
     de: 'Darstellung',
+    it: 'Aspetto',
   },
   {
     key: 'settings.overlay.appearance.description',
@@ -251,6 +281,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Appearance detail section description.',
     en: 'Use the same palette behavior as dropdowns and map surfaces.',
     de: 'Nutze dasselbe Palettenverhalten wie bei Dropdowns und Kartenoberflächen.',
+    it: 'Utilizza lo stesso comportamento della tavolozza dei menu a discesa e delle superfici della mappa.',
   },
   {
     key: 'settings.overlay.appearance.themeMode.label',
@@ -258,6 +289,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for theme mode segmented control.',
     en: 'Theme mode',
     de: 'Designmodus',
+    it: 'Modalità tema',
   },
   {
     key: 'settings.overlay.appearance.themeMode.option.light',
@@ -265,6 +297,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Theme mode option label.',
     en: 'Light',
     de: 'Hell',
+    it: 'Leggero',
   },
   {
     key: 'settings.overlay.appearance.themeMode.option.dark',
@@ -272,6 +305,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Theme mode option label.',
     en: 'Dark',
     de: 'Dunkel',
+    it: 'Buio',
   },
   {
     key: 'settings.overlay.appearance.themeMode.option.system',
@@ -279,6 +313,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Theme mode option label.',
     en: 'System',
     de: 'System',
+    it: 'Sistema',
   },
   {
     key: 'settings.overlay.notifications.title',
@@ -286,6 +321,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Notifications detail section heading.',
     en: 'Notifications',
     de: 'Benachrichtigungen',
+    it: 'Notifiche',
   },
   {
     key: 'settings.overlay.notifications.description',
@@ -293,6 +329,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Notifications detail section description.',
     en: 'Choose what feedback appears while working on-site.',
     de: 'Wähle, welches Feedback während der Arbeit vor Ort angezeigt wird.',
+    it: 'Scegli quale feedback visualizzare mentre lavori sul posto.',
   },
   {
     key: 'settings.overlay.notifications.inApp.title',
@@ -300,6 +337,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle title for in-app notifications.',
     en: 'In-app notifications',
     de: 'In-App-Benachrichtigungen',
+    it: 'Notifiche nell\'app',
   },
   {
     key: 'settings.overlay.notifications.inApp.description',
@@ -307,6 +345,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle description for in-app notifications.',
     en: 'Show success and warning notices for actions.',
     de: 'Zeigt Erfolgs- und Warnhinweise für Aktionen an.',
+    it: 'Mostra avvisi di successo e di avviso per le azioni.',
   },
   {
     key: 'settings.overlay.notifications.uploadFailure.title',
@@ -314,6 +353,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle title for upload failure alerts.',
     en: 'Upload failure alerts',
     de: 'Upload-Fehlerhinweise',
+    it: 'Carica avvisi di errore',
   },
   {
     key: 'settings.overlay.notifications.uploadFailure.description',
@@ -321,6 +361,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle description for upload failure alerts.',
     en: 'Raise immediate warning toasts for failed uploads.',
     de: 'Zeigt sofortige Warnmeldungen bei fehlgeschlagenen Uploads.',
+    it: 'Genera avvisi immediati per i caricamenti non riusciti.',
   },
   {
     key: 'settings.overlay.map.title',
@@ -328,6 +369,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Map preferences detail section heading.',
     en: 'Map Preferences',
     de: 'Karten-Einstellungen',
+    it: 'Preferenze mappa',
   },
   {
     key: 'settings.overlay.map.description',
@@ -335,6 +377,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Map preferences detail section description.',
     en: 'Keep map behavior consistent with field navigation workflows.',
     de: 'Halte das Kartenverhalten konsistent mit den Vor-Ort-Navigationsabläufen.',
+    it: 'Mantieni il comportamento della mappa coerente con i flussi di lavoro di navigazione sul campo.',
   },
   {
     key: 'settings.overlay.map.autoLocate.title',
@@ -342,6 +385,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle title for map auto locate setting.',
     en: 'Auto-locate after login',
     de: 'Nach Login automatisch lokalisieren',
+    it: 'Localizzazione automatica dopo l\'accesso',
   },
   {
     key: 'settings.overlay.map.autoLocate.description',
@@ -349,6 +393,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle description for map auto locate setting.',
     en: 'Center map to your current position when entering map shell.',
     de: 'Zentriert die Karte beim Öffnen der Kartenansicht auf deine Position.',
+    it: 'Centra la mappa sulla posizione corrente quando entri nella shell della mappa.',
   },
   {
     key: 'settings.overlay.map.gridOverlay.title',
@@ -356,6 +401,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle title for map grid overlay setting.',
     en: 'Grid helper overlay',
     de: 'Raster-Hilfsebene',
+    it: 'Sovrapposizione dell\'helper della griglia',
   },
   {
     key: 'settings.overlay.map.gridOverlay.description',
@@ -363,6 +409,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle description for map grid overlay setting.',
     en: 'Show subtle grid alignment lines on high zoom levels.',
     de: 'Zeigt dezente Rasterlinien bei hoher Zoomstufe an.',
+    it: 'Mostra sottili linee di allineamento della griglia a livelli di zoom elevati.',
   },
   {
     key: 'settings.overlay.map.markerMotion.label',
@@ -370,6 +417,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for marker motion setting.',
     en: 'Marker motion',
     de: 'Markerbewegung',
+    it: 'Movimento del marcatore',
   },
   {
     key: 'settings.overlay.map.markerMotion.option.off',
@@ -377,6 +425,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Marker motion option label.',
     en: 'Off',
     de: 'Aus',
+    it: 'Spento',
   },
   {
     key: 'settings.overlay.map.markerMotion.option.smooth',
@@ -384,6 +433,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Marker motion option label.',
     en: 'Smooth',
     de: 'Sanft',
+    it: 'Liscio',
   },
   {
     key: 'settings.overlay.search.title',
@@ -391,6 +441,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Search tuning detail section heading.',
     en: 'Search Tuning',
     de: 'Such-Optimierung',
+    it: 'Cerca sintonizzazione',
   },
   {
     key: 'settings.overlay.search.description',
@@ -398,6 +449,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Search tuning detail section description.',
     en: 'Adjust bias and distance defaults for address and place results.',
     de: 'Passe Bias und Distanz-Standardwerte für Adress- und Orts-Ergebnisse an.',
+    it: 'Regola le impostazioni predefinite di deviazione e distanza per i risultati di indirizzi e luoghi.',
   },
   {
     key: 'settings.overlay.search.bias.label',
@@ -405,6 +457,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for search bias selector.',
     en: 'Search bias',
     de: 'Such-Bias',
+    it: 'Distorsioni di ricerca',
   },
   {
     key: 'settings.overlay.search.bias.option.balanced',
@@ -412,6 +465,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Search bias option label.',
     en: 'Balanced',
     de: 'Ausgewogen',
+    it: 'Equilibrato',
   },
   {
     key: 'settings.overlay.search.bias.option.addressFirst',
@@ -419,6 +473,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Search bias option label.',
     en: 'Address first',
     de: 'Adresse zuerst',
+    it: 'Prima l\'indirizzo',
   },
   {
     key: 'settings.overlay.search.bias.option.placeFirst',
@@ -426,6 +481,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Search bias option label.',
     en: 'Place first',
     de: 'Ort zuerst',
+    it: 'Posizionati per primo',
   },
   {
     key: 'settings.overlay.search.radius.label',
@@ -433,6 +489,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for search radius slider.',
     en: 'Default radius (km)',
     de: 'Standardradius (km)',
+    it: 'Raggio predefinito (km)',
   },
   {
     key: 'settings.overlay.data.title',
@@ -440,6 +497,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Data detail section heading.',
     en: 'Data and Privacy',
     de: 'Daten und Datenschutz',
+    it: 'Dati e Privacy',
   },
   {
     key: 'settings.overlay.data.description',
@@ -447,6 +505,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Data detail section description.',
     en: 'Control retention and diagnostics behavior.',
     de: 'Steuere Aufbewahrungs- und Diagnoseverhalten.',
+    it: 'Controllare il comportamento di conservazione e diagnostica.',
   },
   {
     key: 'settings.overlay.data.cacheRetention.label',
@@ -454,6 +513,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Field label for cache retention slider.',
     en: 'Local cache retention',
     de: 'Lokale Cache-Aufbewahrung',
+    it: 'Conservazione della cache locale',
   },
   {
     key: 'settings.overlay.data.telemetry.title',
@@ -461,6 +521,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle title for diagnostics telemetry.',
     en: 'Diagnostics telemetry',
     de: 'Diagnose-Telemetrie',
+    it: 'Telemetria diagnostica',
   },
   {
     key: 'settings.overlay.data.telemetry.description',
@@ -468,6 +529,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Toggle description for diagnostics telemetry.',
     en: 'Send anonymous performance and crash diagnostics.',
     de: 'Sendet anonyme Leistungs- und Absturzdiagnosen.',
+    it: 'Invia prestazioni anonime e diagnostica degli arresti anomali.',
   },
   {
     key: 'settings.overlay.account.title',
@@ -475,6 +537,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Account detail section heading.',
     en: 'Account',
     de: 'Konto',
+    it: 'Account',
   },
   {
     key: 'settings.overlay.account.description',
@@ -482,6 +545,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Account detail section description.',
     en: 'Signed-in identity and workspace session context.',
     de: 'Angemeldete Identität und Arbeitsbereichs-Sitzungskontext.',
+    it: 'Identità di accesso e contesto della sessione dell\'area di lavoro.',
   },
   {
     key: 'settings.overlay.account.close',
@@ -489,6 +553,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Button label to close settings from account section.',
     en: 'Close settings',
     de: 'Einstellungen schließen',
+    it: 'Chiudi le impostazioni',
   },
   {
     key: 'settings.overlay.account.logout.action',
@@ -496,6 +561,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Primary action button label to open account logout confirmation.',
     en: 'Logout',
     de: 'Abmelden',
+    it: 'Esci',
   },
   {
     key: 'settings.overlay.account.logout.confirmTitle',
@@ -503,6 +569,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Heading text in account logout confirmation dialog.',
     en: 'Logout now?',
     de: 'Jetzt abmelden?',
+    it: 'Esci adesso?',
   },
   {
     key: 'settings.overlay.account.logout.confirmDescription',
@@ -510,6 +577,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Description text in account logout confirmation dialog.',
     en: 'This ends your current Feldpost session on this device.',
     de: 'Dadurch wird deine aktuelle Feldpost-Sitzung auf diesem Gerät beendet.',
+    it: 'Questa operazione termina la tua attuale sessione Feldpost su questo dispositivo.',
   },
   {
     key: 'settings.overlay.account.logout.cancel',
@@ -517,6 +585,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Secondary button label to cancel account logout confirmation.',
     en: 'Cancel',
     de: 'Abbrechen',
+    it: 'Cancellare',
   },
   {
     key: 'settings.overlay.account.logout.pending',
@@ -524,6 +593,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Pending button label while account logout is in progress.',
     en: 'Logging out...',
     de: 'Abmeldung läuft...',
+    it: 'Disconnessione...',
   },
   {
     key: 'settings.overlay.account.logout.confirm',
@@ -531,6 +601,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Primary confirmation button label for account logout.',
     en: 'Confirm logout',
     de: 'Abmeldung bestätigen',
+    it: 'Conferma la disconnessione',
   },
   {
     key: 'settings.overlay.account.logout.error',
@@ -538,6 +609,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Error message shown when account logout fails.',
     en: 'Logout failed. Please try again.',
     de: 'Abmeldung fehlgeschlagen. Bitte versuche es erneut.',
+    it: 'Disconnessione non riuscita. Per favore riprova.',
   },
   {
     key: 'settings.overlay.account.unknownUser',
@@ -545,6 +617,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Fallback account name when no profile name/email is available.',
     en: 'Unknown user',
     de: 'Unbekannter Benutzer',
+    it: 'Utente sconosciuto',
   },
   {
     key: 'settings.overlay.account.noEmail',
@@ -552,6 +625,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Fallback account email text when no email is present.',
     en: 'No email available',
     de: 'Keine E-Mail verfügbar',
+    it: 'Nessuna e-mail disponibile',
   },
   {
     key: 'settings.overlay.error.noSession',
@@ -559,6 +633,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Error message when loading settings without authenticated user.',
     en: 'No authenticated session found.',
     de: 'Keine authentifizierte Sitzung gefunden.',
+    it: 'Nessuna sessione autenticata trovata.',
   },
   {
     key: 'settings.overlay.error.generic',
@@ -566,6 +641,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Generic error message when settings loading fails.',
     en: 'Unable to load settings right now.',
     de: 'Einstellungen können derzeit nicht geladen werden.',
+    it: 'Impossibile caricare le impostazioni in questo momento.',
   },
   {
     key: 'settings.overlay.loading.title',
@@ -573,6 +649,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Overlay state title while loading settings.',
     en: 'Loading settings',
     de: 'Einstellungen werden geladen',
+    it: 'Caricamento delle impostazioni',
   },
   {
     key: 'settings.overlay.error.title',
@@ -580,6 +657,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Overlay state title when settings fetch fails.',
     en: 'Could not load settings',
     de: 'Einstellungen konnten nicht geladen werden',
+    it: 'Impossibile caricare le impostazioni',
   },
   {
     key: 'settings.overlay.retry',
@@ -587,6 +665,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     context: 'Button label to retry failed settings load.',
     en: 'Retry',
     de: 'Erneut versuchen',
+    it: 'Riprova',
   },
 ];
 

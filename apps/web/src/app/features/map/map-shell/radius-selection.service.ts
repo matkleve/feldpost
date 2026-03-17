@@ -30,13 +30,17 @@ export class RadiusSelectionService {
       : new Set<string>();
 
     for (const [markerKey, markerState] of params.uploadedPhotoMarkers.entries()) {
-      const markerDistance = params.map.distance(params.center, [markerState.lat, markerState.lng]);
-      if (markerDistance > params.radiusMeters) continue;
+      const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
+      const insideCells = cells.filter(
+        (cell) => params.map.distance(params.center, [cell.lat, cell.lng]) <= params.radiusMeters,
+      );
+      if (insideCells.length === 0) {
+        continue;
+      }
 
       nextSelectedKeys.add(markerKey);
 
-      const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
-      for (const cell of cells) {
+      for (const cell of insideCells) {
         cellMap.set(params.toMarkerKey(cell.lat, cell.lng), cell);
       }
     }

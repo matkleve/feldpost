@@ -158,6 +158,43 @@ function scanFile(filePath) {
     for (const match of template.matchAll(attrRegex)) {
       addEntry(match[2], `${contextPrefix} attr:${match[1]}`);
     }
+
+    // Extract string literals from Angular interpolations, e.g.
+    // {{ saving() ? 'Saving...' : 'Save name' }}
+    const interpolationRegex = /\{\{([\s\S]*?)\}\}/g;
+    for (const interpolationMatch of template.matchAll(interpolationRegex)) {
+      const expression = interpolationMatch[1];
+      const literalRegex =
+        /'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"/g;
+      for (const literalMatch of expression.matchAll(literalRegex)) {
+        const value = (literalMatch[1] ?? literalMatch[2] ?? "")
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, " ")
+          .trim();
+        if (!value) continue;
+        addEntry(value, `${contextPrefix} interpolation-literal`);
+      }
+    }
+
+    // Extract string literals from bound attributes, e.g.
+    // [title]="'Confirm logout'"
+    const boundAttrRegex =
+      /\[(title|aria-label|placeholder|message|confirmLabel|cancelLabel)\]\s*=\s*"([^"]+)"/g;
+    for (const boundAttrMatch of template.matchAll(boundAttrRegex)) {
+      const expression = boundAttrMatch[2];
+      const literalRegex =
+        /'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"/g;
+      for (const literalMatch of expression.matchAll(literalRegex)) {
+        const value = (literalMatch[1] ?? literalMatch[2] ?? "")
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, " ")
+          .trim();
+        if (!value) continue;
+        addEntry(value, `${contextPrefix} bound-attr:${boundAttrMatch[1]}`);
+      }
+    }
   };
 
   if (filePath.endsWith(".html")) {
@@ -169,6 +206,15 @@ function scanFile(filePath) {
     const inlineTemplateRegex = /template\s*:\s*`([\s\S]*?)`/g;
     for (const match of content.matchAll(inlineTemplateRegex)) {
       extractFromTemplate(match[1], `${rel} inline-template`);
+    }
+
+    // Extract TS-side user-facing toast/dialog messages.
+    const messageRegex =
+      /\b(message|title|confirmLabel|cancelLabel)\s*:\s*'([^'\\]*(?:\\.[^'\\]*)*)'/g;
+    for (const match of content.matchAll(messageRegex)) {
+      const value = match[2].replace(/\\'/g, "'").replace(/\\n/g, " ").trim();
+      if (!value) continue;
+      addEntry(value, `${rel} ts-prop:${match[1]}`);
     }
   }
 }

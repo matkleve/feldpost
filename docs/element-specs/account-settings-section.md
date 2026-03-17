@@ -6,7 +6,7 @@ A Settings Overlay section for account identity and account security management.
 
 ## What It Looks Like
 
-The section is rendered in the right detail column of the Settings Overlay as a stacked `.ui-container` layout with grouped cards: `Profil`, `Anmeldung`, `2FA`, and `Sitzung`. Each card follows existing `.ui-item` rhythm with clear title, short helper copy, and a single focused action area (inline form or step flow). Destructive actions are visually isolated and use critical action tokens; primary account actions keep neutral/brand emphasis. Every interactive control keeps minimum height `2.75rem` (44px) for tap targets. There is no secondary local close action in this section; overlay dismissal remains at shell level (top-right close button, backdrop click, or Escape).
+The section is rendered in the right detail column of the Settings Overlay as a stacked `.ui-container` layout with grouped cards: `Profil`, `Anmeldung`, `2FA`, and `Sitzung`. The section frame appears instantly when `Konto` is selected (no global settings loader). Data-backed fields inside cards hydrate progressively using local placeholders/spinners/skeletons until profile and MFA payloads are ready. Destructive actions are visually isolated and use critical action tokens; primary account actions keep neutral/brand emphasis. Every interactive control keeps minimum height `2.75rem` (44px) for tap targets. There is no secondary local close action in this section; overlay dismissal remains at shell level (top-right close button, backdrop click, or Escape).
 
 ## Where It Lives
 
@@ -18,7 +18,8 @@ The section is rendered in the right detail column of the Settings Overlay as a 
 
 | #   | User Action                                        | System Response                                                                               | Triggers                                          |
 | --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 1   | Opens `Konto` section                              | Renders identity, email, password, 2FA, and session groups with current user context          | section selection in settings registry            |
+| 1   | Opens `Konto` section                              | Renders account cards immediately with local placeholder/skeleton state                       | section selection in settings registry            |
+| 1a  | Section-local profile/MFA fetch in progress        | Keeps layout visible; shows loading indicators only in affected controls/cards                | section-local async load                          |
 | 2   | Edits display name and saves                       | Persists profile metadata, updates visible identity label, shows success feedback             | `UserProfileService.updateDisplayName()`          |
 | 3   | Starts email change                                | Validates email syntax, calls auth email update, displays verification-required state         | `AuthService.updateEmail()`                       |
 | 4   | Confirms new email via verification link/OTP       | Session/user metadata refreshes and section resolves to new verified email                    | Supabase `updateUser({ email })` confirmation     |
@@ -35,29 +36,34 @@ The section is rendered in the right detail column of the Settings Overlay as a 
 
 ```mermaid
 flowchart TD
-    A[Open Konto section] --> B[Render Profil, Anmeldung, 2FA, Sitzung]
-    B --> C{Action type}
-    C -- Profil --> D[Update display name]
-    C -- Email --> E[Start email change and verification]
-    C -- Passwort --> F[Re-auth if required and update password]
-    C -- Passwort vergessen --> G[Send password reset email]
-    C -- 2FA Setup --> H[Enroll TOTP and verify code]
-    C -- 2FA Remove --> I[Confirm and remove factor]
-    C -- Logout --> J[Open logout confirmation]
-    D --> K{Success?}
-    E --> K
-    F --> K
-    G --> K
-    H --> K
-    I --> K
-    J --> L{Confirmed?}
-    L -- Yes --> M[Run signOut orchestration]
-    L -- No --> B
-    M --> N{Success?}
-    N -- Yes --> O[Close overlay and route to auth entry]
-    N -- No --> P[Show error and allow retry]
-    K -- Yes --> B
-    K -- No --> P
+    A[Open Konto section] --> B[Render Profil, Anmeldung, 2FA, Sitzung shell immediately]
+    B --> C[Start section-local profile + MFA fetch]
+    C --> D{Fetch success?}
+    D -- Yes --> E[Hydrate cards with real identity/security data]
+    D -- No --> F[Show section-local error/retry state]
+    F --> C
+    E --> G{Action type}
+    G -- Profil --> H[Update display name]
+    G -- Email --> I[Start email change and verification]
+    G -- Passwort --> J[Re-auth if required and update password]
+    G -- Passwort vergessen --> K[Send password reset email]
+    G -- 2FA Setup --> L[Enroll TOTP and verify code]
+    G -- 2FA Remove --> M[Confirm and remove factor]
+    G -- Logout --> N[Open logout confirmation]
+    H --> O{Success?}
+    I --> O
+    J --> O
+    K --> O
+    L --> O
+    M --> O
+    N --> P{Confirmed?}
+    P -- Yes --> Q[Run signOut orchestration]
+    P -- No --> E
+    Q --> R{Success?}
+    R -- Yes --> S[Close overlay and route to auth entry]
+    R -- No --> T[Show error and allow retry]
+    O -- Yes --> E
+    O -- No --> T
 ```
 
 ## Component Hierarchy

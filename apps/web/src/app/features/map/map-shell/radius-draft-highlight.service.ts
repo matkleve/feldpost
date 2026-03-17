@@ -10,12 +10,16 @@ export class RadiusDraftHighlightService {
     currentKeys: Set<string>;
     center: L.LatLng;
     radiusMeters: number;
-    refreshPhotoMarker: (markerKey: string) => void;
   }): Set<string> {
     const nextKeys = new Set<string>();
     for (const [markerKey, markerState] of params.uploadedPhotoMarkers.entries()) {
-      const markerDistance = params.map.distance(params.center, [markerState.lat, markerState.lng]);
-      if (markerDistance <= params.radiusMeters) {
+      const sourceCells = markerState.sourceCells ?? [
+        { lat: markerState.lat, lng: markerState.lng },
+      ];
+      const hasCellInsideRadius = sourceCells.some(
+        (cell) => params.map.distance(params.center, [cell.lat, cell.lng]) <= params.radiusMeters,
+      );
+      if (hasCellInsideRadius) {
         nextKeys.add(markerKey);
       }
     }
@@ -27,31 +31,12 @@ export class RadiusDraftHighlightService {
       return params.currentKeys;
     }
 
-    for (const key of params.currentKeys) {
-      if (!nextKeys.has(key)) {
-        params.refreshPhotoMarker(key);
-      }
-    }
-
-    for (const key of nextKeys) {
-      if (!params.currentKeys.has(key)) {
-        params.refreshPhotoMarker(key);
-      }
-    }
-
     return nextKeys;
   }
 
-  clearDraftHighlights(
-    currentKeys: Set<string>,
-    refreshPhotoMarker: (markerKey: string) => void,
-  ): Set<string> {
+  clearDraftHighlights(currentKeys: Set<string>): Set<string> {
     if (currentKeys.size === 0) {
       return currentKeys;
-    }
-
-    for (const markerKey of currentKeys) {
-      refreshPhotoMarker(markerKey);
     }
 
     return new Set<string>();
