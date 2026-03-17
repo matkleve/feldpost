@@ -114,7 +114,7 @@ async function translateFromEn(value, targetLang) {
 
   const { protectedText, placeholders } = protectPlaceholders(core);
   const query = encodeURIComponent(protectedText);
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${encodeURIComponent(targetLang)}&dt=t&q=${query}`;
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${query}`;
 
   const response = await fetch(url);
   if (!response.ok) {

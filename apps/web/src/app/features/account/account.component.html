@@ -1,4 +1,4 @@
-<section class="account-page ui-container" aria-label="Account page">
+<section class="account-page ui-container" [attr.aria-label]="tr('Account page')">
   <header class="account-card account-card--identity ui-container ui-container--compact">
     <div class="account-card__avatar" aria-hidden="true">
       @if (loading()) {
@@ -13,7 +13,7 @@
         <p class="account-skeleton account-skeleton--line account-skeleton--line-short"></p>
       } @else {
         <h1>{{ displayName() }}</h1>
-        <p>{{ userEmail() || 'Keine E-Mail verfügbar' }}</p>
+        <p>{{ userEmail() || tr('Keine E-Mail verfügbar') }}</p>
       }
     </div>
     <div class="account-card__badges">
@@ -28,10 +28,10 @@
   </header>
 
   <section class="account-card ui-container ui-container--compact">
-    <h2>Profil</h2>
-    <p>Aktualisiere deinen sichtbaren Namen.</p>
+    <h2>{{ tr('Profil') }}</h2>
+    <p>{{ tr('Aktualisiere deinen sichtbaren Namen.') }}</p>
     <label class="account-field">
-      <span>Anzeigename</span>
+      <span>{{ tr('Anzeigename') }}</span>
       <input
         type="text"
         [value]="pendingDisplayName()"
@@ -45,16 +45,16 @@
       (click)="saveDisplayName()"
       [disabled]="loading() || savingProfile()"
     >
-      {{ savingProfile() ? 'Speichern...' : 'Namen speichern' }}
+      {{ savingProfile() ? tr('Speichern...') : tr('Namen speichern') }}
     </button>
   </section>
 
   <section class="account-card ui-container ui-container--compact">
-    <h2>Anmeldung</h2>
-    <p>E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.</p>
+    <h2>{{ tr('Anmeldung') }}</h2>
+    <p>{{ tr('E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.') }}</p>
 
     <label class="account-field">
-      <span>Neue E-Mail</span>
+      <span>{{ tr('Neue E-Mail') }}</span>
       <input
         type="email"
         [value]="pendingEmail()"
@@ -68,12 +68,12 @@
       (click)="updateEmail()"
       [disabled]="loading() || updatingEmail()"
     >
-      {{ updatingEmail() ? 'Aktualisiere...' : 'E-Mail ändern' }}
+      {{ updatingEmail() ? tr('Aktualisiere...') : tr('E-Mail ändern') }}
     </button>
 
     <div class="account-grid">
       <label class="account-field">
-        <span>Aktuelles Passwort</span>
+        <span>{{ tr('Aktuelles Passwort') }}</span>
         <input
           type="password"
           [value]="currentPassword()"
@@ -82,7 +82,7 @@
         />
       </label>
       <label class="account-field">
-        <span>Neues Passwort</span>
+        <span>{{ tr('Neues Passwort') }}</span>
         <input
           type="password"
           [value]="nextPassword()"
@@ -91,7 +91,7 @@
         />
       </label>
       <label class="account-field">
-        <span>Neues Passwort bestätigen</span>
+        <span>{{ tr('Neues Passwort bestätigen') }}</span>
         <input
           type="password"
           [value]="confirmPassword()"
@@ -108,7 +108,7 @@
         (click)="updatePassword()"
         [disabled]="loading() || updatingPassword()"
       >
-        {{ updatingPassword() ? 'Aktualisiere...' : 'Passwort ändern' }}
+        {{ updatingPassword() ? tr('Aktualisiere...') : tr('Passwort ändern') }}
       </button>
       <button
         type="button"
@@ -116,21 +116,21 @@
         (click)="sendPasswordReset()"
         [disabled]="loading() || sendingReset()"
       >
-        {{ sendingReset() ? 'Sende...' : 'Passwort vergessen' }}
+        {{ sendingReset() ? tr('Sende...') : tr('Passwort vergessen') }}
       </button>
     </div>
   </section>
 
   <section class="account-card ui-container ui-container--compact">
-    <h2>2FA</h2>
-    <p>Aktive Faktoren und TOTP-Setup.</p>
+    <h2>{{ tr('2FA') }}</h2>
+    <p>{{ tr('Aktive Faktoren und TOTP-Setup.') }}</p>
 
     <div class="account-factor-list" role="list">
       @if (loading()) {
         <div class="account-factor account-skeleton-row"></div>
         <div class="account-factor account-skeleton-row"></div>
       } @else if (mfaFactors().length === 0) {
-        <p class="account-muted">Noch keine 2FA-Faktoren vorhanden.</p>
+        <p class="account-muted">{{ tr('Noch keine 2FA-Faktoren vorhanden.') }}</p>
       } @else {
         @for (factor of mfaFactors(); track factor.id) {
           <div class="account-factor" role="listitem">
@@ -144,7 +144,7 @@
               (click)="removeFactor(factor.id)"
               [disabled]="mfaBusy()"
             >
-              Entfernen
+              {{ tr('Entfernen') }}
             </button>
           </div>
         }
@@ -157,17 +157,17 @@
       (click)="startTotpEnrollment()"
       [disabled]="loading() || mfaBusy()"
     >
-      {{ mfaBusy() ? 'Lädt...' : 'TOTP einrichten' }}
+      {{ mfaBusy() ? tr('Lädt...') : tr('TOTP einrichten') }}
     </button>
 
     @if (mfaEnrollFactorId()) {
       <div class="account-enroll">
         @if (asQrDataUrl(mfaQrCode()); as qrDataUrl) {
-          <img [src]="qrDataUrl" alt="2FA QR code" />
+          <img [src]="qrDataUrl" [attr.alt]="tr('2FA QR code')" />
         }
-        <p>Secret: {{ mfaSecret() }}</p>
+        <p>{{ tr('Secret:') }} {{ mfaSecret() }}</p>
         <label class="account-field">
-          <span>6-stelligen Code eingeben</span>
+          <span>{{ tr('6-stelligen Code eingeben') }}</span>
           <input type="text" [value]="mfaCode()" (input)="mfaCode.set($any($event.target).value)" />
         </label>
         <button
@@ -176,45 +176,45 @@
           (click)="verifyTotpEnrollment()"
           [disabled]="mfaBusy()"
         >
-          {{ mfaBusy() ? 'Prüfe...' : '2FA bestätigen' }}
+          {{ mfaBusy() ? tr('Prüfe...') : tr('2FA bestätigen') }}
         </button>
       </div>
     }
   </section>
 
   <section class="account-card ui-container ui-container--compact">
-    <h2>Sitzung</h2>
-    <p>Beende deine aktuelle Sitzung sicher.</p>
+    <h2>{{ tr('Sitzung') }}</h2>
+    <p>{{ tr('Beende deine aktuelle Sitzung sicher.') }}</p>
     <button
       type="button"
       class="account-btn account-btn--danger"
       (click)="openLogoutConfirm()"
       [disabled]="loading()"
     >
-      Logout
+      {{ tr('Logout') }}
     </button>
   </section>
 
   <section class="account-card account-card--danger ui-container ui-container--compact">
-    <h2>Konto löschen</h2>
-    <p>Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.</p>
+    <h2>{{ tr('Konto löschen') }}</h2>
+    <p>{{ tr('Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.') }}</p>
     <button
       type="button"
       class="account-btn account-btn--danger"
       (click)="openDeleteConfirm()"
       [disabled]="loading()"
     >
-      Konto löschen
+      {{ tr('Konto löschen') }}
     </button>
   </section>
 </section>
 
 @if (logoutConfirmOpen()) {
   <app-confirm-dialog
-    [title]="'Logout bestätigen'"
-    [message]="'Möchtest du die aktuelle Sitzung wirklich beenden?'"
-    [confirmLabel]="'Logout'"
-    [cancelLabel]="'Abbrechen'"
+    [title]="tr('Logout bestätigen')"
+    [message]="tr('Möchtest du die aktuelle Sitzung wirklich beenden?')"
+    [confirmLabel]="tr('Logout')"
+    [cancelLabel]="tr('Abbrechen')"
     [danger]="true"
     (cancelled)="closeLogoutConfirm()"
     (confirmed)="confirmLogout()"
@@ -226,13 +226,13 @@
     class="account-delete-overlay"
     role="dialog"
     aria-modal="true"
-    aria-label="Konto löschen bestätigen"
+    [attr.aria-label]="tr('Konto löschen bestätigen')"
   >
     <div class="account-delete-dialog ui-container ui-container--compact">
-      <h3>Konto löschen</h3>
-      <p>Bitte gib DELETE ein, um die Löschung zu bestätigen.</p>
+      <h3>{{ tr('Konto löschen') }}</h3>
+      <p>{{ tr('Bitte gib DELETE ein, um die Löschung zu bestätigen.') }}</p>
       <label class="account-field">
-        <span>Bestätigung</span>
+        <span>{{ tr('Bestätigung') }}</span>
         <input
           type="text"
           [value]="deletePhrase()"
@@ -241,7 +241,7 @@
       </label>
       <div class="account-actions">
         <button type="button" class="account-btn account-btn--ghost" (click)="closeDeleteConfirm()">
-          Abbrechen
+          {{ tr('Abbrechen') }}
         </button>
         <button
           type="button"
@@ -249,7 +249,7 @@
           [disabled]="!canConfirmDelete() || deletingAccount()"
           (click)="confirmDeleteAccount()"
         >
-          {{ deletingAccount() ? 'Lösche...' : 'Endgültig löschen' }}
+          {{ deletingAccount() ? tr('Lösche...') : tr('Endgültig löschen') }}
         </button>
       </div>
     </div>

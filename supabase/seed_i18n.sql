@@ -1235,7 +1235,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Auswahl oeffnen', 'published'
+select t.id, 'it', 'Apri la selezione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0040.auswahl_oeffnen'
 on conflict (app_text_id, lang) do update set
@@ -1483,7 +1483,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Bestätigung für die neue E-Mail wurde versendet.', 'published'
+select t.id, 'it', 'La conferma della nuova email è stata inviata.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0048.best_tigung_f_r_die_neue_e_mail_wurde_versendet'
 on conflict (app_text_id, lang) do update set
@@ -1576,7 +1576,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Bitte gültige E-Mail eingeben.', 'published'
+select t.id, 'it', 'Inserisci un''e-mail valida.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0051.bitte_g_ltige_e_mail_eingeben'
 on conflict (app_text_id, lang) do update set
@@ -1607,7 +1607,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Bitte gültigen 2FA-Code eingeben.', 'published'
+select t.id, 'it', 'Inserisci un codice 2FA valido.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0052.bitte_g_ltigen_2fa_code_eingeben'
 on conflict (app_text_id, lang) do update set
@@ -4304,7 +4304,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Endgültig löschen', 'published'
+select t.id, 'it', 'Elimina definitivamente', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0139.endg_ltig_l_schen'
 on conflict (app_text_id, lang) do update set
@@ -4614,7 +4614,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Foto geloescht.', 'published'
+select t.id, 'it', 'Foto esaminata.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0149.foto_geloescht'
 on conflict (app_text_id, lang) do update set
@@ -4707,7 +4707,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Freigabelink konnte nicht aufgeloest werden.', 'published'
+select t.id, 'it', 'Impossibile risolvere il collegamento di condivisione.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0152.freigabelink_konnte_nicht_aufgeloest_werden'
 on conflict (app_text_id, lang) do update set
@@ -4769,7 +4769,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.', 'published'
+select t.id, 'it', 'Collegamento di condivisione non valido, scaduto o nessun accesso.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0154.freigabelink_ungueltig_abgelaufen_oder_ohne_zugriff'
 on conflict (app_text_id, lang) do update set
@@ -5885,7 +5885,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Keine Medien fuer Projektzuweisung gefunden.', 'published'
+select t.id, 'it', 'Nessun supporto trovato per l''assegnazione del progetto.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0190.keine_medien_fuer_projektzuweisung_gefunden'
 on conflict (app_text_id, lang) do update set
@@ -5916,7 +5916,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Keine Medien in Radius-Auswahl verfuegbar.', 'published'
+select t.id, 'it', 'Nessun supporto disponibile nella selezione del raggio.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0191.keine_medien_in_radius_auswahl_verfuegbar'
 on conflict (app_text_id, lang) do update set
@@ -6102,7 +6102,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Lädt...', 'published'
+select t.id, 'it', 'Caricamento...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0197.l_dt'
 on conflict (app_text_id, lang) do update set
@@ -6567,7 +6567,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Lösche...', 'published'
+select t.id, 'it', 'Eliminare...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0212.l_sche'
 on conflict (app_text_id, lang) do update set
@@ -6815,7 +6815,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Marker verschieben folgt im nächsten Schritt.', 'published'
+select t.id, 'it', 'Lo spostamento dei marcatori avviene nel passaggio successivo.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0220.marker_verschieben_folgt_im_n_chsten_schritt'
 on conflict (app_text_id, lang) do update set
@@ -6970,7 +6970,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Möchtest du die aktuelle Sitzung wirklich beenden?', 'published'
+select t.id, 'it', 'Sei sicuro di voler terminare la sessione corrente?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0225.m_chtest_du_die_aktuelle_sitzung_wirklich_beenden'
 on conflict (app_text_id, lang) do update set
@@ -7249,7 +7249,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Neues Passwort muss mindestens 6 Zeichen haben.', 'published'
+select t.id, 'it', 'La nuova password deve contenere almeno 6 caratteri.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0234.neues_passwort_muss_mindestens_6_zeichen_haben'
 on conflict (app_text_id, lang) do update set
@@ -12581,7 +12581,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Speichern...', 'published'
+select t.id, 'it', 'Salva...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0406.speichern'
 on conflict (app_text_id, lang) do update set

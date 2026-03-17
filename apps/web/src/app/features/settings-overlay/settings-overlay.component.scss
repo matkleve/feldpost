@@ -6,8 +6,12 @@
   /* Uses the existing narrow-rail step (25rem) and caps near 30rem on desktop. */
   --settings-overlay-right-width: clamp(25rem, 40vw, 30rem);
   --settings-stroke-width: 1.5px;
-  --settings-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
-  --settings-hover-focus: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --settings-border-muted: var(--interactive-border-muted);
+  --settings-hover-focus: var(--interactive-surface-hover);
+  --settings-interactive-border: var(--settings-stroke-width) solid var(--settings-border-muted);
+  --settings-interactive-radius: var(--container-radius-control);
+  --settings-focus-ring: var(--interactive-focus-ring);
+  --settings-interactive-transition: var(--interactive-transition-standard);
 }
 
 .settings-overlay {
@@ -40,17 +44,24 @@
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
+  border: var(--settings-interactive-border);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
   color: var(--color-text-secondary);
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__close:hover {
   color: var(--color-text-primary);
   border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
   background: var(--settings-hover-focus);
+}
+
+.settings-overlay__close:focus-visible {
+  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
 }
 
 .settings-overlay__lead-divider {
@@ -119,6 +130,7 @@
   text-align: left;
   color: var(--color-text-primary);
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__section-item:hover {
@@ -128,6 +140,12 @@
 .settings-overlay__section-item--active {
   border-color: color-mix(in srgb, var(--color-clay) 42%, transparent);
   background: color-mix(in srgb, var(--color-clay) 12%, transparent);
+}
+
+.settings-overlay__section-item:focus-visible {
+  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
 }
 
 .settings-overlay__section-media {
@@ -204,7 +222,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
+  border: var(--settings-interactive-border);
   border-radius: var(--radius-full);
   padding: 0.15rem;
 }
@@ -219,6 +237,7 @@
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__segmented button:hover {
@@ -231,21 +250,33 @@
   color: var(--color-clay);
 }
 
+.settings-overlay__segmented button:focus-visible {
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
+}
+
 .settings-overlay__toggle-row {
   --ui-item-media-size: 0;
   grid-template-columns: minmax(0, 1fr) auto;
 
   width: 100%;
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
+  border: var(--settings-interactive-border);
   background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent);
   text-align: left;
   color: var(--color-text-primary);
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__toggle-row:hover {
   border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
   background: var(--settings-hover-focus);
+}
+
+.settings-overlay__toggle-row:focus-visible {
+  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
 }
 
 .settings-overlay__toggle-row .ui-item-label {
@@ -294,11 +325,18 @@
 
 .settings-overlay__select {
   min-height: 2.5rem;
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
-  border-radius: var(--container-radius-control);
+  border: var(--settings-interactive-border);
+  border-radius: var(--settings-interactive-radius);
   background: var(--color-bg-surface);
   color: var(--color-text-primary);
   padding: 0.5rem 0.75rem;
+  transition: var(--settings-interactive-transition);
+}
+
+.settings-overlay__select:focus-visible {
+  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
 }
 
 .settings-overlay__range {
@@ -359,17 +397,24 @@
 .settings-overlay__ghost-button {
   align-self: center;
   min-height: 2.5rem;
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
-  border-radius: var(--container-radius-control);
+  border: var(--settings-interactive-border);
+  border-radius: var(--settings-interactive-radius);
   background: transparent;
   color: var(--color-text-primary);
   padding: 0.45rem 0.9rem;
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__ghost-button:hover {
   border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
   background: var(--settings-hover-focus);
+}
+
+.settings-overlay__ghost-button:focus-visible {
+  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
 }
 
 .settings-overlay__logout-button {
@@ -381,6 +426,7 @@
   color: var(--color-danger);
   font-weight: 600;
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__account-page-button {
@@ -392,10 +438,17 @@
   color: var(--color-clay);
   font-weight: 600;
   cursor: pointer;
+  transition: var(--settings-interactive-transition);
 }
 
 .settings-overlay__account-page-button:hover {
   background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
+}
+
+.settings-overlay__account-page-button:focus-visible,
+.settings-overlay__logout-button:focus-visible {
+  box-shadow: var(--settings-focus-ring);
+  outline: none;
 }
 
 .settings-overlay__logout-button:hover:not(:disabled) {

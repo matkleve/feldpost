@@ -126,6 +126,16 @@
   );
   --layout-sidebar-icon-size: 1.25rem;
   --layout-sidebar-label-size: 0.8125rem;
+
+  // Shared interactive primitives (single source for hover/focus/motion)
+  --interactive-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
+  --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --interactive-focus-ring: 0 0 0 2px color-mix(in srgb, var(--color-clay) 16%, transparent);
+  --interactive-transition-standard:
+    border-color 120ms ease-out,
+    background 120ms ease-out,
+    color 120ms ease-out,
+    box-shadow 120ms ease-out;
 }
 
 // ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
@@ -477,13 +487,14 @@ router-outlet + * {
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
   cursor: pointer;
+  transition: var(--interactive-transition-standard);
 
   .material-icons {
     font-size: 1rem;
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    background: var(--interactive-surface-hover);
     color: var(--color-text-primary);
   }
 }
@@ -500,16 +511,14 @@ router-outlet + * {
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition:
-    background 80ms ease-out,
-    color 80ms ease-out;
+  transition: var(--interactive-transition-standard);
 
   .material-icons {
     font-size: 1rem;
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    background: var(--interactive-surface-hover);
     color: var(--color-clay);
   }
 }
@@ -545,21 +554,17 @@ router-outlet + * {
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    background 120ms ease-out,
-    color 120ms ease-out,
-    border-color 120ms ease-out,
-    box-shadow 120ms ease-out;
+  transition: var(--interactive-transition-standard);
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
+    background: var(--interactive-surface-hover);
     border-color: color-mix(in srgb, var(--color-clay) 35%, var(--color-border));
     color: var(--color-clay);
   }
 
   &:focus-visible {
     border-color: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 16%, transparent);
+    box-shadow: var(--interactive-focus-ring);
     outline: none;
   }
 }
@@ -599,7 +604,7 @@ router-outlet + * {
 
 .option-menu-surface {
   background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--interactive-border-muted);
   border-radius: var(--radius-lg);
   box-shadow: var(--elevation-dropdown);
   overflow: hidden;
@@ -613,7 +618,7 @@ router-outlet + * {
 
 .option-menu-header {
   padding: var(--spacing-2) var(--spacing-3);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--interactive-border-muted);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-secondary);
@@ -637,9 +642,7 @@ router-outlet + * {
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0;
-  transition:
-    background 80ms ease-out,
-    color 80ms ease-out;
+  transition: var(--interactive-transition-standard);
 
   .material-icons,
   .material-symbols-outlined {
@@ -648,7 +651,7 @@ router-outlet + * {
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    background: var(--interactive-surface-hover);
     color: var(--color-text-primary);
   }
 }

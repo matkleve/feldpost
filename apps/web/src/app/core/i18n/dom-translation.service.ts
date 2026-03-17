@@ -140,7 +140,8 @@ export class DomTranslationService {
       tag === 'code' ||
       tag === 'pre' ||
       tag === 'textarea' ||
-      element.classList.contains('material-icons')
+      element.classList.contains('material-icons') ||
+      element.closest('[data-i18n-skip]') !== null
     );
   }
 }

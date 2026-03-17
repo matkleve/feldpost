@@ -229,12 +229,18 @@ export class I18nService {
 
   t(key: string, fallback = ''): string {
     const language = this.languageSignal();
-    const runtimeDictionary = this.runtimeDictionaries()[language];
-    const runtimeByKey = runtimeDictionary.byKey[key];
-    if (runtimeByKey) return runtimeByKey;
-
     const entry = TRANSLATION_BY_KEY[key];
-    if (!entry) return fallback || key;
+    const runtimeDictionary = this.runtimeDictionaries()[language];
+
+    // Canonical key-based UI copy must be deterministic and come from the
+    // in-repo catalog. Runtime DB translations are only used as fallback for
+    // non-catalog keys or for missing Italian catalog values.
+    if (!entry) {
+      const runtimeByKey = runtimeDictionary.byKey[key];
+      if (runtimeByKey) return runtimeByKey;
+      return fallback || key;
+    }
+
     switch (language) {
       case 'de':
         return entry.de;

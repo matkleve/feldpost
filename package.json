@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "i18n:generate-language": "node scripts/generate-i18n-language.mjs",
+    "i18n:validate-language": "node scripts/validate-i18n-language.mjs"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0"
   }

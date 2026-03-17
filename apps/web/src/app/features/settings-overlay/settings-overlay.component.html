@@ -36,7 +36,6 @@
         <div class="settings-overlay__section-list" role="list">
           @for (section of sectionList(); track section.id) {
             <button
-              type="button"
               class="settings-overlay__section-item ui-item dd-item"
               [class.settings-overlay__section-item--active]="isSectionSelected(section.id)"
               [attr.aria-current]="isSectionSelected(section.id) ? 'true' : null"
@@ -78,6 +77,7 @@
                 <div
                   class="settings-overlay__segmented"
                   role="group"
+                   data-i18n-skip
                   [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
                 >
                   <button
@@ -85,21 +85,21 @@
                     [class.settings-overlay__segmented--active]="settingsModel().language === 'en'"
                     (click)="setLanguage('en')"
                   >
-                    {{ t('settings.overlay.general.language.option.en', 'English') }}
+                    English
                   </button>
                   <button
                     type="button"
                     [class.settings-overlay__segmented--active]="settingsModel().language === 'de'"
                     (click)="setLanguage('de')"
                   >
-                    {{ t('settings.overlay.general.language.option.de', 'Deutsch') }}
+                    Deutsch
                   </button>
                   <button
                     type="button"
                     [class.settings-overlay__segmented--active]="settingsModel().language === 'it'"
                     (click)="setLanguage('it')"
                   >
-                    {{ t('settings.overlay.general.language.option.it', 'Italiano') }}
+                    Italiano
                   </button>
                 </div>
               </div>

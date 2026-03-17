@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { AuthService, MfaFactorViewModel } from '../../core/auth.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { UserProfileService } from '../../core/user-profile.service';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
@@ -30,8 +31,10 @@ export class AccountComponent implements OnInit {
   } | null = null;
 
   private readonly authService = inject(AuthService);
+  private readonly i18nService = inject(I18nService);
   private readonly userProfileService = inject(UserProfileService);
   private readonly toastService = inject(ToastService);
+  readonly tr = (value: string) => this.i18nService.translateOriginal(value, value);
 
   readonly loading = signal(true);
   readonly savingProfile = signal(false);
@@ -62,13 +65,13 @@ export class AccountComponent implements OnInit {
   readonly deletePhrase = signal('');
 
   readonly userEmail = computed(() => this.authService.user()?.email ?? '');
-  readonly roleBadgeLabel = computed(() => this.roleNames()[0] ?? 'User');
+  readonly roleBadgeLabel = computed(() => this.roleNames()[0] ?? this.tr('User'));
   readonly displayName = computed(() => {
     const value = this.fullName().trim();
     if (value.length > 0) return value;
     const email = this.userEmail().trim();
     if (email.length > 0) return email;
-    return 'Unknown user';
+    return this.tr('Unknown user');
   });
   readonly canConfirmDelete = computed(() => this.deletePhrase().trim().toUpperCase() === 'DELETE');
 
@@ -87,7 +90,7 @@ export class AccountComponent implements OnInit {
   async saveDisplayName(): Promise<void> {
     const nextName = this.pendingDisplayName().trim();
     if (nextName.length < 2) {
-      this.toastService.show({ message: 'Name muss mindestens 2 Zeichen haben.', type: 'error' });
+      this.toastService.show({ message: this.tr('Name muss mindestens 2 Zeichen haben.'), type: 'error' });
       return;
     }
 
@@ -101,13 +104,13 @@ export class AccountComponent implements OnInit {
     }
 
     this.fullName.set(nextName);
-    this.toastService.show({ message: 'Name gespeichert.', type: 'success', dedupe: true });
+    this.toastService.show({ message: this.tr('Name gespeichert.'), type: 'success', dedupe: true });
   }
 
   async updateEmail(): Promise<void> {
     const email = this.pendingEmail().trim();
     if (!this.isValidEmail(email)) {
-      this.toastService.show({ message: 'Bitte gültige E-Mail eingeben.', type: 'error' });
+      this.toastService.show({ message: this.tr('Bitte gültige E-Mail eingeben.'), type: 'error' });
       return;
     }
 
@@ -121,7 +124,7 @@ export class AccountComponent implements OnInit {
     }
 
     this.toastService.show({
-      message: 'Bestätigung für die neue E-Mail wurde versendet.',
+      message: this.tr('Bestätigung für die neue E-Mail wurde versendet.'),
       type: 'success',
       dedupe: true,
     });
@@ -133,20 +136,20 @@ export class AccountComponent implements OnInit {
     const confirm = this.confirmPassword().trim();
 
     if (current.length === 0) {
-      this.toastService.show({ message: 'Bitte aktuelles Passwort eingeben.', type: 'error' });
+      this.toastService.show({ message: this.tr('Bitte aktuelles Passwort eingeben.'), type: 'error' });
       return;
     }
 
     if (next.length < 6) {
       this.toastService.show({
-        message: 'Neues Passwort muss mindestens 6 Zeichen haben.',
+        message: this.tr('Neues Passwort muss mindestens 6 Zeichen haben.'),
         type: 'error',
       });
       return;
     }
 
     if (next !== confirm) {
-      this.toastService.show({ message: 'Neue Passwörter stimmen nicht überein.', type: 'error' });
+      this.toastService.show({ message: this.tr('Neue Passwörter stimmen nicht überein.'), type: 'error' });
       return;
     }
 
@@ -155,7 +158,7 @@ export class AccountComponent implements OnInit {
     if (reauthResult.error) {
       this.updatingPassword.set(false);
       this.toastService.show({
-        message: 'Re-Authentifizierung erforderlich. Prüfe deine E-Mails und versuche es erneut.',
+        message: this.tr('Re-Authentifizierung erforderlich. Prüfe deine E-Mails und versuche es erneut.'),
         type: 'error',
       });
       return;
@@ -172,13 +175,13 @@ export class AccountComponent implements OnInit {
     this.currentPassword.set('');
     this.nextPassword.set('');
     this.confirmPassword.set('');
-    this.toastService.show({ message: 'Passwort aktualisiert.', type: 'success', dedupe: true });
+    this.toastService.show({ message: this.tr('Passwort aktualisiert.'), type: 'success', dedupe: true });
   }
 
   async sendPasswordReset(): Promise<void> {
     const email = this.userEmail();
     if (!email) {
-      this.toastService.show({ message: 'Keine E-Mail im Konto verfügbar.', type: 'error' });
+      this.toastService.show({ message: this.tr('Keine E-Mail im Konto verfügbar.'), type: 'error' });
       return;
     }
 
@@ -192,7 +195,7 @@ export class AccountComponent implements OnInit {
     }
 
     this.toastService.show({
-      message: 'Wenn das Konto existiert, wurde eine Reset-Mail versendet.',
+      message: this.tr('Wenn das Konto existiert, wurde eine Reset-Mail versendet.'),
       type: 'info',
       dedupe: true,
     });
@@ -218,7 +221,7 @@ export class AccountComponent implements OnInit {
     const factorId = this.mfaEnrollFactorId();
     const code = this.mfaCode().trim();
     if (!factorId || code.length < 6) {
-      this.toastService.show({ message: 'Bitte gültigen 2FA-Code eingeben.', type: 'error' });
+      this.toastService.show({ message: this.tr('Bitte gültigen 2FA-Code eingeben.'), type: 'error' });
       return;
     }
 
@@ -237,7 +240,7 @@ export class AccountComponent implements OnInit {
     this.mfaCode.set('');
     await this.reloadSecurityState();
     this.toastService.show({
-      message: '2FA erfolgreich aktiviert.',
+      message: this.tr('2FA erfolgreich aktiviert.'),
       type: 'success',
       dedupe: true,
     });
@@ -254,7 +257,7 @@ export class AccountComponent implements OnInit {
     }
 
     await this.reloadSecurityState();
-    this.toastService.show({ message: '2FA-Faktor entfernt.', type: 'success', dedupe: true });
+    this.toastService.show({ message: this.tr('2FA-Faktor entfernt.'), type: 'success', dedupe: true });
   }
 
   openLogoutConfirm(): void {
@@ -293,7 +296,7 @@ export class AccountComponent implements OnInit {
 
     this.deleteConfirmOpen.set(false);
     this.toastService.show({
-      message: 'Konto wurde gelöscht. Du wirst abgemeldet.',
+      message: this.tr('Konto wurde gelöscht. Du wirst abgemeldet.'),
       type: 'success',
       dedupe: true,
     });
