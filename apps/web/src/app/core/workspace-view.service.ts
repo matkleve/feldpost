@@ -144,28 +144,8 @@ export class WorkspaceViewService {
     this.selectionActive.set(true);
     this.isLoading.set(true);
     try {
-      const results = await Promise.all(
-        cells.map((cell) =>
-          this.supabase.client.rpc('cluster_images', {
-            p_cluster_lat: cell.lat,
-            p_cluster_lng: cell.lng,
-            p_zoom: zoom,
-          }),
-        ),
-      );
+      const images = await this.fetchClusterImages(cells, zoom);
       if (requestId !== this.clusterLoadId) return;
-
-      const seen = new Set<string>();
-      const images: WorkspaceImage[] = [];
-      for (const { data, error } of results) {
-        if (error || !data) continue;
-        for (const row of data as RawClusterRow[]) {
-          if (!seen.has(row.image_id)) {
-            seen.add(row.image_id);
-            images.push(mapClusterRow(row));
-          }
-        }
-      }
 
       this.rawImages.set(images);
       if (images.length > 0) {
@@ -178,6 +158,42 @@ export class WorkspaceViewService {
         this.isLoading.set(false);
       }
     }
+  }
+
+  /**
+   * Fetch images for one or more cluster cells and return a deduplicated list.
+   * Used by marker-click loading and radius-based selections.
+   */
+  async fetchClusterImages(
+    cells: Array<{ lat: number; lng: number }>,
+    zoom: number,
+  ): Promise<WorkspaceImage[]> {
+    if (cells.length === 0) return [];
+
+    const results = await Promise.all(
+      cells.map((cell) =>
+        this.supabase.client.rpc('cluster_images', {
+          p_cluster_lat: cell.lat,
+          p_cluster_lng: cell.lng,
+          p_zoom: zoom,
+        }),
+      ),
+    );
+
+    const seen = new Set<string>();
+    const images: WorkspaceImage[] = [];
+
+    for (const { data, error } of results) {
+      if (error || !Array.isArray(data)) continue;
+
+      for (const row of data as RawClusterRow[]) {
+        if (seen.has(row.image_id)) continue;
+        seen.add(row.image_id);
+        images.push(mapClusterRow(row));
+      }
+    }
+
+    return images;
   }
 
   /** Set images directly (e.g. from a radius selection). */

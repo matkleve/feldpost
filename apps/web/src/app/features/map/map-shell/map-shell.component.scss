@@ -203,6 +203,29 @@
   }
 }
 
+:host ::ng-deep .map-radius-label {
+  pointer-events: none;
+}
+
+:host ::ng-deep .map-radius-label__value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.5rem;
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 60%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 70%, var(--color-bg-surface));
+  color: var(--color-text-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: var(--elevation-overlay);
+  transform: translate(-50%, -50%) rotate(var(--radius-label-rotation, 0deg));
+  transform-origin: center;
+  white-space: nowrap;
+}
+
 // Applies only to historic base tiles; labels are handled in a separate pane.
 :host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane {
   filter: sepia(0.78) saturate(0.82) hue-rotate(-26deg) contrast(1.2) brightness(0.9)
@@ -394,7 +417,20 @@
   transform: scale(var(--photo-marker-selected-scale));
 
   .map-photo-marker__body {
-    box-shadow: 0 0 0 2px var(--color-clay);
+    border-color: transparent;
+    outline: 2px solid var(--color-clay);
+    outline-offset: -1px;
+    background: color-mix(in srgb, var(--color-warning) 22%, var(--color-bg-surface));
+  }
+
+  .map-photo-marker__correction-dot {
+    border-color: var(--color-clay);
+  }
+}
+
+:host ::ng-deep .map-photo-marker--selected.map-photo-marker--placeholder {
+  .map-photo-marker__placeholder-icon {
+    background: var(--color-clay);
   }
 }
 
@@ -491,6 +527,14 @@
     -webkit-mask-position: center;
   }
 
+  .map-photo-marker__fallback-label {
+    font-size: 0.52rem;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+  }
+
   &.is-loading .map-photo-marker__body {
     animation: map-photo-marker-placeholder-pulse 1400ms ease-in-out infinite;
   }
@@ -523,8 +567,12 @@
 }
 
 :host ::ng-deep .map-photo-marker--count.map-photo-marker--selected {
+  .map-photo-marker__body {
+    background: color-mix(in srgb, var(--color-warning) 24%, var(--color-bg-surface));
+  }
+
   .map-photo-marker__count-label {
-    color: var(--color-clay);
+    color: var(--color-text-primary);
   }
 }
 

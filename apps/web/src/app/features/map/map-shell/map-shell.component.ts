@@ -45,6 +45,7 @@ import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-lo
 import { ToastService } from '../../../core/toast.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
+import type { WorkspaceImage } from '../../../core/workspace-view.types';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
 import { SettingsPaneService } from '../../../core/settings-pane.service';
@@ -84,6 +85,8 @@ export class MapShellComponent implements OnDestroy {
   private static readonly DETAIL_LOCATION_FOCUS_ZOOM = 21;
   private static readonly DETAIL_LOCATION_FLY_DURATION_S = 0.35;
   private static readonly MARKER_MOVE_DURATION_MS = 320;
+  private static readonly RADIUS_SELECTION_MIN_METERS = 10;
+  private static readonly RADIUS_CLICK_GUARD_MS = 220;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -262,6 +265,7 @@ export class MapShellComponent implements OnDestroy {
     return Math.min(Math.max(golden, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
   });
   readonly selectedMarkerKey = signal<string | null>(null);
+  readonly selectedMarkerKeys = signal<Set<string>>(new Set());
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
@@ -298,6 +302,7 @@ export class MapShellComponent implements OnDestroy {
       lng: number;
       thumbnailUrl?: string;
       thumbnailSourcePath?: string;
+      fallbackLabel?: string;
       direction?: number;
       corrected?: boolean;
       uploading?: boolean;
@@ -315,6 +320,7 @@ export class MapShellComponent implements OnDestroy {
         count: number;
         thumbnailUrl?: string;
         thumbnailLoading?: boolean;
+        fallbackLabel?: string;
         direction?: number;
         corrected?: boolean;
         uploading?: boolean;
@@ -337,6 +343,21 @@ export class MapShellComponent implements OnDestroy {
   private photoMarkerLayer: L.LayerGroup | null = null;
   private activeBaseTileLayer: L.TileLayer | null = null;
   private activeHistoricLabelTileLayer: L.TileLayer | null = null;
+  private radiusDrawStartLatLng: L.LatLng | null = null;
+  private radiusDrawActive = false;
+  private radiusDrawAdditive = false;
+  private radiusDraftLine: L.Polyline | null = null;
+  private radiusDraftCircle: L.Circle | null = null;
+  private radiusDraftLabel: L.Marker | null = null;
+  private radiusDrawMoveHandler: ((event: L.LeafletMouseEvent) => void) | null = null;
+  private radiusDrawMouseUpHandler: ((event: L.LeafletMouseEvent) => void) | null = null;
+  private radiusDraftHighlightedKeys = new Set<string>();
+  private readonly radiusCommittedVisuals: Array<{
+    circle: L.Circle;
+    label: L.Marker;
+    centerDot: L.CircleMarker;
+  }> = [];
+  private suppressMapClickUntil = 0;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -414,6 +435,8 @@ export class MapShellComponent implements OnDestroy {
     this.userLocationMarker?.remove();
     this.userLocationMarker = null;
     this.clearSearchLocationMarker();
+    this.cancelRadiusDrawing();
+    this.clearRadiusSelectionVisuals();
     this.map?.remove();
   }
 
@@ -439,7 +462,9 @@ export class MapShellComponent implements OnDestroy {
     this.photoPanelOpen.set(false);
     this.detailImageId.set(null);
     this.setSelectedMarker(null);
+    this.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
+    this.clearRadiusSelectionVisuals();
     // Let Angular remove the pane from the DOM, then tell Leaflet to reclaim the space.
     setTimeout(() => this.map?.invalidateSize(), 0);
   }
@@ -644,6 +669,10 @@ export class MapShellComponent implements OnDestroy {
     // Map click handler: closes upload panel and, when active, places images
     // that had no GPS EXIF data.
     this.map.on('click', (e: L.LeafletMouseEvent) => this.handleMapClick(e));
+    this.map.on('mousedown', (e: L.LeafletMouseEvent) => this.handleMapMouseDown(e));
+    this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
+      e.originalEvent.preventDefault();
+    });
 
     // Suppress viewport queries during zoom animation to avoid rapid
     // fire-and-cancel cycles that cause visible lag.
@@ -888,6 +917,17 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private handleMapClick(e: L.LeafletMouseEvent): void {
+    const clickButton = e.originalEvent?.button ?? 0;
+    const isPrimaryClick = clickButton === 0;
+    const hasMarkerSelection =
+      this.selectedMarkerKey() !== null || this.selectedMarkerKeys().size > 0;
+    const allowPrimaryDeselection =
+      isPrimaryClick && hasMarkerSelection && !this.searchPlacementActive();
+
+    if (Date.now() < this.suppressMapClickUntil && !allowPrimaryDeselection) {
+      return;
+    }
+
     if (this.pendingPlacementKey) {
       // Prevent accidental placement immediately after drag/pan movement.
       if (Date.now() - this.lastMapMoveAt < MapShellComponent.PLACEMENT_CLICK_GUARD_MS) {
@@ -909,13 +949,333 @@ export class MapShellComponent implements OnDestroy {
       // Deselect the active marker but keep the workspace pane open.
       // The pane is closed only via its own close button.
       this.setSelectedMarker(null);
+      this.setSelectedMarkerKeys(new Set());
       this.detailImageId.set(null);
+      this.workspaceViewService.clearActiveSelection();
+      this.clearRadiusSelectionVisuals();
       return;
     }
 
     this.renderOrUpdateSearchLocationMarker([e.latlng.lat, e.latlng.lng]);
     this.searchPlacementActive.set(false);
     this.map?.getContainer().classList.remove('map-container--placing');
+  }
+
+  private handleMapMouseDown(event: L.LeafletMouseEvent): void {
+    if (event.originalEvent.button !== 2) {
+      return;
+    }
+
+    event.originalEvent.preventDefault();
+    this.startRadiusSelectionDraw(event);
+  }
+
+  private startRadiusSelectionDraw(event: L.LeafletMouseEvent): void {
+    if (!this.map || this.placementActive() || this.searchPlacementActive()) {
+      return;
+    }
+
+    this.cancelRadiusDrawing();
+
+    this.radiusDrawActive = true;
+    this.radiusDrawAdditive = event.originalEvent.ctrlKey || event.originalEvent.metaKey;
+    this.radiusDrawStartLatLng = event.latlng;
+    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+
+    this.radiusDraftLine = L.polyline([event.latlng, event.latlng], {
+      color: 'var(--color-clay)',
+      weight: 2,
+      opacity: 0.95,
+      dashArray: '6 4',
+      interactive: false,
+    }).addTo(this.map);
+
+    this.radiusDraftCircle = L.circle(event.latlng, {
+      radius: 1,
+      color: 'var(--color-clay)',
+      weight: 2,
+      opacity: 0.95,
+      fillColor: 'var(--color-clay)',
+      fillOpacity: 0.1,
+      interactive: false,
+    }).addTo(this.map);
+
+    this.radiusDraftLabel = this.createRadiusLabelMarker(event.latlng, 0, 0).addTo(this.map);
+
+    this.radiusDrawMoveHandler = (moveEvent: L.LeafletMouseEvent) => {
+      this.updateRadiusSelectionDraft(moveEvent.latlng);
+    };
+
+    this.radiusDrawMouseUpHandler = (upEvent: L.LeafletMouseEvent) => {
+      void this.commitRadiusSelection(upEvent.latlng);
+    };
+
+    this.map.on('mousemove', this.radiusDrawMoveHandler);
+    this.map.on('mouseup', this.radiusDrawMouseUpHandler);
+  }
+
+  private updateRadiusSelectionDraft(currentLatLng: L.LatLng): void {
+    if (!this.map || !this.radiusDrawStartLatLng) {
+      return;
+    }
+
+    const radiusMeters = this.map.distance(this.radiusDrawStartLatLng, currentLatLng);
+    const labelLatLng = this.getRadiusLabelLatLng(this.radiusDrawStartLatLng, currentLatLng);
+    const labelAngleDeg = this.getReadableLineAngleDeg(this.radiusDrawStartLatLng, currentLatLng);
+
+    this.radiusDraftLine?.setLatLngs([this.radiusDrawStartLatLng, currentLatLng]);
+    this.radiusDraftCircle?.setRadius(radiusMeters);
+    this.radiusDraftLabel?.setLatLng(labelLatLng);
+    this.updateRadiusLabelMarker(this.radiusDraftLabel, radiusMeters, labelAngleDeg);
+    this.updateRadiusDraftMarkerHighlights(this.radiusDrawStartLatLng, radiusMeters);
+  }
+
+  private async commitRadiusSelection(endLatLng: L.LatLng): Promise<void> {
+    if (!this.map || !this.radiusDrawStartLatLng) {
+      this.cancelRadiusDrawing();
+      return;
+    }
+
+    const center = this.radiusDrawStartLatLng;
+    const radiusMeters = this.map.distance(center, endLatLng);
+    const additive = this.radiusDrawAdditive;
+
+    this.cancelRadiusDrawing(true);
+
+    if (radiusMeters < MapShellComponent.RADIUS_SELECTION_MIN_METERS) {
+      this.clearRadiusDraftMarkerHighlights();
+      return;
+    }
+
+    if (!additive) {
+      this.clearRadiusSelectionVisuals();
+    }
+
+    this.addRadiusSelectionVisual(center, radiusMeters, endLatLng);
+    await this.selectRadiusImages(center, radiusMeters, additive);
+    this.clearRadiusDraftMarkerHighlights();
+    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private cancelRadiusDrawing(preserveDraftHighlights = false): void {
+    if (this.map && this.radiusDrawMoveHandler) {
+      this.map.off('mousemove', this.radiusDrawMoveHandler);
+    }
+
+    if (this.map && this.radiusDrawMouseUpHandler) {
+      this.map.off('mouseup', this.radiusDrawMouseUpHandler);
+    }
+
+    this.radiusDrawMoveHandler = null;
+    this.radiusDrawMouseUpHandler = null;
+    this.radiusDrawActive = false;
+    this.radiusDrawAdditive = false;
+    this.radiusDrawStartLatLng = null;
+
+    this.radiusDraftLine?.remove();
+    this.radiusDraftLine = null;
+    this.radiusDraftCircle?.remove();
+    this.radiusDraftCircle = null;
+    this.radiusDraftLabel?.remove();
+    this.radiusDraftLabel = null;
+
+    if (!preserveDraftHighlights) {
+      this.clearRadiusDraftMarkerHighlights();
+    }
+  }
+
+  private updateRadiusDraftMarkerHighlights(center: L.LatLng, radiusMeters: number): void {
+    if (!this.map) {
+      return;
+    }
+
+    const nextKeys = new Set<string>();
+    for (const [markerKey, markerState] of this.uploadedPhotoMarkers.entries()) {
+      const markerDistance = this.map.distance(center, [markerState.lat, markerState.lng]);
+      if (markerDistance <= radiusMeters) {
+        nextKeys.add(markerKey);
+      }
+    }
+
+    if (
+      this.radiusDraftHighlightedKeys.size === nextKeys.size &&
+      Array.from(this.radiusDraftHighlightedKeys).every((key) => nextKeys.has(key))
+    ) {
+      return;
+    }
+
+    const previousKeys = this.radiusDraftHighlightedKeys;
+    this.radiusDraftHighlightedKeys = nextKeys;
+
+    for (const key of previousKeys) {
+      if (!nextKeys.has(key)) {
+        this.refreshPhotoMarker(key);
+      }
+    }
+
+    for (const key of nextKeys) {
+      if (!previousKeys.has(key)) {
+        this.refreshPhotoMarker(key);
+      }
+    }
+  }
+
+  private clearRadiusDraftMarkerHighlights(): void {
+    if (this.radiusDraftHighlightedKeys.size === 0) {
+      return;
+    }
+
+    const previousKeys = this.radiusDraftHighlightedKeys;
+    this.radiusDraftHighlightedKeys = new Set<string>();
+    for (const markerKey of previousKeys) {
+      this.refreshPhotoMarker(markerKey);
+    }
+  }
+
+  private clearRadiusSelectionVisuals(): void {
+    for (const visual of this.radiusCommittedVisuals) {
+      visual.circle.remove();
+      visual.label.remove();
+      visual.centerDot.remove();
+    }
+    this.radiusCommittedVisuals.length = 0;
+  }
+
+  private addRadiusSelectionVisual(center: L.LatLng, radiusMeters: number, edge: L.LatLng): void {
+    if (!this.map) return;
+
+    const labelLatLng = this.getRadiusLabelLatLng(center, edge);
+    const labelAngleDeg = this.getReadableLineAngleDeg(center, edge);
+
+    const circle = L.circle(center, {
+      radius: radiusMeters,
+      color: 'var(--color-clay)',
+      weight: 2,
+      opacity: 0.95,
+      fillColor: 'var(--color-clay)',
+      fillOpacity: 0.1,
+      interactive: false,
+    }).addTo(this.map);
+
+    const centerDot = L.circleMarker(center, {
+      radius: 4,
+      color: 'var(--color-clay)',
+      fillColor: 'var(--color-clay)',
+      fillOpacity: 1,
+      weight: 0,
+      interactive: false,
+    }).addTo(this.map);
+
+    const label = this.createRadiusLabelMarker(labelLatLng, radiusMeters, labelAngleDeg).addTo(
+      this.map,
+    );
+    this.radiusCommittedVisuals.push({ circle, label, centerDot });
+  }
+
+  private createRadiusLabelMarker(
+    position: L.LatLng,
+    radiusMeters: number,
+    angleDeg: number,
+  ): L.Marker {
+    return L.marker(position, {
+      interactive: false,
+      keyboard: false,
+      icon: L.divIcon({
+        className: 'map-radius-label',
+        html: `<span class="map-radius-label__value" style="--radius-label-rotation:${angleDeg.toFixed(2)}deg">${this.formatRadiusDistance(radiusMeters)}</span>`,
+        iconSize: [0, 0],
+      }),
+    });
+  }
+
+  private updateRadiusLabelMarker(
+    marker: L.Marker | null,
+    radiusMeters: number,
+    angleDeg: number,
+  ): void {
+    const el = marker?.getElement();
+    if (!el) return;
+    const value = el.querySelector('.map-radius-label__value');
+    if (value instanceof HTMLElement) {
+      value.textContent = this.formatRadiusDistance(radiusMeters);
+      value.style.setProperty('--radius-label-rotation', `${angleDeg.toFixed(2)}deg`);
+    }
+  }
+
+  private getRadiusLabelLatLng(start: L.LatLng, end: L.LatLng): L.LatLng {
+    return L.latLng((start.lat + end.lat) / 2, (start.lng + end.lng) / 2);
+  }
+
+  private getReadableLineAngleDeg(start: L.LatLng, end: L.LatLng): number {
+    if (!this.map) return 0;
+
+    const startPoint = this.map.latLngToContainerPoint(start);
+    const endPoint = this.map.latLngToContainerPoint(end);
+    const deltaX = endPoint.x - startPoint.x;
+    const deltaY = endPoint.y - startPoint.y;
+    let angle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
+
+    if (angle > 90) angle -= 180;
+    if (angle < -90) angle += 180;
+    return angle;
+  }
+
+  private formatRadiusDistance(radiusMeters: number): string {
+    if (!Number.isFinite(radiusMeters) || radiusMeters <= 0) return '0 m';
+    if (radiusMeters < 1000) return `${Math.round(radiusMeters)} m`;
+    if (radiusMeters < 10000) return `${(radiusMeters / 1000).toFixed(1)} km`;
+    return `${Math.round(radiusMeters / 1000)} km`;
+  }
+
+  private async selectRadiusImages(
+    center: L.LatLng,
+    radiusMeters: number,
+    additive: boolean,
+  ): Promise<void> {
+    if (!this.map) return;
+
+    const cellMap = new Map<string, { lat: number; lng: number }>();
+    const selectedKeys = additive ? new Set(this.selectedMarkerKeys()) : new Set<string>();
+
+    for (const [markerKey, markerState] of this.uploadedPhotoMarkers.entries()) {
+      const markerDistance = this.map.distance(center, [markerState.lat, markerState.lng]);
+      if (markerDistance > radiusMeters) continue;
+
+      selectedKeys.add(markerKey);
+
+      const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
+      for (const cell of cells) {
+        cellMap.set(this.toMarkerKey(cell.lat, cell.lng), cell);
+      }
+    }
+
+    this.setSelectedMarkerKeys(selectedKeys);
+
+    const zoom = Math.round(this.map.getZoom() ?? 13);
+    const cells = Array.from(cellMap.values());
+    const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
+
+    const merged = additive
+      ? this.mergeWorkspaceImages(this.workspaceViewService.rawImages(), incoming)
+      : incoming;
+    this.workspaceViewService.setActiveSelectionImages(merged);
+
+    if (!this.photoPanelOpen()) {
+      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+    }
+    this.photoPanelOpen.set(true);
+    this.detailImageId.set(null);
+    this.setSelectedMarker(null);
+  }
+
+  private mergeWorkspaceImages(
+    current: WorkspaceImage[],
+    incoming: WorkspaceImage[],
+  ): WorkspaceImage[] {
+    const byId = new Map<string, WorkspaceImage>();
+    for (const image of current) byId.set(image.id, image);
+    for (const image of incoming) byId.set(image.id, image);
+    return Array.from(byId.values());
   }
 
   private renderOrUpdateUserLocationMarker(coords: [number, number]): void {
@@ -1211,6 +1571,7 @@ export class MapShellComponent implements OnDestroy {
         (row.cluster_lat !== row.exif_latitude || row.cluster_lng !== row.exif_longitude);
       const thumbnailSourcePath =
         count === 1 ? (row.thumbnail_path ?? row.storage_path ?? undefined) : undefined;
+      const fallbackLabel = this.buildFallbackLabelFromPath(thumbnailSourcePath);
 
       if (existing) {
         // Revoke stale ObjectURL when signed URL takes over from optimistic blob.
@@ -1230,6 +1591,7 @@ export class MapShellComponent implements OnDestroy {
           if (newImageId) this.markersByImageId.set(newImageId, key);
           existing.imageId = newImageId;
         }
+        existing.fallbackLabel = fallbackLabel;
         // Update if data changed.
         if (
           existing.count !== count ||
@@ -1240,6 +1602,7 @@ export class MapShellComponent implements OnDestroy {
           existing.direction = direction;
           existing.corrected = corrected;
           existing.thumbnailSourcePath = thumbnailSourcePath;
+          existing.fallbackLabel = fallbackLabel;
           existing.sourceCells = row.sourceCells;
           existing.optimistic = false;
           this.refreshPhotoMarker(key);
@@ -1298,6 +1661,7 @@ export class MapShellComponent implements OnDestroy {
           reusableState.direction = direction;
           reusableState.corrected = corrected;
           reusableState.thumbnailSourcePath = thumbnailSourcePath;
+          reusableState.fallbackLabel = fallbackLabel;
           reusableState.imageId = nextImageId;
           reusableState.optimistic = false;
 
@@ -1342,6 +1706,7 @@ export class MapShellComponent implements OnDestroy {
         direction,
         corrected,
         thumbnailSourcePath,
+        fallbackLabel,
         imageId: count === 1 ? (row.image_id ?? undefined) : undefined,
       });
 
@@ -1367,6 +1732,19 @@ export class MapShellComponent implements OnDestroy {
       this.uploadedPhotoMarkers.delete(oldKey);
     }
 
+    const staleSelectedKeys = new Set(this.selectedMarkerKeys());
+    let selectedKeysChanged = false;
+    for (const markerKey of staleSelectedKeys) {
+      if (this.uploadedPhotoMarkers.has(markerKey)) {
+        continue;
+      }
+      staleSelectedKeys.delete(markerKey);
+      selectedKeysChanged = true;
+    }
+    if (selectedKeysChanged) {
+      this.selectedMarkerKeys.set(staleSelectedKeys);
+    }
+
     // Clear optimistic flag from surviving markers.
     for (const state of this.uploadedPhotoMarkers.values()) {
       state.optimistic = false;
@@ -1381,6 +1759,7 @@ export class MapShellComponent implements OnDestroy {
     override?: Partial<{
       count: number;
       thumbnailUrl?: string;
+      fallbackLabel?: string;
       direction?: number;
       corrected?: boolean;
       uploading?: boolean;
@@ -1389,6 +1768,10 @@ export class MapShellComponent implements OnDestroy {
     const markerState = this.uploadedPhotoMarkers.get(markerKey);
     const count = override?.count ?? markerState?.count ?? 1;
     const thumbnailUrl = override?.thumbnailUrl ?? markerState?.thumbnailUrl;
+    const fallbackLabel =
+      override?.fallbackLabel ??
+      markerState?.fallbackLabel ??
+      this.getMarkerFallbackLabel(markerState);
     const direction = override?.direction ?? markerState?.direction;
     const corrected = override?.corrected ?? markerState?.corrected;
     const uploading = override?.uploading ?? markerState?.uploading;
@@ -1399,8 +1782,9 @@ export class MapShellComponent implements OnDestroy {
       html: buildPhotoMarkerHtml({
         count,
         thumbnailUrl,
+        fallbackLabel,
         bearing: direction,
-        selected: markerKey === this.selectedMarkerKey(),
+        selected: this.isMarkerSelected(markerKey),
         corrected,
         uploading,
         loading,
@@ -1412,7 +1796,7 @@ export class MapShellComponent implements OnDestroy {
     });
   }
 
-  private handlePhotoMarkerClick(markerKey: string): void {
+  private handlePhotoMarkerClick(markerKey: string, clickEvent?: L.LeafletMouseEvent): void {
     const markerState = this.uploadedPhotoMarkers.get(markerKey);
     if (!markerState) {
       return;
@@ -1428,6 +1812,20 @@ export class MapShellComponent implements OnDestroy {
     // Load images at this marker's grid position(s) into the workspace view.
     const zoom = Math.round(this.map?.getZoom() ?? 13);
     const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
+    const additive = !!(clickEvent?.originalEvent.ctrlKey || clickEvent?.originalEvent.metaKey);
+
+    if (additive) {
+      // Ctrl/Meta-click appends marker results to the current active selection.
+      const selectedKeys = new Set(this.selectedMarkerKeys());
+      selectedKeys.add(markerKey);
+      this.setSelectedMarkerKeys(selectedKeys);
+      void this.addMarkerCellsToSelection(cells, zoom);
+      this.detailImageId.set(null);
+      return;
+    }
+
+    this.setSelectedMarkerKeys(new Set([markerKey]));
+
     void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
 
     // Single-image marker: also jump directly to detail view.
@@ -1462,7 +1860,18 @@ export class MapShellComponent implements OnDestroy {
   /** Ensure marker click always resolves to the current marker key. */
   private bindMarkerClickInteraction(markerKey: string, marker: L.Marker): void {
     marker.off('click');
-    marker.on('click', () => this.handlePhotoMarkerClick(markerKey));
+    marker.on('click', (event: L.LeafletMouseEvent) =>
+      this.handlePhotoMarkerClick(markerKey, event),
+    );
+  }
+
+  private async addMarkerCellsToSelection(
+    cells: Array<{ lat: number; lng: number }>,
+    zoom: number,
+  ): Promise<void> {
+    const incoming = await this.workspaceViewService.fetchClusterImages(cells, zoom);
+    const merged = this.mergeWorkspaceImages(this.workspaceViewService.rawImages(), incoming);
+    this.workspaceViewService.setActiveSelectionImages(merged);
   }
 
   /** Fade in newly added marker elements for smoother cluster reconciliation. */
@@ -1724,6 +2133,39 @@ export class MapShellComponent implements OnDestroy {
     }
   }
 
+  private setSelectedMarkerKeys(nextKeys: Set<string>): void {
+    const previousKeys = this.selectedMarkerKeys();
+
+    if (
+      previousKeys.size === nextKeys.size &&
+      Array.from(previousKeys).every((key) => nextKeys.has(key))
+    ) {
+      return;
+    }
+
+    this.selectedMarkerKeys.set(nextKeys);
+
+    for (const markerKey of previousKeys) {
+      if (!nextKeys.has(markerKey)) {
+        this.refreshPhotoMarker(markerKey);
+      }
+    }
+
+    for (const markerKey of nextKeys) {
+      if (!previousKeys.has(markerKey)) {
+        this.refreshPhotoMarker(markerKey);
+      }
+    }
+  }
+
+  private isMarkerSelected(markerKey: string): boolean {
+    return (
+      markerKey === this.selectedMarkerKey() ||
+      this.selectedMarkerKeys().has(markerKey) ||
+      this.radiusDraftHighlightedKeys.has(markerKey)
+    );
+  }
+
   /**
    * Debounced handler for the Leaflet `moveend` event.
    * Fires a viewport query on every moveend (pan or zoom) so the
@@ -1838,7 +2280,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const selected = markerKey === this.selectedMarkerKey();
+    const selected = this.isMarkerSelected(markerKey);
     const zoomLevel = this.getPhotoMarkerZoomLevel();
     const last = markerState.lastRendered;
 
@@ -1848,6 +2290,7 @@ export class MapShellComponent implements OnDestroy {
       last.count === markerState.count &&
       last.thumbnailUrl === markerState.thumbnailUrl &&
       last.thumbnailLoading === markerState.thumbnailLoading &&
+      last.fallbackLabel === markerState.fallbackLabel &&
       last.direction === markerState.direction &&
       last.corrected === markerState.corrected &&
       last.uploading === markerState.uploading &&
@@ -1861,6 +2304,7 @@ export class MapShellComponent implements OnDestroy {
       count: markerState.count,
       thumbnailUrl: markerState.thumbnailUrl,
       thumbnailLoading: markerState.thumbnailLoading,
+      fallbackLabel: markerState.fallbackLabel,
       direction: markerState.direction,
       corrected: markerState.corrected,
       uploading: markerState.uploading,
@@ -1875,8 +2319,9 @@ export class MapShellComponent implements OnDestroy {
       const html = buildPhotoMarkerHtml({
         count: markerState.count,
         thumbnailUrl: markerState.thumbnailUrl,
+        fallbackLabel: markerState.fallbackLabel ?? this.getMarkerFallbackLabel(markerState),
         bearing: markerState.direction,
-        selected: markerKey === this.selectedMarkerKey(),
+        selected,
         corrected: markerState.corrected,
         uploading: markerState.uploading,
         loading: markerState.thumbnailLoading,
@@ -1886,6 +2331,44 @@ export class MapShellComponent implements OnDestroy {
     } else {
       // Fallback if element not yet in DOM.
       markerState.marker.setIcon(this.buildPhotoMarkerIcon(markerKey));
+    }
+  }
+
+  private getMarkerFallbackLabel(
+    state:
+      | {
+          count: number;
+          thumbnailSourcePath?: string;
+          fallbackLabel?: string;
+        }
+      | undefined,
+  ): string | undefined {
+    if (!state || state.count !== 1) return undefined;
+    if (state.fallbackLabel) return state.fallbackLabel;
+    return this.buildFallbackLabelFromPath(state.thumbnailSourcePath);
+  }
+
+  private buildFallbackLabelFromPath(path: string | undefined): string | undefined {
+    if (!path) return undefined;
+
+    const ext = path.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+        return 'DOC';
+      case 'docx':
+        return 'DOCX';
+      case 'xls':
+        return 'XLS';
+      case 'xlsx':
+        return 'XLSX';
+      case 'ppt':
+        return 'PPT';
+      case 'pptx':
+        return 'PPTX';
+      default:
+        return undefined;
     }
   }
 

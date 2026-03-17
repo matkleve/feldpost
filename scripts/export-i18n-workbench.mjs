@@ -25,9 +25,12 @@ function addEntry(original, context) {
   const normalized = original.replace(/\s+/g, " ").trim();
   if (!normalized) return;
   if (normalized.length < 2) return;
+  if (context.includes("text-node") && /^[a-z][a-z0-9_]*$/.test(normalized))
+    return;
   if (/^[{}()[\],.:;!?+\-/*0-9\s]+$/.test(normalized)) return;
   if (!/[A-Za-z]/.test(normalized)) return;
   if (/[@$]|=>|^\/|\.component\.|\.service\.|^--/.test(normalized)) return;
+  if (/^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(normalized)) return;
 
   const key = normalized.toLowerCase();
   if (!textEntries.has(key)) {
@@ -99,7 +102,7 @@ for (const row of rows) {
   );
 }
 
-writeFileSync(outCsv, `${lines.join("\n")}\n`, "utf8");
+writeFileSync(outCsv, `\ufeff${lines.join("\n")}\n`, "utf8");
 console.log(
   `Generated ${rows.length} translation rows -> ${relative(repoRoot, outCsv)}`,
 );

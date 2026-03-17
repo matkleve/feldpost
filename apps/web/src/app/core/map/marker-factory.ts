@@ -3,6 +3,7 @@ export type PhotoMarkerZoomLevel = 'far' | 'mid' | 'near';
 export interface PhotoMarkerHtmlOptions {
   count: number;
   thumbnailUrl?: string;
+  fallbackLabel?: string;
   selected?: boolean;
   corrected?: boolean;
   uploading?: boolean;
@@ -27,6 +28,7 @@ export function buildPhotoMarkerHtml(options: PhotoMarkerHtmlOptions): string {
     hasSingleThumbnail,
     isPlaceholder,
     options.thumbnailUrl,
+    options.fallbackLabel,
   );
   const overlays = buildMarkerOverlays(options);
 
@@ -69,11 +71,15 @@ function buildMarkerContent(
   hasSingleThumbnail: boolean,
   isPlaceholder: boolean,
   thumbnailUrl?: string,
+  fallbackLabel?: string,
 ): string {
   if (hasSingleThumbnail) {
     return `<img src="${escapeHtmlAttribute(thumbnailUrl)}" alt="" onerror="this.parentElement.classList.add('map-photo-marker__body--error');this.remove()" />`;
   }
   if (isPlaceholder) {
+    if (fallbackLabel) {
+      return `<span class="map-photo-marker__fallback-label" aria-hidden="true">${escapeHtmlAttribute(fallbackLabel)}</span>`;
+    }
     return '<span class="map-photo-marker__placeholder-icon" aria-hidden="true"></span>';
   }
   const displayCount = count > 999 ? '999+' : String(count);

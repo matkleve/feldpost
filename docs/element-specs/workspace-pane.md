@@ -1,4 +1,4 @@
-/im# Workspace Pane
+# Workspace Pane
 
 ## What It Is
 
@@ -16,7 +16,7 @@ The right-side panel that shows image groups, thumbnails, and detail views. It's
 
 **Desktop:** 320px wide by default, resizable 280–640px via Drag Divider. Uses the shared `.ui-container` panel shell so the workspace aligns with the same outer radius and panel padding language as other app surfaces. `--color-bg-surface` background. Slides in from the right edge when opened. Contains Group Tab Bar at top, content area below (thumbnail grid or image detail).
 
-Pane header includes a Notion-like fullscreen toggle button at top-right. Fullscreen mode expands the workspace pane to occupy the available app content area and hides divider resize affordances while active.
+Pane header includes a Notion-like fullscreen toggle button at top-right. Fullscreen mode expands the workspace pane from right to left until it spans the full content width (edge-to-edge workspace canvas). Divider resize affordances are hidden while active.
 
 **Mobile:** Bottom Sheet with drag handle. Three snap points: minimized (64px, shows handle + group name), half-screen (50vh, shows thumbnails), full-screen (100vh, shows detail). Map stays interactive in minimized and half-screen states.
 
@@ -39,7 +39,7 @@ Pane header includes a Notion-like fullscreen toggle button at top-right. Fullsc
 | 5   | Swipes up on bottom sheet handle (mobile)     | Snaps to higher position                                                                                                               | Snap point logic                                   |
 | 6   | Clicks a thumbnail in the grid                | Image Detail View replaces grid, back arrow to return                                                                                  | Detail view state                                  |
 | 7   | Selects a group tab                           | Content switches to that group's thumbnails                                                                                            | Active tab change                                  |
-| 8   | Clicks fullscreen button in pane header       | Workspace enters fullscreen mode (desktop: expands pane; mobile: snaps to full and locks)                                              | `isFullscreen` → true                              |
+| 8   | Clicks fullscreen button in pane header       | Workspace enters fullscreen mode (desktop: expands pane right→left to full content width; mobile: snaps to full and locks)             | `isFullscreen` → true                              |
 | 9   | Clicks fullscreen button again or presses Esc | Workspace exits fullscreen and restores prior width/snap                                                                               | `isFullscreen` → false                             |
 
 ### Interaction Flowchart
@@ -51,8 +51,8 @@ flowchart TD
     B -- Detail --> D[Image detail visible]
     C --> E{Header actions}
     D --> E
-    E -- Fullscreen on --> F[Expand pane to fullscreen]
-    F --> G[Hide divider resize affordance]
+  E -- Fullscreen on --> F[Expand pane from right edge to left edge]
+  F --> G[Hide divider resize affordance]
     G --> H{Exit action}
     H -- Fullscreen button --> I[Restore prior width or snap]
     H -- Esc --> I
@@ -104,7 +104,7 @@ BottomSheet                                ← fixed bottom, full width
 | `detailImageId`         | `string \| null`                          | `null`        | If set, show detail view instead of grid                                                                         |
 | `activeClusterImageIds` | `string[] \| null`                        | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
 | `mobileSnapPoint`       | `'minimized' \| 'half' \| 'full'`         | `'minimized'` | Mobile bottom sheet position                                                                                     |
-| `isFullscreen`          | `boolean`                                 | `false`       | Fullscreen workspace mode                                                                                        |
+| `isFullscreen`          | `boolean`                                 | `false`       | Fullscreen workspace mode (desktop right→left full-width canvas)                                                 |
 | `restoreWidth`          | `number \| null`                          | `null`        | Stored desktop width to restore after fullscreen                                                                 |
 | `restoreSnapPoint`      | `'minimized' \| 'half' \| 'full' \| null` | `null`        | Stored mobile snap point to restore after fullscreen                                                             |
 
@@ -123,13 +123,19 @@ BottomSheet                                ← fixed bottom, full width
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  participant User
+  participant Shell as MapShellComponent
+  participant Pane as WorkspacePaneComponent
+  participant View as WorkspaceViewService
+
+  User->>Shell: Open workspace
+  Shell->>Pane: isOpen=true, width=320
+  User->>Pane: Toggle fullscreen
+  Pane->>Pane: cache restoreWidth
+  Pane-->>Shell: width=100% (right→left)
+  Pane->>View: keep active selection context
+  User->>Pane: Exit fullscreen (Esc/button)
+  Pane-->>Shell: restore width/snap
 ```
 
 - Imported in `MapShellComponent` template, placed after Map Zone
@@ -166,7 +172,7 @@ flowchart LR
 - [x] Content switches between thumbnail grid and image detail
 - [x] Group Tab Bar is scrollable horizontally
 - [ ] Header includes fullscreen button at top-right
-- [ ] Fullscreen mode expands workspace pane and disables divider drag while active
+- [ ] Fullscreen mode expands workspace pane right→left until it spans full content width and disables divider drag while active
 - [ ] Exiting fullscreen restores prior desktop width or mobile snap point
 - [ ] `Esc` exits fullscreen before other pane-level escape behavior
 - [ ] Cluster click opens pane with Active Selection tab active

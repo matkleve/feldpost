@@ -35,6 +35,12 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'video/quicktime',
   'video/webm',
   'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 ]);
 
 const PHOTO_MIME_TYPES = new Set([
@@ -122,7 +128,7 @@ export class UploadService {
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
       return {
         valid: false,
-        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, or PDF.`,
+        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, XLS, XLSX, PPT, or PPTX.`,
       };
     }
     return { valid: true };
