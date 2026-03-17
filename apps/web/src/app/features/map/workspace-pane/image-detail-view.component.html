@@ -252,7 +252,13 @@
             <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
             <span class="detail-row__label">Projects</span>
             @if (editingField() === 'project_ids') {
-              <div class="detail-tags" role="group" aria-label="Manage projects">
+              <div
+                class="detail-tags"
+                role="group"
+                aria-label="Manage projects"
+                appClickOutside
+                (clickOutside)="editingField.set(null)"
+              >
                 <div class="detail-tags__editor">
                   @for (opt of projectOptions(); track opt.id) {
                     @if (selectedProjectIds().has(opt.id)) {
@@ -263,6 +269,9 @@
                         [attr.aria-label]="'Remove project ' + opt.label"
                         title="Remove"
                       >
+                        @if (primarySelectorVisible() && isPrimaryProject(opt.id)) {
+                          <span class="detail-tags__chip-primary">Primary</span>
+                        }
                         <span class="detail-tags__chip-label">{{ opt.label }}</span>
                         <span class="material-icons" aria-hidden="true">close</span>
                       </button>
@@ -285,6 +294,18 @@
                 <div class="detail-tags__dropdown" role="listbox" aria-label="Project options">
                   <div class="detail-tags__hint">Select an option or create one</div>
 
+                  @if (!canAssignMultipleProjects()) {
+                    <div class="detail-tags__note" role="status">
+                      No GPS: this item can only belong to one project.
+                    </div>
+                  }
+
+                  @if (isGpsAssignmentLocked()) {
+                    <div class="detail-tags__note" role="status">
+                      GPS assignment is disabled for this file type.
+                    </div>
+                  }
+
                   @if (projectCanCreate()) {
                     <button
                       type="button"
@@ -299,20 +320,40 @@
                   <div class="detail-tags__divider" aria-hidden="true"></div>
 
                   @for (opt of filteredProjectOptions(); track opt.id) {
-                    <button
-                      type="button"
-                      class="detail-tags__option"
-                      [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
-                      (click)="toggleProjectMembership(opt.id)"
-                    >
-                      <span class="detail-tags__option-color" aria-hidden="true"></span>
-                      <span class="detail-tags__option-check" aria-hidden="true">
-                        @if (selectedProjectIds().has(opt.id)) {
-                          <span class="material-icons">check</span>
-                        }
-                      </span>
-                      <span>{{ opt.label }}</span>
-                    </button>
+                    <div class="detail-tags__option-row">
+                      <button
+                        type="button"
+                        class="detail-tags__option"
+                        [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
+                        [disabled]="
+                          !selectedProjectIds().has(opt.id) && !canAssignMultipleProjects()
+                        "
+                        (click)="toggleProjectMembership(opt.id)"
+                      >
+                        <span class="detail-tags__option-color" aria-hidden="true"></span>
+                        <span class="detail-tags__option-check" aria-hidden="true">
+                          @if (selectedProjectIds().has(opt.id)) {
+                            <span class="material-icons">check</span>
+                          }
+                        </span>
+                        <span>{{ opt.label }}</span>
+                      </button>
+
+                      @if (primarySelectorVisible()) {
+                        <button
+                          type="button"
+                          class="detail-tags__primary"
+                          [class.detail-tags__primary--active]="isPrimaryProject(opt.id)"
+                          [disabled]="!selectedProjectIds().has(opt.id)"
+                          [attr.aria-label]="'Set ' + opt.label + ' as primary project'"
+                          (click)="setPrimaryProject(opt.id)"
+                        >
+                          <span class="material-icons" aria-hidden="true">
+                            {{ isPrimaryProject(opt.id) ? 'star' : 'star_border' }}
+                          </span>
+                        </button>
+                      }
+                    </div>
                   }
                 </div>
               </div>
@@ -629,6 +670,30 @@
                 <span class="detail-correction-history__value">
                   {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
                 </span>
+              </div>
+            </div>
+          }
+
+          @if (image()!.latitude == null || image()!.longitude == null) {
+            <div class="detail-row detail-row--readonly">
+              <button
+                class="detail-row-action detail-row-action--left"
+                type="button"
+                aria-label="Copy coordinates"
+                title="Copy coordinates"
+                (click)="copyCoordinates()"
+              >
+                <span class="material-icons" aria-hidden="true">content_copy</span>
+              </button>
+              <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
+              <span class="detail-row__label">Coordinates</span>
+              <div class="detail-row__value-wrap">
+                <span class="detail-row__value detail-row__value--static">No GPS</span>
+                @if (isGpsAssignmentLocked()) {
+                  <span class="detail-row__subvalue"
+                    >GPS assignment disabled for this file type.</span
+                  >
+                }
               </div>
             </div>
           }

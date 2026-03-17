@@ -2,11 +2,11 @@
   class="upload-panel ui-container"
   [class.upload-panel--visible]="visible()"
   role="region"
-  aria-label="Upload images"
+  aria-label="Upload files"
 >
   <header class="upload-panel__header">
-    <h3 class="upload-panel__title">Upload photos</h3>
-    <p class="upload-panel__subtitle">Add site images with EXIF location when available.</p>
+    <h3 class="upload-panel__title">Upload files</h3>
+    <p class="upload-panel__subtitle">Add photos, videos, and PDFs for the active project.</p>
   </header>
 
   @if (scanningLabel(); as label) {
@@ -22,23 +22,25 @@
     (drop)="onDrop($event)"
     role="button"
     tabindex="0"
-    aria-label="Drag images here or click to select"
+    aria-label="Drag files here or click to select"
     (click)="openFilePicker(fileInput)"
     (keydown)="onDropZoneKeydown($event, fileInput)"
   >
     <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">photo_camera</span>
     <p class="upload-panel__dropzone-label">
-      Drag &amp; drop images here<br />
+      Drag &amp; drop files here<br />
       <span class="upload-panel__dropzone-sub">or click to select files</span>
     </p>
-    <p class="upload-panel__dropzone-hint">JPEG · PNG · HEIC · WebP · max 25 MB</p>
+    <p class="upload-panel__dropzone-hint">
+      JPEG · PNG · HEIC · WebP · MP4 · MOV · WebM · PDF · max 25 MB
+    </p>
 
     <!-- Hidden file input; trigger by clicking the drop zone -->
     <input
       #fileInput
       type="file"
       class="upload-panel__file-input"
-      accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+      accept="image/jpeg,image/png,image/heic,image/heif,image/webp,video/mp4,video/quicktime,video/webm,application/pdf"
       multiple
       aria-hidden="true"
       tabindex="-1"
@@ -103,7 +105,7 @@
     <section class="upload-panel__empty" aria-label="Upload idle state">
       <span class="upload-panel__empty-title">No uploads yet</span>
       <p class="upload-panel__empty-text">
-        Add photos to start. Status dots and lane filters appear once files enter the queue.
+        Add files to start. Status dots and lane filters appear once files enter the queue.
       </p>
     </section>
   }

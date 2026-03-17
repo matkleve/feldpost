@@ -1,0 +1,231 @@
+key,original,context,en,de
+auto.0001.click_it_to_activate_your_account,. Click it to activate your account.,apps/web/src/app/features/auth/register/register.component.html text-node,. Click it to activate your account.,. Click it to activate your account.
+auto.0002.account_circle,account_circle,apps/web/src/app/features/settings-overlay/settings-overlay.component.html text-node,account_circle,account_circle
+auto.0003.actions,Actions,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,Actions,Actions
+auto.0004.active,Active,apps/web/src/app/features/projects/projects-page.component.html text-node,Active,Active
+auto.0005.add,add,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html text-node,add,add
+auto.0006.add_metadata,Add metadata,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html text-node,Add metadata,Add metadata
+auto.0007.add_photos_to_start_status_dots_and_lane_filters_appear_once_fil,Add photos to start. Status dots and lane filters appear once files enter the queue.,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Add photos to start. Status dots and lane filters appear once files enter the queue.,Add photos to start. Status dots and lane filters appear once files enter the queue.
+auto.0008.add_site_images_with_exif_location_when_available,Add site images with EXIF location when available.,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Add site images with EXIF location when available.,Add site images with EXIF location when available.
+auto.0009.add_to_project,Add to project,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,Add to project,Add to project
+auto.0010.add_photo_alternate,add_photo_alternate,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,add_photo_alternate,add_photo_alternate
+auto.0011.additional_upload_actions,Additional upload actions,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Additional upload actions,Additional upload actions
+auto.0012.addresses,Addresses,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Addresses,Addresses
+auto.0013.all,All,apps/web/src/app/features/projects/projects-page.component.html text-node,All,All
+auto.0014.already_have_an_account,Already have an account?,apps/web/src/app/features/auth/register/register.component.html text-node,Already have an account?,Already have an account?
+auto.0015.archived,Archived,apps/web/src/app/features/projects/projects-page.component.html text-node,Archived,Archived
+auto.0016.arrow_back,arrow_back,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,arrow_back,arrow_back
+auto.0017.back_to_gallery,Back to gallery,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Back to gallery,Back to gallery
+auto.0018.back_to_sign_in,Back to sign in,apps/web/src/app/features/auth/register/register.component.html text-node,Back to sign in,Back to sign in
+auto.0019.cancel,Cancel,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Cancel,Cancel
+auto.0020.captured,Captured,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Captured,Captured
+auto.0021.change_project_color,Change project color,apps/web/src/app/features/projects/projects-page.component.html attr:title,Change project color,Change project color
+auto.0022.chat,chat,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,chat,chat
+auto.0023.check,check,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,check,check
+auto.0024.check_your_email,Check your email,apps/web/src/app/features/auth/register/register.component.html text-node,Check your email,Check your email
+auto.0025.chevron_left,chevron_left,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html text-node,chevron_left,chevron_left
+auto.0026.chevron_right,chevron_right,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html text-node,chevron_right,chevron_right
+auto.0027.choose_a_strong_password_for_your_account,Choose a strong password for your account.,apps/web/src/app/features/auth/update-password/update-password.component.html text-node,Choose a strong password for your account.,Choose a strong password for your account.
+auto.0028.city,City,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,City,City
+auto.0029.clear,Clear,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html text-node,Clear,Clear
+auto.0030.clear_search,Clear search,apps/web/src/app/features/map/search-bar/search-bar.component.html attr:aria-label,Clear search,Clear search
+auto.0031.clerk,Clerk,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Clerk,Clerk
+auto.0032.click_to_edit_title,Click to edit title,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:title,Click to edit title,Click to edit title
+auto.0033.close,close,apps/web/src/app/core/toast-item.component.html text-node,close,close
+auto.0034.cloud_upload,cloud_upload,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,cloud_upload,cloud_upload
+auto.0035.commands,Commands,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Commands,Commands
+auto.0036.confirm_new_password,Confirm new password,apps/web/src/app/features/auth/update-password/update-password.component.html text-node,Confirm new password,Confirm new password
+auto.0037.confirm_password,Confirm password,apps/web/src/app/features/auth/register/register.component.html text-node,Confirm password,Confirm password
+auto.0038.content_copy,content_copy,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,content_copy,content_copy
+auto.0039.coordinates,Coordinates,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Coordinates,Coordinates
+auto.0040.copy_coordinates,Copy coordinates,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,Copy coordinates,Copy coordinates
+auto.0041.copy_invite_link,Copy invite link,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Copy invite link,Copy invite link
+auto.0042.corrected,Corrected,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Corrected,Corrected
+auto.0043.country,Country,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Country,Country
+auto.0044.create,Create,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Create,Create
+auto.0045.create_account,Create account,apps/web/src/app/features/auth/register/register.component.html text-node,Create account,Create account
+auto.0046.create_account_form,Create account form,apps/web/src/app/features/auth/register/register.component.html attr:aria-label,Create account form,Create account form
+auto.0047.create_one,Create one,apps/web/src/app/features/auth/login/login.component.html text-node,Create one,Create one
+auto.0048.dd_mm_yyyy,DD.MM.YYYY,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html attr:placeholder,DD.MM.YYYY,DD.MM.YYYY
+auto.0049.decorative_city_map_background,Decorative city map background,apps/web/src/app/features/auth/login/login.component.html attr:title,Decorative city map background,Decorative city map background
+auto.0050.delete,delete,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,delete,delete
+auto.0051.delete_image,Delete image,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,Delete image,Delete image
+auto.0052.delete_this_image,Delete this image?,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:title,Delete this image?,Delete this image?
+auto.0053.details,Details,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Details,Details
+auto.0054.dismiss,Dismiss,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:title,Dismiss,Dismiss
+auto.0055.dismiss_job_file_name,Dismiss {{ job.file.name }},apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Dismiss {{ job.file.name }},Dismiss {{ job.file.name }}
+auto.0056.dismiss_notification,Dismiss notification,apps/web/src/app/core/toast-item.component.html attr:aria-label,Dismiss notification,Dismiss notification
+auto.0057.district,District,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,District,District
+auto.0058.don_t_have_an_account,Don't have an account?,apps/web/src/app/features/auth/login/login.component.html text-node,Don't have an account?,Don't have an account?
+auto.0059.done,Done,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html text-node,Done,Done
+auto.0060.drag_amp_drop_images_here,Drag &amp; drop images here,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Drag &amp; drop images here,Drag &amp; drop images here
+auto.0061.drag_images_here_or_click_to_select,Drag images here or click to select,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Drag images here or click to select,Drag images here or click to select
+auto.0062.drag_indicator,drag_indicator,apps/web/src/app/features/map/workspace-pane/drag-divider/drag-divider.component.html text-node,drag_indicator,drag_indicator
+auto.0063.drop_pin,Drop pin,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Drop pin,Drop pin
+auto.0064.edit,edit,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,edit,edit
+auto.0065.edit_captured_date,Edit captured date,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit captured date,Edit captured date
+auto.0066.edit_city,Edit city,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit city,Edit city
+auto.0067.edit_country,Edit country,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit country,Edit country
+auto.0068.edit_date,Edit date,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html attr:aria-label,Edit date,Edit date
+auto.0069.edit_district,Edit district,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit district,Edit district
+auto.0070.edit_image_title,Edit image title,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit image title,Edit image title
+auto.0071.edit_projects,Edit projects,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit projects,Edit projects
+auto.0072.edit_street,Edit street,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Edit street,Edit street
+auto.0073.edit_time_24h_format,Edit time (24h format),apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html attr:aria-label,Edit time (24h format),Edit time (24h format)
+auto.0074.email,Email,apps/web/src/app/features/auth/login/login.component.html text-node,Email,Email
+auto.0075.email_is_required,Email is required.,apps/web/src/app/features/auth/login/login.component.html text-node,Email is required.,Email is required.
+auto.0076.enter_a_valid_email_address,Enter a valid email address.,apps/web/src/app/features/auth/login/login.component.html text-node,Enter a valid email address.,Enter a valid email address.
+auto.0077.enter_your_email_and_we_ll_send_you_a_reset_link,Enter your email and we'll send you a reset link.,apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node,Enter your email and we'll send you a reset link.,Enter your email and we'll send you a reset link.
+auto.0078.error_outline,error_outline,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,error_outline,error_outline
+auto.0079.expand_more,expand_more,apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.html text-node,expand_more,expand_more
+auto.0080.file_name,File name,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,File name,File name
+auto.0081.filter,Filter,apps/web/src/app/features/projects/projects-page.component.html text-node,Filter,Filter
+auto.0082.folder,folder,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,folder,folder
+auto.0083.folder_open,folder_open,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,folder_open,folder_open
+auto.0084.forgot_password,Forgot password?,apps/web/src/app/features/auth/login/login.component.html text-node,Forgot password?,Forgot password?
+auto.0085.full_name,Full name,apps/web/src/app/features/auth/register/register.component.html text-node,Full name,Full name
+auto.0086.full_name_is_required,Full name is required.,apps/web/src/app/features/auth/register/register.component.html text-node,Full name is required.,Full name is required.
+auto.0087.full_size_photo,Full-size photo,apps/web/src/app/shared/photo-lightbox/photo-lightbox.component.html attr:aria-label,Full-size photo,Full-size photo
+auto.0088.gps_assignment_disabled_for_this_file_type,GPS assignment disabled for this file type.,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,GPS assignment disabled for this file type.,GPS assignment disabled for this file type.
+auto.0089.gps_assignment_is_disabled_for_this_file_type,GPS assignment is disabled for this file type.,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,GPS assignment is disabled for this file type.,GPS assignment is disabled for this file type.
+auto.0090.gps_fixed,gps_fixed,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,gps_fixed,gps_fixed
+auto.0091.gps_off,gps_off,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,gps_off,gps_off
+auto.0092.grouping,Grouping,apps/web/src/app/features/projects/projects-page.component.html text-node,Grouping,Grouping
+auto.0093.historic,Historic,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Historic,Historic
+auto.0094.historic_map,Historic map,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Historic map,Historic map
+auto.0095.image,image,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,image,image
+auto.0096.image_unavailable,Image unavailable,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Image unavailable,Image unavailable
+auto.0097.invite_link,Invite link,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Invite link,Invite link
+auto.0098.invite_management,Invite Management,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Invite Management,Invite Management
+auto.0099.invite_qr_code,Invite QR code,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Invite QR code,Invite QR code
+auto.0100.invite_unavailable,Invite unavailable,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Invite unavailable,Invite unavailable
+auto.0101.jane_smith,Jane Smith,apps/web/src/app/features/auth/register/register.component.html attr:placeholder,Jane Smith,Jane Smith
+auto.0102.jpeg_png_heic_webp_max_25_mb,JPEG · PNG · HEIC · WebP · max 25 MB,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,JPEG · PNG · HEIC · WebP · max 25 MB,JPEG · PNG · HEIC · WebP · max 25 MB
+auto.0103.key,Key,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html attr:placeholder,Key,Key
+auto.0104.label,label,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html text-node,label,label
+auto.0105.last_upload,Last upload,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Last upload,Last upload
+auto.0106.last_upload_summary,Last upload summary,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Last upload summary,Last upload summary
+auto.0107.loading_image_details,Loading image details,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Loading image details,Loading image details
+auto.0108.loading_projects,Loading projects,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Loading projects,Loading projects
+auto.0109.loading_qr_code,Loading QR code,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Loading QR code,Loading QR code
+auto.0110.loading,Loading…,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Loading…,Loading…
+auto.0111.location,Location,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Location,Location
+auto.0112.location_city,location_city,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,location_city,location_city
+auto.0113.mail,mail,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,mail,mail
+auto.0114.main_navigation,Main navigation,apps/web/src/app/features/nav/nav.component.html attr:aria-label,Main navigation,Main navigation
+auto.0115.manage_projects,Manage projects,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Manage projects,Manage projects
+auto.0116.map,map,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,map,map
+auto.0117.map_style,Map style,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Map style,Map style
+auto.0118.metadata,Metadata,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html text-node,Metadata,Metadata
+auto.0119.min_6_characters,Min. 6 characters,apps/web/src/app/features/auth/register/register.component.html attr:placeholder,Min. 6 characters,Min. 6 characters
+auto.0120.more_actions,More actions,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,More actions,More actions
+auto.0121.more_vert,more_vert,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,more_vert,more_vert
+auto.0122.my_location,my_location,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,my_location,my_location
+auto.0123.new_metadata_key,New metadata key,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html attr:aria-label,New metadata key,New metadata key
+auto.0124.new_metadata_value,New metadata value,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html attr:aria-label,New metadata value,New metadata value
+auto.0125.new_password,New password,apps/web/src/app/features/auth/update-password/update-password.component.html text-node,New password,New password
+auto.0126.new_project,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,New project
+auto.0127.next_month,Next month,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html attr:aria-label,Next month,Next month
+auto.0128.no_gps,No GPS,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,No GPS,No GPS
+auto.0129.no_gps_this_item_can_only_belong_to_one_project,No GPS: this item can only belong to one project.,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,No GPS: this item can only belong to one project.,No GPS: this item can only belong to one project.
+auto.0130.no_photo_attached,No photo attached,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,No photo attached,No photo attached
+auto.0131.no_projects_found,No projects found,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,No projects found,No projects found
+auto.0132.no_projects_match_your_filters,No projects match your filters,apps/web/src/app/features/projects/projects-page.component.html text-node,No projects match your filters,No projects match your filters
+auto.0133.no_recent_searches_yet,No recent searches yet.,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,No recent searches yet.,No recent searches yet.
+auto.0134.no_time,No time,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html attr:placeholder,No time,No time
+auto.0135.no_uploads_yet,No uploads yet,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,No uploads yet,No uploads yet
+auto.0136.open_settings_overlay,Open settings overlay,apps/web/src/app/features/nav/nav.component.html attr:aria-label,Open settings overlay,Open settings overlay
+auto.0137.or_click_to_select_files,or click to select files,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,or click to select files,or click to select files
+auto.0138.original_exif,Original EXIF,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Original EXIF,Original EXIF
+auto.0139.palette,palette,apps/web/src/app/features/projects/projects-page.component.html text-node,palette,palette
+auto.0140.password,Password,apps/web/src/app/features/auth/login/login.component.html text-node,Password,Password
+auto.0141.password_is_required,Password is required.,apps/web/src/app/features/auth/login/login.component.html text-node,Password is required.,Password is required.
+auto.0142.password_must_be_at_least_6_characters,Password must be at least 6 characters.,apps/web/src/app/features/auth/register/register.component.html text-node,Password must be at least 6 characters.,Password must be at least 6 characters.
+auto.0143.passwords_do_not_match,Passwords do not match.,apps/web/src/app/features/auth/register/register.component.html text-node,Passwords do not match.,Passwords do not match.
+auto.0144.photo,Photo,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Photo,Photo
+auto.0145.photo_map,Photo map,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Photo map,Photo map
+auto.0146.photo_camera,photo_camera,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,photo_camera,photo_camera
+auto.0147.pin_drop,pin_drop,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,pin_drop,pin_drop
+auto.0148.place,place,apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html text-node,place,place
+auto.0149.place_job_file_name_on_map,Place {{ job.file.name }} on map,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Place {{ job.file.name }} on map,Place {{ job.file.name }} on map
+auto.0150.place_on_map,Place on map,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:title,Place on map,Place on map
+auto.0151.places,Places,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Places,Places
+auto.0152.previous_month,Previous month,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html attr:aria-label,Previous month,Previous month
+auto.0153.primary,Primary,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Primary,Primary
+auto.0154.project_action_modal,Project action modal,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project action modal,Project action modal
+auto.0155.project_controls,Project controls,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project controls,Project controls
+auto.0156.project_name,Project name,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project name,Project name
+auto.0157.project_options,Project options,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Project options,Project options
+auto.0158.project_search,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Project search
+auto.0159.project_status_filter,Project status filter,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project status filter,Project status filter
+auto.0160.projects,Projects,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Projects,Projects
+auto.0161.projects_amp_groups,Projects &amp; Groups,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Projects &amp; Groups,Projects &amp; Groups
+auto.0162.projects_card_grid,Projects card grid,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Projects card grid,Projects card grid
+auto.0163.projects_list,Projects list,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Projects list,Projects list
+auto.0164.public,public,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,public,public
+auto.0165.qr_preview,QR preview,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,QR preview,QR preview
+auto.0166.recent_searches,Recent searches,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Recent searches,Recent searches
+auto.0167.regenerate,Regenerate,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Regenerate,Regenerate
+auto.0168.remove,Remove,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:title,Remove,Remove
+auto.0169.rename_project,Rename project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Rename project,Rename project
+auto.0170.replace_photo,Replace photo,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Replace photo,Replace photo
+auto.0171.reset_password,Reset password,apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node,Reset password,Reset password
+auto.0172.revert_corrected_coordinates,Revert corrected coordinates,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Revert corrected coordinates,Revert corrected coordinates
+auto.0173.revoke,Revoke,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Revoke,Revoke
+auto.0174.role_picker,Role picker,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Role picker,Role picker
+auto.0175.save_city,Save city,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Save city,Save city
+auto.0176.save_country,Save country,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Save country,Save country
+auto.0177.save_district,Save district,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Save district,Save district
+auto.0178.save_new_metadata,Save new metadata,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html attr:aria-label,Save new metadata,Save new metadata
+auto.0179.save_street,Save street,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Save street,Save street
+auto.0180.schedule,schedule,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,schedule,schedule
+auto.0181.search,search,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,search,search
+auto.0182.search_address,Search address…,apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html attr:placeholder,Search address…,Search address…
+auto.0183.search_for_an_address,Search for an address,apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html attr:aria-label,Search for an address,Search for an address
+auto.0184.search_projects,Search projects,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,Search projects,Search projects
+auto.0185.searching,Searching…,apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html text-node,Searching…,Searching…
+auto.0186.select_an_option_or_create_one,Select an option or create one,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Select an option or create one,Select an option or create one
+auto.0187.select_project_or_create_one,Select project or create one,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:placeholder,Select project or create one,Select project or create one
+auto.0188.set_new_password,Set new password,apps/web/src/app/features/auth/update-password/update-password.component.html text-node,Set new password,Set new password
+auto.0189.settings,Settings,apps/web/src/app/features/nav/nav.component.html text-node,Settings,Settings
+auto.0190.share_a_role_scoped_one_time_invite_to_your_organization,Share a role-scoped one-time invite to your organization.,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Share a role-scoped one-time invite to your organization.,Share a role-scoped one-time invite to your organization.
+auto.0191.share_actions,Share actions,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Share actions,Share actions
+auto.0192.share_invite_via_email,Share invite via email,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Share invite via email,Share invite via email
+auto.0193.share_invite_via_whatsapp,Share invite via WhatsApp,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label,Share invite via WhatsApp,Share invite via WhatsApp
+auto.0194.share_via_email,Share via email,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title,Share via email,Share via email
+auto.0195.share_via_whatsapp,Share via WhatsApp,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title,Share via WhatsApp,Share via WhatsApp
+auto.0196.sign_in,Sign in,apps/web/src/app/features/auth/login/login.component.html text-node,Sign in,Sign in
+auto.0197.signpost,signpost,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,signpost,signpost
+auto.0198.site_map,Site map,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Site map,Site map
+auto.0199.sort,Sort,apps/web/src/app/features/projects/projects-page.component.html text-node,Sort,Sort
+auto.0200.start_documenting_your_sites,Start documenting your sites,apps/web/src/app/features/auth/register/register.component.html text-node,Start documenting your sites,Start documenting your sites
+auto.0201.street,Street,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Street,Street
+auto.0202.street_map,Street map,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Street map,Street map
+auto.0203.sync,sync,apps/web/src/app/features/settings-overlay/settings-overlay.component.html text-node,sync,sync
+auto.0204.take_photo,Take photo,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Take photo,Take photo
+auto.0205.target_role,Target role,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Target role,Target role
+auto.0206.this_feature_is_coming_soon,This feature is coming soon.,apps/web/src/app/features/nav/nav.component.html text-node,This feature is coming soon.,This feature is coming soon.
+auto.0207.today,Today,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html text-node,Today,Today
+auto.0208.try_a_different_address_or_pin_manually,Try a different address or pin manually.,apps/web/src/app/features/map/search-bar/search-bar.component.html text-node,Try a different address or pin manually.,Try a different address or pin manually.
+auto.0209.try_again,Try again,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Try again,Try again
+auto.0210.try_another_search_or_reset_your_status_filter,Try another search or reset your status filter.,apps/web/src/app/features/projects/projects-page.component.html text-node,Try another search or reset your status filter.,Try another search or reset your status filter.
+auto.0211.upload_folder,Upload folder,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Upload folder,Upload folder
+auto.0212.upload_idle_state,Upload idle state,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Upload idle state,Upload idle state
+auto.0213.upload_images,Upload images,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Upload images,Upload images
+auto.0214.upload_lanes,Upload lanes,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Upload lanes,Upload lanes
+auto.0215.upload_photos,Upload photos,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node,Upload photos,Upload photos
+auto.0216.upload_progress_board,Upload progress board,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Upload progress board,Upload progress board
+auto.0217.upload_queue,Upload queue,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Upload queue,Upload queue
+auto.0218.upload_status_matrix,Upload status matrix,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Upload status matrix,Upload status matrix
+auto.0219.uploaded,Uploaded,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Uploaded,Uploaded
+auto.0220.value,Value,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html attr:placeholder,Value,Value
+auto.0221.view_full_size_photo,View full-size photo,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,View full-size photo,View full-size photo
+auto.0222.warning,warning,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,warning,warning
+auto.0223.we_sent_a_confirmation_link_to,We sent a confirmation link to,apps/web/src/app/features/auth/register/register.component.html text-node,We sent a confirmation link to,We sent a confirmation link to
+auto.0224.we_sent_a_password_reset_link_to,We sent a password reset link to,apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node,We sent a password reset link to,We sent a password reset link to
+auto.0225.welcome_back_to_feldpost,Welcome back to Feldpost,apps/web/src/app/features/auth/login/login.component.html text-node,Welcome back to Feldpost,Welcome back to Feldpost
+auto.0226.worker,Worker,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Worker,Worker
+auto.0227.workspace_controls,Workspace controls,apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.html attr:aria-label,Workspace controls,Workspace controls
+auto.0228.workspace_pane,Workspace pane,apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html attr:aria-label,Workspace pane,Workspace pane
+auto.0229.zoom_to_location,Zoom to location,apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html text-node,Zoom to location,Zoom to location
+auto.0230.zoom_in_map,zoom_in_map,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,zoom_in_map,zoom_in_map

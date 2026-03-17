@@ -123,27 +123,19 @@ describe('MapShellComponent', () => {
     expect(bar).not.toBeNull();
   });
 
-  it('renders the top-left basemap switch button', () => {
+  it('renders the top-left map style switch with three options', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    const switchButton = (fixture.nativeElement as HTMLElement).querySelector(
-      '.map-basemap-switch',
+    const switchRoot = (fixture.nativeElement as HTMLElement).querySelector('.map-style-switch');
+    const options = (fixture.nativeElement as HTMLElement).querySelectorAll(
+      '.map-style-switch__option',
     );
-    expect(switchButton).not.toBeNull();
-    expect((switchButton as HTMLButtonElement).getAttribute('role')).toBe('switch');
-    expect((switchButton as HTMLButtonElement).getAttribute('aria-checked')).toBe('false');
-  });
-
-  it('renders the analog map material option button', () => {
-    const fixture = TestBed.createComponent(MapShellComponent);
-    fixture.detectChanges();
-
-    const optionButton = (fixture.nativeElement as HTMLElement).querySelector(
-      '.map-material-toggle',
-    );
-    expect(optionButton).not.toBeNull();
-    expect((optionButton as HTMLButtonElement).disabled).toBe(false);
+    expect(switchRoot).not.toBeNull();
+    expect(options).toHaveLength(3);
+    expect(options[0]?.textContent?.trim()).toBe('Street');
+    expect(options[1]?.textContent?.trim()).toBe('Photo');
+    expect(options[2]?.textContent?.trim()).toBe('Historic');
   });
 
   it('renders the map container element', () => {
@@ -178,24 +170,52 @@ describe('MapShellComponent', () => {
     expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
   });
 
-  it('toggleMapBasemap() flips the basemap and persists the preference', () => {
+  it('setMapViewMode("photo") persists photo map preference', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.mapBasemap()).toBe('default');
+    expect(fixture.componentInstance.mapMaterial()).toBe('default');
 
-    fixture.componentInstance.toggleMapBasemap();
+    fixture.componentInstance.setMapViewMode('photo');
 
     expect(fixture.componentInstance.mapBasemap()).toBe('satellite');
+    expect(fixture.componentInstance.mapMaterial()).toBe('default');
+    expect(fixture.componentInstance.mapViewMode()).toBe('photo');
     expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('satellite');
-
-    fixture.componentInstance.toggleMapBasemap();
-
-    expect(fixture.componentInstance.mapBasemap()).toBe('default');
-    expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
+    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('default');
   });
 
-  it('toggleMapBasemap() replaces the active tile layer when map exists', () => {
+  it('setMapViewMode("historic") enables analog material and persists preferences', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.setMapViewMode('historic');
+
+    expect(fixture.componentInstance.mapBasemap()).toBe('default');
+    expect(fixture.componentInstance.mapMaterial()).toBe('analog');
+    expect(fixture.componentInstance.analogMaterialActive()).toBe(true);
+    expect(fixture.componentInstance.mapViewMode()).toBe('historic');
+    expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
+    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('analog');
+  });
+
+  it('setMapViewMode("street") resets analog material', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.setMapViewMode('historic');
+    fixture.componentInstance.setMapViewMode('street');
+
+    expect(fixture.componentInstance.mapBasemap()).toBe('default');
+    expect(fixture.componentInstance.mapMaterial()).toBe('default');
+    expect(fixture.componentInstance.analogMaterialActive()).toBe(false);
+    expect(fixture.componentInstance.mapViewMode()).toBe('street');
+    expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
+    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('default');
+  });
+
+  it('setMapViewMode("photo") replaces the active tile layer when map exists', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
@@ -210,53 +230,18 @@ describe('MapShellComponent', () => {
       map: { removeLayer: ReturnType<typeof vi.fn> };
       activeBaseTileLayer: { addTo: ReturnType<typeof vi.fn> } | null;
       createMapBasemapLayer: (mode: 'default' | 'satellite') => { addTo: ReturnType<typeof vi.fn> };
-      toggleMapBasemap: () => void;
+      setMapViewMode: (mode: 'street' | 'photo' | 'historic') => void;
     };
 
     component.map = mapStub;
     component.activeBaseTileLayer = previousLayer;
     component.createMapBasemapLayer = vi.fn().mockReturnValue(nextLayer);
 
-    component.toggleMapBasemap();
+    component.setMapViewMode('photo');
 
     expect(mapStub.removeLayer).toHaveBeenCalledWith(previousLayer);
+    expect(component.createMapBasemapLayer).toHaveBeenCalledWith('satellite');
     expect(nextLayer.addTo).toHaveBeenCalledWith(mapStub);
-  });
-
-  it('toggleMapMaterial() flips material and persists preference', () => {
-    const fixture = TestBed.createComponent(MapShellComponent);
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.mapMaterial()).toBe('default');
-    expect(fixture.componentInstance.analogMaterialActive()).toBe(false);
-
-    fixture.componentInstance.toggleMapMaterial();
-
-    expect(fixture.componentInstance.mapMaterial()).toBe('analog');
-    expect(fixture.componentInstance.analogMaterialActive()).toBe(true);
-    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('analog');
-
-    fixture.componentInstance.toggleMapMaterial();
-
-    expect(fixture.componentInstance.mapMaterial()).toBe('default');
-    expect(fixture.componentInstance.analogMaterialActive()).toBe(false);
-    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('default');
-  });
-
-  it('disables analog material option in photo map mode', () => {
-    const fixture = TestBed.createComponent(MapShellComponent);
-    fixture.detectChanges();
-
-    fixture.componentInstance.toggleMapBasemap();
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.mapBasemap()).toBe('satellite');
-    expect(fixture.componentInstance.mapMaterialOptionEnabled()).toBe(false);
-
-    const optionButton = (fixture.nativeElement as HTMLElement).querySelector(
-      '.map-material-toggle',
-    );
-    expect((optionButton as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('toggleUploadPanel() hides the panel when called twice', () => {

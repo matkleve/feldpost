@@ -31,7 +31,24 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'image/heic',
   'image/heif',
   'image/webp',
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'application/pdf',
 ]);
+
+const PHOTO_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/heic',
+  'image/heif',
+  'image/webp',
+]);
+
+const VIDEO_MIME_TYPES = new Set(['video/mp4', 'video/quicktime', 'video/webm']);
+
+type MediaType = 'photo' | 'video' | 'document';
+type LocationStatus = 'gps' | 'no_gps' | 'unresolved';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -105,7 +122,7 @@ export class UploadService {
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
       return {
         valid: false,
-        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, or WebP.`,
+        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, or PDF.`,
       };
     }
     return { valid: true };
@@ -186,6 +203,7 @@ export class UploadService {
     file: File,
     manualCoords?: ExifCoords,
     parsedExif?: ParsedExif,
+    projectId?: string,
   ): Promise<UploadResult> {
     // ── 0. Auth guard ──────────────────────────────────────────────────────
     const user = this.auth.user();
@@ -254,12 +272,42 @@ export class UploadService {
         captured_at: capturedAt ?? null,
         direction: direction ?? null,
         location_unresolved: finalCoords != null,
+        project_id: projectId ?? null,
       })
       .select('id')
       .single();
 
     if (dbError) {
       return { error: dbError };
+    }
+
+    // Shadow write into mixed-media tables when upload context has a primary project.
+    if (projectId) {
+      const mediaType = this.resolveMediaType(file.type);
+      const locationStatus = this.resolveLocationStatus(mediaType, finalCoords);
+
+      const { error: mediaError } = await this.supabase.client.from('media_items').insert({
+        organization_id: orgId,
+        primary_project_id: projectId,
+        created_by: user.id,
+        media_type: mediaType,
+        mime_type: file.type,
+        storage_path: storagePath,
+        file_name: file.name,
+        file_size_bytes: file.size,
+        captured_at: capturedAt ?? null,
+        exif_latitude: exifCoords?.lat ?? null,
+        exif_longitude: exifCoords?.lng ?? null,
+        latitude: finalCoords?.lat ?? null,
+        longitude: finalCoords?.lng ?? null,
+        location_status: locationStatus,
+        gps_assignment_allowed: mediaType !== 'document',
+        source_image_id: imageRow.id as string,
+      });
+
+      if (mediaError) {
+        return { error: mediaError };
+      }
     }
 
     // Fire-and-forget: reverse-geocode coordinates to populate address fields.
@@ -366,5 +414,16 @@ export class UploadService {
 
   private sanitizeSnippet(value: string): string {
     return value.replace(/\s+/g, ' ').trim().slice(0, 300);
+  }
+
+  private resolveMediaType(mimeType: string): MediaType {
+    if (PHOTO_MIME_TYPES.has(mimeType)) return 'photo';
+    if (VIDEO_MIME_TYPES.has(mimeType)) return 'video';
+    return 'document';
+  }
+
+  private resolveLocationStatus(mediaType: MediaType, coords?: ExifCoords): LocationStatus {
+    if (coords) return 'gps';
+    return mediaType === 'document' ? 'no_gps' : 'unresolved';
   }
 }

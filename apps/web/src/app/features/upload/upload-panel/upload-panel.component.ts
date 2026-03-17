@@ -15,6 +15,7 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExifCoords } from '../../../core/upload.service';
+import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import {
   UploadManagerService,
   UploadJob,
@@ -55,6 +56,7 @@ type UploadLane = 'uploading' | 'uploaded' | 'issues';
 })
 export class UploadPanelComponent {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly workspaceView = inject(WorkspaceViewService);
 
   // ── Inputs / outputs ───────────────────────────────────────────────────────
 
@@ -105,7 +107,7 @@ export class UploadPanelComponent {
   readonly scanningLabel = computed(() => {
     const batch = this.activeBatch();
     if (!batch || batch.status !== 'scanning') return null;
-    return `Scanning... ${batch.totalFiles} image${batch.totalFiles === 1 ? '' : 's'} found`;
+    return `Scanning... ${batch.totalFiles} file${batch.totalFiles === 1 ? '' : 's'} found`;
   });
 
   readonly selectedLane = signal<UploadLane>('uploading');
@@ -159,7 +161,7 @@ export class UploadPanelComponent {
     if (batch.totalFiles <= 1) {
       return batch.label;
     }
-    return `Batch · ${batch.totalFiles} photos`;
+    return `Batch · ${batch.totalFiles} files`;
   });
 
   constructor() {
@@ -206,7 +208,7 @@ export class UploadPanelComponent {
 
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
-      this.uploadManager.submit(Array.from(files));
+      this.uploadManager.submit(Array.from(files), { projectId: this.activeProjectId() });
     }
   }
 
@@ -215,7 +217,7 @@ export class UploadPanelComponent {
   onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files));
+      this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
       // Reset so the same file can be re-selected if needed
       input.value = '';
     }
@@ -224,7 +226,7 @@ export class UploadPanelComponent {
   onCaptureInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadManager.submit([input.files[0]]);
+      this.uploadManager.submit([input.files[0]], { projectId: this.activeProjectId() });
       input.value = '';
     }
   }
@@ -305,7 +307,7 @@ export class UploadPanelComponent {
 
     try {
       const dirHandle = await picker.call(window);
-      await this.uploadManager.submitFolder(dirHandle);
+      await this.uploadManager.submitFolder(dirHandle, { projectId: this.activeProjectId() });
     } catch {
       // User cancel and permission errors are non-fatal for panel state.
     }
@@ -314,9 +316,14 @@ export class UploadPanelComponent {
   onFolderInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files));
+      this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
       input.value = '';
     }
+  }
+
+  private activeProjectId(): string | undefined {
+    const ids = this.workspaceView.selectedProjectIds();
+    return ids.size > 0 ? (Array.from(ids.values())[0] ?? undefined) : undefined;
   }
 
   // ── Manual placement ───────────────────────────────────────────────────────

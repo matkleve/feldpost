@@ -201,6 +201,7 @@ export class UploadManagerService {
       thumbnailUrl: URL.createObjectURL(file),
       submittedAt: new Date(),
       mode: 'new' as UploadJobMode,
+      projectId: options?.projectId,
     }));
 
     this.jobState.addJobs(newJobs);
@@ -241,7 +242,7 @@ export class UploadManagerService {
     // Update batch with final count and switch to uploading.
     this.batchService.updateBatch(batchId, {
       totalFiles: files.length,
-      label: `${label} \u2014 ${files.length} image${files.length === 1 ? '' : 's'}`,
+      label: `${label} \u2014 ${files.length} file${files.length === 1 ? '' : 's'}`,
       status: files.length > 0 ? 'uploading' : 'complete',
     });
 
@@ -261,6 +262,7 @@ export class UploadManagerService {
       thumbnailUrl: URL.createObjectURL(file),
       submittedAt: new Date(),
       mode: 'new' as UploadJobMode,
+      projectId: options?.projectId,
     }));
 
     this.jobState.addJobs(newJobs);

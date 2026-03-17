@@ -66,6 +66,8 @@ export interface UploadJob {
   oldStoragePath?: string;
   /** For 'replace' mode: the old thumbnail_path to delete after DB update succeeds. */
   oldThumbnailPath?: string;
+  /** Optional primary project context for mixed-media shadow writes. */
+  projectId?: string;
   /** If conflict detected, the existing photoless row that matched. */
   conflictCandidate?: ConflictCandidate;
   /** User's resolution when a conflict was detected. */

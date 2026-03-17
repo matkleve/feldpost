@@ -59,11 +59,14 @@ import {
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapBasemapPreference = 'default' | 'satellite';
 type MapMaterialPreference = 'default' | 'analog';
+type MapViewMode = 'street' | 'photo' | 'historic';
 
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
 const MAP_MATERIAL_STORAGE_KEY = 'sitesnap.settings.map.material';
+const HISTORIC_BASE_PANE = 'historic-base';
+const HISTORIC_LABEL_PANE = 'historic-label';
 
 @Component({
   selector: 'app-map-shell',
@@ -220,10 +223,15 @@ export class MapShellComponent implements OnDestroy {
   readonly gpsTrackingActive = signal(false);
   readonly mapBasemap = signal<MapBasemapPreference>(this.readMapBasemapPreference());
   readonly mapMaterial = signal<MapMaterialPreference>(this.readMapMaterialPreference());
-  readonly mapMaterialOptionEnabled = computed(() => this.mapBasemap() === 'default');
   readonly analogMaterialActive = computed(
     () => this.mapBasemap() === 'default' && this.mapMaterial() === 'analog',
   );
+  readonly mapViewMode = computed<MapViewMode>(() => {
+    if (this.mapBasemap() === 'satellite') {
+      return 'photo';
+    }
+    return this.mapMaterial() === 'analog' ? 'historic' : 'street';
+  });
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -328,6 +336,7 @@ export class MapShellComponent implements OnDestroy {
   /** LayerGroup for all photo markers — enables batch add/remove. */
   private photoMarkerLayer: L.LayerGroup | null = null;
   private activeBaseTileLayer: L.TileLayer | null = null;
+  private activeHistoricLabelTileLayer: L.TileLayer | null = null;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -548,14 +557,45 @@ export class MapShellComponent implements OnDestroy {
   toggleMapBasemap(): void {
     const next: MapBasemapPreference = this.mapBasemap() === 'default' ? 'satellite' : 'default';
     this.mapBasemap.set(next);
+    if (next === 'satellite') {
+      this.mapMaterial.set('default');
+      this.persistMapMaterialPreference('default');
+    }
     this.persistMapBasemapPreference(next);
     this.applyMapBasemapLayer();
   }
 
   toggleMapMaterial(): void {
     const next: MapMaterialPreference = this.mapMaterial() === 'default' ? 'analog' : 'default';
+    if (this.mapBasemap() === 'satellite') {
+      this.mapBasemap.set('default');
+      this.persistMapBasemapPreference('default');
+    }
     this.mapMaterial.set(next);
     this.persistMapMaterialPreference(next);
+    this.applyMapBasemapLayer();
+  }
+
+  setMapViewMode(mode: MapViewMode): void {
+    const previousBasemap = this.mapBasemap();
+
+    if (mode === 'photo') {
+      this.mapBasemap.set('satellite');
+      this.mapMaterial.set('default');
+    } else if (mode === 'historic') {
+      this.mapBasemap.set('default');
+      this.mapMaterial.set('analog');
+    } else {
+      this.mapBasemap.set('default');
+      this.mapMaterial.set('default');
+    }
+
+    this.persistMapBasemapPreference(this.mapBasemap());
+    this.persistMapMaterialPreference(this.mapMaterial());
+
+    if (this.mapBasemap() !== previousBasemap || mode === 'historic' || mode === 'street') {
+      this.applyMapBasemapLayer();
+    }
   }
 
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
@@ -585,6 +625,13 @@ export class MapShellComponent implements OnDestroy {
       maxZoom: 22,
       zoomControl: false,
     });
+
+    const historicBasePane = this.map.createPane(HISTORIC_BASE_PANE);
+    historicBasePane.style.zIndex = '210';
+
+    const historicLabelPane = this.map.createPane(HISTORIC_LABEL_PANE);
+    historicLabelPane.style.zIndex = '211';
+    historicLabelPane.style.pointerEvents = 'none';
 
     this.applyMapBasemapLayer();
 
@@ -733,8 +780,18 @@ export class MapShellComponent implements OnDestroy {
       this.map.removeLayer(this.activeBaseTileLayer);
     }
 
+    if (this.activeHistoricLabelTileLayer) {
+      this.map.removeLayer(this.activeHistoricLabelTileLayer);
+      this.activeHistoricLabelTileLayer = null;
+    }
+
     this.activeBaseTileLayer = this.createMapBasemapLayer(this.mapBasemap());
     this.activeBaseTileLayer.addTo(this.map);
+
+    if (this.mapBasemap() === 'default' && this.mapMaterial() === 'analog') {
+      this.activeHistoricLabelTileLayer = this.createHistoricLabelLayer();
+      this.activeHistoricLabelTileLayer.addTo(this.map);
+    }
   }
 
   private createMapBasemapLayer(mode: MapBasemapPreference): L.TileLayer {
@@ -749,6 +806,20 @@ export class MapShellComponent implements OnDestroy {
       );
     }
 
+    if (this.mapMaterial() === 'analog') {
+      // Historic mode: split base and labels to preserve street readability.
+      return L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+        {
+          pane: HISTORIC_BASE_PANE,
+          maxNativeZoom: 19,
+          maxZoom: 22,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        },
+      );
+    }
+
     // CartoDB Positron — clean, uncluttered light tile (design.md §3.1).
     return L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxNativeZoom: 19,
@@ -756,6 +827,19 @@ export class MapShellComponent implements OnDestroy {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
     });
+  }
+
+  private createHistoricLabelLayer(): L.TileLayer {
+    return L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+      {
+        pane: HISTORIC_LABEL_PANE,
+        maxNativeZoom: 19,
+        maxZoom: 22,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      },
+    );
   }
 
   private readMapFocusPayload(): { imageId: string; lat: number; lng: number } | null {

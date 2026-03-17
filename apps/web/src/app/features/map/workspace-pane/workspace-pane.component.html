@@ -3,9 +3,15 @@
   <app-pane-header
     [title]="title()"
     [editable]="titleEditable()"
+    [editEnabled]="titleEditEnabled()"
     [editValue]="titleEditValue()"
+    [colorToken]="projectColorToken()"
+    [colorPickerEnabled]="colorPickerEnabled()"
+    [colorPickerOpen]="colorPickerOpen()"
     (editValueChange)="onTitleEditValueChange($event)"
     (editSubmitted)="onTitleSubmit($event)"
+    (editRequested)="onTitleEditRequest()"
+    (colorPickerRequested)="onColorPickerRequest()"
     (close)="close()"
   ></app-pane-header>
 

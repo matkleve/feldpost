@@ -164,7 +164,7 @@ export class UploadNewPipelineService {
     this.jobState.updateJob(jobId, { progress: 0 });
 
     // ── Phase: saving_record (UploadService does upload + insert as one call)
-    const result = await this.uploadService.uploadFile(job.file, coords, parsedExif);
+    const result = await this.uploadService.uploadFile(job.file, coords, parsedExif, job.projectId);
 
     if (result.error !== null) {
       const msg =

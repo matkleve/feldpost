@@ -3,12 +3,12 @@
     class="settings-overlay ui-container"
     role="dialog"
     aria-modal="true"
-    aria-label="Settings"
+    [attr.aria-label]="t('settings.overlay.aria.dialog', 'Settings')"
   >
     <button
       type="button"
       class="settings-overlay__close"
-      aria-label="Close settings overlay"
+      [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
       (click)="requestClose()"
     >
       <span class="material-icons" aria-hidden="true">close</span>
@@ -17,17 +17,24 @@
     <div class="settings-overlay__lead-divider" aria-hidden="true"></div>
 
     <div class="settings-overlay__shell">
-      <aside class="settings-overlay__sections" aria-label="Settings sections">
+      <aside
+        class="settings-overlay__sections"
+        [attr.aria-label]="t('settings.overlay.aria.sections', 'Settings sections')"
+      >
         <header class="settings-overlay__sections-header">
-          <p class="settings-overlay__kicker">Settings</p>
-          <h2 class="settings-overlay__title">Workspace Preferences</h2>
+          <p class="settings-overlay__kicker">{{ t('settings.overlay.kicker', 'Settings') }}</p>
+          <h2 class="settings-overlay__title">
+            {{ t('settings.overlay.title', 'Workspace Preferences') }}
+          </h2>
           <p class="settings-overlay__subtitle">
-            iOS-style section navigation with Feldpost controls.
+            {{
+              t('settings.overlay.subtitle', 'iOS-style section navigation with Feldpost controls.')
+            }}
           </p>
         </header>
 
         <div class="settings-overlay__section-list" role="list">
-          @for (section of sectionList; track section.id) {
+          @for (section of sectionList(); track section.id) {
             <button
               type="button"
               class="settings-overlay__section-item ui-item dd-item"
@@ -56,28 +63,46 @@
         @if (loadState() === 'loading') {
           <div class="settings-overlay__state settings-overlay__state--loading">
             <span class="material-icons" aria-hidden="true">sync</span>
-            <h3>Loading settings</h3>
-            <p>We are preparing your configuration profile.</p>
+            <h3>{{ t('settings.overlay.loading.title', 'Loading settings') }}</h3>
+            <p>
+              {{
+                t(
+                  'settings.overlay.loading.description',
+                  'We are preparing your configuration profile.'
+                )
+              }}
+            </p>
           </div>
         } @else if (loadState() === 'error') {
           <div class="settings-overlay__state settings-overlay__state--error">
             <span class="material-icons" aria-hidden="true">warning</span>
-            <h3>Could not load settings</h3>
+            <h3>{{ t('settings.overlay.error.title', 'Could not load settings') }}</h3>
             <p>{{ lastError() }}</p>
             <button type="button" class="settings-overlay__ghost-button" (click)="retryLoad()">
-              Retry
+              {{ t('settings.overlay.retry', 'Retry') }}
             </button>
           </div>
         } @else {
           @switch (selectedSectionId()) {
             @case ('general') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>General</h3>
-                <p>Control base language and content density for workspace surfaces.</p>
+                <h3>{{ t('settings.overlay.general.title', 'General') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.general.description',
+                      'Control base language and content density for workspace surfaces.'
+                    )
+                  }}
+                </p>
 
                 <div class="settings-overlay__field-row">
-                  <span>Language</span>
-                  <div class="settings-overlay__segmented" role="group" aria-label="Language">
+                  <span>{{ t('settings.overlay.general.language.label', 'Language') }}</span>
+                  <div
+                    class="settings-overlay__segmented"
+                    role="group"
+                    [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
+                  >
                     <button
                       type="button"
                       [class.settings-overlay__segmented--active]="
@@ -85,7 +110,7 @@
                       "
                       (click)="setLanguage('en')"
                     >
-                      English
+                      {{ t('settings.overlay.general.language.option.en', 'English') }}
                     </button>
                     <button
                       type="button"
@@ -94,14 +119,18 @@
                       "
                       (click)="setLanguage('de')"
                     >
-                      Deutsch
+                      {{ t('settings.overlay.general.language.option.de', 'Deutsch') }}
                     </button>
                   </div>
                 </div>
 
                 <div class="settings-overlay__field-row">
-                  <span>Density</span>
-                  <div class="settings-overlay__segmented" role="group" aria-label="Density">
+                  <span>{{ t('settings.overlay.general.density.label', 'Density') }}</span>
+                  <div
+                    class="settings-overlay__segmented"
+                    role="group"
+                    [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
+                  >
                     <button
                       type="button"
                       [class.settings-overlay__segmented--active]="
@@ -109,7 +138,7 @@
                       "
                       (click)="setDensity('compact')"
                     >
-                      Compact
+                      {{ t('settings.overlay.general.density.option.compact', 'Compact') }}
                     </button>
                     <button
                       type="button"
@@ -118,7 +147,7 @@
                       "
                       (click)="setDensity('comfortable')"
                     >
-                      Comfortable
+                      {{ t('settings.overlay.general.density.option.comfortable', 'Comfortable') }}
                     </button>
                   </div>
                 </div>
@@ -127,11 +156,24 @@
 
             @case ('appearance') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>Appearance</h3>
-                <p>Use the same palette behavior as dropdowns and map surfaces.</p>
+                <h3>{{ t('settings.overlay.appearance.title', 'Appearance') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.appearance.description',
+                      'Use the same palette behavior as dropdowns and map surfaces.'
+                    )
+                  }}
+                </p>
                 <div class="settings-overlay__field-row">
-                  <span>Theme mode</span>
-                  <div class="settings-overlay__segmented" role="group" aria-label="Theme mode">
+                  <span>{{ t('settings.overlay.appearance.themeMode.label', 'Theme mode') }}</span>
+                  <div
+                    class="settings-overlay__segmented"
+                    role="group"
+                    [attr.aria-label]="
+                      t('settings.overlay.appearance.themeMode.label', 'Theme mode')
+                    "
+                  >
                     <button
                       type="button"
                       [class.settings-overlay__segmented--active]="
@@ -139,7 +181,7 @@
                       "
                       (click)="setThemeMode('light')"
                     >
-                      Light
+                      {{ t('settings.overlay.appearance.themeMode.option.light', 'Light') }}
                     </button>
                     <button
                       type="button"
@@ -148,7 +190,7 @@
                       "
                       (click)="setThemeMode('dark')"
                     >
-                      Dark
+                      {{ t('settings.overlay.appearance.themeMode.option.dark', 'Dark') }}
                     </button>
                     <button
                       type="button"
@@ -157,7 +199,7 @@
                       "
                       (click)="setThemeMode('system')"
                     >
-                      System
+                      {{ t('settings.overlay.appearance.themeMode.option.system', 'System') }}
                     </button>
                   </div>
                 </div>
@@ -166,8 +208,15 @@
 
             @case ('notifications') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>Notifications</h3>
-                <p>Choose what feedback appears while working on-site.</p>
+                <h3>{{ t('settings.overlay.notifications.title', 'Notifications') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.notifications.description',
+                      'Choose what feedback appears while working on-site.'
+                    )
+                  }}
+                </p>
 
                 <button
                   type="button"
@@ -175,8 +224,17 @@
                   (click)="toggleSetting('notificationsEnabled')"
                 >
                   <span class="ui-item-label">
-                    <strong>In-app notifications</strong>
-                    <small>Show success and warning notices for actions.</small>
+                    <strong>{{
+                      t('settings.overlay.notifications.inApp.title', 'In-app notifications')
+                    }}</strong>
+                    <small>
+                      {{
+                        t(
+                          'settings.overlay.notifications.inApp.description',
+                          'Show success and warning notices for actions.'
+                        )
+                      }}
+                    </small>
                   </span>
                   <span
                     class="settings-overlay__toggle"
@@ -190,8 +248,22 @@
                   (click)="toggleSetting('uploadFailureAlerts')"
                 >
                   <span class="ui-item-label">
-                    <strong>Upload failure alerts</strong>
-                    <small>Raise immediate warning toasts for failed uploads.</small>
+                    <strong>
+                      {{
+                        t(
+                          'settings.overlay.notifications.uploadFailure.title',
+                          'Upload failure alerts'
+                        )
+                      }}
+                    </strong>
+                    <small>
+                      {{
+                        t(
+                          'settings.overlay.notifications.uploadFailure.description',
+                          'Raise immediate warning toasts for failed uploads.'
+                        )
+                      }}
+                    </small>
                   </span>
                   <span
                     class="settings-overlay__toggle"
@@ -203,8 +275,15 @@
 
             @case ('map') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>Map Preferences</h3>
-                <p>Keep map behavior consistent with field navigation workflows.</p>
+                <h3>{{ t('settings.overlay.map.title', 'Map Preferences') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.map.description',
+                      'Keep map behavior consistent with field navigation workflows.'
+                    )
+                  }}
+                </p>
 
                 <button
                   type="button"
@@ -212,8 +291,17 @@
                   (click)="toggleSetting('mapAutoLocate')"
                 >
                   <span class="ui-item-label">
-                    <strong>Auto-locate after login</strong>
-                    <small>Center map to your current position when entering map shell.</small>
+                    <strong>{{
+                      t('settings.overlay.map.autoLocate.title', 'Auto-locate after login')
+                    }}</strong>
+                    <small>
+                      {{
+                        t(
+                          'settings.overlay.map.autoLocate.description',
+                          'Center map to your current position when entering map shell.'
+                        )
+                      }}
+                    </small>
                   </span>
                   <span
                     class="settings-overlay__toggle"
@@ -227,8 +315,17 @@
                   (click)="toggleSetting('mapGridOverlay')"
                 >
                   <span class="ui-item-label">
-                    <strong>Grid helper overlay</strong>
-                    <small>Show subtle grid alignment lines on high zoom levels.</small>
+                    <strong>{{
+                      t('settings.overlay.map.gridOverlay.title', 'Grid helper overlay')
+                    }}</strong>
+                    <small>
+                      {{
+                        t(
+                          'settings.overlay.map.gridOverlay.description',
+                          'Show subtle grid alignment lines on high zoom levels.'
+                        )
+                      }}
+                    </small>
                   </span>
                   <span
                     class="settings-overlay__toggle"
@@ -237,8 +334,14 @@
                 </button>
 
                 <div class="settings-overlay__field-row">
-                  <span>Marker motion</span>
-                  <div class="settings-overlay__segmented" role="group" aria-label="Marker motion">
+                  <span>{{ t('settings.overlay.map.markerMotion.label', 'Marker motion') }}</span>
+                  <div
+                    class="settings-overlay__segmented"
+                    role="group"
+                    [attr.aria-label]="
+                      t('settings.overlay.map.markerMotion.label', 'Marker motion')
+                    "
+                  >
                     <button
                       type="button"
                       [class.settings-overlay__segmented--active]="
@@ -246,7 +349,7 @@
                       "
                       (click)="setMarkerMotion('off')"
                     >
-                      Off
+                      {{ t('settings.overlay.map.markerMotion.option.off', 'Off') }}
                     </button>
                     <button
                       type="button"
@@ -255,7 +358,7 @@
                       "
                       (click)="setMarkerMotion('smooth')"
                     >
-                      Smooth
+                      {{ t('settings.overlay.map.markerMotion.option.smooth', 'Smooth') }}
                     </button>
                   </div>
                 </div>
@@ -264,24 +367,39 @@
 
             @case ('search') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>Search Tuning</h3>
-                <p>Adjust bias and distance defaults for address and place results.</p>
+                <h3>{{ t('settings.overlay.search.title', 'Search Tuning') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.search.description',
+                      'Adjust bias and distance defaults for address and place results.'
+                    )
+                  }}
+                </p>
 
                 <div class="settings-overlay__field-row">
-                  <span>Search bias</span>
+                  <span>{{ t('settings.overlay.search.bias.label', 'Search bias') }}</span>
                   <select
                     class="settings-overlay__select"
                     [value]="settingsModel().searchBias"
                     (change)="setSearchBias($any($event.target).value)"
                   >
-                    <option value="balanced">Balanced</option>
-                    <option value="address-first">Address first</option>
-                    <option value="place-first">Place first</option>
+                    <option value="balanced">
+                      {{ t('settings.overlay.search.bias.option.balanced', 'Balanced') }}
+                    </option>
+                    <option value="address-first">
+                      {{ t('settings.overlay.search.bias.option.addressFirst', 'Address first') }}
+                    </option>
+                    <option value="place-first">
+                      {{ t('settings.overlay.search.bias.option.placeFirst', 'Place first') }}
+                    </option>
                   </select>
                 </div>
 
                 <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
-                  <span>Default radius (km)</span>
+                  <span>{{
+                    t('settings.overlay.search.radius.label', 'Default radius (km)')
+                  }}</span>
                   <input
                     class="settings-overlay__range"
                     type="range"
@@ -297,11 +415,20 @@
 
             @case ('data') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>Data and Privacy</h3>
-                <p>Control retention and diagnostics behavior.</p>
+                <h3>{{ t('settings.overlay.data.title', 'Data and Privacy') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.data.description',
+                      'Control retention and diagnostics behavior.'
+                    )
+                  }}
+                </p>
 
                 <div class="settings-overlay__field-row settings-overlay__field-row--stacked">
-                  <span>Local cache retention</span>
+                  <span>{{
+                    t('settings.overlay.data.cacheRetention.label', 'Local cache retention')
+                  }}</span>
                   <input
                     class="settings-overlay__range"
                     type="range"
@@ -319,8 +446,17 @@
                   (click)="toggleSetting('telemetryEnabled')"
                 >
                   <span class="ui-item-label">
-                    <strong>Diagnostics telemetry</strong>
-                    <small>Send anonymous performance and crash diagnostics.</small>
+                    <strong>{{
+                      t('settings.overlay.data.telemetry.title', 'Diagnostics telemetry')
+                    }}</strong>
+                    <small>
+                      {{
+                        t(
+                          'settings.overlay.data.telemetry.description',
+                          'Send anonymous performance and crash diagnostics.'
+                        )
+                      }}
+                    </small>
                   </span>
                   <span
                     class="settings-overlay__toggle"
@@ -332,8 +468,15 @@
 
             @case ('account') {
               <section class="settings-overlay__detail-card ui-container ui-container--compact">
-                <h3>Account</h3>
-                <p>Signed-in identity and workspace session context.</p>
+                <h3>{{ t('settings.overlay.account.title', 'Account') }}</h3>
+                <p>
+                  {{
+                    t(
+                      'settings.overlay.account.description',
+                      'Signed-in identity and workspace session context.'
+                    )
+                  }}
+                </p>
 
                 <div class="settings-overlay__identity">
                   <span class="material-icons" aria-hidden="true">account_circle</span>
@@ -348,7 +491,7 @@
                   class="settings-overlay__ghost-button"
                   (click)="requestClose()"
                 >
-                  Close settings
+                  {{ t('settings.overlay.account.close', 'Close settings') }}
                 </button>
               </section>
             }

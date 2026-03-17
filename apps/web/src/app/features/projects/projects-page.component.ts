@@ -179,6 +179,21 @@ export class ProjectsPageComponent {
   readonly hasPendingAction = computed(
     () => !!this.pendingProjectAction() && !!this.pendingProjectId(),
   );
+  readonly selectedProject = computed(() => {
+    const selectedId = this.selectedProjectId();
+    if (!selectedId) {
+      return null;
+    }
+
+    return this.projects().find((project) => project.id === selectedId) ?? null;
+  });
+  readonly selectedProjectColorKey = computed<ProjectColorKey | null>(
+    () => this.selectedProject()?.colorKey ?? null,
+  );
+  readonly selectedProjectColorToken = computed<string | null>(() => {
+    const colorKey = this.selectedProjectColorKey();
+    return colorKey ? this.colorTokenFor(colorKey) : null;
+  });
   readonly pendingProject = computed(() => {
     const projectId = this.pendingProjectId();
     if (!projectId) {
@@ -746,6 +761,34 @@ export class ProjectsPageComponent {
 
     this.workspaceTitleEditProjectId.set(null);
     this.workspaceTitleEditValue.set('');
+  }
+
+  startWorkspaceTitleEdit(): void {
+    const selected = this.selectedProject();
+    if (!selected) {
+      return;
+    }
+
+    this.workspaceTitleEditProjectId.set(selected.id);
+    this.workspaceTitleEditValue.set(selected.name);
+  }
+
+  toggleWorkspaceColorPicker(): void {
+    const selectedId = this.selectedProjectId();
+    if (!selectedId) {
+      return;
+    }
+
+    this.toggleColorPicker(selectedId);
+  }
+
+  onWorkspaceColorSelected(colorKey: ProjectColorKey): void {
+    const selectedId = this.selectedProjectId();
+    if (!selectedId) {
+      return;
+    }
+
+    void this.onColorSelected(selectedId, colorKey);
   }
 
   onWorkspaceWidthChange(newWidth: number): void {

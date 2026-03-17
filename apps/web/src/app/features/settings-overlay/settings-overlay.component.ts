@@ -9,6 +9,8 @@ import {
   signal,
 } from '@angular/core';
 import { AuthService } from '../../core/auth.service';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { LanguageCode } from '../../core/i18n/translation-catalog';
 import { SettingsPaneService } from '../../core/settings-pane.service';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 
@@ -35,7 +37,7 @@ interface SettingsSection {
 interface SettingsModel {
   themeMode: ThemeMode;
   density: DensityMode;
-  language: 'en' | 'de';
+  language: LanguageCode;
   notificationsEnabled: boolean;
   uploadFailureAlerts: boolean;
   mapAutoLocate: boolean;
@@ -57,64 +59,75 @@ interface SettingsModel {
 })
 export class SettingsOverlayComponent {
   private readonly authService = inject(AuthService);
+  private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private hasLoadedOnce = false;
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly sectionList: ReadonlyArray<SettingsSection> = [
+  readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() => [
     {
       id: 'general',
       icon: 'tune',
-      title: 'General',
-      subtitle: 'Language, density, and defaults',
+      title: this.t('settings.overlay.section.general.title', 'General'),
+      subtitle: this.t(
+        'settings.overlay.section.general.subtitle',
+        'Language, density, and defaults',
+      ),
     },
     {
       id: 'appearance',
       icon: 'palette',
-      title: 'Appearance',
-      subtitle: 'Theme and visual behavior',
+      title: this.t('settings.overlay.section.appearance.title', 'Appearance'),
+      subtitle: this.t('settings.overlay.section.appearance.subtitle', 'Theme and visual behavior'),
     },
     {
       id: 'notifications',
       icon: 'notifications',
-      title: 'Notifications',
-      subtitle: 'In-app status and alerts',
+      title: this.t('settings.overlay.section.notifications.title', 'Notifications'),
+      subtitle: this.t(
+        'settings.overlay.section.notifications.subtitle',
+        'In-app status and alerts',
+      ),
     },
     {
       id: 'map',
       icon: 'map',
-      title: 'Map Preferences',
-      subtitle: 'Map behaviors and helper layers',
+      title: this.t('settings.overlay.section.map.title', 'Map Preferences'),
+      subtitle: this.t('settings.overlay.section.map.subtitle', 'Map behaviors and helper layers'),
     },
     {
       id: 'search',
       icon: 'manage_search',
-      title: 'Search Tuning',
-      subtitle: 'Ranking and fallback tuning',
+      title: this.t('settings.overlay.section.search.title', 'Search Tuning'),
+      subtitle: this.t('settings.overlay.section.search.subtitle', 'Ranking and fallback tuning'),
     },
     {
       id: 'data',
       icon: 'storage',
-      title: 'Data and Privacy',
-      subtitle: 'Retention and telemetry',
+      title: this.t('settings.overlay.section.data.title', 'Data and Privacy'),
+      subtitle: this.t('settings.overlay.section.data.subtitle', 'Retention and telemetry'),
     },
     {
       id: 'account',
       icon: 'person',
-      title: 'Account',
-      subtitle: 'Identity and sign-in context',
+      title: this.t('settings.overlay.section.account.title', 'Account'),
+      subtitle: this.t('settings.overlay.section.account.subtitle', 'Identity and sign-in context'),
     },
     {
       id: 'invite-management',
       icon: 'qr_code_2',
-      title: 'Invite Management',
-      subtitle: 'Role-scoped QR and share links',
+      title: this.t('settings.overlay.section.invites.title', 'Invite Management'),
+      subtitle: this.t(
+        'settings.overlay.section.invites.subtitle',
+        'Role-scoped QR and share links',
+      ),
     },
-  ];
+  ]);
 
-  readonly selectedSectionId = signal<string>(this.sectionList[0].id);
+  readonly selectedSectionId = signal<string>('general');
   readonly loadState = signal<SettingsLoadState>('loading');
   readonly lastError = signal<string | null>(null);
   readonly inviteSectionRequest = this.settingsPaneService.inviteSectionRequest;
@@ -122,7 +135,7 @@ export class SettingsOverlayComponent {
   readonly settingsModel = signal<SettingsModel>({
     themeMode: 'system',
     density: 'comfortable',
-    language: 'en',
+    language: this.i18nService.language(),
     notificationsEnabled: true,
     uploadFailureAlerts: true,
     mapAutoLocate: false,
@@ -147,12 +160,14 @@ export class SettingsOverlayComponent {
       return email;
     }
 
-    return 'Unknown user';
+    return this.t('settings.overlay.account.unknownUser', 'Unknown user');
   });
 
   readonly userEmail = computed(() => {
     const email = this.authService.user()?.email;
-    return typeof email === 'string' && email.length > 0 ? email : 'No email available';
+    return typeof email === 'string' && email.length > 0
+      ? email
+      : this.t('settings.overlay.account.noEmail', 'No email available');
   });
 
   constructor() {
@@ -225,8 +240,9 @@ export class SettingsOverlayComponent {
     this.settingsModel.update((model) => ({ ...model, density }));
   }
 
-  setLanguage(language: 'en' | 'de'): void {
+  setLanguage(language: LanguageCode): void {
     this.settingsModel.update((model) => ({ ...model, language }));
+    this.i18nService.setLanguage(language);
   }
 
   setSearchBias(searchBias: SearchBias): void {
@@ -277,12 +293,17 @@ export class SettingsOverlayComponent {
       const user = this.authService.user();
 
       if (!user) {
-        throw new Error('No authenticated session found.');
+        throw new Error(
+          this.t('settings.overlay.error.noSession', 'No authenticated session found.'),
+        );
       }
 
       this.loadState.set('populated');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to load settings right now.';
+      const message =
+        error instanceof Error
+          ? error.message
+          : this.t('settings.overlay.error.generic', 'Unable to load settings right now.');
       this.lastError.set(message);
       this.loadState.set('error');
     }
