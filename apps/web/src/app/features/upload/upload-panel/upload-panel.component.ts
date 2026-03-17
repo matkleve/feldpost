@@ -386,6 +386,30 @@ export class UploadPanelComponent {
     return job.id;
   }
 
+  documentFallbackLabel(job: UploadJob): string | null {
+    const type = job.file.type;
+    if (!type) {
+      const ext = this.fileExtension(job.file.name);
+      return this.extensionToBadge(ext);
+    }
+
+    if (type === 'application/pdf') return 'PDF';
+    if (type === 'application/msword') return 'DOC';
+    if (type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      return 'DOCX';
+    }
+    if (type === 'application/vnd.ms-excel') return 'XLS';
+    if (type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      return 'XLSX';
+    }
+    if (type === 'application/vnd.ms-powerpoint') return 'PPT';
+    if (type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+      return 'PPTX';
+    }
+
+    return null;
+  }
+
   private getLaneForJob(job: UploadJob): UploadLane {
     if (job.phase === 'complete' || job.phase === 'skipped') return 'uploaded';
     if (job.phase === 'error' || job.phase === 'missing_data') return 'issues';
@@ -405,5 +429,31 @@ export class UploadPanelComponent {
       return 'uploading';
     }
     return 'queued';
+  }
+
+  private fileExtension(fileName: string): string {
+    const parts = fileName.toLowerCase().split('.');
+    return parts.length > 1 ? (parts[parts.length - 1] ?? '') : '';
+  }
+
+  private extensionToBadge(extension: string): string | null {
+    switch (extension) {
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+        return 'DOC';
+      case 'docx':
+        return 'DOCX';
+      case 'xls':
+        return 'XLS';
+      case 'xlsx':
+        return 'XLSX';
+      case 'ppt':
+        return 'PPT';
+      case 'pptx':
+        return 'PPTX';
+      default:
+        return null;
+    }
   }
 }

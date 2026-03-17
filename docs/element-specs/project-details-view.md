@@ -1,14 +1,16 @@
-# Project Details View
+﻿# Project Details View
 
 > **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
 
 ## What It Is
 
-A project-scoped workspace detail mode inside the Projects Page. It opens when a project is selected and reuses the existing workspace/image-detail experience to browse only that project's photos while remaining on `/projects`.
+A project-scoped workspace detail mode inside the Projects Page. It opens when a project is selected and reuses the existing workspace/image-detail experience to browse only that project's media while remaining on `/projects`.
 
 ## What It Looks Like
 
-The layout is projects-first: project list/cards remain the primary surface and a workspace pane opens with the selected project context. The pane shows the project's photos in the existing grid/collection presentation and can open image details inline. No embedded map is shown in this view. Map linkage is provided by the image-details map action, which opens `/map` and zooms to the selected image location. Surfaces use shared `.ui-container` geometry and tokenized spacing.
+The layout is projects-first: project list/cards remain the primary surface and a workspace pane opens with the selected project context. The pane shows project-scoped media in the existing grid/collection presentation and can open image details inline. No embedded map is shown in this view; map handoff is provided by the image-details map action, which opens `/map` and zooms to the selected image location.
+
+A dedicated Project Full View action expands the workspace pane from right to left across the full content width. In this mode, the projects list surface is visually de-emphasized so the workspace becomes the primary canvas.
 
 ## Where It Lives
 
@@ -16,16 +18,19 @@ The layout is projects-first: project list/cards remain the primary surface and 
 - **Parent**: `ProjectsPage`
 - **Appears when**: User clicks a project row/card or "Open in workspace"
 
-## Actions
+## Actions & Interactions
 
-| #   | User Action                                    | System Response                                                                 | Triggers                         |
-| --- | ---------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------- |
-| 1   | Opens `/projects`                              | Loads projects list/cards and related metadata                                  | Router + projects data service   |
-| 2   | Clicks a project row/card                      | Sets selected project and opens workspace pane scoped to that project           | `selectedProjectId` + pane state |
-| 3   | Clicks "Open in workspace"                     | Opens the same project-scoped workspace pane (no route change)                  | Shared open action               |
-| 4   | Clicks a photo thumbnail in the workspace pane | Opens image details for the selected photo                                      | Existing image detail state      |
-| 5   | Clicks map button in image details             | Navigates to `/map` and centers/zooms to the selected image location            | Router + map focus payload       |
-| 6   | Closes workspace pane                          | Returns to projects list/cards context while preserving search/filter/view mode | Pane close action                |
+| #   | User Action                              | System Response                                                                             | Triggers                                |
+| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 1   | Opens `/projects`                        | Loads projects list/cards and related metadata                                              | Router + projects data service          |
+| 2   | Clicks a project row/card                | Sets selected project and opens workspace pane scoped to that project                       | `selectedProjectId` + pane state        |
+| 3   | Clicks "Open in workspace"               | Opens the same project-scoped workspace pane (no route change)                              | Shared open action                      |
+| 4   | Clicks a thumbnail in the workspace pane | Opens image details for the selected item                                                   | Existing image detail state             |
+| 5   | Clicks map button in image details       | Navigates to `/map` and centers/zooms to selected image location                            | Router + map focus payload              |
+| 6   | Closes workspace pane                    | Returns to projects list/cards context while preserving search/filter/view mode             | Pane close action                       |
+| 7   | Clicks Project Full View toggle          | Expands workspace pane right→left to full content width and hides list emphasis             | `isProjectFullView` → true              |
+| 8   | Presses Esc or clicks exit full view     | Restores split layout with previous pane width and list context                             | `isProjectFullView` → false             |
+| 9   | Opens DOCX/XLSX/PPTX/PDF item            | Shows generated document preview thumbnail if available, otherwise deterministic type badge | `media_items.thumbnail_path` / fallback |
 
 ### Interaction Flowchart
 
@@ -34,11 +39,26 @@ flowchart TD
     A[Open /projects] --> B[Load projects list/cards]
     B --> C[Select project]
     C --> D[Open workspace pane scoped to selected project]
-    D --> E{Photo selected?}
-    E -- Yes --> F[Open image details]
-    F --> G[Click map button]
-    G --> H[Navigate to /map and zoom to image]
-    E -- No --> I[Continue browsing project photos]
+    D --> E{Full view requested?}
+    E -- Yes --> F[Expand workspace pane right→left to full width]
+    E -- No --> G[Keep split list + pane layout]
+    F --> H{Media selected?}
+    G --> H
+    H -- Yes --> I[Open image details]
+    I --> J[Click map button]
+    J --> K[Navigate to /map and zoom to image]
+    H -- No --> L[Continue browsing project media]
+```
+
+### Full View State
+
+```mermaid
+stateDiagram-v2
+    [*] --> Split
+    Split --> FullView: toggle full view
+    FullView --> Split: toggle full view / Esc
+    Split --> Closed: close pane
+    FullView --> Closed: close pane
 ```
 
 ## Component Hierarchy
@@ -49,47 +69,75 @@ ProjectsPage (host route)
 └── WorkspacePaneComponent (reused)
     ├── PaneHeader
     │   ├── Project context title
+    │   ├── FullViewToggle
     │   └── CloseButton
-    ├── PhotoGrid / CollectionThumbnails (reused)
+    ├── MediaGrid / CollectionThumbnails (reused)
     └── ImageDetailView (reused)
         └── MapButton → navigate `/map` and focus selected image
 ```
 
-## Data
+## Data Requirements
 
 ### Data Flow (Mermaid)
 
 ```mermaid
 flowchart LR
-  UI[UI Component] --> S[Service Layer]
-  S --> DB[(Supabase Tables)]
-  DB --> S
-  S --> UI
+  UI[ProjectsPage + WorkspacePane] --> Projects[ProjectsService]
+  UI --> Uploads[UploadManagerService]
+  Projects --> DB[(projects, media_items, media_projects)]
+  Uploads --> DB
+  DB --> Projects
+  Projects --> UI
+  Uploads --> UI
+```
+
+### Document Preview Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  participant Pane as WorkspacePane
+  participant Grid as MediaGrid
+  participant Manager as UploadManagerService
+  participant DB as media_items
+
+  Pane->>Grid: render project-scoped media list
+  Grid->>DB: fetch thumbnail_path/poster_path per media item
+  alt document with generated preview
+    DB-->>Grid: thumbnail_path set
+    Grid-->>Pane: show preview thumbnail
+  else no preview available
+    DB-->>Grid: thumbnail_path null
+    Grid-->>Pane: show DOCX/XLSX/PPTX/PDF fallback badge
+  end
+  Manager-->>Grid: async refresh after preview generation
 ```
 
 | Field                   | Source                                                            | Type                 |
-| ----------------------- | ----------------------------------------------------------------- | -------------------- | ----- |
+| ----------------------- | ----------------------------------------------------------------- | -------------------- |
 | Active project          | Selected project from projects list/cards + projects table        | `string` / `Project` |
-| Project-scoped images   | Existing map/workspace data pipeline filtered by project ID       | `Image[]`            |
-| Selected image location | Existing image record geo fields used by image details map action | `LatLng \\           | null` |
+| Project-scoped media    | Existing workspace pipeline filtered by project ID                | `Image[]`            |
+| Selected image location | Existing image record geo fields used by image-details map action | `LatLng \| null`     |
+| Generated previews      | `media_items.thumbnail_path` / `media_items.poster_path`          | `string \| null`     |
 
 ## State
 
-| Name                | Type                                                    | Default | Controls                            |
-| ------------------- | ------------------------------------------------------- | ------- | ----------------------------------- |
-| `selectedProjectId` | `string \| null`                                        | `null`  | Active project scope                |
-| `workspacePaneOpen` | `boolean`                                               | `false` | Workspace visibility                |
-| `selectedImageId`   | `string \| null`                                        | `null`  | Active image details                |
-| `mapFocusPayload`   | `{ imageId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus |
+| Name                | Type                                                    | Default | Controls                                 |
+| ------------------- | ------------------------------------------------------- | ------- | ---------------------------------------- |
+| `selectedProjectId` | `string \| null`                                        | `null`  | Active project scope                     |
+| `workspacePaneOpen` | `boolean`                                               | `false` | Workspace visibility                     |
+| `selectedImageId`   | `string \| null`                                        | `null`  | Active image details                     |
+| `mapFocusPayload`   | `{ imageId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus      |
+| `isProjectFullView` | `boolean`                                               | `false` | Right→left full-width workspace mode     |
+| `restorePaneWidth`  | `number \| null`                                        | `null`  | Width to restore after leaving full view |
 
 ## File Map
 
-| File                                                                       | Purpose                                                      |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `apps/web/src/app/features/projects/projects-page.component.ts`            | Host page state for project selection + workspace visibility |
-| `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts` | Reused pane for project-scoped photo browsing                |
-| `apps/web/src/app/features/image-detail/image-detail-view.component.ts`    | Reused details view with map action                          |
-| `apps/web/src/app/features/projects/projects-page.component.spec.ts`       | Integration tests for in-page project details behavior       |
+| File                                                                          | Purpose                                                      |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `apps/web/src/app/features/projects/projects-page.component.ts`               | Host page state for project selection + workspace visibility |
+| `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Reused pane for project-scoped media browsing                |
+| `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.ts` | Reused details view with map action                          |
+| `apps/web/src/app/features/projects/projects-page.component.spec.ts`          | Integration tests for in-page project details behavior       |
 
 ## Wiring
 
@@ -97,28 +145,37 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  participant User
+  participant Page as ProjectsPage
+  participant Pane as WorkspacePaneComponent
+  participant Service as ProjectsService
+
+  User->>Page: Select project card
+  Page->>Service: loadProjectWorkspaceImages(projectId)
+  Service-->>Page: project media list
+  Page->>Pane: open scoped workspace
+  User->>Pane: toggle full view
+  Pane-->>Page: isProjectFullView=true
+  User->>Pane: exit full view
+  Pane-->>Page: restore split layout
 ```
 
 - Keep route as `{ path: 'projects', component: ProjectsPageComponent }`.
 - On project open action, set selected project scope in page/workspace state without route transition.
-- Reuse existing Workspace Pane and Image Details components for project-scoped photo browsing.
-- Wire image-details map action to navigate to `/map` with selected image coordinates and id so map can zoom/focus target photo.
+- Reuse existing Workspace Pane and Image Details components for project-scoped media browsing.
+- Wire image-details map action to navigate to `/map` with selected image coordinates and id so map can zoom/focus the target image.
 
 ## Acceptance Criteria
 
 - [ ] [PPW-1] Clicking a project in `/projects` opens project details in the workspace pane without leaving `/projects`.
 - [ ] Existing workspace grid/collection and image details components are reused (no duplicate implementations).
-- [ ] [PPW-2] Workspace content is filtered to the selected project photos and thumbnail selection opens image details for that scoped image.
+- [ ] [PPW-2] Workspace content is filtered to selected project media and thumbnail selection opens image details for that scoped item.
 - [ ] [PPW-3] Image details map button navigates to `/map` and zooms/focuses the exact selected photo location.
 - [ ] [PPW-4] Closing the workspace pane preserves prior projects-page search/filter/view-mode state.
 - [ ] [PPW-5] Re-opening the same project restores prior project-scoped browsing context (including prior subview and scroll position).
+- [ ] Project Full View toggle expands workspace pane right→left to full content width and hides list emphasis while active.
+- [ ] Exiting Project Full View restores prior split width/layout without losing current media selection context.
+- [ ] Document items (`.doc/.docx/.xls/.xlsx/.ppt/.pptx/.pdf`) display generated thumbnail previews when available, otherwise deterministic fallback badges.
 
 ## Use Cases
 

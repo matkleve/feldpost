@@ -380,7 +380,7 @@
 
   &__file-main {
     display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr);
+    grid-template-columns: 2.1rem minmax(0, 1fr);
     gap: var(--spacing-2);
     align-items: center;
     min-height: var(--upload-row-height);
@@ -409,23 +409,32 @@
   }
 
   &__thumbnail {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 1.9rem;
+    aspect-ratio: 3 / 4;
     object-fit: cover;
     border-radius: var(--radius-sm);
     display: block;
-    background: var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-base) 90%, var(--color-border));
 
     &--placeholder {
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--color-text-disabled);
+      border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
 
       .material-icons {
-        font-size: 0.9rem;
+        font-size: 0.82rem;
       }
     }
+  }
+
+  &__thumbnail-fallback {
+    font-size: 0.56rem;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--color-text-secondary);
   }
 
   &__file-meta {

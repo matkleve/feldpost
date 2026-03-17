@@ -22,6 +22,7 @@ import { Injectable, Signal, effect, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { FolderScanService } from './folder-scan.service';
+import { MediaPreviewService } from './media-preview.service';
 import { SupabaseService } from './supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
@@ -88,6 +89,7 @@ export class UploadManagerService {
   private readonly batchService = inject(UploadBatchService);
   private readonly queue = inject(UploadQueueService);
   private readonly folderScan = inject(FolderScanService);
+  private readonly mediaPreview = inject(MediaPreviewService);
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
@@ -198,13 +200,14 @@ export class UploadManagerService {
       phase: 'queued' as UploadPhase,
       progress: 0,
       statusLabel: phaseLabel('queued'),
-      thumbnailUrl: URL.createObjectURL(file),
+      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
       submittedAt: new Date(),
       mode: 'new' as UploadJobMode,
       projectId: options?.projectId,
     }));
 
     this.jobState.addJobs(newJobs);
+    this.hydrateDeferredPreviews(newJobs);
     this.drainQueue();
 
     return batchId;
@@ -259,13 +262,14 @@ export class UploadManagerService {
       phase: 'queued' as UploadPhase,
       progress: 0,
       statusLabel: phaseLabel('queued'),
-      thumbnailUrl: URL.createObjectURL(file),
+      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
       submittedAt: new Date(),
       mode: 'new' as UploadJobMode,
       projectId: options?.projectId,
     }));
 
     this.jobState.addJobs(newJobs);
+    this.hydrateDeferredPreviews(newJobs);
     this.drainQueue();
 
     return batchId;
@@ -382,13 +386,14 @@ export class UploadManagerService {
       phase: 'queued',
       progress: 0,
       statusLabel: phaseLabel('queued'),
-      thumbnailUrl: URL.createObjectURL(file),
+      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
       submittedAt: new Date(),
       mode: 'replace',
       targetImageId: imageId,
     };
 
     this.jobState.addJobs([job]);
+    this.hydrateDeferredPreviews([job]);
     this.drainQueue();
     return jobId;
   }
@@ -429,16 +434,35 @@ export class UploadManagerService {
       phase: 'queued',
       progress: 0,
       statusLabel: phaseLabel('queued'),
-      thumbnailUrl: URL.createObjectURL(file),
+      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
       submittedAt: new Date(),
       mode: 'attach',
       targetImageId: imageId,
     };
 
     this.jobState.addJobs([job]);
+    this.hydrateDeferredPreviews([job]);
     console.log('[upload-manager] attach job added to state, calling drainQueue. jobId:', jobId);
     this.drainQueue();
     return jobId;
+  }
+
+  private hydrateDeferredPreviews(jobs: ReadonlyArray<UploadJob>): void {
+    for (const job of jobs) {
+      if (job.thumbnailUrl) continue;
+
+      void this.mediaPreview.createDeferredPreviewUrl(job.file).then((previewUrl) => {
+        if (!previewUrl) return;
+
+        const current = this.jobState.findJob(job.id);
+        if (!current || current.thumbnailUrl) {
+          URL.revokeObjectURL(previewUrl);
+          return;
+        }
+
+        this.jobState.updateJob(job.id, { thumbnailUrl: previewUrl });
+      });
+    }
   }
 
   /**

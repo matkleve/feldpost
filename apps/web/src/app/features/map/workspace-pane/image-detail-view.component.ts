@@ -154,8 +154,11 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly displayTitle = computed(() => {
     const img = this.image();
     if (!img) return '';
-    return img.address_label ?? img.storage_path?.split('/').pop() ?? 'Photo';
+    return img.address_label ?? img.storage_path?.split('/').pop() ?? 'File';
   });
+
+  readonly mediaTypeLabel = computed(() => this.resolveMediaTypeLabel());
+  readonly detailViewLabel = computed(() => `${this.mediaTypeLabel()} details`);
 
   readonly captureDate = computed(() => {
     const img = this.image();
@@ -294,6 +297,11 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (this.fullResPreloaded()) return true;
     if (this.thumbState() === 'loaded' && this.thumbnailUrl()) return true;
     return false;
+  });
+
+  readonly canOpenLightbox = computed(() => {
+    if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
+    return this.isImageLikeMedia(this.image()?.storage_path ?? null);
   });
 
   private abortController: AbortController | null = null;
@@ -776,10 +784,17 @@ export class ImageDetailViewComponent implements OnDestroy {
   private async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
     if (!img.storage_path) return;
 
-    const thumbPath = img.thumbnail_path ?? img.storage_path;
+    const isImageAsset = this.isImageLikeMedia(img.storage_path);
+    const thumbPath = this.resolvePreviewThumbnailPath(img.thumbnail_path, img.storage_path);
+    const fullPath = isImageAsset ? img.storage_path : null;
+
     const [thumbResult, fullResult] = await Promise.all([
-      this.photoLoad.getSignedUrl(thumbPath, 'thumb', img.id),
-      this.photoLoad.getSignedUrl(img.storage_path, 'full', img.id),
+      thumbPath
+        ? this.photoLoad.getSignedUrl(thumbPath, 'thumb', img.id)
+        : Promise.resolve({ url: null }),
+      fullPath
+        ? this.photoLoad.getSignedUrl(fullPath, 'full', img.id)
+        : Promise.resolve({ url: null }),
     ]);
 
     if (abortSignal.aborted) return;
@@ -788,11 +803,105 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.fullResUrl.set(fullResult.url);
 
     // Preload full-res for crossfade (spec: photoLoad.preload before showing)
-    if (fullResult.url) {
+    if (isImageAsset && fullResult.url) {
       const preloaded = await this.photoLoad.preload(fullResult.url);
       if (!abortSignal.aborted) {
         this.fullResPreloaded.set(preloaded);
       }
+    }
+  }
+
+  openLightbox(): void {
+    if (!this.canOpenLightbox()) {
+      return;
+    }
+    this.showLightbox.set(true);
+  }
+
+  private resolvePreviewThumbnailPath(
+    thumbnailPath: string | null,
+    storagePath: string,
+  ): string | null {
+    if (thumbnailPath && this.isLikelyImagePath(thumbnailPath)) {
+      return thumbnailPath;
+    }
+
+    if (this.isLikelyImagePath(storagePath)) {
+      return storagePath;
+    }
+
+    return null;
+  }
+
+  private isImageLikeMedia(storagePath: string | null): boolean {
+    const mediaType = this.mediaType();
+    if (mediaType) {
+      return mediaType === 'image';
+    }
+
+    const mimeType = this.mediaMimeType();
+    if (mimeType) {
+      return mimeType.startsWith('image/');
+    }
+
+    return this.isLikelyImagePath(storagePath);
+  }
+
+  private isLikelyImagePath(path: string | null): boolean {
+    if (!path) return false;
+    return /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|tiff?|webp)$/i.test(path);
+  }
+
+  private resolveMediaTypeLabel(): string {
+    const mimeType = this.mediaMimeType();
+    if (mimeType) {
+      const fromMime = this.mapMimeTypeToLabel(mimeType);
+      if (fromMime) return fromMime;
+    }
+
+    const mediaType = this.mediaType();
+    if (mediaType === 'image') return 'Image';
+    if (mediaType === 'video') return 'Video';
+    if (mediaType === 'document') return 'Document';
+
+    const path = this.image()?.storage_path;
+    const extension = path?.split('.').pop()?.toUpperCase();
+    if (extension) {
+      if (
+        extension === 'JPG' ||
+        extension === 'JPEG' ||
+        extension === 'PNG' ||
+        extension === 'WEBP'
+      ) {
+        return 'Image';
+      }
+      return extension;
+    }
+
+    return 'Media';
+  }
+
+  private mapMimeTypeToLabel(mimeType: string): string | null {
+    if (mimeType.startsWith('image/')) return 'Image';
+    if (mimeType.startsWith('video/')) return 'Video';
+
+    switch (mimeType) {
+      case 'application/pdf':
+        return 'PDF';
+      case 'application/msword':
+        return 'DOC';
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return 'DOCX';
+      case 'application/vnd.ms-excel':
+        return 'XLS';
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        return 'XLSX';
+      case 'application/vnd.ms-powerpoint':
+        return 'PPT';
+      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        return 'PPTX';
+      default:
+        return null;
     }
   }
 

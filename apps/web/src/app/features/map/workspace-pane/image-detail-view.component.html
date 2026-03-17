@@ -2,7 +2,7 @@
 
 <!-- Loading state -->
 @if (loading()) {
-  <div class="detail-loading" role="status" aria-label="Loading image details">
+  <div class="detail-loading" role="status" aria-label="Loading media details">
     <span class="detail-loading__spinner" aria-hidden="true"></span>
     <span class="detail-loading__text">Loading…</span>
   </div>
@@ -52,6 +52,8 @@
           {{ displayTitle() }}
         </button>
       }
+
+      <span class="detail-kind-chip" aria-label="File type">{{ mediaTypeLabel() }}</span>
 
       <button
         class="detail-actions-btn"
@@ -107,11 +109,13 @@
           <button
             class="detail-image-wrap"
             type="button"
+            [disabled]="!canOpenLightbox()"
+            [class.detail-image-wrap--static]="!canOpenLightbox()"
             aria-label="View full-size photo"
-            (click)="showLightbox.set(true)"
+            (click)="openLightbox()"
           >
             <!-- Placeholder: pulsing gradient while loading (behind images via grid stacking) -->
-            @if (!fullResPreloaded()) {
+            @if (!imageReady()) {
               @if (thumbState() === 'error' && fullState() === 'error') {
                 <div class="detail-image-placeholder detail-image-placeholder--no-photo">
                   <span
@@ -130,9 +134,15 @@
               }
             }
             <!-- Tier 2: blurred thumbnail (covers placeholder via grid stacking) -->
-            @if (thumbnailUrl() && thumbState() === 'loaded' && !fullResPreloaded()) {
+            @if (
+              thumbnailUrl() &&
+              thumbState() === 'loaded' &&
+              (!fullResPreloaded() || !canOpenLightbox())
+            ) {
               <img
-                class="detail-image detail-image--thumb"
+                class="detail-image"
+                [class.detail-image--thumb]="canOpenLightbox()"
+                [class.detail-image--preview]="!canOpenLightbox()"
                 [src]="thumbnailUrl()"
                 alt="Photo preview"
                 aria-hidden="true"
@@ -200,7 +210,23 @@
 
         <!-- Details Section -->
         <div class="detail-section">
-          <div class="dd-section-label">Details</div>
+          <div class="dd-section-label">{{ detailViewLabel() }}</div>
+
+          <div class="detail-row detail-row--readonly">
+            <button
+              class="detail-row-action detail-row-action--left"
+              type="button"
+              aria-label="Copy coordinates"
+              title="Copy coordinates"
+              (click)="copyCoordinates()"
+            >
+              <span class="material-icons" aria-hidden="true">content_copy</span>
+            </button>
+            <span class="material-icons detail-row__icon" aria-hidden="true">description</span>
+            <span class="detail-row__label">Type</span>
+            <span class="detail-row__value detail-row__value--static">{{ mediaTypeLabel() }}</span>
+            <span class="detail-row-action detail-row-action--right" aria-hidden="true"></span>
+          </div>
 
           <!-- Captured date -->
           <div class="detail-row" [class.detail-row--editing]="editingField() === 'captured_at'">
@@ -724,7 +750,7 @@
 }
 
 <!-- Photo lightbox overlay -->
-@if (showLightbox() && (fullResUrl() || thumbnailUrl())) {
+@if (showLightbox() && canOpenLightbox() && (fullResUrl() || thumbnailUrl())) {
   <app-photo-lightbox
     [imageUrl]="(fullResUrl() ?? thumbnailUrl())!"
     [alt]="displayTitle()"

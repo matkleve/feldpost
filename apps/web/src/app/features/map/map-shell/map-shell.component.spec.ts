@@ -16,6 +16,13 @@ import { SupabaseService } from '../../../core/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 
+function createMarkerStub() {
+  return {
+    getElement: vi.fn().mockReturnValue(null),
+    setIcon: vi.fn(),
+  };
+}
+
 function createJsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -282,6 +289,70 @@ describe('MapShellComponent', () => {
     ).handleMapClick({ latlng: { lat: 48.2082, lng: 16.3738 } });
 
     expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
+  });
+
+  it('plain map click clears all map selection state', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      selectedMarkerKey: { set: (value: string | null) => void; (): string | null };
+      selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
+      detailImageId: { set: (value: string | null) => void; (): string | null };
+      clearRadiusSelectionVisuals: ReturnType<typeof vi.fn>;
+      handleMapClick: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent?: { button?: number };
+      }) => void;
+    };
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    const clearActiveSelectionSpy = vi
+      .spyOn(workspaceView, 'clearActiveSelection')
+      .mockImplementation(() => {});
+
+    component.selectedMarkerKey.set('cluster-1');
+    component.selectedMarkerKeys.set(new Set(['cluster-1', 'cluster-2']));
+    component.detailImageId.set('img-1');
+    component.clearRadiusSelectionVisuals = vi.fn();
+
+    component.handleMapClick({
+      latlng: { lat: 48.2082, lng: 16.3738 },
+      originalEvent: { button: 0 },
+    });
+
+    expect(component.selectedMarkerKey()).toBeNull();
+    expect(component.selectedMarkerKeys().size).toBe(0);
+    expect(component.detailImageId()).toBeNull();
+    expect(clearActiveSelectionSpy).toHaveBeenCalled();
+    expect(component.clearRadiusSelectionVisuals).toHaveBeenCalled();
+  });
+
+  it('primary map click clears marker selection even during click guard', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      selectedMarkerKey: { set: (value: string | null) => void; (): string | null };
+      selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
+      suppressMapClickUntil: number;
+      handleMapClick: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: { button: number };
+      }) => void;
+    };
+
+    component.selectedMarkerKey.set('cluster-1');
+    component.selectedMarkerKeys.set(new Set(['cluster-1', 'cluster-2']));
+    component.suppressMapClickUntil = Date.now() + 60_000;
+
+    component.handleMapClick({
+      latlng: { lat: 48.2082, lng: 16.3738 },
+      originalEvent: { button: 0 },
+    });
+
+    expect(component.selectedMarkerKey()).toBeNull();
+    expect(component.selectedMarkerKeys().size).toBe(0);
   });
 
   it('renders the app-upload-panel element', () => {
@@ -834,6 +905,453 @@ describe('MapShellComponent', () => {
       (fixture.componentInstance as unknown as { searchLocationMarker: unknown })
         .searchLocationMarker,
     ).not.toBeNull();
+  });
+
+  // ── Radius selection ───────────────────────────────────────────────────────
+
+  it('radius selection replaces workspace images when Ctrl is not pressed', async () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      getZoom: vi.fn().mockReturnValue(15),
+      distance: vi.fn((_center: unknown, target: [number, number]) =>
+        target[0] === 48.2 ? 80 : 600,
+      ),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          sourceCells?: Array<{ lat: number; lng: number }>;
+        }
+      >;
+      selectRadiusImages: (
+        center: { lat: number; lng: number },
+        radiusMeters: number,
+        additive: boolean,
+      ) => Promise<void>;
+    };
+
+    component.map = mapStub;
+    component.uploadedPhotoMarkers.set('in-radius', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+      sourceCells: [{ lat: 48.2, lng: 16.37 }],
+    });
+    component.uploadedPhotoMarkers.set('out-radius', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 47.5,
+      lng: 15.9,
+      sourceCells: [{ lat: 47.5, lng: 15.9 }],
+    });
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    const incoming = [
+      {
+        id: 'img-radius-1',
+        latitude: 48.2,
+        longitude: 16.37,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ];
+
+    const fetchSpy = vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue(incoming);
+    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+
+    await component.selectRadiusImages({ lat: 48.2, lng: 16.37 }, 200, false);
+
+    expect(fetchSpy).toHaveBeenCalledWith([{ lat: 48.2, lng: 16.37 }], 15);
+    expect(setSpy).toHaveBeenCalledWith(incoming);
+    expect(Array.from(component.selectedMarkerKeys())).toEqual(['in-radius']);
+  });
+
+  it('radius selection merges workspace images when Ctrl-additive is used', async () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      getZoom: vi.fn().mockReturnValue(15),
+      distance: vi.fn(() => 70),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          sourceCells?: Array<{ lat: number; lng: number }>;
+        }
+      >;
+      selectRadiusImages: (
+        center: { lat: number; lng: number },
+        radiusMeters: number,
+        additive: boolean,
+      ) => Promise<void>;
+    };
+
+    component.map = mapStub;
+    component.uploadedPhotoMarkers.set('in-radius', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+      sourceCells: [{ lat: 48.2, lng: 16.37 }],
+    });
+    component.uploadedPhotoMarkers.set('already-selected', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.25,
+      lng: 16.35,
+      sourceCells: [{ lat: 48.25, lng: 16.35 }],
+    });
+    component.selectedMarkerKeys.set(new Set(['already-selected']));
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    workspaceView.rawImages.set([
+      {
+        id: 'img-existing',
+        latitude: 48.25,
+        longitude: 16.35,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ]);
+
+    const incoming = [
+      {
+        id: 'img-existing',
+        latitude: 48.25,
+        longitude: 16.35,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+      {
+        id: 'img-added',
+        latitude: 48.21,
+        longitude: 16.38,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ];
+
+    vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue(incoming);
+    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+
+    await component.selectRadiusImages({ lat: 48.2, lng: 16.37 }, 200, true);
+
+    const merged = setSpy.mock.calls[0]?.[0] ?? [];
+    expect(merged.map((image) => image.id).sort()).toEqual(['img-added', 'img-existing']);
+    expect(Array.from(component.selectedMarkerKeys()).sort()).toEqual([
+      'already-selected',
+      'in-radius',
+    ]);
+  });
+
+  it('radius draft highlights markers live while dragging', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      distance: vi.fn((_center: unknown, target: [number, number] | { lat: number }) => {
+        const targetLat = Array.isArray(target) ? target[0] : target.lat;
+        return targetLat === 48.2 ? 80 : 600;
+      }),
+      latLngToContainerPoint: vi.fn(() => ({ x: 0, y: 0 })),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+        }
+      >;
+      radiusDrawStartLatLng: { lat: number; lng: number } | null;
+      radiusDraftLine: {
+        setLatLngs: ReturnType<typeof vi.fn>;
+        remove: ReturnType<typeof vi.fn>;
+      } | null;
+      radiusDraftCircle: {
+        setRadius: ReturnType<typeof vi.fn>;
+        remove: ReturnType<typeof vi.fn>;
+      } | null;
+      radiusDraftLabel: {
+        setLatLng: ReturnType<typeof vi.fn>;
+        remove: ReturnType<typeof vi.fn>;
+        getElement: ReturnType<typeof vi.fn>;
+      } | null;
+      radiusDraftHighlightedKeys: Set<string>;
+      updateRadiusSelectionDraft: (currentLatLng: { lat: number; lng: number }) => void;
+      refreshPhotoMarker: ReturnType<typeof vi.fn>;
+    };
+
+    component.map = mapStub;
+    component.radiusDrawStartLatLng = { lat: 48.2, lng: 16.37 };
+    component.radiusDraftLine = { setLatLngs: vi.fn(), remove: vi.fn() };
+    component.radiusDraftCircle = { setRadius: vi.fn(), remove: vi.fn() };
+    component.radiusDraftLabel = {
+      setLatLng: vi.fn(),
+      remove: vi.fn(),
+      getElement: vi.fn().mockReturnValue(null),
+    };
+    component.refreshPhotoMarker = vi.fn();
+
+    component.uploadedPhotoMarkers.set('in-radius', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+    });
+    component.uploadedPhotoMarkers.set('out-radius', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 47.5,
+      lng: 15.9,
+    });
+
+    component.updateRadiusSelectionDraft({ lat: 48.2, lng: 16.38 });
+
+    expect(Array.from(component.radiusDraftHighlightedKeys)).toEqual(['in-radius']);
+    expect(component.refreshPhotoMarker).toHaveBeenCalledWith('in-radius');
+  });
+
+  it('Ctrl-click on marker appends marker images to active selection', async () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      getZoom: vi.fn().mockReturnValue(15),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          sourceCells?: Array<{ lat: number; lng: number }>;
+        }
+      >;
+      handlePhotoMarkerClick: (
+        markerKey: string,
+        clickEvent?: { originalEvent: { ctrlKey?: boolean; metaKey?: boolean } },
+      ) => Promise<void>;
+    };
+
+    component.map = mapStub;
+    component.uploadedPhotoMarkers.set('cluster-1', {
+      marker: createMarkerStub(),
+      count: 3,
+      lat: 48.2,
+      lng: 16.37,
+      sourceCells: [{ lat: 48.2, lng: 16.37 }],
+    });
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    workspaceView.rawImages.set([
+      {
+        id: 'img-existing',
+        latitude: 48.25,
+        longitude: 16.35,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ]);
+
+    vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue([
+      {
+        id: 'img-added',
+        latitude: 48.21,
+        longitude: 16.38,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ]);
+
+    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+
+    await component.handlePhotoMarkerClick('cluster-1', { originalEvent: { ctrlKey: true } });
+
+    const merged = setSpy.mock.calls[0]?.[0] ?? [];
+    expect(merged.map((image) => image.id).sort()).toEqual(['img-added', 'img-existing']);
+  });
+
+  it('Ctrl-click on single marker appends selection without opening detail view', async () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      getZoom: vi.fn().mockReturnValue(15),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          sourceCells?: Array<{ lat: number; lng: number }>;
+          imageId?: string;
+        }
+      >;
+      handlePhotoMarkerClick: (
+        markerKey: string,
+        clickEvent?: { originalEvent: { ctrlKey?: boolean; metaKey?: boolean } },
+      ) => Promise<void>;
+    };
+
+    component.map = mapStub;
+    component.uploadedPhotoMarkers.set('single-1', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+      sourceCells: [{ lat: 48.2, lng: 16.37 }],
+      imageId: 'img-single',
+    });
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    workspaceView.rawImages.set([]);
+
+    vi.spyOn(workspaceView, 'fetchClusterImages').mockResolvedValue([
+      {
+        id: 'img-single',
+        latitude: 48.2,
+        longitude: 16.37,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ]);
+
+    const setSpy = vi.spyOn(workspaceView, 'setActiveSelectionImages').mockImplementation(() => {});
+
+    await component.handlePhotoMarkerClick('single-1', { originalEvent: { ctrlKey: true } });
+
+    expect(setSpy).toHaveBeenCalled();
+    expect(fixture.componentInstance.detailImageId()).toBeNull();
   });
 
   // ── Photo panel ────────────────────────────────────────────────────────────

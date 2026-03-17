@@ -20,6 +20,12 @@ export class FolderScanService {
     'video/quicktime',
     'video/webm',
     'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   ]);
 
   private static readonly SUPPORTED_EXTENSIONS = new Set([
@@ -35,6 +41,12 @@ export class FolderScanService {
     '.mov',
     '.webm',
     '.pdf',
+    '.doc',
+    '.docx',
+    '.xls',
+    '.xlsx',
+    '.ppt',
+    '.pptx',
   ]);
 
   /** Whether the File System Access API is available (Chromium only). */

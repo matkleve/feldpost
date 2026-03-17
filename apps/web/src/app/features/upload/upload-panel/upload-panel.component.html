@@ -6,7 +6,9 @@
 >
   <header class="upload-panel__header">
     <h3 class="upload-panel__title">Upload files</h3>
-    <p class="upload-panel__subtitle">Add photos, videos, and PDFs for the active project.</p>
+    <p class="upload-panel__subtitle">
+      Add photos, videos, PDFs, and Office files for the active project.
+    </p>
   </header>
 
   @if (scanningLabel(); as label) {
@@ -32,7 +34,7 @@
       <span class="upload-panel__dropzone-sub">or click to select files</span>
     </p>
     <p class="upload-panel__dropzone-hint">
-      JPEG · PNG · HEIC · WebP · MP4 · MOV · WebM · PDF · max 25 MB
+      JPEG · PNG · HEIC · WebP · MP4 · MOV · WebM · PDF · DOCX · XLSX · PPTX · max 25 MB
     </p>
 
     <!-- Hidden file input; trigger by clicking the drop zone -->
@@ -40,7 +42,7 @@
       #fileInput
       type="file"
       class="upload-panel__file-input"
-      accept="image/jpeg,image/png,image/heic,image/heif,image/webp,video/mp4,video/quicktime,video/webm,application/pdf"
+      accept="image/jpeg,image/png,image/heic,image/heif,image/webp,video/mp4,video/quicktime,video/webm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
       multiple
       aria-hidden="true"
       tabindex="-1"
@@ -200,7 +202,11 @@
                 class="upload-panel__thumbnail upload-panel__thumbnail--placeholder"
                 aria-hidden="true"
               >
-                <span class="material-icons">image</span>
+                @if (documentFallbackLabel(job); as fallbackLabel) {
+                  <span class="upload-panel__thumbnail-fallback">{{ fallbackLabel }}</span>
+                } @else {
+                  <span class="material-icons">image</span>
+                }
               </div>
             }
 

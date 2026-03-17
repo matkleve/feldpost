@@ -1,4 +1,4 @@
-export type LanguageCode = 'en' | 'de';
+﻿export type LanguageCode = 'en' | 'de';
 
 export interface TranslationEntry {
   key: string;
@@ -113,7 +113,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Identity and sign-in context',
     context: 'Settings section navigation subtitle for account settings.',
     en: 'Identity and sign-in context',
-    de: 'Identitaet und Anmeldekontext',
+    de: 'Identität und Anmeldekontext',
   },
   {
     key: 'settings.overlay.section.invites.title',
@@ -141,7 +141,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Close settings overlay',
     context: 'ARIA label for the overlay close button.',
     en: 'Close settings overlay',
-    de: 'Einstellungs-Overlay schliessen',
+    de: 'Einstellungs-Overlay schließen',
   },
   {
     key: 'settings.overlay.aria.sections',
@@ -204,7 +204,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Control base language and content density for workspace surfaces.',
     context: 'General settings detail section description.',
     en: 'Control base language and content density for workspace surfaces.',
-    de: 'Steuere Basissprache und Darstellungsdichte fuer Arbeitsbereichsoberflaechen.',
+    de: 'Steuere Basissprache und Darstellungsdichte für Arbeitsbereichsoberflächen.',
   },
   {
     key: 'settings.overlay.general.density.label',
@@ -239,7 +239,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Use the same palette behavior as dropdowns and map surfaces.',
     context: 'Appearance detail section description.',
     en: 'Use the same palette behavior as dropdowns and map surfaces.',
-    de: 'Nutze dasselbe Palettenverhalten wie bei Dropdowns und Kartenoberflaechen.',
+    de: 'Nutze dasselbe Palettenverhalten wie bei Dropdowns und Kartenoberflächen.',
   },
   {
     key: 'settings.overlay.appearance.themeMode.label',
@@ -281,7 +281,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Choose what feedback appears while working on-site.',
     context: 'Notifications detail section description.',
     en: 'Choose what feedback appears while working on-site.',
-    de: 'Waehle, welches Feedback waehrend der Arbeit vor Ort angezeigt wird.',
+    de: 'Wähle, welches Feedback während der Arbeit vor Ort angezeigt wird.',
   },
   {
     key: 'settings.overlay.notifications.inApp.title',
@@ -295,7 +295,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Show success and warning notices for actions.',
     context: 'Toggle description for in-app notifications.',
     en: 'Show success and warning notices for actions.',
-    de: 'Zeigt Erfolgs- und Warnhinweise fuer Aktionen an.',
+    de: 'Zeigt Erfolgs- und Warnhinweise für Aktionen an.',
   },
   {
     key: 'settings.overlay.notifications.uploadFailure.title',
@@ -323,7 +323,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Keep map behavior consistent with field navigation workflows.',
     context: 'Map preferences detail section description.',
     en: 'Keep map behavior consistent with field navigation workflows.',
-    de: 'Halte das Kartenverhalten konsistent mit den Vor-Ort-Navigationsablaeufen.',
+    de: 'Halte das Kartenverhalten konsistent mit den Vor-Ort-Navigationsabläufen.',
   },
   {
     key: 'settings.overlay.map.autoLocate.title',
@@ -337,7 +337,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Center map to your current position when entering map shell.',
     context: 'Toggle description for map auto locate setting.',
     en: 'Center map to your current position when entering map shell.',
-    de: 'Zentriert die Karte beim Oeffnen der Kartenansicht auf deine Position.',
+    de: 'Zentriert die Karte beim Öffnen der Kartenansicht auf deine Position.',
   },
   {
     key: 'settings.overlay.map.gridOverlay.title',
@@ -386,7 +386,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Adjust bias and distance defaults for address and place results.',
     context: 'Search tuning detail section description.',
     en: 'Adjust bias and distance defaults for address and place results.',
-    de: 'Passe Bias und Distanz-Standardwerte fuer Adress- und Orts-Ergebnisse an.',
+    de: 'Passe Bias und Distanz-Standardwerte für Adress- und Orts-Ergebnisse an.',
   },
   {
     key: 'settings.overlay.search.bias.label',
@@ -470,14 +470,14 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Signed-in identity and workspace session context.',
     context: 'Account detail section description.',
     en: 'Signed-in identity and workspace session context.',
-    de: 'Angemeldete Identitaet und Arbeitsbereichs-Sitzungskontext.',
+    de: 'Angemeldete Identität und Arbeitsbereichs-Sitzungskontext.',
   },
   {
     key: 'settings.overlay.account.close',
     original: 'Close settings',
     context: 'Button label to close settings from account section.',
     en: 'Close settings',
-    de: 'Einstellungen schliessen',
+    de: 'Einstellungen schließen',
   },
   {
     key: 'settings.overlay.account.unknownUser',
@@ -491,7 +491,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'No email available',
     context: 'Fallback account email text when no email is present.',
     en: 'No email available',
-    de: 'Keine E-Mail verfuegbar',
+    de: 'Keine E-Mail verfügbar',
   },
   {
     key: 'settings.overlay.error.noSession',
@@ -505,7 +505,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     original: 'Unable to load settings right now.',
     context: 'Generic error message when settings loading fails.',
     en: 'Unable to load settings right now.',
-    de: 'Einstellungen koennen derzeit nicht geladen werden.',
+    de: 'Einstellungen können derzeit nicht geladen werden.',
   },
   {
     key: 'settings.overlay.loading.title',
@@ -536,3 +536,15 @@ export const TRANSLATION_BY_KEY: Readonly<Record<string, TranslationEntry>> = Ob
     return acc;
   }, {}),
 );
+
+export const TRANSLATION_BY_ORIGINAL: Readonly<Record<string, TranslationEntry>> = Object.freeze(
+  TRANSLATION_CATALOG.reduce<Record<string, TranslationEntry>>((acc, entry) => {
+    if (!acc[entry.original]) {
+      acc[entry.original] = entry;
+    }
+    return acc;
+  }, {}),
+);
+
+
+
