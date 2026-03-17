@@ -4,9 +4,7 @@
   Layout (left→right):
     MapZone (flex-fill)
       UploadButton (absolute, top-right, z-upload-button, visually over map)
-      LeafletMap
       SearchBar (floating, top-center)
-        ResultsDropdown (conditional)
       GPSButton (floating, bottom-right)
       PlacementBanner (conditional)
     DragDivider (hidden when PhotoPanel closed)
@@ -116,30 +114,69 @@
           <span class="material-icons dd-item__icon" aria-hidden="true">add_location</span>
           <span class="dd-item__label">Media Marker hier erstellen</span>
         </button>
-        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCenterHere()">
+        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextZoomHouseHere()">
           <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
-          <span class="dd-item__label">Karte hier zentrieren</span>
+          <span class="dd-item__label">Hierhin zoomen (Hausnaehe)</span>
         </button>
         <button
           class="dd-item"
           type="button"
           role="menuitem"
-          (click)="onMapContextCopyCoordinates()"
+          (click)="onMapContextZoomStreetHere()"
         >
+          <span class="material-icons dd-item__icon" aria-hidden="true">zoom_in</span>
+          <span class="dd-item__label">Hierhin zoomen (Strassennaehe)</span>
+        </button>
+        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCopyAddress()">
           <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">Koordinaten kopieren</span>
+          <span class="dd-item__label">Adresse kopieren</span>
+        </button>
+        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCopyGps()">
+          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+          <span class="dd-item__label">GPS kopieren</span>
         </button>
         <div class="dd-divider" aria-hidden="true"></div>
         <button
           class="dd-item"
           type="button"
           role="menuitem"
-          (click)="onMapContextStartRadiusFromHere()"
+          (click)="onMapContextOpenGoogleMaps()"
         >
-          <span class="material-icons dd-item__icon" aria-hidden="true"
-            >radio_button_unchecked</span
-          >
-          <span class="dd-item__label">Radius von hier starten</span>
+          <span class="material-icons dd-item__icon" aria-hidden="true">open_in_new</span>
+          <span class="dd-item__label">In Google Maps oeffnen</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (radiusContextMenuOpen() && radiusContextMenuPosition(); as radiusMenuPos) {
+    <div
+      class="map-context-menu"
+      [style.left.px]="radiusMenuPos.x"
+      [style.top.px]="radiusMenuPos.y"
+      role="menu"
+      aria-label="Radius context menu"
+    >
+      <div class="map-context-menu__header">Radius Auswahl</div>
+
+      <div class="dd-items">
+        <button
+          class="dd-item"
+          type="button"
+          role="menuitem"
+          (click)="onRadiusContextCreateProjectFromSelection()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">folder</span>
+          <span class="dd-item__label">Neues Projekt aus Radius</span>
+        </button>
+        <button
+          class="dd-item"
+          type="button"
+          role="menuitem"
+          (click)="onRadiusContextAssignToProject()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
+          <span class="dd-item__label">Zu Projekt zuweisen...</span>
         </button>
       </div>
     </div>
@@ -180,28 +217,50 @@
             class="dd-item"
             type="button"
             role="menuitem"
-            (click)="onMarkerContextMoveMarker()"
+            (click)="onMarkerContextZoomHouse()"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">open_with</span>
-            <span class="dd-item__label">Marker verschieben</span>
+            <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
+            <span class="dd-item__label">Hierhin zoomen (Hausnaehe)</span>
           </button>
           <button
             class="dd-item"
             type="button"
             role="menuitem"
-            (click)="onMarkerContextAddToGroup()"
+            (click)="onMarkerContextZoomStreet()"
           >
-            <span class="material-icons dd-item__icon" aria-hidden="true">group_add</span>
-            <span class="dd-item__label">Zu Gruppe hinzufuegen...</span>
+            <span class="material-icons dd-item__icon" aria-hidden="true">zoom_in</span>
+            <span class="dd-item__label">Hierhin zoomen (Strassennaehe)</span>
           </button>
           <button
             class="dd-item"
             type="button"
             role="menuitem"
-            (click)="onMarkerContextCopyCoordinates()"
+            (click)="onMarkerContextAssignToProject()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
+            <span class="dd-item__label">Projekt hinzufuegen...</span>
+          </button>
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            (click)="onMarkerContextCopyAddress()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">Koordinaten kopieren</span>
+            <span class="dd-item__label">Adresse kopieren</span>
+          </button>
+          <button class="dd-item" type="button" role="menuitem" (click)="onMarkerContextCopyGps()">
+            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+            <span class="dd-item__label">GPS kopieren</span>
+          </button>
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            (click)="onMarkerContextOpenGoogleMaps()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">open_in_new</span>
+            <span class="dd-item__label">In Google Maps oeffnen</span>
           </button>
           @if (markerContextIsSingle) {
             <div class="dd-divider" aria-hidden="true"></div>

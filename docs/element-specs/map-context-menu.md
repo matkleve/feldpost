@@ -1,10 +1,11 @@
 # Map Context Menu
 
 > **Use cases:** [use-cases/map-context-menu.md](../use-cases/map-context-menu.md)
+> **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
 
 ## What It Is
 
-A contextual action menu opened by secondary click on an empty map position. It gives fast map-local actions (for example "Create Media Marker Here") without entering a full-screen mode or losing map context.
+A contextual action menu opened by secondary click on an empty map position. It gives fast map-local actions (for example "Media Marker hier erstellen") without entering a full-screen mode or losing map context.
 
 Primary use cases are: quick media marker drafting at exact coordinates, fast map zoom-in to a practical working scale (house or street proximity), and utility actions like copying address/GPS or opening Google Maps. The interaction uses a two-step desktop handshake: first right-click opens the app menu, second right-click (nearby and shortly after) allows the native browser menu. A secondary-click drag continues to start Radius Selection.
 
@@ -17,13 +18,13 @@ The menu is a compact floating surface anchored near the pointer position, using
 - **Route**: Global within map route `/`
 - **Parent**: Map Zone in `MapShellComponent`
 - **Appears when**: User performs a short secondary click on empty map area (desktop) or long-press without drag on empty map area (mobile)
-- **Precedence note**: When an active radius exists, secondary clicks inside radius open Radius Context Menu (group actions). Secondary clicks outside radius close the radius on the first click.
+- **Precedence note**: When an active radius exists, secondary clicks inside radius open Radius Context Menu (project actions). Secondary clicks outside radius close the radius on the first click.
 
 ## Actions & Interactions
 
 | #   | User Action                                                    | System Response                                                                                             | Triggers                                                       |
 | --- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| 0   | Active radius exists + right-click inside radius               | Radius Context Menu wins (group actions), map menu does not open                                            | radius hit-test precedence                                     |
+| 0   | Active radius exists + right-click inside radius               | Radius Context Menu wins (project actions), map menu does not open                                          | radius hit-test precedence                                     |
 | 0a  | Active radius exists + short right-click outside radius        | Radius closes immediately; map menu does not open on that same click                                        | outside-radius dismiss rule                                    |
 | 1   | First short right-click on empty map (desktop)                 | Opens Map Context Menu at pointer coordinates and suppresses native browser menu                            | `MapAdapter` context event + no marker target                  |
 | 2   | Second short right-click near same point within `2000ms`       | Closes app menu and allows native browser context menu (no `preventDefault`)                                | double-secondary-click handshake                               |
@@ -158,7 +159,7 @@ sequenceDiagram
   alt targetKind = marker
     MS-->>MS: ignore map menu, delegate to marker menu flow
   else targetKind = inside-active-radius
-    MS->>RCM: open group-focused radius menu
+    MS->>RCM: open project-focused radius menu
   else targetKind = outside-active-radius
     MS->>RS: clear active radius and visuals
   else targetKind = empty-map
@@ -217,7 +218,7 @@ sequenceDiagram
 - [ ] Right-click drag (movement `>= 8px`) starts Radius Selection and never flashes the map context menu.
 - [ ] Long-press without drag on mobile opens the action-sheet variant.
 - [ ] Long-press + drag on mobile starts Radius Selection instead of opening menu.
-- [ ] `Create Media Marker Here` creates an ephemeral draft marker at clicked coordinates and opens Workspace Pane with upload prompt.
+- [ ] `Media Marker hier erstellen` creates an ephemeral draft marker at clicked coordinates and opens Workspace Pane with upload prompt.
 - [ ] If user dismisses the draft session without uploading any media, the draft marker is removed immediately.
 - [ ] If at least one media file is uploaded, the marker is persisted and remains visible.
 - [ ] `Hierhin zoomen (Hausnaehe)` zooms to building-level context around clicked point.

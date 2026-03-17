@@ -11,7 +11,10 @@
 
 .thumbnail-grid__cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(128px, 128px));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--thumbnail-grid-card-size, 128px), var(--thumbnail-grid-card-size, 128px))
+  );
   justify-content: center;
   gap: var(--spacing-2);
   padding: var(--spacing-1) 0;
@@ -19,6 +22,27 @@
 
 .thumbnail-grid__cards--start {
   justify-content: start;
+}
+
+.thumbnail-grid--row .thumbnail-grid__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  justify-content: start;
+}
+
+.thumbnail-grid--large .thumbnail-grid__cards,
+.thumbnail-grid--large .thumbnail-grid__skeleton {
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: start;
+}
+
+.thumbnail-grid--medium .thumbnail-grid__cards {
+  justify-content: center;
+}
+
+.thumbnail-grid--small .thumbnail-grid__cards {
+  justify-content: center;
 }
 
 .thumbnail-grid__empty {
@@ -86,8 +110,11 @@
 
 .thumbnail-grid__skeleton {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(128px, 128px));
-  justify-content: start;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--thumbnail-grid-card-size, 128px), var(--thumbnail-grid-card-size, 128px))
+  );
+  justify-content: center;
   gap: var(--spacing-3);
   padding: var(--spacing-1) 0;
 }

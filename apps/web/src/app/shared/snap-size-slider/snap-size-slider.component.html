@@ -1,31 +1,25 @@
 <section class="snap-size-slider" role="group" [attr.aria-label]="label()">
-  <p class="snap-size-slider__label">{{ label() }}</p>
-
-  <input
-    class="snap-size-slider__range"
-    type="range"
-    [attr.min]="0"
-    [attr.max]="maxIndex()"
-    [attr.step]="1"
-    [value]="selectedIndex()"
-    [attr.aria-valuetext]="valueText()"
-    (input)="onRangeInput($event)"
-  />
-
-  <div class="snap-size-slider__steps" aria-hidden="true">
-    @for (option of options(); track option.value; let i = $index) {
+  <div
+    class="snap-size-slider__steps"
+    role="radiogroup"
+    [attr.aria-label]="label()"
+    [style.--snap-option-count]="options().length"
+  >
+    @for (option of options(); track option.value) {
       <button
         class="snap-size-slider__step"
         type="button"
         [class.snap-size-slider__step--active]="value() === option.value"
-        (click)="selectIndex(i)"
+        role="radio"
+        [attr.aria-label]="option.label"
+        [attr.aria-checked]="value() === option.value"
+        (click)="select(option.value)"
       >
         @if (option.icon) {
           <span class="snap-size-slider__step-icon material-icons" aria-hidden="true">
             {{ option.icon }}
           </span>
         }
-        <span class="snap-size-slider__step-text">{{ option.shortLabel ?? option.label }}</span>
       </button>
     }
   </div>

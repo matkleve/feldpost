@@ -1,10 +1,10 @@
 import {
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   afterNextRender,
   computed,
-  effect,
   inject,
   output,
   signal,
@@ -27,6 +27,10 @@ type RenderItem =
   template: `
     <div
       class="thumbnail-grid"
+      [class.thumbnail-grid--row]="viewService.thumbnailSizePreset() === 'row'"
+      [class.thumbnail-grid--small]="viewService.thumbnailSizePreset() === 'small'"
+      [class.thumbnail-grid--medium]="viewService.thumbnailSizePreset() === 'medium'"
+      [class.thumbnail-grid--large]="viewService.thumbnailSizePreset() === 'large'"
       #scrollContainer
       (scroll)="onScroll()"
       [style.--thumbnail-grid-card-size.px]="thumbnailCardSizePx()"
@@ -73,6 +77,7 @@ type RenderItem =
                 @for (img of item.images; track img.id) {
                   <app-thumbnail-card
                     [image]="img"
+                    [viewMode]="viewService.thumbnailSizePreset()"
                     [selected]="selectionService.isSelected(img.id)"
                     (clicked)="thumbnailClicked.emit($event)"
                     (selectionToggled)="onSelectionToggled($event)"
@@ -90,6 +95,7 @@ type RenderItem =
           @for (img of flatImages(); track img.id) {
             <app-thumbnail-card
               [image]="img"
+              [viewMode]="viewService.thumbnailSizePreset()"
               [selected]="selectionService.isSelected(img.id)"
               (clicked)="thumbnailClicked.emit($event)"
               (selectionToggled)="onSelectionToggled($event)"
@@ -109,8 +115,10 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   readonly thumbnailCardSizePx = computed(() => {
     switch (this.viewService.thumbnailSizePreset()) {
+      case 'row':
+        return 96;
       case 'small':
-        return 112;
+        return 96;
       case 'large':
         return 160;
       default:
@@ -122,8 +130,6 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-
   readonly maxColumns = signal(1);
 
   readonly sections = computed(() => this.viewService.groupedSections());
@@ -167,15 +173,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   constructor() {
     afterNextRender(() => {
       this.scheduleThumbnailSigning();
-      this.observeWidthChanges();
       this.updateMaxColumns();
-    });
-
-    effect(() => {
-      this.thumbnailCardSizePx();
-      afterNextRender(() => {
-        this.updateMaxColumns();
-      });
     });
   }
 
@@ -183,10 +181,11 @@ export class ThumbnailGridComponent implements OnDestroy {
     if (this.signBatchTimer) {
       clearTimeout(this.signBatchTimer);
     }
-    this.resizeObserver?.disconnect();
   }
 
   isUnderfilled(itemCount: number): boolean {
+    if (this.viewService.thumbnailSizePreset() === 'row') return false;
+    if (this.viewService.thumbnailSizePreset() === 'large') return false;
     return itemCount > 0 && itemCount < this.maxColumns();
   }
 
@@ -230,6 +229,11 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.scheduleThumbnailSigning();
   }
 
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateMaxColumns();
+  }
+
   onSelectionToggled(event: ThumbnailCardInteraction): void {
     this.selectionService.toggle(event.imageId, { additive: event.additive });
   }
@@ -259,17 +263,6 @@ export class ThumbnailGridComponent implements OnDestroy {
       }
     }
     return result;
-  }
-
-  private observeWidthChanges(): void {
-    const host = this.scrollContainerRef()?.nativeElement;
-    if (!host || typeof ResizeObserver === 'undefined') return;
-
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = new ResizeObserver(() => {
-      this.updateMaxColumns();
-    });
-    this.resizeObserver.observe(host);
   }
 
   private updateMaxColumns(): void {

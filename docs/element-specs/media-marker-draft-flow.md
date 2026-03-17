@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A map-to-workspace creation flow started from the Map Context Menu action Create Media Marker Here. It creates an ephemeral marker draft at the clicked coordinates so users can immediately upload media in Workspace context.
+A map-to-workspace creation flow started from the Map Context Menu action Media Marker hier erstellen. It creates an ephemeral marker draft at the clicked coordinates so users can immediately upload media in Workspace context.
 
 If no media is uploaded and the draft session is dismissed (for example by left-clicking the map), the draft is discarded and the marker disappears.
 
@@ -16,14 +16,14 @@ The upload intake uses existing Upload Panel visual language and supports all cu
 
 - **Route**: Global within map route `/`
 - **Parent**: Triggered from Map Context Menu in `MapShellComponent`
-- **Appears when**: user selects Create Media Marker Here on an empty map location
+- **Appears when**: user selects Media Marker hier erstellen on an empty map location
 
 ## Actions & Interactions
 
 | #   | User Action                                        | System Response                                                              | Triggers                               |
 | --- | -------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------- |
-| 1   | Opens map context menu on empty map                | Shows Create Media Marker Here action                                        | map secondary-click/long-press         |
-| 2   | Selects Create Media Marker Here                   | Creates ephemeral draft marker and opens Workspace Pane in upload-ready mode | draft creation handler                 |
+| 1   | Opens map context menu on empty map                | Shows Media Marker hier erstellen action                                     | map secondary-click/long-press         |
+| 2   | Selects Media Marker hier erstellen                | Creates ephemeral draft marker and opens Workspace Pane in upload-ready mode | draft creation handler                 |
 | 3   | Uploads first media file                           | Promotes draft marker to persistent marker                                   | upload completion event                |
 | 4   | Uploads additional media files                     | Keeps marker persistent and appends media to same marker context             | upload manager pipeline                |
 | 5   | Dismisses draft session with uploadCount = 0       | Closes draft workspace context and removes draft marker                      | map left-click / pane dismiss / escape |
@@ -35,7 +35,7 @@ The upload intake uses existing Upload Panel visual language and supports all cu
 ```
 MapShellComponent
 ├── Map Context Menu
-│   └── Action: Create Media Marker Here
+│   └── Action: Media Marker hier erstellen
 ├── DraftMarkerLayer
 │   └── DraftMediaMarker (ephemeral, uploadCount-aware visual state)
 └── WorkspacePaneComponent
@@ -58,7 +58,7 @@ MapShellComponent
 
 ```mermaid
 flowchart LR
-  U[User selects Create Media Marker Here] --> MS[MapShell draft creator]
+  U[User selects Media Marker hier erstellen] --> MS[MapShell draft creator]
   MS --> D[Draft marker state]
   D --> WP[Workspace draft upload state]
   WP --> UM[UploadManagerService]
@@ -99,7 +99,7 @@ sequenceDiagram
   participant Pane as WorkspacePane
   participant UM as UploadManagerService
 
-  User->>MCM: Click Create Media Marker Here
+  User->>MCM: Click Media Marker hier erstellen
   MCM->>Shell: createDraft(lat,lng)
   Shell->>Pane: openDraftContext(draftMarkerId)
   Pane->>UM: await uploads for draft
@@ -118,7 +118,7 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] Create Media Marker Here creates exactly one draft marker at clicked coordinates.
+- [ ] Media Marker hier erstellen creates exactly one draft marker at clicked coordinates.
 - [ ] Draft marker opens Workspace Pane in upload-ready mode.
 - [ ] Draft accepts all currently allowed media types from upload intake.
 - [ ] First successful upload promotes marker to persistent state.

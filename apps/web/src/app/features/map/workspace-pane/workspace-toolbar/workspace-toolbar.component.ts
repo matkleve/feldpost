@@ -20,9 +20,10 @@ import {
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
 const THUMBNAIL_SIZE_OPTIONS: ReadonlyArray<SnapSizeSliderOption> = [
-  { value: 'small', label: 'Small', shortLabel: 'S', icon: 'view_comfy' },
-  { value: 'medium', label: 'Medium', shortLabel: 'M', icon: 'grid_view' },
-  { value: 'large', label: 'Large', shortLabel: 'L', icon: 'apps' },
+  { value: 'row', label: 'Zeilen', icon: 'view_headline' },
+  { value: 'small', label: 'Klein', icon: 'grid_view' },
+  { value: 'medium', label: 'Mittel', icon: 'apps' },
+  { value: 'large', label: 'Gross', icon: 'view_agenda' },
 ];
 
 @Component({
@@ -134,7 +135,7 @@ export class WorkspaceToolbarComponent {
   }
 
   onThumbnailSizeChanged(value: string): void {
-    if (value !== 'small' && value !== 'medium' && value !== 'large') return;
+    if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
     this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
   }
 

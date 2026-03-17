@@ -1,7 +1,7 @@
 # Map Context Menu — Use Cases & Interaction Scenarios
 
 > **Element spec:** [element-specs/map-context-menu.md](../element-specs/map-context-menu.md)
-> **Related specs:** [photo-marker-context-menu](../element-specs/photo-marker-context-menu.md), [workspace-pane](../element-specs/workspace-pane.md), [upload-panel](../element-specs/upload-panel.md)
+> **Related specs:** [map-secondary-click-system](../element-specs/map-secondary-click-system.md), [radius-selection](../element-specs/radius-selection.md), [photo-marker-context-menu](../element-specs/photo-marker-context-menu.md), [workspace-pane](../element-specs/workspace-pane.md), [upload-panel](../element-specs/upload-panel.md)
 
 ---
 
@@ -255,7 +255,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Secondary press starts] --> B{Pointer moved >= 8px?}
+    A[Secondary press starts] --> B{Pointer moved >= 8px}
     B -->|Yes| C[Suppress map context menu]
     C --> D[Start Radius Selection]
     B -->|No| E[Open Map Context Menu]
@@ -287,9 +287,9 @@ flowchart TD
 
 ---
 
-## MCM-12: Active Radius — Right-Click Inside Opens Group Actions
+## MCM-12: Active Radius — Right-Click Inside Opens Project Actions
 
-**Context:** User has an active radius and wants to curate the selected set into groups quickly.
+**Context:** User has an active radius and wants to assign the selected set to projects quickly.
 
 ```mermaid
 sequenceDiagram
@@ -297,19 +297,19 @@ sequenceDiagram
     participant Map as MapAdapter
     participant Shell as MapShell
     participant RadiusMenu as RadiusContextMenu
-    participant Groups as GroupFlows
+    participant Projects as ProjectFlows
 
     User->>Map: Right-click inside active radius
     Map->>Shell: secondaryClickInsideRadius
-    Shell->>RadiusMenu: open group-focused menu
-    User->>RadiusMenu: Select "Neue Gruppe aus Radius" or "Zu Gruppe hinzufuegen..."
-    RadiusMenu->>Groups: run selected group action on in-radius media set
+    Shell->>RadiusMenu: open project-focused menu
+    User->>RadiusMenu: Select "Neues Projekt aus Radius" or "Zu Projekt zuweisen..."
+    RadiusMenu->>Projects: run selected project action on in-radius media set
 ```
 
 **Expected result:**
 
 - Radius-specific menu opens (not map context menu).
-- Group actions operate on current in-radius result set.
+- Project actions operate on current in-radius result set.
 
 ---
 
@@ -351,5 +351,5 @@ sequenceDiagram
 - [ ] "In Google Maps oeffnen" opens external map tab at clicked point.
 - [ ] Secondary-click drag above threshold starts radius selection instead of menu.
 - [ ] Edge/corner right-click keeps app menu visible and does not require browser-menu-specific placement logic.
-- [ ] With active radius, right-click inside radius opens group-focused radius actions.
+- [ ] With active radius, right-click inside radius opens project-focused radius actions.
 - [ ] With active radius, short right-click outside radius closes radius and does not open map menu on same click.

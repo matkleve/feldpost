@@ -1,7 +1,7 @@
 # Photo Marker Context Menu — Use Cases & Interaction Scenarios
 
 > **Element spec:** [element-specs/photo-marker-context-menu.md](../element-specs/photo-marker-context-menu.md)
-> **Related specs:** [map-context-menu](../element-specs/map-context-menu.md), [workspace-pane](../element-specs/workspace-pane.md), [projects-dropdown](../element-specs/projects-dropdown.md)
+> **Related specs:** [map-secondary-click-system](../element-specs/map-secondary-click-system.md), [map-context-menu](../element-specs/map-context-menu.md), [radius-selection](../element-specs/radius-selection.md), [workspace-pane](../element-specs/workspace-pane.md), [projects-dropdown](../element-specs/projects-dropdown.md)
 
 ---
 
@@ -28,7 +28,7 @@ sequenceDiagram
 
 ---
 
-## PMC-2: Open Details (Single)
+## PMC-2: Details Oeffnen (Single)
 
 **Context:** User wants full metadata editing for one marker image.
 
@@ -50,7 +50,7 @@ sequenceDiagram
 
 ---
 
-## PMC-3: Open Selection (Cluster)
+## PMC-3: Auswahl Oeffnen (Cluster)
 
 **Context:** User wants all media at clustered marker position.
 
@@ -209,7 +209,7 @@ sequenceDiagram
 
 ---
 
-## PMC-10: Delete Photo (Single Only)
+## PMC-10: Foto Loeschen (Single Only)
 
 **Context:** User removes wrong/obsolete single-marker photo.
 

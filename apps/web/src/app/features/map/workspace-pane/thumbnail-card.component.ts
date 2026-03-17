@@ -1,5 +1,5 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import type { WorkspaceImage } from '../../../core/workspace-view.types';
+import type { ThumbnailSizePreset, WorkspaceImage } from '../../../core/workspace-view.types';
 import { PHOTO_PLACEHOLDER_ICON, PHOTO_NO_PHOTO_ICON } from '../../../core/photo-load.service';
 
 export interface ThumbnailCardInteraction {
@@ -10,35 +10,50 @@ export interface ThumbnailCardInteraction {
 @Component({
   selector: 'app-thumbnail-card',
   template: `
-    <article class="thumbnail-card" [class.thumbnail-card--selected]="selected()">
+    <article
+      class="thumbnail-card"
+      [class.thumbnail-card--selected]="selected()"
+      [class.thumbnail-card--row]="viewMode() === 'row'"
+      [class.thumbnail-card--medium]="viewMode() === 'medium'"
+      [class.thumbnail-card--large]="viewMode() === 'large'"
+    >
       <button
         class="thumbnail-card__main"
         type="button"
         [attr.aria-label]="'View image ' + image().storagePath"
         (click)="onCardClick($event)"
       >
-        @if (image().signedThumbnailUrl) {
-          <img
-            class="thumbnail-card__img"
-            [class.thumbnail-card__img--loaded]="!imgLoading()"
-            [src]="image().signedThumbnailUrl"
-            [alt]="'Photo thumbnail'"
-            loading="lazy"
-            (load)="onImgLoad()"
-            (error)="onImgError()"
-          />
-        }
-        @if (!imageReady()) {
-          <div
-            class="thumbnail-card__placeholder"
-            [class.thumbnail-card__placeholder--loading]="isLoading()"
-            [class.thumbnail-card__placeholder--no-photo]="!isLoading()"
-          >
-            <span
-              class="thumbnail-card__placeholder-icon"
-              [class.thumbnail-card__placeholder-icon--no-photo]="!isLoading()"
-              aria-hidden="true"
-            ></span>
+        <div class="thumbnail-card__media">
+          @if (image().signedThumbnailUrl) {
+            <img
+              class="thumbnail-card__img"
+              [class.thumbnail-card__img--loaded]="!imgLoading()"
+              [src]="image().signedThumbnailUrl"
+              [alt]="'Photo thumbnail'"
+              loading="lazy"
+              (load)="onImgLoad()"
+              (error)="onImgError()"
+            />
+          }
+          @if (!imageReady()) {
+            <div
+              class="thumbnail-card__placeholder"
+              [class.thumbnail-card__placeholder--loading]="isLoading()"
+              [class.thumbnail-card__placeholder--no-photo]="!isLoading()"
+            >
+              <span
+                class="thumbnail-card__placeholder-icon"
+                [class.thumbnail-card__placeholder-icon--no-photo]="!isLoading()"
+                aria-hidden="true"
+              ></span>
+            </div>
+          }
+        </div>
+
+        @if (viewMode() === 'row') {
+          <div class="thumbnail-card__meta" aria-hidden="true">
+            <p class="thumbnail-card__title">{{ displayName() }}</p>
+            <p class="thumbnail-card__subtitle">{{ subtitle() }}</p>
           </div>
         }
       </button>
@@ -67,9 +82,23 @@ export class ThumbnailCardComponent {
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   readonly image = input.required<WorkspaceImage>();
+  readonly viewMode = input<ThumbnailSizePreset>('medium');
   readonly selected = input(false);
   readonly clicked = output<string>();
   readonly selectionToggled = output<ThumbnailCardInteraction>();
+  readonly displayName = computed(() => {
+    const storagePath = this.image().storagePath;
+    if (!storagePath) return 'Image';
+    const parts = storagePath.split('/');
+    return parts[parts.length - 1] || storagePath;
+  });
+  readonly subtitle = computed(() => {
+    const project = this.image().projectName;
+    if (project) return project;
+    const city = this.image().city;
+    if (city) return city;
+    return 'Photo';
+  });
   /** True while the <img> element is still loading from network. */
   readonly imgLoading = signal(true);
   /** True when the <img> errored (broken URL). */

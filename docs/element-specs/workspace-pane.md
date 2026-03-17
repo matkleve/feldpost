@@ -48,7 +48,7 @@ When one or more media items are selected, a bottom-aligned Workspace Export Bar
 | 10  | Selects one or more media items               | Workspace Export Bar animates in at pane bottom                                                                                        | `selectedMediaIds.size > 0`                        |
 | 11  | Clears last selected item                     | Workspace Export Bar animates out                                                                                                      | `selectedMediaIds.size === 0`                      |
 | 12  | Uses export bar actions                       | Opens curation/share/download dialogs and executes batch actions for selected media                                                    | Workspace export wiring                            |
-| 13  | Opens pane from `Create Media Marker Here`    | Workspace opens with draft media-marker selected and upload prompt focused                                                             | `draftMediaMarker != null`                         |
+| 13  | Opens pane from `Media Marker hier erstellen` | Workspace opens with draft media-marker selected and upload prompt focused                                                             | `draftMediaMarker != null`                         |
 | 14  | Dismisses draft pane without uploading media  | Pane closes draft flow and signals map to remove ephemeral marker                                                                      | `draftMediaMarker.uploadCount === 0`               |
 
 ### Interaction Flowchart
@@ -196,7 +196,7 @@ flowchart LR
 - [ ] Workspace Export Bar appears whenever at least one media item is selected
 - [ ] Workspace Export Bar hides when selection count returns to zero
 - [ ] Selection and export state persist through fullscreen toggle transitions
-- [ ] If pane is opened from `Create Media Marker Here`, upload prompt is focused for the draft marker context
+- [ ] If pane is opened from `Media Marker hier erstellen`, upload prompt is focused for the draft marker context
 - [ ] If draft pane is dismissed with zero uploads, pane clears draft context and marker is removed from map
 - [ ] Cluster click opens pane with Active Selection tab active
 - [ ] Active Selection tab shows all images that belong to the clicked cluster

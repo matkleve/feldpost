@@ -94,6 +94,8 @@ export class MapShellComponent implements OnDestroy {
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_PX = 24;
   private static readonly CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
   private static readonly QUICK_RADIUS_METERS = 250;
+  private static readonly HOUSE_PROXIMITY_ZOOM = 19;
+  private static readonly STREET_PROXIMITY_ZOOM = 17;
   private static readonly MARKER_LONG_PRESS_MS = 500;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
@@ -278,6 +280,9 @@ export class MapShellComponent implements OnDestroy {
   readonly mapContextMenuOpen = signal(false);
   readonly mapContextMenuPosition = signal<{ x: number; y: number } | null>(null);
   readonly mapContextMenuCoords = signal<{ lat: number; lng: number } | null>(null);
+  readonly radiusContextMenuOpen = signal(false);
+  readonly radiusContextMenuPosition = signal<{ x: number; y: number } | null>(null);
+  readonly radiusContextMenuCoords = signal<{ lat: number; lng: number } | null>(null);
   readonly markerContextMenuOpen = signal(false);
   readonly markerContextMenuPosition = signal<{ x: number; y: number } | null>(null);
   readonly markerContextMenuPayload = signal<{
@@ -501,6 +506,7 @@ export class MapShellComponent implements OnDestroy {
 
   closeContextMenus(): void {
     this.mapContextMenuOpen.set(false);
+    this.radiusContextMenuOpen.set(false);
     this.markerContextMenuOpen.set(false);
   }
 
@@ -530,24 +536,65 @@ export class MapShellComponent implements OnDestroy {
     this.closeContextMenus();
   }
 
-  onMapContextCenterHere(): void {
+  onMapContextZoomHouseHere(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords || !this.map) return;
-    this.map.setView([coords.lat, coords.lng], this.map.getZoom());
+    this.map.setView([coords.lat, coords.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
     this.closeContextMenus();
   }
 
-  async onMapContextCopyCoordinates(): Promise<void> {
+  onMapContextZoomStreetHere(): void {
+    const coords = this.mapContextMenuCoords();
+    if (!coords || !this.map) return;
+    this.map.setView([coords.lat, coords.lng], MapShellComponent.STREET_PROXIMITY_ZOOM);
+    this.closeContextMenus();
+  }
+
+  async onMapContextCopyAddress(): Promise<void> {
+    const coords = this.mapContextMenuCoords();
+    if (!coords) return;
+
+    const copied = await this.copyAddressFromCoords(coords.lat, coords.lng);
+    if (copied) {
+      this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
+    } else {
+      this.toastService.show({
+        message: 'Adresse konnte nicht aufgeloest werden.',
+        type: 'warning',
+        dedupe: true,
+      });
+    }
+    this.closeContextMenus();
+  }
+
+  async onMapContextCopyGps(): Promise<void> {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
     const text = `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
     const copied = await this.copyTextToClipboard(text);
     this.toastService.show({
-      message: copied ? 'Koordinaten kopiert.' : text,
+      message: copied ? 'GPS kopiert.' : text,
       type: copied ? 'success' : 'info',
       dedupe: true,
     });
     this.closeContextMenus();
+  }
+
+  onMapContextOpenGoogleMaps(): void {
+    const coords = this.mapContextMenuCoords();
+    if (!coords || typeof window === 'undefined') return;
+    const url = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    this.closeContextMenus();
+  }
+
+  // Backwards-compatible wrappers kept for existing tests and call sites.
+  onMapContextCenterHere(): void {
+    this.onMapContextZoomStreetHere();
+  }
+
+  async onMapContextCopyCoordinates(): Promise<void> {
+    await this.onMapContextCopyGps();
   }
 
   async onMapContextStartRadiusFromHere(): Promise<void> {
@@ -562,6 +609,47 @@ export class MapShellComponent implements OnDestroy {
     this.addRadiusSelectionVisual(center, radiusMeters, edge);
     await this.selectRadiusImages(center, radiusMeters, false);
     this.closeContextMenus();
+  }
+
+  async onRadiusContextCreateProjectFromSelection(): Promise<void> {
+    const project = await this.promptProjectSelection();
+    if (!project) {
+      this.closeContextMenus();
+      return;
+    }
+
+    const imageIds = this.workspaceViewService.rawImages().map((img) => img.id);
+    if (imageIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Medien in Radius-Auswahl verfuegbar.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.closeContextMenus();
+      return;
+    }
+
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({ project_id: project.id })
+      .in('id', imageIds);
+
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+      this.closeContextMenus();
+      return;
+    }
+
+    this.toastService.show({
+      message: `${imageIds.length} Medien dem Projekt "${project.name}" zugewiesen.`,
+      type: 'success',
+      dedupe: true,
+    });
+    this.closeContextMenus();
+  }
+
+  async onRadiusContextAssignToProject(): Promise<void> {
+    await this.onRadiusContextCreateProjectFromSelection();
   }
 
   get markerContextIsSingle(): boolean {
@@ -592,28 +680,104 @@ export class MapShellComponent implements OnDestroy {
     this.closeContextMenus();
   }
 
-  onMarkerContextAddToGroup(): void {
+  async onMarkerContextAssignToProject(): Promise<void> {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
+
+    const project = await this.promptProjectSelection();
+    if (!project) {
+      this.closeContextMenus();
+      return;
+    }
+
+    const imageIds = await this.resolveMarkerContextImageIds(payload);
+    if (imageIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Medien fuer Projektzuweisung gefunden.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.closeContextMenus();
+      return;
+    }
+
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .update({ project_id: project.id })
+      .in('id', imageIds);
+
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+      this.closeContextMenus();
+      return;
+    }
+
     this.toastService.show({
-      message: 'Zu Gruppe hinzufügen folgt im nächsten Schritt.',
-      type: 'info',
+      message:
+        imageIds.length === 1
+          ? `Zum Projekt \"${project.name}\" zugewiesen.`
+          : `${imageIds.length} Medien dem Projekt \"${project.name}\" zugewiesen.`,
+      type: 'success',
       dedupe: true,
     });
     this.closeContextMenus();
   }
 
-  async onMarkerContextCopyCoordinates(): Promise<void> {
+  onMarkerContextZoomHouse(): void {
+    const payload = this.markerContextMenuPayload();
+    if (!payload || !this.map) return;
+    this.map.setView([payload.lat, payload.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
+    this.closeContextMenus();
+  }
+
+  onMarkerContextZoomStreet(): void {
+    const payload = this.markerContextMenuPayload();
+    if (!payload || !this.map) return;
+    this.map.setView([payload.lat, payload.lng], MapShellComponent.STREET_PROXIMITY_ZOOM);
+    this.closeContextMenus();
+  }
+
+  async onMarkerContextCopyAddress(): Promise<void> {
+    const payload = this.markerContextMenuPayload();
+    if (!payload) return;
+
+    const copied = await this.copyAddressFromCoords(payload.lat, payload.lng);
+    if (copied) {
+      this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
+    } else {
+      this.toastService.show({
+        message: 'Adresse konnte nicht aufgeloest werden.',
+        type: 'warning',
+        dedupe: true,
+      });
+    }
+    this.closeContextMenus();
+  }
+
+  async onMarkerContextCopyGps(): Promise<void> {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
     const text = `${payload.lat.toFixed(6)}, ${payload.lng.toFixed(6)}`;
     const copied = await this.copyTextToClipboard(text);
     this.toastService.show({
-      message: copied ? 'Koordinaten kopiert.' : text,
+      message: copied ? 'GPS kopiert.' : text,
       type: copied ? 'success' : 'info',
       dedupe: true,
     });
     this.closeContextMenus();
+  }
+
+  onMarkerContextOpenGoogleMaps(): void {
+    const payload = this.markerContextMenuPayload();
+    if (!payload || typeof window === 'undefined') return;
+    const url = `https://www.google.com/maps?q=${payload.lat},${payload.lng}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    this.closeContextMenus();
+  }
+
+  // Backwards-compatible wrapper kept for existing tests/call sites.
+  async onMarkerContextCopyCoordinates(): Promise<void> {
+    await this.onMarkerContextCopyGps();
   }
 
   async onMarkerContextDeletePhoto(): Promise<void> {
@@ -1272,7 +1436,7 @@ export class MapShellComponent implements OnDestroy {
 
     const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
     this.pendingSecondaryPress = null;
-    this.openMapContextMenuAt(startLatLng, startClientX, startClientY);
+    this.openContextMenuForShortSecondaryClick(startLatLng, startClientX, startClientY);
   }
 
   private handleMapContextMenu(event: L.LeafletMouseEvent): void {
@@ -1291,7 +1455,27 @@ export class MapShellComponent implements OnDestroy {
 
     const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
     this.pendingSecondaryPress = null;
-    this.openMapContextMenuAt(startLatLng, startClientX, startClientY);
+    this.openContextMenuForShortSecondaryClick(startLatLng, startClientX, startClientY);
+  }
+
+  private openContextMenuForShortSecondaryClick(
+    latlng: L.LatLng,
+    clientX: number,
+    clientY: number,
+  ): void {
+    if (this.hasActiveRadiusSelection()) {
+      if (this.isInsideAnyCommittedRadius(latlng)) {
+        this.openRadiusContextMenuAt(latlng, clientX, clientY);
+        return;
+      }
+
+      this.clearActiveRadiusSelection();
+      this.closeContextMenus();
+      this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+      return;
+    }
+
+    this.openMapContextMenuAt(latlng, clientX, clientY);
   }
 
   private shouldAllowNativeContextMenu(event: MouseEvent): boolean {
@@ -2849,10 +3033,21 @@ export class MapShellComponent implements OnDestroy {
 
   private openMapContextMenuAt(latlng: L.LatLng, clientX: number, clientY: number): void {
     const position = this.clampContextMenuPosition(clientX, clientY);
+    this.radiusContextMenuOpen.set(false);
     this.markerContextMenuOpen.set(false);
     this.mapContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
     this.mapContextMenuPosition.set(position);
     this.mapContextMenuOpen.set(true);
+    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private openRadiusContextMenuAt(latlng: L.LatLng, clientX: number, clientY: number): void {
+    const position = this.clampContextMenuPosition(clientX, clientY);
+    this.mapContextMenuOpen.set(false);
+    this.markerContextMenuOpen.set(false);
+    this.radiusContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
+    this.radiusContextMenuPosition.set(position);
+    this.radiusContextMenuOpen.set(true);
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
@@ -2873,6 +3068,7 @@ export class MapShellComponent implements OnDestroy {
     const position = this.clampContextMenuPosition(x ?? 0, y ?? 0);
 
     this.mapContextMenuOpen.set(false);
+    this.radiusContextMenuOpen.set(false);
     this.markerContextMenuPosition.set(position);
     this.markerContextMenuPayload.set({
       markerKey,
@@ -2884,6 +3080,31 @@ export class MapShellComponent implements OnDestroy {
     });
     this.markerContextMenuOpen.set(true);
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private hasActiveRadiusSelection(): boolean {
+    return this.radiusCommittedVisuals.length > 0;
+  }
+
+  private isInsideAnyCommittedRadius(position: L.LatLng): boolean {
+    if (!this.map) {
+      return false;
+    }
+
+    return this.radiusCommittedVisuals.some((visual) => {
+      const center = visual.circle.getLatLng();
+      const radiusMeters = visual.circle.getRadius();
+      return this.map!.distance(center, position) <= radiusMeters;
+    });
+  }
+
+  private clearActiveRadiusSelection(): void {
+    this.clearRadiusSelectionVisuals();
+    this.setSelectedMarker(null);
+    this.setSelectedMarkerKeys(new Set());
+    this.detailImageId.set(null);
+    this.workspaceViewService.clearActiveSelection();
+    this.workspaceSelectionService.clearSelection();
   }
 
   private clampContextMenuPosition(x: number, y: number): { x: number; y: number } {
@@ -2911,6 +3132,71 @@ export class MapShellComponent implements OnDestroy {
     } catch {
       return false;
     }
+  }
+
+  private async copyAddressFromCoords(lat: number, lng: number): Promise<boolean> {
+    const reverse = await this.geocodingService.reverse(lat, lng);
+    const address = reverse?.addressLabel?.trim();
+    if (!address) {
+      return false;
+    }
+    return this.copyTextToClipboard(address);
+  }
+
+  private async promptProjectSelection(): Promise<{ id: string; name: string } | null> {
+    const { data, error } = await this.supabaseService.client
+      .from('projects')
+      .select('id,name')
+      .order('name', { ascending: true });
+
+    if (error || !Array.isArray(data) || data.length === 0) {
+      this.toastService.show({
+        message: 'Keine Projekte verfuegbar.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return null;
+    }
+
+    if (typeof window === 'undefined') {
+      return { id: data[0].id as string, name: (data[0].name as string) ?? 'Projekt' };
+    }
+
+    const lines = data.map((project, idx) => `${idx + 1}. ${project.name}`).join('\n');
+    const value = window.prompt(`Projekt auswaehlen:\n${lines}\n\nNummer eingeben:`);
+    if (!value) {
+      return null;
+    }
+
+    const selectedIndex = Number.parseInt(value, 10) - 1;
+    const selected = Number.isFinite(selectedIndex) ? data[selectedIndex] : undefined;
+    if (!selected) {
+      this.toastService.show({
+        message: 'Ungueltige Projektauswahl.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return null;
+    }
+
+    return {
+      id: selected.id as string,
+      name: (selected.name as string) ?? 'Projekt',
+    };
+  }
+
+  private async resolveMarkerContextImageIds(payload: {
+    count: number;
+    imageId?: string;
+    sourceCells: Array<{ lat: number; lng: number }>;
+  }): Promise<string[]> {
+    if (payload.count === 1 && payload.imageId) {
+      return [payload.imageId];
+    }
+
+    const zoom = this.map?.getZoom() ?? 13;
+    const images = await this.workspaceViewService.fetchClusterImages(payload.sourceCells, zoom);
+    return images.map((img) => img.id);
   }
 
   private offsetLatLngEast(center: L.LatLng, meters: number): L.LatLng {

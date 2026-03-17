@@ -1,12 +1,13 @@
 # Photo Marker Context Menu
 
 > **Use cases:** [use-cases/photo-marker-context-menu.md](../use-cases/photo-marker-context-menu.md)
+> **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
 
 ## What It Is
 
 A contextual action menu opened on a photo marker (single image or cluster) via right-click on desktop or long-press on touch. It enables marker-scoped actions without navigating away from the map.
 
-Primary use cases are: quick inspection (`Open details` / `Open selection`), fast focus zoom (`house` / `street` proximity), project assignment (`Projekt hinzufuegen`), utility copy/open actions (`Adresse`, `GPS`, `Google Maps`), and destructive cleanup (`Delete photo` for single-image markers only).
+Primary use cases are: quick inspection (`Details oeffnen` / `Auswahl oeffnen`), fast focus zoom (`house` / `street` proximity), project assignment (`Projekt hinzufuegen`), utility copy/open actions (`Adresse`, `GPS`, `Google Maps`), and destructive cleanup (`Foto loeschen` for single-image markers only).
 
 ## What It Looks Like
 
@@ -26,15 +27,15 @@ For cluster markers, the menu header shows a compact summary (for example: `12 p
 | --- | ------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
 | 1   | Right-clicks single marker (desktop)              | Opens marker context menu anchored to marker             | marker target hit-test                               |
 | 2   | Long-presses single marker (mobile)               | Opens action-sheet marker menu                           | touch long-press recognizer                          |
-| 3   | Selects `Open Details` (single)                   | Opens Workspace Pane and focuses image detail            | selection + detail routing state                     |
-| 4   | Selects `Open Selection` (cluster)                | Loads cluster images into Active Selection               | `WorkspaceViewService.fetchClusterImages(...)`       |
+| 3   | Selects `Details oeffnen` (single)                | Opens Workspace Pane and focuses image detail            | selection + detail routing state                     |
+| 4   | Selects `Auswahl oeffnen` (cluster)               | Loads cluster images into Active Selection               | `WorkspaceViewService.fetchClusterImages(...)`       |
 | 5   | Selects `Hierhin zoomen (Hausnaehe)`              | Centers marker and zooms to building-level context       | `MapAdapter.setView(markerLatLng, 19)`               |
 | 6   | Selects `Hierhin zoomen (Strassennaehe)`          | Centers marker and zooms to street-level context         | `MapAdapter.setView(markerLatLng, 17)`               |
 | 7   | Selects `Projekt hinzufuegen...`                  | Opens project assignment flow for selected marker images | project assignment UI                                |
 | 8   | Selects `Adresse kopieren`                        | Resolves marker address and copies to clipboard          | `GeocodingService.reverse()` + clipboard             |
 | 9   | Selects `GPS kopieren`                            | Copies marker lat/lng and shows success toast            | clipboard + toast                                    |
 | 10  | Selects `In Google Maps oeffnen`                  | Opens a new browser tab at marker coordinates            | `window.open(https://www.google.com/maps?q=lat,lng)` |
-| 11  | Selects `Delete Photo` (single only)              | Opens confirmation, then deletes image on confirm        | delete flow                                          |
+| 11  | Selects `Foto loeschen` (single only)             | Opens confirmation, then deletes image on confirm        | delete flow                                          |
 | 12  | Clicks outside / presses Escape / taps backdrop   | Closes menu without side effects                         | dismiss handler                                      |
 | 13  | Starts drag instead of long-press hold completion | Cancels menu and continues map gesture                   | gesture arbitration                                  |
 
@@ -45,8 +46,8 @@ PhotoMarkerContextMenuHost (owned by MapShellComponent)
 ├── [desktop] MarkerContextPopover                   ← anchored to marker screen point
 │   ├── MarkerContextHeader                          ← thumbnail/count summary
 │   └── .dd-items
-│       ├── .dd-item "Open Details" (single)
-│       ├── .dd-item "Open Selection" (cluster)
+│       ├── .dd-item "Details oeffnen" (single)
+│       ├── .dd-item "Auswahl oeffnen" (cluster)
 │       ├── .dd-item "Hierhin zoomen (Hausnaehe)"
 │       ├── .dd-item "Hierhin zoomen (Strassennaehe)"
 │       ├── .dd-item "Projekt hinzufuegen..."
@@ -54,7 +55,7 @@ PhotoMarkerContextMenuHost (owned by MapShellComponent)
 │       ├── .dd-item "GPS kopieren"
 │       ├── .dd-item "In Google Maps oeffnen"
 │       ├── .dd-divider
-│       └── .dd-item.dd-item--danger "Delete Photo" (single only)
+│       └── .dd-item.dd-item--danger "Foto loeschen" (single only)
 ├── [mobile] MarkerContextActionSheet                ← same actions as popover, touch-safe
 └── MarkerContextBackdrop                            ← outside click/tap close
 ```
@@ -69,9 +70,9 @@ flowchart LR
   MA --> MS[MapShellComponent]
   MS --> MCM[Photo Marker Context Menu]
   MCM --> T{Marker type}
-  T -->|single| OD[Open Details]
-  T -->|cluster| OS[Open Selection]
-  T -->|single| DP[Delete Photo]
+  T -->|single| OD[Details oeffnen]
+  T -->|cluster| OS[Auswahl oeffnen]
+  T -->|single| DP[Foto loeschen]
   MCM --> ZH[Zoom house proximity]
   MCM --> ZS[Zoom street proximity]
   MCM --> AP[Add to project]
@@ -140,11 +141,11 @@ sequenceDiagram
   MS-->>MS: suppress map context menu
   MS->>MS: open marker context menu
   U->>MS: choose action
-  alt Open Selection (cluster)
+  alt Auswahl oeffnen (cluster)
     MS->>WVS: fetchClusterImages(cells, zoom)
     WVS-->>MS: images[]
     MS->>MS: set Active Selection
-  else Open Details (single)
+  else Details oeffnen (single)
     MS->>MS: select image + focus detail view
   else Projekt hinzufuegen
     MS->>MS: open project assignment dialog
@@ -156,7 +157,7 @@ sequenceDiagram
     MS->>MS: copy lat,lng + toast
   else In Google Maps oeffnen
     MS->>BR: window.open("https://www.google.com/maps?q=lat,lng")
-  else Delete Photo (single)
+  else Foto loeschen (single)
     MS->>SS: delete image
     SS-->>MS: success
     MS->>MS: refresh visible markers
@@ -171,14 +172,14 @@ sequenceDiagram
 
 - [ ] Right-click on a single marker opens marker context menu at marker position.
 - [ ] Long-press on a single marker opens the mobile action-sheet variant.
-- [ ] Cluster marker menu shows `Open Selection` and hides single-only actions.
-- [ ] `Open Details` focuses the selected image in the Workspace Pane.
+- [ ] Cluster marker menu shows `Auswahl oeffnen` and hides single-only actions.
+- [ ] `Details oeffnen` focuses the selected image in the Workspace Pane.
 - [ ] `Hierhin zoomen (Hausnaehe)` centers marker and zooms to building-level context.
 - [ ] `Hierhin zoomen (Strassennaehe)` centers marker and zooms to street-level context.
 - [ ] `Projekt hinzufuegen...` opens project assignment flow for marker image set.
 - [ ] `Adresse kopieren` copies a resolved address for marker coordinates.
 - [ ] `GPS kopieren` copies coordinates and shows success feedback.
 - [ ] `In Google Maps oeffnen` opens a new tab with marker coordinates.
-- [ ] `Delete Photo` appears only for single markers and requires confirmation.
+- [ ] `Foto loeschen` appears only for single markers and requires confirmation.
 - [ ] Clicking outside, backdrop tap, and Escape close the menu.
 - [ ] Marker menu wins over map menu when right-click target is a marker.

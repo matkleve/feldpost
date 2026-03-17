@@ -14,7 +14,7 @@ import type {
 
 const DEFAULT_SORTS: SortConfig[] = [{ key: 'date-captured', direction: 'desc' }];
 const THUMBNAIL_SIZE_PRESET_STORAGE_KEY = 'sitesnap.settings.workspace.thumbnailSizePreset';
-const THUMBNAIL_SIZE_PRESETS: readonly ThumbnailSizePreset[] = ['small', 'medium', 'large'];
+const THUMBNAIL_SIZE_PRESETS: readonly ThumbnailSizePreset[] = ['row', 'small', 'medium', 'large'];
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceViewService {
@@ -440,6 +440,7 @@ export class WorkspaceViewService {
     if (typeof window === 'undefined') return 'medium';
     const raw = window.localStorage.getItem(THUMBNAIL_SIZE_PRESET_STORAGE_KEY);
     if (!raw) return 'medium';
+    if (raw === 'hero') return 'large';
     return THUMBNAIL_SIZE_PRESETS.includes(raw as ThumbnailSizePreset)
       ? (raw as ThumbnailSizePreset)
       : 'medium';

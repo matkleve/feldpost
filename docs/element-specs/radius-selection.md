@@ -1,6 +1,7 @@
 # Radius Selection
 
 > **Blueprint:** [implementation-blueprints/radius-selection.md](../implementation-blueprints/radius-selection.md)
+> **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
 
 ## What It Is
 
@@ -23,17 +24,17 @@ A semi-transparent circle overlay on the map with a `--color-clay` stroke (2px) 
 | 2   | Releases mouse                          | Circle committed, becomes active filter                         | `FilterService.setRadiusFilter()` |
 | 3   | Drags edge handle                       | Resizes the circle radius                                       | Filter updated, map re-queries    |
 | 4   | Drags center point                      | Moves the entire circle                                         | Filter updated, map re-queries    |
-| 5   | Right-click inside active radius        | Opens Radius Context Menu with group-focused actions            | Hit-test inside radius polygon    |
-| 6   | Chooses `Neue Gruppe aus Radius`        | Creates a named group from current in-radius media              | Existing group creation flow      |
-| 7   | Chooses `Zu Gruppe hinzufuegen...`      | Opens existing group picker and appends all in-radius media     | Existing add-to-group flow        |
+| 5   | Right-click inside active radius        | Opens Radius Context Menu with project-focused actions          | Hit-test inside radius polygon    |
+| 6   | Chooses `Neues Projekt aus Radius`      | Creates a named project from current in-radius media            | Existing project creation flow    |
+| 7   | Chooses `Zu Projekt zuweisen...`        | Opens existing project picker and assigns all in-radius media   | Existing assign-to-project flow   |
 | 8   | Short right-click outside active radius | Closes radius selection immediately (no map menu on same click) | Outside-radius secondary click    |
 | 9   | Clicks × on radius filter chip          | Removes the circle and radius filter                            | Circle removed from map           |
 | 10  | Long-press + drag (mobile)              | Same as right-click + drag                                      | Circle overlay drawn              |
 
 ### Interaction Rationale
 
-- **Inside-radius menu gets group actions first**: Users selecting by radius are usually in curation mode; group operations are the next likely step.
-- **Reuse existing group verbs**: `Neue Gruppe aus Radius` and `Zu Gruppe hinzufuegen...` mirror existing group workflows and reduce new UI concepts.
+- **Inside-radius menu gets project actions first**: Users selecting by radius are usually in curation mode; project assignment is the next likely step.
+- **Reuse existing project verbs**: `Neues Projekt aus Radius` and `Zu Projekt zuweisen...` mirror existing project workflows and reduce new UI concepts.
 - **Outside short right-click closes radius**: Fast "dismiss" gesture prevents accidental stale spatial filters and keeps map cleanup one click away.
 - **No same-click menu reopen outside radius**: Avoids conflicting intent (dismiss vs open) and reduces surprise.
 
@@ -77,7 +78,7 @@ sequenceDiagram
   participant FS as FilterService
   participant AFC as ActiveFilterChips
   participant RCM as RadiusContextMenu
-  participant G as GroupFlows
+  participant P as ProjectFlows
 
   U->>MA: Secondary press on empty map
   MA->>MS: radiusGestureIntent(startPoint, movedPx)
@@ -93,11 +94,11 @@ sequenceDiagram
 
   U->>MA: Right-click inside active radius
   MA->>MS: secondaryClickInsideRadius(latlng)
-  MS->>RCM: open group-first radius menu
-  alt Neue Gruppe aus Radius
-    RCM->>G: createGroupFromRadiusSelection()
-  else Zu Gruppe hinzufuegen
-    RCM->>G: addRadiusSelectionToExistingGroup()
+  MS->>RCM: open project-first radius menu
+  alt Neues Projekt aus Radius
+    RCM->>P: createProjectFromRadiusSelection()
+  else Zu Projekt zuweisen
+    RCM->>P: assignRadiusSelectionToExistingProject()
   end
 
   U->>MA: Short right-click outside active radius
@@ -111,7 +112,7 @@ sequenceDiagram
 - `FilterService` includes radius in spatial queries
 - Removing the Active Filter Chip for radius also removes the map circle
 - Only one radius selection active at a time
-- Inside active radius, context actions prioritize group workflows
+- Inside active radius, context actions prioritize project workflows
 - Short outside right-click acts as explicit radius-dismiss gesture
 
 ## Acceptance Criteria
@@ -122,9 +123,9 @@ sequenceDiagram
 - [ ] Radius label shown near the edge
 - [ ] Edge handle allows resizing after commit
 - [ ] Center dot allows repositioning after commit
-- [ ] Right-click inside active radius opens Radius Context Menu with group actions.
-- [ ] `Neue Gruppe aus Radius` creates a group from the in-radius result set.
-- [ ] `Zu Gruppe hinzufuegen...` appends in-radius result set to an existing group.
+- [ ] Right-click inside active radius opens Radius Context Menu with project actions.
+- [ ] `Neues Projekt aus Radius` creates a project from the in-radius result set.
+- [ ] `Zu Projekt zuweisen...` assigns in-radius result set to an existing project.
 - [ ] Short right-click outside active radius closes radius filter immediately.
 - [ ] Radius filter integrates with `FilterService` and Active Filter Chips
 - [ ] Removing the chip removes the circle

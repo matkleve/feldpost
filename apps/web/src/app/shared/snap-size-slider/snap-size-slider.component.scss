@@ -1,63 +1,48 @@
 .snap-size-slider {
-  display: grid;
-  gap: var(--spacing-1);
-  min-inline-size: 10.5rem;
-}
-
-.snap-size-slider__label {
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  line-height: 1.2;
-}
-
-.snap-size-slider__range {
-  inline-size: 100%;
-  accent-color: var(--color-clay);
-  cursor: pointer;
+  min-inline-size: 11rem;
 }
 
 .snap-size-slider__steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--spacing-1);
+  display: inline-grid;
+  grid-template-columns: repeat(var(--snap-option-count, 3), minmax(0, 1fr));
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  padding: 0.25rem;
 }
 
 .snap-size-slider__step {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
+  inline-size: 2rem;
+  block-size: 2rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 0.6875rem;
-  line-height: 1.1;
-  padding: var(--spacing-1) 0;
   cursor: pointer;
   transition:
     border-color 150ms ease,
     color 150ms ease,
-    background 150ms ease;
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .snap-size-slider__step-icon {
-  font-size: 0.8rem;
-  line-height: 1;
-}
-
-.snap-size-slider__step-text {
+  font-size: 1rem;
   line-height: 1;
 }
 
 .snap-size-slider__step:hover {
-  border-color: var(--color-clay);
+  border-color: var(--color-border);
   color: var(--color-text-primary);
 }
 
 .snap-size-slider__step--active {
   border-color: var(--color-clay);
-  background: color-mix(in srgb, var(--color-clay) 16%, transparent);
+  background: color-mix(in srgb, var(--color-clay) 32%, transparent);
   color: var(--color-text-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-clay) 40%, transparent);
 }

@@ -65,4 +65,4 @@ export interface FilterRule {
 }
 
 /** Discrete thumbnail size presets used by snap-slider controls. */
-export type ThumbnailSizePreset = 'small' | 'medium' | 'large';
+export type ThumbnailSizePreset = 'row' | 'small' | 'medium' | 'large';
