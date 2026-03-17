@@ -1,8 +1,9 @@
 -- Feldpost: DSGVO/Security verification helpers
 -- Scope: post-migration validation after storage orphan cleanup rollout
 
--- 1) Trigger one cleanup run (P0-4 evidence)
-select public.run_storage_cleanup_job(1000) as run_id;
+-- 1) Run cleanup via Storage API (outside SQL):
+--    node scripts/cleanup-storage-orphans.mjs 1000
+--    This script creates one row in public.storage_cleanup_runs.
 
 -- 2) Show latest cleanup runs
 select id, started_at, finished_at, deleted_count, status, error_message
@@ -25,3 +26,7 @@ where o.bucket_id = 'images'
 select jobid, jobname, schedule, active, command
 from cron.job
 where jobname = 'cleanup-storage-orphans-hourly';
+
+-- 5) Optional: preview candidate orphan paths (API cleanup source)
+select *
+from public.list_orphaned_storage_paths(50);

@@ -91,12 +91,13 @@ Validation:
 Migration `supabase/migrations/20260318130000_storage_orphan_cleanup_job.sql` adds:
 
 - `public.storage_cleanup_runs` audit table
-- `public.run_storage_cleanup_job(p_limit int)` execution function
-- Optional hourly `pg_cron` schedule (`cleanup-storage-orphans-hourly`) when `pg_cron` is available
+- API-mode discovery function (`public.list_orphaned_storage_paths`) is added via `20260318143000_storage_cleanup_api_mode.sql`
+- Cleanup execution script: `node scripts/cleanup-storage-orphans.mjs 1000`
 
 Validation:
 
 - [ ] `select * from public.storage_cleanup_runs order by started_at desc limit 5;` returns recent runs.
+- [ ] `node scripts/cleanup-storage-orphans.mjs 1000` succeeds.
 - [ ] Orphaned objects in `storage.objects` for bucket `images` are deleted and counted in `deleted_count`.
 
 ## 9. P0 verification quick path

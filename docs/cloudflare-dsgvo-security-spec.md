@@ -46,6 +46,9 @@ Repository references:
 - User lifecycle + deletion flow: `docs/user-lifecycle.md`
 - Cloudflare runbook: `docs/cloudflare-deployment-security-runbook.md`
 - Storage cleanup migration: `supabase/migrations/20260318130000_storage_orphan_cleanup_job.sql`
+- Storage cleanup API-mode migration: `supabase/migrations/20260318143000_storage_cleanup_api_mode.sql`
+- Storage cleanup runner guard migration: `supabase/migrations/20260318144000_storage_cleanup_runner_api_only.sql`
+- Storage cleanup script: `scripts/cleanup-storage-orphans.mjs`
 - Share-token hash hardening migration: `supabase/migrations/20260318140000_share_set_token_sha256.sql`
 
 ---
@@ -121,7 +124,10 @@ Repository references:
 ### 4.2 Latest Verification Update
 
 - 2026-03-17: Migration push for `20260318140000_share_set_token_sha256.sql` completed successfully.
-- Remaining for full P0-4 verification: execute cleanup run and store SQL evidence from `storage_cleanup_runs`.
+- 2026-03-17: Migration push for `20260318143000_storage_cleanup_api_mode.sql` and `20260318144000_storage_cleanup_runner_api_only.sql` completed successfully.
+- 2026-03-17: Current `storage_cleanup_runs` evidence query returned `[]` (no run recorded yet).
+- 2026-03-17: Current orphan backlog is `47` objects in bucket `images`.
+- Remaining for full P0-4 verification: execute `node scripts/cleanup-storage-orphans.mjs 1000` and store SQL evidence from `storage_cleanup_runs`.
 
 ---
 
@@ -185,16 +191,20 @@ Repository references:
 
 - `scripts/validate-dsgvo-security.sql`
 
-2. Capture HTTP response headers from production domain.
-3. Run geocode deny/allow checks:
+2. Run API-based orphan cleanup:
+
+- `node scripts/cleanup-storage-orphans.mjs 1000`
+
+3. Capture HTTP response headers from production domain.
+4. Run geocode deny/allow checks:
 
 - deny from unallowlisted origin
 - deny without JWT
 - allow with valid JWT from allowlisted origin
 
-4. Execute org-isolation and viewer write-block tests with two users.
-5. Attach Cloudflare and Supabase DPA/SCC/subprocessor links.
-6. Update this spec's checklist and sign-off block.
+5. Execute org-isolation and viewer write-block tests with two users.
+6. Attach Cloudflare and Supabase DPA/SCC/subprocessor links.
+7. Update this spec's checklist and sign-off block.
 
 ---
 
