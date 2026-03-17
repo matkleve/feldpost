@@ -104,7 +104,7 @@ Repository references:
 
 - [ ] [P0-4] Storage orphan cleanup is operational:
   - [x] migration applied
-  - [ ] at least one successful run recorded in `storage_cleanup_runs`
+  - [x] at least one successful run recorded in `storage_cleanup_runs`
 
 - [ ] [P0-5] RLS/storage org-isolation tests pass for two users in different organizations.
 
@@ -117,7 +117,7 @@ Repository references:
 | P0-1 | Cloudflare security headers               | Yes         | No       | Curl/header output in release notes  |
 | P0-2 | geocode JWT + fail-closed CORS            | Yes         | No       | Endpoint denial/allow test output    |
 | P0-3 | ALLOWED_ORIGINS configured                | No          | No       | Screenshot/export of function secret |
-| P0-4 | Storage orphan cleanup operational        | Yes         | No       | `storage_cleanup_runs` SQL output    |
+| P0-4 | Storage orphan cleanup operational        | Yes         | Yes      | `storage_cleanup_runs` SQL output    |
 | P0-5 | Cross-org RLS/storage isolation           | Yes         | No       | Test notes with actor/results        |
 | P0-6 | Processor governance (DPA/SCC/subprocess) | No          | No       | Linked documents in release notes    |
 
@@ -125,9 +125,9 @@ Repository references:
 
 - 2026-03-17: Migration push for `20260318140000_share_set_token_sha256.sql` completed successfully.
 - 2026-03-17: Migration push for `20260318143000_storage_cleanup_api_mode.sql` and `20260318144000_storage_cleanup_runner_api_only.sql` completed successfully.
-- 2026-03-17: Current `storage_cleanup_runs` evidence query returned `[]` (no run recorded yet).
-- 2026-03-17: Current orphan backlog is `47` objects in bucket `images`.
-- Remaining for full P0-4 verification: execute `node scripts/cleanup-storage-orphans.mjs 1000` and store SQL evidence from `storage_cleanup_runs`.
+- 2026-03-17: API cleanup executed successfully via `node scripts/cleanup-storage-orphans.mjs 1000`.
+- 2026-03-17: Evidence run `id=2`, `status=success`, `deleted_count=47`, `error_message=null`.
+- 2026-03-17: Post-run orphan backlog is `0` objects in bucket `images`.
 
 ---
 

@@ -25,6 +25,7 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 | 5   | Clicks Retry                               | Re-runs profile/preference load and returns to loading state                | Retry button in error state           |
 | 6   | Selects section in left list               | Right detail area switches to selected section component                    | `selectedSectionId` signal update     |
 | 7   | Selects `Konto` section                    | Renders identity info and account-session actions (`Logout`)                | account section selection             |
+| 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status     | shortcuts section selection           |
 | 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                 | Backdrop click / Escape key           |
 | 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing               | sidebar expansion signal              |
 
@@ -208,3 +209,4 @@ sequenceDiagram
 - **Custom Properties**: organization metadata key configuration defaults.
 - **Map Preferences**: map tile and map-behavior defaults.
 - **Workspace Sort Defaults**: default sorting and ordering preferences.
+- **Interaction & Shortcuts**: grouped keyboard shortcut reference by category, including implementation status visibility.

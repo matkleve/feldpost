@@ -101,6 +101,8 @@ sequenceDiagram
     GR->>MS: open marker context menu
   else target = empty map and drag >= 8px
     GR->>MS: start/continue radius selection
+  else target = empty map and second right-click handshake matches
+    GR->>MS: allow native browser context menu (skip preventDefault)
   else target = empty map and no drag
     GR->>MS: open map context menu
   end

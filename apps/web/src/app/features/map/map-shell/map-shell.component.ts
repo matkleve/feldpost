@@ -90,6 +90,9 @@ export class MapShellComponent implements OnDestroy {
   private static readonly RADIUS_SELECTION_MIN_METERS = 10;
   private static readonly RADIUS_CLICK_GUARD_MS = 220;
   private static readonly CONTEXT_MENU_DRAG_THRESHOLD_PX = 8;
+  private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_MS = 2000;
+  private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_PX = 24;
+  private static readonly CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
   private static readonly QUICK_RADIUS_METERS = 250;
   private static readonly MARKER_LONG_PRESS_MS = 500;
 
@@ -285,6 +288,9 @@ export class MapShellComponent implements OnDestroy {
     imageId?: string;
     sourceCells: Array<{ lat: number; lng: number }>;
   } | null>(null);
+  readonly draftMediaMarker = signal<{ lat: number; lng: number; uploadCount: number } | null>(
+    null,
+  );
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
@@ -312,6 +318,7 @@ export class MapShellComponent implements OnDestroy {
 
   private userLocationMarker: L.Marker | null = null;
   private searchLocationMarker: L.Marker | null = null;
+  private draftMediaMarkerLeaflet: L.Marker | null = null;
   private readonly uploadedPhotoMarkers = new Map<
     string,
     {
@@ -373,6 +380,8 @@ export class MapShellComponent implements OnDestroy {
   private pendingSecondaryPress: {
     startPoint: L.Point;
     startLatLng: L.LatLng;
+    startClientX: number;
+    startClientY: number;
     additive: boolean;
   } | null = null;
   private radiusDraftHighlightedKeys = new Set<string>();
@@ -382,6 +391,9 @@ export class MapShellComponent implements OnDestroy {
     centerDot: L.CircleMarker;
   }> = [];
   private suppressMapClickUntil = 0;
+  private lastSecondaryContextClickAt: number | null = null;
+  private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
+  private nativeContextMenuBypassUntil = 0;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -408,6 +420,22 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
     this.markerMotionPreference.set(this.readMarkerMotionPreference());
+  };
+  private readonly mapContainerContextMenuHandler = (event: MouseEvent): void => {
+    if (event.button !== 2) {
+      return;
+    }
+
+    if (this.shouldAllowNativeContextMenu(event)) {
+      this.nativeContextMenuBypassUntil =
+        Date.now() + MapShellComponent.CONTEXT_MENU_NATIVE_BYPASS_TTL_MS;
+      this.pendingSecondaryPress = null;
+      this.closeContextMenus();
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   /** Subscriptions for upload manager events — cleaned up in ngOnDestroy. */
@@ -458,11 +486,16 @@ export class MapShellComponent implements OnDestroy {
     this.uploadManagerSubs = [];
     this.userLocationMarker?.remove();
     this.userLocationMarker = null;
+    this.removeDraftMediaMarker();
     this.clearSearchLocationMarker();
     this.cancelRadiusDrawing();
     this.pendingSecondaryPress = null;
     this.closeContextMenus();
     this.clearRadiusSelectionVisuals();
+    const mapContainer = this.map?.getContainer();
+    if (mapContainer) {
+      mapContainer.removeEventListener('contextmenu', this.mapContainerContextMenuHandler, true);
+    }
     this.map?.remove();
   }
 
@@ -474,11 +507,26 @@ export class MapShellComponent implements OnDestroy {
   onMapContextCreateMarkerHere(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
-    this.renderOrUpdateSearchLocationMarker([coords.lat, coords.lng]);
+    this.draftMediaMarker.set({ lat: coords.lat, lng: coords.lng, uploadCount: 0 });
+    this.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
     this.searchPlacementActive.set(false);
     this.placementActive.set(false);
+    if (!this.photoPanelOpen()) {
+      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+    }
+    this.photoPanelOpen.set(true);
+    this.detailImageId.set(null);
+    this.setSelectedMarker(null);
+    this.setSelectedMarkerKeys(new Set());
+    this.workspaceViewService.clearActiveSelection();
+    this.workspaceSelectionService.clearSelection();
+    this.uploadPanelPinned.set(true);
     this.map?.getContainer().classList.remove('map-container--placing');
-    this.toastService.show({ message: 'Marker hier erstellt.', type: 'success', dedupe: true });
+    this.toastService.show({
+      message: 'Media Marker erstellt. Upload starten.',
+      type: 'success',
+      dedupe: true,
+    });
     this.closeContextMenus();
   }
 
@@ -630,6 +678,9 @@ export class MapShellComponent implements OnDestroy {
 
   /** Closes the workspace pane entirely and clears selection state. */
   closeWorkspacePane(): void {
+    if ((this.draftMediaMarker()?.uploadCount ?? 0) === 0) {
+      this.removeDraftMediaMarker();
+    }
     this.photoPanelOpen.set(false);
     this.detailImageId.set(null);
     this.setSelectedMarker(null);
@@ -688,10 +739,20 @@ export class MapShellComponent implements OnDestroy {
   onImageUploaded(event: ImageUploadedEvent): void {
     if (!this.map) return;
     this.upsertUploadedPhotoMarker(event);
+    this.resolveDraftMediaMarkerUpload(event);
   }
 
   /** Enters placement mode for a file with no GPS EXIF data. */
   enterPlacementMode(key: string): void {
+    const draft = this.draftMediaMarker();
+    if (draft) {
+      const panel = this.uploadPanelChild();
+      if (panel) {
+        panel.placeFile(key, { lat: draft.lat, lng: draft.lng });
+        return;
+      }
+    }
+
     this.pendingPlacementKey = key;
     this.placementActive.set(true);
     this.map?.getContainer().classList.add('map-container--placing');
@@ -844,9 +905,13 @@ export class MapShellComponent implements OnDestroy {
     this.map.on('mousedown', (e: L.LeafletMouseEvent) => this.handleMapMouseDown(e));
     this.map.on('mousemove', (e: L.LeafletMouseEvent) => this.handleMapMouseMove(e));
     this.map.on('mouseup', (e: L.LeafletMouseEvent) => this.handleMapMouseUp(e));
-    this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
-      e.originalEvent.preventDefault();
-    });
+    this.map.on('contextmenu', (e: L.LeafletMouseEvent) => this.handleMapContextMenu(e));
+
+    // Capture-phase suppression ensures the native browser menu never opens
+    // above the custom app context menu.
+    this.map
+      .getContainer()
+      .addEventListener('contextmenu', this.mapContainerContextMenuHandler, true);
 
     // Suppress viewport queries during zoom animation to avoid rapid
     // fire-and-cancel cycles that cause visible lag.
@@ -1104,6 +1169,20 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
+    const activeDraft = this.draftMediaMarker();
+    if (
+      isPrimaryClick &&
+      activeDraft &&
+      activeDraft.uploadCount === 0 &&
+      !this.pendingPlacementKey &&
+      !this.searchPlacementActive()
+    ) {
+      this.uploadPanelPinned.set(false);
+      this.removeDraftMediaMarker();
+      this.closeWorkspacePane();
+      return;
+    }
+
     if (this.pendingPlacementKey) {
       // Prevent accidental placement immediately after drag/pan movement.
       if (Date.now() - this.lastMapMoveAt < MapShellComponent.PLACEMENT_CLICK_GUARD_MS) {
@@ -1151,6 +1230,8 @@ export class MapShellComponent implements OnDestroy {
     this.pendingSecondaryPress = {
       startPoint: this.map.mouseEventToContainerPoint(event.originalEvent),
       startLatLng: event.latlng,
+      startClientX: event.originalEvent.clientX,
+      startClientY: event.originalEvent.clientY,
       additive: !!(event.originalEvent.ctrlKey || event.originalEvent.metaKey),
     };
     this.closeContextMenus();
@@ -1183,17 +1264,70 @@ export class MapShellComponent implements OnDestroy {
 
     event.originalEvent.preventDefault();
 
-    if (this.radiusDrawActive) {
+    // Short secondary click should open the context menu. Radius drawing already
+    // clears pendingSecondaryPress during mousemove once drag threshold is crossed.
+    if (!this.pendingSecondaryPress || this.radiusDrawActive) {
       return;
     }
 
-    if (!this.pendingSecondaryPress) {
-      return;
-    }
-
-    const { startLatLng } = this.pendingSecondaryPress;
+    const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
     this.pendingSecondaryPress = null;
-    this.openMapContextMenuAt(startLatLng, event.originalEvent);
+    this.openMapContextMenuAt(startLatLng, startClientX, startClientY);
+  }
+
+  private handleMapContextMenu(event: L.LeafletMouseEvent): void {
+    if (this.consumeNativeContextMenuBypass()) {
+      return;
+    }
+
+    event.originalEvent.preventDefault();
+    event.originalEvent.stopPropagation();
+
+    // Mouse-up opens the menu for short right-click interactions. Keep this as a
+    // fallback for platforms where only contextmenu is emitted.
+    if (this.radiusDrawActive || !this.pendingSecondaryPress) {
+      return;
+    }
+
+    const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
+    this.pendingSecondaryPress = null;
+    this.openMapContextMenuAt(startLatLng, startClientX, startClientY);
+  }
+
+  private shouldAllowNativeContextMenu(event: MouseEvent): boolean {
+    const now = Date.now();
+    const currentPos = { x: event.clientX, y: event.clientY };
+    const previousAt = this.lastSecondaryContextClickAt;
+    const previousPos = this.lastSecondaryContextClickPos;
+
+    const withinTime =
+      previousAt !== null && now - previousAt <= MapShellComponent.CONTEXT_MENU_NATIVE_HANDSHAKE_MS;
+    const withinDistance =
+      previousPos !== null &&
+      Math.hypot(currentPos.x - previousPos.x, currentPos.y - previousPos.y) <=
+        MapShellComponent.CONTEXT_MENU_NATIVE_HANDSHAKE_PX;
+
+    const allowNative = withinTime && withinDistance;
+
+    if (allowNative) {
+      this.lastSecondaryContextClickAt = null;
+      this.lastSecondaryContextClickPos = null;
+      return true;
+    }
+
+    this.lastSecondaryContextClickAt = now;
+    this.lastSecondaryContextClickPos = currentPos;
+    return false;
+  }
+
+  private consumeNativeContextMenuBypass(): boolean {
+    if (Date.now() > this.nativeContextMenuBypassUntil) {
+      this.nativeContextMenuBypassUntil = 0;
+      return false;
+    }
+
+    this.nativeContextMenuBypassUntil = 0;
+    return true;
   }
 
   private startRadiusSelectionDraw(startLatLng: L.LatLng, additive: boolean): void {
@@ -1570,6 +1704,70 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.searchLocationMarker.setLatLng(coords);
+  }
+
+  private renderOrUpdateDraftMediaMarker(coords: [number, number]): void {
+    if (!this.map) return;
+
+    const icon = this.buildDraftMediaMarkerIcon();
+    if (!this.draftMediaMarkerLeaflet) {
+      this.draftMediaMarkerLeaflet = L.marker(coords, {
+        icon,
+        interactive: false,
+        keyboard: false,
+      });
+
+      if (this.photoMarkerLayer) {
+        this.photoMarkerLayer.addLayer(this.draftMediaMarkerLeaflet);
+      } else {
+        this.draftMediaMarkerLeaflet.addTo(this.map);
+      }
+      return;
+    }
+
+    this.draftMediaMarkerLeaflet.setLatLng(coords);
+    this.draftMediaMarkerLeaflet.setIcon(icon);
+  }
+
+  private buildDraftMediaMarkerIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'map-photo-marker-wrapper',
+      html: buildPhotoMarkerHtml({
+        count: 1,
+        selected: true,
+        zoomLevel: this.getPhotoMarkerZoomLevel(),
+      }),
+      iconSize: PHOTO_MARKER_ICON_SIZE,
+      iconAnchor: PHOTO_MARKER_ICON_ANCHOR,
+      popupAnchor: PHOTO_MARKER_POPUP_ANCHOR,
+    });
+  }
+
+  private removeDraftMediaMarker(): void {
+    if (this.draftMediaMarkerLeaflet) {
+      if (this.photoMarkerLayer) {
+        this.photoMarkerLayer.removeLayer(this.draftMediaMarkerLeaflet);
+      } else {
+        this.draftMediaMarkerLeaflet.remove();
+      }
+      this.draftMediaMarkerLeaflet = null;
+    }
+    this.draftMediaMarker.set(null);
+  }
+
+  private resolveDraftMediaMarkerUpload(event: ImageUploadedEvent): void {
+    const draft = this.draftMediaMarker();
+    if (!draft) return;
+
+    const draftKey = this.toMarkerKey(draft.lat, draft.lng);
+    const uploadedKey = this.toMarkerKey(event.lat, event.lng);
+    if (draftKey !== uploadedKey) {
+      return;
+    }
+
+    this.removeDraftMediaMarker();
+    this.setSelectedMarker(uploadedKey);
+    this.setSelectedMarkerKeys(new Set([uploadedKey]));
   }
 
   private clearSearchLocationMarker(): void {
@@ -2112,6 +2310,10 @@ export class MapShellComponent implements OnDestroy {
     });
 
     marker.on('contextmenu', (event: L.LeafletMouseEvent) => {
+      if (this.consumeNativeContextMenuBypass()) {
+        return;
+      }
+
       event.originalEvent.preventDefault();
       event.originalEvent.stopPropagation();
       this.pendingSecondaryPress = null;
@@ -2645,8 +2847,8 @@ export class MapShellComponent implements OnDestroy {
     return 'far';
   }
 
-  private openMapContextMenuAt(latlng: L.LatLng, mouseEvent: MouseEvent): void {
-    const position = this.clampContextMenuPosition(mouseEvent.clientX, mouseEvent.clientY);
+  private openMapContextMenuAt(latlng: L.LatLng, clientX: number, clientY: number): void {
+    const position = this.clampContextMenuPosition(clientX, clientY);
     this.markerContextMenuOpen.set(false);
     this.mapContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
     this.mapContextMenuPosition.set(position);

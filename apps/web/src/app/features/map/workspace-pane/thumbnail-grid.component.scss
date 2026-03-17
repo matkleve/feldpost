@@ -17,6 +17,10 @@
   padding: var(--spacing-1) 0;
 }
 
+.thumbnail-grid__cards--start {
+  justify-content: start;
+}
+
 .thumbnail-grid__empty {
   text-align: center;
   color: var(--color-text-secondary);

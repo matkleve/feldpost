@@ -945,6 +945,16 @@ describe('MapShellComponent', () => {
           preventDefault: () => void;
         };
       }) => void;
+      handleMapContextMenu: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          button: number;
+          clientX: number;
+          clientY: number;
+          preventDefault: () => void;
+          stopPropagation: () => void;
+        };
+      }) => void;
     };
 
     component.map = mapStub;
@@ -966,9 +976,69 @@ describe('MapShellComponent', () => {
         preventDefault: vi.fn(),
       },
     });
+    component.handleMapContextMenu({
+      latlng: { lat: 48.2, lng: 16.37 },
+      originalEvent: {
+        button: 2,
+        clientX: 162,
+        clientY: 224,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      },
+    });
 
     expect(component.mapContextMenuOpen()).toBe(true);
     expect(component.mapContextMenuCoords()).toEqual({ lat: 48.2, lng: 16.37 });
+  });
+
+  it('map context create marker action opens draft workspace flow', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      mapContextMenuCoords: { set: (value: { lat: number; lng: number } | null) => void };
+      draftMediaMarker: {
+        (): { lat: number; lng: number; uploadCount: number } | null;
+      };
+      photoPanelOpen: { (): boolean };
+      uploadPanelOpen: { (): boolean };
+      onMapContextCreateMarkerHere: () => void;
+    };
+
+    component.mapContextMenuCoords.set({ lat: 48.2, lng: 16.37 });
+    component.onMapContextCreateMarkerHere();
+
+    expect(component.draftMediaMarker()).toEqual({ lat: 48.2, lng: 16.37, uploadCount: 0 });
+    expect(component.photoPanelOpen()).toBe(true);
+    expect(component.uploadPanelOpen()).toBe(true);
+  });
+
+  it('left click dismisses empty draft marker and closes workspace pane', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      draftMediaMarker: {
+        set: (value: { lat: number; lng: number; uploadCount: number } | null) => void;
+        (): { lat: number; lng: number; uploadCount: number } | null;
+      };
+      photoPanelOpen: { set: (value: boolean) => void; (): boolean };
+      handleMapClick: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: { button: number };
+      }) => void;
+    };
+
+    component.draftMediaMarker.set({ lat: 48.2, lng: 16.37, uploadCount: 0 });
+    component.photoPanelOpen.set(true);
+
+    component.handleMapClick({
+      latlng: { lat: 48.21, lng: 16.38 },
+      originalEvent: { button: 0 },
+    });
+
+    expect(component.draftMediaMarker()).toBeNull();
+    expect(component.photoPanelOpen()).toBe(false);
   });
 
   it('right-click drag starts radius draw instead of opening map menu', () => {
@@ -1033,6 +1103,85 @@ describe('MapShellComponent', () => {
     expect(component.mapContextMenuOpen()).toBe(false);
   });
 
+  it('short right-click does not start radius on later mouse move', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      mouseEventToContainerPoint: vi.fn((evt: { clientX: number; clientY: number }) => ({
+        x: evt.clientX,
+        y: evt.clientY,
+      })),
+      on: vi.fn(),
+      off: vi.fn(),
+      distance: vi.fn().mockReturnValue(100),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      mapContextMenuOpen: { (): boolean };
+      radiusDrawActive: boolean;
+      handleMapMouseDown: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          button: number;
+          clientX: number;
+          clientY: number;
+          preventDefault: () => void;
+        };
+      }) => void;
+      handleMapMouseUp: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          button: number;
+          clientX: number;
+          clientY: number;
+          preventDefault: () => void;
+        };
+      }) => void;
+      handleMapMouseMove: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          clientX: number;
+          clientY: number;
+        };
+      }) => void;
+    };
+
+    component.map = mapStub;
+    component.handleMapMouseDown({
+      latlng: { lat: 48.2, lng: 16.37 },
+      originalEvent: {
+        button: 2,
+        clientX: 100,
+        clientY: 100,
+        preventDefault: vi.fn(),
+      },
+    });
+
+    component.handleMapMouseUp({
+      latlng: { lat: 48.2, lng: 16.37 },
+      originalEvent: {
+        button: 2,
+        clientX: 100,
+        clientY: 100,
+        preventDefault: vi.fn(),
+      },
+    });
+
+    component.handleMapMouseMove({
+      latlng: { lat: 48.2, lng: 16.39 },
+      originalEvent: {
+        clientX: 130,
+        clientY: 132,
+      },
+    });
+
+    expect(component.mapContextMenuOpen()).toBe(true);
+    expect(component.radiusDrawActive).toBe(false);
+  });
+
   it('opens marker context menu payload for right-clicked marker', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
@@ -1089,6 +1238,31 @@ describe('MapShellComponent', () => {
     expect(component.markerContextMenuOpen()).toBe(true);
     expect(component.markerContextMenuPayload()?.markerKey).toBe('single-1');
     expect(component.markerContextMenuPayload()?.imageId).toBe('img-1');
+  });
+
+  it('enterPlacementMode auto-places missing-data jobs at active draft marker', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const placeFile = vi.fn();
+    const component = fixture.componentInstance as unknown as {
+      draftMediaMarker: {
+        set: (value: { lat: number; lng: number; uploadCount: number } | null) => void;
+      };
+      uploadPanelChild: () => {
+        placeFile: (key: string, coords: { lat: number; lng: number }) => void;
+      };
+      placementActive: { (): boolean };
+      enterPlacementMode: (key: string) => void;
+    };
+
+    component.draftMediaMarker.set({ lat: 48.2, lng: 16.37, uploadCount: 0 });
+    component.uploadPanelChild = () => ({ placeFile });
+
+    component.enterPlacementMode('job-1');
+
+    expect(placeFile).toHaveBeenCalledWith('job-1', { lat: 48.2, lng: 16.37 });
+    expect(component.placementActive()).toBe(false);
   });
 
   it('radius selection replaces workspace images when Ctrl is not pressed', async () => {

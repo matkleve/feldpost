@@ -98,15 +98,6 @@
     aria-label="Site map"
   ></div>
 
-  @if (mapContextMenuOpen() || markerContextMenuOpen()) {
-    <button
-      class="map-context-backdrop"
-      type="button"
-      aria-label="Close context menu"
-      (click)="closeContextMenus()"
-    ></button>
-  }
-
   @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
     <div
       class="map-context-menu"
@@ -123,7 +114,7 @@
           (click)="onMapContextCreateMarkerHere()"
         >
           <span class="material-icons dd-item__icon" aria-hidden="true">add_location</span>
-          <span class="dd-item__label">Marker hier erstellen</span>
+          <span class="dd-item__label">Media Marker hier erstellen</span>
         </button>
         <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCenterHere()">
           <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>

@@ -9,9 +9,12 @@ import type {
   GroupedSection,
   SortConfig,
   PropertyRef,
+  ThumbnailSizePreset,
 } from './workspace-view.types';
 
 const DEFAULT_SORTS: SortConfig[] = [{ key: 'date-captured', direction: 'desc' }];
+const THUMBNAIL_SIZE_PRESET_STORAGE_KEY = 'sitesnap.settings.workspace.thumbnailSizePreset';
+const THUMBNAIL_SIZE_PRESETS: readonly ThumbnailSizePreset[] = ['small', 'medium', 'large'];
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceViewService {
@@ -27,6 +30,7 @@ export class WorkspaceViewService {
   readonly selectedProjectIds = signal<Set<string>>(new Set());
   readonly activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
   readonly activeGroupings = signal<PropertyRef[]>([]);
+  readonly thumbnailSizePreset = signal<ThumbnailSizePreset>(this.readThumbnailSizePreset());
   readonly collapsedGroups = signal<Set<string>>(new Set());
   readonly isLoading = signal(false);
   /** True once a marker click triggers a load — distinguishes "no selection" from "empty result". */
@@ -259,6 +263,11 @@ export class WorkspaceViewService {
     });
   }
 
+  setThumbnailSizePreset(preset: ThumbnailSizePreset): void {
+    this.thumbnailSizePreset.set(preset);
+    this.persistThumbnailSizePreset(preset);
+  }
+
   /** Batch-sign thumbnail URLs for a set of images. */
   async batchSignThumbnails(images: WorkspaceImage[]): Promise<void> {
     const unsigned = images.filter((img) => !img.signedThumbnailUrl && !img.thumbnailUnavailable);
@@ -425,6 +434,20 @@ export class WorkspaceViewService {
     }
 
     return sections;
+  }
+
+  private readThumbnailSizePreset(): ThumbnailSizePreset {
+    if (typeof window === 'undefined') return 'medium';
+    const raw = window.localStorage.getItem(THUMBNAIL_SIZE_PRESET_STORAGE_KEY);
+    if (!raw) return 'medium';
+    return THUMBNAIL_SIZE_PRESETS.includes(raw as ThumbnailSizePreset)
+      ? (raw as ThumbnailSizePreset)
+      : 'medium';
+  }
+
+  private persistThumbnailSizePreset(preset: ThumbnailSizePreset): void {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(THUMBNAIL_SIZE_PRESET_STORAGE_KEY, preset);
   }
 }
 

@@ -6,10 +6,24 @@ import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { FilterService } from '../../../../core/filter.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
-import type { PropertyRef, SortConfig } from '../../../../core/workspace-view.types';
+import type {
+  PropertyRef,
+  SortConfig,
+  ThumbnailSizePreset,
+} from '../../../../core/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
+import {
+  SnapSizeSliderComponent,
+  type SnapSizeSliderOption,
+} from '../../../../shared/snap-size-slider/snap-size-slider.component';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
+
+const THUMBNAIL_SIZE_OPTIONS: ReadonlyArray<SnapSizeSliderOption> = [
+  { value: 'small', label: 'Small', shortLabel: 'S', icon: 'view_comfy' },
+  { value: 'medium', label: 'Medium', shortLabel: 'M', icon: 'grid_view' },
+  { value: 'large', label: 'Large', shortLabel: 'L', icon: 'apps' },
+];
 
 @Component({
   selector: 'app-workspace-toolbar',
@@ -21,6 +35,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
+    SnapSizeSliderComponent,
   ],
 })
 export class WorkspaceToolbarComponent {
@@ -29,6 +44,8 @@ export class WorkspaceToolbarComponent {
   private readonly registry = inject(PropertyRegistryService);
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
+  readonly thumbnailSizeOptions = THUMBNAIL_SIZE_OPTIONS;
+  readonly thumbnailSizePreset = computed(() => this.viewService.thumbnailSizePreset());
 
   // Dropdown position (fixed, computed from button rect)
   readonly dropdownTop = signal(0);
@@ -114,6 +131,11 @@ export class WorkspaceToolbarComponent {
 
   closeDropdown(): void {
     this.activeDropdown.set(null);
+  }
+
+  onThumbnailSizeChanged(value: string): void {
+    if (value !== 'small' && value !== 'medium' && value !== 'large') return;
+    this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
   }
 
   @HostListener('document:keydown.escape')

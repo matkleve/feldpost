@@ -222,6 +222,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `theme-toggle.md` — Theme Toggle (light / dark / system)
 - ✅ `radius-selection.md` — Radius Selection (right-click-drag circle)
 - ✅ `map-context-menu.md` — Map Context Menu (short right-click actions on empty map)
+- ✅ `media-marker-draft-flow.md` — Media Marker Draft Flow (create from map context menu, persist on upload, remove on empty dismiss)
 
 ### Pages
 

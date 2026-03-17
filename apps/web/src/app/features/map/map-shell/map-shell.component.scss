@@ -185,15 +185,6 @@
   overflow: hidden;
 }
 
-.map-context-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 70;
-  border: none;
-  background: transparent;
-  cursor: default;
-}
-
 .map-context-menu {
   position: fixed;
   z-index: 80;

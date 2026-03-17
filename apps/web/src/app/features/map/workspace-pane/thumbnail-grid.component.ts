@@ -4,8 +4,10 @@ import {
   OnDestroy,
   afterNextRender,
   computed,
+  effect,
   inject,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
@@ -23,7 +25,12 @@ type RenderItem =
 @Component({
   selector: 'app-thumbnail-grid',
   template: `
-    <div class="thumbnail-grid" #scrollContainer (scroll)="onScroll()">
+    <div
+      class="thumbnail-grid"
+      #scrollContainer
+      (scroll)="onScroll()"
+      [style.--thumbnail-grid-card-size.px]="thumbnailCardSizePx()"
+    >
       @if (viewService.isLoading()) {
         <div class="thumbnail-grid__skeleton">
           @for (i of skeletonCards; track i) {
@@ -59,7 +66,10 @@ type RenderItem =
                 (toggle)="viewService.toggleGroupCollapsed(item.heading)"
               />
             } @else {
-              <div class="thumbnail-grid__cards">
+              <div
+                class="thumbnail-grid__cards"
+                [class.thumbnail-grid__cards--start]="isUnderfilled(item.images.length)"
+              >
                 @for (img of item.images; track img.id) {
                   <app-thumbnail-card
                     [image]="img"
@@ -73,7 +83,10 @@ type RenderItem =
           }
         }
       } @else {
-        <div class="thumbnail-grid__cards">
+        <div
+          class="thumbnail-grid__cards"
+          [class.thumbnail-grid__cards--start]="isUnderfilled(flatImages().length)"
+        >
           @for (img of flatImages(); track img.id) {
             <app-thumbnail-card
               [image]="img"
@@ -94,10 +107,24 @@ export class ThumbnailGridComponent implements OnDestroy {
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
 
+  readonly thumbnailCardSizePx = computed(() => {
+    switch (this.viewService.thumbnailSizePreset()) {
+      case 'small':
+        return 112;
+      case 'large':
+        return 160;
+      default:
+        return 128;
+    }
+  });
+
   readonly thumbnailClicked = output<string>();
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+
+  readonly maxColumns = signal(1);
 
   readonly sections = computed(() => this.viewService.groupedSections());
 
@@ -140,6 +167,15 @@ export class ThumbnailGridComponent implements OnDestroy {
   constructor() {
     afterNextRender(() => {
       this.scheduleThumbnailSigning();
+      this.observeWidthChanges();
+      this.updateMaxColumns();
+    });
+
+    effect(() => {
+      this.thumbnailCardSizePx();
+      afterNextRender(() => {
+        this.updateMaxColumns();
+      });
     });
   }
 
@@ -147,6 +183,11 @@ export class ThumbnailGridComponent implements OnDestroy {
     if (this.signBatchTimer) {
       clearTimeout(this.signBatchTimer);
     }
+    this.resizeObserver?.disconnect();
+  }
+
+  isUnderfilled(itemCount: number): boolean {
+    return itemCount > 0 && itemCount < this.maxColumns();
   }
 
   isCollapsed(heading: string): boolean {
@@ -218,5 +259,34 @@ export class ThumbnailGridComponent implements OnDestroy {
       }
     }
     return result;
+  }
+
+  private observeWidthChanges(): void {
+    const host = this.scrollContainerRef()?.nativeElement;
+    if (!host || typeof ResizeObserver === 'undefined') return;
+
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateMaxColumns();
+    });
+    this.resizeObserver.observe(host);
+  }
+
+  private updateMaxColumns(): void {
+    const host = this.scrollContainerRef()?.nativeElement;
+    if (!host) return;
+
+    const measured = host.clientWidth;
+    if (measured <= 0) {
+      this.maxColumns.set(1);
+      return;
+    }
+
+    const styles = getComputedStyle(host);
+    const gapValue = styles.getPropertyValue('--spacing-2').trim();
+    const gap = Number.parseFloat(gapValue || '8') || 8;
+    const cardWidth = this.thumbnailCardSizePx();
+    const columns = Math.max(1, Math.floor((measured + gap) / (cardWidth + gap)));
+    this.maxColumns.set(columns);
   }
 }

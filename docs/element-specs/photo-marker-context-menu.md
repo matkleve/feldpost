@@ -1,10 +1,12 @@
 # Photo Marker Context Menu
 
+> **Use cases:** [use-cases/photo-marker-context-menu.md](../use-cases/photo-marker-context-menu.md)
+
 ## What It Is
 
 A contextual action menu opened on a photo marker (single image or cluster) via right-click on desktop or long-press on touch. It enables marker-scoped actions without navigating away from the map.
 
-Primary use cases are: quick inspection (`Open details`), spatial correction (`Move marker`), curation (`Add to group`), and destructive cleanup (`Delete photo` for single-image markers only).
+Primary use cases are: quick inspection (`Open details` / `Open selection`), fast focus zoom (`house` / `street` proximity), project assignment (`Projekt hinzufuegen`), utility copy/open actions (`Adresse`, `GPS`, `Google Maps`), and destructive cleanup (`Delete photo` for single-image markers only).
 
 ## What It Looks Like
 
@@ -20,18 +22,21 @@ For cluster markers, the menu header shows a compact summary (for example: `12 p
 
 ## Actions & Interactions
 
-| #   | User Action                                       | System Response                                        | Triggers                                       |
-| --- | ------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------- |
-| 1   | Right-clicks single marker (desktop)              | Opens marker context menu anchored to marker           | marker target hit-test                         |
-| 2   | Long-presses single marker (mobile)               | Opens action-sheet marker menu                         | touch long-press recognizer                    |
-| 3   | Selects `Open Details` (single)                   | Opens Workspace Pane and focuses image detail          | selection + detail routing state               |
-| 4   | Selects `Open Selection` (cluster)                | Loads cluster images into Active Selection             | `WorkspaceViewService.fetchClusterImages(...)` |
-| 5   | Selects `Move Marker`                             | Enters marker correction mode for that marker          | map correction interaction state               |
-| 6   | Selects `Add to Group...`                         | Opens group assignment flow for selected marker images | group assignment UI                            |
-| 7   | Selects `Copy Coordinates`                        | Copies marker lat/lng and shows success toast          | clipboard + toast                              |
-| 8   | Selects `Delete Photo` (single only)              | Opens confirmation, then deletes image on confirm      | delete flow                                    |
-| 9   | Clicks outside / presses Escape / taps backdrop   | Closes menu without side effects                       | dismiss handler                                |
-| 10  | Starts drag instead of long-press hold completion | Cancels menu and continues map gesture                 | gesture arbitration                            |
+| #   | User Action                                       | System Response                                          | Triggers                                             |
+| --- | ------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
+| 1   | Right-clicks single marker (desktop)              | Opens marker context menu anchored to marker             | marker target hit-test                               |
+| 2   | Long-presses single marker (mobile)               | Opens action-sheet marker menu                           | touch long-press recognizer                          |
+| 3   | Selects `Open Details` (single)                   | Opens Workspace Pane and focuses image detail            | selection + detail routing state                     |
+| 4   | Selects `Open Selection` (cluster)                | Loads cluster images into Active Selection               | `WorkspaceViewService.fetchClusterImages(...)`       |
+| 5   | Selects `Hierhin zoomen (Hausnaehe)`              | Centers marker and zooms to building-level context       | `MapAdapter.setView(markerLatLng, 19)`               |
+| 6   | Selects `Hierhin zoomen (Strassennaehe)`          | Centers marker and zooms to street-level context         | `MapAdapter.setView(markerLatLng, 17)`               |
+| 7   | Selects `Projekt hinzufuegen...`                  | Opens project assignment flow for selected marker images | project assignment UI                                |
+| 8   | Selects `Adresse kopieren`                        | Resolves marker address and copies to clipboard          | `GeocodingService.reverse()` + clipboard             |
+| 9   | Selects `GPS kopieren`                            | Copies marker lat/lng and shows success toast            | clipboard + toast                                    |
+| 10  | Selects `In Google Maps oeffnen`                  | Opens a new browser tab at marker coordinates            | `window.open(https://www.google.com/maps?q=lat,lng)` |
+| 11  | Selects `Delete Photo` (single only)              | Opens confirmation, then deletes image on confirm        | delete flow                                          |
+| 12  | Clicks outside / presses Escape / taps backdrop   | Closes menu without side effects                         | dismiss handler                                      |
+| 13  | Starts drag instead of long-press hold completion | Cancels menu and continues map gesture                   | gesture arbitration                                  |
 
 ## Component Hierarchy
 
@@ -42,9 +47,12 @@ PhotoMarkerContextMenuHost (owned by MapShellComponent)
 │   └── .dd-items
 │       ├── .dd-item "Open Details" (single)
 │       ├── .dd-item "Open Selection" (cluster)
-│       ├── .dd-item "Move Marker"
-│       ├── .dd-item "Add to Group..."
-│       ├── .dd-item "Copy Coordinates"
+│       ├── .dd-item "Hierhin zoomen (Hausnaehe)"
+│       ├── .dd-item "Hierhin zoomen (Strassennaehe)"
+│       ├── .dd-item "Projekt hinzufuegen..."
+│       ├── .dd-item "Adresse kopieren"
+│       ├── .dd-item "GPS kopieren"
+│       ├── .dd-item "In Google Maps oeffnen"
 │       ├── .dd-divider
 │       └── .dd-item.dd-item--danger "Delete Photo" (single only)
 ├── [mobile] MarkerContextActionSheet                ← same actions as popover, touch-safe
@@ -64,13 +72,21 @@ flowchart LR
   T -->|single| OD[Open Details]
   T -->|cluster| OS[Open Selection]
   T -->|single| DP[Delete Photo]
-  MCM --> MM[Move Marker]
-  MCM --> AG[Add to Group]
-  MCM --> CC[Copy Coordinates]
+  MCM --> ZH[Zoom house proximity]
+  MCM --> ZS[Zoom street proximity]
+  MCM --> AP[Add to project]
+  MCM --> CA[Copy address]
+  MCM --> CG[Copy GPS]
+  MCM --> GM[Open Google Maps]
   OD --> WP[Workspace Pane]
   OS --> WVS[WorkspaceViewService]
-  MM --> CM[Correction Mode]
-  AG --> SG[Saved Groups flow]
+  ZH --> MA[MapAdapter]
+  ZS --> MA[MapAdapter]
+  AP --> PA[Project assignment flow]
+  CA --> GS[GeocodingService]
+  CA --> TS[ToastService]
+  CG --> TS[ToastService]
+  GM --> BR[Browser tab]
   DP --> SS[SupabaseService]
   MS --> SUP[Suppress Map Context Menu]
 ```
@@ -91,7 +107,7 @@ flowchart LR
 | `markerContextOpen`       | `boolean`                                                                                                          | `false` | Menu visibility                           |
 | `markerContextPayload`    | `{ markerKey: string; markerType: 'single' \| 'cluster'; lat: number; lng: number; x: number; y: number } \| null` | `null`  | Action availability and anchoring         |
 | `markerContextSource`     | `'mouse' \| 'touch' \| null`                                                                                       | `null`  | Popover vs action-sheet variant           |
-| `markerContextBusyAction` | `'delete' \| 'open-selection' \| 'move' \| null`                                                                   | `null`  | Disables duplicate taps while action runs |
+| `markerContextBusyAction` | `'delete' \| 'open-selection' \| 'project' \| 'copy-address' \| null`                                              | `null`  | Disables duplicate taps while action runs |
 
 ## File Map
 
@@ -116,6 +132,8 @@ sequenceDiagram
   participant MS as MapShellComponent
   participant WVS as WorkspaceViewService
   participant SS as SupabaseService
+  participant GS as GeocodingService
+  participant BR as Browser
 
   U->>MA: Secondary click on marker
   MA->>MS: markerContextIntent(payload)
@@ -128,12 +146,20 @@ sequenceDiagram
     MS->>MS: set Active Selection
   else Open Details (single)
     MS->>MS: select image + focus detail view
+  else Projekt hinzufuegen
+    MS->>MS: open project assignment dialog
+  else Adresse kopieren
+    MS->>GS: reverse(markerLatLng)
+    GS-->>MS: address label
+    MS->>MS: copy address + toast
+  else GPS kopieren
+    MS->>MS: copy lat,lng + toast
+  else In Google Maps oeffnen
+    MS->>BR: window.open("https://www.google.com/maps?q=lat,lng")
   else Delete Photo (single)
     MS->>SS: delete image
     SS-->>MS: success
     MS->>MS: refresh visible markers
-  else Move Marker
-    MS->>MS: enter correction mode
   end
 ```
 
@@ -147,9 +173,12 @@ sequenceDiagram
 - [ ] Long-press on a single marker opens the mobile action-sheet variant.
 - [ ] Cluster marker menu shows `Open Selection` and hides single-only actions.
 - [ ] `Open Details` focuses the selected image in the Workspace Pane.
-- [ ] `Move Marker` enters correction mode for the targeted marker.
-- [ ] `Add to Group...` opens group assignment flow for marker image set.
-- [ ] `Copy Coordinates` copies coordinates and shows success feedback.
+- [ ] `Hierhin zoomen (Hausnaehe)` centers marker and zooms to building-level context.
+- [ ] `Hierhin zoomen (Strassennaehe)` centers marker and zooms to street-level context.
+- [ ] `Projekt hinzufuegen...` opens project assignment flow for marker image set.
+- [ ] `Adresse kopieren` copies a resolved address for marker coordinates.
+- [ ] `GPS kopieren` copies coordinates and shows success feedback.
+- [ ] `In Google Maps oeffnen` opens a new tab with marker coordinates.
 - [ ] `Delete Photo` appears only for single markers and requires confirmation.
 - [ ] Clicking outside, backdrop tap, and Escape close the menu.
 - [ ] Marker menu wins over map menu when right-click target is a marker.
