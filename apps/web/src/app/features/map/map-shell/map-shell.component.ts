@@ -25,7 +25,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
 import {
   UploadPanelComponent,
@@ -44,6 +44,7 @@ import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
+import { ShareSetService } from '../../../core/share-set.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import type { WorkspaceImage } from '../../../core/workspace-view.types';
@@ -63,11 +64,29 @@ import {
   PHOTO_MARKER_POPUP_ANCHOR,
   PhotoMarkerZoomLevel,
 } from '../../../core/map/marker-factory';
+import { MapShellState } from './map-shell.state';
+import { DetailZoomHighlightService } from './detail-zoom-highlight.service';
+import { MarkerInteractionService } from './marker-interaction.service';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapBasemapPreference = 'default' | 'satellite';
 type MapMaterialPreference = 'default' | 'analog';
 type MapViewMode = 'street' | 'photo' | 'historic';
+
+type ViewportMarkerRow = {
+  cluster_lat: number;
+  cluster_lng: number;
+  image_count: number;
+  image_id: string | null;
+  direction: number | null;
+  storage_path: string | null;
+  thumbnail_path: string | null;
+  exif_latitude: number | null;
+  exif_longitude: number | null;
+  created_at: string | null;
+};
+
+type MergedViewportRow = ViewportMarkerRow & { sourceCells: Array<{ lat: number; lng: number }> };
 
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
@@ -88,6 +107,7 @@ const HISTORIC_LABEL_PANE = 'historic-label';
   ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',
+  providers: [MapShellState],
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
     '(document:keydown.escape)': 'closeContextMenus()',
@@ -127,7 +147,12 @@ export class MapShellComponent implements OnDestroy {
   private readonly photoLoadService = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly shareSetService = inject(ShareSetService);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly state = inject(MapShellState);
+  private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
+  private readonly markerInteractionService = inject(MarkerInteractionService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -270,10 +295,10 @@ export class MapShellComponent implements OnDestroy {
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
   /** Whether the workspace pane (photo panel) is open. */
-  readonly photoPanelOpen = signal(false);
+  readonly photoPanelOpen = this.state.photoPanelOpen;
 
   /** Current workspace pane width in px. Initialised lazily to golden-ratio default on first open. */
-  readonly workspacePaneWidth = signal(360);
+  readonly workspacePaneWidth = this.state.workspacePaneWidth;
 
   /** Minimum workspace pane width in px (17.5rem). */
   readonly workspacePaneMinWidth = 280;
@@ -295,44 +320,35 @@ export class MapShellComponent implements OnDestroy {
     const golden = Math.round(viewportWidth * (1 - 1 / 1.618));
     return Math.min(Math.max(golden, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
   });
-  readonly selectedMarkerKey = signal<string | null>(null);
-  readonly selectedMarkerKeys = signal<Set<string>>(new Set());
-  readonly linkedHoveredWorkspaceImageIds = signal<Set<string>>(new Set());
-  readonly mapContextMenuOpen = signal(false);
-  readonly mapContextMenuPosition = signal<{ x: number; y: number } | null>(null);
-  readonly mapContextMenuCoords = signal<{ lat: number; lng: number } | null>(null);
-  readonly radiusContextMenuOpen = signal(false);
-  readonly radiusContextMenuPosition = signal<{ x: number; y: number } | null>(null);
-  readonly radiusContextMenuCoords = signal<{ lat: number; lng: number } | null>(null);
-  readonly markerContextMenuOpen = signal(false);
-  readonly markerContextMenuPosition = signal<{ x: number; y: number } | null>(null);
-  readonly markerContextMenuPayload = signal<{
-    markerKey: string;
-    count: number;
-    lat: number;
-    lng: number;
-    imageId?: string;
-    sourceCells: Array<{ lat: number; lng: number }>;
-  } | null>(null);
-  readonly draftMediaMarker = signal<{ lat: number; lng: number; uploadCount: number } | null>(
-    null,
-  );
-  readonly projectSelectionDialogOpen = signal(false);
-  readonly projectSelectionDialogTitle = signal('Projekt auswaehlen');
-  readonly projectSelectionDialogMessage = signal('');
-  readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
-  readonly projectSelectionDialogSelectedId = signal<string | null>(null);
-  readonly projectNameDialogOpen = signal(false);
-  readonly projectNameDialogTitle = signal('Name fuer neues Projekt aus Radius');
-  readonly projectNameDialogMessage = signal('Gib einen Projektnamen ein.');
-  readonly projectNameDialogInitialValue = signal('');
+  readonly selectedMarkerKey = this.state.selectedMarkerKey;
+  readonly selectedMarkerKeys = this.state.selectedMarkerKeys;
+  readonly linkedHoveredWorkspaceImageIds = this.state.linkedHoveredWorkspaceImageIds;
+  readonly mapContextMenuOpen = this.state.mapContextMenuOpen;
+  readonly mapContextMenuPosition = this.state.mapContextMenuPosition;
+  readonly mapContextMenuCoords = this.state.mapContextMenuCoords;
+  readonly radiusContextMenuOpen = this.state.radiusContextMenuOpen;
+  readonly radiusContextMenuPosition = this.state.radiusContextMenuPosition;
+  readonly radiusContextMenuCoords = this.state.radiusContextMenuCoords;
+  readonly markerContextMenuOpen = this.state.markerContextMenuOpen;
+  readonly markerContextMenuPosition = this.state.markerContextMenuPosition;
+  readonly markerContextMenuPayload = this.state.markerContextMenuPayload;
+  readonly draftMediaMarker = this.state.draftMediaMarker;
+  readonly projectSelectionDialogOpen = this.state.projectSelectionDialogOpen;
+  readonly projectSelectionDialogTitle = this.state.projectSelectionDialogTitle;
+  readonly projectSelectionDialogMessage = this.state.projectSelectionDialogMessage;
+  readonly projectSelectionDialogOptions = this.state.projectSelectionDialogOptions;
+  readonly projectSelectionDialogSelectedId = this.state.projectSelectionDialogSelectedId;
+  readonly projectNameDialogOpen = this.state.projectNameDialogOpen;
+  readonly projectNameDialogTitle = this.state.projectNameDialogTitle;
+  readonly projectNameDialogMessage = this.state.projectNameDialogMessage;
+  readonly projectNameDialogInitialValue = this.state.projectNameDialogInitialValue;
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
    * Set to a DB image UUID when the user clicks a thumbnail or marker detail action.
    * Set to null to return to the thumbnail grid.
    */
-  readonly detailImageId = signal<string | null>(null);
+  readonly detailImageId = this.state.detailImageId;
 
   /** Thumbnail URL for the currently selected single marker. */
   readonly selectedMarkerThumbnail = computed(() => {
@@ -496,6 +512,7 @@ export class MapShellComponent implements OnDestroy {
     lng: number;
     requestedAt: number;
   } | null = null;
+  private shareTokenResolved = false;
 
   constructor() {
     afterNextRender(() => {
@@ -503,6 +520,7 @@ export class MapShellComponent implements OnDestroy {
       window.addEventListener(MAP_MARKER_MOTION_EVENT, this.markerMotionEventHandler);
       this.initMap();
       this.subscribeToUploadManagerEvents();
+      void this.tryResolveShareTokenFromQuery();
       this.scheduleDeferredStartupWork();
     });
   }
@@ -1036,10 +1054,10 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const markerElement = this.uploadedPhotoMarkers.get(markerKey)?.marker.getElement();
-    const markerWrapper = markerElement?.querySelector(
-      '.map-photo-marker-wrapper',
-    ) as HTMLElement | null;
+    const markerElement = this.uploadedPhotoMarkers
+      .get(markerKey)
+      ?.marker.getElement() as HTMLElement | null;
+    const markerWrapper = this.detailZoomHighlightService.resolveMarkerWrapper(markerElement);
     if (!markerWrapper || !this.isZoomHighlightRenderReady(markerWrapper)) {
       if (attempt < MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES) {
         setTimeout(
@@ -1071,49 +1089,26 @@ export class MapShellComponent implements OnDestroy {
   private waitForMapIdleThenFlushZoomHighlight(): void {
     if (!this.map) return;
 
-    let flushed = false;
-    const flushOnce = () => {
-      if (flushed) return;
-      flushed = true;
-      this.flushPendingZoomHighlight();
-    };
-
-    this.map.once('idle', flushOnce);
-    setTimeout(flushOnce, MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS);
+    this.detailZoomHighlightService.waitForIdleOrTimeout(
+      this.map,
+      MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS,
+      () => this.flushPendingZoomHighlight(),
+    );
   }
 
   private isZoomHighlightRenderReady(markerElement: HTMLElement): boolean {
-    if (Date.now() - this.lastMapMoveAt < MapShellComponent.DETAIL_LOCATION_RENDER_SETTLE_MS) {
-      return false;
-    }
-
-    if (!markerElement.isConnected) {
-      return false;
-    }
-
-    const rect = markerElement.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) {
-      return false;
-    }
-
-    return markerElement.classList.contains('map-photo-marker-wrapper');
+    return this.detailZoomHighlightService.isRenderReady(
+      markerElement,
+      this.lastMapMoveAt,
+      MapShellComponent.DETAIL_LOCATION_RENDER_SETTLE_MS,
+    );
   }
 
   private startZoomMarkerSpotlight(markerElement: HTMLElement): void {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!markerElement.isConnected) {
-          return;
-        }
-        markerElement.classList.remove('map-photo-marker-wrapper--spotlight');
-        void markerElement.offsetWidth;
-        markerElement.classList.add('map-photo-marker-wrapper--spotlight');
-        setTimeout(
-          () => markerElement.classList.remove('map-photo-marker-wrapper--spotlight'),
-          MapShellComponent.DETAIL_LOCATION_MARKER_PULSE_MS,
-        );
-      });
-    });
+    this.detailZoomHighlightService.startSpotlight(
+      markerElement,
+      MapShellComponent.DETAIL_LOCATION_MARKER_PULSE_MS,
+    );
   }
 
   private findMarkerKeyForZoomTarget(
@@ -1608,6 +1603,78 @@ export class MapShellComponent implements OnDestroy {
 
     this.map.setView([payload.lat, payload.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM);
     this.pendingMapFocus.set(null);
+  }
+
+  private async tryResolveShareTokenFromQuery(): Promise<void> {
+    if (this.shareTokenResolved) {
+      return;
+    }
+
+    this.shareTokenResolved = true;
+    const shareToken = this.route.snapshot.queryParamMap.get('share')?.trim() ?? '';
+    if (!shareToken) {
+      return;
+    }
+
+    try {
+      const resolvedItems = await this.shareSetService.resolveShareSet(shareToken);
+      const orderedIds = resolvedItems.map((item) => item.imageId);
+
+      if (orderedIds.length === 0) {
+        this.toastService.show({
+          message: 'Freigabelink ungueltig, abgelaufen oder ohne Zugriff.',
+          type: 'warning',
+          dedupe: true,
+        });
+        return;
+      }
+
+      const images = await this.workspaceViewService.loadImagesByIdsOrdered(orderedIds);
+      if (images.length === 0) {
+        this.toastService.show({
+          message: 'Freigabelink enthaelt keine verfuegbaren Medien.',
+          type: 'warning',
+          dedupe: true,
+        });
+        return;
+      }
+
+      this.workspaceViewService.clearActiveSelectionAndSettings();
+      this.workspaceViewService.setActiveSelectionImages(images);
+
+      const loadedIds = new Set(images.map((image) => image.id));
+      const selectionIds = orderedIds.filter((id) => loadedIds.has(id));
+      this.workspaceSelectionService.selectAllInScope(selectionIds);
+
+      this.detailImageId.set(null);
+      this.setSelectedMarker(null);
+      this.setSelectedMarkerKeys(new Set());
+      this.searchPlacementActive.set(false);
+      this.placementActive.set(false);
+      if (!this.photoPanelOpen()) {
+        this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+      }
+      this.photoPanelOpen.set(true);
+
+      this.toastService.show({
+        message: `${selectionIds.length} Medien aus Freigabelink geladen.`,
+        type: 'success',
+        dedupe: true,
+      });
+    } catch {
+      this.toastService.show({
+        message: 'Freigabelink konnte nicht aufgeloest werden.',
+        type: 'error',
+        dedupe: true,
+      });
+    } finally {
+      await this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { share: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
   }
 
   private recenterOnKnownUserPosition(): boolean {
@@ -2439,42 +2506,8 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    type ViewportRow = {
-      cluster_lat: number;
-      cluster_lng: number;
-      image_count: number;
-      image_id: string | null;
-      direction: number | null;
-      storage_path: string | null;
-      thumbnail_path: string | null;
-      exif_latitude: number | null;
-      exif_longitude: number | null;
-      created_at: string | null;
-    };
-
-    // Client-side pixel-distance merge: collapse clusters whose on-screen
-    // distance is less than the marker icon width. This fixes the grid
-    // boundary problem where adjacent grid cells produce overlapping markers.
-    const merged = this.mergeOverlappingClusters(data as ViewportRow[]);
-
-    // Build the incoming marker set keyed the same way we store them.
-    type MergedRow = ViewportRow & { sourceCells: Array<{ lat: number; lng: number }> };
-    const incoming = new Map<string, MergedRow>();
-    for (const row of merged) {
-      if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
-      const key = this.toMarkerKey(row.cluster_lat, row.cluster_lng);
-      incoming.set(key, row);
-    }
-
-    // Mark non-optimistic outgoing markers as recyclable first. Some can be
-    // re-used for incoming markers so they animate to the new centroid.
-    const recyclableKeys = new Set<string>();
-    for (const [key, state] of this.uploadedPhotoMarkers) {
-      if (state.optimistic) continue;
-      if (!incoming.has(key)) {
-        recyclableKeys.add(key);
-      }
-    }
+    const incoming = this.buildIncomingViewportMarkers(data as ViewportMarkerRow[]);
+    const recyclableKeys = this.collectRecyclableMarkerKeys(incoming);
 
     // --- Add or update markers ---
     for (const [key, row] of incoming) {
@@ -2651,18 +2684,7 @@ export class MapShellComponent implements OnDestroy {
       this.uploadedPhotoMarkers.delete(oldKey);
     }
 
-    const staleSelectedKeys = new Set(this.selectedMarkerKeys());
-    let selectedKeysChanged = false;
-    for (const markerKey of staleSelectedKeys) {
-      if (this.uploadedPhotoMarkers.has(markerKey)) {
-        continue;
-      }
-      staleSelectedKeys.delete(markerKey);
-      selectedKeysChanged = true;
-    }
-    if (selectedKeysChanged) {
-      this.selectedMarkerKeys.set(staleSelectedKeys);
-    }
+    this.pruneStaleSelectedMarkerKeys();
 
     // Clear optimistic flag from surviving markers.
     for (const state of this.uploadedPhotoMarkers.values()) {
@@ -2683,6 +2705,51 @@ export class MapShellComponent implements OnDestroy {
     ) {
       this.setLinkedHoverMarkerFromMap(null);
       this.linkedHoveredWorkspaceImageIds.set(new Set());
+    }
+  }
+
+  private buildIncomingViewportMarkers(rows: ViewportMarkerRow[]): Map<string, MergedViewportRow> {
+    // Client-side pixel-distance merge: collapse clusters whose on-screen
+    // distance is less than the marker icon width. This fixes the grid
+    // boundary problem where adjacent grid cells produce overlapping markers.
+    const merged = this.mergeOverlappingClusters(rows);
+
+    // Build the incoming marker set keyed the same way we store them.
+    const incoming = new Map<string, MergedViewportRow>();
+    for (const row of merged) {
+      if (typeof row.cluster_lat !== 'number' || typeof row.cluster_lng !== 'number') continue;
+      const key = this.toMarkerKey(row.cluster_lat, row.cluster_lng);
+      incoming.set(key, row);
+    }
+
+    return incoming;
+  }
+
+  private collectRecyclableMarkerKeys(incoming: Map<string, MergedViewportRow>): Set<string> {
+    // Mark non-optimistic outgoing markers as recyclable first. Some can be
+    // re-used for incoming markers so they animate to the new centroid.
+    const recyclableKeys = new Set<string>();
+    for (const [key, state] of this.uploadedPhotoMarkers) {
+      if (state.optimistic) continue;
+      if (!incoming.has(key)) {
+        recyclableKeys.add(key);
+      }
+    }
+    return recyclableKeys;
+  }
+
+  private pruneStaleSelectedMarkerKeys(): void {
+    const staleSelectedKeys = new Set(this.selectedMarkerKeys());
+    let selectedKeysChanged = false;
+    for (const markerKey of staleSelectedKeys) {
+      if (this.uploadedPhotoMarkers.has(markerKey)) {
+        continue;
+      }
+      staleSelectedKeys.delete(markerKey);
+      selectedKeysChanged = true;
+    }
+    if (selectedKeysChanged) {
+      this.selectedMarkerKeys.set(staleSelectedKeys);
     }
   }
 
@@ -2796,50 +2863,36 @@ export class MapShellComponent implements OnDestroy {
 
   /** Ensure marker click always resolves to the current marker key. */
   private bindMarkerClickInteraction(markerKey: string, marker: L.Marker): void {
-    marker.off('click');
-    marker.on('click', (event: L.LeafletMouseEvent) =>
+    this.markerInteractionService.bindClick(marker, (event: L.LeafletMouseEvent) =>
       this.handlePhotoMarkerClick(markerKey, event),
     );
   }
 
   private bindMarkerContextInteraction(markerKey: string, marker: L.Marker): void {
-    marker.off('contextmenu');
-    marker.off('mousedown');
-
-    marker.on('mousedown', (event: L.LeafletMouseEvent) => {
-      if (event.originalEvent.button !== 2) return;
-      event.originalEvent.preventDefault();
-      event.originalEvent.stopPropagation();
-      this.pendingSecondaryPress = null;
-    });
-
-    marker.on('contextmenu', (event: L.LeafletMouseEvent) => {
-      if (this.consumeNativeContextMenuBypass()) {
-        return;
-      }
-
-      event.originalEvent.preventDefault();
-      event.originalEvent.stopPropagation();
-      this.pendingSecondaryPress = null;
-      this.openMarkerContextMenu(markerKey, event.originalEvent);
+    this.markerInteractionService.bindContextMenu(marker, {
+      shouldBypass: () => this.consumeNativeContextMenuBypass(),
+      onSecondaryReset: () => {
+        this.pendingSecondaryPress = null;
+      },
+      onOpen: (event: MouseEvent) => {
+        this.openMarkerContextMenu(markerKey, event);
+      },
     });
   }
 
   private bindMarkerHoverInteraction(markerKey: string, marker: L.Marker): void {
-    marker.off('mouseover');
-    marker.off('mouseout');
-
-    marker.on('mouseover', () => {
-      this.setLinkedHoverMarkerFromMap(markerKey);
-      this.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
-    });
-
-    marker.on('mouseout', () => {
-      if (this.linkedHoverMarkerFromMapKey !== markerKey) {
-        return;
-      }
-      this.setLinkedHoverMarkerFromMap(null);
-      this.linkedHoveredWorkspaceImageIds.set(new Set());
+    this.markerInteractionService.bindHover(marker, {
+      onEnter: () => {
+        this.setLinkedHoverMarkerFromMap(markerKey);
+        this.setLinkedHoveredWorkspaceImageIdsForMarker(markerKey);
+      },
+      onLeave: () => {
+        if (this.linkedHoverMarkerFromMapKey !== markerKey) {
+          return;
+        }
+        this.setLinkedHoverMarkerFromMap(null);
+        this.linkedHoveredWorkspaceImageIds.set(new Set());
+      },
     });
   }
 

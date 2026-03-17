@@ -4296,7 +4296,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wir haben einen Bestätigungslink an gesendet', 'published'
+select t.id, 'de', 'Wir haben einen Bestätigungslink an folgende Adresse gesendet:', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0187.we_sent_a_confirmation_link_to'
 on conflict (app_text_id, lang) do update set
@@ -4319,7 +4319,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wir haben einen Link zum Zurücksetzen des Passworts an gesendet', 'published'
+select t.id, 'de', 'Wir haben einen Link zum Zurücksetzen des Passworts an folgende Adresse gesendet:', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0188.we_sent_a_password_reset_link_to'
 on conflict (app_text_id, lang) do update set

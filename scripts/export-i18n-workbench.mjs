@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const repoRoot = process.cwd();
@@ -6,6 +6,86 @@ const appRoot = join(repoRoot, "apps", "web", "src", "app");
 const outCsv = join(repoRoot, "docs", "i18n", "translation-workbench.csv");
 
 const textEntries = new Map();
+const existingTranslationsByOriginal = new Map();
+
+function parseCsv(text) {
+  const rows = [];
+  let current = "";
+  let row = [];
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (ch === '"') {
+      if (inQuotes && next === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (ch === "," && !inQuotes) {
+      row.push(current);
+      current = "";
+      continue;
+    }
+
+    if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      if (ch === "\r" && next === "\n") i++;
+      if (current.length > 0 || row.length > 0) {
+        row.push(current);
+        rows.push(row);
+        row = [];
+        current = "";
+      }
+      continue;
+    }
+
+    current += ch;
+  }
+
+  if (current.length > 0 || row.length > 0) {
+    row.push(current);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function loadExistingTranslations() {
+  if (!existsSync(outCsv)) return;
+
+  const csv = readFileSync(outCsv, "utf8");
+  const rows = parseCsv(csv);
+  if (rows.length < 2) return;
+
+  const header = rows[0].map((cell, idx) => {
+    const raw = String(cell);
+    const withoutBom = idx === 0 ? raw.replace(/^\ufeff/, "") : raw;
+    return withoutBom.trim().toLowerCase();
+  });
+
+  const originalIdx = header.indexOf("original");
+  const enIdx = header.indexOf("en");
+  const deIdx = header.indexOf("de");
+
+  if (originalIdx === -1 || enIdx === -1 || deIdx === -1) return;
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const original = (row[originalIdx] ?? "").replace(/\s+/g, " ").trim();
+    if (!original) continue;
+
+    existingTranslationsByOriginal.set(original.toLowerCase(), {
+      en: (row[enIdx] ?? "").trim(),
+      de: (row[deIdx] ?? "").trim(),
+    });
+  }
+}
 
 function walk(dir) {
   for (const entry of readdirSync(dir)) {
@@ -16,7 +96,9 @@ function walk(dir) {
       continue;
     }
 
-    if (!fullPath.endsWith(".html")) continue;
+    if (!fullPath.endsWith(".html") && !fullPath.endsWith(".component.ts")) {
+      continue;
+    }
     scanFile(fullPath);
   }
 }
@@ -34,12 +116,13 @@ function addEntry(original, context) {
 
   const key = normalized.toLowerCase();
   if (!textEntries.has(key)) {
+    const existing = existingTranslationsByOriginal.get(key);
     textEntries.set(key, {
       key: "",
       original: normalized,
       context,
-      en: normalized,
-      de: normalized,
+      en: existing?.en || normalized,
+      de: existing?.de || normalized,
     });
   }
 }
@@ -56,19 +139,29 @@ function scanFile(filePath) {
   const rel = relative(repoRoot, filePath).replace(/\\/g, "/");
   const content = readFileSync(filePath, "utf8");
 
-  if (filePath.endsWith(".html")) {
+  const extractFromTemplate = (template, contextPrefix) => {
     const textNodeRegex = />([^<>{}@][^<>{}]*)</g;
-    for (const match of content.matchAll(textNodeRegex)) {
-      addEntry(match[1], `${rel} text-node`);
+    for (const match of template.matchAll(textNodeRegex)) {
+      addEntry(match[1], `${contextPrefix} text-node`);
     }
 
     const attrRegex = /(title|aria-label|placeholder)\s*=\s*"([^"]+)"/g;
-    for (const match of content.matchAll(attrRegex)) {
-      addEntry(match[2], `${rel} attr:${match[1]}`);
+    for (const match of template.matchAll(attrRegex)) {
+      addEntry(match[2], `${contextPrefix} attr:${match[1]}`);
     }
+  };
+
+  if (filePath.endsWith(".html")) {
+    extractFromTemplate(content, rel);
+    return;
   }
 
-  // Intentionally HTML-only: TS literals include many implementation strings/noise.
+  if (filePath.endsWith(".component.ts")) {
+    const inlineTemplateRegex = /template\s*:\s*`([\s\S]*?)`/g;
+    for (const match of content.matchAll(inlineTemplateRegex)) {
+      extractFromTemplate(match[1], `${rel} inline-template`);
+    }
+  }
 }
 
 function csvEscape(value) {
@@ -79,6 +172,7 @@ function csvEscape(value) {
   return v;
 }
 
+loadExistingTranslations();
 walk(appRoot);
 
 const rows = [...textEntries.values()]

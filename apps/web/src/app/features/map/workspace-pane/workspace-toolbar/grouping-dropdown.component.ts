@@ -7,6 +7,7 @@ import {
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
+import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
 
 export interface GroupingProperty {
   id: string;
@@ -17,84 +18,86 @@ export interface GroupingProperty {
 @Component({
   selector: 'app-grouping-dropdown',
   template: `
-    <div class="grouping-dropdown" cdkDropListGroup>
-      <div class="grouping-section">
-        <div class="grouping-section__header">
-          <span class="dd-section-label">Grouped by</span>
-          @if (activeGroupings().length > 0) {
-            <button class="dd-reset-btn" (click)="clearGroupings()" aria-label="Reset grouping">
-              <span class="material-icons">restart_alt</span>
-            </button>
-          }
-        </div>
-        <div
-          cdkDropList
-          #activeList="cdkDropList"
-          [cdkDropListData]="activeGroupings()"
-          [cdkDropListConnectedTo]="[availableList]"
-          (cdkDropListDropped)="onDrop($event)"
-          class="grouping-drop-zone"
-          [class.grouping-drop-zone--empty]="activeGroupings().length === 0"
-          [class.grouping-drop-zone--dragging]="isDragging()"
-        >
-          @if (activeGroupings().length === 0) {
-            <div class="grouping-empty-slot">
-              {{ isDragging() ? 'Drop here to group' : 'No grouping applied' }}
-            </div>
-          }
-          @for (prop of activeGroupings(); track prop.id) {
-            <div
-              cdkDrag
-              [cdkDragData]="prop"
-              (cdkDragStarted)="onDragStart()"
-              (cdkDragEnded)="onDragEnd()"
-              class="dd-item dd-item--active"
-              [class.grouping-row--selected]="selectedRows().has(prop.id)"
-              (click)="onRowClick(prop.id, $event)"
-            >
-              <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
-              <span class="dd-item__label">{{ prop.label }}</span>
-              <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
-                >drag_indicator</span
+    <app-standard-dropdown class="grouping-dropdown" [showSearch]="false">
+      <div dropdown-items cdkDropListGroup>
+        <div class="grouping-section">
+          <div class="grouping-section__header">
+            <span class="dd-section-label">Grouped by</span>
+            @if (activeGroupings().length > 0) {
+              <button class="dd-reset-btn" (click)="clearGroupings()" aria-label="Reset grouping">
+                <span class="material-icons">restart_alt</span>
+              </button>
+            }
+          </div>
+          <div
+            cdkDropList
+            #activeList="cdkDropList"
+            [cdkDropListData]="activeGroupings()"
+            [cdkDropListConnectedTo]="[availableList]"
+            (cdkDropListDropped)="onDrop($event)"
+            class="grouping-drop-zone grouping-drop-zone--active-list"
+            [class.grouping-drop-zone--empty]="activeGroupings().length === 0"
+            [class.grouping-drop-zone--dragging]="isDragging()"
+          >
+            @if (activeGroupings().length === 0) {
+              <div class="grouping-empty-slot">
+                {{ isDragging() ? 'Drop here to group' : 'No grouping applied' }}
+              </div>
+            }
+            @for (prop of activeGroupings(); track prop.id) {
+              <div
+                cdkDrag
+                [cdkDragData]="prop"
+                (cdkDragStarted)="onDragStart()"
+                (cdkDragEnded)="onDragEnd()"
+                class="dd-item dd-item--active"
+                [class.grouping-row--selected]="selectedRows().has(prop.id)"
+                (click)="onRowClick(prop.id, $event)"
               >
-            </div>
-          }
+                <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
+                <span class="dd-item__label">{{ prop.label }}</span>
+                <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
+                  >drag_indicator</span
+                >
+              </div>
+            }
+          </div>
+        </div>
+        <div class="dd-divider"></div>
+        <div class="grouping-section">
+          <span class="dd-section-label">Available</span>
+          <div
+            cdkDropList
+            #availableList="cdkDropList"
+            [cdkDropListData]="availableProperties()"
+            [cdkDropListConnectedTo]="[activeList]"
+            (cdkDropListDropped)="onDrop($event)"
+            class="grouping-drop-zone grouping-drop-zone--available-list"
+          >
+            @for (prop of availableProperties(); track prop.id) {
+              <div
+                cdkDrag
+                [cdkDragData]="prop"
+                (cdkDragStarted)="onDragStart()"
+                (cdkDragEnded)="onDragEnd()"
+                class="dd-item dd-item--muted"
+                [class.grouping-row--selected]="selectedRows().has(prop.id)"
+                (click)="onRowClick(prop.id, $event)"
+              >
+                <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
+                <span class="dd-item__label">{{ prop.label }}</span>
+                <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
+                  >drag_indicator</span
+                >
+              </div>
+            }
+          </div>
         </div>
       </div>
-      <div class="dd-divider"></div>
-      <div class="grouping-section">
-        <span class="dd-section-label">Available</span>
-        <div
-          cdkDropList
-          #availableList="cdkDropList"
-          [cdkDropListData]="availableProperties()"
-          [cdkDropListConnectedTo]="[activeList]"
-          (cdkDropListDropped)="onDrop($event)"
-          class="grouping-drop-zone"
-        >
-          @for (prop of availableProperties(); track prop.id) {
-            <div
-              cdkDrag
-              [cdkDragData]="prop"
-              (cdkDragStarted)="onDragStart()"
-              (cdkDragEnded)="onDragEnd()"
-              class="dd-item dd-item--muted"
-              [class.grouping-row--selected]="selectedRows().has(prop.id)"
-              (click)="onRowClick(prop.id, $event)"
-            >
-              <span class="material-icons dd-item__icon" aria-hidden="true">{{ prop.icon }}</span>
-              <span class="dd-item__label">{{ prop.label }}</span>
-              <span class="material-icons dd-drag-handle" cdkDragHandle aria-hidden="true"
-                >drag_indicator</span
-              >
-            </div>
-          }
-        </div>
-      </div>
-    </div>
+    </app-standard-dropdown>
   `,
   styleUrl: './grouping-dropdown.component.scss',
-  imports: [CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [StandardDropdownComponent, CdkDropList, CdkDrag, CdkDragHandle],
 })
 export class GroupingDropdownComponent {
   // State owned by parent (WorkspaceToolbarComponent) — passed in as inputs

@@ -185,8 +185,8 @@ auto.0183.upload_status_matrix,Upload status matrix,apps/web/src/app/features/up
 auto.0184.uploaded,Uploaded,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html text-node,Uploaded,Hochgeladen
 auto.0185.value,Value,apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html attr:placeholder,Value,Wert
 auto.0186.view_full_size_photo,View full-size photo,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html attr:aria-label,View full-size photo,Foto in voller Größe ansehen
-auto.0187.we_sent_a_confirmation_link_to,We sent a confirmation link to,apps/web/src/app/features/auth/register/register.component.html text-node,We sent a confirmation link to,Wir haben einen Bestätigungslink an gesendet
-auto.0188.we_sent_a_password_reset_link_to,We sent a password reset link to,apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node,We sent a password reset link to,Wir haben einen Link zum Zurücksetzen des Passworts an gesendet
+auto.0187.we_sent_a_confirmation_link_to,We sent a confirmation link to,apps/web/src/app/features/auth/register/register.component.html text-node,We sent a confirmation link to,Wir haben einen Bestätigungslink an folgende Adresse gesendet:
+auto.0188.we_sent_a_password_reset_link_to,We sent a password reset link to,apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node,We sent a password reset link to,Wir haben einen Link zum Zurücksetzen des Passworts an folgende Adresse gesendet:
 auto.0189.welcome_back_to_feldpost,Welcome back to Feldpost,apps/web/src/app/features/auth/login/login.component.html text-node,Welcome back to Feldpost,Willkommen zurück bei Feldpost
 auto.0190.worker,Worker,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Worker,Mitarbeiter
 auto.0191.workspace_controls,Workspace controls,apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.html attr:aria-label,Workspace controls,Arbeitsbereich-Steuerelemente

@@ -5,7 +5,7 @@ import type { ProjectColorKey } from '../../core/projects/projects.types';
   selector: 'app-project-color-picker',
   standalone: true,
   template: `
-    <div class="project-color-picker" role="menu" aria-label="Project color">
+    <div class="project-color-picker option-menu-surface" role="menu" aria-label="Project color">
       <div class="dd-items">
         <button type="button" class="dd-item" (click)="pickRandomBrandHue()">
           <span class="material-icons dd-item__icon" aria-hidden="true">palette</span>
@@ -22,10 +22,6 @@ import type { ProjectColorKey } from '../../core/projects/projects.types';
     `
       .project-color-picker {
         min-width: 14rem;
-        border: 1px solid var(--color-border);
-        border-radius: var(--container-radius-panel);
-        background: var(--color-bg-elevated);
-        box-shadow: var(--elevation-dropdown);
       }
 
       .project-color-picker .dd-items {

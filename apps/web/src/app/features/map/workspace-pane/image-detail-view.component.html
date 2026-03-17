@@ -68,7 +68,11 @@
       </button>
 
       @if (showContextMenu()) {
-        <div class="detail-context-menu dd-items" role="menu" (keydown.escape)="closeContextMenu()">
+        <div
+          class="detail-context-menu option-menu-surface dd-items"
+          role="menu"
+          (keydown.escape)="closeContextMenu()"
+        >
           <button
             class="dd-item dd-item--danger"
             type="button"

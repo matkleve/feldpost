@@ -2,6 +2,7 @@ import { Component, computed, inject, input } from '@angular/core';
 import { FilterService } from '../../../../core/filter.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyType } from '../../../../core/property-registry.types';
+import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
 
 export interface FilterDropdownPropertyOption {
   id: string;
@@ -27,61 +28,65 @@ function operatorsForType(type: PropertyType | undefined): string[] {
 @Component({
   selector: 'app-filter-dropdown',
   template: `
-    <div class="filter-dropdown">
-      @if (filterService.rules().length === 0) {
-        <div class="dd-empty">No filters applied</div>
-      } @else {
-        <div class="filter-rules">
-          @for (rule of filterService.rules(); track rule.id; let i = $index) {
-            <div class="filter-rule">
-              <button class="filter-rule__conj" (click)="toggleConjunction(rule.id)">
-                {{ i === 0 ? 'Where' : rule.conjunction === 'and' ? 'And' : 'Or' }}
-              </button>
-              <select
-                class="filter-rule__select"
-                [value]="rule.property"
-                (change)="updateProperty(rule.id, $any($event.target).value)"
-              >
-                <option value="" disabled>Property</option>
-                @for (prop of propertyOptions(); track prop.id) {
-                  <option [value]="prop.id">{{ prop.label }}</option>
-                }
-              </select>
-              <select
-                class="filter-rule__select"
-                [value]="rule.operator"
-                (change)="updateOperator(rule.id, $any($event.target).value)"
-              >
-                <option value="" disabled>Operator</option>
-                @for (op of getOperatorsForRule(rule.property); track op) {
-                  <option [value]="op">{{ op }}</option>
-                }
-              </select>
-              <input
-                class="filter-rule__value"
-                [type]="getInputType(rule.property)"
-                placeholder="Value…"
-                [value]="rule.value"
-                (input)="updateValue(rule.id, $any($event.target).value)"
-              />
-              <button
-                class="filter-rule__remove icon-btn-ghost icon-btn-ghost--danger"
-                (click)="removeRule(rule.id)"
-                aria-label="Remove filter"
-              >
-                <span class="material-icons">close</span>
-              </button>
-            </div>
-          }
-        </div>
-      }
-      <button class="dd-action-row" (click)="filterService.addRule()">
-        <span class="material-icons">add</span>
-        Add a filter
-      </button>
-    </div>
+    <app-standard-dropdown
+      class="filter-dropdown"
+      [showSearch]="false"
+      actionLabel="Add a filter"
+      (actionRequested)="filterService.addRule()"
+    >
+      <div dropdown-items>
+        @if (filterService.rules().length === 0) {
+          <div class="dd-empty">No filters applied</div>
+        } @else {
+          <div class="filter-rules">
+            @for (rule of filterService.rules(); track rule.id; let i = $index) {
+              <div class="filter-rule">
+                <button class="filter-rule__conj" (click)="toggleConjunction(rule.id)">
+                  {{ i === 0 ? 'Where' : rule.conjunction === 'and' ? 'And' : 'Or' }}
+                </button>
+                <select
+                  class="filter-rule__select"
+                  [value]="rule.property"
+                  (change)="updateProperty(rule.id, $any($event.target).value)"
+                >
+                  <option value="" disabled>Property</option>
+                  @for (prop of propertyOptions(); track prop.id) {
+                    <option [value]="prop.id">{{ prop.label }}</option>
+                  }
+                </select>
+                <select
+                  class="filter-rule__select"
+                  [value]="rule.operator"
+                  (change)="updateOperator(rule.id, $any($event.target).value)"
+                >
+                  <option value="" disabled>Operator</option>
+                  @for (op of getOperatorsForRule(rule.property); track op) {
+                    <option [value]="op">{{ op }}</option>
+                  }
+                </select>
+                <input
+                  class="filter-rule__value"
+                  [type]="getInputType(rule.property)"
+                  placeholder="Value…"
+                  [value]="rule.value"
+                  (input)="updateValue(rule.id, $any($event.target).value)"
+                />
+                <button
+                  class="filter-rule__remove icon-btn-ghost icon-btn-ghost--danger"
+                  (click)="removeRule(rule.id)"
+                  aria-label="Remove filter"
+                >
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </app-standard-dropdown>
   `,
   styleUrl: './filter-dropdown.component.scss',
+  imports: [StandardDropdownComponent],
 })
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);

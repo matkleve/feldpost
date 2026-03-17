@@ -15,7 +15,8 @@ Defined in schema/seed:
 Important:
 
 - `clerk` and `worker` now exist as explicit DB roles.
-- Current RLS behavior still treats them like `user` (same effective permissions), which matches the current product request.
+- Baseline RLS behavior for most domains still treats them like `user` (same effective permissions).
+- Feature-specific policies can be stricter than this baseline (see QR invite override below).
 
 ## Fit Check: admin, clerk, worker
 
@@ -48,6 +49,11 @@ Authorization:
 - Read-only checks use `is_viewer()`.
 
 ## Effective Behavior by Domain
+
+Model note:
+
+- This section combines baseline behavior with explicit per-feature overrides.
+- If a feature override exists, the override is authoritative for that feature.
 
 Images:
 
@@ -85,30 +91,36 @@ Storage (`images` bucket):
 - Read: org-scoped.
 - Delete: owner or admin.
 
+QR invites:
+
+- Create QR invite: only `admin`, `clerk`, `worker`.
+- `user` and `viewer`: denied by `can_create_qr_invites()` + RLS insert checks.
+
 ## Action Matrix (Current Effective)
 
 Legend: ALLOW, DENY, CONDITIONAL
 
-| Action                   | admin | user        | viewer | Notes                              |
-| ------------------------ | ----- | ----------- | ------ | ---------------------------------- |
-| Read images in own org   | ALLOW | ALLOW       | ALLOW  | org-scoped                         |
-| Upload image             | ALLOW | ALLOW       | DENY   | user_id path and row checks        |
-| Edit image details       | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers |
-| Delete image             | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers |
-| Edit image metadata      | ALLOW | ALLOW       | DENY   | non-viewer org scope               |
-| Create metadata key      | ALLOW | ALLOW       | DENY   | non-viewer org scope               |
-| Delete metadata key      | ALLOW | CONDITIONAL | DENY   | creator or admin                   |
-| Read projects in own org | ALLOW | ALLOW       | ALLOW  | org-scoped                         |
-| Create project           | ALLOW | ALLOW       | DENY   | non-viewer                         |
-| Update project           | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers |
-| Delete project           | ALLOW | CONDITIONAL | DENY   | owner or admin                     |
-| Assign/revoke roles      | ALLOW | DENY        | DENY   | admin-only policy                  |
-| Upload storage object    | ALLOW | ALLOW       | DENY   | path and role checks               |
-| Delete storage object    | ALLOW | CONDITIONAL | DENY   | owner or admin                     |
+| Action                   | admin | user        | viewer | Notes                                        |
+| ------------------------ | ----- | ----------- | ------ | -------------------------------------------- |
+| Read images in own org   | ALLOW | ALLOW       | ALLOW  | org-scoped                                   |
+| Upload image             | ALLOW | ALLOW       | DENY   | user_id path and row checks                  |
+| Edit image details       | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers           |
+| Delete image             | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers           |
+| Edit image metadata      | ALLOW | ALLOW       | DENY   | non-viewer org scope                         |
+| Create metadata key      | ALLOW | ALLOW       | DENY   | non-viewer org scope                         |
+| Delete metadata key      | ALLOW | CONDITIONAL | DENY   | creator or admin                             |
+| Read projects in own org | ALLOW | ALLOW       | ALLOW  | org-scoped                                   |
+| Create project           | ALLOW | ALLOW       | DENY   | non-viewer                                   |
+| Update project           | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers           |
+| Delete project           | ALLOW | CONDITIONAL | DENY   | owner or admin                               |
+| Assign/revoke roles      | ALLOW | DENY        | DENY   | admin-only policy                            |
+| Upload storage object    | ALLOW | ALLOW       | DENY   | path and role checks                         |
+| Delete storage object    | ALLOW | CONDITIONAL | DENY   | owner or admin                               |
+| Create QR invite         | ALLOW | DENY        | DENY   | override: only admin/clerk/worker may create |
 
 ## Action Matrix (Requested Role Names, Current Mapping)
 
-Current effective behavior: clerk and worker both follow non-viewer `user` behavior until dedicated RLS splits are introduced.
+Current effective behavior: clerk and worker generally follow non-viewer `user` behavior until dedicated RLS splits are introduced, except for explicit feature overrides like QR invites.
 
 | Action                   | admin | clerk       | worker      | Notes                              |
 | ------------------------ | ----- | ----------- | ----------- | ---------------------------------- |
@@ -126,6 +138,7 @@ Current effective behavior: clerk and worker both follow non-viewer `user` behav
 | Assign/revoke roles      | ALLOW | DENY        | DENY        | admin-only policy                  |
 | Upload storage object    | ALLOW | ALLOW       | ALLOW       | path and role checks               |
 | Delete storage object    | ALLOW | CONDITIONAL | CONDITIONAL | owner or admin                     |
+| Create QR invite         | ALLOW | ALLOW       | ALLOW       | `user` and `viewer` are denied     |
 
 ## Production Decision Required
 

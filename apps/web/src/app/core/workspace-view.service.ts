@@ -228,6 +228,146 @@ export class WorkspaceViewService {
     void this.loadImageMetadata(images);
   }
 
+  /** Load and map images by explicit IDs while preserving the input order. */
+  async loadImagesByIdsOrdered(imageIds: string[]): Promise<WorkspaceImage[]> {
+    const uniqueIds = Array.from(new Set(imageIds.filter((id) => !!id)));
+    if (uniqueIds.length === 0) {
+      return [];
+    }
+
+    const { data, error } = await this.supabase.client
+      .from('images')
+      .select(
+        'id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, project_id, direction, exif_latitude, exif_longitude, address_label, city, district, street, country, user_id',
+      )
+      .in('id', uniqueIds);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const rows = Array.isArray(data) ? (data as RawSharedImageRow[]) : [];
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const userIds = Array.from(
+      new Set(rows.map((row) => row.user_id).filter((id): id is string => !!id)),
+    );
+    const profileNameById = new Map<string, string>();
+
+    if (userIds.length > 0) {
+      const { data: profilesData, error: profilesError } = await this.supabase.client
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
+
+      if (!profilesError && Array.isArray(profilesData)) {
+        for (const profile of profilesData as Array<{ id: string; full_name: string | null }>) {
+          if (profile.full_name) {
+            profileNameById.set(profile.id, profile.full_name);
+          }
+        }
+      }
+    }
+
+    const membershipByImageId = new Map<string, Array<{ id: string; name: string | null }>>();
+    const { data: membershipsData, error: membershipsError } = await this.supabase.client
+      .from('image_projects')
+      .select('image_id, project_id, projects(name)')
+      .in('image_id', uniqueIds);
+
+    if (!membershipsError && Array.isArray(membershipsData)) {
+      for (const row of membershipsData as RawImageProjectMembershipRow[]) {
+        const bucket = membershipByImageId.get(row.image_id) ?? [];
+        const relatedProject = Array.isArray(row.projects) ? row.projects[0] : row.projects;
+        bucket.push({
+          id: row.project_id,
+          name: relatedProject?.name ?? null,
+        });
+        membershipByImageId.set(row.image_id, bucket);
+      }
+    }
+
+    const fallbackProjectIds = Array.from(
+      new Set(rows.map((row) => row.project_id).filter((id): id is string => !!id)),
+    );
+    const fallbackProjectNameById = new Map<string, string>();
+
+    if (fallbackProjectIds.length > 0) {
+      const { data: projectsData, error: projectsError } = await this.supabase.client
+        .from('projects')
+        .select('id, name')
+        .in('id', fallbackProjectIds);
+
+      if (!projectsError && Array.isArray(projectsData)) {
+        for (const project of projectsData as Array<{ id: string; name: string }>) {
+          fallbackProjectNameById.set(project.id, project.name);
+        }
+      }
+    }
+
+    const imageById = new Map<string, WorkspaceImage>();
+    for (const row of rows) {
+      if (
+        typeof row.latitude !== 'number' ||
+        !Number.isFinite(row.latitude) ||
+        typeof row.longitude !== 'number' ||
+        !Number.isFinite(row.longitude)
+      ) {
+        continue;
+      }
+
+      const memberships = membershipByImageId.get(row.id) ?? [];
+      memberships.sort((a, b) => {
+        const aName = (a.name ?? '').toLowerCase();
+        const bName = (b.name ?? '').toLowerCase();
+        return aName < bName ? -1 : aName > bName ? 1 : 0;
+      });
+
+      const projectIds = memberships.map((entry) => entry.id);
+      const projectNames = memberships.map((entry) => entry.name ?? '').filter((name) => !!name);
+      const fallbackProjectName = row.project_id
+        ? (fallbackProjectNameById.get(row.project_id) ?? null)
+        : null;
+      const primaryProjectId = projectIds[0] ?? row.project_id;
+      const primaryProjectName = projectNames[0] ?? fallbackProjectName;
+
+      imageById.set(row.id, {
+        id: row.id,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        thumbnailPath: row.thumbnail_path,
+        storagePath: row.storage_path,
+        capturedAt: row.captured_at,
+        createdAt: row.created_at,
+        projectId: primaryProjectId,
+        projectName: primaryProjectName,
+        projectIds,
+        projectNames,
+        direction: row.direction,
+        exifLatitude: row.exif_latitude,
+        exifLongitude: row.exif_longitude,
+        addressLabel: row.address_label,
+        city: row.city,
+        district: row.district,
+        street: row.street,
+        country: row.country,
+        userName: row.user_id ? (profileNameById.get(row.user_id) ?? null) : null,
+      });
+    }
+
+    const ordered: WorkspaceImage[] = [];
+    for (const id of imageIds) {
+      const image = imageById.get(id);
+      if (image) {
+        ordered.push(image);
+      }
+    }
+
+    return ordered;
+  }
+
   /** Convenience: "select" state populated but holding zero rows (RPC returned nothing). */
   readonly emptySelection = computed(
     () => this.selectionActive() && !this.isLoading() && this.rawImages().length === 0,
@@ -475,6 +615,32 @@ interface RawClusterRow {
   street: string | null;
   country: string | null;
   user_name: string | null;
+}
+
+interface RawSharedImageRow {
+  id: string;
+  latitude: number | null;
+  longitude: number | null;
+  thumbnail_path: string | null;
+  storage_path: string | null;
+  captured_at: string | null;
+  created_at: string;
+  project_id: string | null;
+  direction: number | null;
+  exif_latitude: number | null;
+  exif_longitude: number | null;
+  address_label: string | null;
+  city: string | null;
+  district: string | null;
+  street: string | null;
+  country: string | null;
+  user_id: string | null;
+}
+
+interface RawImageProjectMembershipRow {
+  image_id: string;
+  project_id: string;
+  projects: { name: string | null } | Array<{ name: string | null }> | null;
 }
 
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {

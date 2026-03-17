@@ -583,10 +583,28 @@ router-outlet + * {
   max-height: min(24rem, calc(100vh - 6rem));
   display: flex;
   flex-direction: column;
+}
+
+.option-menu-surface {
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--elevation-dropdown);
+  overflow: hidden;
+}
+
+.option-menu-surface.dd-items,
+.option-menu-surface .dd-items {
+  max-height: min(18rem, 52vh);
+  overflow-y: auto;
+}
+
+.option-menu-header {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
 }
 
 // ── Shared icon ghost button primitives ─────────────────────────────────────

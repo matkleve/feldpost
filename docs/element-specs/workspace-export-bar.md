@@ -37,7 +37,7 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 | 12  | Confirms deletion                                     | Deletes selected media rows and related storage references, then clears selection | `bulkDeleteMedia(ids)`              |
 | 13  | Clicks `Share link`                                   | Opens Share Dialog with count and visibility summary                              | `shareDialogOpen = true`            |
 | 14  | Confirms link generation                              | Creates or fetches stable share-set token mapped to normalized selected IDs       | `createShareSetToken(ids)`          |
-| 15  | Clicks `Copy link`                                    | Writes resolved URL to clipboard and shows toast                                  | `navigator.clipboard.writeText`     |
+| 15  | Clicks `Copy link` (`Link kopieren` in de locale)     | Writes resolved URL to clipboard and shows toast                                  | `navigator.clipboard.writeText`     |
 | 16  | Clicks `Share` on supported device                    | Invokes native share sheet with URL/title/text                                    | `navigator.share`                   |
 | 17  | Clicks `Download ZIP`                                 | Opens Download Dialog with prefilled filename/title                               | `downloadDialogOpen = true`         |
 | 18  | Confirms ZIP download                                 | Fetches binaries, packages ZIP, starts browser download                           | `startZipExport()`                  |

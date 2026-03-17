@@ -59,6 +59,8 @@ import { Component, input, output } from '@angular/core';
       .standard-dropdown .dd-items {
         min-height: 0;
         overflow-y: auto;
+        padding-top: calc(var(--spacing-2) + var(--spacing-1));
+        padding-bottom: calc(var(--spacing-2) + var(--spacing-1));
       }
     `,
   ],

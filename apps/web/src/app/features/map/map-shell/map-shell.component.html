@@ -98,7 +98,7 @@
 
   @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
     <div
-      class="map-context-menu"
+      class="map-context-menu option-menu-surface"
       [style.left.px]="mapMenuPos.x"
       [style.top.px]="mapMenuPos.y"
       role="menu"
@@ -151,13 +151,13 @@
 
   @if (radiusContextMenuOpen() && radiusContextMenuPosition(); as radiusMenuPos) {
     <div
-      class="map-context-menu"
+      class="map-context-menu option-menu-surface"
       [style.left.px]="radiusMenuPos.x"
       [style.top.px]="radiusMenuPos.y"
       role="menu"
       aria-label="Radius context menu"
     >
-      <div class="map-context-menu__header">Radius Auswahl</div>
+      <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
 
       <div class="dd-items">
         <button
@@ -185,13 +185,13 @@
   @if (markerContextMenuOpen() && markerContextMenuPosition(); as markerMenuPos) {
     @if (markerContextMenuPayload(); as markerMenu) {
       <div
-        class="map-context-menu"
+        class="map-context-menu option-menu-surface"
         [style.left.px]="markerMenuPos.x"
         [style.top.px]="markerMenuPos.y"
         role="menu"
         aria-label="Marker context menu"
       >
-        <div class="map-context-menu__header">
+        <div class="map-context-menu__header option-menu-header">
           @if (markerContextIsSingle) {
             Foto Marker
           } @else {
