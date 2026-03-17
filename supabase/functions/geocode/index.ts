@@ -38,11 +38,11 @@ function resolveAllowedOrigin(req: Request): string | null {
   }
 
   if (ALLOWED_ORIGINS.length === 0) {
-    // Backward-compatible fallback for local development if not configured.
-    return origin;
+    // Fail closed in production: if no allow-list is configured, do not allow browser origins.
+    return null;
   }
 
-  if (ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin)) {
+  if (ALLOWED_ORIGINS.includes(origin)) {
     return origin;
   }
 

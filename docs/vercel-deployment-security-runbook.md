@@ -71,7 +71,7 @@ Set this secret for the `geocode` edge function:
 Behavior:
 
 - Requests from non-allowlisted browser origins get `403 Origin not allowed`.
-- If `ALLOWED_ORIGINS` is empty, the function falls back to permissive mode for backward compatibility.
+- If `ALLOWED_ORIGINS` is empty, browser-origin calls are denied (fail-closed).
 
 ---
 
