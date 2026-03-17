@@ -151,6 +151,9 @@
           role="tab"
           class="upload-panel__lane-btn upload-panel__lane-btn--issues"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'issues'"
+          [class.upload-panel__lane-btn--attention]="
+            issueAttentionPulse() && laneCounts().issues > 0 && effectiveLane() !== 'issues'
+          "
           [attr.aria-selected]="effectiveLane() === 'issues'"
           (click)="setSelectedLane('issues')"
         >
@@ -182,10 +185,16 @@
 
           <div
             class="upload-panel__file-main"
-            [class.upload-panel__file-main--interactive]="canZoomToJob(job)"
-            [attr.role]="canZoomToJob(job) ? 'button' : null"
-            [attr.tabindex]="canZoomToJob(job) ? '0' : null"
-            [attr.aria-label]="canZoomToJob(job) ? 'Zoom map to ' + job.file.name : null"
+            [class.upload-panel__file-main--interactive]="isRowInteractive(job)"
+            [attr.role]="isRowInteractive(job) ? 'button' : null"
+            [attr.tabindex]="isRowInteractive(job) ? '0' : null"
+            [attr.aria-label]="
+              job.phase === 'missing_data'
+                ? 'Place ' + job.file.name + ' on map'
+                : canZoomToJob(job)
+                  ? 'Zoom map to ' + job.file.name
+                  : null
+            "
             (click)="onRowMainClick(job)"
             (keydown)="onRowMainKeydown(job, $event)"
           >

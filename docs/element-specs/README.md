@@ -185,6 +185,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 ### Map Markers
 
 - ✅ `photo-marker.md` — Photo Marker (square thumbnail marker + cluster)
+- ✅ `photo-marker-context-menu.md` — Photo Marker Context Menu (right-click/long-press marker actions)
 - ✅ `user-location-marker.md` — GPS user location marker
 
 ### Upload
@@ -220,6 +221,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `gps-button.md` — GPS Button (center on user location)
 - ✅ `theme-toggle.md` — Theme Toggle (light / dark / system)
 - ✅ `radius-selection.md` — Radius Selection (right-click-drag circle)
+- ✅ `map-context-menu.md` — Map Context Menu (short right-click actions on empty map)
 
 ### Pages
 

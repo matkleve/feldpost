@@ -41,6 +41,7 @@ import {
   UploadFailedEvent,
 } from '../../../core/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
@@ -76,6 +77,7 @@ const HISTORIC_LABEL_PANE = 'historic-label';
   styleUrl: './map-shell.component.scss',
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
+    '(document:keydown.escape)': 'closeContextMenus()',
   },
 })
 export class MapShellComponent implements OnDestroy {
@@ -87,12 +89,16 @@ export class MapShellComponent implements OnDestroy {
   private static readonly MARKER_MOVE_DURATION_MS = 320;
   private static readonly RADIUS_SELECTION_MIN_METERS = 10;
   private static readonly RADIUS_CLICK_GUARD_MS = 220;
+  private static readonly CONTEXT_MENU_DRAG_THRESHOLD_PX = 8;
+  private static readonly QUICK_RADIUS_METERS = 250;
+  private static readonly MARKER_LONG_PRESS_MS = 500;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
+  private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly photoLoadService = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
@@ -266,6 +272,19 @@ export class MapShellComponent implements OnDestroy {
   });
   readonly selectedMarkerKey = signal<string | null>(null);
   readonly selectedMarkerKeys = signal<Set<string>>(new Set());
+  readonly mapContextMenuOpen = signal(false);
+  readonly mapContextMenuPosition = signal<{ x: number; y: number } | null>(null);
+  readonly mapContextMenuCoords = signal<{ lat: number; lng: number } | null>(null);
+  readonly markerContextMenuOpen = signal(false);
+  readonly markerContextMenuPosition = signal<{ x: number; y: number } | null>(null);
+  readonly markerContextMenuPayload = signal<{
+    markerKey: string;
+    count: number;
+    lat: number;
+    lng: number;
+    imageId?: string;
+    sourceCells: Array<{ lat: number; lng: number }>;
+  } | null>(null);
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
@@ -351,6 +370,11 @@ export class MapShellComponent implements OnDestroy {
   private radiusDraftLabel: L.Marker | null = null;
   private radiusDrawMoveHandler: ((event: L.LeafletMouseEvent) => void) | null = null;
   private radiusDrawMouseUpHandler: ((event: L.LeafletMouseEvent) => void) | null = null;
+  private pendingSecondaryPress: {
+    startPoint: L.Point;
+    startLatLng: L.LatLng;
+    additive: boolean;
+  } | null = null;
   private radiusDraftHighlightedKeys = new Set<string>();
   private readonly radiusCommittedVisuals: Array<{
     circle: L.Circle;
@@ -436,8 +460,155 @@ export class MapShellComponent implements OnDestroy {
     this.userLocationMarker = null;
     this.clearSearchLocationMarker();
     this.cancelRadiusDrawing();
+    this.pendingSecondaryPress = null;
+    this.closeContextMenus();
     this.clearRadiusSelectionVisuals();
     this.map?.remove();
+  }
+
+  closeContextMenus(): void {
+    this.mapContextMenuOpen.set(false);
+    this.markerContextMenuOpen.set(false);
+  }
+
+  onMapContextCreateMarkerHere(): void {
+    const coords = this.mapContextMenuCoords();
+    if (!coords) return;
+    this.renderOrUpdateSearchLocationMarker([coords.lat, coords.lng]);
+    this.searchPlacementActive.set(false);
+    this.placementActive.set(false);
+    this.map?.getContainer().classList.remove('map-container--placing');
+    this.toastService.show({ message: 'Marker hier erstellt.', type: 'success', dedupe: true });
+    this.closeContextMenus();
+  }
+
+  onMapContextCenterHere(): void {
+    const coords = this.mapContextMenuCoords();
+    if (!coords || !this.map) return;
+    this.map.setView([coords.lat, coords.lng], this.map.getZoom());
+    this.closeContextMenus();
+  }
+
+  async onMapContextCopyCoordinates(): Promise<void> {
+    const coords = this.mapContextMenuCoords();
+    if (!coords) return;
+    const text = `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
+    const copied = await this.copyTextToClipboard(text);
+    this.toastService.show({
+      message: copied ? 'Koordinaten kopiert.' : text,
+      type: copied ? 'success' : 'info',
+      dedupe: true,
+    });
+    this.closeContextMenus();
+  }
+
+  async onMapContextStartRadiusFromHere(): Promise<void> {
+    const coords = this.mapContextMenuCoords();
+    if (!coords || !this.map) return;
+
+    const center = L.latLng(coords.lat, coords.lng);
+    const radiusMeters = MapShellComponent.QUICK_RADIUS_METERS;
+    const edge = this.offsetLatLngEast(center, radiusMeters);
+
+    this.clearRadiusSelectionVisuals();
+    this.addRadiusSelectionVisual(center, radiusMeters, edge);
+    await this.selectRadiusImages(center, radiusMeters, false);
+    this.closeContextMenus();
+  }
+
+  get markerContextIsSingle(): boolean {
+    const payload = this.markerContextMenuPayload();
+    return !!payload && payload.count === 1;
+  }
+
+  get markerContextIsCluster(): boolean {
+    const payload = this.markerContextMenuPayload();
+    return !!payload && payload.count > 1;
+  }
+
+  onMarkerContextOpenDetailsOrSelection(): void {
+    const payload = this.markerContextMenuPayload();
+    if (!payload) return;
+    this.closeContextMenus();
+    this.handlePhotoMarkerClick(payload.markerKey);
+  }
+
+  onMarkerContextMoveMarker(): void {
+    const payload = this.markerContextMenuPayload();
+    if (!payload) return;
+    this.toastService.show({
+      message: 'Marker verschieben folgt im nächsten Schritt.',
+      type: 'info',
+      dedupe: true,
+    });
+    this.closeContextMenus();
+  }
+
+  onMarkerContextAddToGroup(): void {
+    const payload = this.markerContextMenuPayload();
+    if (!payload) return;
+    this.toastService.show({
+      message: 'Zu Gruppe hinzufügen folgt im nächsten Schritt.',
+      type: 'info',
+      dedupe: true,
+    });
+    this.closeContextMenus();
+  }
+
+  async onMarkerContextCopyCoordinates(): Promise<void> {
+    const payload = this.markerContextMenuPayload();
+    if (!payload) return;
+    const text = `${payload.lat.toFixed(6)}, ${payload.lng.toFixed(6)}`;
+    const copied = await this.copyTextToClipboard(text);
+    this.toastService.show({
+      message: copied ? 'Koordinaten kopiert.' : text,
+      type: copied ? 'success' : 'info',
+      dedupe: true,
+    });
+    this.closeContextMenus();
+  }
+
+  async onMarkerContextDeletePhoto(): Promise<void> {
+    const payload = this.markerContextMenuPayload();
+    if (!payload || payload.count !== 1 || !payload.imageId) return;
+
+    const confirmed =
+      typeof window === 'undefined' ||
+      window.confirm(
+        'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
+      );
+    if (!confirmed) return;
+
+    const { error } = await this.supabaseService.client
+      .from('images')
+      .delete()
+      .eq('id', payload.imageId);
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error', dedupe: true });
+      return;
+    }
+
+    const markerState = this.uploadedPhotoMarkers.get(payload.markerKey);
+    if (markerState && this.photoMarkerLayer) {
+      this.cancelMarkerMoveAnimation(markerState.marker);
+      this.photoMarkerLayer.removeLayer(markerState.marker);
+      this.uploadedPhotoMarkers.delete(payload.markerKey);
+    }
+    this.markersByImageId.delete(payload.imageId);
+    if (this.selectedMarkerKey() === payload.markerKey) {
+      this.setSelectedMarker(null);
+    }
+    if (this.selectedMarkerKeys().has(payload.markerKey)) {
+      const next = new Set(this.selectedMarkerKeys());
+      next.delete(payload.markerKey);
+      this.setSelectedMarkerKeys(next);
+    }
+    if (this.detailImageId() === payload.imageId) {
+      this.detailImageId.set(null);
+    }
+
+    this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
+    this.closeContextMenus();
   }
 
   // ── Workspace pane resize ─────────────────────────────────────────────────
@@ -464,6 +635,7 @@ export class MapShellComponent implements OnDestroy {
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
+    this.workspaceSelectionService.clearSelection();
     this.clearRadiusSelectionVisuals();
     // Let Angular remove the pane from the DOM, then tell Leaflet to reclaim the space.
     setTimeout(() => this.map?.invalidateSize(), 0);
@@ -670,6 +842,8 @@ export class MapShellComponent implements OnDestroy {
     // that had no GPS EXIF data.
     this.map.on('click', (e: L.LeafletMouseEvent) => this.handleMapClick(e));
     this.map.on('mousedown', (e: L.LeafletMouseEvent) => this.handleMapMouseDown(e));
+    this.map.on('mousemove', (e: L.LeafletMouseEvent) => this.handleMapMouseMove(e));
+    this.map.on('mouseup', (e: L.LeafletMouseEvent) => this.handleMapMouseUp(e));
     this.map.on('contextmenu', (e: L.LeafletMouseEvent) => {
       e.originalEvent.preventDefault();
     });
@@ -917,6 +1091,8 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private handleMapClick(e: L.LeafletMouseEvent): void {
+    this.closeContextMenus();
+
     const clickButton = e.originalEvent?.button ?? 0;
     const isPrimaryClick = clickButton === 0;
     const hasMarkerSelection =
@@ -952,6 +1128,7 @@ export class MapShellComponent implements OnDestroy {
       this.setSelectedMarkerKeys(new Set());
       this.detailImageId.set(null);
       this.workspaceViewService.clearActiveSelection();
+      this.workspaceSelectionService.clearSelection();
       this.clearRadiusSelectionVisuals();
       return;
     }
@@ -967,22 +1144,72 @@ export class MapShellComponent implements OnDestroy {
     }
 
     event.originalEvent.preventDefault();
-    this.startRadiusSelectionDraw(event);
+    if (!this.map || this.placementActive() || this.searchPlacementActive()) {
+      return;
+    }
+
+    this.pendingSecondaryPress = {
+      startPoint: this.map.mouseEventToContainerPoint(event.originalEvent),
+      startLatLng: event.latlng,
+      additive: !!(event.originalEvent.ctrlKey || event.originalEvent.metaKey),
+    };
+    this.closeContextMenus();
   }
 
-  private startRadiusSelectionDraw(event: L.LeafletMouseEvent): void {
+  private handleMapMouseMove(event: L.LeafletMouseEvent): void {
+    if (!this.map || !this.pendingSecondaryPress || this.radiusDrawActive) {
+      return;
+    }
+
+    const currentPoint = this.map.mouseEventToContainerPoint(event.originalEvent);
+    const dx = currentPoint.x - this.pendingSecondaryPress.startPoint.x;
+    const dy = currentPoint.y - this.pendingSecondaryPress.startPoint.y;
+    const movedPx = Math.hypot(dx, dy);
+
+    if (movedPx < MapShellComponent.CONTEXT_MENU_DRAG_THRESHOLD_PX) {
+      return;
+    }
+
+    const { startLatLng, additive } = this.pendingSecondaryPress;
+    this.pendingSecondaryPress = null;
+    this.startRadiusSelectionDraw(startLatLng, additive);
+    this.updateRadiusSelectionDraft(event.latlng);
+  }
+
+  private handleMapMouseUp(event: L.LeafletMouseEvent): void {
+    if (event.originalEvent.button !== 2) {
+      return;
+    }
+
+    event.originalEvent.preventDefault();
+
+    if (this.radiusDrawActive) {
+      return;
+    }
+
+    if (!this.pendingSecondaryPress) {
+      return;
+    }
+
+    const { startLatLng } = this.pendingSecondaryPress;
+    this.pendingSecondaryPress = null;
+    this.openMapContextMenuAt(startLatLng, event.originalEvent);
+  }
+
+  private startRadiusSelectionDraw(startLatLng: L.LatLng, additive: boolean): void {
     if (!this.map || this.placementActive() || this.searchPlacementActive()) {
       return;
     }
 
     this.cancelRadiusDrawing();
+    this.closeContextMenus();
 
     this.radiusDrawActive = true;
-    this.radiusDrawAdditive = event.originalEvent.ctrlKey || event.originalEvent.metaKey;
-    this.radiusDrawStartLatLng = event.latlng;
+    this.radiusDrawAdditive = additive;
+    this.radiusDrawStartLatLng = startLatLng;
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
 
-    this.radiusDraftLine = L.polyline([event.latlng, event.latlng], {
+    this.radiusDraftLine = L.polyline([startLatLng, startLatLng], {
       color: 'var(--color-clay)',
       weight: 2,
       opacity: 0.95,
@@ -990,7 +1217,7 @@ export class MapShellComponent implements OnDestroy {
       interactive: false,
     }).addTo(this.map);
 
-    this.radiusDraftCircle = L.circle(event.latlng, {
+    this.radiusDraftCircle = L.circle(startLatLng, {
       radius: 1,
       color: 'var(--color-clay)',
       weight: 2,
@@ -1000,7 +1227,7 @@ export class MapShellComponent implements OnDestroy {
       interactive: false,
     }).addTo(this.map);
 
-    this.radiusDraftLabel = this.createRadiusLabelMarker(event.latlng, 0, 0).addTo(this.map);
+    this.radiusDraftLabel = this.createRadiusLabelMarker(startLatLng, 0, 0).addTo(this.map);
 
     this.radiusDrawMoveHandler = (moveEvent: L.LeafletMouseEvent) => {
       this.updateRadiusSelectionDraft(moveEvent.latlng);
@@ -1259,6 +1486,9 @@ export class MapShellComponent implements OnDestroy {
       ? this.mergeWorkspaceImages(this.workspaceViewService.rawImages(), incoming)
       : incoming;
     this.workspaceViewService.setActiveSelectionImages(merged);
+    if (!additive) {
+      this.workspaceSelectionService.clearSelection();
+    }
 
     if (!this.photoPanelOpen()) {
       this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
@@ -1504,13 +1734,15 @@ export class MapShellComponent implements OnDestroy {
     const fetchEast = bounds.getEast() + lngPad;
     const roundedZoom = Math.round(zoom);
 
-    const { data, error } = await this.supabaseService.client.rpc('viewport_markers', {
-      min_lat: fetchSouth,
-      min_lng: fetchWest,
-      max_lat: fetchNorth,
-      max_lng: fetchEast,
-      zoom: roundedZoom,
-    });
+    const { data, error } = await this.supabaseService.client
+      .rpc('viewport_markers', {
+        min_lat: fetchSouth,
+        min_lng: fetchWest,
+        max_lat: fetchNorth,
+        max_lng: fetchEast,
+        zoom: roundedZoom,
+      })
+      .abortSignal(controller.signal);
 
     // If this query was aborted, discard the result.
     if (controller.signal.aborted) return;
@@ -1824,6 +2056,8 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
+    this.workspaceSelectionService.clearSelection();
+
     this.setSelectedMarkerKeys(new Set([markerKey]));
 
     void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
@@ -1845,11 +2079,12 @@ export class MapShellComponent implements OnDestroy {
   ): void {
     const shouldFadeIn = options?.fadeIn ?? true;
     this.bindMarkerClickInteraction(markerKey, marker);
+    this.bindMarkerContextInteraction(markerKey, marker);
     // Attach long-press handler for touch direction cone after element is in DOM.
     marker.once('add', () => {
       const el = marker.getElement();
       if (el) {
-        this.attachLongPressHandler(el);
+        this.attachLongPressHandler(el, markerKey);
         if (shouldFadeIn) {
           this.triggerMarkerFadeIn(el);
         }
@@ -1863,6 +2098,25 @@ export class MapShellComponent implements OnDestroy {
     marker.on('click', (event: L.LeafletMouseEvent) =>
       this.handlePhotoMarkerClick(markerKey, event),
     );
+  }
+
+  private bindMarkerContextInteraction(markerKey: string, marker: L.Marker): void {
+    marker.off('contextmenu');
+    marker.off('mousedown');
+
+    marker.on('mousedown', (event: L.LeafletMouseEvent) => {
+      if (event.originalEvent.button !== 2) return;
+      event.originalEvent.preventDefault();
+      event.originalEvent.stopPropagation();
+      this.pendingSecondaryPress = null;
+    });
+
+    marker.on('contextmenu', (event: L.LeafletMouseEvent) => {
+      event.originalEvent.preventDefault();
+      event.originalEvent.stopPropagation();
+      this.pendingSecondaryPress = null;
+      this.openMarkerContextMenu(markerKey, event.originalEvent);
+    });
   }
 
   private async addMarkerCellsToSelection(
@@ -2086,15 +2340,19 @@ export class MapShellComponent implements OnDestroy {
    * On long press, toggles `.map-photo-marker--long-pressed` so the direction
    * cone is visible on touch devices (mirrors the desktop `:hover` affordance).
    */
-  private attachLongPressHandler(el: HTMLElement): void {
+  private attachLongPressHandler(el: HTMLElement, markerKey: string): void {
     let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 
     el.addEventListener(
       'pointerdown',
-      () => {
+      (event: PointerEvent) => {
+        if (event.pointerType && event.pointerType !== 'touch') {
+          return;
+        }
         longPressTimer = setTimeout(() => {
           el.classList.add('map-photo-marker--long-pressed');
-        }, 500);
+          this.openMarkerContextMenu(markerKey, event);
+        }, MapShellComponent.MARKER_LONG_PRESS_MS);
       },
       { passive: true },
     );
@@ -2183,6 +2441,7 @@ export class MapShellComponent implements OnDestroy {
       if (this.zoomAnimating) return;
 
       const currentZoom = this.getPhotoMarkerZoomLevel();
+      this.closeContextMenus();
       const zoomChanged = currentZoom !== this.lastZoomLevel;
 
       // Skip the RPC if zoom didn't change and viewport is still inside
@@ -2386,6 +2645,79 @@ export class MapShellComponent implements OnDestroy {
     return 'far';
   }
 
+  private openMapContextMenuAt(latlng: L.LatLng, mouseEvent: MouseEvent): void {
+    const position = this.clampContextMenuPosition(mouseEvent.clientX, mouseEvent.clientY);
+    this.markerContextMenuOpen.set(false);
+    this.mapContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
+    this.mapContextMenuPosition.set(position);
+    this.mapContextMenuOpen.set(true);
+    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private openMarkerContextMenu(markerKey: string, sourceEvent?: MouseEvent | PointerEvent): void {
+    const state = this.uploadedPhotoMarkers.get(markerKey);
+    if (!state) return;
+
+    let x = sourceEvent?.clientX;
+    let y = sourceEvent?.clientY;
+
+    if ((x == null || y == null) && this.map) {
+      const point = this.map.latLngToContainerPoint([state.lat, state.lng]);
+      const containerRect = this.map.getContainer().getBoundingClientRect();
+      x = containerRect.left + point.x;
+      y = containerRect.top + point.y;
+    }
+
+    const position = this.clampContextMenuPosition(x ?? 0, y ?? 0);
+
+    this.mapContextMenuOpen.set(false);
+    this.markerContextMenuPosition.set(position);
+    this.markerContextMenuPayload.set({
+      markerKey,
+      count: state.count,
+      lat: state.lat,
+      lng: state.lng,
+      imageId: state.imageId,
+      sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
+    });
+    this.markerContextMenuOpen.set(true);
+    this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private clampContextMenuPosition(x: number, y: number): { x: number; y: number } {
+    if (typeof window === 'undefined') {
+      return { x, y };
+    }
+
+    const menuWidth = 240;
+    const menuHeight = 280;
+    const margin = 8;
+    return {
+      x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),
+      y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
+    };
+  }
+
+  private async copyTextToClipboard(text: string): Promise<boolean> {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+      return false;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private offsetLatLngEast(center: L.LatLng, meters: number): L.LatLng {
+    const latRad = (center.lat * Math.PI) / 180;
+    const metersPerDegreeLng = 111320 * Math.max(Math.cos(latRad), 0.0001);
+    const lngOffset = meters / metersPerDegreeLng;
+    return L.latLng(center.lat, center.lng + lngOffset);
+  }
+
   /**
    * Client-side pixel-distance merge pass.
    *
@@ -2421,11 +2753,30 @@ export class MapShellComponent implements OnDestroy {
       this.map!.latLngToContainerPoint([row.cluster_lat, row.cluster_lng]),
     );
 
+    // Bucket points in screen-space cells to avoid O(n^2) scans on dense viewports.
+    const cellSize = minDist;
+    const buckets = new Map<string, number[]>();
+    for (let i = 0; i < points.length; i++) {
+      const cellX = Math.floor(points[i].x / cellSize);
+      const cellY = Math.floor(points[i].y / cellSize);
+      const bucketKey = `${cellX}:${cellY}`;
+      const list = buckets.get(bucketKey);
+      if (list) {
+        list.push(i);
+      } else {
+        buckets.set(bucketKey, [i]);
+      }
+    }
+
     const consumed = new Set<number>();
     const result: Array<T & { sourceCells: Array<{ lat: number; lng: number }> }> = [];
 
     for (let i = 0; i < rows.length; i++) {
       if (consumed.has(i)) continue;
+
+      const point = points[i];
+      const baseCellX = Math.floor(point.x / cellSize);
+      const baseCellY = Math.floor(point.y / cellSize);
 
       // Accumulate weighted position + totals for the merge group.
       let totalCount = Number(rows[i].image_count);
@@ -2437,17 +2788,26 @@ export class MapShellComponent implements OnDestroy {
         { lat: rows[i].cluster_lat, lng: rows[i].cluster_lng },
       ];
 
-      for (let j = i + 1; j < rows.length; j++) {
-        if (consumed.has(j)) continue;
-        const dx = points[i].x - points[j].x;
-        const dy = points[i].y - points[j].y;
-        if (dx * dx + dy * dy < minDistSq) {
-          consumed.add(j);
-          const jCount = Number(rows[j].image_count);
-          wLat += rows[j].cluster_lat * jCount;
-          wLng += rows[j].cluster_lng * jCount;
-          totalCount += jCount;
-          sourceCells.push({ lat: rows[j].cluster_lat, lng: rows[j].cluster_lng });
+      // Compare only with points from the same or neighboring screen buckets.
+      for (let dxCell = -1; dxCell <= 1; dxCell++) {
+        for (let dyCell = -1; dyCell <= 1; dyCell++) {
+          const neighborKey = `${baseCellX + dxCell}:${baseCellY + dyCell}`;
+          const candidates = buckets.get(neighborKey);
+          if (!candidates) continue;
+
+          for (const j of candidates) {
+            if (j <= i || consumed.has(j)) continue;
+            const dx = point.x - points[j].x;
+            const dy = point.y - points[j].y;
+            if (dx * dx + dy * dy < minDistSq) {
+              consumed.add(j);
+              const jCount = Number(rows[j].image_count);
+              wLat += rows[j].cluster_lat * jCount;
+              wLng += rows[j].cluster_lng * jCount;
+              totalCount += jCount;
+              sourceCells.push({ lat: rows[j].cluster_lat, lng: rows[j].cluster_lng });
+            }
+          }
         }
       }
 

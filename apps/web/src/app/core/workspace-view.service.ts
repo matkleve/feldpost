@@ -170,6 +170,25 @@ export class WorkspaceViewService {
   ): Promise<WorkspaceImage[]> {
     if (cells.length === 0) return [];
 
+    if (cells.length > 1) {
+      const { data, error } = await this.supabase.client.rpc('cluster_images_multi', {
+        p_cells: cells,
+        p_zoom: zoom,
+      });
+
+      if (!error && Array.isArray(data)) {
+        const seen = new Set<string>();
+        const images: WorkspaceImage[] = [];
+        for (const row of data as RawClusterRow[]) {
+          if (seen.has(row.image_id)) continue;
+          seen.add(row.image_id);
+          images.push(mapClusterRow(row));
+        }
+        return images;
+      }
+      // Fallback to per-cell RPCs if the batch RPC is unavailable.
+    }
+
     const results = await Promise.all(
       cells.map((cell) =>
         this.supabase.client.rpc('cluster_images', {

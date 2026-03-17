@@ -24,5 +24,12 @@
   } @else {
     <app-workspace-toolbar />
     <app-thumbnail-grid (thumbnailClicked)="onThumbnailClick($event)" />
+
+    @if (selectionService.selectedCount() > 0) {
+      <app-workspace-export-bar
+        [scopeIds]="exportScopeIds()"
+        [images]="exportScopeImages()"
+      ></app-workspace-export-bar>
+    }
   }
 </div>

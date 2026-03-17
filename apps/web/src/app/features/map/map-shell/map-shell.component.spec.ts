@@ -909,6 +909,188 @@ describe('MapShellComponent', () => {
 
   // ── Radius selection ───────────────────────────────────────────────────────
 
+  it('short right-click on map opens map context menu', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      mouseEventToContainerPoint: vi.fn((evt: { clientX: number; clientY: number }) => ({
+        x: evt.clientX,
+        y: evt.clientY,
+      })),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      mapContextMenuOpen: { (): boolean };
+      mapContextMenuCoords: { (): { lat: number; lng: number } | null };
+      handleMapMouseDown: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          button: number;
+          clientX: number;
+          clientY: number;
+          ctrlKey?: boolean;
+          metaKey?: boolean;
+          preventDefault: () => void;
+        };
+      }) => void;
+      handleMapMouseUp: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          button: number;
+          clientX: number;
+          clientY: number;
+          preventDefault: () => void;
+        };
+      }) => void;
+    };
+
+    component.map = mapStub;
+    component.handleMapMouseDown({
+      latlng: { lat: 48.2, lng: 16.37 },
+      originalEvent: {
+        button: 2,
+        clientX: 160,
+        clientY: 220,
+        preventDefault: vi.fn(),
+      },
+    });
+    component.handleMapMouseUp({
+      latlng: { lat: 48.2, lng: 16.37 },
+      originalEvent: {
+        button: 2,
+        clientX: 162,
+        clientY: 224,
+        preventDefault: vi.fn(),
+      },
+    });
+
+    expect(component.mapContextMenuOpen()).toBe(true);
+    expect(component.mapContextMenuCoords()).toEqual({ lat: 48.2, lng: 16.37 });
+  });
+
+  it('right-click drag starts radius draw instead of opening map menu', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      mouseEventToContainerPoint: vi.fn((evt: { clientX: number; clientY: number }) => ({
+        x: evt.clientX,
+        y: evt.clientY,
+      })),
+      on: vi.fn(),
+      off: vi.fn(),
+      distance: vi.fn().mockReturnValue(100),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      mapContextMenuOpen: { (): boolean };
+      radiusDrawActive: boolean;
+      handleMapMouseDown: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          button: number;
+          clientX: number;
+          clientY: number;
+          ctrlKey?: boolean;
+          metaKey?: boolean;
+          preventDefault: () => void;
+        };
+      }) => void;
+      handleMapMouseMove: (event: {
+        latlng: { lat: number; lng: number };
+        originalEvent: {
+          clientX: number;
+          clientY: number;
+        };
+      }) => void;
+    };
+
+    component.map = mapStub;
+    component.handleMapMouseDown({
+      latlng: { lat: 48.2, lng: 16.37 },
+      originalEvent: {
+        button: 2,
+        clientX: 100,
+        clientY: 100,
+        preventDefault: vi.fn(),
+      },
+    });
+
+    component.handleMapMouseMove({
+      latlng: { lat: 48.2, lng: 16.39 },
+      originalEvent: {
+        clientX: 130,
+        clientY: 132,
+      },
+    });
+
+    expect(component.radiusDrawActive).toBe(true);
+    expect(component.mapContextMenuOpen()).toBe(false);
+  });
+
+  it('opens marker context menu payload for right-clicked marker', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      latLngToContainerPoint: vi.fn().mockReturnValue({ x: 10, y: 10 }),
+      getContainer: vi.fn().mockReturnValue({
+        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0 }),
+      }),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          imageId?: string;
+          sourceCells?: Array<{ lat: number; lng: number }>;
+        }
+      >;
+      markerContextMenuOpen: { (): boolean };
+      markerContextMenuPayload: {
+        (): {
+          markerKey: string;
+          count: number;
+          lat: number;
+          lng: number;
+          imageId?: string;
+        } | null;
+      };
+      openMarkerContextMenu: (
+        markerKey: string,
+        sourceEvent?: { clientX: number; clientY: number },
+      ) => void;
+    };
+
+    component.map = mapStub;
+    component.uploadedPhotoMarkers.set('single-1', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+      imageId: 'img-1',
+      sourceCells: [{ lat: 48.2, lng: 16.37 }],
+    });
+
+    component.openMarkerContextMenu('single-1', { clientX: 220, clientY: 240 });
+
+    expect(component.markerContextMenuOpen()).toBe(true);
+    expect(component.markerContextMenuPayload()?.markerKey).toBe('single-1');
+    expect(component.markerContextMenuPayload()?.imageId).toBe('img-1');
+  });
+
   it('radius selection replaces workspace images when Ctrl is not pressed', async () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();

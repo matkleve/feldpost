@@ -60,13 +60,23 @@ Note: This is primarily a Leaflet layer managed by `MapAdapter`, not a standalon
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  participant U as User
+  participant MA as MapAdapter
+  participant MS as MapShellComponent
+  participant FS as FilterService
+  participant AFC as ActiveFilterChips
+
+  U->>MA: Secondary press on empty map
+  MA->>MS: radiusGestureIntent(startPoint, movedPx)
+  alt movedPx >= 8
+    MS->>MA: draw/update radius overlay
+    U->>MA: release pointer
+    MA->>MS: radiusCommitted(center, radiusMeters)
+    MS->>FS: setRadiusFilter(center, radiusMeters)
+    FS-->>AFC: publish Radius chip
+  else movedPx < 8
+    MS-->>MS: treat as map-context-menu click (no radius commit)
+  end
 ```
 
 - Right-click/long-press interaction detected by `MapAdapter`

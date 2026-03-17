@@ -1,0 +1,82 @@
+<section class="workspace-export" aria-label="Workspace export actions">
+  <div class="workspace-export__summary">
+    <strong>{{ selectionService.selectedCount() }}</strong>
+    <span>selected</span>
+  </div>
+
+  <div class="workspace-export__actions">
+    <button type="button" class="workspace-export__btn" (click)="selectAll()">
+      <span class="material-icons workspace-export__btn-icon" aria-hidden="true">done_all</span>
+      <span>Select all</span>
+    </button>
+    <button type="button" class="workspace-export__btn" (click)="selectNone()">
+      <span class="material-icons workspace-export__btn-icon" aria-hidden="true">deselect</span>
+      <span>Select none</span>
+    </button>
+    <button
+      type="button"
+      class="workspace-export__btn"
+      [disabled]="pending()"
+      (click)="shareLink()"
+    >
+      <span class="material-icons workspace-export__btn-icon" aria-hidden="true">share</span>
+      <span>Share</span>
+    </button>
+    <button type="button" class="workspace-export__btn" [disabled]="pending()" (click)="copyLink()">
+      <span class="material-icons workspace-export__btn-icon" aria-hidden="true">content_copy</span>
+      <span>Copy link</span>
+    </button>
+    <button
+      type="button"
+      class="workspace-export__btn workspace-export__btn--primary"
+      [disabled]="pending()"
+      (click)="openZipDialog()"
+    >
+      <span class="material-icons workspace-export__btn-icon" aria-hidden="true">download</span>
+      <span>Download ZIP</span>
+    </button>
+  </div>
+</section>
+
+@if (zipDialogOpen()) {
+  <div class="workspace-export__dialog-backdrop" (click)="closeZipDialog()"></div>
+  <section
+    class="workspace-export__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Download ZIP"
+  >
+    <h3>Download selection</h3>
+    <label for="zip-title">Title</label>
+    <input
+      id="zip-title"
+      type="text"
+      [value]="zipTitle()"
+      (input)="zipTitle.set($any($event.target).value)"
+      [disabled]="pending()"
+    />
+
+    <div class="workspace-export__progress" [style.--progress]="zipProgress() * 100 + '%'">
+      <span>{{ (zipProgress() * 100).toFixed(0) }}%</span>
+    </div>
+
+    <div class="workspace-export__dialog-actions">
+      <button
+        type="button"
+        class="workspace-export__btn"
+        [disabled]="pending()"
+        (click)="closeZipDialog()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="workspace-export__btn workspace-export__btn--primary"
+        [disabled]="pending()"
+        (click)="downloadZip()"
+      >
+        {{ pending() ? 'Preparing...' : 'Download' }}
+      </button>
+    </div>
+  </section>
+}

@@ -541,6 +541,46 @@ describe('UploadPanelComponent', () => {
         lng: 16.3738,
       });
     });
+
+    it('emits placementRequested when clicking missing_data row main area', async () => {
+      const { fixture, component, fakeManager } = await setup();
+      const placementSpy = vi.spyOn(component.placementRequested, 'emit');
+
+      fakeManager._jobsSignal.set([
+        makeUploadJob({
+          phase: 'missing_data',
+          statusLabel: 'Missing location',
+        }),
+      ]);
+      component.setSelectedLane('issues');
+      fixture.detectChanges();
+
+      const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+      (rowMain.nativeElement as HTMLElement).click();
+
+      expect(placementSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports keyboard placement request on missing_data row', async () => {
+      const { fixture, component, fakeManager } = await setup();
+      const placementSpy = vi.spyOn(component.placementRequested, 'emit');
+
+      fakeManager._jobsSignal.set([
+        makeUploadJob({
+          phase: 'missing_data',
+          statusLabel: 'Missing location',
+        }),
+      ]);
+      component.setSelectedLane('issues');
+      fixture.detectChanges();
+
+      const rowMain = fixture.debugElement.query(By.css('.upload-panel__file-main'));
+      (rowMain.nativeElement as HTMLElement).dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter' }),
+      );
+
+      expect(placementSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('missing_data prompt', () => {

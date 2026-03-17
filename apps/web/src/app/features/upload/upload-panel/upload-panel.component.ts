@@ -111,6 +111,9 @@ export class UploadPanelComponent {
   });
 
   readonly selectedLane = signal<UploadLane>('uploading');
+  readonly issueAttentionPulse = signal(false);
+
+  private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly laneCounts = computed(() => {
     const jobs = this.jobs();
@@ -121,16 +124,7 @@ export class UploadPanelComponent {
     };
   });
 
-  readonly effectiveLane = computed<UploadLane>(() => {
-    const lane = this.selectedLane();
-    const counts = this.laneCounts();
-    const total = counts.uploading + counts.uploaded + counts.issues;
-    if (total === 0) return lane;
-    if (counts[lane] > 0) return lane;
-    if (counts.uploading > 0) return 'uploading';
-    if (counts.issues > 0) return 'issues';
-    return 'uploaded';
-  });
+  readonly effectiveLane = computed<UploadLane>(() => this.selectedLane());
 
   readonly laneJobs = computed(() => {
     const lane = this.effectiveLane();
@@ -184,6 +178,17 @@ export class UploadPanelComponent {
           thumbnailUrl: event.thumbnailUrl,
         });
       }
+    });
+
+    // New issue transitions should be visually noticeable in the lane switch.
+    this.uploadManager.jobPhaseChanged$.subscribe((event) => {
+      const becameIssue =
+        (event.currentPhase === 'error' || event.currentPhase === 'missing_data') &&
+        event.previousPhase !== 'error' &&
+        event.previousPhase !== 'missing_data';
+
+      if (!becameIssue) return;
+      this.triggerIssueAttentionPulse();
     });
   }
 
@@ -274,7 +279,16 @@ export class UploadPanelComponent {
     );
   }
 
+  isRowInteractive(job: UploadJob): boolean {
+    return this.canZoomToJob(job) || job.phase === 'missing_data';
+  }
+
   onRowMainClick(job: UploadJob): void {
+    if (job.phase === 'missing_data') {
+      this.placementRequested.emit(job.id);
+      return;
+    }
+
     if (!this.canZoomToJob(job)) return;
     this.zoomToLocationRequested.emit({
       imageId: job.imageId!,
@@ -284,7 +298,7 @@ export class UploadPanelComponent {
   }
 
   onRowMainKeydown(job: UploadJob, event: KeyboardEvent): void {
-    if (!this.canZoomToJob(job)) return;
+    if (!this.isRowInteractive(job)) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
     this.onRowMainClick(job);
@@ -455,5 +469,18 @@ export class UploadPanelComponent {
       default:
         return null;
     }
+  }
+
+  private triggerIssueAttentionPulse(): void {
+    this.issueAttentionPulse.set(true);
+
+    if (this.issueAttentionTimer) {
+      clearTimeout(this.issueAttentionTimer);
+    }
+
+    this.issueAttentionTimer = setTimeout(() => {
+      this.issueAttentionPulse.set(false);
+      this.issueAttentionTimer = null;
+    }, 1500);
   }
 }

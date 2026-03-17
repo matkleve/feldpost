@@ -6,7 +6,7 @@
 .workspace-toolbar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--spacing-2);
   width: min(60rem, 100%);
   margin-inline: auto;

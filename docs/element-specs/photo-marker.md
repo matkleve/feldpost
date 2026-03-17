@@ -305,13 +305,28 @@ These rules exist to prevent marker lag during map pan/zoom interactions.
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  participant U as User
+  participant MA as MapAdapter
+  participant MS as MapShellComponent
+  participant SB as SupabaseService
+  participant MF as marker-factory.ts
+  participant PL as PhotoLoadService
+  participant LM as Leaflet Marker Layer
+
+  U->>MA: Pan/zoom map
+  MA->>MS: moveend(bounds, zoom)
+  MS->>SB: rpc viewport_markers(bounds, zoom)
+  SB-->>MS: clustered/single rows
+  loop for changed markers only
+    MS->>PL: getSignedUrl(path, 'marker')
+    PL-->>MS: thumbnail or placeholder state
+    MS->>MF: buildPhotoMarkerHtml(state)
+    MF-->>MS: DivIcon HTML
+    MS->>LM: add/update/remove marker (reconcile)
+  end
+  U->>MA: Secondary click on marker
+  MA->>MS: markerContextIntent(payload)
+  MS-->>MS: open Photo Marker Context Menu flow
 ```
 
 - The Map Shell creates Leaflet markers and delegates DivIcon HTML generation to `marker-factory.ts`.
@@ -347,8 +362,8 @@ sequenceDiagram
 - [x] Selected markers have a clear visual state — `.map-photo-marker--selected` applies accent ring + `scale(1.05)`
 - [ ] Ctrl+click adds to Active Selection without clearing previous selection (blocked — requires `SelectionService`)
 - [ ] Long-press + tap provides mobile equivalent of multi-select (blocked — requires `SelectionService`)
-- [ ] Right-click opens context menu (view detail, edit location, manage projects) (blocked — requires context menu component)
-- [ ] Long-press opens context menu on mobile (blocked — requires context menu component)
+- [ ] Right-click opens context menu (view detail, edit location, manage projects) — see `photo-marker-context-menu.md`
+- [ ] Long-press opens context menu on mobile — see `photo-marker-context-menu.md`
 - [ ] Drag marker in correction mode to update coordinates (blocked — requires correction mode handler)
 
 ### Viewport-Driven Loading

@@ -98,6 +98,137 @@
     aria-label="Site map"
   ></div>
 
+  @if (mapContextMenuOpen() || markerContextMenuOpen()) {
+    <button
+      class="map-context-backdrop"
+      type="button"
+      aria-label="Close context menu"
+      (click)="closeContextMenus()"
+    ></button>
+  }
+
+  @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
+    <div
+      class="map-context-menu"
+      [style.left.px]="mapMenuPos.x"
+      [style.top.px]="mapMenuPos.y"
+      role="menu"
+      aria-label="Map context menu"
+    >
+      <div class="dd-items">
+        <button
+          class="dd-item"
+          type="button"
+          role="menuitem"
+          (click)="onMapContextCreateMarkerHere()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">add_location</span>
+          <span class="dd-item__label">Marker hier erstellen</span>
+        </button>
+        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCenterHere()">
+          <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
+          <span class="dd-item__label">Karte hier zentrieren</span>
+        </button>
+        <button
+          class="dd-item"
+          type="button"
+          role="menuitem"
+          (click)="onMapContextCopyCoordinates()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+          <span class="dd-item__label">Koordinaten kopieren</span>
+        </button>
+        <div class="dd-divider" aria-hidden="true"></div>
+        <button
+          class="dd-item"
+          type="button"
+          role="menuitem"
+          (click)="onMapContextStartRadiusFromHere()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true"
+            >radio_button_unchecked</span
+          >
+          <span class="dd-item__label">Radius von hier starten</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (markerContextMenuOpen() && markerContextMenuPosition(); as markerMenuPos) {
+    @if (markerContextMenuPayload(); as markerMenu) {
+      <div
+        class="map-context-menu"
+        [style.left.px]="markerMenuPos.x"
+        [style.top.px]="markerMenuPos.y"
+        role="menu"
+        aria-label="Marker context menu"
+      >
+        <div class="map-context-menu__header">
+          @if (markerContextIsSingle) {
+            Foto Marker
+          } @else {
+            {{ markerMenu.count }} Fotos an dieser Stelle
+          }
+        </div>
+
+        <div class="dd-items">
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            (click)="onMarkerContextOpenDetailsOrSelection()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">
+              {{ markerContextIsSingle ? 'open_in_new' : 'grid_view' }}
+            </span>
+            <span class="dd-item__label">
+              {{ markerContextIsSingle ? 'Details oeffnen' : 'Auswahl oeffnen' }}
+            </span>
+          </button>
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            (click)="onMarkerContextMoveMarker()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">open_with</span>
+            <span class="dd-item__label">Marker verschieben</span>
+          </button>
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            (click)="onMarkerContextAddToGroup()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">group_add</span>
+            <span class="dd-item__label">Zu Gruppe hinzufuegen...</span>
+          </button>
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            (click)="onMarkerContextCopyCoordinates()"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+            <span class="dd-item__label">Koordinaten kopieren</span>
+          </button>
+          @if (markerContextIsSingle) {
+            <div class="dd-divider" aria-hidden="true"></div>
+            <button
+              class="dd-item dd-item--danger"
+              type="button"
+              role="menuitem"
+              (click)="onMarkerContextDeletePhoto()"
+            >
+              <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
+              <span class="dd-item__label">Foto loeschen</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  }
+
   <ss-search-bar
     [queryContext]="searchQueryContext()"
     (mapCenterRequested)="onSearchMapCenterRequested($event)"

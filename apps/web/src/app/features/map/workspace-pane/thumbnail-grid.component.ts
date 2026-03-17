@@ -10,8 +10,9 @@ import {
 } from '@angular/core';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { FilterService } from '../../../core/filter.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
-import { ThumbnailCardComponent } from './thumbnail-card.component';
+import { ThumbnailCardComponent, ThumbnailCardInteraction } from './thumbnail-card.component';
 import { GroupHeaderComponent } from './group-header.component';
 
 /** Flat renderable item — either a group header or a grid of images. */
@@ -60,7 +61,12 @@ type RenderItem =
             } @else {
               <div class="thumbnail-grid__cards">
                 @for (img of item.images; track img.id) {
-                  <app-thumbnail-card [image]="img" (clicked)="thumbnailClicked.emit($event)" />
+                  <app-thumbnail-card
+                    [image]="img"
+                    [selected]="selectionService.isSelected(img.id)"
+                    (clicked)="thumbnailClicked.emit($event)"
+                    (selectionToggled)="onSelectionToggled($event)"
+                  />
                 }
               </div>
             }
@@ -69,7 +75,12 @@ type RenderItem =
       } @else {
         <div class="thumbnail-grid__cards">
           @for (img of flatImages(); track img.id) {
-            <app-thumbnail-card [image]="img" (clicked)="thumbnailClicked.emit($event)" />
+            <app-thumbnail-card
+              [image]="img"
+              [selected]="selectionService.isSelected(img.id)"
+              (clicked)="thumbnailClicked.emit($event)"
+              (selectionToggled)="onSelectionToggled($event)"
+            />
           }
         </div>
       }
@@ -80,6 +91,7 @@ type RenderItem =
 })
 export class ThumbnailGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
+  protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
 
   readonly thumbnailClicked = output<string>();
@@ -175,6 +187,10 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   onScroll(): void {
     this.scheduleThumbnailSigning();
+  }
+
+  onSelectionToggled(event: ThumbnailCardInteraction): void {
+    this.selectionService.toggle(event.imageId, { additive: event.additive });
   }
 
   /** Batch-sign thumbnails for currently visible images after a debounce. */

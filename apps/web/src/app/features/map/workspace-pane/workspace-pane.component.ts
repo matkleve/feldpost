@@ -1,8 +1,11 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { PaneHeaderComponent } from './pane-header.component';
 import { WorkspaceToolbarComponent } from './workspace-toolbar/workspace-toolbar.component';
 import { ThumbnailGridComponent } from './thumbnail-grid.component';
 import { ImageDetailViewComponent } from './image-detail-view.component';
+import { WorkspaceExportBarComponent } from './workspace-export-bar.component';
+import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 
 @Component({
   selector: 'app-workspace-pane',
@@ -11,11 +14,15 @@ import { ImageDetailViewComponent } from './image-detail-view.component';
     WorkspaceToolbarComponent,
     ThumbnailGridComponent,
     ImageDetailViewComponent,
+    WorkspaceExportBarComponent,
   ],
   templateUrl: './workspace-pane.component.html',
   styleUrl: './workspace-pane.component.scss',
 })
 export class WorkspacePaneComponent {
+  private readonly workspaceViewService = inject(WorkspaceViewService);
+  protected readonly selectionService = inject(WorkspaceSelectionService);
+
   // ── Inputs from MapShell ──────────────────────────────────────────────────
   readonly detailImageId = input<string | null>(null);
   readonly title = input('Workspace');
@@ -38,6 +45,10 @@ export class WorkspacePaneComponent {
 
   // ── Internal state ───────────────────────────────────────────────────────
   readonly activeTabId = signal<string>('selection');
+  readonly exportScopeIds = computed(() =>
+    this.workspaceViewService.rawImages().map((img) => img.id),
+  );
+  readonly exportScopeImages = computed(() => this.workspaceViewService.rawImages());
 
   // ── Methods ──────────────────────────────────────────────────────────────
   close(): void {

@@ -905,3 +905,104 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     expect(allImages.every((img) => img.metadata?.['uuid-bauphase'] === 'Rohbau')).toBe(true);
   });
 });
+
+describe('WorkspaceViewService — cluster batch RPC', () => {
+  function makeClusterRow(overrides: Record<string, unknown> = {}) {
+    return {
+      image_id: 'img-1',
+      latitude: 48.2,
+      longitude: 16.37,
+      thumbnail_path: null,
+      storage_path: 'org/user/photo.jpg',
+      captured_at: '2026-01-01T00:00:00Z',
+      created_at: '2026-01-01T00:00:00Z',
+      project_id: null,
+      project_name: null,
+      project_ids: [],
+      project_names: [],
+      direction: null,
+      exif_latitude: null,
+      exif_longitude: null,
+      address_label: null,
+      city: null,
+      district: null,
+      street: null,
+      country: null,
+      user_name: null,
+      ...overrides,
+    };
+  }
+
+  it('uses cluster_images_multi for multi-cell fetches', async () => {
+    const { service, fakeSupabase } = setup();
+
+    fakeSupabase.client.rpc.mockImplementation((fn: string) => {
+      if (fn === 'cluster_images_multi') {
+        return Promise.resolve({
+          data: [
+            makeClusterRow({ image_id: 'img-1' }),
+            makeClusterRow({ image_id: 'img-2', latitude: 48.201, longitude: 16.371 }),
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: [], error: null });
+    });
+
+    const images = await service.fetchClusterImages(
+      [
+        { lat: 48.2, lng: 16.37 },
+        { lat: 48.201, lng: 16.371 },
+      ],
+      14,
+    );
+
+    expect(fakeSupabase.client.rpc).toHaveBeenCalledWith('cluster_images_multi', {
+      p_cells: [
+        { lat: 48.2, lng: 16.37 },
+        { lat: 48.201, lng: 16.371 },
+      ],
+      p_zoom: 14,
+    });
+    expect(fakeSupabase.client.rpc).not.toHaveBeenCalledWith('cluster_images', expect.anything());
+    expect(images.map((img) => img.id)).toEqual(['img-1', 'img-2']);
+  });
+
+  it('falls back to per-cell cluster_images when batch RPC fails', async () => {
+    const { service, fakeSupabase } = setup();
+
+    fakeSupabase.client.rpc.mockImplementation((fn: string, args: Record<string, unknown>) => {
+      if (fn === 'cluster_images_multi') {
+        return Promise.resolve({ data: null, error: { message: 'function not found' } });
+      }
+      if (fn === 'cluster_images') {
+        const lat = Number(args['p_cluster_lat']);
+        const lng = Number(args['p_cluster_lng']);
+        return Promise.resolve({
+          data: [
+            makeClusterRow({
+              image_id: lat === 48.2 ? 'img-a' : 'img-b',
+              latitude: lat,
+              longitude: lng,
+            }),
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: [], error: null });
+    });
+
+    const images = await service.fetchClusterImages(
+      [
+        { lat: 48.2, lng: 16.37 },
+        { lat: 48.25, lng: 16.35 },
+      ],
+      13,
+    );
+
+    const calledFns = fakeSupabase.client.rpc.mock.calls.map((c: unknown[]) => c[0] as string);
+    expect(calledFns).toContain('cluster_images_multi');
+    expect(calledFns.filter((fn: string) => fn === 'cluster_images').length).toBe(2);
+    expect(images.map((img) => img.id)).toEqual(['img-a', 'img-b']);
+  });
+});
