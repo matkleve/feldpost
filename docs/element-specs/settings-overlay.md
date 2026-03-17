@@ -16,18 +16,18 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 
 ## Actions
 
-| #   | User Action                                | System Response                                                             | Triggers                              |
-| --- | ------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------- |
-| 1   | Clicks avatar Settings row                 | Opens overlay instantly, anchors to sidenav right edge + spacing token `md` | `NavComponent` overlay open action    |
-| 2   | Overlay opens                              | Starts profile/preference load; shows loading state in detail area          | `UserProfileService` read request     |
-| 3   | Load succeeds                              | Renders selected section content with populated values                      | profile + preference payload received |
-| 4   | Load fails                                 | Shows error state with retry action                                         | Supabase/service error                |
-| 5   | Clicks Retry                               | Re-runs profile/preference load and returns to loading state                | Retry button in error state           |
-| 6   | Selects section in left list               | Right detail area switches to selected section component                    | `selectedSectionId` signal update     |
+| #   | User Action                                | System Response                                                                                 | Triggers                              |
+| --- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------- |
+| 1   | Clicks avatar Settings row                 | Opens overlay instantly, anchors to sidenav right edge + spacing token `md`                     | `NavComponent` overlay open action    |
+| 2   | Overlay opens                              | Starts profile/preference load; shows loading state in detail area                              | `UserProfileService` read request     |
+| 3   | Load succeeds                              | Renders selected section content with populated values                                          | profile + preference payload received |
+| 4   | Load fails                                 | Shows error state with retry action                                                             | Supabase/service error                |
+| 5   | Clicks Retry                               | Re-runs profile/preference load and returns to loading state                                    | Retry button in error state           |
+| 6   | Selects section in left list               | Right detail area switches to selected section component                                        | `selectedSectionId` signal update     |
 | 7   | Selects `Konto` section                    | Renders identity, email/password management, password-recovery action, 2FA, and session actions | account section selection             |
-| 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status     | shortcuts section selection           |
-| 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                 | Backdrop click / Escape key           |
-| 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing               | sidebar expansion signal              |
+| 7a  | Selects `Shortcuts` section                | Renders categorized shortcut reference table with implementation status                         | shortcuts section selection           |
+| 8   | Clicks outside panel or presses Escape     | Closes overlay immediately and discards unsaved local edits                                     | Backdrop click / Escape key           |
+| 9   | Sidenav width changes (collapsed/expanded) | Overlay position recalculates with matching transition timing                                   | sidebar expansion signal              |
 
 ```mermaid
 flowchart TD

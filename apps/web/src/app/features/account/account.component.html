@@ -30,7 +30,12 @@
           (input)="pendingDisplayName.set($any($event.target).value)"
         />
       </label>
-      <button type="button" class="account-btn account-btn--primary" (click)="saveDisplayName()" [disabled]="savingProfile()">
+      <button
+        type="button"
+        class="account-btn account-btn--primary"
+        (click)="saveDisplayName()"
+        [disabled]="savingProfile()"
+      >
         {{ savingProfile() ? 'Speichern...' : 'Namen speichern' }}
       </button>
     </section>
@@ -47,7 +52,12 @@
           (input)="pendingEmail.set($any($event.target).value)"
         />
       </label>
-      <button type="button" class="account-btn" (click)="updateEmail()" [disabled]="updatingEmail()">
+      <button
+        type="button"
+        class="account-btn"
+        (click)="updateEmail()"
+        [disabled]="updatingEmail()"
+      >
         {{ updatingEmail() ? 'Aktualisiere...' : 'E-Mail ändern' }}
       </button>
 
@@ -79,10 +89,20 @@
       </div>
 
       <div class="account-actions">
-        <button type="button" class="account-btn" (click)="updatePassword()" [disabled]="updatingPassword()">
+        <button
+          type="button"
+          class="account-btn"
+          (click)="updatePassword()"
+          [disabled]="updatingPassword()"
+        >
           {{ updatingPassword() ? 'Aktualisiere...' : 'Passwort ändern' }}
         </button>
-        <button type="button" class="account-btn account-btn--ghost" (click)="sendPasswordReset()" [disabled]="sendingReset()">
+        <button
+          type="button"
+          class="account-btn account-btn--ghost"
+          (click)="sendPasswordReset()"
+          [disabled]="sendingReset()"
+        >
           {{ sendingReset() ? 'Sende...' : 'Passwort vergessen' }}
         </button>
       </div>
@@ -102,7 +122,12 @@
                 <strong>{{ factor.friendlyName }}</strong>
                 <small>{{ factor.factorType }} · {{ factor.status }}</small>
               </div>
-              <button type="button" class="account-btn account-btn--ghost" (click)="removeFactor(factor.id)" [disabled]="mfaBusy()">
+              <button
+                type="button"
+                class="account-btn account-btn--ghost"
+                (click)="removeFactor(factor.id)"
+                [disabled]="mfaBusy()"
+              >
                 Entfernen
               </button>
             </div>
@@ -110,7 +135,12 @@
         }
       </div>
 
-      <button type="button" class="account-btn" (click)="startTotpEnrollment()" [disabled]="mfaBusy()">
+      <button
+        type="button"
+        class="account-btn"
+        (click)="startTotpEnrollment()"
+        [disabled]="mfaBusy()"
+      >
         {{ mfaBusy() ? 'Lädt...' : 'TOTP einrichten' }}
       </button>
 
@@ -122,9 +152,18 @@
           <p>Secret: {{ mfaSecret() }}</p>
           <label class="account-field">
             <span>6-stelligen Code eingeben</span>
-            <input type="text" [value]="mfaCode()" (input)="mfaCode.set($any($event.target).value)" />
+            <input
+              type="text"
+              [value]="mfaCode()"
+              (input)="mfaCode.set($any($event.target).value)"
+            />
           </label>
-          <button type="button" class="account-btn" (click)="verifyTotpEnrollment()" [disabled]="mfaBusy()">
+          <button
+            type="button"
+            class="account-btn"
+            (click)="verifyTotpEnrollment()"
+            [disabled]="mfaBusy()"
+          >
             {{ mfaBusy() ? 'Prüfe...' : '2FA bestätigen' }}
           </button>
         </div>
@@ -162,16 +201,27 @@
 }
 
 @if (deleteConfirmOpen()) {
-  <div class="account-delete-overlay" role="dialog" aria-modal="true" aria-label="Konto löschen bestätigen">
+  <div
+    class="account-delete-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Konto löschen bestätigen"
+  >
     <div class="account-delete-dialog ui-container ui-container--compact">
       <h3>Konto löschen</h3>
       <p>Bitte gib DELETE ein, um die Löschung zu bestätigen.</p>
       <label class="account-field">
         <span>Bestätigung</span>
-        <input type="text" [value]="deletePhrase()" (input)="deletePhrase.set($any($event.target).value)" />
+        <input
+          type="text"
+          [value]="deletePhrase()"
+          (input)="deletePhrase.set($any($event.target).value)"
+        />
       </label>
       <div class="account-actions">
-        <button type="button" class="account-btn account-btn--ghost" (click)="closeDeleteConfirm()">Abbrechen</button>
+        <button type="button" class="account-btn account-btn--ghost" (click)="closeDeleteConfirm()">
+          Abbrechen
+        </button>
         <button
           type="button"
           class="account-btn account-btn--danger"

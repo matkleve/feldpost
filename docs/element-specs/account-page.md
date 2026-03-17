@@ -16,21 +16,21 @@ Full-width page, max-width centered (640px). User info appears at top (avatar ci
 
 ## Actions
 
-| #   | User Action                    | System Response                                                            | Triggers                                     |
-| --- | ------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------- |
-| 1   | Navigates to /account          | Shows current email, role, avatar, assurance level, and account actions   | Load from `AuthService` and profile service  |
-| 2   | Updates display name           | Saves profile metadata and refreshes identity display                      | `UserProfileService.updateDisplayName()`     |
-| 3   | Clicks "E-Mail ändern"         | Opens inline form and starts verified email-change flow                    | `AuthService.updateEmail()`                  |
-| 4   | Submits new email              | Sends verification and shows pending verification hint                     | Supabase `updateUser({ email })`             |
-| 5   | Clicks "Passwort ändern"       | Expands password form with validation and optional re-auth requirement     | local validation + `AuthService.reauthenticate()` |
-| 6   | Submits new password           | Password updated, shows success                                            | Supabase `updateUser({ password })`          |
-| 7   | Clicks "Passwort vergessen"     | Sends reset email and shows neutral confirmation                           | `AuthService.resetPasswordForEmail()`        |
-| 8   | Starts 2FA setup               | Shows TOTP QR/secret and verify input                                     | `AuthService.mfaEnrollTotp()`                |
-| 9   | Verifies 2FA code              | Marks factor verified and updates assurance level                          | `AuthService.mfaChallengeAndVerifyTotp()`    |
-| 10  | Removes 2FA factor             | Requires confirmation and removes selected factor                          | `AuthService.mfaUnenroll()`                  |
-| 11  | Clicks "Logout"               | Opens confirmation dialog and signs out on confirm                         | `AuthService.signOut()`                      |
-| 12  | Clicks "Delete account"        | Confirmation dialog: "This cannot be undone. Type DELETE to confirm."      | local confirm flow                           |
-| 13  | Confirms deletion              | Deletes auth user, cascades profile/app data, logs out, redirects to login | backend delete flow (service/RPC/admin path) |
+| #   | User Action                 | System Response                                                            | Triggers                                          |
+| --- | --------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------- |
+| 1   | Navigates to /account       | Shows current email, role, avatar, assurance level, and account actions    | Load from `AuthService` and profile service       |
+| 2   | Updates display name        | Saves profile metadata and refreshes identity display                      | `UserProfileService.updateDisplayName()`          |
+| 3   | Clicks "E-Mail ändern"      | Opens inline form and starts verified email-change flow                    | `AuthService.updateEmail()`                       |
+| 4   | Submits new email           | Sends verification and shows pending verification hint                     | Supabase `updateUser({ email })`                  |
+| 5   | Clicks "Passwort ändern"    | Expands password form with validation and optional re-auth requirement     | local validation + `AuthService.reauthenticate()` |
+| 6   | Submits new password        | Password updated, shows success                                            | Supabase `updateUser({ password })`               |
+| 7   | Clicks "Passwort vergessen" | Sends reset email and shows neutral confirmation                           | `AuthService.resetPasswordForEmail()`             |
+| 8   | Starts 2FA setup            | Shows TOTP QR/secret and verify input                                      | `AuthService.mfaEnrollTotp()`                     |
+| 9   | Verifies 2FA code           | Marks factor verified and updates assurance level                          | `AuthService.mfaChallengeAndVerifyTotp()`         |
+| 10  | Removes 2FA factor          | Requires confirmation and removes selected factor                          | `AuthService.mfaUnenroll()`                       |
+| 11  | Clicks "Logout"             | Opens confirmation dialog and signs out on confirm                         | `AuthService.signOut()`                           |
+| 12  | Clicks "Delete account"     | Confirmation dialog: "This cannot be undone. Type DELETE to confirm."      | local confirm flow                                |
+| 13  | Confirms deletion           | Deletes auth user, cascades profile/app data, logs out, redirects to login | backend delete flow (service/RPC/admin path)      |
 
 ## Component Hierarchy
 
@@ -82,31 +82,31 @@ flowchart LR
   S --> UI
 ```
 
-| Field        | Source                                     | Type      |
-| ------------ | ------------------------------------------ | --------- |
-| Current user | `AuthService.currentUser()`                | `User`    |
-| Profile      | `supabase.from('profiles').select('role')` | `Profile` |
-| MFA Factors  | `AuthService.mfaListFactors()`             | `MfaFactor[]` |
+| Field        | Source                                         | Type                       |
+| ------------ | ---------------------------------------------- | -------------------------- |
+| Current user | `AuthService.currentUser()`                    | `User`                     |
+| Profile      | `supabase.from('profiles').select('role')`     | `Profile`                  |
+| MFA Factors  | `AuthService.mfaListFactors()`                 | `MfaFactor[]`              |
 | AAL          | `AuthService.getAuthenticatorAssuranceLevel()` | `'aal1' \| 'aal2' \| null` |
 
 ## State
 
-| Name                | Type                            | Default | Controls                         |
-| ------------------- | ------------------------------- | ------- | -------------------------------- |
-| `expandedSection`   | `'profile' \| 'email' \| 'password' \| 'mfa' \| null` | `null`  | Which form/group is open         |
-| `submitting`        | `boolean`                       | `false` | Loading state for forms/actions  |
-| `deleteConfirmOpen` | `boolean`                       | `false` | Whether deletion dialog is shown |
-| `mfaSetupState`     | `'idle' \| 'enrolling' \| 'verifying'` | `'idle'` | Current TOTP setup progress      |
+| Name                | Type                                                  | Default  | Controls                         |
+| ------------------- | ----------------------------------------------------- | -------- | -------------------------------- |
+| `expandedSection`   | `'profile' \| 'email' \| 'password' \| 'mfa' \| null` | `null`   | Which form/group is open         |
+| `submitting`        | `boolean`                                             | `false`  | Loading state for forms/actions  |
+| `deleteConfirmOpen` | `boolean`                                             | `false`  | Whether deletion dialog is shown |
+| `mfaSetupState`     | `'idle' \| 'enrolling' \| 'verifying'`                | `'idle'` | Current TOTP setup progress      |
 
 ## File Map
 
-| File                                      | Purpose                                |
-| ----------------------------------------- | -------------------------------------- |
-| `features/account/account.component.ts`   | Account and security page component    |
-| `features/account/account.component.html` | Template                               |
-| `features/account/account.component.scss` | Styles                                 |
+| File                                      | Purpose                                              |
+| ----------------------------------------- | ---------------------------------------------------- |
+| `features/account/account.component.ts`   | Account and security page component                  |
+| `features/account/account.component.html` | Template                                             |
+| `features/account/account.component.scss` | Styles                                               |
 | `core/auth.service.ts`                    | Email/password/reset/mfa/logout/delete auth boundary |
-| `core/user-profile.service.ts`            | Display name read/update               |
+| `core/user-profile.service.ts`            | Display name read/update                             |
 
 ## Wiring
 

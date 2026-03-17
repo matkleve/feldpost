@@ -16,22 +16,22 @@ The section is rendered in the right detail column of the Settings Overlay as a 
 
 ## Actions
 
-| #   | User Action                                        | System Response                                                                                 | Triggers                                          |
-| --- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 1   | Opens `Konto` section                              | Renders identity, email, password, 2FA, and session groups with current user context           | section selection in settings registry            |
-| 2   | Edits display name and saves                       | Persists profile metadata, updates visible identity label, shows success feedback               | `UserProfileService.updateDisplayName()`          |
-| 3   | Starts email change                                | Validates email syntax, calls auth email update, displays verification-required state           | `AuthService.updateEmail()`                        |
-| 4   | Confirms new email via verification link/OTP       | Session/user metadata refreshes and section resolves to new verified email                      | Supabase `updateUser({ email })` confirmation     |
-| 5   | Starts password change                             | Requests current password + new password, validates policy, optionally requests re-auth nonce   | local validation + `AuthService.reauthenticate()` |
-| 6   | Submits password change                            | Updates password and clears password form; surfaces secure success message                      | `AuthService.updatePassword()`                    |
-| 7   | Clicks "Passwort vergessen" in account context      | Sends reset email and shows neutral "if account exists" confirmation copy                       | `AuthService.resetPasswordForEmail()`             |
-| 8   | Opens 2FA setup (TOTP)                             | Starts enrollment flow, displays QR/secret and one-time verify input                           | `AuthService.mfaEnrollTotp()`                     |
-| 9   | Verifies 2FA code                                  | Marks factor verified, elevates assurance state, refreshes factor list                          | `AuthService.mfaChallengeAndVerifyTotp()`         |
-| 10  | Removes existing 2FA factor                        | Requires confirmation and active high-assurance session, then removes factor                    | `AuthService.mfaUnenroll()`                       |
-| 11  | Clicks `Logout`                                    | Opens confirmation dialog/sheet with consequences copy                                          | logout action in account section                  |
-| 12  | Confirms logout                                    | Cancels volatile client activity, signs out auth session, closes overlay                        | `AuthService.signOut()`                           |
-| 13  | Any auth/security action fails                     | Keeps current session state, shows actionable inline error + retry where applicable             | failed auth/service request                        |
-| 14  | Dismisses Settings Overlay while request in-flight | Keeps active request semantics intact; discards only local draft UI state not yet persisted     | shell close action                                 |
+| #   | User Action                                        | System Response                                                                               | Triggers                                          |
+| --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 1   | Opens `Konto` section                              | Renders identity, email, password, 2FA, and session groups with current user context          | section selection in settings registry            |
+| 2   | Edits display name and saves                       | Persists profile metadata, updates visible identity label, shows success feedback             | `UserProfileService.updateDisplayName()`          |
+| 3   | Starts email change                                | Validates email syntax, calls auth email update, displays verification-required state         | `AuthService.updateEmail()`                       |
+| 4   | Confirms new email via verification link/OTP       | Session/user metadata refreshes and section resolves to new verified email                    | Supabase `updateUser({ email })` confirmation     |
+| 5   | Starts password change                             | Requests current password + new password, validates policy, optionally requests re-auth nonce | local validation + `AuthService.reauthenticate()` |
+| 6   | Submits password change                            | Updates password and clears password form; surfaces secure success message                    | `AuthService.updatePassword()`                    |
+| 7   | Clicks "Passwort vergessen" in account context     | Sends reset email and shows neutral "if account exists" confirmation copy                     | `AuthService.resetPasswordForEmail()`             |
+| 8   | Opens 2FA setup (TOTP)                             | Starts enrollment flow, displays QR/secret and one-time verify input                          | `AuthService.mfaEnrollTotp()`                     |
+| 9   | Verifies 2FA code                                  | Marks factor verified, elevates assurance state, refreshes factor list                        | `AuthService.mfaChallengeAndVerifyTotp()`         |
+| 10  | Removes existing 2FA factor                        | Requires confirmation and active high-assurance session, then removes factor                  | `AuthService.mfaUnenroll()`                       |
+| 11  | Clicks `Logout`                                    | Opens confirmation dialog/sheet with consequences copy                                        | logout action in account section                  |
+| 12  | Confirms logout                                    | Cancels volatile client activity, signs out auth session, closes overlay                      | `AuthService.signOut()`                           |
+| 13  | Any auth/security action fails                     | Keeps current session state, shows actionable inline error + retry where applicable           | failed auth/service request                       |
+| 14  | Dismisses Settings Overlay while request in-flight | Keeps active request semantics intact; discards only local draft UI state not yet persisted   | shell close action                                |
 
 ```mermaid
 flowchart TD
@@ -153,53 +153,53 @@ sequenceDiagram
     end
 ```
 
-| Field             | Source                                | Type                              |
-| ----------------- | ------------------------------------- | --------------------------------- |
-| `userEmail`       | `AuthService.user()?.email`           | `string \| null`                  |
-| `userDisplayName` | `UserProfileService.getDisplayName()` | `string`                          |
-| `userAal`         | `AuthService.getAuthenticatorAssuranceLevel()` | `'aal1' \| 'aal2' \| null` |
-| `mfaFactors`      | `AuthService.mfaListFactors()`        | `MfaFactor[]`                     |
-| `pendingEmail`    | section-local signal                  | `string`                          |
-| `emailChangeState`| section-local signal                  | `'idle' \| 'verification_required' \| 'error'` |
-| `logoutResult`    | `AuthService.signOut()`               | `{ ok: boolean; error?: string }` |
-| `isLoggingOut`    | section-local signal                  | `boolean`                         |
-| `logoutError`     | section-local signal                  | `string \| null`                  |
+| Field              | Source                                         | Type                                           |
+| ------------------ | ---------------------------------------------- | ---------------------------------------------- |
+| `userEmail`        | `AuthService.user()?.email`                    | `string \| null`                               |
+| `userDisplayName`  | `UserProfileService.getDisplayName()`          | `string`                                       |
+| `userAal`          | `AuthService.getAuthenticatorAssuranceLevel()` | `'aal1' \| 'aal2' \| null`                     |
+| `mfaFactors`       | `AuthService.mfaListFactors()`                 | `MfaFactor[]`                                  |
+| `pendingEmail`     | section-local signal                           | `string`                                       |
+| `emailChangeState` | section-local signal                           | `'idle' \| 'verification_required' \| 'error'` |
+| `logoutResult`     | `AuthService.signOut()`                        | `{ ok: boolean; error?: string }`              |
+| `isLoggingOut`     | section-local signal                           | `boolean`                                      |
+| `logoutError`      | section-local signal                           | `string \| null`                               |
 
 ## State
 
-| Name                   | Type                                      | Default | Controls                                                           |
-| ---------------------- | ----------------------------------------- | ------- | ------------------------------------------------------------------ |
-| `confirmOpen`          | `boolean`                                 | `false` | visibility of logout confirmation dialog                           |
-| `isSavingProfile`      | `boolean`                                 | `false` | loading/disabled states while saving display name                  |
-| `isUpdatingEmail`      | `boolean`                                 | `false` | loading/disabled states while requesting email change              |
-| `isUpdatingPassword`   | `boolean`                                 | `false` | loading/disabled states while changing password                    |
-| `isSendingReset`       | `boolean`                                 | `false` | loading state for password-reset request                           |
-| `isEnrollingMfa`       | `boolean`                                 | `false` | loading state during TOTP enrollment start                         |
-| `isVerifyingMfa`       | `boolean`                                 | `false` | loading state during TOTP verification                             |
-| `isRemovingMfa`        | `boolean`                                 | `false` | loading state during factor removal                                |
-| `isLoggingOut`         | `boolean`                                 | `false` | loading/disabled states for logout controls                        |
-| `errorMessage`         | `string \| null`                          | `null`  | shared inline error copy for failed account-security actions       |
-| `successMessage`       | `string \| null`                          | `null`  | short success confirmation after save/update actions               |
-| `userEmail`            | `string`                                  | `''`    | identity row secondary line                                        |
-| `userDisplayName`      | `string`                                  | `''`    | identity row primary line                                          |
-| `pendingDisplayName`   | `string`                                  | `''`    | profile edit control                                               |
-| `pendingEmail`         | `string`                                  | `''`    | email change control                                               |
-| `passwordForm`         | `{ current: string; next: string; confirm: string }` | empty | password change controls and validation                            |
-| `emailChangeState`     | `'idle' \| 'verification_required' \| 'error'` | `'idle'` | email verification guidance state                                  |
-| `mfaEnrollment`        | `{ factorId: string; qrCode: string; secret: string } \| null` | `null` | active TOTP enrollment step payload                               |
-| `mfaVerifyCode`        | `string`                                  | `''`    | TOTP verify input                                                  |
-| `mfaFactors`           | `MfaFactor[]`                             | `[]`    | rendered factor list and remove actions                            |
+| Name                 | Type                                                           | Default  | Controls                                                     |
+| -------------------- | -------------------------------------------------------------- | -------- | ------------------------------------------------------------ |
+| `confirmOpen`        | `boolean`                                                      | `false`  | visibility of logout confirmation dialog                     |
+| `isSavingProfile`    | `boolean`                                                      | `false`  | loading/disabled states while saving display name            |
+| `isUpdatingEmail`    | `boolean`                                                      | `false`  | loading/disabled states while requesting email change        |
+| `isUpdatingPassword` | `boolean`                                                      | `false`  | loading/disabled states while changing password              |
+| `isSendingReset`     | `boolean`                                                      | `false`  | loading state for password-reset request                     |
+| `isEnrollingMfa`     | `boolean`                                                      | `false`  | loading state during TOTP enrollment start                   |
+| `isVerifyingMfa`     | `boolean`                                                      | `false`  | loading state during TOTP verification                       |
+| `isRemovingMfa`      | `boolean`                                                      | `false`  | loading state during factor removal                          |
+| `isLoggingOut`       | `boolean`                                                      | `false`  | loading/disabled states for logout controls                  |
+| `errorMessage`       | `string \| null`                                               | `null`   | shared inline error copy for failed account-security actions |
+| `successMessage`     | `string \| null`                                               | `null`   | short success confirmation after save/update actions         |
+| `userEmail`          | `string`                                                       | `''`     | identity row secondary line                                  |
+| `userDisplayName`    | `string`                                                       | `''`     | identity row primary line                                    |
+| `pendingDisplayName` | `string`                                                       | `''`     | profile edit control                                         |
+| `pendingEmail`       | `string`                                                       | `''`     | email change control                                         |
+| `passwordForm`       | `{ current: string; next: string; confirm: string }`           | empty    | password change controls and validation                      |
+| `emailChangeState`   | `'idle' \| 'verification_required' \| 'error'`                 | `'idle'` | email verification guidance state                            |
+| `mfaEnrollment`      | `{ factorId: string; qrCode: string; secret: string } \| null` | `null`   | active TOTP enrollment step payload                          |
+| `mfaVerifyCode`      | `string`                                                       | `''`     | TOTP verify input                                            |
+| `mfaFactors`         | `MfaFactor[]`                                                  | `[]`     | rendered factor list and remove actions                      |
 
 ## File Map
 
-| File                                                                         | Purpose                                                       |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`   | account section state machine for profile/auth/mfa/session actions |
+| File                                                                         | Purpose                                                                          |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`   | account section state machine for profile/auth/mfa/session actions               |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.html` | account section template with grouped cards, forms, mfa flow, and logout confirm |
-| `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` | account group styling, form states, and critical action variants |
-| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`    | section registration entry for `account`                      |
-| `apps/web/src/app/core/auth/auth.service.ts`                                 | auth boundary for updateUser, resetPasswordForEmail, mfa, reauth, and sign-out |
-| `apps/web/src/app/core/user-profile.service.ts`                              | display-name lookup for identity row                          |
+| `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` | account group styling, form states, and critical action variants                 |
+| `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`    | section registration entry for `account`                                         |
+| `apps/web/src/app/core/auth/auth.service.ts`                                 | auth boundary for updateUser, resetPasswordForEmail, mfa, reauth, and sign-out   |
+| `apps/web/src/app/core/user-profile.service.ts`                              | display-name lookup for identity row                                             |
 
 ## Wiring
 
@@ -224,12 +224,12 @@ sequenceDiagram
 
 - None directly in the section component.
 - Delegated through `AuthService`:
-    - `updateUser({ email })`
-    - `updateUser({ password })` (with nonce when secure password change is active)
-    - `resetPasswordForEmail(email, { redirectTo })`
-    - `reauthenticate()`
-    - `mfa.enroll/challenge/verify/challengeAndVerify/listFactors/unenroll`
-    - `signOut()`
+  - `updateUser({ email })`
+  - `updateUser({ password })` (with nonce when secure password change is active)
+  - `resetPasswordForEmail(email, { redirectTo })`
+  - `reauthenticate()`
+  - `mfa.enroll/challenge/verify/challengeAndVerify/listFactors/unenroll`
+  - `signOut()`
 
 ```mermaid
 flowchart LR
