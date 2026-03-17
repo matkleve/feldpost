@@ -43,6 +43,7 @@ export interface CalendarDay {
 export class CapturedDateEditorComponent implements OnInit, OnDestroy {
   private readonly i18nService = inject(I18nService);
   private readonly elRef = inject(ElementRef);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   // ── Inputs ─────────────────────────────────────────────────────────────────
 

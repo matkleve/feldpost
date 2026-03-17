@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import * as L from 'leaflet';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { GeocodingService } from '../../../core/geocoding.service';
 import type { WorkspaceImage } from '../../../core/workspace-view.types';
 
 export interface AssignImagesToProjectResult {
@@ -11,6 +12,8 @@ export interface AssignImagesToProjectResult {
 
 @Injectable({ providedIn: 'root' })
 export class MapContextActionsService {
+  private readonly geocodingService = inject(GeocodingService);
+
   clampContextMenuPosition(x: number, y: number): { x: number; y: number } {
     if (typeof window === 'undefined') {
       return { x, y };
@@ -36,6 +39,15 @@ export class MapContextActionsService {
     } catch {
       return false;
     }
+  }
+
+  async copyAddressFromCoords(lat: number, lng: number): Promise<boolean> {
+    const reverse = await this.geocodingService.reverse(lat, lng);
+    const address = reverse?.addressLabel?.trim();
+    if (!address) {
+      return false;
+    }
+    return this.copyTextToClipboard(address);
   }
 
   resolveMarkerContextMenuPosition(

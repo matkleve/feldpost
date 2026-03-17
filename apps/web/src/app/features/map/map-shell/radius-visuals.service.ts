@@ -9,6 +9,13 @@ export interface RadiusCommittedVisual {
 
 @Injectable({ providedIn: 'root' })
 export class RadiusVisualsService {
+  offsetLatLngEast(center: L.LatLng, meters: number): L.LatLng {
+    const latRad = (center.lat * Math.PI) / 180;
+    const metersPerDegreeLng = 111320 * Math.max(Math.cos(latRad), 0.0001);
+    const lngOffset = meters / metersPerDegreeLng;
+    return L.latLng(center.lat, center.lng + lngOffset);
+  }
+
   createLabelMarker(position: L.LatLng, radiusMeters: number, angleDeg: number): L.Marker {
     return L.marker(position, {
       interactive: false,

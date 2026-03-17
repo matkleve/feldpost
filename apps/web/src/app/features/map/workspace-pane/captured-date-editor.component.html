@@ -6,9 +6,9 @@
       #dateField
       class="captured-date-editor__date-input"
       type="text"
-      placeholder="DD.MM.YYYY"
+      [placeholder]="t('workspace.capturedDate.placeholder.date', 'DD.MM.YYYY')"
       [value]="dateInput()"
-      aria-label="Edit date"
+      [attr.aria-label]="t('workspace.capturedDate.aria.editDate', 'Edit date')"
       (input)="dateInput.set(dateField.value)"
       (blur)="onDateBlur()"
       (keydown)="onDateKeydown($event)"
@@ -18,9 +18,9 @@
       class="captured-date-editor__time-input"
       type="text"
       inputmode="numeric"
-      placeholder="No time"
+      [placeholder]="t('workspace.capturedDate.placeholder.time', 'No time')"
       [value]="timeInput()"
-      aria-label="Edit time (24h format)"
+      [attr.aria-label]="t('workspace.capturedDate.aria.editTime', 'Edit time (24h format)')"
       (input)="timeInput.set(timeField.value)"
       (blur)="onTimeBlur()"
       (keydown)="onTimeKeydown($event)"
@@ -35,12 +35,12 @@
       type="button"
       (click)="setToday()"
     >
-      Today
+      {{ t('workspace.capturedDate.action.today', 'Today') }}
     </button>
     <button
       class="captured-date-editor__nav-btn focus-ring-primary"
       type="button"
-      aria-label="Previous month"
+      [attr.aria-label]="t('workspace.capturedDate.aria.previousMonth', 'Previous month')"
       (click)="prevMonth()"
     >
       <span class="material-icons" aria-hidden="true">chevron_left</span>
@@ -48,7 +48,7 @@
     <button
       class="captured-date-editor__nav-btn focus-ring-primary"
       type="button"
-      aria-label="Next month"
+      [attr.aria-label]="t('workspace.capturedDate.aria.nextMonth', 'Next month')"
       (click)="nextMonth()"
     >
       <span class="material-icons" aria-hidden="true">chevron_right</span>
@@ -85,14 +85,14 @@
       type="button"
       (click)="emitClear()"
     >
-      Clear
+      {{ t('workspace.capturedDate.action.clear', 'Clear') }}
     </button>
     <button
       class="captured-date-editor__done-btn focus-ring-primary"
       type="button"
       (click)="emitSave()"
     >
-      Done
+      {{ t('workspace.capturedDate.action.done', 'Done') }}
     </button>
   </div>
 </div>

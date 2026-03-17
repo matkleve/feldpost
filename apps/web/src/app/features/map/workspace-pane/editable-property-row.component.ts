@@ -10,7 +10,8 @@
  * Escape discards changes.
  */
 
-import { Component, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 export interface SelectOption {
   id: string;
@@ -35,7 +36,7 @@ export interface SelectOption {
               class="prop-input"
               type="datetime-local"
               [value]="dateInputValue()"
-              [attr.aria-label]="'Edit ' + label()"
+              [attr.aria-label]="t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
               (keydown.enter)="commitEdit($event)"
               (keydown.escape)="cancelEdit()"
               (blur)="commitEdit($event)"
@@ -45,12 +46,12 @@ export interface SelectOption {
             <select
               #editInput
               class="prop-input prop-input--select"
-              [attr.aria-label]="'Edit ' + label()"
+              [attr.aria-label]="t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
               (change)="commitSelect($event)"
               (keydown.escape)="cancelEdit()"
               (blur)="commitSelect($event)"
             >
-              <option value="">— None —</option>
+              <option value="">{{ t('workspace.editableRow.option.none', '— None —') }}</option>
               @for (opt of options(); track opt.id) {
                 <option [value]="opt.id" [selected]="opt.id === value()">{{ opt.label }}</option>
               }
@@ -62,7 +63,7 @@ export interface SelectOption {
               class="prop-input"
               type="text"
               [value]="value()"
-              [attr.aria-label]="'Edit ' + label()"
+              [attr.aria-label]="t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
               (keydown.enter)="commitEdit($event)"
               (keydown.escape)="cancelEdit()"
               (blur)="commitEdit($event)"
@@ -73,11 +74,11 @@ export interface SelectOption {
         <button
           class="prop-value"
           type="button"
-          [title]="readonly() ? label() : 'Edit ' + label()"
+          [title]="readonly() ? label() : t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()"
           [disabled]="readonly()"
           (click)="startEdit()"
         >
-          {{ displayValue() || '—' }}
+          {{ displayValue() || t('workspace.editableRow.value.empty', '—') }}
         </button>
       }
     </div>
@@ -165,6 +166,9 @@ export interface SelectOption {
   ],
 })
 export class EditablePropertyRowComponent {
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
   readonly label = input.required<string>();
   readonly value = input.required<string>();
   readonly displayValue = input<string>('');

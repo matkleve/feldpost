@@ -171,8 +171,8 @@
   min-height: 1.5rem;
   padding: 0 var(--spacing-2);
   border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
-  background: color-mix(in srgb, var(--color-bg-base) 78%, var(--color-bg-surface));
+  border: 1px solid var(--menu-surface-border);
+  background: color-mix(in srgb, var(--section-bg) 78%, var(--field-bg));
   color: var(--color-text-secondary);
   font-size: 0.68rem;
   font-weight: 700;
@@ -625,7 +625,7 @@
     transition: color 80ms ease-out;
 
     &:hover:not(:disabled) {
-      color: var(--color-primary);
+      color: var(--action-text-active);
     }
 
     &--static {
@@ -777,10 +777,10 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-1);
-    border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
+    border: 1px solid var(--menu-surface-border);
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--color-bg-subtle) 88%, transparent);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--section-bg) 88%, transparent);
+    color: var(--menu-item-text);
     min-height: 2rem;
     padding: 0 var(--spacing-2);
     font-size: 0.8125rem;
@@ -793,7 +793,7 @@
     }
 
     &:hover {
-      background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+      background: var(--menu-item-bg-hover);
     }
   }
 
@@ -825,7 +825,7 @@
     border: none;
     border-radius: 0;
     background: transparent;
-    color: var(--color-text-primary);
+    color: var(--field-text);
     padding: var(--spacing-1) var(--spacing-2);
     font-size: 0.9375rem;
     text-align: left;
@@ -923,7 +923,7 @@
 
     &--active {
       color: var(--color-warning);
-      background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+      background: var(--state-warning-bg);
     }
   }
 
@@ -932,7 +932,7 @@
     align-items: center;
     justify-content: center;
     width: 1.125rem;
-    color: var(--color-primary);
+    color: var(--action-text-active);
 
     .material-icons {
       font-size: 0.875rem;
@@ -958,12 +958,12 @@
   }
 
   &__create-label {
-    color: var(--color-text-secondary);
+    color: var(--section-text);
   }
 
   &__create-value {
     margin-left: auto;
-    color: var(--color-text-primary);
+    color: var(--menu-item-text);
     max-width: 10rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -974,7 +974,7 @@
   &__note {
     padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    background: var(--state-warning-bg);
     color: var(--color-text-secondary);
     font-size: 0.8125rem;
     line-height: 1.35;

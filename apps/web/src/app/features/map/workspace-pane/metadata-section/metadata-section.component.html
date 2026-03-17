@@ -1,4 +1,4 @@
-<div class="dd-section-label">Metadata</div>
+<div class="dd-section-label">{{ t('workspace.metadata.section.title', 'Metadata') }}</div>
 
 @for (entry of entries(); track entry.metadataKeyId) {
   <div class="metadata-row-wrap">
@@ -18,8 +18,8 @@
         #newKeyInput
         class="add-metadata-input"
         type="text"
-        placeholder="Key"
-        aria-label="New metadata key"
+        [placeholder]="t('workspace.metadata.input.key.placeholder', 'Key')"
+        [attr.aria-label]="t('workspace.metadata.input.key.aria', 'New metadata key')"
         (input)="onMetadataKeyInput(newKeyInput.value)"
         (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
         (keydown.enter)="newValueInput.focus()"
@@ -45,15 +45,15 @@
       #newValueInput
       class="add-metadata-input"
       type="text"
-      placeholder="Value"
-      aria-label="New metadata value"
+      [placeholder]="t('workspace.metadata.input.value.placeholder', 'Value')"
+      [attr.aria-label]="t('workspace.metadata.input.value.aria', 'New metadata value')"
       (keydown.enter)="addMetadata(newKeyInput.value, newValueInput.value)"
       (keydown.escape)="showAddForm.set(false); keySuggestions.set([])"
     />
     <button
       class="add-metadata-confirm dd-item"
       type="button"
-      aria-label="Save new metadata"
+      [attr.aria-label]="t('workspace.metadata.action.save.aria', 'Save new metadata')"
       (click)="addMetadata(newKeyInput.value, newValueInput.value)"
     >
       <span class="material-icons" aria-hidden="true">check</span>
@@ -64,6 +64,6 @@
 @if (!showAddForm()) {
   <button class="add-metadata-btn dd-action-row" type="button" (click)="showAddForm.set(true)">
     <span class="material-icons" aria-hidden="true">add</span>
-    Add metadata
+    {{ t('workspace.metadata.action.add', 'Add metadata') }}
   </button>
 }

@@ -204,6 +204,53 @@
   --photo-marker-drop-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
 }
 
+// Optional custom profile to validate themeability of semantic aliases.
+// Activate manually via: document.documentElement.setAttribute('data-theme', 'sandstone')
+[data-theme='sandstone'] {
+  --color-bg-base: #f3efe8;
+  --color-bg-surface: #fdfaf4;
+  --color-bg-elevated: #fffaf0;
+  --color-border: #d8cdbf;
+  --color-border-strong: #b9ab98;
+  --color-text-primary: #2f271f;
+  --color-text-secondary: #655749;
+  --color-text-disabled: #9e8f80;
+  --color-primary: #a56137;
+  --color-primary-hover: #8d4f2a;
+  --color-clay: #a56137;
+  --color-map-user-marker: #2f5f89;
+
+  --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
+  --action-bg-active: color-mix(in srgb, #a56137 22%, transparent);
+  --action-border-default: color-mix(in srgb, #a56137 36%, var(--color-border));
+  --action-border-active: color-mix(in srgb, #a56137 52%, var(--color-border));
+  --action-text-default: #6b5a47;
+  --action-text-active: #8f522d;
+
+  --menu-surface-bg: #fffaf2;
+  --menu-surface-border: color-mix(in srgb, #a38d73 44%, transparent);
+  --menu-item-bg-hover: color-mix(in srgb, #c59f63 14%, transparent);
+  --menu-item-bg-active: color-mix(in srgb, #a56137 18%, transparent);
+  --menu-item-text: #2f271f;
+  --menu-item-text-active: #8f522d;
+
+  --field-bg: #fffdf8;
+  --field-border: #b7a48e;
+  --field-border-focus: #8f522d;
+  --field-placeholder: #9f8d78;
+  --field-text: #2f271f;
+
+  --section-bg: #fdf8ef;
+  --section-border: color-mix(in srgb, #a38d73 42%, transparent);
+  --section-title: #2f271f;
+  --section-text: #66594a;
+
+  --state-success-bg: color-mix(in srgb, #4f8b4b 20%, transparent);
+  --state-warning-bg: color-mix(in srgb, #d08b36 24%, transparent);
+  --state-danger-bg: color-mix(in srgb, #ba4b44 18%, transparent);
+  --state-info-bg: color-mix(in srgb, #2f5f89 18%, transparent);
+}
+
 // ── Dark-mode tokens — system preference fallback (audit issue #10) ───────────
 // Applies dark tokens when the user's OS is in dark mode and they haven't
 // explicitly set a preference in the app.
@@ -657,6 +704,137 @@ router-outlet + * {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--section-text);
+}
+
+// ── Shared settings/form primitives ─────────────────────────────────────────
+
+.ui-section-card {
+  border: 1.5px solid var(--section-border);
+  background: var(--section-bg);
+}
+
+.ui-field-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 12rem) 1fr;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.ui-field-row--stacked {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+.ui-field-label {
+  font-size: 0.875rem;
+  color: var(--section-text);
+}
+
+.ui-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  border: 1.5px solid var(--action-border-default);
+  border-radius: var(--radius-full);
+  padding: 0.15rem;
+}
+
+.ui-segmented__button {
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--action-bg-default);
+  color: var(--action-text-default);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--interactive-transition-standard);
+
+  &:hover {
+    color: var(--menu-item-text);
+    background: var(--action-bg-hover);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-segmented__button--active {
+  background: var(--action-bg-active);
+  color: var(--action-text-active);
+}
+
+.ui-toggle-row {
+  --ui-item-media-size: 0;
+
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+  border: 1.5px solid var(--action-border-default);
+  background: color-mix(in srgb, var(--field-bg) 90%, transparent);
+  text-align: left;
+  color: var(--menu-item-text);
+  cursor: pointer;
+  transition: var(--interactive-transition-standard);
+
+  &:hover {
+    border-color: var(--action-border-active);
+    background: var(--action-bg-hover);
+  }
+
+  &:focus-visible {
+    border-color: var(--action-border-active);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-toggle-switch {
+  position: relative;
+  display: inline-flex;
+  width: 2.6rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--action-text-default) 35%, transparent);
+}
+
+.ui-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 0.15rem;
+  left: 0.17rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: var(--radius-full);
+  background: var(--field-bg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 140ms ease-out;
+}
+
+.ui-toggle-switch--on {
+  background: color-mix(in srgb, var(--action-text-active) 70%, transparent);
+}
+
+.ui-toggle-switch--on::after {
+  transform: translateX(1.08rem);
+}
+
+.ui-select-control {
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  border-radius: var(--radius-md);
+  background: var(--field-bg);
+  color: var(--field-text);
+  padding: 0.5rem 0.75rem;
+  transition: var(--interactive-transition-standard);
+
+  &:focus-visible {
+    border-color: var(--field-border-focus);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
 }
 
 // ── Shared icon ghost button primitives ─────────────────────────────────────

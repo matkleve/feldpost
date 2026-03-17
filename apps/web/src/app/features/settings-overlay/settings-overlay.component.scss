@@ -186,9 +186,6 @@
 
 .settings-overlay__detail-card {
   --ui-container-gap: var(--spacing-3);
-
-  border: var(--settings-stroke-width) solid var(--settings-border-muted);
-  background: var(--color-bg-elevated);
 }
 
 .settings-overlay__detail-card h3 {
@@ -201,82 +198,13 @@
   color: var(--color-text-secondary);
 }
 
-.settings-overlay__field-row {
-  display: grid;
-  grid-template-columns: minmax(10rem, 12rem) 1fr;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
 .settings-overlay__field-row span {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 }
-
-.settings-overlay__field-row--stacked {
-  grid-template-columns: 1fr;
-  align-items: start;
-}
-
-.settings-overlay__segmented {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  border: var(--settings-interactive-border);
-  border-radius: var(--radius-full);
-  padding: 0.15rem;
-}
-
-.settings-overlay__segmented button {
-  min-height: 2.25rem;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--color-text-secondary);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__segmented button:hover {
-  color: var(--color-text-primary);
-  background: var(--settings-hover-focus);
-}
-
 .settings-overlay__segmented button.settings-overlay__segmented--active {
-  background: color-mix(in srgb, var(--color-clay) 16%, transparent);
-  color: var(--color-clay);
-}
-
-.settings-overlay__segmented button:focus-visible {
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
-}
-
-.settings-overlay__toggle-row {
-  --ui-item-media-size: 0;
-  grid-template-columns: minmax(0, 1fr) auto;
-
-  width: 100%;
-  border: var(--settings-interactive-border);
-  background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent);
-  text-align: left;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__toggle-row:hover {
-  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
-  background: var(--settings-hover-focus);
-}
-
-.settings-overlay__toggle-row:focus-visible {
-  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
+  background: var(--action-bg-active);
+  color: var(--action-text-active);
 }
 
 .settings-overlay__toggle-row .ui-item-label {
@@ -291,52 +219,6 @@
 .settings-overlay__toggle-row .ui-item-label small {
   font-size: 0.75rem;
   color: var(--color-text-secondary);
-}
-
-.settings-overlay__toggle {
-  position: relative;
-  display: inline-flex;
-  width: 2.6rem;
-  height: 1.5rem;
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-text-secondary) 35%, transparent);
-}
-
-.settings-overlay__toggle::after {
-  content: '';
-  position: absolute;
-  top: 0.15rem;
-  left: 0.17rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  border-radius: var(--radius-full);
-  background: var(--color-bg-surface);
-  box-shadow: var(--shadow-sm);
-  transition: transform 140ms ease-out;
-}
-
-.settings-overlay__toggle--on {
-  background: color-mix(in srgb, var(--color-clay) 70%, transparent);
-}
-
-.settings-overlay__toggle--on::after {
-  transform: translateX(1.08rem);
-}
-
-.settings-overlay__select {
-  min-height: 2.5rem;
-  border: var(--settings-interactive-border);
-  border-radius: var(--settings-interactive-radius);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  padding: 0.5rem 0.75rem;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__select:focus-visible {
-  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
 }
 
 .settings-overlay__range {

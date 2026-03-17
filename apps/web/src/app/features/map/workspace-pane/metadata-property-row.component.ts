@@ -2,7 +2,8 @@
  * MetadataPropertyRowComponent - metadata row with fixed action cells.
  */
 
-import { Component, ElementRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-metadata-property-row',
@@ -12,8 +13,8 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
       <button
         class="detail-row-action detail-row-action--left"
         type="button"
-        [attr.aria-label]="'Edit ' + metaKey()"
-        [title]="'Edit ' + metaKey()"
+        [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+        [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
         (click)="startEdit()"
       >
         <span class="material-icons" aria-hidden="true">edit</span>
@@ -27,22 +28,22 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
           class="meta-row__input"
           type="text"
           [value]="metaValue()"
-          aria-label="Edit {{ metaKey() }}"
+          [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
           (keydown.enter)="commitEdit($event)"
           (keydown.escape)="cancelEdit()"
           (blur)="commitEdit($event)"
         />
       } @else {
-        <span class="meta-row__value" [title]="metaValue() || '-'">
-          {{ metaValue() || '-' }}
+        <span class="meta-row__value" [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')">
+          {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}
         </span>
       }
 
       <button
         class="detail-row-action detail-row-action--right detail-row-action--danger"
         type="button"
-        [attr.aria-label]="'Remove ' + metaKey()"
-        title="Remove metadata"
+        [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
+        [attr.title]="t('workspace.metadata.row.removeTitle', 'Remove metadata')"
         (click)="deleteRequested.emit()"
       >
         <span class="material-icons" aria-hidden="true">close</span>
@@ -174,6 +175,9 @@ import { Component, ElementRef, input, output, signal, viewChild } from '@angula
   ],
 })
 export class MetadataPropertyRowComponent {
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
   readonly metaKey = input.required<string>({ alias: 'key' });
   readonly metaValue = input.required<string>({ alias: 'value' });
   readonly valueChanged = output<string>();

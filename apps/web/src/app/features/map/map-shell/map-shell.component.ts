@@ -50,10 +50,7 @@ import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.compone
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
 import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card.component';
 import { SettingsPaneService } from '../../../core/settings-pane.service';
-import {
-  ProjectSelectDialogComponent,
-  ProjectSelectOption,
-} from '../../../shared/project-select-dialog/project-select-dialog.component';
+import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import {
   buildPhotoMarkerHtml,
@@ -91,6 +88,11 @@ import {
 import { MapBasemapLayerService } from './map-basemap-layer.service';
 import { MapFocusPayloadService } from './map-focus-payload.service';
 import { ShareTokenSelectionService } from './share-token-selection.service';
+import { MapGeolocationService } from './map-geolocation.service';
+import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferred-startup.service';
+import { MapProjectActionsService } from './map-project-actions.service';
+import { MapProjectDialogService } from './map-project-dialog.service';
+import { MarkerStateMutationsService } from './marker-state-mutations.service';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo' | 'historic';
@@ -204,6 +206,11 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
   private readonly shareTokenSelectionService = inject(ShareTokenSelectionService);
+  private readonly mapGeolocationService = inject(MapGeolocationService);
+  private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
+  private readonly mapProjectActionsService = inject(MapProjectActionsService);
+  private readonly mapProjectDialogService = inject(MapProjectDialogService);
+  private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
@@ -478,10 +485,6 @@ export class MapShellComponent implements OnDestroy {
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
   private nativeContextMenuBypassUntil = 0;
-  private projectSelectionDialogResolver:
-    | ((value: { id: string; name: string } | null) => void)
-    | null = null;
-  private projectNameDialogResolver: ((value: string | null) => void) | null = null;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -529,9 +532,11 @@ export class MapShellComponent implements OnDestroy {
 
   /** Subscriptions for upload manager events — cleaned up in ngOnDestroy. */
   private uploadManagerSubs: { unsubscribe(): void }[] = [];
-  private deferredStartupRafId: number | null = null;
-  private deferredStartupTimer: ReturnType<typeof setTimeout> | null = null;
-  private markerBootstrapTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly deferredStartupHandles: DeferredStartupHandles = {
+    rafId: null,
+    startupTimer: null,
+    markerBootstrapTimer: null,
+  };
   private userLocationFoundTimer: ReturnType<typeof setTimeout> | null = null;
   private gpsTrackingTimer: ReturnType<typeof setInterval> | null = null;
   private lastMapMoveAt = 0;
@@ -601,13 +606,12 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private cleanupMarkerLayersAndCaches(): void {
-    for (const state of this.uploadedPhotoMarkers.values()) {
-      this.cancelMarkerMoveAnimation(state.marker);
-    }
-
-    this.photoMarkerLayer?.clearLayers();
-    this.uploadedPhotoMarkers.clear();
-    this.markersByImageId.clear();
+    this.markerStateMutationsService.cleanupMarkerLayersAndCaches({
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      photoMarkerLayer: this.photoMarkerLayer,
+      markersByImageId: this.markersByImageId,
+      cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+    });
   }
 
   private cleanupUploadManagerSubscriptions(): void {
@@ -625,8 +629,7 @@ export class MapShellComponent implements OnDestroy {
     this.cancelRadiusDrawing();
     this.pendingSecondaryPress = null;
     this.closeContextMenus();
-    this.resolveAndCloseProjectSelectionDialog(null);
-    this.resolveAndCloseProjectNameDialog(null);
+    this.mapProjectDialogService.closeAllDialogs(this.state);
     this.clearRadiusSelectionVisuals();
   }
 
@@ -688,7 +691,10 @@ export class MapShellComponent implements OnDestroy {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
 
-    const copied = await this.copyAddressFromCoords(coords.lat, coords.lng);
+    const copied = await this.mapContextActionsService.copyAddressFromCoords(
+      coords.lat,
+      coords.lng,
+    );
     if (copied) {
       this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
     } else {
@@ -737,7 +743,7 @@ export class MapShellComponent implements OnDestroy {
 
     const center = L.latLng(coords.lat, coords.lng);
     const radiusMeters = MapShellComponent.QUICK_RADIUS_METERS;
-    const edge = this.offsetLatLngEast(center, radiusMeters);
+    const edge = this.radiusVisualsService.offsetLatLngEast(center, radiusMeters);
 
     this.clearRadiusSelectionVisuals();
     this.addRadiusSelectionVisual(center, radiusMeters, edge);
@@ -746,7 +752,9 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onRadiusContextCreateProjectFromSelection(): Promise<void> {
-    const imageIds = this.getActiveSelectionImageIds();
+    const imageIds = this.mapProjectActionsService.getActiveSelectionImageIds(
+      this.workspaceViewService.rawImages(),
+    );
     if (imageIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien in Radius-Auswahl verfuegbar.',
@@ -763,8 +771,25 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const projectData = await this.createProjectFromRadiusSelection(projectName, imageIds[0]);
-    if (!projectData) {
+    const created = await this.mapProjectActionsService.createProjectFromFirstImage({
+      client: this.supabaseService.client,
+      projectName,
+      firstImageId: imageIds[0],
+    });
+    if (!created.ok || !created.project) {
+      if (created.reason === 'organization-missing') {
+        this.toastService.show({
+          message: 'Projekt konnte nicht erstellt werden (Organisation unbekannt).',
+          type: 'error',
+          dedupe: true,
+        });
+      } else {
+        this.toastService.show({
+          message: created.errorMessage ?? 'Projekt konnte nicht erstellt werden.',
+          type: 'error',
+          dedupe: true,
+        });
+      }
       this.closeContextMenus();
       return;
     }
@@ -772,82 +797,32 @@ export class MapShellComponent implements OnDestroy {
     const assigned = await this.mapContextActionsService.assignImagesToProject(
       this.supabaseService.client,
       imageIds,
-      projectData.id as string,
+      created.project.id,
     );
-    if (!this.handleProjectAssignmentResult(assigned)) {
+    const assignFailureMessage =
+      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
+    if (assignFailureMessage) {
+      this.toastService.show({
+        message: assignFailureMessage,
+        type: assigned.reason === 'empty' ? 'warning' : 'error',
+        dedupe: true,
+      });
       this.closeContextMenus();
       return;
     }
 
     this.toastService.show({
-      message: `Projekt "${(projectData.name as string) ?? projectName}" erstellt und ${imageIds.length} Medien zugewiesen.`,
+      message: `Projekt "${created.project.name}" erstellt und ${imageIds.length} Medien zugewiesen.`,
       type: 'success',
       dedupe: true,
     });
     this.closeContextMenus();
   }
 
-  private async createProjectFromRadiusSelection(
-    projectName: string,
-    firstImageId: string,
-  ): Promise<{ id: string; name: string } | null> {
-    const organizationId = await this.resolveOrganizationIdForImage(firstImageId);
-    if (!organizationId) {
-      this.toastService.show({
-        message: 'Projekt konnte nicht erstellt werden (Organisation unbekannt).',
-        type: 'error',
-        dedupe: true,
-      });
-      return null;
-    }
-
-    const { data: projectData, error: projectError } = await this.supabaseService.client
-      .from('projects')
-      .insert({ name: projectName, organization_id: organizationId })
-      .select('id,name')
-      .single();
-
-    if (projectError || !projectData) {
-      this.toastService.show({
-        message: projectError?.message ?? 'Projekt konnte nicht erstellt werden.',
-        type: 'error',
-        dedupe: true,
-      });
-      return null;
-    }
-
-    return {
-      id: String(projectData.id),
-      name: String(projectData.name ?? projectName),
-    };
-  }
-
-  private handleProjectAssignmentResult(result: {
-    ok: boolean;
-    reason: 'success' | 'empty' | 'error';
-    errorMessage?: string;
-  }): boolean {
-    if (result.ok) {
-      return true;
-    }
-
-    if (result.reason === 'empty') {
-      this.toastService.show({
-        message: 'Keine Medien fuer Projektzuweisung gefunden.',
-        type: 'warning',
-        dedupe: true,
-      });
-      return false;
-    }
-
-    if (result.errorMessage) {
-      this.toastService.show({ message: result.errorMessage, type: 'error', dedupe: true });
-    }
-    return false;
-  }
-
   async onRadiusContextAssignToProject(): Promise<void> {
-    const imageIds = this.getActiveSelectionImageIds();
+    const imageIds = this.mapProjectActionsService.getActiveSelectionImageIds(
+      this.workspaceViewService.rawImages(),
+    );
     if (imageIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien in Radius-Auswahl verfuegbar.',
@@ -869,20 +844,23 @@ export class MapShellComponent implements OnDestroy {
       imageIds,
       project.id,
     );
-    if (assigned.ok) {
+    const assignFailureMessage =
+      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
+    if (!assignFailureMessage) {
       this.toastService.show({
-        message: `${imageIds.length} Medien dem Projekt "${project.name}" zugewiesen.`,
+        message: this.mapProjectActionsService.formatProjectAssignmentSuccess(
+          project.name,
+          imageIds.length,
+        ),
         type: 'success',
         dedupe: true,
       });
-    } else if (assigned.reason === 'empty') {
+    } else {
       this.toastService.show({
-        message: 'Keine Medien fuer Projektzuweisung gefunden.',
-        type: 'warning',
+        message: assignFailureMessage,
+        type: assigned.reason === 'empty' ? 'warning' : 'error',
         dedupe: true,
       });
-    } else if (assigned.errorMessage) {
-      this.toastService.show({ message: assigned.errorMessage, type: 'error', dedupe: true });
     }
     this.closeContextMenus();
   }
@@ -945,25 +923,23 @@ export class MapShellComponent implements OnDestroy {
       imageIds,
       project.id,
     );
-    if (!assigned.ok) {
-      if (assigned.reason === 'empty') {
-        this.toastService.show({
-          message: 'Keine Medien fuer Projektzuweisung gefunden.',
-          type: 'warning',
-          dedupe: true,
-        });
-      } else if (assigned.errorMessage) {
-        this.toastService.show({ message: assigned.errorMessage, type: 'error', dedupe: true });
-      }
+    const assignFailureMessage =
+      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
+    if (assignFailureMessage) {
+      this.toastService.show({
+        message: assignFailureMessage,
+        type: assigned.reason === 'empty' ? 'warning' : 'error',
+        dedupe: true,
+      });
       this.closeContextMenus();
       return;
     }
 
     this.toastService.show({
-      message:
-        imageIds.length === 1
-          ? `Zum Projekt \"${project.name}\" zugewiesen.`
-          : `${imageIds.length} Medien dem Projekt \"${project.name}\" zugewiesen.`,
+      message: this.mapProjectActionsService.formatProjectAssignmentSuccess(
+        project.name,
+        imageIds.length,
+      ),
       type: 'success',
       dedupe: true,
     });
@@ -988,7 +964,10 @@ export class MapShellComponent implements OnDestroy {
     const payload = this.markerContextMenuPayload();
     if (!payload) return;
 
-    const copied = await this.copyAddressFromCoords(payload.lat, payload.lng);
+    const copied = await this.mapContextActionsService.copyAddressFromCoords(
+      payload.lat,
+      payload.lng,
+    );
     if (copied) {
       this.toastService.show({ message: 'Adresse kopiert.', type: 'success', dedupe: true });
     } else {
@@ -1029,8 +1008,8 @@ export class MapShellComponent implements OnDestroy {
 
   async onMarkerContextDeletePhoto(): Promise<void> {
     const payload = this.markerContextMenuPayload();
-    const target = this.getSingleMarkerContextImageTarget(payload);
-    if (!target || !this.confirmMarkerPhotoDelete()) return;
+    const target = this.markerContextPhotoDeleteService.getSingleImageTarget(payload);
+    if (!target || !this.markerContextPhotoDeleteService.confirmPhotoDelete()) return;
 
     const deleted = await this.markerContextPhotoDeleteService.deleteImageById(
       this.supabaseService.client,
@@ -1045,57 +1024,23 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.removeDeletedPhotoFromMapUi(target.markerKey, target.imageId);
+    this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
+      markerKey: target.markerKey,
+      imageId: target.imageId,
+      uploadedPhotoMarkers: this.uploadedPhotoMarkers,
+      photoMarkerLayer: this.photoMarkerLayer,
+      markersByImageId: this.markersByImageId,
+      selectedMarkerKey: this.selectedMarkerKey(),
+      selectedMarkerKeys: this.selectedMarkerKeys(),
+      detailImageId: this.detailImageId(),
+      cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
+      setSelectedMarker: (markerKey) => this.setSelectedMarker(markerKey),
+      setSelectedMarkerKeys: (markerKeys) => this.setSelectedMarkerKeys(markerKeys),
+      setDetailImageId: (imageId) => this.detailImageId.set(imageId),
+    });
 
     this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
     this.closeContextMenus();
-  }
-
-  private getSingleMarkerContextImageTarget(
-    payload: {
-      markerKey: string;
-      count: number;
-      imageId?: string;
-    } | null,
-  ): { markerKey: string; imageId: string } | null {
-    if (!payload || payload.count !== 1 || !payload.imageId) {
-      return null;
-    }
-    return { markerKey: payload.markerKey, imageId: payload.imageId };
-  }
-
-  private confirmMarkerPhotoDelete(): boolean {
-    return (
-      typeof window === 'undefined' ||
-      window.confirm(
-        'Foto wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.',
-      )
-    );
-  }
-
-  private removeDeletedPhotoFromMapUi(markerKey: string, imageId: string): void {
-    const markerState = this.uploadedPhotoMarkers.get(markerKey);
-    if (markerState && this.photoMarkerLayer) {
-      this.cancelMarkerMoveAnimation(markerState.marker);
-      this.photoMarkerLayer.removeLayer(markerState.marker);
-      this.uploadedPhotoMarkers.delete(markerKey);
-    }
-
-    this.markersByImageId.delete(imageId);
-
-    if (this.selectedMarkerKey() === markerKey) {
-      this.setSelectedMarker(null);
-    }
-
-    if (this.selectedMarkerKeys().has(markerKey)) {
-      const next = new Set(this.selectedMarkerKeys());
-      next.delete(markerKey);
-      this.setSelectedMarkerKeys(next);
-    }
-
-    if (this.detailImageId() === imageId) {
-      this.detailImageId.set(null);
-    }
   }
 
   // ── Workspace pane resize ─────────────────────────────────────────────────
@@ -1355,8 +1300,6 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-
     this.gpsTrackingActive.set(true);
     this.gpsLocating.set(true);
 
@@ -1364,14 +1307,13 @@ export class MapShellComponent implements OnDestroy {
     // requests a fresh high-accuracy fix before tracking continues.
     this.recenterOnKnownUserPosition();
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    this.mapGeolocationService.requestCurrentPosition({
+      onSuccess: (coords) => {
         if (!this.gpsTrackingActive()) {
           this.gpsLocating.set(false);
           return;
         }
 
-        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         this.userPosition.set(coords);
         void this.refreshSearchCountryCode(coords[0], coords[1]);
         const zoom = Math.max(this.map?.getZoom() ?? 0, MapShellComponent.GPS_RECENTER_MIN_ZOOM);
@@ -1381,12 +1323,11 @@ export class MapShellComponent implements OnDestroy {
         this.startGpsTracking();
         this.gpsLocating.set(false);
       },
-      () => {
+      onError: () => {
         this.stopGpsTracking();
         this.gpsLocating.set(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
-    );
+    });
   }
 
   toggleMapBasemap(): void {
@@ -1517,111 +1458,70 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private scheduleDeferredStartupWork(): void {
-    const runStartup = () => {
-      if (!this.map) {
-        return;
-      }
-
-      // Keep first route paint responsive, then run startup data work.
-      this.initGeolocation();
-      void this.workspaceViewService.loadCustomProperties();
-
-      this.markerBootstrapTimer = setTimeout(() => {
-        this.markerBootstrapTimer = null;
+    this.mapDeferredStartupService.scheduleDeferredStartup({
+      handles: this.deferredStartupHandles,
+      runStartup: () => {
         if (!this.map) {
           return;
         }
-        void this.queryViewportMarkers();
-      }, 120);
-    };
 
-    if (typeof window === 'undefined') {
-      runStartup();
-      return;
-    }
+        // Keep first route paint responsive, then run startup data work.
+        this.initGeolocation();
+        void this.workspaceViewService.loadCustomProperties();
 
-    this.deferredStartupRafId = window.requestAnimationFrame(() => {
-      this.deferredStartupRafId = null;
-      this.deferredStartupTimer = setTimeout(() => {
-        this.deferredStartupTimer = null;
-        runStartup();
-      }, 0);
+        this.deferredStartupHandles.markerBootstrapTimer = setTimeout(() => {
+          this.deferredStartupHandles.markerBootstrapTimer = null;
+          if (!this.map) {
+            return;
+          }
+          void this.queryViewportMarkers();
+        }, 120);
+      },
     });
   }
 
   private cancelDeferredStartupWork(): void {
-    if (this.deferredStartupRafId !== null && typeof window !== 'undefined') {
-      window.cancelAnimationFrame(this.deferredStartupRafId);
-      this.deferredStartupRafId = null;
-    }
-
-    if (this.deferredStartupTimer) {
-      clearTimeout(this.deferredStartupTimer);
-      this.deferredStartupTimer = null;
-    }
-
-    if (this.markerBootstrapTimer) {
-      clearTimeout(this.markerBootstrapTimer);
-      this.markerBootstrapTimer = null;
-    }
+    this.mapDeferredStartupService.cancelDeferredStartup(this.deferredStartupHandles);
   }
 
   private initGeolocation(): void {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+    this.mapGeolocationService.requestCurrentPosition({
+      onSuccess: (coords) => {
         this.userPosition.set(coords);
         void this.refreshSearchCountryCode(coords[0], coords[1]);
         this.renderOrUpdateUserLocationMarker(coords);
       },
-      () => {
+      onError: () => {
         // Geolocation denied or unavailable — Vienna fallback already set.
       },
-    );
+    });
   }
 
   private startGpsTracking(): void {
-    if (this.gpsTrackingTimer) {
-      clearInterval(this.gpsTrackingTimer);
-      this.gpsTrackingTimer = null;
-    }
+    this.gpsTrackingTimer = this.mapGeolocationService.clearTrackingTimer(this.gpsTrackingTimer);
 
-    this.gpsTrackingTimer = setInterval(() => {
-      if (!this.gpsTrackingActive()) {
-        return;
-      }
-      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    this.gpsTrackingTimer = this.mapGeolocationService.startTracking({
+      intervalMs: MapShellComponent.GPS_TRACKING_INTERVAL_MS,
+      isTrackingActive: () => this.gpsTrackingActive(),
+      onTickStart: () => this.gpsLocating.set(true),
+      onSuccess: (coords) => {
+        this.userPosition.set(coords);
+        void this.refreshSearchCountryCode(coords[0], coords[1]);
+        this.renderOrUpdateUserLocationMarker(coords);
+        this.triggerUserLocationFoundState();
+        this.gpsLocating.set(false);
+      },
+      onError: () => {
+        // When tracking can no longer get a fix, leave toggle mode.
         this.stopGpsTracking();
-        return;
-      }
-
-      this.gpsLocating.set(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          this.userPosition.set(coords);
-          void this.refreshSearchCountryCode(coords[0], coords[1]);
-          this.renderOrUpdateUserLocationMarker(coords);
-          this.triggerUserLocationFoundState();
-          this.gpsLocating.set(false);
-        },
-        () => {
-          // When tracking can no longer get a fix, leave toggle mode.
-          this.stopGpsTracking();
-          this.gpsLocating.set(false);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 },
-      );
-    }, MapShellComponent.GPS_TRACKING_INTERVAL_MS);
+        this.gpsLocating.set(false);
+      },
+    });
   }
 
   private stopGpsTracking(): void {
     this.gpsTrackingActive.set(false);
-    if (this.gpsTrackingTimer) {
-      clearInterval(this.gpsTrackingTimer);
-      this.gpsTrackingTimer = null;
-    }
+    this.gpsTrackingTimer = this.mapGeolocationService.clearTrackingTimer(this.gpsTrackingTimer);
   }
 
   private applyMapBasemapLayer(): void {
@@ -3285,22 +3185,12 @@ export class MapShellComponent implements OnDestroy {
     this.workspaceSelectionService.clearSelection();
   }
 
-  private async copyAddressFromCoords(lat: number, lng: number): Promise<boolean> {
-    const reverse = await this.geocodingService.reverse(lat, lng);
-    const address = reverse?.addressLabel?.trim();
-    if (!address) {
-      return false;
-    }
-    return this.mapContextActionsService.copyTextToClipboard(address);
-  }
-
   private async promptProjectSelection(): Promise<{ id: string; name: string } | null> {
-    const { data, error } = await this.supabaseService.client
-      .from('projects')
-      .select('id,name')
-      .order('name', { ascending: true });
+    const projects = await this.mapProjectActionsService.loadProjectOptions(
+      this.supabaseService.client,
+    );
 
-    if (error || !Array.isArray(data) || data.length === 0) {
+    if (!projects.ok) {
       this.toastService.show({
         message: 'Keine Projekte verfuegbar.',
         type: 'warning',
@@ -3309,122 +3199,41 @@ export class MapShellComponent implements OnDestroy {
       return null;
     }
 
-    const options = data.map((project) => ({
-      id: project.id as string,
-      name: (project.name as string) ?? 'Projekt',
-    }));
-
-    return this.openProjectSelectionDialog(
-      options,
+    return this.mapProjectDialogService.openProjectSelectionDialog(
+      this.state,
+      projects.options,
       'Projekt auswaehlen',
       'Waehle ein bestehendes Projekt fuer die Zuweisung aus.',
     );
   }
 
   private async promptProjectNameFromRadius(): Promise<string | null> {
-    return this.openProjectNameDialog('Name fuer neues Projekt aus Radius', 'Neues Radius Projekt');
+    return this.mapProjectDialogService.openProjectNameDialog(
+      this.state,
+      'Name fuer neues Projekt aus Radius',
+      'Neues Radius Projekt',
+      'Gib einen Projektnamen ein.',
+    );
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {
-    this.projectSelectionDialogSelectedId.set(projectId);
+    this.mapProjectDialogService.setProjectSelectionSelectedId(this.state, projectId);
   }
 
   onProjectSelectionDialogConfirmed(projectId: string): void {
-    const selected = this.projectSelectionDialogOptions().find((option) => option.id === projectId);
-    if (!selected) {
-      this.resolveAndCloseProjectSelectionDialog(null);
-      return;
-    }
-
-    this.resolveAndCloseProjectSelectionDialog({ id: selected.id, name: selected.name });
+    this.mapProjectDialogService.confirmProjectSelection(this.state, projectId);
   }
 
   onProjectSelectionDialogCancelled(): void {
-    this.resolveAndCloseProjectSelectionDialog(null);
+    this.mapProjectDialogService.cancelProjectSelection(this.state);
   }
 
   onProjectNameDialogConfirmed(projectName: string): void {
-    this.resolveAndCloseProjectNameDialog(projectName);
+    this.mapProjectDialogService.confirmProjectName(this.state, projectName);
   }
 
   onProjectNameDialogCancelled(): void {
-    this.resolveAndCloseProjectNameDialog(null);
-  }
-
-  private openProjectSelectionDialog(
-    options: ReadonlyArray<ProjectSelectOption>,
-    title: string,
-    message: string,
-  ): Promise<{ id: string; name: string } | null> {
-    this.resolveAndCloseProjectSelectionDialog(null);
-
-    this.projectSelectionDialogOptions.set(options);
-    this.projectSelectionDialogTitle.set(title);
-    this.projectSelectionDialogMessage.set(message);
-    this.projectSelectionDialogSelectedId.set(options.length > 0 ? options[0].id : null);
-    this.projectSelectionDialogOpen.set(true);
-
-    return new Promise((resolve) => {
-      this.projectSelectionDialogResolver = resolve;
-    });
-  }
-
-  private resolveAndCloseProjectSelectionDialog(value: { id: string; name: string } | null): void {
-    const resolver = this.projectSelectionDialogResolver;
-    this.projectSelectionDialogResolver = null;
-    this.projectSelectionDialogOpen.set(false);
-    this.projectSelectionDialogOptions.set([]);
-    this.projectSelectionDialogSelectedId.set(null);
-    if (resolver) {
-      resolver(value);
-    }
-  }
-
-  private openProjectNameDialog(title: string, initialValue: string): Promise<string | null> {
-    this.resolveAndCloseProjectNameDialog(null);
-    this.projectNameDialogTitle.set(title);
-    this.projectNameDialogMessage.set('Gib einen Projektnamen ein.');
-    this.projectNameDialogInitialValue.set(initialValue);
-    this.projectNameDialogOpen.set(true);
-
-    return new Promise((resolve) => {
-      this.projectNameDialogResolver = resolve;
-    });
-  }
-
-  private resolveAndCloseProjectNameDialog(value: string | null): void {
-    const resolver = this.projectNameDialogResolver;
-    this.projectNameDialogResolver = null;
-    this.projectNameDialogOpen.set(false);
-    if (resolver) {
-      resolver(value);
-    }
-  }
-
-  private getActiveSelectionImageIds(): string[] {
-    const unique = new Set(this.workspaceViewService.rawImages().map((img) => img.id));
-    return Array.from(unique);
-  }
-
-  private async resolveOrganizationIdForImage(imageId: string): Promise<string | null> {
-    const { data, error } = await this.supabaseService.client
-      .from('images')
-      .select('organization_id')
-      .eq('id', imageId)
-      .single();
-
-    if (error || !data?.organization_id) {
-      return null;
-    }
-
-    return data.organization_id as string;
-  }
-
-  private offsetLatLngEast(center: L.LatLng, meters: number): L.LatLng {
-    const latRad = (center.lat * Math.PI) / 180;
-    const metersPerDegreeLng = 111320 * Math.max(Math.cos(latRad), 0.0001);
-    const lngOffset = meters / metersPerDegreeLng;
-    return L.latLng(center.lat, center.lng + lngOffset);
+    this.mapProjectDialogService.cancelProjectName(this.state);
   }
 
   /**

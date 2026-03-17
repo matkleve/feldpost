@@ -1,5 +1,6 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { ForwardGeocodeResult, GeocodingService } from '../../../../core/geocoding.service';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-address-search',
@@ -9,6 +10,8 @@ import { ForwardGeocodeResult, GeocodingService } from '../../../../core/geocodi
 })
 export class AddressSearchComponent {
   private readonly geocodingService = inject(GeocodingService);
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly currentAddress = input('');
   readonly suggestionApplied = output<ForwardGeocodeResult>();

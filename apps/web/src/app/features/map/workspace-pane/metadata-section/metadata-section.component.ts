@@ -1,6 +1,7 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { MetadataPropertyRowComponent } from '../metadata-property-row.component';
 import { MetadataEntry } from '../image-detail-view.types';
+import { I18nService } from '../../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-metadata-section',
@@ -10,6 +11,9 @@ import { MetadataEntry } from '../image-detail-view.types';
   styleUrl: './metadata-section.component.scss',
 })
 export class MetadataSectionComponent {
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
   readonly entries = input.required<MetadataEntry[]>();
   readonly allKeyNames = input<string[]>([]);
 

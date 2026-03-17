@@ -30,7 +30,7 @@ export interface ThumbnailCardHoverEvent {
       <button
         class="thumbnail-card__main"
         type="button"
-        [attr.aria-label]="'View image ' + image().storagePath"
+        [attr.aria-label]="t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') + ' ' + (image().storagePath || displayName())"
         (click)="onCardClick($event)"
       >
         <div class="thumbnail-card__media">
@@ -39,7 +39,7 @@ export interface ThumbnailCardHoverEvent {
               class="thumbnail-card__img"
               [class.thumbnail-card__img--loaded]="!imgLoading()"
               [src]="image().signedThumbnailUrl"
-              [alt]="'Photo thumbnail'"
+              [alt]="t('workspace.thumbnailCard.photoThumbnail.alt', 'Photo thumbnail')"
               loading="lazy"
               (load)="onImgLoad()"
               (error)="onImgError()"
@@ -74,8 +74,8 @@ export interface ThumbnailCardHoverEvent {
       <button
         class="thumbnail-card__locate"
         type="button"
-        aria-label="Zur Position springen"
-        title="Zur Position springen"
+        [attr.aria-label]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
+        [attr.title]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
         [disabled]="!hasCoordinates()"
         (click)="onZoomToLocationClick($event)"
       >
@@ -87,7 +87,7 @@ export interface ThumbnailCardHoverEvent {
         type="button"
         [class.thumbnail-card__select--active]="selected()"
         [attr.aria-pressed]="selected()"
-        aria-label="Toggle selection"
+        [attr.aria-label]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
         (click)="onSelectClick($event)"
       >
         @if (selected()) {
@@ -104,6 +104,7 @@ export interface ThumbnailCardHoverEvent {
 })
 export class ThumbnailCardComponent {
   private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   readonly image = input.required<WorkspaceImage>();
@@ -120,7 +121,7 @@ export class ThumbnailCardComponent {
   );
   readonly displayName = computed(() => {
     const storagePath = this.image().storagePath;
-    if (!storagePath) return 'Image';
+    if (!storagePath) return this.t('workspace.thumbnailCard.fallback.image', 'Image');
     const parts = storagePath.split('/');
     return parts[parts.length - 1] || storagePath;
   });
@@ -130,12 +131,14 @@ export class ThumbnailCardComponent {
     if (project && city) return `${project} · ${city}`;
     if (project) return project;
     if (city) return city;
-    return 'Photo';
+    return this.t('workspace.thumbnailCard.fallback.photo', 'Photo');
   });
   readonly capturedLabel = computed(() => {
     const input = this.image().capturedAt ?? this.image().createdAt;
     const date = new Date(input);
-    if (Number.isNaN(date.getTime())) return 'Unbekannt';
+    if (Number.isNaN(date.getTime())) {
+      return this.t('workspace.thumbnailCard.fallback.unknown', 'Unknown');
+    }
     return new Intl.DateTimeFormat(this.i18nService.locale(), {
       day: '2-digit',
       month: '2-digit',

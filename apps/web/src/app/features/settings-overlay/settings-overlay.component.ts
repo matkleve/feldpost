@@ -14,7 +14,7 @@ import { SettingsPaneService } from '../../core/settings-pane.service';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 import { AccountComponent } from '../account/account.component';
 
-type ThemeMode = 'light' | 'dark' | 'system';
+type ThemeMode = 'light' | 'dark' | 'system' | 'sandstone';
 
 type DensityMode = 'compact' | 'comfortable';
 
@@ -24,6 +24,7 @@ type MarkerMotionPreference = 'off' | 'smooth';
 
 const MAP_MARKER_MOTION_STORAGE_KEY = 'feldpost.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'feldpost:map-marker-motion-changed';
+const THEME_MODE_STORAGE_KEY = 'feldpost.settings.themeMode';
 
 interface SettingsSection {
   id: string;
@@ -131,7 +132,7 @@ export class SettingsOverlayComponent {
   readonly inviteSectionRequest = this.settingsPaneService.inviteSectionRequest;
 
   readonly settingsModel = signal<SettingsModel>({
-    themeMode: 'system',
+    themeMode: this.readThemeModePreference(),
     density: 'comfortable',
     language: this.i18nService.language(),
     notificationsEnabled: true,
@@ -151,6 +152,10 @@ export class SettingsOverlayComponent {
       if (pendingSection) {
         this.selectedSectionId.set(pendingSection);
       }
+    });
+
+    effect(() => {
+      this.applyThemeMode(this.settingsModel().themeMode);
     });
   }
 
@@ -200,6 +205,12 @@ export class SettingsOverlayComponent {
 
   setThemeMode(themeMode: ThemeMode): void {
     this.settingsModel.update((model) => ({ ...model, themeMode }));
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(THEME_MODE_STORAGE_KEY, themeMode);
   }
 
   setDensity(density: DensityMode): void {
@@ -255,5 +266,30 @@ export class SettingsOverlayComponent {
     if (typeof window === 'undefined') return 'smooth';
     const stored = window.localStorage.getItem(MAP_MARKER_MOTION_STORAGE_KEY);
     return stored === 'off' ? 'off' : 'smooth';
+  }
+
+  private readThemeModePreference(): ThemeMode {
+    if (typeof window === 'undefined') return 'system';
+
+    const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+    if (stored === 'light' || stored === 'dark' || stored === 'system' || stored === 'sandstone') {
+      return stored;
+    }
+
+    return 'system';
+  }
+
+  private applyThemeMode(themeMode: ThemeMode): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    if (themeMode === 'system') {
+      root.removeAttribute('data-theme');
+      return;
+    }
+
+    root.setAttribute('data-theme', themeMode);
   }
 }

@@ -5,8 +5,8 @@
       #addressSearchInput
       class="address-search__input"
       type="text"
-      placeholder="Search address..."
-      aria-label="Search for an address"
+      [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+      [attr.aria-label]="t('workspace.addressSearch.aria.search', 'Search for an address')"
       [value]="query()"
       (input)="onInput(addressSearchInput.value)"
       (keydown.escape)="cancel()"
@@ -16,7 +16,7 @@
       <button
         class="address-search__clear icon-btn-ghost"
         type="button"
-        aria-label="Clear search"
+        [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
         (click)="query.set(''); addressSearchInput.focus()"
       >
         <span class="material-icons" aria-hidden="true">close</span>
@@ -36,11 +36,11 @@
   }
 
   @if (loading()) {
-    <div class="address-search__loading">Searching...</div>
+    <div class="address-search__loading">{{ t('workspace.addressSearch.loading', 'Searching...') }}</div>
   }
 } @else {
   <button class="address-search__trigger dd-item dd-item--muted" type="button" (click)="open()">
     <span class="material-icons dd-item__icon" aria-hidden="true">search</span>
-    <span class="dd-item__label">{{ currentAddress() || 'Search address...' }}</span>
+    <span class="dd-item__label">{{ currentAddress() || t('workspace.addressSearch.placeholder', 'Search address...') }}</span>
   </button>
 }

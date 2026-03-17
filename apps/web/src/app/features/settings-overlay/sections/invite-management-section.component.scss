@@ -1,8 +1,8 @@
 :host {
   display: block;
   --invite-stroke-width: 1.5px;
-  --invite-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
-  --invite-hover-focus: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --invite-border-muted: var(--menu-surface-border);
+  --invite-hover-focus: var(--action-bg-hover);
 }
 
 .invite-section {
@@ -104,8 +104,8 @@
   min-height: 2.75rem;
   border: var(--invite-stroke-width) solid var(--invite-border-muted);
   border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
+  background: var(--field-bg);
+  color: var(--field-text);
   padding: 0.6rem 0.75rem;
 }
 
@@ -144,8 +144,8 @@
   position: absolute;
   width: 2rem;
   height: 2rem;
-  border: 2px solid color-mix(in srgb, var(--color-clay) 20%, var(--color-border));
-  border-top-color: var(--color-clay);
+  border: 2px solid color-mix(in srgb, var(--action-text-active) 20%, var(--color-border));
+  border-top-color: var(--action-text-active);
   border-radius: var(--radius-full);
   animation: invite-qr-spin 800ms linear infinite;
 }
@@ -188,8 +188,8 @@
   height: 2.75rem;
   border: var(--invite-stroke-width) solid var(--invite-border-muted);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
-  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--field-bg) 88%, transparent);
+  color: var(--menu-item-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -202,7 +202,7 @@
 
 .invite-section__icon-button:hover:not(:disabled) {
   background: var(--invite-hover-focus);
-  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
+  border-color: var(--action-border-default);
 }
 
 .invite-section__icon-button:disabled {
@@ -214,8 +214,8 @@
   min-height: 2.75rem;
   border: var(--invite-stroke-width) solid var(--invite-border-muted);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
-  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--field-bg) 88%, transparent);
+  color: var(--menu-item-text);
   padding: 0.45rem 0.8rem;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -224,7 +224,7 @@
 
 .invite-section__button:hover:not(:disabled) {
   background: var(--invite-hover-focus);
-  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
+  border-color: var(--action-border-default);
 }
 
 .invite-section__button:disabled {
@@ -266,8 +266,8 @@
   min-height: 2.75rem;
   border: var(--invite-stroke-width) solid var(--invite-border-muted);
   border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--color-text-primary);
+  background: var(--action-bg-default);
+  color: var(--menu-item-text);
   padding: 0.5rem 0.9rem;
   cursor: pointer;
 }

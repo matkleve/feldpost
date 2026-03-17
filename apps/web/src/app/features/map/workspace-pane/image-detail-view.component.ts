@@ -75,6 +75,7 @@ interface MediaContextRow {
 })
 export class ImageDetailViewComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -156,11 +157,15 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly displayTitle = computed(() => {
     const img = this.image();
     if (!img) return '';
-    return img.address_label ?? img.storage_path?.split('/').pop() ?? 'File';
+    return (
+      img.address_label ?? img.storage_path?.split('/').pop() ?? this.t('workspace.imageDetail.fallback.file', 'File')
+    );
   });
 
   readonly mediaTypeLabel = computed(() => this.resolveMediaTypeLabel());
-  readonly detailViewLabel = computed(() => `${this.mediaTypeLabel()} details`);
+  readonly detailViewLabel = computed(
+    () => `${this.mediaTypeLabel()} ${this.t('workspace.imageDetail.detailsSuffix', 'details')}`,
+  );
 
   readonly captureDate = computed(() => {
     const img = this.image();
@@ -316,20 +321,26 @@ export class ImageDetailViewComponent implements OnDestroy {
     return [
       {
         icon: 'folder',
-        text: this.projectName() || 'No project',
+        text: this.projectName() || this.t('workspace.imageDetail.value.noProject', 'No project'),
         variant: this.selectedProjectIds().size > 0 ? ('filled' as const) : ('default' as const),
-        title: 'Projects',
+        title: this.t('workspace.imageDetail.field.projects', 'Projects'),
       },
       {
         icon: 'schedule',
-        text: this.captureDate() ?? 'No date',
-        title: 'Capture date',
+        text: this.captureDate() ?? this.t('workspace.imageDetail.value.noDate', 'No date'),
+        title: this.t('workspace.imageDetail.chip.captureDate', 'Capture date'),
       },
       {
         icon: 'my_location',
-        text: hasGps ? (this.isCorrected() ? 'Corrected' : 'GPS') : 'No GPS',
+        text: hasGps
+          ? this.isCorrected()
+            ? this.t('workspace.imageDetail.badge.corrected', 'Corrected')
+            : this.t('workspace.imageDetail.value.gps', 'GPS')
+          : this.t('workspace.imageDetail.value.noGps', 'No GPS'),
         variant: hasGps ? ('success' as const) : ('warning' as const),
-        title: hasGps ? 'Copy coordinates' : 'No GPS data',
+        title: hasGps
+          ? this.t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
+          : this.t('workspace.imageDetail.value.noGpsData', 'No GPS data'),
       },
     ];
   });
@@ -546,7 +557,7 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (nextIds.length === 0) {
       this.selectedProjectIds.set(previous);
       this.toastService.show({
-        message: 'At least one project is required.',
+        message: this.t('workspace.imageDetail.toast.projectRequired', 'At least one project is required.'),
         type: 'warning',
         dedupe: true,
       });
@@ -556,7 +567,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (!this.canAssignMultipleProjects() && nextIds.length > 1) {
       this.selectedProjectIds.set(previous);
       this.toastService.show({
-        message: 'No-GPS media can only belong to one project.',
+        message: this.t(
+          'workspace.imageDetail.toast.noGpsSingleProject',
+          'No-GPS media can only belong to one project.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -611,7 +625,10 @@ export class ImageDetailViewComponent implements OnDestroy {
       if (!ok) {
         this.selectedProjectIds.set(previous);
         this.toastService.show({
-          message: 'Could not update project memberships.',
+          message: this.t(
+            'workspace.imageDetail.toast.membershipUpdateFailed',
+            'Could not update project memberships.',
+          ),
           type: 'error',
           dedupe: true,
         });
@@ -624,7 +641,10 @@ export class ImageDetailViewComponent implements OnDestroy {
       if (!ok) {
         this.selectedProjectIds.set(previous);
         this.toastService.show({
-          message: 'Could not update project memberships.',
+          message: this.t(
+            'workspace.imageDetail.toast.membershipUpdateFailed',
+            'Could not update project memberships.',
+          ),
           type: 'error',
           dedupe: true,
         });
@@ -637,7 +657,10 @@ export class ImageDetailViewComponent implements OnDestroy {
       if (!ok) {
         this.selectedProjectIds.set(previous);
         this.toastService.show({
-          message: 'Could not set primary project.',
+          message: this.t(
+            'workspace.imageDetail.toast.primaryProjectFailed',
+            'Could not set primary project.',
+          ),
           type: 'error',
           dedupe: true,
         });
@@ -656,7 +679,7 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     if (removing && previous.size === 1) {
       this.toastService.show({
-        message: 'At least one project is required.',
+        message: this.t('workspace.imageDetail.toast.projectRequired', 'At least one project is required.'),
         type: 'warning',
         dedupe: true,
       });
@@ -665,7 +688,10 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     if (!removing && !this.canAssignMultipleProjects() && previous.size > 0) {
       this.toastService.show({
-        message: 'No-GPS media can only belong to one project.',
+        message: this.t(
+          'workspace.imageDetail.toast.noGpsSingleProject',
+          'No-GPS media can only belong to one project.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -713,7 +739,10 @@ export class ImageDetailViewComponent implements OnDestroy {
       if (!ok) {
         this.primaryProjectId.set(previousPrimary);
         this.toastService.show({
-          message: 'Could not set primary project.',
+          message: this.t(
+            'workspace.imageDetail.toast.primaryProjectFailed',
+            'Could not set primary project.',
+          ),
           type: 'error',
           dedupe: true,
         });
@@ -752,7 +781,10 @@ export class ImageDetailViewComponent implements OnDestroy {
 
     if (!this.canAssignMultipleProjects() && this.selectedProjectIds().size > 0) {
       this.toastService.show({
-        message: 'No-GPS media can only belong to one project.',
+        message: this.t(
+          'workspace.imageDetail.toast.noGpsSingleProject',
+          'No-GPS media can only belong to one project.',
+        ),
         type: 'warning',
         dedupe: true,
       });
@@ -863,9 +895,9 @@ export class ImageDetailViewComponent implements OnDestroy {
     }
 
     const mediaType = this.mediaType();
-    if (mediaType === 'image') return 'Image';
-    if (mediaType === 'video') return 'Video';
-    if (mediaType === 'document') return 'Document';
+    if (mediaType === 'image') return this.t('workspace.imageDetail.mediaType.image', 'Image');
+    if (mediaType === 'video') return this.t('workspace.imageDetail.mediaType.video', 'Video');
+    if (mediaType === 'document') return this.t('workspace.imageDetail.mediaType.document', 'Document');
 
     const path = this.image()?.storage_path;
     const extension = path?.split('.').pop()?.toUpperCase();
@@ -876,17 +908,17 @@ export class ImageDetailViewComponent implements OnDestroy {
         extension === 'PNG' ||
         extension === 'WEBP'
       ) {
-        return 'Image';
+        return this.t('workspace.imageDetail.mediaType.image', 'Image');
       }
       return extension;
     }
 
-    return 'Media';
+    return this.t('workspace.imageDetail.mediaType.media', 'Media');
   }
 
   private mapMimeTypeToLabel(mimeType: string): string | null {
-    if (mimeType.startsWith('image/')) return 'Image';
-    if (mimeType.startsWith('video/')) return 'Video';
+    if (mimeType.startsWith('image/')) return this.t('workspace.imageDetail.mediaType.image', 'Image');
+    if (mimeType.startsWith('video/')) return this.t('workspace.imageDetail.mediaType.video', 'Video');
 
     switch (mimeType) {
       case 'application/pdf':
@@ -1078,9 +1110,21 @@ export class ImageDetailViewComponent implements OnDestroy {
             }
           : prev,
       );
-      this.toastService.show({ message: 'Could not revert coordinates', type: 'error' });
+      this.toastService.show({
+        message: this.t(
+          'workspace.imageDetail.toast.coordinatesRevertFailed',
+          'Could not revert coordinates',
+        ),
+        type: 'error',
+      });
     } else {
-      this.toastService.show({ message: 'Coordinates reverted to EXIF', type: 'success' });
+      this.toastService.show({
+        message: this.t(
+          'workspace.imageDetail.toast.coordinatesReverted',
+          'Coordinates reverted to EXIF',
+        ),
+        type: 'success',
+      });
     }
 
     this.saving.set(false);
@@ -1122,7 +1166,11 @@ export class ImageDetailViewComponent implements OnDestroy {
     navigator.clipboard.writeText(text).catch(() => {
       /* silent — clipboard may be unavailable */
     });
-    this.toastService.show({ message: 'Coordinates copied', type: 'info', duration: 2000 });
+    this.toastService.show({
+      message: this.t('workspace.imageDetail.toast.coordinatesCopied', 'Coordinates copied'),
+      type: 'info',
+      duration: 2000,
+    });
     this.showContextMenu.set(false);
   }
 
@@ -1374,7 +1422,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     }
 
     this.updateGridCache(event.imageId, event.newStoragePath);
-    this.toastService.show({ message: 'Photo replaced', type: 'success' });
+    this.toastService.show({
+      message: this.t('workspace.imageDetail.toast.photoReplaced', 'Photo replaced'),
+      type: 'success',
+    });
   }
 
   private async handleImageAttached(event: ImageAttachedEvent): Promise<void> {
@@ -1404,7 +1455,10 @@ export class ImageDetailViewComponent implements OnDestroy {
     }
 
     this.updateGridCache(event.imageId, event.newStoragePath);
-    this.toastService.show({ message: 'Photo attached', type: 'success' });
+    this.toastService.show({
+      message: this.t('workspace.imageDetail.toast.photoAttached', 'Photo attached'),
+      type: 'success',
+    });
   }
 
   private updateGridCache(imageId: string, newStoragePath: string): void {
