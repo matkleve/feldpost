@@ -1,0 +1,42 @@
+<div
+  class="text-input-dialog-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="text-input-dialog-title"
+  (click)="cancelled.emit()"
+>
+  <div class="text-input-dialog ui-container" (click)="$event.stopPropagation()">
+    <h2 id="text-input-dialog-title" class="text-input-dialog__title">{{ title() }}</h2>
+
+    @if (message(); as content) {
+      <p class="text-input-dialog__message">{{ content }}</p>
+    }
+
+    <input
+      #nameInput
+      class="text-input-dialog__input"
+      type="text"
+      [value]="initialValue()"
+      [placeholder]="placeholder()"
+      [attr.aria-label]="title()"
+      maxlength="120"
+      autofocus
+      (keydown.escape)="cancelled.emit()"
+      (keydown.enter)="emitConfirmed(nameInput.value)"
+    />
+
+    <div class="text-input-dialog__actions">
+      <button class="text-input-dialog__cancel" type="button" (click)="cancelled.emit()">
+        {{ cancelLabel() }}
+      </button>
+      <button
+        class="text-input-dialog__confirm"
+        type="button"
+        [disabled]="nameInput.value.trim().length === 0"
+        (click)="emitConfirmed(nameInput.value)"
+      >
+        {{ confirmLabel() }}
+      </button>
+    </div>
+  </div>
+</div>

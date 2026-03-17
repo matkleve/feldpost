@@ -23,7 +23,10 @@
     />
   } @else {
     <app-workspace-toolbar />
-    <app-thumbnail-grid (thumbnailClicked)="onThumbnailClick($event)" />
+    <app-thumbnail-grid
+      (thumbnailClicked)="onThumbnailClick($event)"
+      (zoomToLocationRequested)="onZoomToLocation($event)"
+    />
 
     @if (selectionService.selectedCount() > 0) {
       <app-workspace-export-bar

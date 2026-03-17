@@ -1,0 +1,97 @@
+:host {
+  display: contents;
+}
+
+.text-input-dialog-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: color-mix(in srgb, var(--color-bg-base) 80%, transparent);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4);
+}
+
+.text-input-dialog {
+  width: min(100%, 30rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevation-modal);
+  background: var(--color-bg-elevated);
+  padding: var(--spacing-5);
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.text-input-dialog__title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+.text-input-dialog__message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.text-input-dialog__input {
+  min-height: 3rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding: 0 var(--spacing-3);
+  font: inherit;
+
+  &:focus-visible {
+    outline: none;
+    border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.text-input-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.text-input-dialog__cancel,
+.text-input-dialog__confirm {
+  min-height: 2.75rem;
+  border-radius: var(--radius-md);
+  padding: 0 var(--spacing-4);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+
+.text-input-dialog__cancel {
+  border: 1px solid var(--color-border-strong);
+  background: none;
+  color: var(--color-text-primary);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+  }
+}
+
+.text-input-dialog__confirm {
+  border: 1px solid transparent;
+  background: var(--color-primary);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}

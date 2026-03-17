@@ -45,6 +45,8 @@ cd apps/web && ng test
 - Use Angular **signals** and new control flow syntax (`@if`, `@for`, `@switch`)
 - Prefer **`inject()`** over constructor injection
 - **SCSS** for component styling
+- Prefer standardized shared UI components from `apps/web/src/app/shared/` (especially dialogs/modals) before building feature-local variants
+- Avoid browser-native UI primitives (`window.prompt`, `window.confirm`, native context UI) for product flows when a shared component exists
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting
 

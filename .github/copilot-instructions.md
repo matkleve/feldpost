@@ -21,6 +21,8 @@ Feldpost is a geo-temporal image management system for construction companies. I
 - **Tailwind CSS** for utility classes in templates
 - Use CSS custom properties for design tokens — never hardcode colors or spacing values
 - Use Supabase client from `@supabase/supabase-js` — always through service abstractions, never directly in components
+- Prefer reusable shared UI components from `apps/web/src/app/shared/` before creating new feature-local variants (especially for modal/dialog patterns)
+- Avoid browser-native prompts/confirms for user-facing product flows when a shared modal/dialog component can be used
 
 ## File Naming Conventions
 

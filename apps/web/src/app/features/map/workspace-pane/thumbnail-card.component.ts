@@ -62,6 +62,17 @@ export interface ThumbnailCardInteraction {
       </button>
 
       <button
+        class="thumbnail-card__locate"
+        type="button"
+        aria-label="Zur Position springen"
+        title="Zur Position springen"
+        [disabled]="!hasCoordinates()"
+        (click)="onZoomToLocationClick($event)"
+      >
+        <span class="material-icons" aria-hidden="true">near_me</span>
+      </button>
+
+      <button
         class="thumbnail-card__select"
         type="button"
         [class.thumbnail-card__select--active]="selected()"
@@ -89,6 +100,10 @@ export class ThumbnailCardComponent {
   readonly selected = input(false);
   readonly clicked = output<string>();
   readonly selectionToggled = output<ThumbnailCardInteraction>();
+  readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly hasCoordinates = computed(
+    () => Number.isFinite(this.image().latitude) && Number.isFinite(this.image().longitude),
+  );
   readonly displayName = computed(() => {
     const storagePath = this.image().storagePath;
     if (!storagePath) return 'Image';
@@ -144,6 +159,16 @@ export class ThumbnailCardComponent {
     this.selectionToggled.emit({
       imageId: this.image().id,
       additive: !!(event.ctrlKey || event.metaKey),
+    });
+  }
+
+  onZoomToLocationClick(event: MouseEvent): void {
+    event.stopPropagation();
+    if (!this.hasCoordinates()) return;
+    this.zoomToLocationRequested.emit({
+      imageId: this.image().id,
+      lat: this.image().latitude,
+      lng: this.image().longitude,
     });
   }
 

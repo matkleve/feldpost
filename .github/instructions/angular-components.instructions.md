@@ -22,6 +22,8 @@ applyTo: "**/*.component.ts"
 - Feature components: `src/app/features/{feature}/`
 - Core services: `src/app/core/`
 - Each component gets its own directory
+- Prefer reusable components from `src/app/shared/` (dialogs, modals, action sheets) before creating feature-local variants
+- Avoid browser-native `window.prompt` / `window.confirm` in user-facing flows when a shared dialog component can be used
 
 ## Templates (applies to `.component.html`)
 

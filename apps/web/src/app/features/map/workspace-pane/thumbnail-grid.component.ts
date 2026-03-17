@@ -80,6 +80,7 @@ type RenderItem =
                     [viewMode]="viewService.thumbnailSizePreset()"
                     [selected]="selectionService.isSelected(img.id)"
                     (clicked)="thumbnailClicked.emit($event)"
+                    (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
                     (selectionToggled)="onSelectionToggled($event)"
                   />
                 }
@@ -98,6 +99,7 @@ type RenderItem =
               [viewMode]="viewService.thumbnailSizePreset()"
               [selected]="selectionService.isSelected(img.id)"
               (clicked)="thumbnailClicked.emit($event)"
+              (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
               (selectionToggled)="onSelectionToggled($event)"
             />
           }
@@ -127,6 +129,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   });
 
   readonly thumbnailClicked = output<string>();
+  readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;

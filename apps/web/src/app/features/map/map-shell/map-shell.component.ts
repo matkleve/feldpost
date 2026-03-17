@@ -51,6 +51,11 @@ import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.compone
 import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
 import { SettingsPaneService } from '../../../core/settings-pane.service';
 import {
+  ProjectSelectDialogComponent,
+  ProjectSelectOption,
+} from '../../../shared/project-select-dialog/project-select-dialog.component';
+import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
+import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
   PHOTO_MARKER_ICON_SIZE,
@@ -72,7 +77,14 @@ const HISTORIC_LABEL_PANE = 'historic-label';
 
 @Component({
   selector: 'app-map-shell',
-  imports: [UploadPanelComponent, SearchBarComponent, WorkspacePaneComponent, DragDividerComponent],
+  imports: [
+    UploadPanelComponent,
+    SearchBarComponent,
+    WorkspacePaneComponent,
+    DragDividerComponent,
+    ProjectSelectDialogComponent,
+    TextInputDialogComponent,
+  ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',
   host: {
@@ -296,6 +308,15 @@ export class MapShellComponent implements OnDestroy {
   readonly draftMediaMarker = signal<{ lat: number; lng: number; uploadCount: number } | null>(
     null,
   );
+  readonly projectSelectionDialogOpen = signal(false);
+  readonly projectSelectionDialogTitle = signal('Projekt auswaehlen');
+  readonly projectSelectionDialogMessage = signal('');
+  readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
+  readonly projectSelectionDialogSelectedId = signal<string | null>(null);
+  readonly projectNameDialogOpen = signal(false);
+  readonly projectNameDialogTitle = signal('Name fuer neues Projekt aus Radius');
+  readonly projectNameDialogMessage = signal('Gib einen Projektnamen ein.');
+  readonly projectNameDialogInitialValue = signal('');
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
@@ -399,6 +420,10 @@ export class MapShellComponent implements OnDestroy {
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
   private nativeContextMenuBypassUntil = 0;
+  private projectSelectionDialogResolver:
+    | ((value: { id: string; name: string } | null) => void)
+    | null = null;
+  private projectNameDialogResolver: ((value: string | null) => void) | null = null;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -496,6 +521,8 @@ export class MapShellComponent implements OnDestroy {
     this.cancelRadiusDrawing();
     this.pendingSecondaryPress = null;
     this.closeContextMenus();
+    this.resolveAndCloseProjectSelectionDialog(null);
+    this.resolveAndCloseProjectNameDialog(null);
     this.clearRadiusSelectionVisuals();
     const mapContainer = this.map?.getContainer();
     if (mapContainer) {
@@ -623,7 +650,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const projectName = this.promptProjectNameFromRadius();
+    const projectName = await this.promptProjectNameFromRadius();
     if (!projectName) {
       this.closeContextMenus();
       return;
@@ -3205,44 +3232,96 @@ export class MapShellComponent implements OnDestroy {
       return null;
     }
 
-    if (typeof window === 'undefined') {
-      return { id: data[0].id as string, name: (data[0].name as string) ?? 'Projekt' };
-    }
+    const options = data.map((project) => ({
+      id: project.id as string,
+      name: (project.name as string) ?? 'Projekt',
+    }));
 
-    const lines = data.map((project, idx) => `${idx + 1}. ${project.name}`).join('\n');
-    const value = window.prompt(`Projekt auswaehlen:\n${lines}\n\nNummer eingeben:`);
-    if (!value) {
-      return null;
-    }
-
-    const selectedIndex = Number.parseInt(value, 10) - 1;
-    const selected = Number.isFinite(selectedIndex) ? data[selectedIndex] : undefined;
-    if (!selected) {
-      this.toastService.show({
-        message: 'Ungueltige Projektauswahl.',
-        type: 'warning',
-        dedupe: true,
-      });
-      return null;
-    }
-
-    return {
-      id: selected.id as string,
-      name: (selected.name as string) ?? 'Projekt',
-    };
+    return this.openProjectSelectionDialog(
+      options,
+      'Projekt auswaehlen',
+      'Waehle ein bestehendes Projekt fuer die Zuweisung aus.',
+    );
   }
 
-  private promptProjectNameFromRadius(): string | null {
-    if (typeof window === 'undefined') {
-      return 'Neues Radius Projekt';
+  private async promptProjectNameFromRadius(): Promise<string | null> {
+    return this.openProjectNameDialog('Name fuer neues Projekt aus Radius', 'Neues Radius Projekt');
+  }
+
+  onProjectSelectionDialogSelected(projectId: string): void {
+    this.projectSelectionDialogSelectedId.set(projectId);
+  }
+
+  onProjectSelectionDialogConfirmed(projectId: string): void {
+    const selected = this.projectSelectionDialogOptions().find((option) => option.id === projectId);
+    if (!selected) {
+      this.resolveAndCloseProjectSelectionDialog(null);
+      return;
     }
 
-    const value = window.prompt('Name fuer neues Projekt aus Radius:');
-    const name = value?.trim();
-    if (!name) {
-      return null;
+    this.resolveAndCloseProjectSelectionDialog({ id: selected.id, name: selected.name });
+  }
+
+  onProjectSelectionDialogCancelled(): void {
+    this.resolveAndCloseProjectSelectionDialog(null);
+  }
+
+  onProjectNameDialogConfirmed(projectName: string): void {
+    this.resolveAndCloseProjectNameDialog(projectName);
+  }
+
+  onProjectNameDialogCancelled(): void {
+    this.resolveAndCloseProjectNameDialog(null);
+  }
+
+  private openProjectSelectionDialog(
+    options: ReadonlyArray<ProjectSelectOption>,
+    title: string,
+    message: string,
+  ): Promise<{ id: string; name: string } | null> {
+    this.resolveAndCloseProjectSelectionDialog(null);
+
+    this.projectSelectionDialogOptions.set(options);
+    this.projectSelectionDialogTitle.set(title);
+    this.projectSelectionDialogMessage.set(message);
+    this.projectSelectionDialogSelectedId.set(options.length > 0 ? options[0].id : null);
+    this.projectSelectionDialogOpen.set(true);
+
+    return new Promise((resolve) => {
+      this.projectSelectionDialogResolver = resolve;
+    });
+  }
+
+  private resolveAndCloseProjectSelectionDialog(value: { id: string; name: string } | null): void {
+    const resolver = this.projectSelectionDialogResolver;
+    this.projectSelectionDialogResolver = null;
+    this.projectSelectionDialogOpen.set(false);
+    this.projectSelectionDialogOptions.set([]);
+    this.projectSelectionDialogSelectedId.set(null);
+    if (resolver) {
+      resolver(value);
     }
-    return name;
+  }
+
+  private openProjectNameDialog(title: string, initialValue: string): Promise<string | null> {
+    this.resolveAndCloseProjectNameDialog(null);
+    this.projectNameDialogTitle.set(title);
+    this.projectNameDialogMessage.set('Gib einen Projektnamen ein.');
+    this.projectNameDialogInitialValue.set(initialValue);
+    this.projectNameDialogOpen.set(true);
+
+    return new Promise((resolve) => {
+      this.projectNameDialogResolver = resolve;
+    });
+  }
+
+  private resolveAndCloseProjectNameDialog(value: string | null): void {
+    const resolver = this.projectNameDialogResolver;
+    this.projectNameDialogResolver = null;
+    this.projectNameDialogOpen.set(false);
+    if (resolver) {
+      resolver(value);
+    }
   }
 
   private getActiveSelectionImageIds(): string[] {

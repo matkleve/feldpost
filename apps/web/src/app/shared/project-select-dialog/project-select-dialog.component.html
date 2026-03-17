@@ -1,0 +1,48 @@
+<div
+  class="project-select-dialog-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="project-select-dialog-title"
+  (click)="cancelled.emit()"
+>
+  <div class="project-select-dialog ui-container" (click)="$event.stopPropagation()">
+    <h2 id="project-select-dialog-title" class="project-select-dialog__title">{{ title() }}</h2>
+
+    @if (message(); as content) {
+      <p class="project-select-dialog__message">{{ content }}</p>
+    }
+
+    <div class="project-select-dialog__list" role="listbox" [attr.aria-label]="title()">
+      @for (option of options(); track option.id) {
+        <button
+          class="project-select-dialog__option"
+          [class.project-select-dialog__option--active]="selectedId() === option.id"
+          type="button"
+          role="option"
+          [attr.aria-selected]="selectedId() === option.id"
+          (click)="selectOption(option.id)"
+          (dblclick)="confirmSelection()"
+        >
+          <span class="project-select-dialog__check material-icons" aria-hidden="true">
+            {{ selectedId() === option.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
+          </span>
+          <span class="project-select-dialog__name">{{ option.name }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="project-select-dialog__actions">
+      <button class="project-select-dialog__cancel" type="button" (click)="cancelled.emit()">
+        {{ cancelLabel() }}
+      </button>
+      <button
+        class="project-select-dialog__confirm"
+        type="button"
+        [disabled]="!selectedId()"
+        (click)="confirmSelection()"
+      >
+        {{ confirmLabel() }}
+      </button>
+    </div>
+  </div>
+</div>

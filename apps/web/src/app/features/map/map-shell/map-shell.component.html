@@ -327,6 +327,33 @@
       </button>
     </div>
   }
+
+  @if (projectSelectionDialogOpen()) {
+    <app-project-select-dialog
+      [title]="projectSelectionDialogTitle()"
+      [message]="projectSelectionDialogMessage()"
+      [options]="projectSelectionDialogOptions()"
+      [selectedId]="projectSelectionDialogSelectedId()"
+      confirmLabel="Auswaehlen"
+      cancelLabel="Abbrechen"
+      (selectedIdChange)="onProjectSelectionDialogSelected($event)"
+      (confirmed)="onProjectSelectionDialogConfirmed($event)"
+      (cancelled)="onProjectSelectionDialogCancelled()"
+    />
+  }
+
+  @if (projectNameDialogOpen()) {
+    <app-text-input-dialog
+      [title]="projectNameDialogTitle()"
+      [message]="projectNameDialogMessage()"
+      placeholder="z. B. Radius Auswahl Nord"
+      [initialValue]="projectNameDialogInitialValue()"
+      confirmLabel="Projekt erstellen"
+      cancelLabel="Abbrechen"
+      (confirmed)="onProjectNameDialogConfirmed($event)"
+      (cancelled)="onProjectNameDialogCancelled()"
+    />
+  }
 </div>
 
 <!-- Drag divider (shown only when workspace pane is open, desktop only) -->

@@ -29,6 +29,8 @@ src/app/
 - Match the component hierarchy in the element spec exactly
 - Use glossary names from `docs/glossary.md`
 - Floating/overlay elements go in Map Zone, not outside Map Shell
+- Prefer shared standardized UI components in `src/app/shared/` before implementing feature-local duplicates
+- Prefer app dialogs/modals over browser-native `window.prompt` / `window.confirm` for product interactions
 
 ## Build & Test
 
