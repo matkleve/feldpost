@@ -563,6 +563,35 @@ export class ProjectsPageComponent {
     this.onStatusFilterChange('all');
   }
 
+  projectColorActionLabel(projectName: string): string {
+    return this.t('projects.page.action.changeColorFor', 'Change color for {name}').replace(
+      '{name}',
+      projectName,
+    );
+  }
+
+  projectNameAriaLabel(): string {
+    return this.t('projects.page.field.projectName.aria', 'Project name');
+  }
+
+  renameProjectActionLabel(): string {
+    return this.t('projects.page.action.renameProject', 'Rename project');
+  }
+
+  projectDangerActionLabel(status: 'active' | 'archived'): string {
+    return status === 'archived'
+      ? this.t('projects.page.action.deleteProject', 'Delete project')
+      : this.t('projects.page.action.archiveProject', 'Archive project');
+  }
+
+  projectResultWord(): string {
+    return this.t('projects.page.metric.results', 'results');
+  }
+
+  projectPhotoWord(): string {
+    return this.t('projects.page.metric.photos', 'photos');
+  }
+
   onSortModeChange(value: string): void {
     if (value === 'name' || value === 'updated' || value === 'image-count') {
       this.sortMode.set(value);
@@ -687,7 +716,10 @@ export class ProjectsPageComponent {
       const draft = await this.projectsService.createDraftProject();
       if (!draft) {
         this.toastService.show({
-          message: 'Could not create project. Please try again.',
+          message: this.t(
+            'projects.page.toast.createError',
+            'Could not create project. Please try again.',
+          ),
           type: 'error',
           dedupe: true,
         });
@@ -702,7 +734,10 @@ export class ProjectsPageComponent {
       await this.refreshSearchCounts();
     } catch {
       this.toastService.show({
-        message: 'Could not create project. Please try again.',
+        message: this.t(
+          'projects.page.toast.createError',
+          'Could not create project. Please try again.',
+        ),
         type: 'error',
         dedupe: true,
       });
@@ -821,7 +856,10 @@ export class ProjectsPageComponent {
         const persisted = await this.projectsService.archiveProject(projectId);
         if (!persisted) {
           this.toastService.show({
-            message: 'Could not archive project. Please try again.',
+            message: this.t(
+              'projects.page.toast.archiveError',
+              'Could not archive project. Please try again.',
+            ),
             type: 'error',
             dedupe: true,
           });
@@ -842,7 +880,10 @@ export class ProjectsPageComponent {
           ),
         );
 
-        this.toastService.show({ message: 'Project archived', type: 'success' });
+        this.toastService.show({
+          message: this.t('projects.page.toast.archiveSuccess', 'Project archived'),
+          type: 'success',
+        });
       }
 
       if (action === 'delete') {
@@ -853,8 +894,10 @@ export class ProjectsPageComponent {
         const persisted = await this.projectsService.deleteProject(projectId);
         if (!persisted) {
           this.toastService.show({
-            message:
+            message: this.t(
+              'projects.page.toast.deleteError',
               'Could not delete archived project. Check permissions or refresh and try again.',
+            ),
             type: 'error',
             dedupe: true,
           });
@@ -862,7 +905,10 @@ export class ProjectsPageComponent {
         }
 
         this.projects.update((all) => all.filter((entry) => entry.id !== projectId));
-        this.toastService.show({ message: 'Archived project deleted', type: 'success' });
+        this.toastService.show({
+          message: this.t('projects.page.toast.deleteSuccess', 'Archived project deleted'),
+          type: 'success',
+        });
       }
 
       if (this.selectedProjectId() === projectId) {
@@ -879,23 +925,33 @@ export class ProjectsPageComponent {
 
   pendingActionTitle(): string {
     if (this.pendingProjectAction() === 'delete') {
-      return 'Delete archived project?';
+      return this.t('projects.page.pending.title.deleteArchived', 'Delete archived project?');
     }
 
-    return 'Archive project?';
+    return this.t('projects.page.pending.title.archive', 'Archive project?');
   }
 
   pendingActionMessage(): string {
-    const name = this.pendingProject()?.name ?? 'this project';
+    const name =
+      this.pendingProject()?.name ??
+      this.t('projects.page.pending.subject.thisProject', 'this project');
     if (this.pendingProjectAction() === 'delete') {
-      return `"${name}" will be permanently deleted for your organization.`;
+      return this.t(
+        'projects.page.pending.message.delete',
+        '"{name}" will be permanently deleted for your organization.',
+      ).replace('{name}', name);
     }
 
-    return `"${name}" will move to Archived and stay visible for all users in your organization.`;
+    return this.t(
+      'projects.page.pending.message.archive',
+      '"{name}" will move to Archived and stay visible for all users in your organization.',
+    ).replace('{name}', name);
   }
 
   pendingActionConfirmLabel(): string {
-    return this.pendingProjectAction() === 'delete' ? 'Delete now' : 'Archive now';
+    return this.pendingProjectAction() === 'delete'
+      ? this.t('projects.page.pending.confirm.delete', 'Delete now')
+      : this.t('projects.page.pending.confirm.archive', 'Archive now');
   }
 
   isDeletePending(): boolean {

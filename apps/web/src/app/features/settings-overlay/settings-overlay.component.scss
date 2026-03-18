@@ -35,33 +35,14 @@
 }
 
 .settings-overlay__close {
+  --icon-btn-size: 2.25rem;
+  --icon-btn-radius: var(--radius-full);
+  --icon-btn-icon-size: 1.05rem;
+
   position: absolute;
   top: var(--spacing-2);
   right: var(--spacing-2);
   z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: var(--settings-interactive-border);
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-bg-elevated) 92%, transparent);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__close:hover {
-  color: var(--color-text-primary);
-  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
-  background: var(--settings-hover-focus);
-}
-
-.settings-overlay__close:focus-visible {
-  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
 }
 
 .settings-overlay__lead-divider {
@@ -202,11 +183,6 @@
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 }
-.settings-overlay__segmented button.settings-overlay__segmented--active {
-  background: var(--action-bg-active);
-  color: var(--action-text-active);
-}
-
 .settings-overlay__toggle-row .ui-item-label {
   display: grid;
   gap: var(--spacing-1);
@@ -274,103 +250,6 @@
 .settings-overlay__state p {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-}
-
-.settings-overlay__ghost-button {
-  align-self: center;
-  min-height: 2.5rem;
-  border: var(--settings-interactive-border);
-  border-radius: var(--settings-interactive-radius);
-  background: transparent;
-  color: var(--color-text-primary);
-  padding: 0.45rem 0.9rem;
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__ghost-button:hover {
-  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
-  background: var(--settings-hover-focus);
-}
-
-.settings-overlay__ghost-button:focus-visible {
-  border-color: color-mix(in srgb, var(--color-clay) 46%, var(--color-border));
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
-}
-
-.settings-overlay__logout-button {
-  min-height: 2.75rem;
-  border: var(--settings-stroke-width) solid
-    color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
-  border-radius: var(--container-radius-control);
-  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-bg-surface));
-  color: var(--color-danger);
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__account-page-button {
-  min-height: 2.75rem;
-  border: var(--settings-stroke-width) solid
-    color-mix(in srgb, var(--color-clay) 36%, var(--color-border));
-  border-radius: var(--container-radius-control);
-  background: color-mix(in srgb, var(--color-clay) 8%, var(--color-bg-surface));
-  color: var(--color-clay);
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--settings-interactive-transition);
-}
-
-.settings-overlay__account-page-button:hover {
-  background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
-}
-
-.settings-overlay__account-page-button:focus-visible,
-.settings-overlay__logout-button:focus-visible {
-  box-shadow: var(--settings-focus-ring);
-  outline: none;
-}
-
-.settings-overlay__logout-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-danger) 14%, var(--color-bg-surface));
-}
-
-.settings-overlay__logout-button:disabled,
-.settings-overlay__ghost-button:disabled {
-  opacity: 0.66;
-  cursor: not-allowed;
-}
-
-.settings-overlay__logout-button--confirm {
-  min-width: 9.75rem;
-}
-
-.settings-overlay__logout-confirm {
-  display: grid;
-  gap: var(--spacing-2);
-  border: var(--settings-stroke-width) solid
-    color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
-  border-radius: var(--container-radius-control);
-  padding: var(--spacing-3);
-  background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-elevated));
-}
-
-.settings-overlay__logout-confirm strong {
-  font-size: 0.9375rem;
-  color: var(--color-text-primary);
-}
-
-.settings-overlay__logout-confirm p {
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
-}
-
-.settings-overlay__logout-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-2);
 }
 
 .settings-overlay__logout-error {

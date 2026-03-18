@@ -937,9 +937,14 @@ router-outlet + * {
   }
 }
 
-.icon-btn-ghost--danger:hover {
-  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+.icon-btn-ghost--danger {
+  border-color: color-mix(in srgb, var(--color-danger) 36%, var(--interactive-border-muted));
   color: var(--color-danger);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
 }
 
 // ── Shared focus-ring primitive ─────────────────────────────────────────────

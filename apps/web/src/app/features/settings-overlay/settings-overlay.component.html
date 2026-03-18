@@ -8,7 +8,7 @@
   >
     <button
       type="button"
-      class="settings-overlay__close"
+      class="settings-overlay__close icon-btn-ghost"
       [attr.aria-label]="t('settings.overlay.aria.close', 'Close settings overlay')"
       (click)="requestClose()"
     >
@@ -88,7 +88,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="settingsModel().language === 'en'"
                     [class.ui-segmented__button--active]="settingsModel().language === 'en'"
                     (click)="setLanguage('en')"
                   >
@@ -97,7 +96,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="settingsModel().language === 'de'"
                     [class.ui-segmented__button--active]="settingsModel().language === 'de'"
                     (click)="setLanguage('de')"
                   >
@@ -106,7 +104,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="settingsModel().language === 'it'"
                     [class.ui-segmented__button--active]="settingsModel().language === 'it'"
                     (click)="setLanguage('it')"
                   >
@@ -127,9 +124,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().density === 'compact'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().density === 'compact'"
                     (click)="setDensity('compact')"
                   >
@@ -138,9 +132,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().density === 'comfortable'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().density === 'comfortable'"
                     (click)="setDensity('comfortable')"
                   >
@@ -176,9 +167,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'light'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().themeMode === 'light'"
                     (click)="setThemeMode('light')"
                   >
@@ -187,9 +175,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'dark'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().themeMode === 'dark'"
                     (click)="setThemeMode('dark')"
                   >
@@ -198,9 +183,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'system'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().themeMode === 'system'"
                     (click)="setThemeMode('system')"
                   >
@@ -209,9 +191,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().themeMode === 'sandstone'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().themeMode === 'sandstone'"
                     (click)="setThemeMode('sandstone')"
                   >
@@ -256,7 +235,6 @@
                 </span>
                 <span
                   class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().notificationsEnabled"
                   [class.ui-toggle-switch--on]="settingsModel().notificationsEnabled"
                 ></span>
               </button>
@@ -286,7 +264,6 @@
                 </span>
                 <span
                   class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().uploadFailureAlerts"
                   [class.ui-toggle-switch--on]="settingsModel().uploadFailureAlerts"
                 ></span>
               </button>
@@ -327,7 +304,6 @@
                 </span>
                 <span
                   class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().mapAutoLocate"
                   [class.ui-toggle-switch--on]="settingsModel().mapAutoLocate"
                 ></span>
               </button>
@@ -352,7 +328,6 @@
                 </span>
                 <span
                   class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().mapGridOverlay"
                   [class.ui-toggle-switch--on]="settingsModel().mapGridOverlay"
                 ></span>
               </button>
@@ -369,9 +344,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().markerMotion === 'off'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().markerMotion === 'off'"
                     (click)="setMarkerMotion('off')"
                   >
@@ -380,9 +352,6 @@
                   <button
                     type="button"
                     class="ui-segmented__button"
-                    [class.settings-overlay__segmented--active]="
-                      settingsModel().markerMotion === 'smooth'
-                    "
                     [class.ui-segmented__button--active]="settingsModel().markerMotion === 'smooth'"
                     (click)="setMarkerMotion('smooth')"
                   >
@@ -498,7 +467,6 @@
                 </span>
                 <span
                   class="settings-overlay__toggle ui-toggle-switch"
-                  [class.settings-overlay__toggle--on]="settingsModel().telemetryEnabled"
                   [class.ui-toggle-switch--on]="settingsModel().telemetryEnabled"
                 ></span>
               </button>

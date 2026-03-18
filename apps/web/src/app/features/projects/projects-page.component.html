@@ -80,9 +80,7 @@
             [attr.aria-haspopup]="true"
             (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
           >
-            <span class="toolbar-btn__label">{{
-              t('workspace.toolbar.button.sort', 'Sort')
-            }}</span>
+            <span class="toolbar-btn__label">{{ t('workspace.toolbar.button.sort', 'Sort') }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
         </div>
@@ -186,9 +184,9 @@
                           <button
                             type="button"
                             class="project-row__color-trigger"
-                            [attr.aria-label]="'Change color for ' + project.name"
+                            [attr.aria-label]="projectColorActionLabel(project.name)"
                             [attr.aria-expanded]="coloringProjectId() === project.id"
-                            title="Change project color"
+                            [attr.title]="projectColorActionLabel(project.name)"
                             (click)="$event.stopPropagation(); toggleColorPicker(project.id)"
                           >
                             <span
@@ -208,7 +206,7 @@
                                 #renameInput
                                 class="project-row__rename"
                                 [value]="project.name"
-                                aria-label="Project name"
+                                [attr.aria-label]="projectNameAriaLabel()"
                                 (click)="$event.stopPropagation()"
                                 (blur)="confirmRename(project.id, renameInput.value)"
                                 (keydown)="
@@ -221,11 +219,11 @@
 
                             <p class="project-row__meta">
                               @if (searchTerm().trim()) {
-                                {{ project.matchingImageCount }} results ·
-                                {{ project.totalImageCount }} photos ·
+                                {{ project.matchingImageCount }} {{ projectResultWord() }} ·
+                                {{ project.totalImageCount }} {{ projectPhotoWord() }} ·
                                 {{ formatRelativeDate(project.lastActivity) }}
                               } @else {
-                                {{ project.totalImageCount }} photos ·
+                                {{ project.totalImageCount }} {{ projectPhotoWord() }} ·
                                 {{ formatRelativeDate(project.lastActivity) }}
                               }
                             </p>
@@ -235,21 +233,17 @@
                             <button
                               type="button"
                               class="icon-btn-ghost project-row__action"
-                              aria-label="Rename project"
-                              title="Rename project"
+                              [attr.aria-label]="renameProjectActionLabel()"
+                              [attr.title]="renameProjectActionLabel()"
                               (click)="$event.stopPropagation(); startRename(project.id)"
                             >
                               <span class="material-icons" aria-hidden="true">edit</span>
                             </button>
                             <button
                               type="button"
-                              class="icon-btn-ghost icon-btn-ghost--danger project-row__action project-row__action--danger"
-                              [attr.aria-label]="
-                                project.status === 'archived' ? 'Delete project' : 'Archive project'
-                              "
-                              [attr.title]="
-                                project.status === 'archived' ? 'Delete project' : 'Archive project'
-                              "
+                              class="icon-btn-ghost icon-btn-ghost--danger project-row__action"
+                              [attr.aria-label]="projectDangerActionLabel(project.status)"
+                              [attr.title]="projectDangerActionLabel(project.status)"
                               (click)="$event.stopPropagation(); requestDangerAction(project.id)"
                             >
                               <span class="material-icons" aria-hidden="true">
@@ -312,9 +306,9 @@
                             <button
                               type="button"
                               class="projects-thumbnail-card__color-trigger"
-                              [attr.aria-label]="'Change color for ' + project.name"
+                              [attr.aria-label]="projectColorActionLabel(project.name)"
                               [attr.aria-expanded]="coloringProjectId() === project.id"
-                              title="Change project color"
+                              [attr.title]="projectColorActionLabel(project.name)"
                               (click)="$event.stopPropagation(); toggleColorPicker(project.id)"
                             >
                               <span
@@ -332,14 +326,14 @@
 
                           <p class="projects-thumbnail-card__badge">
                             @if (searchTerm().trim()) {
-                              {{ project.matchingImageCount }} results
+                              {{ project.matchingImageCount }} {{ projectResultWord() }}
                             } @else {
-                              {{ project.totalImageCount }} photos
+                              {{ project.totalImageCount }} {{ projectPhotoWord() }}
                             }
                           </p>
 
                           <p class="projects-thumbnail-card__meta">
-                            {{ project.totalImageCount }} photos ·
+                            {{ project.totalImageCount }} {{ projectPhotoWord() }} ·
                             {{ formatRelativeDate(project.lastActivity) }}
                           </p>
 
@@ -350,21 +344,17 @@
                             <button
                               type="button"
                               class="icon-btn-ghost projects-thumbnail-card__action"
-                              aria-label="Rename project"
-                              title="Rename project"
+                              [attr.aria-label]="renameProjectActionLabel()"
+                              [attr.title]="renameProjectActionLabel()"
                               (click)="$event.stopPropagation(); startRename(project.id)"
                             >
                               <span class="material-icons" aria-hidden="true">edit</span>
                             </button>
                             <button
                               type="button"
-                              class="icon-btn-ghost icon-btn-ghost--danger projects-thumbnail-card__action projects-thumbnail-card__action--danger"
-                              [attr.aria-label]="
-                                project.status === 'archived' ? 'Delete project' : 'Archive project'
-                              "
-                              [attr.title]="
-                                project.status === 'archived' ? 'Delete project' : 'Archive project'
-                              "
+                              class="icon-btn-ghost icon-btn-ghost--danger projects-thumbnail-card__action"
+                              [attr.aria-label]="projectDangerActionLabel(project.status)"
+                              [attr.title]="projectDangerActionLabel(project.status)"
                               (click)="$event.stopPropagation(); requestDangerAction(project.id)"
                             >
                               <span class="material-icons" aria-hidden="true">
@@ -455,7 +445,7 @@
       class="projects-modal"
       role="presentation"
       (click)="cancelPendingAction()"
-      aria-label="Project action modal"
+      [attr.aria-label]="t('projects.page.modal.aria', 'Project action modal')"
     >
       <article
         class="projects-modal__dialog"
@@ -478,7 +468,7 @@
             [disabled]="pendingActionBusy()"
             (click)="cancelPendingAction()"
           >
-            Cancel
+            {{ t('projects.page.modal.cancel', 'Cancel') }}
           </button>
           <button
             type="button"

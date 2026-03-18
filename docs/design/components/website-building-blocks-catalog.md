@@ -121,10 +121,10 @@ This overhaul should be executed as a system migration, not as isolated componen
 ### Phase Status Snapshot (Primitives-Focused)
 
 1. Phase 1: Freeze the Design-System Contract — `95%`
-2. Phase 2: Harden the Primitive Set — `82%`
-3. Phase 3: Migrate High-Visibility Surfaces — `76%`
-4. Phase 4: Migrate Composition Surfaces — `52%`
-5. Phase 5: Verify, Promote, and Enforce — `40%`
+2. Phase 2: Harden the Primitive Set — `86%`
+3. Phase 3: Migrate High-Visibility Surfaces — `79%`
+4. Phase 4: Migrate Composition Surfaces — `58%`
+5. Phase 5: Verify, Promote, and Enforce — `42%`
 
 Status date: 2026-03-18
 
@@ -160,7 +160,7 @@ Remaining:
 
 ### Phase 2: Harden the Primitive Set
 
-Progress: `82%`
+Progress: `86%`
 
 Goal: make the shared primitives good enough that features can adopt them without feature-local redesign.
 
@@ -188,15 +188,19 @@ Done:
 3. Button family standardization has started and ghost-border rule is applied.
 4. Segmented primitive now supports detached inactive option + smooth state transitions + reduced-motion fallback.
 5. Map-type switch now consumes the same shared segmented primitive (legacy local switch styles removed).
+6. Ghost-style toolbar and icon buttons now share a consistent light gray default border via global primitives.
+7. Segmented primitive exposes consumer-level layout variables (host/group width, button min-height/flex) so feature pages stop re-defining segmented button state/layout rules.
+8. Settings overlay close action now consumes the shared `icon-btn-ghost` primitive (feature-local hover/focus state styling removed).
+9. Account action markup now uses primitive-first button classes (`ui-button*`) without redundant feature wrapper class usage.
 
 Remaining:
 
-1. Finish button-family adoption in remaining settings/dialog consumers.
+1. Finish button-family adoption in remaining composition surfaces still carrying local state styling.
 2. Complete canonical field/select/toggle/dialog-shell usage across all major flows.
 
 ### Phase 3: Migrate High-Visibility Surfaces
 
-Progress: `76%`
+Progress: `79%`
 
 Goal: standardize the UI that users see most often.
 
@@ -217,11 +221,12 @@ Exit criteria:
 Done:
 
 1. Toolbar dropdown family and major option-menu surfaces are standardized.
-2. Map-type switch and projects status filter moved toward shared segmented primitives.
+2. Map-type switch and projects status filter now use the shared segmented primitive.
 3. Context-menu structure parity improved across map/detail areas.
 4. `/projects` segmented status filter no longer shifts layout when archived state becomes inactive.
 5. `/projects` labels use a robust fallback helper (`text(key, fallback)`) to avoid empty/vanishing strings.
 6. Map and Projects now share one segmented control primitive with aligned behavior.
+7. `/projects` mobile segmented layout now uses segmented primitive variables instead of local per-button selectors.
 
 Remaining:
 
@@ -231,7 +236,7 @@ Remaining:
 
 ### Phase 4: Migrate Composition Surfaces
 
-Progress: `52%`
+Progress: `58%`
 
 Goal: move larger feature flows onto the same primitives so themes and future redesigns scale.
 
@@ -252,6 +257,9 @@ Done:
 
 1. Settings/account/invite surfaces are partially migrated to shared section/field/action primitives.
 2. Local style duplication has been reduced in several high-use flows.
+3. Shared dialog actions (confirm/project-select/text-input) now consume `ui-button` variants instead of feature-local button visuals.
+4. Invite share actions now consume `icon-btn-ghost`, with local icon-button styles reduced to size/layout concerns.
+5. Settings overlay toggle rows now use the shared toggle-on state class only (redundant local state binding removed).
 
 Remaining:
 
@@ -260,7 +268,7 @@ Remaining:
 
 ### Phase 5: Verify, Promote, and Enforce
 
-Progress: `40%`
+Progress: `42%`
 
 Goal: turn the overhaul into a stable operating model.
 
@@ -282,6 +290,7 @@ Done:
 1. Regression matrix exists and is actively tracked.
 2. Initial focused test infrastructure blockers were reduced.
 3. Segmented-switch motion resource and source rationale were documented.
+4. Regression statuses were updated from pure harness blockers to mixed pass/fail evidence after focused runs.
 
 Remaining:
 
@@ -308,6 +317,7 @@ Remaining:
 3. Projects consumer migration and text fallback hardening:
    1. `apps/web/src/app/features/projects/projects-page.component.ts`
    2. `apps/web/src/app/features/projects/projects-page.component.html`
+   3. `apps/web/src/app/features/projects/projects-page.component.scss`
 4. Motion guidance/resource docs:
    1. `docs/design/components/segmented-switch-motion-resource.md`
 
@@ -355,22 +365,29 @@ Catalog-level enforcement summary:
 
 1. Finish button-family rollout across remaining settings/projects/dialog consumers still using local button styling.
 2. Migrate remaining low-readiness menu surfaces (map context and detail context edge cases) to strict Layer C role aliases only.
-3. Add minimal UI regression matrix (menus, toolbars, settings, dialogs) plus keyboard/focus smoke checks.
-4. Add visual-theme verification pass (light/dark + one new custom theme profile) for all medium-readiness primitives.
+3. Add one shared field-row/select adoption pass in `/projects` filter surfaces to reduce composition drift.
+4. Add visual-theme verification pass (light/dark + one custom theme profile) for medium-readiness primitives.
 
 ## Next Execution Plan (Primitive-First)
 
 ### Slice A — Segmented Primitive Finalization
 
-1. Lock motion values (duration/easing) and detached inactive spacing as tokenized defaults.
-2. Add one additional consumer migration (map-type switch) to prove reuse consistency.
-3. Mark segmented row in regression matrix with concrete `OK/BUG(...)` evidence per theme.
+Status: `completed (implementation) / pending (full theme verification)`
+
+1. Motion values and detached inactive spacing were locked into primitive-level behavior.
+2. Additional consumer migrations were completed (map-type switch + projects status filter).
+3. Segmented regression row now tracks evidence-based bug IDs instead of only harness-blocked placeholders.
 
 ### Slice B — Button/Icon Primitive Completion
 
-1. Finish button-family adoption in remaining settings/dialog consumers.
+1. Finish button-family adoption in remaining composition surfaces.
 2. Remove residual feature-local hover/focus/border state rules where shared button primitives already exist.
-3. Re-run `/projects` and settings visual parity check.
+3. Run targeted visual parity pass for `/projects`, settings overlay, and account surfaces.
+4. Update regression matrix notes for button/icon primitive parity after the visual pass.
+
+Status update:
+
+1. Targeted parity pass is completed at code level for `/projects`, settings overlay, and account surfaces; manual browser theme smoke remains open.
 
 ### Slice C — Menu/Popover Low-Readiness Closure
 

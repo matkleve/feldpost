@@ -49,6 +49,8 @@ Verification notes:
 - Focused run `npx vitest run src/app/features/map/map-shell/map-shell.component.spec.ts` now executes all 57 tests with `36 passed / 21 failed`.
 - Current open failures are now spec-level or fixture-level issues (for example `map.addLayer is not a function`, `NG0303` unknown input bindings on child components, and `NG0950/NG0951` required input/query runtime failures), tracked under `menu-kbd-spec-failures-open` / `segmented-kbd-spec-failures-open` until narrowed to concrete issues.
 - `npx ng test --watch=false --include src/app/features/map/map-shell/map-shell.component.spec.ts` is additionally blocked by unrelated workspace spec compile errors (e.g. `nav.component.spec.ts`, `settings-overlay.component.spec.ts`, `upload.service.spec.ts`).
+- Button/icon primitive parity pass (code-level) completed across `/projects`, settings overlay, and account surfaces: controls now consistently consume shared `ui-button`, `toolbar-btn`, and `icon-btn-ghost` classes with no remaining feature-local hover/focus overrides in those surfaces.
+- Account page cleanup removed redundant wrapper class usage so action buttons are now primitive-first (`ui-button*` only) in template markup.
 - Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.
 
 ## Update Rule

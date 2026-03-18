@@ -34,37 +34,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0002.click_it_to_activate_your_account', '. Click it to activate your account.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '. Click it to activate your account.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0002.click_it_to_activate_your_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '. Klicken Sie darauf, um Ihr Konto zu aktivieren.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0002.click_it_to_activate_your_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '. Fare clic per attivare il tuo account.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0002.click_it_to_activate_your_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0003.2fa', '2FA', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -251,37 +220,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0009.active', 'Active', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Active', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0009.active'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aktiv', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0009.active'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Attivo', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0009.active'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0010.add_files_to_start_status_dots_and_lane_filters_appear_once_file', 'Add files to start. Status dots and lane filters appear once files enter the queue.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -463,37 +401,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Prima l''indirizzo', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0015.address_first'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0016.addresses', 'Addresses', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Addresses', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0016.addresses'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adressen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0016.addresses'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Indirizzi', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0016.addresses'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -747,37 +654,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0025.all', 'All', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'All', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0025.all'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Alle', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0025.all'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Tutto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0025.all'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0026.all_projects', 'All projects', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -804,37 +680,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Tutti i progetti', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0026.all_projects'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0027.already_have_an_account', 'Already have an account?', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Already have an account?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0027.already_have_an_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Hast du bereits ein Konto?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0027.already_have_an_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Hai già un account?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0027.already_have_an_account'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -964,99 +809,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0032.archive', 'archive', 'en', 'apps/web/src/app/features/projects/projects-page.component.html interpolation-literal')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'archive', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0032.archive'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'archive', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0032.archive'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'archivio', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0032.archive'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0033.archived', 'Archived', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Archived', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0033.archived'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Archiviert', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0033.archived'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Archiviato', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0033.archived'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0034.archived_project_deleted', 'Archived project deleted', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Archived project deleted', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0034.archived_project_deleted'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Archived project deleted', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0034.archived_project_deleted'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Progetto archiviato eliminato', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0034.archived_project_deleted'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0035.auswahl_oeffnen', 'Auswahl oeffnen', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -1145,37 +897,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Disponibile', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0037.available'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0038.back_to_sign_in', 'Back to sign in', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Back to sign in', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0038.back_to_sign_in'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Zurück zur Anmeldung', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0038.back_to_sign_in'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Torna per accedere', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0038.back_to_sign_in'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -1429,99 +1150,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0047.change_project_color', 'Change project color', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:title')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Change project color', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0047.change_project_color'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektfarbe ändern', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0047.change_project_color'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Cambia il colore del progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0047.change_project_color'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0048.check_your_email', 'Check your email', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Check your email', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0048.check_your_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Prüfe deine E-Mails', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0048.check_your_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Controlla la tua email', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0048.check_your_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0049.choose_a_strong_password_for_your_account', 'Choose a strong password for your account.', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Choose a strong password for your account.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0049.choose_a_strong_password_for_your_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wähle ein sicheres Passwort für dein Konto.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0049.choose_a_strong_password_for_your_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Scegli una password complessa per il tuo account.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0049.choose_a_strong_password_for_your_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0050.choose_what_feedback_appears_while_working_on_site', 'Choose what feedback appears while working on-site.', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -1641,37 +1269,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Cancella filtri', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0053.clear_filters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0054.clear_search', 'Clear search', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Clear search', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0054.clear_search'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Suche löschen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0054.clear_search'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Cancella ricerca', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0054.clear_search'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -1894,37 +1491,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0062.commands', 'Commands', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Commands', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0062.commands'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Befehle', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0062.commands'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Comandi', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0062.commands'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0063.compact', 'Compact', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -1951,68 +1517,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Compatto', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0063.compact'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0064.confirm_new_password', 'Confirm new password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Confirm new password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0064.confirm_new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neues Passwort bestätigen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0064.confirm_new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Conferma la nuova password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0064.confirm_new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0065.confirm_password', 'Confirm password', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Confirm password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0065.confirm_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort bestätigen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0065.confirm_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Conferma password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0065.confirm_password'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -2142,37 +1646,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0070.copy_invite_link', 'Copy invite link', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Copy invite link', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0070.copy_invite_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladungslink kopieren', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0070.copy_invite_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Copia il link di invito', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0070.copy_invite_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0071.corrected', 'Corrected', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -2199,99 +1672,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Corretto', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0071.corrected'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0072.could_not_archive_project_please_try_again', 'Could not archive project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Could not archive project. Please try again.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0072.could_not_archive_project_please_try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Could not archive project. Please try again.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0072.could_not_archive_project_please_try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Impossibile archiviare il progetto. Per favore riprova.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0072.could_not_archive_project_please_try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0073.could_not_create_project_please_try_again', 'Could not create project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Could not create project. Please try again.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0073.could_not_create_project_please_try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Could not create project. Please try again.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0073.could_not_create_project_please_try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Impossibile creare il progetto. Per favore riprova.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0073.could_not_create_project_please_try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0074.could_not_delete_archived_project_check_permissions_or_refresh_a', 'Could not delete archived project. Check permissions or refresh and try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Could not delete archived project. Check permissions or refresh and try again.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0074.could_not_delete_archived_project_check_permissions_or_refresh_a'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Could not delete archived project. Check permissions or refresh and try again.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0074.could_not_delete_archived_project_check_permissions_or_refresh_a'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Impossibile eliminare il progetto archiviato. Controlla le autorizzazioni o aggiorna e riprova.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0074.could_not_delete_archived_project_check_permissions_or_refresh_a'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -2354,99 +1734,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Creare', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0076.create'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0077.create_account', 'Create account', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Create account', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0077.create_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Benutzerkonto erstellen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0077.create_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Creare un account', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0077.create_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0078.create_account_form', 'Create account form', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Create account form', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0078.create_account_form'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Kontoformular erstellen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0078.create_account_form'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modulo per la creazione di un account', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0078.create_account_form'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0079.create_one', 'Create one', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Create one', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0079.create_one'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Erstelle eins', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0079.create_one'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Creane uno', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0079.create_one'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -2540,37 +1827,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'GG.MM.AAAA', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0082.dd_mm_yyyy'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0083.decorative_city_map_background', 'Decorative city map background', 'en', 'apps/web/src/app/features/auth/login/login.component.html attr:title')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Decorative city map background', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0083.decorative_city_map_background'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dekorativer Stadtplanhintergrund', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0083.decorative_city_map_background'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Sfondo decorativo della mappa della città', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0083.decorative_city_map_background'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -2979,37 +2235,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0097.don_t_have_an_account', 'Don''t have an account?', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Don''t have an account?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0097.don_t_have_an_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Noch kein Konto?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0097.don_t_have_an_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Non hai un account?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0097.don_t_have_an_account'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0098.done', 'Done', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -3227,37 +2452,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0105.drop_pin', 'Drop pin', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Drop pin', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0105.drop_pin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Pin setzen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0105.drop_pin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Perno', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0105.drop_pin'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0106.e_mail_ndern', 'E-Mail ändern', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -3351,68 +2545,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0109.email', 'Email', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Email', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0109.email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'E-Mail', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0109.email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'E-mail', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0109.email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0110.email_is_required', 'Email is required.', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Email is required.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0110.email_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'E-Mail ist erforderlich.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0110.email_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'L''e-mail è obbligatoria.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0110.email_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0111.endg_ltig_l_schen', 'Endgültig löschen', 'en', 'apps/web/src/app/features/account/account.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -3470,68 +2602,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Inglese', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0112.english'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0113.enter_a_valid_email_address', 'Enter a valid email address.', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Enter a valid email address.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0113.enter_a_valid_email_address'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gib eine gültige E-Mail-Adresse ein.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0113.enter_a_valid_email_address'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Inserisci un indirizzo email valido.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0113.enter_a_valid_email_address'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0114.enter_your_email_and_we_ll_send_you_a_reset_link', 'Enter your email and we''ll send you a reset link.', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Enter your email and we''ll send you a reset link.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0114.enter_your_email_and_we_ll_send_you_a_reset_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0114.enter_your_email_and_we_ll_send_you_a_reset_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Inserisci la tua email e ti invieremo un collegamento per il ripristino.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0114.enter_your_email_and_we_ll_send_you_a_reset_link'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -3599,37 +2669,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0117.filter', 'Filter', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Filter', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0117.filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Filter', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0117.filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Filtro', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0117.filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0118.finding_my_location', 'Finding my location', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -3656,37 +2695,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Trovare la mia posizione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0118.finding_my_location'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0119.forgot_password', 'Forgot password?', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Forgot password?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0119.forgot_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort vergessen?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0119.forgot_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ha dimenticato la password?', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0119.forgot_password'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -3842,68 +2850,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Collegamento di condivisione non valido, scaduto o nessun accesso.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0124.freigabelink_ungueltig_abgelaufen_oder_ohne_zugriff'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0125.full_name', 'Full name', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Full name', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0125.full_name'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Vollständiger Name', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0125.full_name'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nome e cognome', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0125.full_name'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0126.full_name_is_required', 'Full name is required.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Full name is required.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0126.full_name_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Der vollständige Name ist erforderlich.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0126.full_name_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'È richiesto il nome completo.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0126.full_name_is_required'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -4188,37 +3134,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0136.grouping', 'Grouping', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Grouping', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0136.grouping'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Gruppierung', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0136.grouping'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Raggruppamento', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0136.grouping'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0137.groups', 'Groups', 'en', 'apps/web/src/app/features/groups/groups.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -4498,130 +3413,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0146.invite_code', 'Invite code', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Invite code', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0146.invite_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Invite code', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0146.invite_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Codice invito', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0146.invite_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0147.invite_code_is_required', 'Invite code is required.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Invite code is required.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0147.invite_code_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Invite code is required.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0147.invite_code_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Il codice invito è obbligatorio.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0147.invite_code_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0148.invite_code_must_be_a_48_character_hex_value', 'Invite code must be a 48-character hex value.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Invite code must be a 48-character hex value.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0148.invite_code_must_be_a_48_character_hex_value'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Invite code must be a 48-character hex value.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0148.invite_code_must_be_a_48_character_hex_value'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Il codice di invito deve essere un valore esadecimale di 48 caratteri.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0148.invite_code_must_be_a_48_character_hex_value'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0149.invite_link', 'Invite link', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Invite link', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0149.invite_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladungslink', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0149.invite_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Collegamento di invito', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0149.invite_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0150.invite_management', 'Invite Management', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -4648,68 +3439,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Gestione degli inviti', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0150.invite_management'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0151.invite_qr_code', 'Invite QR code', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Invite QR code', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0151.invite_qr_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladungs-QR-Code', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0151.invite_qr_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Invita il codice QR', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0151.invite_qr_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0152.invite_unavailable', 'Invite unavailable', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Invite unavailable', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0152.invite_unavailable'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladung nicht verfügbar', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0152.invite_unavailable'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Invito non disponibile', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0152.invite_unavailable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -4772,37 +3501,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Italiano', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0154.italiano'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0155.jane_smith', 'Jane Smith', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Jane Smith', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0155.jane_smith'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Jane Smith', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0155.jane_smith'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Jane Smith', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0155.jane_smith'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -5268,68 +3966,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Visualizzazione elenco', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0170.list_view'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0171.loading_projects', 'Loading projects', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Loading projects', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0171.loading_projects'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekte werden geladen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0171.loading_projects'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Caricamento progetti', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0171.loading_projects'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0172.loading_qr_code', 'Loading QR code', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Loading QR code', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0172.loading_qr_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'QR-Code wird geladen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0172.loading_qr_code'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Caricamento del codice QR', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0172.loading_qr_code'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -6141,68 +4777,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0199.new_password', 'New password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'New password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0199.new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neues Passwort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0199.new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nuova password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0199.new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0200.new_project', 'New project', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'New project', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0200.new_project'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neues Projekt', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0200.new_project'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nuovo progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0200.new_project'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0201.no_filters_applied', 'No filters applied', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -6446,99 +5020,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Nessuna foto in questa posizione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0208.no_photos_at_this_location'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0209.no_projects_found', 'No projects found', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No projects found', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0209.no_projects_found'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Projekte gefunden', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0209.no_projects_found'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessun progetto trovato', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0209.no_projects_found'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0210.no_projects_match_your_filters', 'No projects match your filters', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No projects match your filters', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0210.no_projects_match_your_filters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Keine Projekte passen zu deinen Filtern', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0210.no_projects_match_your_filters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessun progetto corrisponde ai tuoi filtri', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0210.no_projects_match_your_filters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0211.no_recent_searches_yet', 'No recent searches yet.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No recent searches yet.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0211.no_recent_searches_yet'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Noch keine aktuellen Suchanfragen.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0211.no_recent_searches_yet'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nessuna ricerca recente ancora.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0211.no_recent_searches_yet'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -6823,99 +5304,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0221.password', 'Password', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0221.password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0221.password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0221.password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0222.password_is_required', 'Password is required.', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Password is required.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0222.password_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort ist erforderlich.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0222.password_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'È richiesta la password.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0222.password_is_required'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0223.password_must_be_at_least_12_characters', 'Password must be at least 12 characters.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Password must be at least 12 characters.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0223.password_must_be_at_least_12_characters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Password must be at least 12 characters.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0223.password_must_be_at_least_12_characters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'La password deve contenere almeno 12 caratteri.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0223.password_must_be_at_least_12_characters'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0224.password_must_include_uppercase_lowercase_number_and_symbol', 'Password must include uppercase, lowercase, number, and symbol.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -6942,37 +5330,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'La password deve includere lettere maiuscole, minuscole, numeri e simboli.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0224.password_must_include_uppercase_lowercase_number_and_symbol'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0225.passwords_do_not_match', 'Passwords do not match.', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Passwords do not match.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0225.passwords_do_not_match'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwörter stimmen nicht überein.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0225.passwords_do_not_match'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Le password non corrispondono.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0225.passwords_do_not_match'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -7035,37 +5392,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'La password è inutilizzabile', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0227.passwort_vergessen'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0228.paste_invite_code_from_qr_link', 'Paste invite code from QR link', 'en', 'apps/web/src/app/features/auth/register/register.component.html attr:placeholder')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Paste invite code from QR link', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0228.paste_invite_code_from_qr_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Paste invite code from QR link', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0228.paste_invite_code_from_qr_link'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Incolla il codice di invito dal collegamento QR', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0228.paste_invite_code_from_qr_link'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -7288,37 +5614,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0236.places', 'Places', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Places', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0236.places'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Orte', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0236.places'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Luoghi', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0236.places'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0237.preparing', 'Preparing...', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -7412,68 +5707,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0240.project_action_modal', 'Project action modal', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project action modal', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0240.project_action_modal'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektaktionsmodal', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0240.project_action_modal'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Modalità di azione del progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0240.project_action_modal'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0241.project_archived', 'Project archived', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project archived', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0241.project_archived'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Project archived', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0241.project_archived'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Progetto archiviato', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0241.project_archived'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0242.project_color', 'Project color', 'en', 'apps/web/src/app/features/projects/project-color-picker.component.ts inline-template attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -7500,130 +5733,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Colore del progetto', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0242.project_color'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0243.project_controls', 'Project controls', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project controls', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0243.project_controls'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektkontrollen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0243.project_controls'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Controlli del progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0243.project_controls'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0244.project_name', 'Project name', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project name', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0244.project_name'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektname', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0244.project_name'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nome del progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0244.project_name'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0245.project_search', 'Project search', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project search', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0245.project_search'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektsuche', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0245.project_search'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ricerca del progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0245.project_search'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0246.project_status_filter', 'Project status filter', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Project status filter', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0246.project_status_filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektstatusfilter', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0246.project_status_filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Filtro stato progetto', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0246.project_status_filter'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -7686,68 +5795,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Progetti e gruppi', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0248.projects_amp_groups'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0249.projects_card_grid', 'Projects card grid', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Projects card grid', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0249.projects_card_grid'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projekte-Kartenraster', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0249.projects_card_grid'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Griglia delle schede progetti', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0249.projects_card_grid'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0250.projects_list', 'Projects list', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Projects list', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0250.projects_list'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Projektliste', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0250.projects_list'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Elenco progetti', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0250.projects_list'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -7877,37 +5924,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0255.qr_preview', 'QR preview', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'QR preview', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0255.qr_preview'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'QR-Vorschau', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0255.qr_preview'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Anteprima QR', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0255.qr_preview'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0256.radius_auswahl', 'Radius Auswahl', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -8032,37 +6048,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0260.recent_searches', 'Recent searches', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Recent searches', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0260.recent_searches'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aktuelle Suchanfragen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0260.recent_searches'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ricerche recenti', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0260.recent_searches'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0261.regenerate', 'Regenerate', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -8125,37 +6110,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0263.reset_password', 'Reset password', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Reset password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0263.reset_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Passwort zurücksetzen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0263.reset_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Reimposta la password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0263.reset_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0264.revoke', 'Revoke', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -8182,37 +6136,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Revocare', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0264.revoke'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0265.role_picker', 'Role picker', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Role picker', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0265.role_picker'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Rollenauswahl', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0265.role_picker'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Selezione del ruolo', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0265.role_picker'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -8678,37 +6601,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Invia...', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0280.sende'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0281.set_new_password', 'Set new password', 'en', 'apps/web/src/app/features/auth/update-password/update-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Set new password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0281.set_new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Neues Passwort festlegen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0281.set_new_password'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Imposta una nuova password', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0281.set_new_password'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10140,161 +8032,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0328.share_actions', 'Share actions', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Share actions', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0328.share_actions'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aktionen teilen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0328.share_actions'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Condividi azioni', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0328.share_actions'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0329.share_invite_via_email', 'Share invite via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Share invite via email', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0329.share_invite_via_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladung per E-Mail teilen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0329.share_invite_via_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Condividi l''invito tramite e-mail', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0329.share_invite_via_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0330.share_invite_via_whatsapp', 'Share invite via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:aria-label')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Share invite via WhatsApp', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0330.share_invite_via_whatsapp'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Einladung per WhatsApp teilen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0330.share_invite_via_whatsapp'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Condividi l''invito tramite WhatsApp', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0330.share_invite_via_whatsapp'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0331.share_via_email', 'Share via email', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Share via email', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0331.share_via_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Per E-Mail teilen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0331.share_via_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Condividi tramite e-mail', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0331.share_via_email'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0332.share_via_whatsapp', 'Share via WhatsApp', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html attr:title')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Share via WhatsApp', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0332.share_via_whatsapp'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Über WhatsApp teilen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0332.share_via_whatsapp'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Condividi tramite WhatsApp', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0332.share_via_whatsapp'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0333.short', 'short', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -10383,37 +8120,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Mostra avvisi di successo e di avviso per le azioni.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0335.show_success_and_warning_notices_for_actions'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0336.sign_in', 'Sign in', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Sign in', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0336.sign_in'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Anmelden', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0336.sign_in'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Registrazione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0336.sign_in'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -10667,37 +8373,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0340.sort', 'Sort', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Sort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0340.sort'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Sortieren', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0340.sort'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ordinare', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0340.sort'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0341.sorted_by_grouping', 'Sorted by grouping', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -10786,37 +8461,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'stella', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0343.star'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0344.start_documenting_your_sites', 'Start documenting your sites', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Start documenting your sites', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0344.start_documenting_your_sites'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Beginne mit der Dokumentation deiner Baustellen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0344.start_documenting_your_sites'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Inizia a documentare i tuoi siti', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0344.start_documenting_your_sites'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11194,37 +8838,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0357.try_a_different_address_or_pin_manually', 'Try a different address or pin manually.', 'en', 'apps/web/src/app/features/map/search-bar/search-bar.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Try a different address or pin manually.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0357.try_a_different_address_or_pin_manually'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Versuche eine andere Adresse oder setze den Pin manuell.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0357.try_a_different_address_or_pin_manually'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Prova un indirizzo o un PIN diverso manualmente.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0357.try_a_different_address_or_pin_manually'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0358.try_again', 'Try again', 'en', 'apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -11251,37 +8864,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Riprova', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0358.try_again'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0359.try_another_search_or_reset_your_status_filter', 'Try another search or reset your status filter.', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Try another search or reset your status filter.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0359.try_another_search_or_reset_your_status_filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Versuche eine andere Suche oder setze deinen Statusfilter zurück.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0359.try_another_search_or_reset_your_status_filter'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Prova un''altra ricerca o reimposta il filtro dello stato.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0359.try_another_search_or_reset_your_status_filter'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11902,99 +9484,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Modalità di visualizzazione', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0379.view_mode'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0380.we_sent_a_confirmation_link_to', 'We sent a confirmation link to', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'We sent a confirmation link to', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0380.we_sent_a_confirmation_link_to'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wir haben einen Bestätigungslink an folgende Adresse gesendet:', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0380.we_sent_a_confirmation_link_to'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Abbiamo inviato un collegamento di conferma a', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0380.we_sent_a_confirmation_link_to'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0381.we_sent_a_password_reset_link_to', 'We sent a password reset link to', 'en', 'apps/web/src/app/features/auth/reset-password/reset-password.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'We sent a password reset link to', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0381.we_sent_a_password_reset_link_to'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wir haben einen Link zum Zurücksetzen des Passworts an folgende Adresse gesendet:', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0381.we_sent_a_password_reset_link_to'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Abbiamo inviato un collegamento per la reimpostazione della password a', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0381.we_sent_a_password_reset_link_to'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0382.welcome_back_to_feldpost', 'Welcome back to Feldpost', 'en', 'apps/web/src/app/features/auth/login/login.component.html text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Welcome back to Feldpost', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0382.welcome_back_to_feldpost'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Willkommen zurück bei Feldpost', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0382.welcome_back_to_feldpost'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Bentornati a Feldpost', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0382.welcome_back_to_feldpost'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -20024,6 +17513,657 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Altro', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.value.other'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.action.changeColorFor', 'Change color for {name}', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change color for {name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.changeColorFor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Farbe ändern für {name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.changeColorFor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia colore per {name}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.changeColorFor'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.field.projectName.aria', 'Project name', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project name', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.field.projectName.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projektname', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.field.projectName.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nome progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.field.projectName.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.action.renameProject', 'Rename project', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Rename project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.renameProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt umbenennen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.renameProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rinomina progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.renameProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.action.archiveProject', 'Archive project', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Archive project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.archiveProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt archivieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.archiveProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Archivia progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.archiveProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.action.deleteProject', 'Delete project', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.deleteProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt löschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.deleteProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.deleteProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.metric.results', 'results', 'en', 'apps/web/src/app/features/projects/projects-page.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'results', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ergebnisse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'risultati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.results'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.metric.photos', 'photos', 'en', 'apps/web/src/app/features/projects/projects-page.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'photos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.photos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fotos', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.photos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.metric.photos'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.modal.aria', 'Project action modal', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project action modal', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.modal.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projektaktionsdialog', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.modal.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Dialogo azione progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.modal.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.modal.cancel', 'Cancel', 'en', 'apps/web/src/app/features/projects/projects-page.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.modal.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.modal.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.modal.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.createError', 'Could not create project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not create project. Please try again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.createError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt konnte nicht erstellt werden. Bitte erneut versuchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.createError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile creare il progetto. Riprova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.createError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.archiveError', 'Could not archive project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not archive project. Please try again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.archiveError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt konnte nicht archiviert werden. Bitte erneut versuchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.archiveError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile archiviare il progetto. Riprova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.archiveError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.archiveSuccess', 'Project archived', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project archived', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.archiveSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt archiviert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.archiveSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetto archiviato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.archiveSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.deleteError', 'Could not delete archived project. Check permissions or refresh and try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not delete archived project. Check permissions or refresh and try again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.deleteError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Archiviertes Projekt konnte nicht gelöscht werden. Berechtigungen prüfen oder Seite aktualisieren und erneut versuchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.deleteError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile eliminare il progetto archiviato. Controlla i permessi o aggiorna e riprova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.deleteError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.deleteSuccess', 'Archived project deleted', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Archived project deleted', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Archiviertes Projekt gelöscht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetto archiviato eliminato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.deleteSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.title.deleteArchived', 'Delete archived project?', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete archived project?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.deleteArchived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Archiviertes Projekt löschen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.deleteArchived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Eliminare il progetto archiviato?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.deleteArchived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.title.archive', 'Archive project?', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Archive project?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt archivieren?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Archiviare il progetto?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.subject.thisProject', 'this project', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:fallback')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'this project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.subject.thisProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'dieses Projekt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.subject.thisProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'questo progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.subject.thisProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.message.delete', '\{name}\ will be permanently deleted for your organization.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '\{name}\ will be permanently deleted for your organization.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '\{name}\ wird für deine Organisation dauerhaft gelöscht.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '\{name}\ verrà eliminato definitivamente per la tua organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.message.archive', '\{name}\ will move to Archived and stay visible for all users in your organization.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '\{name}\ will move to Archived and stay visible for all users in your organization.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '\{name}\ wird nach Archiviert verschoben und bleibt für alle Nutzer deiner Organisation sichtbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '\{name}\ verrà spostato in Archivio e resterà visibile a tutti gli utenti della tua organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.confirm.delete', 'Delete now', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete now', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Jetzt löschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina ora', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.delete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.confirm.archive', 'Archive now', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Archive now', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Jetzt archivieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.archive'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Archivia ora', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.archive'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
