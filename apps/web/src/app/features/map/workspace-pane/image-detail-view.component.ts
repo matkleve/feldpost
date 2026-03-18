@@ -329,7 +329,11 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   readonly canOpenLightbox = computed(() => {
     if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
-    return isImageLikeMedia(this.mediaType(), this.mediaMimeType(), this.image()?.storage_path ?? null);
+    return isImageLikeMedia(
+      this.mediaType(),
+      this.mediaMimeType(),
+      this.image()?.storage_path ?? null,
+    );
   });
 
   private abortController: AbortController | null = null;
@@ -507,11 +511,7 @@ export class ImageDetailViewComponent implements OnDestroy {
   private async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
     if (!img.storage_path) return;
 
-    const isImageAsset = isImageLikeMedia(
-      this.mediaType(),
-      this.mediaMimeType(),
-      img.storage_path,
-    );
+    const isImageAsset = isImageLikeMedia(this.mediaType(), this.mediaMimeType(), img.storage_path);
     const thumbPath = resolvePreviewThumbnailPath(img.thumbnail_path, img.storage_path);
     const fullPath = isImageAsset ? img.storage_path : null;
 
@@ -942,7 +942,9 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   onFileSelected(event: Event | File): void {
     const file =
-      event instanceof File ? event : ((event.target as HTMLInputElement | null)?.files?.[0] ?? null);
+      event instanceof File
+        ? event
+        : ((event.target as HTMLInputElement | null)?.files?.[0] ?? null);
     if (!file) {
       console.warn('[detail-view] onFileSelected: no file selected');
       return;

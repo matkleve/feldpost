@@ -116,10 +116,7 @@ function resolveLabelFromMime(mimeType: string | null, t: DetailTranslateFn): st
   return mapMimeTypeToLabel(mimeType, t);
 }
 
-function resolveLabelFromMediaType(
-  mediaType: string | null,
-  t: DetailTranslateFn,
-): string | null {
+function resolveLabelFromMediaType(mediaType: string | null, t: DetailTranslateFn): string | null {
   if (mediaType === 'image') return t('workspace.imageDetail.mediaType.image', 'Image');
   if (mediaType === 'video') return t('workspace.imageDetail.mediaType.video', 'Video');
   if (mediaType === 'document') return t('workspace.imageDetail.mediaType.document', 'Document');

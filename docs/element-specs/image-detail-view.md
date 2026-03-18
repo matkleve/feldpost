@@ -48,10 +48,10 @@ Immediately below the photo, a horizontal row of info chips provides at-a-glance
 The layout responds to the **workspace pane width**, not the browser viewport.
 
 | Name   | Pane Width | Layout                         |
-| ------ | ---------- | ------------------------------ |
+| ------ | ---------- | ------------------------------ | -------- |
 | Narrow | < 480px    | Single column, compact spacing |
 | Medium | 480-720px  | Single column, comfortable     |
-| Wide   | > 720px    | Two columns: photo | metadata  |
+| Wide   | > 720px    | Two columns: photo             | metadata |
 
 ## Where It Lives
 
@@ -60,13 +60,13 @@ The layout responds to the **workspace pane width**, not the browser viewport.
 
 ## Actions
 
-| #   | User Action                     | System Response                           |
-| --- | ------------------------------- | ----------------------------------------- |
-| 1   | Clicks back arrow               | Returns to previous workspace state       |
-| 2   | Clicks close on mobile          | Closes overlay                            |
-| 3   | Clicks quick-info projects chip | Opens project membership editing          |
-| 4   | Clicks quick-info date chip     | Enters date edit mode                     |
-| 5   | Clicks quick-info GPS chip      | Copies coordinates and shows a toast      |
+| #   | User Action                     | System Response                      |
+| --- | ------------------------------- | ------------------------------------ |
+| 1   | Clicks back arrow               | Returns to previous workspace state  |
+| 2   | Clicks close on mobile          | Closes overlay                       |
+| 3   | Clicks quick-info projects chip | Opens project membership editing     |
+| 4   | Clicks quick-info date chip     | Enters date edit mode                |
+| 5   | Clicks quick-info GPS chip      | Copies coordinates and shows a toast |
 
 ## Component Hierarchy
 
@@ -82,25 +82,25 @@ ImageDetailView
 
 ## State
 
-| Name        | Type                  | Default | Controls                             |
-| ----------- | --------------------- | ------- | ------------------------------------ |
-| `image`     | `ImageRecord | null`  | `null`  | The displayed image record           |
-| `loading`   | `boolean`             | `false` | Whether record loading is in flight  |
-| `error`     | `string | null`       | `null`  | Error message if loading fails       |
-| `paneWidth` | `number`              | `0`     | Width of the workspace pane in pixels |
+| Name        | Type         | Default | Controls                              |
+| ----------- | ------------ | ------- | ------------------------------------- | ------------------------------ |
+| `image`     | `ImageRecord | null`   | `null`                                | The displayed image record     |
+| `loading`   | `boolean`    | `false` | Whether record loading is in flight   |
+| `error`     | `string      | null`   | `null`                                | Error message if loading fails |
+| `paneWidth` | `number`     | `0`     | Width of the workspace pane in pixels |
 
 ## File Map
 
-| File                                                                        | Purpose |
-| --------------------------------------------------------------------------- | ------- |
-| `features/map/workspace-pane/image-detail-view.component.ts`                | Parent coordinator: load record, own shared state, wire child events |
-| `features/map/workspace-pane/image-detail-view.component.html`              | Composition shell for header, viewer, details, metadata, and actions |
-| `features/map/workspace-pane/image-detail-header/*`                         | Header UI and context menu |
-| `features/map/workspace-pane/image-detail-photo-viewer/*`                   | Photo/upload surface and lightbox |
-| `features/map/workspace-pane/image-detail-inline-section/*`                 | Details and location editing UI |
-| `features/map/workspace-pane/image-detail-project-membership.helper.ts`     | Project membership persistence rules |
-| `features/map/workspace-pane/metadata-section/*`                            | Custom metadata section |
-| `features/map/workspace-pane/detail-actions/*`                              | Actions section |
+| File                                                                    | Purpose                                                              |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `features/map/workspace-pane/image-detail-view.component.ts`            | Parent coordinator: load record, own shared state, wire child events |
+| `features/map/workspace-pane/image-detail-view.component.html`          | Composition shell for header, viewer, details, metadata, and actions |
+| `features/map/workspace-pane/image-detail-header/*`                     | Header UI and context menu                                           |
+| `features/map/workspace-pane/image-detail-photo-viewer/*`               | Photo/upload surface and lightbox                                    |
+| `features/map/workspace-pane/image-detail-inline-section/*`             | Details and location editing UI                                      |
+| `features/map/workspace-pane/image-detail-project-membership.helper.ts` | Project membership persistence rules                                 |
+| `features/map/workspace-pane/metadata-section/*`                        | Custom metadata section                                              |
+| `features/map/workspace-pane/detail-actions/*`                          | Actions section                                                      |
 
 ## Acceptance Criteria
 
