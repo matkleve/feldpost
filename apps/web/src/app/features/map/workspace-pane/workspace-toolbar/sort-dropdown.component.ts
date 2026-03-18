@@ -18,7 +18,7 @@ export type SortDropdownOption = {
     <app-standard-dropdown
       class="sort-dropdown"
       [searchTerm]="searchTerm()"
-      [searchPlaceholder]="t('workspace.sort.search.placeholder', 'Search properties…')"
+      [searchPlaceholder]="t('workspace.sort.search.placeholder', 'Search properties...')"
       [showDefaultClearAction]="false"
       (searchTermChange)="searchTerm.set($event)"
       (clearRequested)="searchTerm.set('')"
@@ -43,23 +43,24 @@ export type SortDropdownOption = {
           @for (opt of groupedOptions(); track opt.id) {
             <button
               class="dd-item dd-item--active"
+              type="button"
+              [class.dd-item--hovered]="isRowHovered(opt.id)"
+              (mouseenter)="setHoveredSort(opt.id)"
+              (mouseleave)="clearHoveredSort(opt.id)"
+              (focus)="setHoveredSort(opt.id)"
+              (blur)="clearHoveredSort(opt.id)"
               (click)="toggleSort(opt.id); $event.stopPropagation()"
             >
               <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
               <span class="dd-item__label">{{ opt.label }}</span>
               <span
                 class="sort-direction sort-direction--visible"
-                role="button"
-                tabindex="0"
-                (click)="toggleSort(opt.id); $event.stopPropagation()"
-                (keydown.enter)="toggleSort(opt.id); $event.stopPropagation()"
-                [attr.aria-label]="
-                  t('workspace.sort.direction.ariaPrefix', 'Sort ') + getDirectionLabel(opt.id)
-                "
-              >
-                <span class="sort-direction__state-current">{{ getDirectionSymbol(opt.id) }}</span>
-                <span class="sort-direction__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
-              </span>
+                [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
+                [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
+                [class.sort-direction--preview]="isRowHovered(opt.id)"
+                aria-hidden="true"
+                [textContent]="getDisplayedDirectionSymbol(opt.id)"
+              ></span>
             </button>
           }
           <div class="dd-divider"></div>
@@ -67,7 +68,13 @@ export type SortDropdownOption = {
         @for (opt of filteredOptions(); track opt.id) {
           <button
             class="dd-item"
+            type="button"
             [class.dd-item--active]="isSortActive(opt.id)"
+            [class.dd-item--hovered]="isRowHovered(opt.id)"
+            (mouseenter)="setHoveredSort(opt.id)"
+            (mouseleave)="clearHoveredSort(opt.id)"
+            (focus)="setHoveredSort(opt.id)"
+            (blur)="clearHoveredSort(opt.id)"
             (click)="toggleSort(opt.id); $event.stopPropagation()"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
@@ -75,17 +82,12 @@ export type SortDropdownOption = {
             <span
               class="sort-direction"
               [class.sort-direction--visible]="isSortActive(opt.id)"
-              role="button"
-              tabindex="0"
-              (click)="toggleSort(opt.id); $event.stopPropagation()"
-              (keydown.enter)="toggleSort(opt.id); $event.stopPropagation()"
-              [attr.aria-label]="
-                t('workspace.sort.direction.ariaPrefix', 'Sort ') + getDirectionLabel(opt.id)
-              "
-            >
-              <span class="sort-direction__state-current">{{ getDirectionSymbol(opt.id) }}</span>
-              <span class="sort-direction__state-next">{{ getNextDirectionSymbol(opt.id) }}</span>
-            </span>
+              [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
+              [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
+              [class.sort-direction--preview]="isRowHovered(opt.id)"
+              aria-hidden="true"
+              [textContent]="getDisplayedDirectionSymbol(opt.id)"
+            ></span>
           </button>
         }
         @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
@@ -100,6 +102,10 @@ export type SortDropdownOption = {
   imports: [StandardDropdownComponent],
 })
 export class SortDropdownComponent {
+  private readonly inactiveSymbol = '\u2013';
+  private readonly ascendingSymbol = '\u2191';
+  private readonly descendingSymbol = '\u2193';
+
   private readonly viewService = inject(WorkspaceViewService);
   private readonly i18nService = inject(I18nService);
   private readonly registry = inject(PropertyRegistryService);
@@ -110,7 +116,6 @@ export class SortDropdownComponent {
   readonly activeSortsInput = input<SortConfig[] | null>(null);
   readonly defaultSorts = input<SortConfig[]>([{ key: 'date-captured', direction: 'desc' }]);
 
-  /** Sort options derived from the property registry (only sortable properties). */
   private readonly options = computed<SortDropdownOption[]>(() => {
     const provided = this.optionsInput();
     if (provided) return provided;
@@ -125,16 +130,15 @@ export class SortDropdownComponent {
 
   readonly searchTerm = signal('');
   readonly activeSorts = signal<SortConfig[]>([]);
+  readonly hoveredSortId = signal<string | null>(null);
   readonly sortChanged = output<SortConfig[]>();
 
-  /** IDs of properties currently used as groupings. */
   private readonly groupingIds = computed(() => {
     const provided = this.groupingIdsInput();
     if (provided) return provided;
     return this.viewService.activeGroupings().map((g) => g.id);
   });
 
-  /** Options in the "Sorted by grouping" section — match grouping order, filtered by search. */
   readonly groupedOptions = computed(() => {
     const ids = this.groupingIds();
     const term = this.searchTerm().toLowerCase();
@@ -145,7 +149,6 @@ export class SortDropdownComponent {
       .filter((o) => !term || o.label.toLowerCase().includes(term));
   });
 
-  /** Remaining options not in the grouping section, filtered by search. */
   readonly filteredOptions = computed(() => {
     const groupedIds = new Set(this.groupingIds());
     const term = this.searchTerm().toLowerCase();
@@ -183,18 +186,21 @@ export class SortDropdownComponent {
     return this.activeSorts().some((s) => s.key === id);
   }
 
-  getDirectionSymbol(id: string): string {
-    const sort = this.activeSorts().find((s) => s.key === id);
-    if (!sort) return '–';
-    return sort.direction === 'asc' ? '↑' : '↓';
+  isRowHovered(id: string): boolean {
+    return this.hoveredSortId() === id;
   }
 
-  /** Returns the symbol for the state that will result from the next click. */
+  getDirectionSymbol(id: string): string {
+    const sort = this.activeSorts().find((s) => s.key === id);
+    if (!sort) return this.inactiveSymbol;
+    return sort.direction === 'asc' ? this.ascendingSymbol : this.descendingSymbol;
+  }
+
   getNextDirectionSymbol(id: string): string {
     const sort = this.activeSorts().find((s) => s.key === id);
-    if (!sort) return '↑'; // Deactivated → Ascending
-    if (sort.direction === 'asc') return '↓'; // Ascending → Descending
-    return '–'; // Descending → Deactivated
+    if (!sort) return this.ascendingSymbol;
+    if (sort.direction === 'asc') return this.descendingSymbol;
+    return this.inactiveSymbol;
   }
 
   getDirectionLabel(id: string): string {
@@ -205,20 +211,21 @@ export class SortDropdownComponent {
       : this.t('workspace.sort.direction.descending', 'descending');
   }
 
-  /** Toggle sort: all items cycle deactivated → ascending → descending → deactivated. */
+  getDisplayedDirectionSymbol(id: string): string {
+    return this.isRowHovered(id) ? this.getNextDirectionSymbol(id) : this.getDirectionSymbol(id);
+  }
+
   toggleSort(id: string): void {
     const current = this.activeSorts();
     const existing = current.find((s) => s.key === id);
+    const defaultDirection = this.getDefaultDirection(id);
 
     let next: SortConfig[];
     if (!existing) {
-      // Deactivated → Ascending
-      next = [...current, { key: id, direction: 'asc' }];
+      next = [...current, { key: id, direction: defaultDirection }];
     } else if (existing.direction === 'asc') {
-      // Ascending → Descending
       next = current.map((s) => (s.key === id ? { ...s, direction: 'desc' as const } : s));
     } else {
-      // Descending → Deactivated
       next = current.filter((s) => s.key !== id);
     }
 
@@ -241,6 +248,20 @@ export class SortDropdownComponent {
     if (this.hasCustomSort()) {
       this.resetSort();
     }
+  }
+
+  setHoveredSort(id: string): void {
+    this.hoveredSortId.set(id);
+  }
+
+  clearHoveredSort(id: string): void {
+    if (this.hoveredSortId() === id) {
+      this.hoveredSortId.set(null);
+    }
+  }
+
+  private getDefaultDirection(id: string): 'asc' | 'desc' {
+    return this.options().find((option) => option.id === id)?.defaultDirection ?? 'asc';
   }
 
   private areSortsEqual(left: SortConfig[], right: SortConfig[]): boolean {

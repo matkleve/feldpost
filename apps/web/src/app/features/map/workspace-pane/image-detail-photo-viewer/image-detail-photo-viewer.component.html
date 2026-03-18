@@ -49,10 +49,9 @@
         />
       }
 
-      @if (fullResUrl()) {
+      @if (fullResUrl() && fullResPreloaded()) {
         <img
-          class="detail-image detail-image--full"
-          [class.detail-image--loaded]="fullResPreloaded()"
+          class="detail-image detail-image--full detail-image--loaded"
           [src]="fullResUrl()!"
           [alt]="displayTitle()"
         />

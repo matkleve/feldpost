@@ -45,6 +45,7 @@
 }
 
 .thumbnail-card--selected.thumbnail-card--linked-hover {
+  border-color: var(--color-clay);
   box-shadow:
     var(--shadow-md),
     0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);

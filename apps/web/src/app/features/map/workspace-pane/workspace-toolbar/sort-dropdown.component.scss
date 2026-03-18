@@ -24,38 +24,43 @@
   color: var(--color-text-secondary);
   font-size: 0.8125rem;
   font-weight: 600;
-  cursor: pointer;
+  line-height: 1;
   opacity: 0;
-  transition: opacity 80ms ease-out;
+  transition:
+    opacity 80ms ease-out,
+    color 80ms ease-out,
+    background 80ms ease-out;
 
   .dd-item:hover & {
     opacity: 1;
+    color: var(--color-clay);
   }
 
   .dd-item--active & {
     opacity: 1;
+    color: var(--color-clay);
+  }
+
+  .dd-item--hovered & {
+    opacity: 1;
+    color: var(--color-clay);
   }
 
   &--visible {
     opacity: 1;
+    color: var(--color-clay);
   }
 
-  &:hover {
+  &--preview,
+  .dd-item:hover &,
+  .dd-item--hovered & {
     background: color-mix(in srgb, var(--color-clay) 12%, transparent);
     color: var(--color-clay);
   }
 }
 
-.sort-direction__state-next {
-  display: none;
+.dd-item--hovered .dd-item__icon,
+.dd-item:hover .dd-item__icon {
+  color: var(--color-clay);
 }
 
-.sort-direction:hover {
-  .sort-direction__state-current {
-    display: none;
-  }
-
-  .sort-direction__state-next {
-    display: inline-flex;
-  }
-}

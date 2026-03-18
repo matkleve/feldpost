@@ -8,7 +8,7 @@ import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-
   standalone: true,
   imports: [PhotoLightboxComponent],
   templateUrl: './image-detail-photo-viewer.component.html',
-  styleUrl: '../image-detail-view.component.scss',
+  styleUrl: './image-detail-photo-viewer.component.scss',
 })
 export class ImageDetailPhotoViewerComponent {
   private readonly i18nService = inject(I18nService);

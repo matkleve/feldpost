@@ -455,14 +455,16 @@
 
 :host ::ng-deep .map-photo-marker--selected.map-photo-marker--linked-hover {
   .map-photo-marker__body {
-    outline-color: var(--color-clay);
+    outline: 2px solid var(--color-clay);
+    outline-offset: -1px;
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 32%, transparent);
   }
 }
 
 :host ::ng-deep .map-photo-marker--selected:hover {
   .map-photo-marker__body {
-    outline-color: var(--color-clay);
+    outline: 2px solid var(--color-clay);
+    outline-offset: -1px;
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 32%, transparent);
   }
 }

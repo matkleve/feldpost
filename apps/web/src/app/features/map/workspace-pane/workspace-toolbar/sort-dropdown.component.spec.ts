@@ -1,17 +1,8 @@
-/**
- * SortDropdownComponent — sort + grouping sync tests (WV-3b).
- *
- * Strategy:
- *  - WorkspaceViewService is faked with signal stubs.
- *  - Tests verify the dropdown correctly splits options into grouped/ungrouped,
- *    reflects the effective sort state, and emits proper SortConfig[] on toggle.
- */
-
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { SortDropdownComponent } from './sort-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
-import { signal } from '@angular/core';
 import type { SortConfig, PropertyRef } from '../../../../core/workspace-view.types';
 
 function buildFakeViewService() {
@@ -32,8 +23,9 @@ function setup(overrides?: Partial<ReturnType<typeof buildFakeViewService>>) {
     ],
   });
 
-  const component = TestBed.createComponent(SortDropdownComponent).componentInstance;
-  return { component, fakeViewService };
+  const fixture = TestBed.createComponent(SortDropdownComponent);
+  fixture.detectChanges();
+  return { component: fixture.componentInstance, fixture, fakeViewService };
 }
 
 describe('SortDropdownComponent', () => {
@@ -82,7 +74,7 @@ describe('SortDropdownComponent', () => {
   });
 
   describe('tri-state toggle', () => {
-    it('activates with ascending on first click (deactivated → ↑)', () => {
+    it('activates with ascending on first click', () => {
       const { component } = setup();
       let emitted: SortConfig[] = [];
       component.sortChanged.subscribe((v: SortConfig[]) => (emitted = v));
@@ -92,59 +84,91 @@ describe('SortDropdownComponent', () => {
       expect(emitted).toContainEqual({ key: 'city', direction: 'asc' });
     });
 
-    it('flips to descending on second click (↑ → ↓)', () => {
+    it('flips to descending on second click', () => {
       const { component } = setup();
       let emitted: SortConfig[] = [];
       component.sortChanged.subscribe((v: SortConfig[]) => (emitted = v));
 
-      component.toggleSort('city'); // → asc
-      component.toggleSort('city'); // → desc
+      component.toggleSort('city');
+      component.toggleSort('city');
 
       const citySort = emitted.find((s) => s.key === 'city');
       expect(citySort?.direction).toBe('desc');
     });
 
-    it('deactivates on third click (↓ → —)', () => {
+    it('deactivates on third click', () => {
       const { component } = setup();
       let emitted: SortConfig[] = [];
       component.sortChanged.subscribe((v: SortConfig[]) => (emitted = v));
 
-      component.toggleSort('city'); // → asc
-      component.toggleSort('city'); // → desc
-      component.toggleSort('city'); // → deactivated
+      component.toggleSort('city');
+      component.toggleSort('city');
+      component.toggleSort('city');
 
       expect(emitted.some((s) => s.key === 'city')).toBe(false);
+    });
+
+    it('activates inactive rows with the option default direction', () => {
+      const { component, fixture } = setup();
+      fixture.componentRef.setInput('optionsInput', [
+        {
+          id: 'date-uploaded',
+          label: 'Date uploaded',
+          icon: 'cloud_upload',
+          defaultDirection: 'desc',
+        },
+      ]);
+      fixture.detectChanges();
+
+      component.toggleSort('date-uploaded');
+
+      expect(component.activeSorts()).toContainEqual({ key: 'date-uploaded', direction: 'desc' });
     });
   });
 
   describe('direction symbols', () => {
-    it('shows – for inactive sort', () => {
+    it('shows en dash for inactive sort', () => {
       const { component } = setup();
-      expect(component.getDirectionSymbol('city')).toBe('–');
+      expect(component.getDirectionSymbol('city')).toBe('\u2013');
     });
 
-    it('shows ↑ for ascending sort', () => {
+    it('shows up arrow for ascending sort', () => {
       const { component } = setup();
       component.toggleSort('city');
-      expect(component.getDirectionSymbol('city')).toBe('↑');
+      expect(component.getDirectionSymbol('city')).toBe('\u2191');
     });
 
-    it('shows ↓ for descending sort', () => {
+    it('shows down arrow for descending sort', () => {
       const { component } = setup();
       component.toggleSort('city');
       component.toggleSort('city');
-      expect(component.getDirectionSymbol('city')).toBe('↓');
+      expect(component.getDirectionSymbol('city')).toBe('\u2193');
     });
 
-    it('shows next state symbol on hover (↑ for inactive, ↓ for asc, – for desc)', () => {
+    it('shows the next state symbol for the next click target', () => {
       const { component } = setup();
-      expect(component.getNextDirectionSymbol('city')).toBe('↑');
+      expect(component.getNextDirectionSymbol('city')).toBe('\u2191');
 
       component.toggleSort('city');
-      expect(component.getNextDirectionSymbol('city')).toBe('↓');
+      expect(component.getNextDirectionSymbol('city')).toBe('\u2193');
 
       component.toggleSort('city');
-      expect(component.getNextDirectionSymbol('city')).toBe('–');
+      expect(component.getNextDirectionSymbol('city')).toBe('\u2013');
+    });
+
+    it('shows the current state at rest and the next state on hover', () => {
+      const { component } = setup();
+
+      expect(component.getDisplayedDirectionSymbol('city')).toBe('\u2013');
+
+      component.setHoveredSort('city');
+      expect(component.getDisplayedDirectionSymbol('city')).toBe('\u2191');
+
+      component.toggleSort('city');
+      expect(component.getDisplayedDirectionSymbol('city')).toBe('\u2193');
+
+      component.clearHoveredSort('city');
+      expect(component.getDisplayedDirectionSymbol('city')).toBe('\u2191');
     });
   });
 
