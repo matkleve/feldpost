@@ -21,8 +21,8 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Interaction & Shortcuts | shortcut-reference-settings.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
 | Invite Management | qr-invite-flow.md | invite creation, acceptance, and revocation controls. |
 | Invite Management | settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
-| Language / Locale | language-locale-settings.md | UI language switch between English and German plus regional formatting defaults. |
-| Language / Locale | settings-overlay.md | UI language and regional formatting defaults. |
+| Language / Locale | language-locale-settings.md | UI language switch between English, German, and Italian with locale-specific formatting and runtime translation fallback behavior. |
+| Language / Locale | settings-overlay.md | UI language and regional formatting defaults; language switch labels stay native (`English`, `Deutsch`, `Italiano`) regardless of active UI language. |
 | Map Basemap | map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
 | Map Marker Motion | photo-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
 | Map Preferences | settings-overlay.md | map tile and map-behavior defaults. |

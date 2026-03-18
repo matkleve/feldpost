@@ -2,18 +2,18 @@
 
 ## What It Is
 
-A dropdown that lets the user choose which image property to group by. Groups organize the workspace pane content into sections with headings. Properties are drag-reorderable to control multi-level grouping priority. The dropdown has two sections: active (dark text, currently grouping) and available (lighter text, inactive). Inspired by Notion's "Group" database view control.
+A dropdown that lets the user choose and order the properties used to group workspace content. It manages an active list and an available list, supports drag-reordering and cross-section moves, and emits grouping changes back to `WorkspaceToolbarComponent` and `WorkspaceViewService`.
 
 ## What It Looks Like
 
-A floating dropdown anchored below the "Grouping" toolbar button. Width: 15rem (240px). `--color-bg-elevated` background, `shadow-xl`, `rounded-lg` corners. Two sections separated by a `--color-border` line:
+A floating dropdown anchored below the "Grouping" toolbar button. Width is compact desktop dropdown width (~240px) and the content is rendered through `StandardDropdownComponent`. Two sections are shown inside one CDK drag context:
 
-- **Upper section (Active)**: properties currently used for grouping. Text in `--color-text-primary`. Header row: **"Grouped by" label (left) + "Empty" button (right)**. The "Empty" button is a small text button (`.dd-clear-btn`) that clears all active groupings, moving every property back to Available. Only visible when there is at least one active grouping. Each property row layout: **Media icon → Label → Drag handle (≡)**. Drag handle visible on hover only (Quiet Actions pattern). Rows are drag-reorderable within the section. **Click** an active row to deactivate it (moves to Available); rows can also be **dragged** downward past the divider into Available to deactivate.
+- **Upper section (Active)**: properties currently used for grouping. Header row shows the "Grouped by" label plus a reset button when at least one grouping is active. Clicking an active row deactivates it; dragging within the section reorders grouping priority.
 - **Lower section (Available)**: properties not currently grouping. Text in `--color-text-secondary`. Click to activate (moves to upper section). Rows can also be dragged upward past the divider into Active to activate.
 
-Each row is a `.ui-item` with a leading media area, a label, and a trailing drag handle (≡, `drag_indicator` Material Icon) on the right. There is **no × remove button** — deactivation is done by **clicking an active row** (moves it back to Available) or by **dragging it down past the divider** into the Available section.
+Each row is a `.dd-item` with icon, label, and trailing `drag_indicator` handle. There is no separate remove button; deactivation is done by clicking an active row or dragging it into the Available section.
 
-**Multi-select**: Ctrl+Click selects multiple rows (applied `selected` visual). Dragging any selected row moves the entire selection as a group. Clicking without Ctrl clears the selection.
+**Multi-select**: Ctrl/Cmd-click selects multiple rows. Dragging a selected row can move the current selection group. Clicking without modifier clears the multi-selection before performing the default activate/deactivate action.
 
 ## Where It Lives
 
@@ -33,19 +33,19 @@ Each row is a `.ui-item` with a leading media area, a label, and a trailing drag
 | 6   | Ctrl+Click on a row                                    | Toggles selection on the row (adds/removes from multi-select). Does not activate/deactivate.       | `selectedRows` updated        |
 | 7   | Drags any selected row (with multi-select active)      | Moves the entire selection group to the drop target section/position                               | `activeGroupings` bulk update |
 | 8   | Clicks a row without Ctrl                              | Clears multi-selection; performs single-click action (activate if available, deactivate if active) | `selectedRows` cleared        |
-| 9   | Clicks outside or Escape                               | Closes dropdown, clears selection                                                                  | Dropdown closes               |
+| 9   | Clicks outside or Escape                               | Closes dropdown; selection is cleared when row interaction resumes                                 | Toolbar dropdown closes       |
 | 10  | Hovers a row                                           | Reveals drag handle (≡) on the right side                                                          | Opacity 0→1, 80ms             |
-| 11  | Clicks "Empty" button next to "Grouped by" header      | Moves all active groupings back to Available; workspace ungroups                                   | `activeGroupings` cleared     |
+| 11  | Clicks reset button next to "Grouped by" header        | Moves all active groupings back to Available; workspace ungroups                                   | `activeGroupings` cleared     |
 
 ## Component Hierarchy
 
 ```
-GroupingDropdown                           ← floating dropdown, --color-bg-elevated, shadow-xl, rounded-lg
+GroupingDropdown                           ← floating dropdown rendered via `StandardDropdownComponent`
 ├── UnifiedDragContext (cdkDropListGroup)   ← single CDK drag context spanning both sections
 │   ├── ActiveSection (cdkDropList)         ← upper drop zone
 │   │   ├── SectionHeader                  ← flex row: label left, button right
 │   │   │   ├── SectionLabel "Grouped by"   ← --text-caption, --color-text-secondary
-│   │   │   └── EmptyButton "Empty"        ← text button, visible only when activeGroupings.length > 0
+│   │   │   └── ResetButton                 ← reset action, visible only when activeGroupings.length > 0
 │   │   └── GroupingRow × N                ← .ui-item, cdkDrag
 │   │       ├── MediaIcon                  ← leading property icon (e.g. calendar, location)
 │   │       ├── PropertyLabel              ← property name, --color-text-primary
@@ -71,38 +71,28 @@ flowchart LR
   S --> UI
 ```
 
-| Field               | Source                                                                                     | Type            |
-| ------------------- | ------------------------------------------------------------------------------------------ | --------------- |
-| Built-in properties | Hardcoded list: Date, Year, Month, Project, City, District, Street, Country, Address, User | `PropertyDef[]` |
-| Custom properties   | `supabase.from('metadata_keys').select('id, key_name').eq('organization_id', orgId)`       | `MetadataKey[]` |
+| Field                | Source                                                                                                | Type                    |
+| -------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------- |
+| Available properties | `PropertyRegistryService.groupableProperties()` filtered by active ids in `WorkspaceToolbarComponent` | `GroupingProperty[]`    |
+| Active properties    | `WorkspaceToolbarComponent.activeGroupings`                                                           | `GroupingProperty[]`    |
+| Grouping output      | `groupingsChanged` output from `GroupingDropdownComponent`                                            | `{ active, available }` |
 
-### Built-in Grouping Property Data Sources
+### Property Source Notes
 
-| Property | Image Field    | Derivation                                 | Fallback             |
-| -------- | -------------- | ------------------------------------------ | -------------------- |
-| Date     | `capturedAt`   | `toLocaleDateString(full)` on client       | `"Unknown date"`     |
-| Year     | `capturedAt`   | `getFullYear()` on client                  | `"Unknown year"`     |
-| Month    | `capturedAt`   | `toLocaleDateString(year+month)` on client | `"Unknown month"`    |
-| Project  | `projectName`  | JOIN via `cluster_images` RPC              | `"No project"`       |
-| City     | `city`         | Structured column from reverse geocoding   | `"Unknown city"`     |
-| District | `district`     | Structured column from reverse geocoding   | `"Unknown district"` |
-| Street   | `street`       | Structured column from reverse geocoding   | `"Unknown street"`   |
-| Country  | `country`      | Structured column from reverse geocoding   | `"Unknown country"`  |
-| Address  | `addressLabel` | Full human-readable address                | `"Unknown address"`  |
-| User     | `userName`     | JOIN profiles via `cluster_images` RPC     | `"Unknown user"`     |
+The dropdown does not query Supabase directly. Property availability is derived by `WorkspaceToolbarComponent` from `PropertyRegistryService`, then passed into `GroupingDropdownComponent` as inputs.
 
-See also: [photo-grouping-data use case](../use-cases/photo-grouping-data.md) for full derivation flow.
+Detailed grouping derivation still lives in the workspace view pipeline and related use-case docs.
 
 ## State
 
-| Name              | Type            | Default | Controls                                                   |
-| ----------------- | --------------- | ------- | ---------------------------------------------------------- |
-| `activeGroupings` | `PropertyRef[]` | `[]`    | Ordered list of properties used for grouping               |
-| `availableProps`  | `PropertyDef[]` | all     | Properties not in activeGroupings                          |
-| `selectedRows`    | `Set<string>`   | empty   | Row keys currently multi-selected via Ctrl+Click           |
-| `isDragging`      | `boolean`       | `false` | True while any row is being dragged (cdkDragStarted/Ended) |
+| Name                  | Type                 | Default | Controls                                                      |
+| --------------------- | -------------------- | ------- | ------------------------------------------------------------- |
+| `activeGroupings`     | `GroupingProperty[]` | `[]`    | Ordered list of active groupings passed in from toolbar state |
+| `availableProperties` | `GroupingProperty[]` | `[]`    | Properties not currently active                               |
+| `selectedRows`        | `Set<string>`        | empty   | Rows currently multi-selected via Ctrl/Cmd-click              |
+| `isDragging`          | `boolean`            | `false` | True while any row is being dragged                           |
 
-Where `PropertyRef` = `{ type: 'builtin' | 'custom'; key: string; id?: string }`.
+Where `GroupingProperty` = `{ id: string; label: string; icon: string }`.
 
 ## File Map
 
@@ -113,8 +103,10 @@ Where `PropertyRef` = `{ type: 'builtin' | 'custom'; key: string; id?: string }`
 
 ## Wiring
 
-- Rendered inside `WorkspaceToolbarComponent` via `@if (activeDropdown() === 'grouping')`
-- Emits `groupingsChanged` with ordered `PropertyRef[]` to `WorkspaceViewService`
+- Rendered inside `WorkspaceToolbarComponent` when `activeDropdown() === 'grouping'`
+- Receives `activeGroupings` and `availableProperties` as inputs from `WorkspaceToolbarComponent`
+- Emits `{ active, available }` through `groupingsChanged`
+- `WorkspaceToolbarComponent` maps active rows into `WorkspaceViewService.activeGroupings`
 - `WorkspaceViewService` re-groups the image list and emits grouped sections to the content area
 
 ## Acceptance Criteria
@@ -133,19 +125,16 @@ Where `PropertyRef` = `{ type: 'builtin' | 'custom'; key: string; id?: string }`
 - [x] Ctrl+Click multi-selects rows; dragging any selected row moves the entire selection
 - [x] Click without Ctrl clears multi-selection
 - [x] Workspace pane content regrouped on every change (emits `groupingsChanged`)
-- [x] Built-in properties: Address, City, Country, Date, Project, User
-- [ ] Custom metadata keys appear in available list
+- [x] Available properties are derived from registry-backed groupable properties
+- [x] Reset button clears all active groupings
 - [x] Dropdown uses `position: fixed` to escape overflow
 - [x] Row hover: clay 8% background tint
 - [x] Active row: text-primary, inactive row: text-secondary
 - [x] Selected row: clay 14% background, 2px left border
 - [x] CDK drag preview: elevated shadow, opacity 0.9
 - [x] CDK drag placeholder: dashed border, 40% opacity
-- [ ] "Empty" button on the right of the "Grouped by" header — clears all active groupings
-- [ ] Empty drop target: idle → "No grouping applied" (disabled text, no border)
-- [ ] Empty drop target: drag active → "Drop here to group" (dashed border, clay 4% bg)
-- [ ] Empty drop target: receiving → stronger highlight (clay 10% bg, clay dashed outline)
-- [ ] `isDragging` signal tracks drag lifecycle (cdkDragStarted/cdkDragEnded)
+- [x] Empty active drop target shows default and drag-active copy states
+- [x] `isDragging` signal tracks drag lifecycle (cdkDragStarted/cdkDragEnded)
 
 ---
 

@@ -1,8 +1,15 @@
 # Element Spec Format
 
-Every UI element in Feldpost must have a spec in `docs/element-specs/` before agent implementation. This is the template.
+Practical writing template for specs in `docs/element-specs/`.
+Governance, required section policy, split rules, and lint expectations live in `docs/element-specs/README.md`.
 
 ---
+
+## How To Use This File
+
+- Use this file when creating a new spec or rewriting an existing one.
+- Treat `docs/element-specs/README.md` as the authority for what is required.
+- Use this document for structure examples and writing guidance only.
 
 ## Template Structure
 
@@ -40,10 +47,7 @@ Keep it readable — this is a structural guideline, not copy-pasteable code.
 
 When a panel or list row matches an existing shared primitive, name it directly in the hierarchy (`.ui-container`, `.ui-item`, `.ui-item-media`, `.ui-item-label`, `.ui-spacer`) instead of describing new bespoke geometry.
 
-In addition to the hierarchy tree, every spec should include at least two Mermaid diagrams:
-
-- A **Wiring** diagram (`sequenceDiagram` or `flowchart`) for parent/component/service integration
-- A **Data** diagram (`erDiagram`, `flowchart`, or `sequenceDiagram`) for schema or query/data flow
+In addition to the hierarchy tree, include the Mermaid diagrams required by `docs/element-specs/README.md`.
 
 ### 6. Data (table)
 
@@ -67,104 +71,6 @@ Checkbox list. Each item is testable. Used for verification after implementation
 
 ---
 
-## Example Spec Skeleton
-
-```markdown
-# [Element Name]
-
-## What It Is
-
-[1-2 sentences]
-
-## What It Looks Like
-
-[3-5 sentences with visual description, sizes, colors, design token references]
-
-## Where It Lives
-
-- **Route**: `/path` or "global — available on every page"
-- **Parent**: `ParentComponent` in `path/to/parent.ts`
-- **Appears when**: [trigger condition]
-
-## Actions
-
-| #   | User Action | System Response | Triggers |
-| --- | ----------- | --------------- | -------- |
-| 1   | ...         | ...             | ...      |
-
-## Component Hierarchy
-
-<!-- Tree diagram showing nesting, not real code -->
-```
-
-ElementRoot ← positioning, size, role
-├── SubArea ← what this area does
-│ ├── ChildA ← brief description
-│ └── ChildB ← brief description
-└── [conditional] AnotherArea
-├── ChildC × N ← repeated for each item
-└── EmptyState ← shown when no items
-
-````
-
-## Data Flow (Mermaid)
-
-```mermaid
-sequenceDiagram
-	participant C as Component
-	participant S as Service
-	participant DB as Supabase
-
-	C->>S: Request query/data
-	S->>DB: Read/write
-	DB-->>S: Rows/result
-	S-->>C: Mapped view model
-````
-
-## Wiring Flow (Mermaid)
-
-```mermaid
-flowchart LR
-	Parent[Parent Component] --> Child[Element Component]
-	Child --> Service[Feature Service]
-	Service --> Adapter[Adapter / API Layer]
-```
-
-## Data
-
-| Field | Source                                 | Type     |
-| ----- | -------------------------------------- | -------- |
-| items | `supabase.from('table').select('...')` | `Type[]` |
-
-## State
-
-| Name   | Type      | Default | Controls         |
-| ------ | --------- | ------- | ---------------- |
-| isOpen | `boolean` | `false` | panel visibility |
-
-## File Map
-
-| File                          | Purpose        |
-| ----------------------------- | -------------- |
-| `features/x/x.component.ts`   | root component |
-| `features/x/x.component.html` | template       |
-| `core/x.service.ts`           | data access    |
-
-## Wiring
-
-- Import `XComponent` in `parent.component.ts`
-- Add route in `app.routes.ts` (if routed)
-- Inject `XService` in component constructor
-
-## Acceptance Criteria
-
-- [ ] Specific testable behavior 1
-- [ ] Specific testable behavior 2
-
-```
-
----
-
 ## Why This Format Works
 
 | Section             | What it prevents                                        |
@@ -180,17 +86,11 @@ flowchart LR
 | Wiring              | Agent forgetting to connect the component to its parent |
 | Acceptance Criteria | Unchecked bugs after generation                         |
 
-## Rules
+## Writing Notes
 
-- Every glossary UI element MUST have a spec before implementation
-- Specs are the **source of truth** — code must match spec, not the other way around
-- Update specs BEFORE asking agents to modify features
-- Keep "What It Is" and "What It Looks Like" short — detail goes in Actions and Hierarchy
-- Keep Component Hierarchy as a tree diagram for readability
-- Include at least 2 Mermaid diagrams in each spec: one for Data and one for Wiring
-- Prefer shared layout primitives in the spec before inventing new panel or row patterns
-- Use `rem` as the primary unit for accessibility-sensitive UI dimensions: touch targets, button heights, interactive sizes, spacing, and layout dimensions. Include the px equivalent as an annotation when the exact reference size matters.
-- Use `em` only for component-internal spacing that should scale with the component's own font size.
-- Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.
+- Keep `What It Is` and `What It Looks Like` short; move detail into `Actions`, `Component Hierarchy`, and optional deep-dive sections.
+- Prefer shared layout primitives in the spec before inventing bespoke panel or row patterns.
+- Use `rem` as the primary unit for accessibility-sensitive UI dimensions and annotate px equivalents only when exact size matters.
+- Use `em` only for component-internal spacing that should scale with font size.
+- Use `px` only for precision details that should not scale with font size.
 - Use `vh` / `vw` only for viewport-relative layout behavior.
-```

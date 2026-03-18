@@ -9,6 +9,7 @@ This blueprint holds implementation-level details that were moved out of the ele
 The contract remains in:
 
 - `docs/element-specs/upload-manager.md`
+- `docs/element-specs/upload-manager-pipeline.md`
 
 This blueprint may include:
 

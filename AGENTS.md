@@ -54,14 +54,23 @@ cd apps/web && ng test
 
 - **RLS is the security boundary** — frontend is untrusted; Row-Level Security enforces all data access
 - **Adapter pattern** — never call Leaflet, Supabase, or Nominatim directly from components; use `MapAdapter`, `GeocodingAdapter`, `SupabaseService`
-- **Element specs are contracts** — read `docs/element-specs/[element].md` before building any feature
+- **Element specs are contracts** — implement features from `docs/element-specs/[element].md`; spec governance itself lives in `docs/element-specs/README.md`
 - **Glossary is canonical** — use exact names from `docs/glossary.md`
 
-## Before Implementing a Feature
+## Document Authority
 
-1. Read the element spec: `docs/element-specs/[element].md`
+- **Project rules and invariants**: `AGENTS.md`
+- **Spec system, structure contract, split policy, and index**: `docs/element-specs/README.md`
+- **Spec writing template**: `docs/agent-workflows/element-spec-format.md`
+- **Post-implementation verification**: `docs/agent-workflows/implementation-checklist.md`
+
+## Required Feature Workflow
+
+1. Read the target element spec: `docs/element-specs/[element].md`
 2. Read the implementation blueprint if it exists: `docs/implementation-blueprints/[element].md`
-3. Only read additional design docs (`docs/design/tokens.md`, `docs/design/layout.md`, etc.) if the spec doesn't answer your styling questions
+3. Read additional design docs only if the spec or blueprint does not answer the question
+4. Reuse shared UI and adapter abstractions before introducing new structure
+5. Verify the result against `docs/agent-workflows/implementation-checklist.md`
 
 ## Design Principles (summary)
 

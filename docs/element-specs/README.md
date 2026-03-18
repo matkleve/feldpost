@@ -4,6 +4,7 @@ Last updated: 2026-03-13
 
 Structured implementation contracts for every UI element in Feldpost.
 These are the **source of truth** that agents implement from.
+This file is the **source of truth for the spec system itself**: structure contract, split policy, lint expectations, and index.
 
 See [agent-workflows/element-spec-format.md](../agent-workflows/element-spec-format.md) for the template.
 
@@ -21,8 +22,8 @@ See [agent-workflows/element-spec-format.md](../agent-workflows/element-spec-for
 1. Resolve the target element from the list below (canonical naming from [Glossary](../glossary.md)).
 2. Open the element spec and treat it as implementation contract.
 3. Check `docs/implementation-blueprints/` for service signatures, data-flow diagrams, and query details.
-4. Use `#plan-before-build`, then `#implement-element`.
-5. Run `#review-against-spec` and update acceptance checkboxes if required.
+4. Use the implementation workflow defined in `AGENTS.md`.
+5. Verify the implementation against `docs/agent-workflows/implementation-checklist.md`.
 6. Enforce the **Spec Structure Contract** below; do not model new specs after a "best example" file.
 
 ### Product Owner / Human Flow
@@ -113,6 +114,13 @@ Cross-cutting options:
 
 Guidance: prefer one general structure with required core sections plus optional sections, rather than separate templates per element type.
 
+## Ownership Rules
+
+- `AGENTS.md` owns project-level rules, invariants, and required implementation workflow.
+- `docs/element-specs/README.md` owns spec governance, structure, split policy, and indexing.
+- `docs/agent-workflows/element-spec-format.md` is a writing aid and template, not a second governance source.
+- `docs/agent-workflows/implementation-checklist.md` is a verification aid used after implementation.
+
 ### Mermaid Diagram Policy
 
 Use Mermaid when behavior is temporal, stateful, or multi-source. Diagrams are not required for every spec.
@@ -193,6 +201,8 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `upload-button-zone.md` — Upload Button Zone (FAB toggle)
 - ✅ `upload-panel.md` — Upload Panel (drop zone + file list)
 - ✅ `placement-mode.md` — Placement Mode (banner + crosshair)
+- ✅ `upload-manager.md` — Upload Manager (parent service contract)
+  - ✅ `upload-manager-pipeline.md` — Upload Manager Pipeline (folder upload, dedup, conflict handling, replace/attach orchestration)
 
 ### Workspace & Groups
 
@@ -251,8 +261,9 @@ Priority is review-first, not "all done." Work the queue top-to-bottom unless pr
 
 ### Next Split Candidates
 
-Check ESLint file.
+Review lint output and any large specs together; use size as a signal, not the only reason to split.
 
 1. Any spec above 400 lines (warning) should be reviewed for optional split.
 2. Any spec above 600 lines (error) must be split before implementation changes continue.
-3. Split by concern area, then add a "Child Specs" section in the parent with explicit links.
+3. Split by concern area, then add a `Child Specs` section in the parent with explicit links.
+4. Keep parent specs contractual; move deep orchestration, state-machine detail, and implementation-heavy flows into child specs or blueprints.

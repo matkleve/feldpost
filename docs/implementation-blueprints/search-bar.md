@@ -1,7 +1,7 @@
 # Search Bar — Implementation Blueprint
 
 > **Spec**: [element-specs/search-bar.md](../element-specs/search-bar.md)
-> **Status**: Not implemented. Service layer is complete — component work only.
+> **Status**: Core component and service layer are implemented. This blueprint only tracks follow-up implementation notes beyond the spec.
 
 ## Existing Infrastructure
 
@@ -11,95 +11,18 @@
 | `core/search/search.models.ts`               | All types: `SearchState`, `SearchCandidate` unions, `SearchResultSet`, `SearchCommitAction`, `SearchSection` |
 | `core/map-adapter.ts`                        | `panTo()` for map centering on commit                                                                        |
 
-**The spec for this element is already high-clarity (9/10).** This blueprint covers the remaining gaps: resolver registration, geocoder dedup details, keyboard navigation implementation, animation constraints, and commit routing.
+## Follow-Up Infrastructure Review
 
-## SearchOrchestratorService — Key Methods (already exist)
+| What                            | File                                            | Why                                                                                  |
+| ------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Search resolver split           | `core/search/*`                                 | Decide whether current resolver/helper split is clear enough or should be simplified |
+| Geocoding abstraction alignment | `core/geocoding.service.ts` and search services | Keep adapter/service boundaries consistent with project adapter rules                |
+| Status cleanup                  | search docs + blueprint set                     | Remove stale claims about unimplemented component work                               |
 
-```typescript
-// core/search/search-orchestrator.service.ts
+### Follow-Up Note
 
-// Register data sources at app startup or in SearchBarComponent constructor
-configureSources(adapters: {
-  dbAddressResolver?: (query: string, context: SearchQueryContext) => Observable<SearchAddressCandidate[]>;
-  dbContentResolver?: (query: string, context: SearchQueryContext) => Observable<SearchContentCandidate[]>;
-  geocoderResolver?:  (query: string, context: SearchQueryContext) => Observable<SearchAddressCandidate[]>;
-}): void;
-
-// Bind to input stream → returns staged results (typing → partial → complete)
-searchInput(
-  query$: Observable<string>,
-  context$: Observable<SearchQueryContext>,
-): Observable<SearchResultSet>;
-
-// One-shot search (for re-executing recent searches)
-searchOnce(query: string, context: SearchQueryContext): Observable<SearchResultSet>;
-
-// Convert candidate → commit action
-commit(candidate: SearchCandidate, query: string): SearchCommitAction;
-
-// Recent search management
-addRecentSearch(label: string): void;
-getRecentSearches(limit?: number): SearchRecentCandidate[];
-```
-
-## Missing Infrastructure
-
-| What                | File                                           | Why                                              |
-| ------------------- | ---------------------------------------------- | ------------------------------------------------ |
-| DB Address Resolver | `core/search/resolvers/db-address.resolver.ts` | Queries `images` table by address text           |
-| DB Content Resolver | `core/search/resolvers/db-content.resolver.ts` | Queries `projects`, `saved_groups` by name       |
-| Geocoder Resolver   | `core/search/resolvers/geocoder.resolver.ts`   | Calls Nominatim via `GeocodingAdapter`           |
-| GeocodingAdapter    | `core/geocoding-adapter.ts`                    | Abstract adapter for Nominatim (adapter pattern) |
-
-### Resolver Signatures
-
-```typescript
-// core/search/resolvers/db-address.resolver.ts
-@Injectable({ providedIn: "root" })
-export class DbAddressResolver {
-  constructor(private supabase: SupabaseService) {}
-
-  resolve(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchAddressCandidate[]> {
-    // Query: SELECT DISTINCT address, lat, lng, COUNT(*) as image_count
-    //        FROM images WHERE address ILIKE '%' || query || '%'
-    //        AND organization_id = context.organizationId
-    //        GROUP BY address, lat, lng
-    //        ORDER BY image_count DESC LIMIT 10
-  }
-}
-
-// core/search/resolvers/db-content.resolver.ts
-@Injectable({ providedIn: "root" })
-export class DbContentResolver {
-  constructor(private supabase: SupabaseService) {}
-
-  resolve(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchContentCandidate[]> {
-    // Query projects: .from('projects').select('id, name').ilike('name', `%${query}%`)
-    // Query groups:   .from('saved_groups').select('id, name').ilike('name', `%${query}%`)
-    // Merge, score by prefix match
-  }
-}
-
-// core/search/resolvers/geocoder.resolver.ts
-@Injectable({ providedIn: "root" })
-export class GeocoderResolver {
-  constructor(private geocoding: GeocodingAdapter) {}
-
-  resolve(
-    query: string,
-    context: SearchQueryContext,
-  ): Observable<SearchAddressCandidate[]> {
-    // Use GeocodingAdapter.search(query, viewportBounds)
-    // Map to SearchAddressCandidate[] with family: 'geocoder'
-  }
-}
-```
+Keep this blueprint at the level of resolver boundaries and cleanup questions.
+Do not document hypothetical class splits here as if they already exist unless the codebase actually adopts them.
 
 ## Data Flow
 
@@ -110,9 +33,9 @@ sequenceDiagram
     participant Input as <input>
     participant SB as SearchBarComponent
     participant Orch as SearchOrchestratorService
-    participant DB_Addr as DbAddressResolver
-    participant DB_Cont as DbContentResolver
-    participant Geo as GeocoderResolver
+    participant DB_Addr as DB Address Retrieval
+    participant DB_Cont as DB Content Retrieval
+    participant Geo as Geocoder Retrieval
 
     Input->>SB: keyup → query$ emits "park st"
     SB->>Orch: searchInput(query$, context$)
@@ -155,13 +78,13 @@ sequenceDiagram
 
     alt type === 'map-center'
         SB->>SB: committedCandidate = candidate
-        SB->>MapShell: (output) searchCommit.emit(action)
+        SB->>MapShell: emit map-center related output
         MapShell->>MapShell: mapAdapter.panTo(action.lat, action.lng)
         MapShell->>MapShell: Place Search Location Marker
     else type === 'open-content'
         SB->>Router: navigate(['/groups', action.contentId]) or similar
     else type === 'run-command'
-        SB->>MapShell: (output) searchCommand.emit(action)
+        SB->>MapShell: emit command-related output
         Note over MapShell: Handle 'upload' → open upload panel, etc.
     else type === 'recent-selected'
         SB->>Orch: searchOnce(action.query, context)
@@ -262,17 +185,7 @@ This approach:
 
 ## Component Outputs
 
-```typescript
-// SearchBarComponent outputs → consumed by MapShellComponent template
-@Output() searchCommit = new EventEmitter<SearchCommitAction>();
-@Output() searchCommand = new EventEmitter<SearchCommitAction>();
-
-// In map-shell.component.html:
-// <app-search-bar
-//   (searchCommit)="onSearchCommit($event)"
-//   (searchCommand)="onSearchCommand($event)"
-// />
-```
+The component currently emits focused outputs such as map-centering, clear, drop-pin, QR-invite, and query-change events rather than one generic `searchCommit` event. Keep the spec authoritative and avoid freezing temporary output shapes here unless they are part of the intended contract.
 
 ## State Machine
 
