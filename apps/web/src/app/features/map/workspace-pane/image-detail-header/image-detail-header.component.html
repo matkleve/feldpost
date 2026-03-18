@@ -68,7 +68,12 @@
           t('workspace.imageDetail.action.delete', 'Delete image')
         }}</span>
       </button>
-      <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinatesRequested.emit()">
+      <button
+        class="dd-item"
+        type="button"
+        role="menuitem"
+        (click)="copyCoordinatesRequested.emit()"
+      >
         <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
         <span class="dd-item__label">{{
           t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')

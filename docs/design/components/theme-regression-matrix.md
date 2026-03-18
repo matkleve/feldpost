@@ -18,16 +18,16 @@ Canonical policy references:
 
 ## Matrix
 
-| Surface             | Variant                                 | Light                                 | Dark                                 | Sandstone                                 | Keyboard/Focus                        |
-| ------------------- | --------------------------------------- | ------------------------------------- | ------------------------------------ | ----------------------------------------- | ------------------------------------- |
-| Option menu surface | `option-menu-surface` + `dd-item`       | BUG(menu-theme-light-unverified)      | BUG(menu-theme-dark-unverified)      | BUG(menu-theme-sandstone-unverified)      | BUG(menu-kbd-spec-failures-open)      |
-| Map context menus   | map/radius/marker context menus         | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Surface             | Variant                                 | Light                                   | Dark                                   | Sandstone                                   | Keyboard/Focus                        |
+| ------------------- | --------------------------------------- | --------------------------------------- | -------------------------------------- | ------------------------------------------- | ------------------------------------- |
+| Option menu surface | `option-menu-surface` + `dd-item`       | BUG(menu-theme-light-unverified)        | BUG(menu-theme-dark-unverified)        | BUG(menu-theme-sandstone-unverified)        | BUG(menu-kbd-spec-failures-open)      |
+| Map context menus   | map/radius/marker context menus         | TODO                                    | TODO                                   | TODO                                        | TODO                                  |
 | Detail context menu | image detail overflow menu              | BUG(detail-menu-theme-light-unverified) | BUG(detail-menu-theme-dark-unverified) | BUG(detail-menu-theme-sandstone-unverified) | BUG(detail-menu-kbd-unverified)       |
-| Toolbar controls    | workspace toolbar dropdown triggers     | BUG(toolbar-theme-light-unverified)   | BUG(toolbar-theme-dark-unverified)   | BUG(toolbar-theme-sandstone-unverified)   | BUG(toolbar-kbd-unverified)           |
-| Segmented controls  | `ui-segmented` + `app-segmented-switch` | BUG(segmented-theme-light-unverified) | BUG(segmented-theme-dark-unverified) | BUG(segmented-theme-sandstone-unverified) | BUG(segmented-kbd-spec-failures-open) |
-| Toggle rows         | `ui-toggle-row` + `ui-toggle-switch`    | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
-| Select controls     | `ui-select-control`                     | BUG(select-theme-light-unverified)    | BUG(select-theme-dark-unverified)    | BUG(select-theme-sandstone-unverified)    | BUG(select-kbd-unverified)            |
-| Dialog shell        | confirm/input/select shared dialogs     | BUG(dialog-theme-light-unverified)    | BUG(dialog-theme-dark-unverified)    | BUG(dialog-theme-sandstone-unverified)    | BUG(dialog-kbd-unverified)            |
+| Toolbar controls    | workspace toolbar dropdown triggers     | BUG(toolbar-theme-light-unverified)     | BUG(toolbar-theme-dark-unverified)     | BUG(toolbar-theme-sandstone-unverified)     | BUG(toolbar-kbd-unverified)           |
+| Segmented controls  | `ui-segmented` + `app-segmented-switch` | BUG(segmented-theme-light-unverified)   | BUG(segmented-theme-dark-unverified)   | BUG(segmented-theme-sandstone-unverified)   | BUG(segmented-kbd-spec-failures-open) |
+| Toggle rows         | `ui-toggle-row` + `ui-toggle-switch`    | TODO                                    | TODO                                   | TODO                                        | TODO                                  |
+| Select controls     | `ui-select-control`                     | BUG(select-theme-light-unverified)      | BUG(select-theme-dark-unverified)      | BUG(select-theme-sandstone-unverified)      | BUG(select-kbd-unverified)            |
+| Dialog shell        | confirm/input/select shared dialogs     | BUG(dialog-theme-light-unverified)      | BUG(dialog-theme-dark-unverified)      | BUG(dialog-theme-sandstone-unverified)      | BUG(dialog-kbd-unverified)            |
 
 ## Keyboard Smoke Checks
 
