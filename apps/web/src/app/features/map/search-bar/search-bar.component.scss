@@ -1,5 +1,5 @@
 :host {
-  --search-bar-safe-inline: max(var(--container-inset), calc(3rem + var(--spacing-4)));
+  --search-bar-safe-inline: max(var(--container-inset), calc(10.5rem + var(--spacing-4)));
   --search-bar-viewport-inset: var(--container-inset);
 
   position: absolute;

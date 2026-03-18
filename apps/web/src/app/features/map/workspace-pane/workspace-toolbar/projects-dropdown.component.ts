@@ -1,6 +1,6 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { SupabaseService } from '../../../../core/supabase.service';
+import { ProjectsService } from '../../../../core/projects/projects.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
 
@@ -53,7 +53,7 @@ interface Project {
 })
 export class ProjectsDropdownComponent {
   private readonly i18nService = inject(I18nService);
-  private readonly supabase = inject(SupabaseService);
+  private readonly projectsService = inject(ProjectsService);
   private readonly viewService = inject(WorkspaceViewService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -109,13 +109,12 @@ export class ProjectsDropdownComponent {
   }
 
   private async loadProjects(): Promise<void> {
-    const { data, error } = await this.supabase.client.from('projects').select('id, name');
-    if (error || !data) return;
+    const projects = await this.projectsService.loadProjects();
     this.projects.set(
-      data.map((p: { id: string; name: string }) => ({
-        id: p.id,
-        name: p.name,
-        imageCount: 0,
+      projects.map((project) => ({
+        id: project.id,
+        name: project.name,
+        imageCount: project.totalImageCount,
       })),
     );
   }

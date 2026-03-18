@@ -51,7 +51,7 @@ import {
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
-type PendingProjectAction = 'archive' | 'delete' | null;
+type PendingProjectAction = 'archive' | 'restore' | 'delete' | null;
 
 interface ProjectGroupingOptionDef {
   id: string;
@@ -580,7 +580,7 @@ export class ProjectsPageComponent {
 
   projectDangerActionLabel(status: 'active' | 'archived'): string {
     return status === 'archived'
-      ? this.t('projects.page.action.deleteProject', 'Delete project')
+      ? this.t('projects.page.action.restoreProject', 'Restore project')
       : this.t('projects.page.action.archiveProject', 'Archive project');
   }
 
@@ -824,7 +824,7 @@ export class ProjectsPageComponent {
       return;
     }
 
-    this.pendingProjectAction.set(project.status === 'archived' ? 'delete' : 'archive');
+    this.pendingProjectAction.set(project.status === 'archived' ? 'restore' : 'archive');
     this.pendingProjectId.set(projectId);
     this.closeToolbarDropdown();
     this.coloringProjectId.set(null);
@@ -886,6 +886,40 @@ export class ProjectsPageComponent {
         });
       }
 
+      if (action === 'restore') {
+        const persisted = await this.projectsService.restoreProject(projectId);
+        if (!persisted) {
+          this.toastService.show({
+            message: this.t(
+              'projects.page.toast.restoreError',
+              'Could not restore project. Please try again.',
+            ),
+            type: 'error',
+            dedupe: true,
+          });
+          return;
+        }
+
+        const restoredAt = new Date().toISOString();
+        this.projects.update((all) =>
+          all.map((entry) =>
+            entry.id === projectId
+              ? {
+                  ...entry,
+                  archivedAt: null,
+                  status: 'active',
+                  updatedAt: restoredAt,
+                }
+              : entry,
+          ),
+        );
+
+        this.toastService.show({
+          message: this.t('projects.page.toast.restoreSuccess', 'Project restored'),
+          type: 'success',
+        });
+      }
+
       if (action === 'delete') {
         if (project.status !== 'archived') {
           return;
@@ -928,6 +962,10 @@ export class ProjectsPageComponent {
       return this.t('projects.page.pending.title.deleteArchived', 'Delete archived project?');
     }
 
+    if (this.pendingProjectAction() === 'restore') {
+      return this.t('projects.page.pending.title.restore', 'Restore project?');
+    }
+
     return this.t('projects.page.pending.title.archive', 'Archive project?');
   }
 
@@ -942,6 +980,13 @@ export class ProjectsPageComponent {
       ).replace('{name}', name);
     }
 
+    if (this.pendingProjectAction() === 'restore') {
+      return this.t(
+        'projects.page.pending.message.restore',
+        '"{name}" will move back to Active and reopen normal project workflows.',
+      ).replace('{name}', name);
+    }
+
     return this.t(
       'projects.page.pending.message.archive',
       '"{name}" will move to Archived and stay visible for all users in your organization.',
@@ -949,9 +994,15 @@ export class ProjectsPageComponent {
   }
 
   pendingActionConfirmLabel(): string {
-    return this.pendingProjectAction() === 'delete'
-      ? this.t('projects.page.pending.confirm.delete', 'Delete now')
-      : this.t('projects.page.pending.confirm.archive', 'Archive now');
+    if (this.pendingProjectAction() === 'delete') {
+      return this.t('projects.page.pending.confirm.delete', 'Delete now');
+    }
+
+    if (this.pendingProjectAction() === 'restore') {
+      return this.t('projects.page.pending.confirm.restore', 'Restore now');
+    }
+
+    return this.t('projects.page.pending.confirm.archive', 'Archive now');
   }
 
   isDeletePending(): boolean {

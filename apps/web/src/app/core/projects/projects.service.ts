@@ -273,6 +273,22 @@ export class ProjectsService {
     return ok;
   }
 
+  async restoreProject(projectId: string): Promise<boolean> {
+    const preferred = await this.supabase.client
+      .from('projects')
+      .update({ archived_at: null, updated_at: new Date().toISOString() })
+      .eq('id', projectId)
+      .select('id');
+
+    const ok = !preferred.error && Array.isArray(preferred.data) && preferred.data.length > 0;
+    if (ok) {
+      this.invalidateProjectsReadCaches();
+      this.invalidateProjectWorkspaceCache(projectId);
+    }
+
+    return ok;
+  }
+
   async deleteProject(projectId: string): Promise<boolean> {
     const { data, error } = await this.supabase.client
       .from('projects')

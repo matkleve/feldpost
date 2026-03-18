@@ -17642,6 +17642,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.action.restoreProject', 'Restore project', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Restore project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.restoreProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt wiederherstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.restoreProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristina progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.action.restoreProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'projects.page.action.deleteProject', 'Delete project', 'en', 'apps/web/src/app/features/projects/projects-page.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -17890,6 +17921,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.restoreError', 'Could not restore project. Please try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not restore project. Please try again.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.restoreError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt konnte nicht wiederhergestellt werden. Bitte erneut versuchen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.restoreError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile ripristinare il progetto. Riprova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.restoreError'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.toast.restoreSuccess', 'Project restored', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Project restored', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.restoreSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt wiederhergestellt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.restoreSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetto ripristinato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.toast.restoreSuccess'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'projects.page.toast.deleteError', 'Could not delete archived project. Check permissions or refresh and try again.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -17978,6 +18071,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Eliminare il progetto archiviato?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.title.deleteArchived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.title.restore', 'Restore project?', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Restore project?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt wiederherstellen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristinare il progetto?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.title.restore'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

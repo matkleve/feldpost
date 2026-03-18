@@ -241,13 +241,14 @@
                             </button>
                             <button
                               type="button"
-                              class="icon-btn-ghost icon-btn-ghost--danger project-row__action"
+                              class="icon-btn-ghost project-row__action"
+                              [class.icon-btn-ghost--danger]="project.status !== 'archived'"
                               [attr.aria-label]="projectDangerActionLabel(project.status)"
                               [attr.title]="projectDangerActionLabel(project.status)"
                               (click)="$event.stopPropagation(); requestDangerAction(project.id)"
                             >
                               <span class="material-icons" aria-hidden="true">
-                                {{ project.status === 'archived' ? 'delete' : 'archive' }}
+                                {{ project.status === 'archived' ? 'unarchive' : 'archive' }}
                               </span>
                             </button>
                           </div>
@@ -352,13 +353,14 @@
                             </button>
                             <button
                               type="button"
-                              class="icon-btn-ghost icon-btn-ghost--danger projects-thumbnail-card__action"
+                              class="icon-btn-ghost projects-thumbnail-card__action"
+                              [class.icon-btn-ghost--danger]="project.status !== 'archived'"
                               [attr.aria-label]="projectDangerActionLabel(project.status)"
                               [attr.title]="projectDangerActionLabel(project.status)"
                               (click)="$event.stopPropagation(); requestDangerAction(project.id)"
                             >
                               <span class="material-icons" aria-hidden="true">
-                                {{ project.status === 'archived' ? 'delete' : 'archive' }}
+                                {{ project.status === 'archived' ? 'unarchive' : 'archive' }}
                               </span>
                             </button>
                           </div>

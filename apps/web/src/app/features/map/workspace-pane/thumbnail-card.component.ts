@@ -179,7 +179,7 @@ export class ThumbnailCardComponent {
     event.stopPropagation();
     this.selectionToggled.emit({
       imageId: this.image().id,
-      additive: !!(event.ctrlKey || event.metaKey),
+      additive: true,
     });
   }
 

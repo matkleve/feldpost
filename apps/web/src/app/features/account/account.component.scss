@@ -4,11 +4,13 @@
 }
 
 .account-page {
+  width: 100%;
   max-width: 40rem;
   margin: 0 auto;
   padding: var(--spacing-4);
   display: grid;
   gap: var(--spacing-3);
+  min-width: 0;
 }
 
 .account-page__state {
@@ -22,6 +24,8 @@
 .account-card {
   --ui-container-gap: var(--spacing-3);
 
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--color-border);
   background: var(--color-bg-elevated);
 }
@@ -55,6 +59,7 @@
 }
 
 .account-card__identity-copy h1 {
+  min-width: 0;
   font-size: 1.1rem;
   color: var(--color-text-primary);
 }
@@ -149,6 +154,8 @@
 }
 
 .account-field input {
+  width: 100%;
+  min-width: 0;
   min-height: 2.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--container-radius-control);

@@ -14,6 +14,7 @@ const projectsServiceMock = {
   createDraftProject: vi.fn(),
   renameProject: vi.fn(),
   archiveProject: vi.fn(),
+  restoreProject: vi.fn(),
   deleteProject: vi.fn(),
   setProjectColor: vi.fn(),
   loadProjectWorkspaceImages: vi.fn(),
@@ -189,8 +190,8 @@ describe('ProjectsPageComponent', () => {
     });
   });
 
-  it('deletes archived project via modal confirm flow', async () => {
-    projectsServiceMock.deleteProject.mockResolvedValue(true);
+  it('restores archived project via modal confirm flow', async () => {
+    projectsServiceMock.restoreProject.mockResolvedValue(true);
     component.projects.set([
       {
         id: 'project-archived',
@@ -213,16 +214,16 @@ describe('ProjectsPageComponent', () => {
     component.requestDangerAction('project-archived');
     await component.confirmPendingAction();
 
-    expect(projectsServiceMock.deleteProject).toHaveBeenCalledWith('project-archived');
-    expect(component.projects()).toHaveLength(0);
+    expect(projectsServiceMock.restoreProject).toHaveBeenCalledWith('project-archived');
+    expect(component.projects()[0]?.status).toBe('active');
     expect(component.hasPendingAction()).toBe(false);
     expect(toastServiceMock.show).toHaveBeenCalledWith({
-      message: 'Archived project deleted',
+      message: 'Project restored',
       type: 'success',
     });
   });
 
-  it('opens delete action for archived project', () => {
+  it('opens restore action for archived project', () => {
     component.projects.set([
       {
         id: 'project-archived',
@@ -244,7 +245,7 @@ describe('ProjectsPageComponent', () => {
 
     component.requestDangerAction('project-archived');
 
-    expect(component.isDeletePending()).toBe(true);
+    expect(component.pendingActionConfirmLabel()).toBe('Restore now');
   });
 
   it('creates a draft project, opens workspace, and starts rename mode', async () => {

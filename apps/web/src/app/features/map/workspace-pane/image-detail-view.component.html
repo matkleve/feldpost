@@ -1,20 +1,37 @@
 <!-- ImageDetailViewComponent - full detail view coordinator. -->
 
-@if (loading()) {
-  <div
-    class="detail-loading"
-    role="status"
-    [attr.aria-label]="t('workspace.imageDetail.loading.aria', 'Loading media details')"
-  >
-    <span class="detail-loading__spinner" aria-hidden="true"></span>
-    <span class="detail-loading__text">{{ t('workspace.imageDetail.loading.text', 'Loading...') }}</span>
-  </div>
-}
-
 @if (error() && !loading()) {
   <div class="detail-error" role="alert">
     <span class="material-icons" aria-hidden="true">error_outline</span>
     <span>{{ error() }}</span>
+  </div>
+}
+
+@if (loading() && !error()) {
+  <div class="detail-main-column detail-main-column--loading" aria-hidden="true">
+    <div class="detail-header detail-header--loading">
+      <span class="detail-loading-placeholder detail-loading-placeholder--icon"></span>
+      <div class="detail-loading-placeholder-group">
+        <span class="detail-loading-placeholder detail-loading-placeholder--title"></span>
+      </div>
+      <span class="detail-loading-placeholder detail-loading-placeholder--chip"></span>
+      <span class="detail-loading-placeholder detail-loading-placeholder--icon"></span>
+    </div>
+
+    <div class="detail-scroll">
+      <div class="detail-content">
+        <div class="detail-image-placeholder detail-image-placeholder--loading">
+          <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
+        </div>
+
+        <div class="detail-section detail-section--loading">
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+          <span class="detail-loading-placeholder detail-loading-placeholder--row"></span>
+        </div>
+      </div>
+    </div>
   </div>
 }
 
