@@ -183,6 +183,18 @@
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 }
+
+.settings-overlay__segmented {
+  --segmented-host-width: 100%;
+  --segmented-group-width: 100%;
+  --segmented-button-flex: 1 1 0;
+}
+
+.settings-overlay__segmented--theme {
+  --segmented-button-padding-inline: 0.75rem;
+  --segmented-button-padding-inline-mobile: 0.6rem;
+}
+
 .settings-overlay__toggle-row .ui-item-label {
   display: grid;
   gap: var(--spacing-1);

@@ -28,7 +28,7 @@ export interface GroupingProperty {
             }}</span>
             @if (activeGroupings().length > 0) {
               <button
-                class="dd-reset-btn"
+                class="dd-reset-btn icon-btn-ghost"
                 (click)="clearGroupings()"
                 [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
               >

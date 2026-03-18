@@ -79,65 +79,27 @@
                 <span class="ui-field-label">{{
                   t('settings.overlay.general.language.label', 'Language')
                 }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
+                <app-segmented-switch
+                  class="settings-overlay__segmented"
                   data-i18n-skip
-                  [attr.aria-label]="t('settings.overlay.general.language.label', 'Language')"
-                >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().language === 'en'"
-                    (click)="setLanguage('en')"
-                  >
-                    English
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().language === 'de'"
-                    (click)="setLanguage('de')"
-                  >
-                    Deutsch
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().language === 'it'"
-                    (click)="setLanguage('it')"
-                  >
-                    Italiano
-                  </button>
-                </div>
+                  [ariaLabel]="t('settings.overlay.general.language.label', 'Language')"
+                  [options]="languageOptions"
+                  [value]="settingsModel().language"
+                  (valueChange)="onLanguageValueChange($event)"
+                />
               </div>
 
               <div class="settings-overlay__field-row ui-field-row">
                 <span class="ui-field-label">{{
                   t('settings.overlay.general.density.label', 'Density')
                 }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  [attr.aria-label]="t('settings.overlay.general.density.label', 'Density')"
-                >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().density === 'compact'"
-                    (click)="setDensity('compact')"
-                  >
-                    {{ t('settings.overlay.general.density.option.compact', 'Compact') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().density === 'comfortable'"
-                    (click)="setDensity('comfortable')"
-                  >
-                    {{ t('settings.overlay.general.density.option.comfortable', 'Comfortable') }}
-                  </button>
-                </div>
+                <app-segmented-switch
+                  class="settings-overlay__segmented"
+                  [ariaLabel]="t('settings.overlay.general.density.label', 'Density')"
+                  [options]="densityOptions()"
+                  [value]="settingsModel().density"
+                  (valueChange)="onDensityValueChange($event)"
+                />
               </div>
             </section>
           }
@@ -159,44 +121,13 @@
                 <span class="ui-field-label">{{
                   t('settings.overlay.appearance.themeMode.label', 'Theme mode')
                 }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  [attr.aria-label]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
-                >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'light'"
-                    (click)="setThemeMode('light')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.light', 'Light') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'dark'"
-                    (click)="setThemeMode('dark')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.dark', 'Dark') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'system'"
-                    (click)="setThemeMode('system')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.system', 'System') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().themeMode === 'sandstone'"
-                    (click)="setThemeMode('sandstone')"
-                  >
-                    {{ t('settings.overlay.appearance.themeMode.option.sandstone', 'Sandstone') }}
-                  </button>
-                </div>
+                <app-segmented-switch
+                  class="settings-overlay__segmented settings-overlay__segmented--theme"
+                  [ariaLabel]="t('settings.overlay.appearance.themeMode.label', 'Theme mode')"
+                  [options]="themeModeOptions()"
+                  [value]="settingsModel().themeMode"
+                  (valueChange)="onThemeModeValueChange($event)"
+                />
               </div>
             </section>
           }
@@ -336,28 +267,13 @@
                 <span class="ui-field-label">{{
                   t('settings.overlay.map.markerMotion.label', 'Marker motion')
                 }}</span>
-                <div
-                  class="settings-overlay__segmented ui-segmented"
-                  role="group"
-                  [attr.aria-label]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
-                >
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().markerMotion === 'off'"
-                    (click)="setMarkerMotion('off')"
-                  >
-                    {{ t('settings.overlay.map.markerMotion.option.off', 'Off') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="ui-segmented__button"
-                    [class.ui-segmented__button--active]="settingsModel().markerMotion === 'smooth'"
-                    (click)="setMarkerMotion('smooth')"
-                  >
-                    {{ t('settings.overlay.map.markerMotion.option.smooth', 'Smooth') }}
-                  </button>
-                </div>
+                <app-segmented-switch
+                  class="settings-overlay__segmented"
+                  [ariaLabel]="t('settings.overlay.map.markerMotion.label', 'Marker motion')"
+                  [options]="markerMotionOptions()"
+                  [value]="settingsModel().markerMotion"
+                  (valueChange)="onMarkerMotionValueChange($event)"
+                />
               </div>
             </section>
           }

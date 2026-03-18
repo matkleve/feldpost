@@ -121,10 +121,10 @@ This overhaul should be executed as a system migration, not as isolated componen
 ### Phase Status Snapshot (Primitives-Focused)
 
 1. Phase 1: Freeze the Design-System Contract — `95%`
-2. Phase 2: Harden the Primitive Set — `86%`
-3. Phase 3: Migrate High-Visibility Surfaces — `79%`
-4. Phase 4: Migrate Composition Surfaces — `58%`
-5. Phase 5: Verify, Promote, and Enforce — `42%`
+2. Phase 2: Harden the Primitive Set — `94%`
+3. Phase 3: Migrate High-Visibility Surfaces — `81%`
+4. Phase 4: Migrate Composition Surfaces — `69%`
+5. Phase 5: Verify, Promote, and Enforce — `46%`
 
 Status date: 2026-03-18
 
@@ -160,7 +160,7 @@ Remaining:
 
 ### Phase 2: Harden the Primitive Set
 
-Progress: `86%`
+Progress: `94%`
 
 Goal: make the shared primitives good enough that features can adopt them without feature-local redesign.
 
@@ -192,6 +192,9 @@ Done:
 7. Segmented primitive exposes consumer-level layout variables (host/group width, button min-height/flex) so feature pages stop re-defining segmented button state/layout rules.
 8. Settings overlay close action now consumes the shared `icon-btn-ghost` primitive (feature-local hover/focus state styling removed).
 9. Account action markup now uses primitive-first button classes (`ui-button*`) without redundant feature wrapper class usage.
+10. Settings overlay segmented groups (language, density, theme mode, marker motion) now consume `app-segmented-switch` with typed option/value handlers.
+11. Shared select primitive now supports consumer-level sizing variables, and a shared `ui-input-control` primitive is available for consistent input behavior in compact contexts.
+12. Dropdown search/reset icon actions now consume the shared `icon-btn-ghost` primitive with dropdown-level size/color overrides, replacing duplicated local icon-action base styling.
 
 Remaining:
 
@@ -200,7 +203,7 @@ Remaining:
 
 ### Phase 3: Migrate High-Visibility Surfaces
 
-Progress: `79%`
+Progress: `81%`
 
 Goal: standardize the UI that users see most often.
 
@@ -227,6 +230,7 @@ Done:
 5. `/projects` labels use a robust fallback helper (`text(key, fallback)`) to avoid empty/vanishing strings.
 6. Map and Projects now share one segmented control primitive with aligned behavior.
 7. `/projects` mobile segmented layout now uses segmented primitive variables instead of local per-button selectors.
+8. Toolbar dropdown search/reset actions now share the same icon-ghost primitive baseline in standard/sort/grouping dropdown flows.
 
 Remaining:
 
@@ -236,7 +240,7 @@ Remaining:
 
 ### Phase 4: Migrate Composition Surfaces
 
-Progress: `58%`
+Progress: `69%`
 
 Goal: move larger feature flows onto the same primitives so themes and future redesigns scale.
 
@@ -258,8 +262,11 @@ Done:
 1. Settings/account/invite surfaces are partially migrated to shared section/field/action primitives.
 2. Local style duplication has been reduced in several high-use flows.
 3. Shared dialog actions (confirm/project-select/text-input) now consume `ui-button` variants instead of feature-local button visuals.
-4. Invite share actions now consume `icon-btn-ghost`, with local icon-button styles reduced to size/layout concerns.
-5. Settings overlay toggle rows now use the shared toggle-on state class only (redundant local state binding removed).
+4. Settings overlay section composition now uses shared segmented primitive consistently instead of local per-section segmented button markup.
+5. Invite share actions now consume `icon-btn-ghost`, with local icon-button styles reduced to size/layout concerns.
+6. Settings overlay toggle rows now use the shared toggle-on state class only (redundant local state binding removed).
+7. Projects filter dropdown now consumes shared `ui-select-control` and `ui-input-control` primitives with compact tokenized sizing, replacing duplicate local control-state styling.
+8. Dropdown control composition reduced duplicate action-button state styling by centralizing icon-action base behavior on `icon-btn-ghost`.
 
 Remaining:
 
@@ -268,7 +275,7 @@ Remaining:
 
 ### Phase 5: Verify, Promote, and Enforce
 
-Progress: `42%`
+Progress: `46%`
 
 Goal: turn the overhaul into a stable operating model.
 
@@ -291,6 +298,7 @@ Done:
 2. Initial focused test infrastructure blockers were reduced.
 3. Segmented-switch motion resource and source rationale were documented.
 4. Regression statuses were updated from pure harness blockers to mixed pass/fail evidence after focused runs.
+5. Regression matrix rows for toolbar controls and dialog shell were promoted from `TODO` to tracked `*-unverified` statuses.
 
 Remaining:
 

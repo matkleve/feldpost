@@ -46,7 +46,7 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   {{ conjunctionLabel(i, rule.conjunction) }}
                 </button>
                 <select
-                  class="filter-rule__select"
+                  class="filter-rule__select ui-select-control"
                   [value]="rule.property"
                   (change)="updateProperty(rule.id, $any($event.target).value)"
                 >
@@ -58,7 +58,7 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   }
                 </select>
                 <select
-                  class="filter-rule__select"
+                  class="filter-rule__select ui-select-control"
                   [value]="rule.operator"
                   (change)="updateOperator(rule.id, $any($event.target).value)"
                 >
@@ -70,7 +70,7 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   }
                 </select>
                 <input
-                  class="filter-rule__value"
+                  class="filter-rule__value ui-input-control"
                   [type]="getInputType(rule.property)"
                   [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
                   [value]="rule.value"

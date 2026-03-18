@@ -450,28 +450,21 @@ router-outlet + * {
   }
 }
 
-.dd-search__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--action-text-default);
-  cursor: pointer;
-  padding: 0;
+.dd-search__action,
+.dd-reset-btn {
+  --icon-btn-size: 1.75rem;
+  --icon-btn-icon-size: 1rem;
 
-  .material-icons {
-    font-size: 1rem;
-  }
+  flex-shrink: 0;
+  color: var(--action-text-default);
 
   &:hover {
     background: var(--action-bg-hover);
-    color: var(--menu-item-text);
   }
+}
+
+.dd-search__action:hover {
+  color: var(--menu-item-text);
 }
 
 .dd-items {
@@ -581,28 +574,8 @@ router-outlet + * {
   }
 }
 
-.dd-reset-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--action-text-default);
-  cursor: pointer;
-  transition: var(--interactive-transition-standard);
-
-  .material-icons {
-    font-size: 1rem;
-  }
-
-  &:hover {
-    background: var(--action-bg-hover);
-    color: var(--action-text-active);
-  }
+.dd-reset-btn:hover {
+  color: var(--action-text-active);
 }
 
 .dd-drag-handle {
@@ -827,13 +800,35 @@ router-outlet + * {
 }
 
 .ui-select-control {
-  min-height: 2.5rem;
-  border: 1.5px solid var(--field-border);
+  min-height: var(--ui-select-min-height, 2.5rem);
+  border: var(--ui-select-border, 1.5px solid var(--field-border));
   border-radius: var(--radius-md);
   background: var(--field-bg);
   color: var(--field-text);
-  padding: 0.5rem 0.75rem;
+  padding: var(--ui-select-padding, 0.5rem 0.75rem);
+  font-size: var(--ui-select-font-size, 0.875rem);
   transition: var(--interactive-transition-standard);
+
+  &:focus-visible {
+    border-color: var(--field-border-focus);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-input-control {
+  min-height: var(--ui-input-min-height, 2.5rem);
+  border: var(--ui-input-border, 1.5px solid var(--field-border));
+  border-radius: var(--radius-md);
+  background: var(--field-bg);
+  color: var(--field-text);
+  padding: var(--ui-input-padding, 0.5rem 0.75rem);
+  font-size: var(--ui-input-font-size, 0.875rem);
+  transition: var(--interactive-transition-standard);
+
+  &::placeholder {
+    color: var(--field-placeholder);
+  }
 
   &:focus-visible {
     border-color: var(--field-border-focus);

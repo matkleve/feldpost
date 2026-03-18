@@ -26,7 +26,7 @@ export type SortDropdownOption = {
       @if (searchTerm() || hasCustomSort()) {
         <button
           dropdown-search-action
-          class="dd-search__action"
+          class="dd-search__action icon-btn-ghost"
           type="button"
           (click)="onSearchActionClick()"
           [attr.aria-label]="searchActionAriaLabel()"

@@ -11,6 +11,10 @@ import {
 import { I18nService } from '../../core/i18n/i18n.service';
 import { LanguageCode } from '../../core/i18n/translation-catalog';
 import { SettingsPaneService } from '../../core/settings-pane.service';
+import {
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../shared/segmented-switch/segmented-switch.component';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 import { AccountComponent } from '../account/account.component';
 
@@ -53,7 +57,7 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
-  imports: [InviteManagementSectionComponent, AccountComponent],
+  imports: [SegmentedSwitchComponent, InviteManagementSectionComponent, AccountComponent],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -123,6 +127,53 @@ export class SettingsOverlayComponent {
         'settings.overlay.section.invites.subtitle',
         'Role-scoped QR and share links',
       ),
+    },
+  ]);
+
+  readonly languageOptions: ReadonlyArray<SegmentedSwitchOption> = [
+    { id: 'en', label: 'English' },
+    { id: 'de', label: 'Deutsch' },
+    { id: 'it', label: 'Italiano' },
+  ];
+
+  readonly densityOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+    {
+      id: 'compact',
+      label: this.t('settings.overlay.general.density.option.compact', 'Compact'),
+    },
+    {
+      id: 'comfortable',
+      label: this.t('settings.overlay.general.density.option.comfortable', 'Comfortable'),
+    },
+  ]);
+
+  readonly themeModeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+    {
+      id: 'light',
+      label: this.t('settings.overlay.appearance.themeMode.option.light', 'Light'),
+    },
+    {
+      id: 'dark',
+      label: this.t('settings.overlay.appearance.themeMode.option.dark', 'Dark'),
+    },
+    {
+      id: 'system',
+      label: this.t('settings.overlay.appearance.themeMode.option.system', 'System'),
+    },
+    {
+      id: 'sandstone',
+      label: this.t('settings.overlay.appearance.themeMode.option.sandstone', 'Sandstone'),
+    },
+  ]);
+
+  readonly markerMotionOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+    {
+      id: 'off',
+      label: this.t('settings.overlay.map.markerMotion.option.off', 'Off'),
+    },
+    {
+      id: 'smooth',
+      label: this.t('settings.overlay.map.markerMotion.option.smooth', 'Smooth'),
     },
   ]);
 
@@ -220,6 +271,30 @@ export class SettingsOverlayComponent {
   setLanguage(language: LanguageCode): void {
     this.settingsModel.update((model) => ({ ...model, language }));
     this.i18nService.setLanguage(language);
+  }
+
+  onLanguageValueChange(value: string | null): void {
+    if (value === 'en' || value === 'de' || value === 'it') {
+      this.setLanguage(value);
+    }
+  }
+
+  onDensityValueChange(value: string | null): void {
+    if (value === 'compact' || value === 'comfortable') {
+      this.setDensity(value);
+    }
+  }
+
+  onThemeModeValueChange(value: string | null): void {
+    if (value === 'light' || value === 'dark' || value === 'system' || value === 'sandstone') {
+      this.setThemeMode(value);
+    }
+  }
+
+  onMarkerMotionValueChange(value: string | null): void {
+    if (value === 'off' || value === 'smooth') {
+      this.setMarkerMotion(value);
+    }
   }
 
   setSearchBias(searchBias: SearchBias): void {

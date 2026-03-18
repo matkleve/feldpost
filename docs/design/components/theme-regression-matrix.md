@@ -23,11 +23,11 @@ Canonical policy references:
 | Option menu surface | `option-menu-surface` + `dd-item`       | BUG(menu-theme-light-unverified)      | BUG(menu-theme-dark-unverified)      | BUG(menu-theme-sandstone-unverified)      | BUG(menu-kbd-spec-failures-open)      |
 | Map context menus   | map/radius/marker context menus         | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
 | Detail context menu | image detail overflow menu              | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
-| Toolbar controls    | workspace toolbar dropdown triggers     | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Toolbar controls    | workspace toolbar dropdown triggers     | BUG(toolbar-theme-light-unverified)   | BUG(toolbar-theme-dark-unverified)   | BUG(toolbar-theme-sandstone-unverified)   | BUG(toolbar-kbd-unverified)           |
 | Segmented controls  | `ui-segmented` + `app-segmented-switch` | BUG(segmented-theme-light-unverified) | BUG(segmented-theme-dark-unverified) | BUG(segmented-theme-sandstone-unverified) | BUG(segmented-kbd-spec-failures-open) |
 | Toggle rows         | `ui-toggle-row` + `ui-toggle-switch`    | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
-| Select controls     | `ui-select-control`                     | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
-| Dialog shell        | confirm/input/select shared dialogs     | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Select controls     | `ui-select-control`                     | BUG(select-theme-light-unverified)    | BUG(select-theme-dark-unverified)    | BUG(select-theme-sandstone-unverified)    | BUG(select-kbd-unverified)            |
+| Dialog shell        | confirm/input/select shared dialogs     | BUG(dialog-theme-light-unverified)    | BUG(dialog-theme-dark-unverified)    | BUG(dialog-theme-sandstone-unverified)    | BUG(dialog-kbd-unverified)            |
 
 ## Keyboard Smoke Checks
 
@@ -51,6 +51,10 @@ Verification notes:
 - `npx ng test --watch=false --include src/app/features/map/map-shell/map-shell.component.spec.ts` is additionally blocked by unrelated workspace spec compile errors (e.g. `nav.component.spec.ts`, `settings-overlay.component.spec.ts`, `upload.service.spec.ts`).
 - Button/icon primitive parity pass (code-level) completed across `/projects`, settings overlay, and account surfaces: controls now consistently consume shared `ui-button`, `toolbar-btn`, and `icon-btn-ghost` classes with no remaining feature-local hover/focus overrides in those surfaces.
 - Account page cleanup removed redundant wrapper class usage so action buttons are now primitive-first (`ui-button*` only) in template markup.
+- Toolbar controls and shared dialog shell rows were promoted from `TODO` to `*-unverified` bug IDs to reflect completed code-level migration with pending manual light/dark/sandstone visual + keyboard smoke verification.
+- Settings overlay segmented controls now use shared `app-segmented-switch` for language, density, theme mode, and marker motion; matrix segmented row remains `*-unverified` pending manual multi-theme smoke.
+- Select/input control migration is now primitive-first in compact filter contexts (`ui-select-control` + `ui-input-control` with tokenized compact sizing); select row promoted from `TODO` to tracked `*-unverified` pending manual theme and keyboard smoke.
+- Dropdown icon search/reset actions now consume shared `icon-btn-ghost` across standard/sort/grouping dropdowns with only dropdown-level size/color overrides left local.
 - Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.
 
 ## Update Rule

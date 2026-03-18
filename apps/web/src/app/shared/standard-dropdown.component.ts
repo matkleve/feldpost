@@ -17,7 +17,7 @@ import { Component, input, output } from '@angular/core';
 
           @if (showDefaultClearAction() && searchTerm()) {
             <button
-              class="dd-search__action"
+              class="dd-search__action icon-btn-ghost"
               type="button"
               [attr.aria-label]="clearSearchAriaLabel()"
               (click)="clearRequested.emit()"
