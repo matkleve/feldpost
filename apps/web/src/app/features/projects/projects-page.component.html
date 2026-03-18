@@ -85,6 +85,8 @@
           </button>
         </div>
 
+        <span class="projects-toolbar__spacer" aria-hidden="true"></span>
+
         <app-segmented-switch
           class="projects-status-segment"
           [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
@@ -93,10 +95,12 @@
           (valueChange)="onStatusFilterValueChange($event)"
         />
 
-        <app-projects-view-toggle
-          [viewMode]="viewMode()"
-          (viewModeChange)="onViewModeChange($event)"
-        />
+        <div class="projects-toolbar__view-toggle">
+          <app-projects-view-toggle
+            [viewMode]="viewMode()"
+            (viewModeChange)="onViewModeChange($event)"
+          />
+        </div>
       </section>
 
       @if (activeToolbarDropdown()) {
