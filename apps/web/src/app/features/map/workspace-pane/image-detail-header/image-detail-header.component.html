@@ -38,24 +38,27 @@
   >
 
   <button
+    #contextMenuTrigger
     class="detail-actions-btn icon-btn-ghost"
     type="button"
     [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
     [attr.title]="t('workspace.imageDetail.action.more.title', 'More actions')"
     aria-haspopup="true"
     [attr.aria-expanded]="showContextMenu()"
-    (click)="contextMenuToggled.emit()"
+    (click)="onContextMenuToggleRequested()"
   >
     <span class="material-icons" aria-hidden="true">more_vert</span>
   </button>
 
   @if (showContextMenu()) {
     <div
+      #contextMenuPanel
       class="detail-context-menu option-menu-surface dd-items"
       role="menu"
       appClickOutside
-      (clickOutside)="contextMenuClosed.emit()"
-      (keydown.escape)="contextMenuClosed.emit()"
+      (clickOutside)="onContextMenuCloseRequested()"
+      (keydown.escape)="onContextMenuCloseRequested()"
+      (keydown)="onContextMenuKeydown($event)"
     >
       <button
         class="dd-item dd-item--danger"
@@ -83,7 +86,7 @@
     <div
       class="detail-context-menu-overlay"
       aria-hidden="true"
-      (click)="contextMenuClosed.emit()"
+      (click)="onContextMenuCloseRequested()"
     ></div>
   }
 </div>

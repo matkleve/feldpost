@@ -203,7 +203,7 @@ Remaining:
 
 ### Phase 3: Migrate High-Visibility Surfaces
 
-Progress: `83%`
+Progress: `84%`
 
 Goal: standardize the UI that users see most often.
 
@@ -233,6 +233,7 @@ Done:
 8. Toolbar dropdown search/reset actions now share the same icon-ghost primitive baseline in standard/sort/grouping dropdown flows.
 9. Image-detail header action buttons (back/more) now consume `icon-btn-ghost` with component-level size overrides instead of local ghost button base rules.
 10. Detail inline action rails now consume `icon-btn-ghost` across location/metadata interaction rows for consistent icon action behavior in high-use detail workflows.
+11. Map, radius, and marker context menus now use the shared dropdown shell/frame plus shared option-menu row structure instead of free-standing menu containers.
 
 Remaining:
 
@@ -279,7 +280,7 @@ Remaining:
 
 ### Phase 5: Verify, Promote, and Enforce
 
-Progress: `46%`
+Progress: `47%`
 
 Goal: turn the overhaul into a stable operating model.
 
@@ -303,6 +304,7 @@ Done:
 3. Segmented-switch motion resource and source rationale were documented.
 4. Regression statuses were updated from pure harness blockers to mixed pass/fail evidence after focused runs.
 5. Regression matrix rows for toolbar controls and dialog shell were promoted from `TODO` to tracked `*-unverified` statuses.
+6. Regression matrix row for map context menus was promoted from `TODO` to tracked `*-unverified` status after code-level menu-shell consolidation.
 
 Remaining:
 

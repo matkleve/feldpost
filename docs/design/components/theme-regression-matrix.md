@@ -21,7 +21,7 @@ Canonical policy references:
 | Surface             | Variant                                 | Light                                   | Dark                                   | Sandstone                                   | Keyboard/Focus                        |
 | ------------------- | --------------------------------------- | --------------------------------------- | -------------------------------------- | ------------------------------------------- | ------------------------------------- |
 | Option menu surface | `option-menu-surface` + `dd-item`       | BUG(menu-theme-light-unverified)        | BUG(menu-theme-dark-unverified)        | BUG(menu-theme-sandstone-unverified)        | BUG(menu-kbd-spec-failures-open)      |
-| Map context menus   | map/radius/marker context menus         | TODO                                    | TODO                                   | TODO                                        | TODO                                  |
+| Map context menus   | map/radius/marker context menus         | BUG(map-menu-theme-light-unverified)    | BUG(map-menu-theme-dark-unverified)    | BUG(map-menu-theme-sandstone-unverified)    | BUG(map-menu-kbd-unverified)          |
 | Detail context menu | image detail overflow menu              | BUG(detail-menu-theme-light-unverified) | BUG(detail-menu-theme-dark-unverified) | BUG(detail-menu-theme-sandstone-unverified) | BUG(detail-menu-kbd-unverified)       |
 | Toolbar controls    | workspace toolbar dropdown triggers     | BUG(toolbar-theme-light-unverified)     | BUG(toolbar-theme-dark-unverified)     | BUG(toolbar-theme-sandstone-unverified)     | BUG(toolbar-kbd-unverified)           |
 | Segmented controls  | `ui-segmented` + `app-segmented-switch` | BUG(segmented-theme-light-unverified)   | BUG(segmented-theme-dark-unverified)   | BUG(segmented-theme-sandstone-unverified)   | BUG(segmented-kbd-spec-failures-open) |
@@ -56,7 +56,10 @@ Verification notes:
 - Select/input control migration is now primitive-first in compact filter contexts (`ui-select-control` + `ui-input-control` with tokenized compact sizing); select row promoted from `TODO` to tracked `*-unverified` pending manual theme and keyboard smoke.
 - Dropdown icon search/reset actions now consume shared `icon-btn-ghost` across standard/sort/grouping dropdowns with only dropdown-level size/color overrides left local.
 - Image detail header action buttons (back/more) now consume shared `icon-btn-ghost`, and detail context menu row is promoted from `TODO` to tracked `*-unverified` pending manual multi-theme + keyboard checks.
+- Detail header context menu now also returns focus to its trigger on close and supports `ArrowUp/ArrowDown/Home/End` keyboard navigation between menu actions; final row promotion still depends on manual browser smoke.
 - Detail inline action rails and metadata-row action controls now also consume shared `icon-btn-ghost`; remaining local styles in those areas are limited to positioning/visibility behavior.
+- Map, radius, and marker context menus in `map-shell` now use the shared dropdown shell/frame plus shared option-menu row structure; the map context row is promoted from `TODO` to tracked `*-unverified` pending manual theme and keyboard smoke.
+- Map context menus additionally gained code-level focus return to the map container on close plus `ArrowUp/ArrowDown/Home/End` navigation within menu items; final matrix promotion still depends on manual browser smoke.
 - Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.
 
 ## Update Rule

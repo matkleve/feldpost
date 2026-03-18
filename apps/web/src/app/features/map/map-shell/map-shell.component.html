@@ -63,18 +63,25 @@
     class="map-container"
     [class.map-container--placing]="placementActive() || searchPlacementActive()"
     [class.map-container--analog-material]="analogMaterialActive()"
+    tabindex="-1"
     aria-label="Site map"
   ></div>
 
   @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
-    <div
-      class="map-context-menu option-menu-surface"
-      [style.left.px]="mapMenuPos.x"
-      [style.top.px]="mapMenuPos.y"
-      role="menu"
-      aria-label="Map context menu"
+    <app-dropdown-shell
+      class="map-context-menu"
+      [top]="mapMenuPos.y"
+      [left]="mapMenuPos.x"
+      [minWidth]="224"
+      panelClass="map-context-menu option-menu-surface"
+      (closeRequested)="onMapMenuCloseRequested()"
     >
-      <div class="dd-items">
+      <div
+        class="dd-items"
+        role="menu"
+        aria-label="Map context menu"
+        (keydown)="onMapMenuKeydown($event)"
+      >
         <button
           class="dd-item"
           type="button"
@@ -116,20 +123,26 @@
           <span class="dd-item__label">In Google Maps oeffnen</span>
         </button>
       </div>
-    </div>
+    </app-dropdown-shell>
   }
 
   @if (radiusContextMenuOpen() && radiusContextMenuPosition(); as radiusMenuPos) {
-    <div
-      class="map-context-menu option-menu-surface"
-      [style.left.px]="radiusMenuPos.x"
-      [style.top.px]="radiusMenuPos.y"
-      role="menu"
-      aria-label="Radius context menu"
+    <app-dropdown-shell
+      class="map-context-menu"
+      [top]="radiusMenuPos.y"
+      [left]="radiusMenuPos.x"
+      [minWidth]="224"
+      panelClass="map-context-menu option-menu-surface"
+      (closeRequested)="onMapMenuCloseRequested()"
     >
       <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
 
-      <div class="dd-items">
+      <div
+        class="dd-items"
+        role="menu"
+        aria-label="Radius context menu"
+        (keydown)="onMapMenuKeydown($event)"
+      >
         <button
           class="dd-item"
           type="button"
@@ -149,17 +162,18 @@
           <span class="dd-item__label">Zu Projekt zuweisen...</span>
         </button>
       </div>
-    </div>
+    </app-dropdown-shell>
   }
 
   @if (markerContextMenuOpen() && markerContextMenuPosition(); as markerMenuPos) {
     @if (markerContextMenuPayload(); as markerMenu) {
-      <div
-        class="map-context-menu option-menu-surface"
-        [style.left.px]="markerMenuPos.x"
-        [style.top.px]="markerMenuPos.y"
-        role="menu"
-        aria-label="Marker context menu"
+      <app-dropdown-shell
+        class="map-context-menu"
+        [top]="markerMenuPos.y"
+        [left]="markerMenuPos.x"
+        [minWidth]="224"
+        panelClass="map-context-menu option-menu-surface"
+        (closeRequested)="onMapMenuCloseRequested()"
       >
         <div class="map-context-menu__header option-menu-header">
           @if (markerContextIsSingle) {
@@ -169,7 +183,12 @@
           }
         </div>
 
-        <div class="dd-items">
+        <div
+          class="dd-items"
+          role="menu"
+          aria-label="Marker context menu"
+          (keydown)="onMapMenuKeydown($event)"
+        >
           <button
             class="dd-item"
             type="button"
@@ -245,7 +264,7 @@
             </button>
           }
         </div>
-      </div>
+      </app-dropdown-shell>
     }
   }
 

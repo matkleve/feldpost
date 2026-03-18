@@ -56,6 +56,7 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../../shared/segmented-switch/segmented-switch.component';
+import { DropdownShellComponent } from '../../../shared/dropdown-shell.component';
 import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
@@ -146,13 +147,14 @@ const HISTORIC_LABEL_PANE = 'historic-label';
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
     SegmentedSwitchComponent,
+    DropdownShellComponent,
   ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',
   providers: [MapShellState],
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
-    '(document:keydown.escape)': 'closeContextMenus()',
+    '(document:keydown.escape)': 'onMapMenuCloseRequested()',
   },
 })
 export class MapShellComponent implements OnDestroy {
@@ -673,6 +675,38 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuOpen.set(false);
     this.radiusContextMenuOpen.set(false);
     this.markerContextMenuOpen.set(false);
+  }
+
+  onMapMenuCloseRequested(): void {
+    this.closeContextMenus();
+    this.focusMapContainer();
+  }
+
+  onMapMenuKeydown(event: KeyboardEvent): void {
+    if (!this.isMapMenuNavigationKey(event.key)) {
+      return;
+    }
+
+    const container = event.currentTarget as HTMLElement | null;
+    if (!container) {
+      return;
+    }
+
+    const focusableItems = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('.dd-item:not(:disabled)'),
+    );
+
+    if (focusableItems.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (this.focusBoundaryMapMenuItem(event.key, focusableItems)) {
+      return;
+    }
+
+    this.focusAdjacentMapMenuItem(event.key, focusableItems);
   }
 
   onMapContextCreateMarkerHere(): void {
@@ -3189,6 +3223,7 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
     this.mapContextMenuPosition.set(position);
     this.mapContextMenuOpen.set(true);
+    this.focusFirstOpenMapMenuItem();
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
@@ -3199,6 +3234,7 @@ export class MapShellComponent implements OnDestroy {
     this.radiusContextMenuCoords.set({ lat: latlng.lat, lng: latlng.lng });
     this.radiusContextMenuPosition.set(position);
     this.radiusContextMenuOpen.set(true);
+    this.focusFirstOpenMapMenuItem();
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
   }
 
@@ -3223,7 +3259,51 @@ export class MapShellComponent implements OnDestroy {
       sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
     });
     this.markerContextMenuOpen.set(true);
+    this.focusFirstOpenMapMenuItem();
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;
+  }
+
+  private focusMapContainer(): void {
+    const mapContainer = this.mapContainerRef()?.nativeElement;
+    mapContainer?.focus();
+  }
+
+  private focusFirstOpenMapMenuItem(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      const firstItem = document.querySelector<HTMLButtonElement>('.map-context-menu .dd-item');
+      firstItem?.focus();
+    });
+  }
+
+  private isMapMenuNavigationKey(key: string): boolean {
+    return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End';
+  }
+
+  private focusBoundaryMapMenuItem(key: string, focusableItems: HTMLButtonElement[]): boolean {
+    if (key === 'Home') {
+      focusableItems[0]?.focus();
+      return true;
+    }
+
+    if (key === 'End') {
+      focusableItems[focusableItems.length - 1]?.focus();
+      return true;
+    }
+
+    return false;
+  }
+
+  private focusAdjacentMapMenuItem(key: string, focusableItems: HTMLButtonElement[]): void {
+    const activeIndex = focusableItems.findIndex((item) => item === document.activeElement);
+    const fallbackIndex = key === 'ArrowDown' ? -1 : 0;
+    const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
+    const delta = key === 'ArrowDown' ? 1 : -1;
+    const nextIndex = (currentIndex + delta + focusableItems.length) % focusableItems.length;
+    focusableItems[nextIndex]?.focus();
   }
 
   private clearActiveRadiusSelection(): void {
