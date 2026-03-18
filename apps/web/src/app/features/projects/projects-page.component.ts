@@ -264,6 +264,10 @@ export class ProjectsPageComponent {
   private readonly projectSortOptionIds = new Set(PROJECT_SORT_OPTIONS.map((o) => o.id));
   private readonly projectFilterOptionById = new Map(PROJECT_FILTER_OPTIONS.map((o) => [o.id, o]));
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly text = (key: string, fallback: string) => {
+    const value = this.t(key, fallback);
+    return value && value.trim().length > 0 ? value : fallback;
+  };
 
   readonly projects = signal<ProjectListItem[]>([]);
   readonly loading = signal(false);
@@ -295,7 +299,7 @@ export class ProjectsPageComponent {
     PROJECT_FILTER_OPTIONS.map((option) => ({
       id: option.id,
       type: option.type,
-      label: this.t(option.labelKey, option.fallback),
+      label: this.text(option.labelKey, option.fallback),
     })),
   );
   readonly projectSortOptions = computed<SortDropdownOption[]>(() =>
@@ -303,28 +307,35 @@ export class ProjectsPageComponent {
       id: option.id,
       icon: option.icon,
       defaultDirection: option.defaultDirection,
-      label: this.t(option.labelKey, option.fallback),
+      label: this.text(option.labelKey, option.fallback),
     })),
   );
   readonly groupingOptions = computed<GroupingProperty[]>(() =>
     PROJECT_GROUPING_OPTIONS.map((option) => ({
       id: option.id,
       icon: option.icon,
-      label: this.t(option.labelKey, option.fallback),
+      label: this.text(option.labelKey, option.fallback),
     })),
+  );
+  readonly hasArchivedProjects = computed(() =>
+    this.projects().some((project) => project.status === 'archived'),
   );
   readonly statusFilterOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
     {
       id: 'all',
-      label: this.t('projects.toolbar.status.all', 'All'),
+      label: this.text('projects.toolbar.status.all', 'All'),
+      icon: 'apps',
     },
     {
       id: 'active',
-      label: this.t('projects.toolbar.status.active', 'Active'),
+      label: this.text('projects.toolbar.status.active', 'Active'),
+      icon: 'check_circle',
     },
     {
       id: 'archived',
-      label: this.t('projects.toolbar.status.archived', 'Archived'),
+      label: this.text('projects.toolbar.status.archived', 'Archived'),
+      icon: 'inventory_2',
+      inactive: !this.hasArchivedProjects(),
     },
   ]);
   readonly projectDefaultSorts: SortConfig[] = [];

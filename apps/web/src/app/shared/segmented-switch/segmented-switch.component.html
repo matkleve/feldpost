@@ -1,4 +1,8 @@
-<div class="segmented-switch" [class.segmented-switch--disabled]="disabled()">
+<div
+  class="segmented-switch"
+  [class.segmented-switch--disabled]="disabled()"
+  [class.segmented-switch--has-inactive]="inactiveOptions().length > 0"
+>
   <div
     class="segmented-switch__group ui-segmented"
     role="group"

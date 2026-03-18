@@ -7,7 +7,7 @@
       <span class="material-icons" aria-hidden="true">warning</span>
       <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
-      <button type="button" class="invite-section__ghost" (click)="retry()">
+      <button type="button" class="invite-section__ghost ui-button ui-button--ghost" (click)="retry()">
         {{ t('settings.inviteManagement.errorState.retry', 'Try again') }}
       </button>
     </div>
@@ -64,7 +64,7 @@
           </select>
           <button
             type="button"
-            class="invite-section__button invite-section__button--ghost"
+            class="invite-section__button ui-button ui-button--ghost"
             [disabled]="isRegenerateDisabled()"
             (click)="onRegenerate()"
           >
@@ -72,7 +72,7 @@
           </button>
           <button
             type="button"
-            class="invite-section__button invite-section__button--danger"
+            class="invite-section__button ui-button ui-button--danger"
             [disabled]="activeInvite()?.status !== 'active'"
             (click)="onRevoke()"
           >

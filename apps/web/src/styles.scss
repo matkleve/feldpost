@@ -757,7 +757,9 @@ router-outlet + * {
   }
 
   &:focus-visible {
-    box-shadow: var(--interactive-focus-ring);
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-clay) 18%, transparent),
+      0 1px 2px color-mix(in srgb, var(--color-clay) 12%, transparent);
     outline: none;
   }
 }
@@ -765,6 +767,9 @@ router-outlet + * {
 .ui-segmented__button--active {
   background: var(--action-bg-active);
   color: var(--action-text-active);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
 }
 
 .ui-toggle-row {
@@ -834,6 +839,69 @@ router-outlet + * {
     border-color: var(--field-border-focus);
     box-shadow: var(--interactive-focus-ring);
     outline: none;
+  }
+}
+
+// ── Shared button primitives ──────────────────────────────────────────────────
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  min-height: 2.75rem;
+  padding: 0.45rem var(--spacing-3);
+  border: 1.5px solid var(--action-border-default);
+  border-radius: var(--container-radius-control);
+  background: var(--action-bg-default);
+  color: var(--menu-item-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--interactive-transition-standard);
+
+  &:hover:not(:disabled) {
+    border-color: var(--action-border-active);
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
+  }
+
+  &:focus-visible {
+    border-color: var(--action-border-active);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:disabled {
+    opacity: 0.66;
+    cursor: not-allowed;
+  }
+}
+
+.ui-button--primary {
+  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
+  background: color-mix(in srgb, var(--color-clay) 10%, var(--field-bg));
+  color: var(--action-text-active);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-clay) 16%, var(--field-bg));
+  }
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: var(--menu-item-text);
+}
+
+.ui-button--danger {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--field-bg));
+  color: var(--color-danger);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-danger) 14%, var(--field-bg));
+    color: var(--color-danger);
   }
 }
 

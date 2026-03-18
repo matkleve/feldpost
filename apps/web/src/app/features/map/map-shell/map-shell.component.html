@@ -13,43 +13,13 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-  <div class="map-style-switch" role="group" aria-label="Map style">
-    <button
-      class="map-style-switch__option"
-      type="button"
-      [class.map-style-switch__option--active]="mapViewMode() === 'street'"
-      [attr.aria-pressed]="mapViewMode() === 'street'"
-      aria-label="Street map"
-      title="Street map"
-      (click)="setMapViewMode('street')"
-    >
-      Street
-    </button>
-
-    <button
-      class="map-style-switch__option"
-      type="button"
-      [class.map-style-switch__option--active]="mapViewMode() === 'photo'"
-      [attr.aria-pressed]="mapViewMode() === 'photo'"
-      aria-label="Photo map"
-      title="Photo map"
-      (click)="setMapViewMode('photo')"
-    >
-      Photo
-    </button>
-
-    <button
-      class="map-style-switch__option"
-      type="button"
-      [class.map-style-switch__option--active]="mapViewMode() === 'historic'"
-      [attr.aria-pressed]="mapViewMode() === 'historic'"
-      aria-label="Historic map"
-      title="Historic map"
-      (click)="setMapViewMode('historic')"
-    >
-      Historic
-    </button>
-  </div>
+  <app-segmented-switch
+    class="map-style-switch"
+    ariaLabel="Map style"
+    [options]="mapViewOptions()"
+    [value]="mapViewMode()"
+    (valueChange)="onMapViewModeChange($event)"
+  />
 
   <!-- Upload button — top-right of map zone, visually over map -->
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">

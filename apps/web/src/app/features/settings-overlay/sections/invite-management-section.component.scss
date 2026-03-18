@@ -211,34 +211,8 @@
 }
 
 .invite-section__button {
-  min-height: 2.75rem;
-  border: var(--invite-stroke-width) solid var(--invite-border-muted);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--field-bg) 88%, transparent);
-  color: var(--menu-item-text);
   padding: 0.45rem 0.8rem;
   font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.invite-section__button:hover:not(:disabled) {
-  background: var(--invite-hover-focus);
-  border-color: var(--action-border-default);
-}
-
-.invite-section__button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.invite-section__button--ghost {
-  background: transparent;
-}
-
-.invite-section__button--danger {
-  color: var(--color-danger);
-  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
 }
 
 .invite-section__state {
@@ -263,13 +237,7 @@
 }
 
 .invite-section__ghost {
-  min-height: 2.75rem;
-  border: var(--invite-stroke-width) solid var(--invite-border-muted);
-  border-radius: var(--radius-md);
-  background: var(--action-bg-default);
-  color: var(--menu-item-text);
   padding: 0.5rem 0.9rem;
-  cursor: pointer;
 }
 
 .invite-section__inline-error {

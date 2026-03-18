@@ -20,14 +20,17 @@
 
         <div class="projects-header__actions">
           <button
-            class="projects-header__new"
+            class="ui-button ui-button--primary projects-header__new"
             type="button"
             [disabled]="creatingProject()"
             (click)="onNewProject()"
-            [attr.aria-label]="t('projects.page.action.newProject', 'New project')"
-            [attr.title]="t('projects.page.action.newProject', 'New project')"
+            [attr.aria-label]="text('projects.page.action.newProject', 'New project')"
+            [attr.title]="text('projects.page.action.newProject', 'New project')"
           >
             <span class="material-icons" aria-hidden="true">add</span>
+            <span class="projects-header__new-label">{{
+              text('projects.page.action.newProject', 'New project')
+            }}</span>
           </button>
         </div>
       </header>
@@ -48,7 +51,7 @@
             (click)="toggleToolbarDropdown('grouping', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">{{
-              t('workspace.toolbar.button.grouping', 'Grouping')
+              text('workspace.toolbar.button.grouping', 'Grouping')
             }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
@@ -63,7 +66,7 @@
             (click)="toggleToolbarDropdown('filter', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">{{
-              t('workspace.toolbar.button.filter', 'Filter')
+              text('workspace.toolbar.button.filter', 'Filter')
             }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
@@ -77,7 +80,9 @@
             [attr.aria-haspopup]="true"
             (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
           >
-            <span class="toolbar-btn__label">{{ t('workspace.toolbar.button.sort', 'Sort') }}</span>
+            <span class="toolbar-btn__label">{{
+              text('workspace.toolbar.button.sort', 'Sort')
+            }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
         </div>
@@ -229,7 +234,7 @@
                           <div class="project-row__actions" (click)="$event.stopPropagation()">
                             <button
                               type="button"
-                              class="project-row__action"
+                              class="icon-btn-ghost project-row__action"
                               aria-label="Rename project"
                               title="Rename project"
                               (click)="$event.stopPropagation(); startRename(project.id)"
@@ -238,7 +243,7 @@
                             </button>
                             <button
                               type="button"
-                              class="project-row__action project-row__action--danger"
+                              class="icon-btn-ghost icon-btn-ghost--danger project-row__action project-row__action--danger"
                               [attr.aria-label]="
                                 project.status === 'archived' ? 'Delete project' : 'Archive project'
                               "
@@ -344,7 +349,7 @@
                           >
                             <button
                               type="button"
-                              class="projects-thumbnail-card__action"
+                              class="icon-btn-ghost projects-thumbnail-card__action"
                               aria-label="Rename project"
                               title="Rename project"
                               (click)="$event.stopPropagation(); startRename(project.id)"
@@ -353,7 +358,7 @@
                             </button>
                             <button
                               type="button"
-                              class="projects-thumbnail-card__action projects-thumbnail-card__action--danger"
+                              class="icon-btn-ghost icon-btn-ghost--danger projects-thumbnail-card__action projects-thumbnail-card__action--danger"
                               [attr.aria-label]="
                                 project.status === 'archived' ? 'Delete project' : 'Archive project'
                               "
@@ -469,7 +474,7 @@
         <div class="projects-modal__actions">
           <button
             type="button"
-            class="projects-modal__button projects-modal__button--ghost"
+            class="projects-modal__button ui-button ui-button--ghost"
             [disabled]="pendingActionBusy()"
             (click)="cancelPendingAction()"
           >
@@ -477,8 +482,9 @@
           </button>
           <button
             type="button"
-            class="projects-modal__button"
-            [class.projects-modal__button--danger]="isDeletePending()"
+            class="projects-modal__button ui-button"
+            [class.ui-button--danger]="isDeletePending()"
+            [class.ui-button--primary]="!isDeletePending()"
             [disabled]="pendingActionBusy()"
             (click)="confirmPendingAction()"
           >

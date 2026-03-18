@@ -53,6 +53,10 @@ import { SettingsPaneService } from '../../../core/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import {
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../../shared/segmented-switch/segmented-switch.component';
+import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
   PHOTO_MARKER_ICON_SIZE,
@@ -141,6 +145,7 @@ const HISTORIC_LABEL_PANE = 'historic-label';
     DragDividerComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
+    SegmentedSwitchComponent,
   ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',
@@ -347,6 +352,29 @@ export class MapShellComponent implements OnDestroy {
   readonly analogMaterialActive = computed(
     () => this.mapBasemap() === 'default' && this.mapMaterial() === 'analog',
   );
+  readonly mapViewOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+    {
+      id: 'street',
+      label: 'Street',
+      icon: 'map',
+      ariaLabel: 'Street map',
+      title: 'Street map',
+    },
+    {
+      id: 'photo',
+      label: 'Photo',
+      icon: 'satellite_alt',
+      ariaLabel: 'Photo map',
+      title: 'Photo map',
+    },
+    {
+      id: 'historic',
+      label: 'Historic',
+      icon: 'history_edu',
+      ariaLabel: 'Historic map',
+      title: 'Historic map',
+    },
+  ]);
   readonly mapViewMode = computed<MapViewMode>(() => {
     if (this.mapBasemap() === 'satellite') {
       return 'photo';
@@ -1395,6 +1423,12 @@ export class MapShellComponent implements OnDestroy {
 
     if (this.mapBasemap() !== previousBasemap || mode === 'historic' || mode === 'street') {
       this.applyMapBasemapLayer();
+    }
+  }
+
+  onMapViewModeChange(mode: string | null): void {
+    if (mode === 'street' || mode === 'photo' || mode === 'historic') {
+      this.setMapViewMode(mode);
     }
   }
 

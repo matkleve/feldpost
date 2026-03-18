@@ -168,41 +168,6 @@
   flex-wrap: wrap;
 }
 
-.account-btn {
-  min-height: 2.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--container-radius-control);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  padding: 0.45rem var(--spacing-3);
-  cursor: pointer;
-}
-
-.account-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--color-clay) 38%, var(--color-border));
-  background: color-mix(in srgb, var(--color-clay) 7%, var(--color-bg-surface));
-}
-
-.account-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.account-btn--primary {
-  border-color: color-mix(in srgb, var(--color-clay) 52%, var(--color-border));
-  background: color-mix(in srgb, var(--color-clay) 14%, var(--color-bg-surface));
-}
-
-.account-btn--ghost {
-  background: transparent;
-}
-
-.account-btn--danger {
-  border-color: color-mix(in srgb, var(--color-danger) 36%, var(--color-border));
-  color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-bg-surface));
-}
-
 .account-card--danger {
   border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
 }
