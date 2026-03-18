@@ -58,6 +58,7 @@ Verification notes:
 - Image detail header action buttons (back/more) now consume shared `icon-btn-ghost`, and detail context menu row is promoted from `TODO` to tracked `*-unverified` pending manual multi-theme + keyboard checks.
 - Detail header context menu now also returns focus to its trigger on close and supports `ArrowUp/ArrowDown/Home/End` keyboard navigation between menu actions; final row promotion still depends on manual browser smoke.
 - Detail inline action rails and metadata-row action controls now also consume shared `icon-btn-ghost`; remaining local styles in those areas are limited to positioning/visibility behavior.
+- Detail inline projects editor now uses the shared dropdown shell with clamped viewport-safe placement plus `ArrowUp/ArrowDown/Home/End` keyboard navigation and clean close behavior; final verification still depends on manual browser smoke.
 - Map, radius, and marker context menus in `map-shell` now use the shared dropdown shell/frame plus shared option-menu row structure; the map context row is promoted from `TODO` to tracked `*-unverified` pending manual theme and keyboard smoke.
 - Map context menus additionally gained code-level focus return to the map container on close plus `ArrowUp/ArrowDown/Home/End` navigation within menu items; final matrix promotion still depends on manual browser smoke.
 - Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.

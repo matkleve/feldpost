@@ -51,42 +51,39 @@
   </button>
 
   @if (showContextMenu()) {
-    <div
+    <app-dropdown-shell
       #contextMenuPanel
-      class="detail-context-menu option-menu-surface dd-items"
-      role="menu"
-      appClickOutside
-      (clickOutside)="onContextMenuCloseRequested()"
-      (keydown.escape)="onContextMenuCloseRequested()"
-      (keydown)="onContextMenuKeydown($event)"
+      class="detail-context-menu"
+      [top]="contextMenuTop()"
+      [left]="contextMenuLeft()"
+      [minWidth]="176"
+      panelClass="detail-context-menu option-menu-surface"
+      (closeRequested)="onContextMenuCloseRequested()"
     >
-      <button
-        class="dd-item dd-item--danger"
-        type="button"
-        role="menuitem"
-        (click)="deleteRequested.emit()"
-      >
-        <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-        <span class="dd-item__label">{{
-          t('workspace.imageDetail.action.delete', 'Delete image')
-        }}</span>
-      </button>
-      <button
-        class="dd-item"
-        type="button"
-        role="menuitem"
-        (click)="copyCoordinatesRequested.emit()"
-      >
-        <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-        <span class="dd-item__label">{{
-          t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-        }}</span>
-      </button>
-    </div>
-    <div
-      class="detail-context-menu-overlay"
-      aria-hidden="true"
-      (click)="onContextMenuCloseRequested()"
-    ></div>
+      <div class="dd-items" role="menu" (keydown)="onContextMenuKeydown($event)">
+        <button
+          class="dd-item dd-item--danger"
+          type="button"
+          role="menuitem"
+          (click)="deleteRequested.emit()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
+          <span class="dd-item__label">{{
+            t('workspace.imageDetail.action.delete', 'Delete image')
+          }}</span>
+        </button>
+        <button
+          class="dd-item"
+          type="button"
+          role="menuitem"
+          (click)="copyCoordinatesRequested.emit()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+          <span class="dd-item__label">{{
+            t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
+          }}</span>
+        </button>
+      </div>
+    </app-dropdown-shell>
   }
 </div>

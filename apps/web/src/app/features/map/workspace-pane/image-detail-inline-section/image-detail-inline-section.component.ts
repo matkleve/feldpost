@@ -1,11 +1,21 @@
-import { Component, inject, input, output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CapturedDateEditorComponent, DateSaveEvent } from '../captured-date-editor.component';
 import { AddressSearchComponent } from '../address-search/address-search.component';
-import { ClickOutsideDirective } from '../../../../shared/click-outside.directive';
 import { ForwardGeocodeResult } from '../../../../core/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../image-detail-view.utils';
 import { DetailEditingField, ImageRecord, SelectOption } from '../image-detail-view.types';
+import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
 
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';
@@ -25,13 +35,25 @@ interface AddressFieldDefinition {
 @Component({
   selector: 'app-image-detail-inline-section',
   standalone: true,
-  imports: [CapturedDateEditorComponent, AddressSearchComponent, ClickOutsideDirective],
+  imports: [CapturedDateEditorComponent, AddressSearchComponent, DropdownShellComponent],
   templateUrl: './image-detail-inline-section.component.html',
   styleUrl: '../image-detail-view.component.scss',
 })
 export class ImageDetailInlineSectionComponent {
+  private static readonly PROJECT_DROPDOWN_GAP_PX = 8;
+  private static readonly PROJECT_DROPDOWN_MARGIN_PX = 8;
+
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  private readonly projectEditorRef = viewChild<ElementRef<HTMLElement>>('projectEditor');
+  private readonly projectDropdownRef = viewChild('projectDropdown', {
+    read: ElementRef<HTMLElement>,
+  });
+  private readonly projectSearchInputRef =
+    viewChild<ElementRef<HTMLInputElement>>('projectSearchInput');
+  readonly projectDropdownTop = signal(0);
+  readonly projectDropdownLeft = signal(0);
+  readonly projectDropdownWidth = signal<number | null>(null);
 
   readonly image = input.required<ImageRecord>();
   readonly detailViewLabel = input.required<string>();
@@ -129,6 +151,79 @@ export class ImageDetailInlineSectionComponent {
     },
   ];
 
+  constructor() {
+    effect(() => {
+      if (this.editingField() === 'project_ids') {
+        this.focusProjectSearchInput();
+        this.positionProjectDropdown();
+      }
+    });
+  }
+
+  onProjectDropdownCloseRequested(): void {
+    this.editingCancelled.emit();
+  }
+
+  onProjectSearchKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.editingCancelled.emit();
+      return;
+    }
+
+    if (!this.isProjectDropdownNavigationKey(event.key)) {
+      return;
+    }
+
+    const focusableItems = this.getProjectDropdownFocusableItems();
+    if (focusableItems.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.key === 'End') {
+      focusableItems[focusableItems.length - 1]?.focus();
+      return;
+    }
+
+    focusableItems[0]?.focus();
+  }
+
+  onProjectDropdownKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.editingCancelled.emit();
+      this.focusProjectSearchInput();
+      return;
+    }
+
+    if (!this.isProjectDropdownNavigationKey(event.key)) {
+      return;
+    }
+
+    const focusableItems = this.getProjectDropdownFocusableItems();
+    if (focusableItems.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (this.focusProjectDropdownBoundaryItem(event.key, focusableItems)) {
+      return;
+    }
+
+    this.focusAdjacentProjectDropdownItem(event.key, focusableItems);
+  }
+
+  @HostListener('window:resize')
+  @HostListener('window:scroll')
+  onViewportChanged(): void {
+    if (this.editingField() !== 'project_ids') {
+      return;
+    }
+
+    this.positionProjectDropdown();
+  }
+
   isPrimaryProject(projectId: string): boolean {
     return this.primaryProjectId() === projectId;
   }
@@ -140,5 +235,90 @@ export class ImageDetailInlineSectionComponent {
   fieldValue(field: AddressFieldDefinition['name']): string {
     const image = this.image();
     return image[field] ?? '';
+  }
+
+  private focusProjectSearchInput(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      this.positionProjectDropdown();
+      this.projectSearchInputRef()?.nativeElement.focus();
+    });
+  }
+
+  private positionProjectDropdown(): void {
+    const editor = this.projectEditorRef()?.nativeElement;
+    if (!editor || typeof window === 'undefined') {
+      return;
+    }
+
+    const editorRect = editor.getBoundingClientRect();
+    const panelRect = this.projectDropdownRef()?.nativeElement.getBoundingClientRect();
+    const margin = ImageDetailInlineSectionComponent.PROJECT_DROPDOWN_MARGIN_PX;
+    const gap = ImageDetailInlineSectionComponent.PROJECT_DROPDOWN_GAP_PX;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const availableWidth = Math.max(240, viewportWidth - margin * 2);
+    const preferredWidth = Math.min(editorRect.width, availableWidth);
+    const dropdownHeight = panelRect?.height ?? 0;
+    const preferredLeft = editorRect.left;
+    const maxLeft = Math.max(margin, viewportWidth - preferredWidth - margin);
+    const clampedLeft = Math.min(Math.max(preferredLeft, margin), maxLeft);
+    const belowTop = editorRect.bottom + gap;
+    const aboveTop = editorRect.top - gap - dropdownHeight;
+    const shouldOpenAbove =
+      dropdownHeight > 0 && belowTop + dropdownHeight > viewportHeight - margin;
+    const preferredTop = shouldOpenAbove ? aboveTop : belowTop;
+    const maxTop = Math.max(margin, viewportHeight - dropdownHeight - margin);
+    const clampedTop = Math.min(Math.max(preferredTop, margin), maxTop);
+
+    this.projectDropdownWidth.set(Math.round(preferredWidth));
+    this.projectDropdownLeft.set(Math.round(clampedLeft));
+    this.projectDropdownTop.set(Math.round(clampedTop));
+  }
+
+  private isProjectDropdownNavigationKey(key: string): boolean {
+    return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End';
+  }
+
+  private focusProjectDropdownBoundaryItem(
+    key: string,
+    focusableItems: HTMLButtonElement[],
+  ): boolean {
+    if (key === 'Home') {
+      focusableItems[0]?.focus();
+      return true;
+    }
+
+    if (key === 'End') {
+      focusableItems[focusableItems.length - 1]?.focus();
+      return true;
+    }
+
+    return false;
+  }
+
+  private focusAdjacentProjectDropdownItem(key: string, focusableItems: HTMLButtonElement[]): void {
+    const activeIndex = focusableItems.findIndex((item) => item === document.activeElement);
+    const fallbackIndex = key === 'ArrowDown' ? -1 : 0;
+    const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
+    const delta = key === 'ArrowDown' ? 1 : -1;
+    const nextIndex = (currentIndex + delta + focusableItems.length) % focusableItems.length;
+    focusableItems[nextIndex]?.focus();
+  }
+
+  private getProjectDropdownFocusableItems(): HTMLButtonElement[] {
+    const container = this.projectDropdownRef()?.nativeElement;
+    if (!container) {
+      return [];
+    }
+
+    return Array.from(
+      container.querySelectorAll(
+        '.detail-tags__create:not(:disabled), .detail-tags__option:not(:disabled), .detail-tags__primary:not(:disabled)',
+      ),
+    ) as HTMLButtonElement[];
   }
 }

@@ -70,11 +70,10 @@
     }}</span>
     @if (editingField() === 'project_ids') {
       <div
+        #projectEditor
         class="detail-tags"
         role="group"
         [attr.aria-label]="t('workspace.imageDetail.projects.manage.aria', 'Manage projects')"
-        appClickOutside
-        (clickOutside)="editingCancelled.emit()"
       >
         <div class="detail-tags__editor">
           @for (opt of projectOptions(); track opt.id) {
@@ -111,98 +110,109 @@
             "
             [attr.aria-label]="t('workspace.imageDetail.projects.search.aria', 'Search projects')"
             (input)="projectSearchChanged.emit(projectSearchInput.value)"
-            (keydown.escape)="editingCancelled.emit()"
+            (keydown)="onProjectSearchKeydown($event)"
             (keydown.enter)="projectCreateRequested.emit()"
           />
         </div>
 
-        <div
-          class="detail-tags__dropdown option-menu-surface"
-          role="listbox"
-          [attr.aria-label]="t('workspace.imageDetail.projects.options.aria', 'Project options')"
+        <app-dropdown-shell
+          #projectDropdown
+          class="detail-tags__dropdown"
+          [top]="projectDropdownTop()"
+          [left]="projectDropdownLeft()"
+          [minWidth]="projectDropdownWidth()"
+          [maxWidth]="projectDropdownWidth()"
+          panelClass="detail-tags__dropdown option-menu-surface"
+          (closeRequested)="onProjectDropdownCloseRequested()"
         >
-          <div class="detail-tags__hint">
-            {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
-          </div>
-
-          @if (!canAssignMultipleProjects()) {
-            <div class="detail-tags__note" role="status">
-              {{
-                t(
-                  'workspace.imageDetail.projects.noGpsNote',
-                  'No GPS: this item can only belong to one project.'
-                )
-              }}
+          <div
+            role="listbox"
+            [attr.aria-label]="t('workspace.imageDetail.projects.options.aria', 'Project options')"
+            (keydown)="onProjectDropdownKeydown($event)"
+          >
+            <div class="detail-tags__hint">
+              {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
             </div>
-          }
 
-          @if (isGpsAssignmentLocked()) {
-            <div class="detail-tags__note" role="status">
-              {{
-                t(
-                  'workspace.imageDetail.projects.gpsDisabled',
-                  'GPS assignment is disabled for this file type.'
-                )
-              }}
-            </div>
-          }
+            @if (!canAssignMultipleProjects()) {
+              <div class="detail-tags__note" role="status">
+                {{
+                  t(
+                    'workspace.imageDetail.projects.noGpsNote',
+                    'No GPS: this item can only belong to one project.'
+                  )
+                }}
+              </div>
+            }
 
-          @if (projectCanCreate()) {
-            <button
-              type="button"
-              class="detail-tags__create"
-              (click)="projectCreateRequested.emit()"
-            >
-              <span class="detail-tags__create-label">{{
-                t('workspace.imageDetail.projects.create', 'Create')
-              }}</span>
-              <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
-            </button>
-          }
+            @if (isGpsAssignmentLocked()) {
+              <div class="detail-tags__note" role="status">
+                {{
+                  t(
+                    'workspace.imageDetail.projects.gpsDisabled',
+                    'GPS assignment is disabled for this file type.'
+                  )
+                }}
+              </div>
+            }
 
-          <div class="detail-tags__divider" aria-hidden="true"></div>
-
-          @for (opt of filteredProjectOptions(); track opt.id) {
-            <div class="detail-tags__option-row">
+            @if (projectCanCreate()) {
               <button
                 type="button"
-                class="detail-tags__option"
-                [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
-                [disabled]="!selectedProjectIds().has(opt.id) && !canAssignMultipleProjects()"
-                (click)="projectMembershipToggled.emit(opt.id)"
+                class="detail-tags__create"
+                (click)="projectCreateRequested.emit()"
               >
-                <span class="detail-tags__option-color" aria-hidden="true"></span>
-                <span class="detail-tags__option-check" aria-hidden="true">
-                  @if (selectedProjectIds().has(opt.id)) {
-                    <span class="material-icons">check</span>
-                  }
-                </span>
-                <span>{{ opt.label }}</span>
+                <span class="detail-tags__create-label">{{
+                  t('workspace.imageDetail.projects.create', 'Create')
+                }}</span>
+                <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
               </button>
+            }
 
-              @if (primarySelectorVisible()) {
+            <div class="detail-tags__divider" aria-hidden="true"></div>
+
+            @for (opt of filteredProjectOptions(); track opt.id) {
+              <div class="detail-tags__option-row">
                 <button
                   type="button"
-                  class="detail-tags__primary"
-                  [class.detail-tags__primary--active]="isPrimaryProject(opt.id)"
-                  [disabled]="!selectedProjectIds().has(opt.id)"
-                  [attr.aria-label]="
-                    t('workspace.imageDetail.projects.setPrimaryPrefix', 'Set') +
-                    ' ' +
-                    opt.label +
-                    ' ' +
-                    t('workspace.imageDetail.projects.setPrimarySuffix', 'as primary project')
-                  "
-                  (click)="primaryProjectSelected.emit(opt.id)"
+                  class="detail-tags__option"
+                  [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
+                  [disabled]="!selectedProjectIds().has(opt.id) && !canAssignMultipleProjects()"
+                  (click)="projectMembershipToggled.emit(opt.id)"
                 >
-                  <span class="material-icons" aria-hidden="true">
-                    {{ isPrimaryProject(opt.id) ? 'star' : 'star_border' }}
+                  <span class="detail-tags__option-color" aria-hidden="true"></span>
+                  <span class="detail-tags__option-check" aria-hidden="true">
+                    @if (selectedProjectIds().has(opt.id)) {
+                      <span class="material-icons">check</span>
+                    }
                   </span>
+                  <span>{{ opt.label }}</span>
                 </button>
-              }
-            </div>
-          }
-        </div>
+
+                @if (primarySelectorVisible()) {
+                  <button
+                    type="button"
+                    class="detail-tags__primary"
+                    [class.detail-tags__primary--active]="isPrimaryProject(opt.id)"
+                    [disabled]="!selectedProjectIds().has(opt.id)"
+                    [attr.aria-label]="
+                      t('workspace.imageDetail.projects.setPrimaryPrefix', 'Set') +
+                      ' ' +
+                      opt.label +
+                      ' ' +
+                      t('workspace.imageDetail.projects.setPrimarySuffix', 'as primary project')
+                    "
+                    (click)="primaryProjectSelected.emit(opt.id)"
+                  >
+                    <span class="material-icons" aria-hidden="true">
+                      {{ isPrimaryProject(opt.id) ? 'star' : 'star_border' }}
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </app-dropdown-shell>
       </div>
     } @else {
       <button
@@ -394,7 +404,7 @@
   @if (image().latitude == null || image().longitude == null) {
     <div class="detail-row detail-row--readonly">
       <button
-        class="detail-row-action detail-row-action--left"
+        class="detail-row-action icon-btn-ghost detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
         [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"

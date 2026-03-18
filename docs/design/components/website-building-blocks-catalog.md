@@ -203,7 +203,7 @@ Remaining:
 
 ### Phase 3: Migrate High-Visibility Surfaces
 
-Progress: `84%`
+Progress: `85%`
 
 Goal: standardize the UI that users see most often.
 
@@ -234,6 +234,7 @@ Done:
 9. Image-detail header action buttons (back/more) now consume `icon-btn-ghost` with component-level size overrides instead of local ghost button base rules.
 10. Detail inline action rails now consume `icon-btn-ghost` across location/metadata interaction rows for consistent icon action behavior in high-use detail workflows.
 11. Map, radius, and marker context menus now use the shared dropdown shell/frame plus shared option-menu row structure instead of free-standing menu containers.
+12. Detail header overflow menu and inline projects editor now use hardened shared-shell menu placement with aligned keyboard/focus behavior instead of fragile local dropdown positioning.
 
 Remaining:
 
@@ -243,7 +244,7 @@ Remaining:
 
 ### Phase 4: Migrate Composition Surfaces
 
-Progress: `71%`
+Progress: `72%`
 
 Goal: move larger feature flows onto the same primitives so themes and future redesigns scale.
 
@@ -272,6 +273,7 @@ Done:
 8. Dropdown control composition reduced duplicate action-button state styling by centralizing icon-action base behavior on `icon-btn-ghost`.
 9. Detail-view header composition now keeps only layout/sizing overrides while shared icon-button interaction states come from `icon-btn-ghost`.
 10. Metadata row action controls now consume the shared icon-button primitive with component-level positioning/visibility overrides only.
+11. Detail inline project editing now keeps local styles focused on composition while dropdown placement, close behavior, and keyboard navigation are handled through the shared dropdown shell pattern.
 
 Remaining:
 
@@ -280,7 +282,7 @@ Remaining:
 
 ### Phase 5: Verify, Promote, and Enforce
 
-Progress: `47%`
+Progress: `48%`
 
 Goal: turn the overhaul into a stable operating model.
 
@@ -305,6 +307,7 @@ Done:
 4. Regression statuses were updated from pure harness blockers to mixed pass/fail evidence after focused runs.
 5. Regression matrix rows for toolbar controls and dialog shell were promoted from `TODO` to tracked `*-unverified` statuses.
 6. Regression matrix row for map context menus was promoted from `TODO` to tracked `*-unverified` status after code-level menu-shell consolidation.
+7. Detail-surface tracking notes now explicitly cover header-menu and inline-project-editor placement/keyboard hardening ahead of manual smoke promotion.
 
 Remaining:
 

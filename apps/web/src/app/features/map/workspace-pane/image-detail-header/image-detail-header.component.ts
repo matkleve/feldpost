@@ -1,20 +1,38 @@
-import { Component, ElementRef, effect, inject, input, output, viewChild } from '@angular/core';
-import { ClickOutsideDirective } from '../../../../shared/click-outside.directive';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
 
 @Component({
   selector: 'app-image-detail-header',
   standalone: true,
-  imports: [ClickOutsideDirective],
+  imports: [DropdownShellComponent],
   templateUrl: './image-detail-header.component.html',
   styleUrl: '../image-detail-view.component.scss',
 })
 export class ImageDetailHeaderComponent {
+  private static readonly MENU_GAP_PX = 8;
+  private static readonly MENU_MARGIN_PX = 8;
+  private static readonly MENU_MIN_WIDTH_PX = 176;
+
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   private readonly contextMenuTriggerRef =
     viewChild<ElementRef<HTMLButtonElement>>('contextMenuTrigger');
-  private readonly contextMenuPanelRef = viewChild<ElementRef<HTMLElement>>('contextMenuPanel');
+  private readonly contextMenuPanelRef = viewChild('contextMenuPanel', {
+    read: ElementRef<HTMLElement>,
+  });
+  readonly contextMenuTop = signal(0);
+  readonly contextMenuLeft = signal(0);
 
   readonly displayTitle = input.required<string>();
   readonly titleValue = input<string>('');
@@ -34,6 +52,7 @@ export class ImageDetailHeaderComponent {
   constructor() {
     effect(() => {
       if (this.showContextMenu()) {
+        this.positionContextMenu();
         this.focusFirstContextMenuItem();
       }
     });
@@ -75,16 +94,62 @@ export class ImageDetailHeaderComponent {
     this.focusAdjacentItem(event.key, focusableItems);
   }
 
+  @HostListener('window:resize')
+  @HostListener('window:scroll')
+  onViewportChanged(): void {
+    if (!this.showContextMenu()) {
+      return;
+    }
+
+    this.positionContextMenu();
+  }
+
   private focusFirstContextMenuItem(): void {
     if (typeof window === 'undefined') {
       return;
     }
 
     window.requestAnimationFrame(() => {
-      const firstItem =
-        this.contextMenuPanelRef()?.nativeElement.querySelector<HTMLButtonElement>('.dd-item');
+      this.positionContextMenu();
+      const firstItem = this.contextMenuPanelRef()?.nativeElement.querySelector(
+        '.dd-item',
+      ) as HTMLButtonElement | null;
       firstItem?.focus();
     });
+  }
+
+  private positionContextMenu(): void {
+    const trigger = this.contextMenuTriggerRef()?.nativeElement;
+    if (!trigger || typeof window === 'undefined') {
+      return;
+    }
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const panel = this.contextMenuPanelRef()?.nativeElement;
+    const panelRect = panel?.getBoundingClientRect();
+    const menuWidth = Math.max(
+      ImageDetailHeaderComponent.MENU_MIN_WIDTH_PX,
+      panelRect?.width ?? ImageDetailHeaderComponent.MENU_MIN_WIDTH_PX,
+    );
+    const menuHeight = panelRect?.height ?? 0;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const margin = ImageDetailHeaderComponent.MENU_MARGIN_PX;
+    const gap = ImageDetailHeaderComponent.MENU_GAP_PX;
+
+    const preferredLeft = triggerRect.right - menuWidth;
+    const maxLeft = Math.max(margin, viewportWidth - menuWidth - margin);
+    const clampedLeft = Math.min(Math.max(preferredLeft, margin), maxLeft);
+
+    const belowTop = triggerRect.bottom + gap;
+    const aboveTop = triggerRect.top - gap - menuHeight;
+    const shouldOpenAbove = menuHeight > 0 && belowTop + menuHeight > viewportHeight - margin;
+    const preferredTop = shouldOpenAbove ? aboveTop : belowTop;
+    const maxTop = Math.max(margin, viewportHeight - menuHeight - margin);
+    const clampedTop = Math.min(Math.max(preferredTop, margin), maxTop);
+
+    this.contextMenuLeft.set(Math.round(clampedLeft));
+    this.contextMenuTop.set(Math.round(clampedTop));
   }
 
   private focusContextMenuTrigger(): void {
