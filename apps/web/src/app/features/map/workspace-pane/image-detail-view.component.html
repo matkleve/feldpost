@@ -1,6 +1,5 @@
-<!-- ImageDetailViewComponent — full detail view of a single photo. -->
+<!-- ImageDetailViewComponent - full detail view coordinator. -->
 
-<!-- Loading state -->
 @if (loading()) {
   <div
     class="detail-loading"
@@ -8,13 +7,10 @@
     [attr.aria-label]="t('workspace.imageDetail.loading.aria', 'Loading media details')"
   >
     <span class="detail-loading__spinner" aria-hidden="true"></span>
-    <span class="detail-loading__text">{{
-      t('workspace.imageDetail.loading.text', 'Loading...')
-    }}</span>
+    <span class="detail-loading__text">{{ t('workspace.imageDetail.loading.text', 'Loading...') }}</span>
   </div>
 }
 
-<!-- Error state -->
 @if (error() && !loading()) {
   <div class="detail-error" role="alert">
     <span class="material-icons" aria-hidden="true">error_outline</span>
@@ -22,859 +18,83 @@
   </div>
 }
 
-<!-- Content (visible when image is loaded) -->
 @if (image() && !loading()) {
   <div class="detail-main-column">
-    <!-- DetailHeader: back button + editable title + context menu -->
-    <div class="detail-header">
-      <button
-        class="detail-back-btn"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.back.aria', 'Back to gallery')"
-        [attr.title]="t('workspace.imageDetail.action.back.title', 'Back to gallery')"
-        (click)="close()"
-      >
-        <span class="material-icons" aria-hidden="true">arrow_back</span>
-      </button>
-
-      @if (editingField() === 'address_label') {
-        <input
-          #titleInput
-          class="detail-title-input"
-          type="text"
-          [value]="image()!.address_label ?? ''"
-          [attr.aria-label]="t('workspace.imageDetail.title.edit.aria', 'Edit image title')"
-          (keydown.enter)="saveImageField('address_label', titleInput.value)"
-          (keydown.escape)="editingField.set(null)"
-          (blur)="saveImageField('address_label', titleInput.value)"
-        />
-      } @else {
-        <button
-          class="detail-title detail-title--editable"
-          type="button"
-          [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
-          (click)="editingField.set('address_label')"
-        >
-          {{ displayTitle() }}
-        </button>
-      }
-
-      <span
-        class="detail-kind-chip"
-        [attr.aria-label]="t('workspace.imageDetail.fileType.aria', 'File type')"
-        >{{ mediaTypeLabel() }}</span
-      >
-
-      <button
-        class="detail-actions-btn"
-        type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
-        [attr.title]="t('workspace.imageDetail.action.more.title', 'More actions')"
-        aria-haspopup="true"
-        [attr.aria-expanded]="showContextMenu()"
-        (click)="toggleContextMenu()"
-      >
-        <span class="material-icons" aria-hidden="true">more_vert</span>
-      </button>
-
-      @if (showContextMenu()) {
-        <div
-          class="detail-context-menu option-menu-surface dd-items"
-          role="menu"
-          (keydown.escape)="closeContextMenu()"
-        >
-          <button
-            class="dd-item dd-item--danger"
-            type="button"
-            role="menuitem"
-            (click)="confirmDelete()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-            <span class="dd-item__label">{{
-              t('workspace.imageDetail.action.delete', 'Delete image')
-            }}</span>
-          </button>
-          <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinates()">
-            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">{{
-              t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-            }}</span>
-          </button>
-        </div>
-        <div
-          class="detail-context-menu-overlay"
-          aria-hidden="true"
-          (click)="closeContextMenu()"
-        ></div>
-      }
-    </div>
-
-    <!-- Hidden file input for photo replacement -->
-    <input
-      #fileInput
-      type="file"
-      [accept]="acceptTypes"
-      class="visually-hidden"
-      aria-hidden="true"
-      (change)="onFileSelected($event)"
+    <app-image-detail-header
+      [displayTitle]="displayTitle()"
+      [titleValue]="image()!.address_label ?? ''"
+      [mediaTypeLabel]="mediaTypeLabel()"
+      [editingTitle]="editingField() === 'address_label'"
+      [showContextMenu]="showContextMenu()"
+      (closed)="close()"
+      (titleEditRequested)="editingField.set('address_label')"
+      (titleSaveRequested)="saveImageField('address_label', $event)"
+      (titleEditCancelled)="editingField.set(null)"
+      (contextMenuToggled)="toggleContextMenu()"
+      (contextMenuClosed)="closeContextMenu()"
+      (deleteRequested)="confirmDelete()"
+      (copyCoordinatesRequested)="copyCoordinates()"
     />
 
-    <!-- Scrollable content area -->
     <div class="detail-scroll">
-      <!-- Photo viewer: progressive load — click opens lightbox -->
-      @if (hasPhoto()) {
-        <div class="detail-image-container">
-          <button
-            class="detail-image-wrap"
-            type="button"
-            [disabled]="!canOpenLightbox()"
-            [class.detail-image-wrap--static]="!canOpenLightbox()"
-            [attr.aria-label]="
-              t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')
-            "
-            (click)="openLightbox()"
-          >
-            <!-- Placeholder: pulsing gradient while loading (behind images via grid stacking) -->
-            @if (!imageReady()) {
-              @if (thumbState() === 'error' && fullState() === 'error') {
-                <div class="detail-image-placeholder detail-image-placeholder--no-photo">
-                  <span
-                    class="detail-image-placeholder__icon detail-image-placeholder__icon--no-photo"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="visually-hidden">{{
-                    t('workspace.imageDetail.imageUnavailable', 'Image unavailable')
-                  }}</span>
-                </div>
-              } @else {
-                <div
-                  class="detail-image-placeholder"
-                  [class.detail-image-placeholder--loading]="isImageLoading()"
-                >
-                  <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
-                </div>
-              }
-            }
-            <!-- Tier 2: blurred thumbnail (covers placeholder via grid stacking) -->
-            @if (
-              thumbnailUrl() &&
-              thumbState() === 'loaded' &&
-              (!fullResPreloaded() || !canOpenLightbox())
-            ) {
-              <img
-                class="detail-image"
-                [class.detail-image--thumb]="canOpenLightbox()"
-                [class.detail-image--preview]="!canOpenLightbox()"
-                [src]="thumbnailUrl()"
-                [alt]="t('workspace.imageDetail.photoPreview.alt', 'Photo preview')"
-                aria-hidden="true"
-              />
-            }
-            <!-- Tier 3: full-res with crossfade (preloaded before showing) -->
-            @if (fullResUrl()) {
-              <img
-                class="detail-image detail-image--full"
-                [class.detail-image--loaded]="fullResPreloaded()"
-                [src]="fullResUrl()"
-                [alt]="displayTitle()"
-              />
-            }
-          </button>
+      <app-image-detail-photo-viewer
+        [hasPhoto]="hasPhoto()"
+        [canOpenLightbox]="canOpenLightbox()"
+        [imageReady]="imageReady()"
+        [isImageLoading]="isImageLoading()"
+        [thumbState]="thumbState()"
+        [fullState]="fullState()"
+        [thumbnailUrl]="thumbnailUrl()"
+        [fullResUrl]="fullResUrl()"
+        [fullResPreloaded]="fullResPreloaded()"
+        [displayTitle]="displayTitle()"
+        [replacing]="replacing()"
+        [replaceError]="replaceError()"
+        [acceptTypes]="acceptTypes"
+        (fileSelected)="onFileSelected($event)"
+      />
 
-          <!-- Replace photo overlay button -->
-          <button
-            class="detail-image-edit-btn"
-            type="button"
-            [attr.aria-label]="t('workspace.imageDetail.action.replacePhoto.aria', 'Replace photo')"
-            [attr.title]="t('workspace.imageDetail.action.replacePhoto.title', 'Replace photo')"
-            [disabled]="replacing()"
-            (click)="triggerFileInput()"
-          >
-            @if (replacing()) {
-              <span class="detail-image-edit-btn__spinner" aria-hidden="true"></span>
-            } @else {
-              <span class="material-icons" aria-hidden="true">edit</span>
-            }
-          </button>
-
-          @if (replaceError()) {
-            <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
-          }
-        </div>
-      } @else {
-        <!-- Upload prompt for photoless items (no-photo fast path) -->
-        <div class="detail-upload-prompt">
-          <div class="detail-upload-prompt__placeholder">
-            <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
-            <span class="detail-upload-prompt__text">{{
-              t('workspace.imageDetail.noPhotoAttached', 'No photo attached')
-            }}</span>
-          </div>
-          <button
-            class="detail-upload-prompt__button"
-            type="button"
-            [disabled]="replacing()"
-            (click)="triggerFileInput()"
-          >
-            @if (replacing()) {
-              <span class="detail-upload-prompt__spinner" aria-hidden="true"></span>
-            }
-            {{ t('workspace.imageDetail.action.uploadPhoto', 'Upload photo') }}
-          </button>
-          @if (replaceError()) {
-            <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
-          }
-        </div>
-      }
-
-      <!-- Metadata content area — capped width for readability -->
       <div class="detail-content">
-        <!-- Quick Info Bar -->
         <app-quick-info-chips [chips]="infoChips()" (chipClicked)="onChipClicked($event)" />
 
-        <!-- Details Section -->
-        <div class="detail-section">
-          <div class="dd-section-label">{{ detailViewLabel() }}</div>
+        <app-image-detail-inline-section
+          [image]="image()!"
+          [detailViewLabel]="detailViewLabel()"
+          [mediaTypeLabel]="mediaTypeLabel()"
+          [editingField]="editingField()"
+          [editDate]="editDate()"
+          [editTime]="editTime()"
+          [captureDate]="captureDate()"
+          [uploadDate]="uploadDate()"
+          [projectName]="projectName()"
+          [fullAddress]="fullAddress()"
+          [projectOptions]="projectOptions()"
+          [selectedProjectIds]="selectedProjectIds()"
+          [primaryProjectId]="primaryProjectId()"
+          [projectSearch]="projectSearch()"
+          [filteredProjectOptions]="filteredProjectOptions()"
+          [projectCanCreate]="projectCanCreate()"
+          [canAssignMultipleProjects]="canAssignMultipleProjects()"
+          [primarySelectorVisible]="primarySelectorVisible()"
+          [isGpsAssignmentLocked]="isGpsAssignmentLocked()"
+          [isCorrected]="isCorrected()"
+          [saving]="saving()"
+          (fieldEditRequested)="editingField.set($event)"
+          (fieldSaveRequested)="saveImageField($event.field, $event.value)"
+          (editingCancelled)="editingField.set(null)"
+          (capturedAtEditRequested)="openCapturedAtEditor()"
+          (capturedAtSaved)="saveCapturedAt($event)"
+          (projectSearchChanged)="setProjectSearch($event)"
+          (projectCreateRequested)="createProjectFromSearch()"
+          (projectMembershipToggled)="toggleProjectMembership($event)"
+          (primaryProjectSelected)="setPrimaryProject($event)"
+          (addressSuggestionApplied)="applyAddressSuggestion($event)"
+          (copyCoordinatesRequested)="copyCoordinates()"
+          (zoomToLocationRequested)="zoomToLocation()"
+          (revertCoordinatesRequested)="revertCoordinatesToExif()"
+          (deleteRequested)="confirmDelete()"
+        />
 
-          <div class="detail-row detail-row--readonly">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">description</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.type', 'Type')
-            }}</span>
-            <span class="detail-row__value detail-row__value--static">{{ mediaTypeLabel() }}</span>
-            <span class="detail-row-action detail-row-action--right" aria-hidden="true"></span>
-          </div>
-
-          <!-- Captured date -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'captured_at'">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.captured', 'Captured')
-            }}</span>
-            @if (editingField() === 'captured_at') {
-              <app-captured-date-editor
-                [initialDate]="editDate()"
-                [initialTime]="editTime()"
-                (save)="saveCapturedAt($event)"
-                (cancel)="editingField.set(null)"
-              />
-            } @else {
-              <button class="detail-row__value" type="button" (click)="openCapturedAtEditor()">
-                {{ captureDate() ?? t('workspace.imageDetail.value.empty', '—') }}
-              </button>
-            }
-            <button
-              class="detail-row-action detail-row-action--right"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')
-              "
-              [attr.title]="
-                t('workspace.imageDetail.action.editCaptured.title', 'Edit captured date')
-              "
-              (click)="openCapturedAtEditor()"
-            >
-              <span class="material-icons" aria-hidden="true">edit</span>
-            </button>
-          </div>
-
-          <!-- Project -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'project_ids'">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.projects', 'Projects')
-            }}</span>
-            @if (editingField() === 'project_ids') {
-              <div
-                class="detail-tags"
-                role="group"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.projects.manage.aria', 'Manage projects')
-                "
-                appClickOutside
-                (clickOutside)="editingField.set(null)"
-              >
-                <div class="detail-tags__editor">
-                  @for (opt of projectOptions(); track opt.id) {
-                    @if (selectedProjectIds().has(opt.id)) {
-                      <button
-                        type="button"
-                        class="detail-tags__chip"
-                        (click)="toggleProjectMembership(opt.id)"
-                        [attr.aria-label]="
-                          t('workspace.imageDetail.projects.removePrefix', 'Remove project') +
-                          ' ' +
-                          opt.label
-                        "
-                        [attr.title]="t('workspace.imageDetail.projects.remove', 'Remove')"
-                      >
-                        @if (primarySelectorVisible() && isPrimaryProject(opt.id)) {
-                          <span class="detail-tags__chip-primary">{{
-                            t('workspace.imageDetail.projects.primary', 'Primary')
-                          }}</span>
-                        }
-                        <span class="detail-tags__chip-label">{{ opt.label }}</span>
-                        <span class="material-icons" aria-hidden="true">close</span>
-                      </button>
-                    }
-                  }
-
-                  <input
-                    #projectSearchInput
-                    class="detail-tags__input"
-                    type="text"
-                    [value]="projectSearch()"
-                    [placeholder]="
-                      t(
-                        'workspace.imageDetail.projects.search.placeholder',
-                        'Select project or create one'
-                      )
-                    "
-                    [attr.aria-label]="
-                      t('workspace.imageDetail.projects.search.aria', 'Search projects')
-                    "
-                    (input)="setProjectSearch(projectSearchInput.value)"
-                    (keydown.escape)="editingField.set(null)"
-                    (keydown.enter)="createProjectFromSearch()"
-                  />
-                </div>
-
-                <div
-                  class="detail-tags__dropdown option-menu-surface"
-                  role="listbox"
-                  [attr.aria-label]="
-                    t('workspace.imageDetail.projects.options.aria', 'Project options')
-                  "
-                >
-                  <div class="detail-tags__hint">
-                    {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
-                  </div>
-
-                  @if (!canAssignMultipleProjects()) {
-                    <div class="detail-tags__note" role="status">
-                      {{
-                        t(
-                          'workspace.imageDetail.projects.noGpsNote',
-                          'No GPS: this item can only belong to one project.'
-                        )
-                      }}
-                    </div>
-                  }
-
-                  @if (isGpsAssignmentLocked()) {
-                    <div class="detail-tags__note" role="status">
-                      {{
-                        t(
-                          'workspace.imageDetail.projects.gpsDisabled',
-                          'GPS assignment is disabled for this file type.'
-                        )
-                      }}
-                    </div>
-                  }
-
-                  @if (projectCanCreate()) {
-                    <button
-                      type="button"
-                      class="detail-tags__create"
-                      (click)="createProjectFromSearch()"
-                    >
-                      <span class="detail-tags__create-label">{{
-                        t('workspace.imageDetail.projects.create', 'Create')
-                      }}</span>
-                      <span class="detail-tags__create-value">{{ projectSearch().trim() }}</span>
-                    </button>
-                  }
-
-                  <div class="detail-tags__divider" aria-hidden="true"></div>
-
-                  @for (opt of filteredProjectOptions(); track opt.id) {
-                    <div class="detail-tags__option-row">
-                      <button
-                        type="button"
-                        class="detail-tags__option"
-                        [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
-                        [disabled]="
-                          !selectedProjectIds().has(opt.id) && !canAssignMultipleProjects()
-                        "
-                        (click)="toggleProjectMembership(opt.id)"
-                      >
-                        <span class="detail-tags__option-color" aria-hidden="true"></span>
-                        <span class="detail-tags__option-check" aria-hidden="true">
-                          @if (selectedProjectIds().has(opt.id)) {
-                            <span class="material-icons">check</span>
-                          }
-                        </span>
-                        <span>{{ opt.label }}</span>
-                      </button>
-
-                      @if (primarySelectorVisible()) {
-                        <button
-                          type="button"
-                          class="detail-tags__primary"
-                          [class.detail-tags__primary--active]="isPrimaryProject(opt.id)"
-                          [disabled]="!selectedProjectIds().has(opt.id)"
-                          [attr.aria-label]="
-                            t('workspace.imageDetail.projects.setPrimaryPrefix', 'Set') +
-                            ' ' +
-                            opt.label +
-                            ' ' +
-                            t(
-                              'workspace.imageDetail.projects.setPrimarySuffix',
-                              'as primary project'
-                            )
-                          "
-                          (click)="setPrimaryProject(opt.id)"
-                        >
-                          <span class="material-icons" aria-hidden="true">
-                            {{ isPrimaryProject(opt.id) ? 'star' : 'star_border' }}
-                          </span>
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-              </div>
-            } @else {
-              <button class="detail-row__value" type="button" (click)="openProjectPicker()">
-                {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
-              </button>
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
-                [attr.title]="t('workspace.imageDetail.projects.edit.title', 'Edit projects')"
-                (click)="openProjectPicker()"
-              >
-                <span class="material-icons" aria-hidden="true">edit</span>
-              </button>
-            }
-          </div>
-
-          <!-- Uploaded (read-only) -->
-          <div class="detail-row detail-row--readonly">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.uploaded', 'Uploaded')
-            }}</span>
-            <span class="detail-row__value detail-row__value--static">{{
-              uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
-            }}</span>
-            <button
-              class="detail-row-action detail-row-action--right detail-row-action--danger"
-              type="button"
-              [attr.aria-label]="t('workspace.imageDetail.action.delete', 'Delete image')"
-              [attr.title]="t('workspace.imageDetail.action.delete', 'Delete image')"
-              (click)="confirmDelete()"
-            >
-              <span class="material-icons" aria-hidden="true">delete</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Location Section -->
-        <div class="detail-section">
-          <div class="dd-section-label">
-            {{ t('workspace.imageDetail.section.location', 'Location') }}
-          </div>
-
-          <!-- Address search bar -->
-          <app-address-search
-            [currentAddress]="fullAddress()"
-            (suggestionApplied)="applyAddressSuggestion($event)"
-          />
-
-          <!-- Street -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'street'">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">signpost</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.street', 'Street')
-            }}</span>
-            @if (editingField() === 'street') {
-              <input
-                #streetInput
-                class="detail-row__input"
-                type="text"
-                [value]="image()!.street ?? ''"
-                [attr.aria-label]="t('workspace.imageDetail.action.editStreet.aria', 'Edit street')"
-                (keydown.enter)="saveImageField('street', streetInput.value)"
-                (keydown.escape)="editingField.set(null)"
-                (blur)="saveImageField('street', streetInput.value)"
-              />
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="t('workspace.imageDetail.action.saveStreet.aria', 'Save street')"
-                [attr.title]="t('workspace.imageDetail.action.saveStreet.title', 'Save street')"
-                (click)="saveImageField('street', streetInput.value)"
-              >
-                <span class="material-icons" aria-hidden="true">check</span>
-              </button>
-            } @else {
-              <button class="detail-row__value" type="button" (click)="editingField.set('street')">
-                {{ image()!.street ?? t('workspace.imageDetail.value.empty', '—') }}
-              </button>
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="t('workspace.imageDetail.action.editStreet.aria', 'Edit street')"
-                [attr.title]="t('workspace.imageDetail.action.editStreet.title', 'Edit street')"
-                (click)="editingField.set('street')"
-              >
-                <span class="material-icons" aria-hidden="true">edit</span>
-              </button>
-            }
-          </div>
-
-          <!-- City -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'city'">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">location_city</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.city', 'City')
-            }}</span>
-            @if (editingField() === 'city') {
-              <input
-                #cityInput
-                class="detail-row__input"
-                type="text"
-                [value]="image()!.city ?? ''"
-                [attr.aria-label]="t('workspace.imageDetail.action.editCity.aria', 'Edit city')"
-                (keydown.enter)="saveImageField('city', cityInput.value)"
-                (keydown.escape)="editingField.set(null)"
-                (blur)="saveImageField('city', cityInput.value)"
-              />
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="t('workspace.imageDetail.action.saveCity.aria', 'Save city')"
-                [attr.title]="t('workspace.imageDetail.action.saveCity.title', 'Save city')"
-                (click)="saveImageField('city', cityInput.value)"
-              >
-                <span class="material-icons" aria-hidden="true">check</span>
-              </button>
-            } @else {
-              <button class="detail-row__value" type="button" (click)="editingField.set('city')">
-                {{ image()!.city ?? t('workspace.imageDetail.value.empty', '—') }}
-              </button>
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="t('workspace.imageDetail.action.editCity.aria', 'Edit city')"
-                [attr.title]="t('workspace.imageDetail.action.editCity.title', 'Edit city')"
-                (click)="editingField.set('city')"
-              >
-                <span class="material-icons" aria-hidden="true">edit</span>
-              </button>
-            }
-          </div>
-
-          <!-- District -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'district'">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">map</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.district', 'District')
-            }}</span>
-            @if (editingField() === 'district') {
-              <input
-                #districtInput
-                class="detail-row__input"
-                type="text"
-                [value]="image()!.district ?? ''"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.editDistrict.aria', 'Edit district')
-                "
-                (keydown.enter)="saveImageField('district', districtInput.value)"
-                (keydown.escape)="editingField.set(null)"
-                (blur)="saveImageField('district', districtInput.value)"
-              />
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.saveDistrict.aria', 'Save district')
-                "
-                [attr.title]="t('workspace.imageDetail.action.saveDistrict.title', 'Save district')"
-                (click)="saveImageField('district', districtInput.value)"
-              >
-                <span class="material-icons" aria-hidden="true">check</span>
-              </button>
-            } @else {
-              <button
-                class="detail-row__value"
-                type="button"
-                (click)="editingField.set('district')"
-              >
-                {{ image()!.district ?? t('workspace.imageDetail.value.empty', '—') }}
-              </button>
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.editDistrict.aria', 'Edit district')
-                "
-                [attr.title]="t('workspace.imageDetail.action.editDistrict.title', 'Edit district')"
-                (click)="editingField.set('district')"
-              >
-                <span class="material-icons" aria-hidden="true">edit</span>
-              </button>
-            }
-          </div>
-
-          <!-- Country -->
-          <div class="detail-row" [class.detail-row--editing]="editingField() === 'country'">
-            <button
-              class="detail-row-action detail-row-action--left"
-              type="button"
-              [attr.aria-label]="
-                t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-              "
-              [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-              (click)="copyCoordinates()"
-            >
-              <span class="material-icons" aria-hidden="true">content_copy</span>
-            </button>
-            <span class="material-icons detail-row__icon" aria-hidden="true">public</span>
-            <span class="detail-row__label">{{
-              t('workspace.imageDetail.field.country', 'Country')
-            }}</span>
-            @if (editingField() === 'country') {
-              <input
-                #countryInput
-                class="detail-row__input"
-                type="text"
-                [value]="image()!.country ?? ''"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.editCountry.aria', 'Edit country')
-                "
-                (keydown.enter)="saveImageField('country', countryInput.value)"
-                (keydown.escape)="editingField.set(null)"
-                (blur)="saveImageField('country', countryInput.value)"
-              />
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.saveCountry.aria', 'Save country')
-                "
-                [attr.title]="t('workspace.imageDetail.action.saveCountry.title', 'Save country')"
-                (click)="saveImageField('country', countryInput.value)"
-              >
-                <span class="material-icons" aria-hidden="true">check</span>
-              </button>
-            } @else {
-              <button class="detail-row__value" type="button" (click)="editingField.set('country')">
-                {{ image()!.country ?? t('workspace.imageDetail.value.empty', '—') }}
-              </button>
-              <button
-                class="detail-row-action detail-row-action--right"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.editCountry.aria', 'Edit country')
-                "
-                [attr.title]="t('workspace.imageDetail.action.editCountry.title', 'Edit country')"
-                (click)="editingField.set('country')"
-              >
-                <span class="material-icons" aria-hidden="true">edit</span>
-              </button>
-            }
-          </div>
-
-          <!-- Coordinates (read-only — edited via map correction) -->
-          @if (image()!.latitude != null) {
-            <div class="detail-row detail-row--readonly">
-              <button
-                class="detail-row-action detail-row-action--left-outer"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.zoomToLocation.aria', 'Zoom to location')
-                "
-                [attr.title]="
-                  t('workspace.imageDetail.action.zoomToLocation.title', 'Zoom to location')
-                "
-                (click)="zoomToLocation()"
-              >
-                <span class="material-icons" aria-hidden="true">zoom_in_map</span>
-              </button>
-              <button
-                class="detail-row-action detail-row-action--left"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-                "
-                [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-                (click)="copyCoordinates()"
-              >
-                <span class="material-icons" aria-hidden="true">content_copy</span>
-              </button>
-              <span class="material-icons detail-row__icon" aria-hidden="true">gps_fixed</span>
-              <span class="detail-row__label">
-                {{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}
-                @if (isCorrected()) {
-                  <span class="detail-correction-badge">{{
-                    t('workspace.imageDetail.badge.corrected', 'Corrected')
-                  }}</span>
-                }
-              </span>
-              <span class="detail-row__value detail-row__value--static detail-row__value--mono">
-                {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
-              </span>
-              <button
-                class="detail-row-action detail-row-action--right detail-row-action--danger"
-                type="button"
-                [attr.aria-label]="
-                  t(
-                    'workspace.imageDetail.action.revertCoordinates.aria',
-                    'Revert corrected coordinates'
-                  )
-                "
-                [attr.title]="
-                  t(
-                    'workspace.imageDetail.action.revertCoordinates.title',
-                    'Revert corrected coordinates'
-                  )
-                "
-                [disabled]="!isCorrected() || saving()"
-                (click)="revertCoordinatesToExif()"
-              >
-                <span class="material-icons" aria-hidden="true">close</span>
-              </button>
-            </div>
-          }
-
-          <!-- Correction History -->
-          @if (isCorrected()) {
-            <div class="detail-correction-history">
-              <div class="detail-correction-history__row">
-                <span class="detail-correction-history__key">{{
-                  t('workspace.imageDetail.correction.originalExif', 'Original EXIF')
-                }}</span>
-                <span class="detail-correction-history__value">
-                  {{ formatCoord(image()!.exif_latitude) }}°,
-                  {{ formatCoord(image()!.exif_longitude) }}°
-                </span>
-              </div>
-              <div class="detail-correction-history__row">
-                <span class="detail-correction-history__key">{{
-                  t('workspace.imageDetail.badge.corrected', 'Corrected')
-                }}</span>
-                <span class="detail-correction-history__value">
-                  {{ formatCoord(image()!.latitude) }}°, {{ formatCoord(image()!.longitude) }}°
-                </span>
-              </div>
-            </div>
-          }
-
-          @if (image()!.latitude == null || image()!.longitude == null) {
-            <div class="detail-row detail-row--readonly">
-              <button
-                class="detail-row-action detail-row-action--left"
-                type="button"
-                [attr.aria-label]="
-                  t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-                "
-                [attr.title]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
-                (click)="copyCoordinates()"
-              >
-                <span class="material-icons" aria-hidden="true">content_copy</span>
-              </button>
-              <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
-              <span class="detail-row__label">{{
-                t('workspace.imageDetail.field.coordinates', 'Coordinates')
-              }}</span>
-              <div class="detail-row__value-wrap">
-                <span class="detail-row__value detail-row__value--static">{{
-                  t('workspace.imageDetail.value.noGps', 'No GPS')
-                }}</span>
-                @if (isGpsAssignmentLocked()) {
-                  <span class="detail-row__subvalue">{{
-                    t(
-                      'workspace.imageDetail.projects.gpsDisabled',
-                      'GPS assignment disabled for this file type.'
-                    )
-                  }}</span>
-                }
-              </div>
-            </div>
-          }
-        </div>
-
-        <!-- Custom Metadata Section -->
         <div class="detail-section">
           <app-metadata-section
             [entries]="metadata()"
@@ -885,7 +105,6 @@
           />
         </div>
 
-        <!-- Actions Section -->
         <app-detail-actions
           [hasCoordinates]="hasCoordinates()"
           (zoomToLocation)="zoomToLocation()"
@@ -898,16 +117,6 @@
   </div>
 }
 
-<!-- Photo lightbox overlay -->
-@if (showLightbox() && canOpenLightbox() && (fullResUrl() || thumbnailUrl())) {
-  <app-photo-lightbox
-    [imageUrl]="(fullResUrl() ?? thumbnailUrl())!"
-    [alt]="displayTitle()"
-    (closed)="showLightbox.set(false)"
-  />
-}
-
-<!-- Delete confirmation dialog -->
 @if (showDeleteConfirm()) {
   <app-confirm-dialog
     [title]="t('workspace.imageDetail.deleteDialog.title', 'Delete this image?')"

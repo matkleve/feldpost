@@ -1,6 +1,5 @@
 import {
   Component,
-  ElementRef,
   OnDestroy,
   computed,
   effect,
@@ -8,9 +7,8 @@ import {
   input,
   output,
   signal,
-  viewChild,
 } from '@angular/core';
-import { CapturedDateEditorComponent, DateSaveEvent } from './captured-date-editor.component';
+import { DateSaveEvent } from './captured-date-editor.component';
 import { SupabaseService } from '../../../core/supabase.service';
 import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
@@ -31,40 +29,44 @@ import type { PhotoLoadState } from '../../../core/photo-load.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { ForwardGeocodeResult } from '../../../core/geocoding.service';
-import { ImageRecord, MetadataEntry, SelectOption } from './image-detail-view.types';
-import { PhotoLightboxComponent } from '../../../shared/photo-lightbox/photo-lightbox.component';
+import {
+  DetailEditingField,
+  ImageRecord,
+  MetadataEntry,
+  SelectOption,
+} from './image-detail-view.types';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import {
   QuickInfoChipsComponent,
   ChipDef,
 } from '../../../shared/quick-info-chips/quick-info-chips.component';
-import { AddressSearchComponent } from './address-search/address-search.component';
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
 import { DetailActionsComponent } from './detail-actions/detail-actions.component';
-import { ClickOutsideDirective } from '../../../shared/click-outside.directive';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import {
+  formatCoordinate,
+  isImageLikeMedia,
+  mapImageMetadataRows,
+  resolveMediaTypeLabel,
+  resolvePreviewThumbnailPath,
+} from './image-detail-view.utils';
+import { ImageDetailHeaderComponent } from './image-detail-header/image-detail-header.component';
+import { ImageDetailPhotoViewerComponent } from './image-detail-photo-viewer/image-detail-photo-viewer.component';
+import { ImageDetailInlineSectionComponent } from './image-detail-inline-section/image-detail-inline-section.component';
+import { ImageDetailProjectMembershipHelper } from './image-detail-project-membership.helper';
 export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
-
-interface MediaContextRow {
-  id: string;
-  primary_project_id: string | null;
-  media_type: string | null;
-  mime_type: string | null;
-  location_status: string | null;
-}
 
 @Component({
   selector: 'app-image-detail-view',
   standalone: true,
   imports: [
-    CapturedDateEditorComponent,
-    PhotoLightboxComponent,
     ConfirmDialogComponent,
     QuickInfoChipsComponent,
-    AddressSearchComponent,
     MetadataSectionComponent,
     DetailActionsComponent,
-    ClickOutsideDirective,
+    ImageDetailHeaderComponent,
+    ImageDetailPhotoViewerComponent,
+    ImageDetailInlineSectionComponent,
   ],
   templateUrl: './image-detail-view.component.html',
   styleUrl: './image-detail-view.component.scss',
@@ -105,10 +107,9 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly mediaMimeType = signal<string | null>(null);
   readonly mediaLocationStatus = signal<string | null>(null);
   readonly projectSearch = signal('');
-  readonly editingField = signal<string | null>(null);
+  readonly editingField = signal<DetailEditingField>(null);
   readonly fullResUrl = signal<string | null>(null);
   readonly thumbnailUrl = signal<string | null>(null);
-  readonly showLightbox = signal(false);
   readonly allMetadataKeyNames = signal<string[]>([]);
   private readonly activeJobId = signal<string | null>(null);
 
@@ -139,9 +140,26 @@ export class ImageDetailViewComponent implements OnDestroy {
     return job.phase !== 'complete' && job.phase !== 'error' && job.phase !== 'skipped';
   });
   readonly replaceError = signal<string | null>(null);
-  readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   readonly editDate = signal('');
   readonly editTime = signal('');
+  readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
+  private readonly projectMembershipHelper = new ImageDetailProjectMembershipHelper({
+    supabase: this.supabaseService,
+    projectsService: this.projectsService,
+    toastService: this.toastService,
+    t: this.t,
+    image: this.image,
+    selectedProjectIds: this.selectedProjectIds,
+    primaryProjectId: this.primaryProjectId,
+    mediaItemId: this.mediaItemId,
+    mediaType: this.mediaType,
+    mediaMimeType: this.mediaMimeType,
+    mediaLocationStatus: this.mediaLocationStatus,
+    projectOptions: this.projectOptions,
+    projectSearch: this.projectSearch,
+    canAssignMultipleProjects: () => this.canAssignMultipleProjects(),
+    primarySelectorVisible: () => this.primarySelectorVisible(),
+  });
 
   readonly isCorrected = computed(() => {
     const img = this.image();
@@ -311,7 +329,7 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   readonly canOpenLightbox = computed(() => {
     if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
-    return this.isImageLikeMedia(this.image()?.storage_path ?? null);
+    return isImageLikeMedia(this.mediaType(), this.mediaMimeType(), this.image()?.storage_path ?? null);
   });
 
   private abortController: AbortController | null = null;
@@ -414,7 +432,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.showContextMenu.set(false);
     this.showDeleteConfirm.set(false);
     this.editingField.set(null);
-    this.showLightbox.set(false);
     this.activeJobId.set(null);
     this.replaceError.set(null);
   }
@@ -451,11 +468,7 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.loading.set(false);
 
     // Map metadata
-    const entries: MetadataEntry[] = (metaResult.data ?? []).map((row: any) => ({
-      metadataKeyId: row.metadata_key_id as string,
-      key: (row.metadata_keys as { key_name: string } | null)?.key_name ?? 'Unknown',
-      value: row.value_text as string,
-    }));
+    const entries: MetadataEntry[] = mapImageMetadataRows(metaResult.data ?? []);
     this.metadata.set(entries);
 
     // Load signed URLs and project list in parallel
@@ -464,261 +477,15 @@ export class ImageDetailViewComponent implements OnDestroy {
     } else {
       this.photoLoad.markNoPhoto(imgData.id);
     }
-    await this.loadProjectMemberships(id, imgData.project_id);
+    await this.projectMembershipHelper.loadProjectMemberships(id, imgData.project_id);
     if (imgData.organization_id) {
       this.loadProjects(imgData.organization_id);
       this.loadMetadataKeys(imgData.organization_id);
     }
   }
 
-  private async loadProjectMemberships(
-    imageId: string,
-    fallbackProjectId: string | null,
-  ): Promise<void> {
-    const mediaContext = await this.loadMediaContext(imageId);
-    const memberships = new Set<string>();
-    let resolvedPrimaryProjectId: string | null = mediaContext?.primary_project_id ?? null;
-
-    if (mediaContext?.id) {
-      const mediaMemberships = await this.projectsService.loadMediaProjectMemberships(
-        mediaContext.id,
-      );
-      for (const projectId of mediaMemberships) {
-        memberships.add(projectId);
-      }
-      if (mediaContext.primary_project_id) {
-        memberships.add(mediaContext.primary_project_id);
-      }
-    } else {
-      const { data, error } = await this.supabaseService.client
-        .from('image_projects')
-        .select('project_id')
-        .eq('image_id', imageId);
-
-      if (!error && Array.isArray(data)) {
-        for (const row of data as Array<{ project_id: string }>) {
-          memberships.add(row.project_id);
-        }
-      }
-    }
-
-    if (memberships.size === 0 && fallbackProjectId) {
-      memberships.add(fallbackProjectId);
-    }
-
-    if (!resolvedPrimaryProjectId && fallbackProjectId && memberships.has(fallbackProjectId)) {
-      resolvedPrimaryProjectId = fallbackProjectId;
-    }
-
-    if (!resolvedPrimaryProjectId && memberships.size > 0) {
-      resolvedPrimaryProjectId = [...memberships][0] ?? null;
-    }
-
-    this.selectedProjectIds.set(memberships);
-    this.primaryProjectId.set(resolvedPrimaryProjectId);
-  }
-
-  private async loadMediaContext(imageId: string): Promise<MediaContextRow | null> {
-    const response = await this.supabaseService.client
-      .from('media_items')
-      .select('id,primary_project_id,media_type,mime_type,location_status')
-      .eq('source_image_id', imageId);
-
-    if (response.error || !Array.isArray(response.data) || response.data.length === 0) {
-      this.mediaItemId.set(null);
-      this.mediaType.set(null);
-      this.mediaMimeType.set(null);
-      this.mediaLocationStatus.set(null);
-      return null;
-    }
-
-    const row = response.data[0] as MediaContextRow;
-    this.mediaItemId.set(row.id);
-    this.mediaType.set(row.media_type ?? null);
-    this.mediaMimeType.set(row.mime_type ?? null);
-    this.mediaLocationStatus.set(row.location_status ?? null);
-    return row;
-  }
-
-  private async persistProjectMemberships(previous: Set<string>): Promise<void> {
-    const img = this.image();
-    if (!img) return;
-
-    const next = this.selectedProjectIds();
-    const prevIds = [...previous];
-    const nextIds = [...next];
-
-    const toInsert = nextIds.filter((id) => !previous.has(id));
-    const toDelete = prevIds.filter((id) => !next.has(id));
-    const requestedPrimaryProjectId = this.primaryProjectId();
-    const primaryProjectId =
-      requestedPrimaryProjectId && next.has(requestedPrimaryProjectId)
-        ? requestedPrimaryProjectId
-        : (nextIds[0] ?? null);
-
-    if (nextIds.length === 0) {
-      this.selectedProjectIds.set(previous);
-      this.toastService.show({
-        message: this.t(
-          'workspace.imageDetail.toast.projectRequired',
-          'At least one project is required.',
-        ),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    if (!this.canAssignMultipleProjects() && nextIds.length > 1) {
-      this.selectedProjectIds.set(previous);
-      this.toastService.show({
-        message: this.t(
-          'workspace.imageDetail.toast.noGpsSingleProject',
-          'No-GPS media can only belong to one project.',
-        ),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    const mediaItemId = this.mediaItemId();
-    if (!mediaItemId) {
-      if (toInsert.length > 0) {
-        const insertPayload = toInsert.map((projectId) => ({
-          image_id: img.id,
-          project_id: projectId,
-        }));
-        const { error } = await this.supabaseService.client
-          .from('image_projects')
-          .upsert(insertPayload, { onConflict: 'image_id,project_id' });
-        if (error) {
-          this.selectedProjectIds.set(previous);
-          return;
-        }
-      }
-
-      if (toDelete.length > 0) {
-        const { error } = await this.supabaseService.client
-          .from('image_projects')
-          .delete()
-          .eq('image_id', img.id)
-          .in('project_id', toDelete);
-        if (error) {
-          this.selectedProjectIds.set(previous);
-          return;
-        }
-      }
-
-      const { error: syncError } = await this.supabaseService.client
-        .from('images')
-        .update({ project_id: primaryProjectId })
-        .eq('id', img.id);
-
-      if (syncError) {
-        this.selectedProjectIds.set(previous);
-        return;
-      }
-
-      this.primaryProjectId.set(primaryProjectId);
-      this.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
-      return;
-    }
-
-    for (const projectId of toInsert) {
-      const ok = await this.projectsService.addMediaToProject(mediaItemId, projectId);
-      if (!ok) {
-        this.selectedProjectIds.set(previous);
-        this.toastService.show({
-          message: this.t(
-            'workspace.imageDetail.toast.membershipUpdateFailed',
-            'Could not update project memberships.',
-          ),
-          type: 'error',
-          dedupe: true,
-        });
-        return;
-      }
-    }
-
-    for (const projectId of toDelete) {
-      const ok = await this.projectsService.removeMediaFromProject(mediaItemId, projectId);
-      if (!ok) {
-        this.selectedProjectIds.set(previous);
-        this.toastService.show({
-          message: this.t(
-            'workspace.imageDetail.toast.membershipUpdateFailed',
-            'Could not update project memberships.',
-          ),
-          type: 'error',
-          dedupe: true,
-        });
-        return;
-      }
-    }
-
-    if (primaryProjectId) {
-      const ok = await this.projectsService.setMediaPrimaryProject(mediaItemId, primaryProjectId);
-      if (!ok) {
-        this.selectedProjectIds.set(previous);
-        this.toastService.show({
-          message: this.t(
-            'workspace.imageDetail.toast.primaryProjectFailed',
-            'Could not set primary project.',
-          ),
-          type: 'error',
-          dedupe: true,
-        });
-        return;
-      }
-    }
-
-    this.primaryProjectId.set(primaryProjectId);
-    this.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
-  }
-
   async toggleProjectMembership(projectId: string): Promise<void> {
-    const previous = new Set(this.selectedProjectIds());
-    const next = new Set(previous);
-    const removing = next.has(projectId);
-
-    if (removing && previous.size === 1) {
-      this.toastService.show({
-        message: this.t(
-          'workspace.imageDetail.toast.projectRequired',
-          'At least one project is required.',
-        ),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    if (!removing && !this.canAssignMultipleProjects() && previous.size > 0) {
-      this.toastService.show({
-        message: this.t(
-          'workspace.imageDetail.toast.noGpsSingleProject',
-          'No-GPS media can only belong to one project.',
-        ),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    if (next.has(projectId)) {
-      next.delete(projectId);
-    } else {
-      next.add(projectId);
-    }
-
-    const currentPrimaryProjectId = this.primaryProjectId();
-    if (!currentPrimaryProjectId || !next.has(currentPrimaryProjectId)) {
-      this.primaryProjectId.set([...next][0] ?? null);
-    }
-
-    this.selectedProjectIds.set(next);
-    await this.persistProjectMemberships(previous);
+    await this.projectMembershipHelper.toggleProjectMembership(projectId);
   }
 
   isPrimaryProject(projectId: string): boolean {
@@ -726,109 +493,26 @@ export class ImageDetailViewComponent implements OnDestroy {
   }
 
   async setPrimaryProject(projectId: string): Promise<void> {
-    if (!this.primarySelectorVisible()) {
-      return;
-    }
-
-    if (!this.selectedProjectIds().has(projectId)) {
-      return;
-    }
-
-    if (this.primaryProjectId() === projectId) {
-      return;
-    }
-
-    const previousPrimary = this.primaryProjectId();
-    this.primaryProjectId.set(projectId);
-
-    const mediaItemId = this.mediaItemId();
-    if (mediaItemId) {
-      const ok = await this.projectsService.setMediaPrimaryProject(mediaItemId, projectId);
-      if (!ok) {
-        this.primaryProjectId.set(previousPrimary);
-        this.toastService.show({
-          message: this.t(
-            'workspace.imageDetail.toast.primaryProjectFailed',
-            'Could not set primary project.',
-          ),
-          type: 'error',
-          dedupe: true,
-        });
-        return;
-      }
-    } else {
-      const img = this.image();
-      if (!img) {
-        return;
-      }
-
-      const { error } = await this.supabaseService.client
-        .from('images')
-        .update({ project_id: projectId })
-        .eq('id', img.id);
-
-      if (error) {
-        this.primaryProjectId.set(previousPrimary);
-        return;
-      }
-    }
-
-    this.image.update((prev) => (prev ? { ...prev, project_id: projectId } : prev));
+    await this.projectMembershipHelper.setPrimaryProject(projectId);
   }
 
   setProjectSearch(value: string): void {
-    this.projectSearch.set(value);
+    this.projectMembershipHelper.setProjectSearch(value);
   }
 
   async createProjectFromSearch(): Promise<void> {
-    const name = this.projectSearch().trim();
-    if (!name) return;
-
-    const img = this.image();
-    if (!img?.organization_id) return;
-
-    if (!this.canAssignMultipleProjects() && this.selectedProjectIds().size > 0) {
-      this.toastService.show({
-        message: this.t(
-          'workspace.imageDetail.toast.noGpsSingleProject',
-          'No-GPS media can only belong to one project.',
-        ),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    const existing = this.projectOptions().find(
-      (option) => option.label.toLowerCase() === name.toLowerCase(),
-    );
-    if (existing) {
-      await this.toggleProjectMembership(existing.id);
-      this.projectSearch.set('');
-      return;
-    }
-
-    const { data, error } = await this.supabaseService.client
-      .from('projects')
-      .insert({ name, organization_id: img.organization_id })
-      .select('id,name')
-      .single();
-
-    if (error || !data) return;
-
-    const created = { id: data.id as string, label: data.name as string };
-    this.projectOptions.update((list) =>
-      [...list, created].sort((a, b) => a.label.localeCompare(b.label)),
-    );
-    this.projectSearch.set('');
-    await this.toggleProjectMembership(created.id);
+    await this.projectMembershipHelper.createProjectFromSearch();
   }
 
   private async loadSignedUrls(img: ImageRecord, abortSignal: AbortSignal): Promise<void> {
     if (!img.storage_path) return;
 
-    const isImageAsset = this.isImageLikeMedia(img.storage_path);
-    const thumbPath = this.resolvePreviewThumbnailPath(img.thumbnail_path, img.storage_path);
+    const isImageAsset = isImageLikeMedia(
+      this.mediaType(),
+      this.mediaMimeType(),
+      img.storage_path,
+    );
+    const thumbPath = resolvePreviewThumbnailPath(img.thumbnail_path, img.storage_path);
     const fullPath = isImageAsset ? img.storage_path : null;
 
     const [thumbResult, fullResult] = await Promise.all([
@@ -854,101 +538,8 @@ export class ImageDetailViewComponent implements OnDestroy {
     }
   }
 
-  openLightbox(): void {
-    if (!this.canOpenLightbox()) {
-      return;
-    }
-    this.showLightbox.set(true);
-  }
-
-  private resolvePreviewThumbnailPath(
-    thumbnailPath: string | null,
-    storagePath: string,
-  ): string | null {
-    if (thumbnailPath && this.isLikelyImagePath(thumbnailPath)) {
-      return thumbnailPath;
-    }
-
-    if (this.isLikelyImagePath(storagePath)) {
-      return storagePath;
-    }
-
-    return null;
-  }
-
-  private isImageLikeMedia(storagePath: string | null): boolean {
-    const mediaType = this.mediaType();
-    if (mediaType) {
-      return mediaType === 'image';
-    }
-
-    const mimeType = this.mediaMimeType();
-    if (mimeType) {
-      return mimeType.startsWith('image/');
-    }
-
-    return this.isLikelyImagePath(storagePath);
-  }
-
-  private isLikelyImagePath(path: string | null): boolean {
-    if (!path) return false;
-    return /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|tiff?|webp)$/i.test(path);
-  }
-
   private resolveMediaTypeLabel(): string {
-    const mimeType = this.mediaMimeType();
-    if (mimeType) {
-      const fromMime = this.mapMimeTypeToLabel(mimeType);
-      if (fromMime) return fromMime;
-    }
-
-    const mediaType = this.mediaType();
-    if (mediaType === 'image') return this.t('workspace.imageDetail.mediaType.image', 'Image');
-    if (mediaType === 'video') return this.t('workspace.imageDetail.mediaType.video', 'Video');
-    if (mediaType === 'document')
-      return this.t('workspace.imageDetail.mediaType.document', 'Document');
-
-    const path = this.image()?.storage_path;
-    const extension = path?.split('.').pop()?.toUpperCase();
-    if (extension) {
-      if (
-        extension === 'JPG' ||
-        extension === 'JPEG' ||
-        extension === 'PNG' ||
-        extension === 'WEBP'
-      ) {
-        return this.t('workspace.imageDetail.mediaType.image', 'Image');
-      }
-      return extension;
-    }
-
-    return this.t('workspace.imageDetail.mediaType.media', 'Media');
-  }
-
-  private mapMimeTypeToLabel(mimeType: string): string | null {
-    if (mimeType.startsWith('image/'))
-      return this.t('workspace.imageDetail.mediaType.image', 'Image');
-    if (mimeType.startsWith('video/'))
-      return this.t('workspace.imageDetail.mediaType.video', 'Video');
-
-    switch (mimeType) {
-      case 'application/pdf':
-        return 'PDF';
-      case 'application/msword':
-        return 'DOC';
-      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return 'DOCX';
-      case 'application/vnd.ms-excel':
-        return 'XLS';
-      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        return 'XLSX';
-      case 'application/vnd.ms-powerpoint':
-        return 'PPT';
-      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        return 'PPTX';
-      default:
-        return null;
-    }
+    return resolveMediaTypeLabel(this.image(), this.mediaType(), this.mediaMimeType(), this.t);
   }
 
   close(): void {
@@ -1252,8 +843,7 @@ export class ImageDetailViewComponent implements OnDestroy {
   }
 
   protected formatCoord(value: number | null): string {
-    if (value == null) return '—';
-    return value.toFixed(6);
+    return formatCoordinate(value);
   }
 
   private async loadProjects(organizationId: string): Promise<void> {
@@ -1350,20 +940,9 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.projectSearch.set('');
   }
 
-  /** Accepted MIME types for the file input */
-  readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
-
-  triggerFileInput(): void {
-    const input = this.fileInput()?.nativeElement;
-    if (input) {
-      input.value = '';
-      input.click();
-    }
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  onFileSelected(event: Event | File): void {
+    const file =
+      event instanceof File ? event : ((event.target as HTMLInputElement | null)?.files?.[0] ?? null);
     if (!file) {
       console.warn('[detail-view] onFileSelected: no file selected');
       return;

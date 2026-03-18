@@ -1,0 +1,112 @@
+<input
+  #fileInput
+  type="file"
+  [accept]="acceptTypes()"
+  class="visually-hidden"
+  aria-hidden="true"
+  (change)="onFileSelected($event)"
+/>
+
+@if (hasPhoto()) {
+  <div class="detail-image-container">
+    <button
+      class="detail-image-wrap"
+      type="button"
+      [disabled]="!canOpenLightbox()"
+      [class.detail-image-wrap--static]="!canOpenLightbox()"
+      [attr.aria-label]="t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')"
+      (click)="openLightbox()"
+    >
+      @if (!imageReady()) {
+        @if (thumbState() === 'error' && fullState() === 'error') {
+          <div class="detail-image-placeholder detail-image-placeholder--no-photo">
+            <span
+              class="detail-image-placeholder__icon detail-image-placeholder__icon--no-photo"
+              aria-hidden="true"
+            ></span>
+            <span class="visually-hidden">{{
+              t('workspace.imageDetail.imageUnavailable', 'Image unavailable')
+            }}</span>
+          </div>
+        } @else {
+          <div
+            class="detail-image-placeholder"
+            [class.detail-image-placeholder--loading]="isImageLoading()"
+          >
+            <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
+          </div>
+        }
+      }
+
+      @if (thumbnailUrl() && thumbState() === 'loaded' && (!fullResPreloaded() || !canOpenLightbox())) {
+        <img
+          class="detail-image"
+          [class.detail-image--thumb]="canOpenLightbox()"
+          [class.detail-image--preview]="!canOpenLightbox()"
+          [src]="thumbnailUrl()!"
+          [alt]="t('workspace.imageDetail.photoPreview.alt', 'Photo preview')"
+          aria-hidden="true"
+        />
+      }
+
+      @if (fullResUrl()) {
+        <img
+          class="detail-image detail-image--full"
+          [class.detail-image--loaded]="fullResPreloaded()"
+          [src]="fullResUrl()!"
+          [alt]="displayTitle()"
+        />
+      }
+    </button>
+
+    <button
+      class="detail-image-edit-btn"
+      type="button"
+      [attr.aria-label]="t('workspace.imageDetail.action.replacePhoto.aria', 'Replace photo')"
+      [attr.title]="t('workspace.imageDetail.action.replacePhoto.title', 'Replace photo')"
+      [disabled]="replacing()"
+      (click)="triggerFileInput()"
+    >
+      @if (replacing()) {
+        <span class="detail-image-edit-btn__spinner" aria-hidden="true"></span>
+      } @else {
+        <span class="material-icons" aria-hidden="true">edit</span>
+      }
+    </button>
+
+    @if (replaceError()) {
+      <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+    }
+  </div>
+} @else {
+  <div class="detail-upload-prompt">
+    <div class="detail-upload-prompt__placeholder">
+      <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
+      <span class="detail-upload-prompt__text">{{
+        t('workspace.imageDetail.noPhotoAttached', 'No photo attached')
+      }}</span>
+    </div>
+    <button
+      class="detail-upload-prompt__button"
+      type="button"
+      [disabled]="replacing()"
+      (click)="triggerFileInput()"
+    >
+      @if (replacing()) {
+        <span class="detail-upload-prompt__spinner" aria-hidden="true"></span>
+      }
+      {{ t('workspace.imageDetail.action.uploadPhoto', 'Upload photo') }}
+    </button>
+    @if (replaceError()) {
+      <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>
+    }
+  </div>
+}
+
+@if (showLightbox() && canOpenLightbox() && (fullResUrl() || thumbnailUrl())) {
+  <app-photo-lightbox
+    [imageUrl]="(fullResUrl() ?? thumbnailUrl())!"
+    [alt]="displayTitle()"
+    (closed)="showLightbox.set(false)"
+  />
+}

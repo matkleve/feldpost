@@ -16,6 +16,7 @@ import {
   ImageRecord,
   MetadataEntry,
 } from './image-detail-view.component';
+import { formatCoordinate } from './image-detail-view.utils';
 import {
   UploadManagerService,
   ImageReplacedEvent,
@@ -692,8 +693,7 @@ describe('ImageDetailViewComponent', () => {
 
   describe('formatCoord', () => {
     it('formats a number to 6 decimal places', () => {
-      const { component } = setup();
-      expect(component['formatCoord'](48.208174)).toBe('48.208174');
+      expect(formatCoordinate(48.208174)).toBe('48.208174');
     });
 
     it('returns em-dash for null', () => {

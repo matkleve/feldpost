@@ -1,0 +1,84 @@
+<div class="detail-header">
+  <button
+    class="detail-back-btn"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.back.aria', 'Back to gallery')"
+    [attr.title]="t('workspace.imageDetail.action.back.title', 'Back to gallery')"
+    (click)="closed.emit()"
+  >
+    <span class="material-icons" aria-hidden="true">arrow_back</span>
+  </button>
+
+  @if (editingTitle()) {
+    <input
+      #titleInput
+      class="detail-title-input"
+      type="text"
+      [value]="titleValue()"
+      [attr.aria-label]="t('workspace.imageDetail.title.edit.aria', 'Edit image title')"
+      (keydown.enter)="titleSaveRequested.emit(titleInput.value)"
+      (keydown.escape)="titleEditCancelled.emit()"
+      (blur)="titleSaveRequested.emit(titleInput.value)"
+    />
+  } @else {
+    <button
+      class="detail-title detail-title--editable"
+      type="button"
+      [attr.title]="t('workspace.imageDetail.title.edit.title', 'Click to edit title')"
+      (click)="titleEditRequested.emit()"
+    >
+      {{ displayTitle() }}
+    </button>
+  }
+
+  <span
+    class="detail-kind-chip"
+    [attr.aria-label]="t('workspace.imageDetail.fileType.aria', 'File type')"
+    >{{ mediaTypeLabel() }}</span
+  >
+
+  <button
+    class="detail-actions-btn"
+    type="button"
+    [attr.aria-label]="t('workspace.imageDetail.action.more.aria', 'More actions')"
+    [attr.title]="t('workspace.imageDetail.action.more.title', 'More actions')"
+    aria-haspopup="true"
+    [attr.aria-expanded]="showContextMenu()"
+    (click)="contextMenuToggled.emit()"
+  >
+    <span class="material-icons" aria-hidden="true">more_vert</span>
+  </button>
+
+  @if (showContextMenu()) {
+    <div
+      class="detail-context-menu option-menu-surface dd-items"
+      role="menu"
+      appClickOutside
+      (clickOutside)="contextMenuClosed.emit()"
+      (keydown.escape)="contextMenuClosed.emit()"
+    >
+      <button
+        class="dd-item dd-item--danger"
+        type="button"
+        role="menuitem"
+        (click)="deleteRequested.emit()"
+      >
+        <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
+        <span class="dd-item__label">{{
+          t('workspace.imageDetail.action.delete', 'Delete image')
+        }}</span>
+      </button>
+      <button class="dd-item" type="button" role="menuitem" (click)="copyCoordinatesRequested.emit()">
+        <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
+        <span class="dd-item__label">{{
+          t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
+        }}</span>
+      </button>
+    </div>
+    <div
+      class="detail-context-menu-overlay"
+      aria-hidden="true"
+      (click)="contextMenuClosed.emit()"
+    ></div>
+  }
+</div>
