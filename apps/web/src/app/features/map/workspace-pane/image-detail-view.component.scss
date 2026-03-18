@@ -82,38 +82,15 @@
 
 .detail-back-btn,
 .detail-actions-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: none;
-  border-radius: var(--radius-md);
-  background: none;
+  --icon-btn-size: 2.75rem;
+  --icon-btn-radius: var(--radius-md);
+  --icon-btn-icon-size: 1.25rem;
+
   color: var(--color-text-secondary);
-  cursor: pointer;
   flex-shrink: 0;
-  transition:
-    background 80ms ease-out,
-    color 80ms ease-out;
-
-  .material-icons {
-    font-size: 1.25rem;
-  }
-
-  &:hover {
-    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
-    color: var(--color-text-primary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
 
   @media (max-width: 767px) {
-    width: 3rem;
-    height: 3rem;
+    --icon-btn-size: 3rem;
   }
 }
 

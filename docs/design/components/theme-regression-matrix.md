@@ -22,7 +22,7 @@ Canonical policy references:
 | ------------------- | --------------------------------------- | ------------------------------------- | ------------------------------------ | ----------------------------------------- | ------------------------------------- |
 | Option menu surface | `option-menu-surface` + `dd-item`       | BUG(menu-theme-light-unverified)      | BUG(menu-theme-dark-unverified)      | BUG(menu-theme-sandstone-unverified)      | BUG(menu-kbd-spec-failures-open)      |
 | Map context menus   | map/radius/marker context menus         | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
-| Detail context menu | image detail overflow menu              | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Detail context menu | image detail overflow menu              | BUG(detail-menu-theme-light-unverified) | BUG(detail-menu-theme-dark-unverified) | BUG(detail-menu-theme-sandstone-unverified) | BUG(detail-menu-kbd-unverified)       |
 | Toolbar controls    | workspace toolbar dropdown triggers     | BUG(toolbar-theme-light-unverified)   | BUG(toolbar-theme-dark-unverified)   | BUG(toolbar-theme-sandstone-unverified)   | BUG(toolbar-kbd-unverified)           |
 | Segmented controls  | `ui-segmented` + `app-segmented-switch` | BUG(segmented-theme-light-unverified) | BUG(segmented-theme-dark-unverified) | BUG(segmented-theme-sandstone-unverified) | BUG(segmented-kbd-spec-failures-open) |
 | Toggle rows         | `ui-toggle-row` + `ui-toggle-switch`    | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
@@ -55,6 +55,7 @@ Verification notes:
 - Settings overlay segmented controls now use shared `app-segmented-switch` for language, density, theme mode, and marker motion; matrix segmented row remains `*-unverified` pending manual multi-theme smoke.
 - Select/input control migration is now primitive-first in compact filter contexts (`ui-select-control` + `ui-input-control` with tokenized compact sizing); select row promoted from `TODO` to tracked `*-unverified` pending manual theme and keyboard smoke.
 - Dropdown icon search/reset actions now consume shared `icon-btn-ghost` across standard/sort/grouping dropdowns with only dropdown-level size/color overrides left local.
+- Image detail header action buttons (back/more) now consume shared `icon-btn-ghost`, and detail context menu row is promoted from `TODO` to tracked `*-unverified` pending manual multi-theme + keyboard checks.
 - Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.
 
 ## Update Rule
