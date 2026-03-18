@@ -20,7 +20,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
         <span class="material-icons" aria-hidden="true">edit</span>
       </button>
 
-      <span class="meta-row__label" [title]="metaKey()">{{ metaKey() }}</span>
+      <span class="meta-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
 
       @if (editing()) {
         <input
@@ -36,6 +36,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
       } @else {
         <span
           class="meta-row__value"
+          data-i18n-skip
           [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')"
         >
           {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}

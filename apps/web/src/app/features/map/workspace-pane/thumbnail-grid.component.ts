@@ -14,6 +14,7 @@ import {
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { FilterService } from '../../../core/filter.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
 import {
   ThumbnailCardComponent,
@@ -36,6 +37,7 @@ type RenderItem =
       [class.thumbnail-grid--small]="viewService.thumbnailSizePreset() === 'small'"
       [class.thumbnail-grid--medium]="viewService.thumbnailSizePreset() === 'medium'"
       [class.thumbnail-grid--large]="viewService.thumbnailSizePreset() === 'large'"
+      [attr.data-language]="languageTick()"
       #scrollContainer
       (scroll)="onScroll()"
       [style.--thumbnail-grid-card-size.px]="thumbnailCardSizePx()"
@@ -49,18 +51,36 @@ type RenderItem =
       } @else if (viewService.emptySelection()) {
         <div class="thumbnail-grid__empty-selection">
           <span class="thumbnail-grid__empty-icon">📷</span>
-          <p>No photos at this location</p>
+          <p>
+            {{ t('workspace.thumbnailGrid.emptySelection.title', 'No photos at this location') }}
+          </p>
           <p class="thumbnail-grid__empty-hint">
-            Images may not have been uploaded yet for this area.
+            {{
+              t(
+                'workspace.thumbnailGrid.emptySelection.hint',
+                'Images may not have been uploaded yet for this area.'
+              )
+            }}
           </p>
         </div>
       } @else if (viewService.rawImages().length === 0) {
-        <p class="thumbnail-grid__empty">Select a marker on the map to see photos.</p>
+        <p class="thumbnail-grid__empty">
+          {{
+            t(
+              'workspace.thumbnailGrid.empty.selectMarker',
+              'Select a marker on the map to see photos.'
+            )
+          }}
+        </p>
       } @else if (viewService.totalImageCount() === 0) {
         <div class="thumbnail-grid__filter-empty">
-          <p>No images match the current filters</p>
+          <p>
+            {{
+              t('workspace.thumbnailGrid.filterEmpty.title', 'No images match the current filters')
+            }}
+          </p>
           <button class="thumbnail-grid__clear-btn" type="button" (click)="clearFilters()">
-            Clear filters
+            {{ t('workspace.thumbnailGrid.filterEmpty.clear', 'Clear filters') }}
           </button>
         </div>
       } @else if (hasGrouping()) {
@@ -125,6 +145,9 @@ export class ThumbnailGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly currentLanguage = this.i18nService.language;
 
   readonly thumbnailCardSizePx = computed(() => {
     switch (this.viewService.thumbnailSizePreset()) {
@@ -186,6 +209,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   });
 
   readonly skeletonCards = Array.from({ length: 12 }, (_, i) => i);
+  readonly languageTick = computed(() => this.currentLanguage());
 
   constructor() {
     afterNextRender(() => {

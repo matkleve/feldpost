@@ -628,7 +628,7 @@ router-outlet + * {
   box-sizing: border-box;
   height: 1.75rem;
   padding-inline: var(--spacing-2);
-  border: 1px solid transparent;
+  border: 1px solid var(--action-border-default);
   border-radius: var(--radius-sm);
   background: var(--action-bg-default);
   color: var(--action-text-default);
@@ -849,7 +849,7 @@ router-outlet + * {
   justify-content: center;
   width: var(--icon-btn-size);
   height: var(--icon-btn-size);
-  border: none;
+  border: 1px solid var(--interactive-border-muted);
   border-radius: var(--icon-btn-radius);
   background: transparent;
   color: var(--color-text-secondary);

@@ -3,11 +3,14 @@
     <section class="projects-rail">
       <header class="projects-header">
         <div class="projects-header__title-wrap">
-          <h1 class="projects-header__title">Projects</h1>
+          <h1 class="projects-header__title">{{ t('projects.page.title', 'Projects') }}</h1>
           <p class="projects-header__count">{{ projectCountLabel() }}</p>
         </div>
 
-        <section class="projects-search-surface" aria-label="Project search">
+        <section
+          class="projects-search-surface"
+          [attr.aria-label]="t('projects.page.search.aria', 'Project search')"
+        >
           <ss-search-bar
             mode="projects"
             (queryChanged)="onSearchChanged($event)"
@@ -21,8 +24,8 @@
             type="button"
             [disabled]="creatingProject()"
             (click)="onNewProject()"
-            aria-label="New project"
-            title="New project"
+            [attr.aria-label]="t('projects.page.action.newProject', 'New project')"
+            [attr.title]="t('projects.page.action.newProject', 'New project')"
           >
             <span class="material-icons" aria-hidden="true">add</span>
           </button>
@@ -30,7 +33,11 @@
       </header>
 
       <section class="projects-toolbar">
-        <div class="projects-toolbar-controls" role="toolbar" aria-label="Project controls">
+        <div
+          class="projects-toolbar-controls"
+          role="toolbar"
+          [attr.aria-label]="t('projects.toolbar.aria.controls', 'Project controls')"
+        >
           <button
             type="button"
             class="toolbar-btn"
@@ -40,7 +47,9 @@
             [attr.aria-haspopup]="true"
             (click)="toggleToolbarDropdown('grouping', $event); $event.stopPropagation()"
           >
-            <span class="toolbar-btn__label">Grouping</span>
+            <span class="toolbar-btn__label">{{
+              t('workspace.toolbar.button.grouping', 'Grouping')
+            }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
 
@@ -53,7 +62,9 @@
             [attr.aria-haspopup]="true"
             (click)="toggleToolbarDropdown('filter', $event); $event.stopPropagation()"
           >
-            <span class="toolbar-btn__label">Filter</span>
+            <span class="toolbar-btn__label">{{
+              t('workspace.toolbar.button.filter', 'Filter')
+            }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
 
@@ -66,37 +77,18 @@
             [attr.aria-haspopup]="true"
             (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
           >
-            <span class="toolbar-btn__label">Sort</span>
+            <span class="toolbar-btn__label">{{ t('workspace.toolbar.button.sort', 'Sort') }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
         </div>
 
-        <div class="projects-status-segment" role="group" aria-label="Project status filter">
-          <button
-            type="button"
-            class="projects-status-segment__button"
-            [class.projects-status-segment__button--active]="statusFilter() === 'all'"
-            (click)="onStatusFilterChange('all')"
-          >
-            All
-          </button>
-          <button
-            type="button"
-            class="projects-status-segment__button"
-            [class.projects-status-segment__button--active]="statusFilter() === 'active'"
-            (click)="onStatusFilterChange('active')"
-          >
-            Active
-          </button>
-          <button
-            type="button"
-            class="projects-status-segment__button"
-            [class.projects-status-segment__button--active]="statusFilter() === 'archived'"
-            (click)="onStatusFilterChange('archived')"
-          >
-            Archived
-          </button>
-        </div>
+        <app-segmented-switch
+          class="projects-status-segment"
+          [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
+          [options]="statusFilterOptions()"
+          [value]="statusFilter()"
+          (valueChange)="onStatusFilterValueChange($event)"
+        />
 
         <app-projects-view-toggle
           [viewMode]="viewMode()"
@@ -123,11 +115,11 @@
               />
             }
             @case ('filter') {
-              <app-filter-dropdown [propertyOptionsInput]="projectFilterOptions" />
+              <app-filter-dropdown [propertyOptionsInput]="projectFilterOptions()" />
             }
             @case ('sort') {
               <app-sort-dropdown
-                [optionsInput]="projectSortOptions"
+                [optionsInput]="projectSortOptions()"
                 [groupingIdsInput]="activeGroupingIds()"
                 [activeSortsInput]="activeProjectSorts()"
                 [defaultSorts]="projectDefaultSorts"
@@ -139,19 +131,31 @@
       }
 
       @if (loading()) {
-        <section class="projects-loading" role="status" aria-label="Loading projects">
+        <section
+          class="projects-loading"
+          role="status"
+          [attr.aria-label]="t('projects.page.loading.aria', 'Loading projects')"
+        >
           <div class="projects-loading__row"></div>
           <div class="projects-loading__row"></div>
           <div class="projects-loading__row"></div>
         </section>
       } @else if (showEmptyState()) {
-        <section class="projects-empty ui-container" aria-label="No projects found">
-          <h2>No projects match your filters</h2>
-          <p>Try another search or reset your status filter.</p>
+        <section
+          class="projects-empty ui-container"
+          [attr.aria-label]="t('projects.page.empty.aria', 'No projects found')"
+        >
+          <h2>{{ t('projects.page.empty.title', 'No projects match your filters') }}</h2>
+          <p>
+            {{ t('projects.page.empty.body', 'Try another search or reset your status filter.') }}
+          </p>
         </section>
       } @else {
         @if (viewMode() === 'list') {
-          <section class="thumbnail-grid projects-list" aria-label="Projects list">
+          <section
+            class="thumbnail-grid projects-list"
+            [attr.aria-label]="t('projects.page.list.aria', 'Projects list')"
+          >
             @for (section of groupedSections(); track section.id; let sectionIndex = $index) {
               @if (!isSectionHidden(sectionIndex)) {
                 <section class="projects-thumbnail-section projects-list-group">
@@ -271,7 +275,10 @@
             }
           </section>
         } @else {
-          <section class="thumbnail-grid projects-thumbnail-grid" aria-label="Projects card grid">
+          <section
+            class="thumbnail-grid projects-thumbnail-grid"
+            [attr.aria-label]="t('projects.page.cards.aria', 'Projects card grid')"
+          >
             @for (section of groupedSections(); track section.id; let sectionIndex = $index) {
               @if (!isSectionHidden(sectionIndex)) {
                 <section class="projects-thumbnail-section">

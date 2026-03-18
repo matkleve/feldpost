@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { FilterService } from '../../core/filter.service';
 import { ToastService } from '../../core/toast.service';
@@ -43,38 +44,167 @@ import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
 import { ClickOutsideDirective } from '../../shared/click-outside.directive';
 import { DropdownShellComponent } from '../../shared/dropdown-shell.component';
+import {
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../shared/segmented-switch/segmented-switch.component';
 
 const VIEW_MODE_STORAGE_KEY = 'feldpost-projects-view-mode';
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 type PendingProjectAction = 'archive' | 'delete' | null;
 
-const PROJECT_GROUPING_OPTIONS: GroupingProperty[] = [
-  { id: 'status', label: 'Status', icon: 'inventory_2' },
-  { id: 'district', label: 'Primary district', icon: 'map' },
-  { id: 'city', label: 'Primary city', icon: 'location_city' },
-  { id: 'color-key', label: 'Color', icon: 'palette' },
+interface ProjectGroupingOptionDef {
+  id: string;
+  icon: string;
+  labelKey: string;
+  fallback: string;
+}
+
+interface ProjectFilterOptionDef {
+  id: string;
+  type: FilterDropdownPropertyOption['type'];
+  labelKey: string;
+  fallback: string;
+}
+
+interface ProjectSortOptionDef {
+  id: string;
+  icon: string;
+  defaultDirection: SortDropdownOption['defaultDirection'];
+  labelKey: string;
+  fallback: string;
+}
+
+const PROJECT_GROUPING_OPTIONS: ProjectGroupingOptionDef[] = [
+  {
+    id: 'status',
+    icon: 'inventory_2',
+    labelKey: 'projects.toolbar.option.status',
+    fallback: 'Status',
+  },
+  {
+    id: 'district',
+    icon: 'map',
+    labelKey: 'projects.toolbar.option.primaryDistrict',
+    fallback: 'Primary district',
+  },
+  {
+    id: 'city',
+    icon: 'location_city',
+    labelKey: 'projects.toolbar.option.primaryCity',
+    fallback: 'Primary city',
+  },
+  {
+    id: 'color-key',
+    icon: 'palette',
+    labelKey: 'projects.toolbar.option.color',
+    fallback: 'Color',
+  },
 ];
 
-const PROJECT_FILTER_OPTIONS: FilterDropdownPropertyOption[] = [
-  { id: 'name', label: 'Name', type: 'text' },
-  { id: 'status', label: 'Status', type: 'text' },
-  { id: 'district', label: 'Primary district', type: 'text' },
-  { id: 'city', label: 'Primary city', type: 'text' },
-  { id: 'color-key', label: 'Color', type: 'text' },
-  { id: 'image-count', label: 'Image count', type: 'number' },
-  { id: 'updated-at', label: 'Updated', type: 'date' },
-  { id: 'last-activity', label: 'Last activity', type: 'date' },
+const PROJECT_FILTER_OPTIONS: ProjectFilterOptionDef[] = [
+  { id: 'name', type: 'text', labelKey: 'projects.toolbar.option.name', fallback: 'Name' },
+  {
+    id: 'status',
+    type: 'text',
+    labelKey: 'projects.toolbar.option.status',
+    fallback: 'Status',
+  },
+  {
+    id: 'district',
+    type: 'text',
+    labelKey: 'projects.toolbar.option.primaryDistrict',
+    fallback: 'Primary district',
+  },
+  {
+    id: 'city',
+    type: 'text',
+    labelKey: 'projects.toolbar.option.primaryCity',
+    fallback: 'Primary city',
+  },
+  {
+    id: 'color-key',
+    type: 'text',
+    labelKey: 'projects.toolbar.option.color',
+    fallback: 'Color',
+  },
+  {
+    id: 'image-count',
+    type: 'number',
+    labelKey: 'projects.toolbar.option.imageCount',
+    fallback: 'Image count',
+  },
+  {
+    id: 'updated-at',
+    type: 'date',
+    labelKey: 'projects.toolbar.option.updated',
+    fallback: 'Updated',
+  },
+  {
+    id: 'last-activity',
+    type: 'date',
+    labelKey: 'projects.toolbar.option.lastActivity',
+    fallback: 'Last activity',
+  },
 ];
 
-const PROJECT_SORT_OPTIONS: SortDropdownOption[] = [
-  { id: 'name', label: 'Name', icon: 'sort_by_alpha', defaultDirection: 'asc' },
-  { id: 'updated-at', label: 'Updated', icon: 'update', defaultDirection: 'desc' },
-  { id: 'last-activity', label: 'Last activity', icon: 'history', defaultDirection: 'desc' },
-  { id: 'image-count', label: 'Image count', icon: 'photo_library', defaultDirection: 'desc' },
-  { id: 'status', label: 'Status', icon: 'inventory_2', defaultDirection: 'asc' },
-  { id: 'district', label: 'Primary district', icon: 'map', defaultDirection: 'asc' },
-  { id: 'city', label: 'Primary city', icon: 'location_city', defaultDirection: 'asc' },
-  { id: 'color-key', label: 'Color', icon: 'palette', defaultDirection: 'asc' },
+const PROJECT_SORT_OPTIONS: ProjectSortOptionDef[] = [
+  {
+    id: 'name',
+    icon: 'sort_by_alpha',
+    defaultDirection: 'asc',
+    labelKey: 'projects.toolbar.option.name',
+    fallback: 'Name',
+  },
+  {
+    id: 'updated-at',
+    icon: 'update',
+    defaultDirection: 'desc',
+    labelKey: 'projects.toolbar.option.updated',
+    fallback: 'Updated',
+  },
+  {
+    id: 'last-activity',
+    icon: 'history',
+    defaultDirection: 'desc',
+    labelKey: 'projects.toolbar.option.lastActivity',
+    fallback: 'Last activity',
+  },
+  {
+    id: 'image-count',
+    icon: 'photo_library',
+    defaultDirection: 'desc',
+    labelKey: 'projects.toolbar.option.imageCount',
+    fallback: 'Image count',
+  },
+  {
+    id: 'status',
+    icon: 'inventory_2',
+    defaultDirection: 'asc',
+    labelKey: 'projects.toolbar.option.status',
+    fallback: 'Status',
+  },
+  {
+    id: 'district',
+    icon: 'map',
+    defaultDirection: 'asc',
+    labelKey: 'projects.toolbar.option.primaryDistrict',
+    fallback: 'Primary district',
+  },
+  {
+    id: 'city',
+    icon: 'location_city',
+    defaultDirection: 'asc',
+    labelKey: 'projects.toolbar.option.primaryCity',
+    fallback: 'Primary city',
+  },
+  {
+    id: 'color-key',
+    icon: 'palette',
+    defaultDirection: 'asc',
+    labelKey: 'projects.toolbar.option.color',
+    fallback: 'Color',
+  },
 ];
 
 const TEXT_OPERATORS = ['contains', 'equals', 'is', 'is not', 'before', 'after'];
@@ -116,11 +246,13 @@ interface ProjectGroupedSection {
     ProjectColorPickerComponent,
     ClickOutsideDirective,
     DropdownShellComponent,
+    SegmentedSwitchComponent,
   ],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',
 })
 export class ProjectsPageComponent {
+  private readonly i18nService = inject(I18nService);
   private readonly projectsService = inject(ProjectsService);
   private readonly toastService = inject(ToastService);
   private readonly filterService = inject(FilterService);
@@ -131,6 +263,7 @@ export class ProjectsPageComponent {
   private readonly projectFilterOptionIds = new Set(PROJECT_FILTER_OPTIONS.map((o) => o.id));
   private readonly projectSortOptionIds = new Set(PROJECT_SORT_OPTIONS.map((o) => o.id));
   private readonly projectFilterOptionById = new Map(PROJECT_FILTER_OPTIONS.map((o) => [o.id, o]));
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly projects = signal<ProjectListItem[]>([]);
   readonly loading = signal(false);
@@ -158,8 +291,42 @@ export class ProjectsPageComponent {
   readonly collapsedGroupIds = signal<Set<string>>(new Set());
   readonly isToolbarDragging = signal(false);
   readonly activeProjectSorts = signal<SortConfig[]>([]);
-  readonly projectFilterOptions = PROJECT_FILTER_OPTIONS;
-  readonly projectSortOptions = PROJECT_SORT_OPTIONS;
+  readonly projectFilterOptions = computed<FilterDropdownPropertyOption[]>(() =>
+    PROJECT_FILTER_OPTIONS.map((option) => ({
+      id: option.id,
+      type: option.type,
+      label: this.t(option.labelKey, option.fallback),
+    })),
+  );
+  readonly projectSortOptions = computed<SortDropdownOption[]>(() =>
+    PROJECT_SORT_OPTIONS.map((option) => ({
+      id: option.id,
+      icon: option.icon,
+      defaultDirection: option.defaultDirection,
+      label: this.t(option.labelKey, option.fallback),
+    })),
+  );
+  readonly groupingOptions = computed<GroupingProperty[]>(() =>
+    PROJECT_GROUPING_OPTIONS.map((option) => ({
+      id: option.id,
+      icon: option.icon,
+      label: this.t(option.labelKey, option.fallback),
+    })),
+  );
+  readonly statusFilterOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+    {
+      id: 'all',
+      label: this.t('projects.toolbar.status.all', 'All'),
+    },
+    {
+      id: 'active',
+      label: this.t('projects.toolbar.status.active', 'Active'),
+    },
+    {
+      id: 'archived',
+      label: this.t('projects.toolbar.status.archived', 'Archived'),
+    },
+  ]);
   readonly projectDefaultSorts: SortConfig[] = [];
   readonly activeGroupingIds = computed(() => this.activeGroupings().map((group) => group.id));
   readonly projectFilterRules = computed(() =>
@@ -170,7 +337,7 @@ export class ProjectsPageComponent {
 
   readonly availableGroupings = computed<GroupingProperty[]>(() => {
     const activeIds = new Set(this.activeGroupings().map((group) => group.id));
-    return PROJECT_GROUPING_OPTIONS.filter((grouping) => !activeIds.has(grouping.id));
+    return this.groupingOptions().filter((grouping) => !activeIds.has(grouping.id));
   });
 
   readonly hasGrouping = computed(() => this.activeGroupings().length > 0);
@@ -249,17 +416,24 @@ export class ProjectsPageComponent {
 
   readonly projectCountLabel = computed(() => {
     const total = this.visibleProjects().length;
-    return `${total} project${total === 1 ? '' : 's'}`;
+    if (total === 1) {
+      return this.t('projects.page.count.single', '1 project');
+    }
+
+    return this.t('projects.page.count.multi', '{count} projects').replace(
+      '{count}',
+      String(total),
+    );
   });
 
   readonly workspacePaneTitle = computed(() => {
     const selectedId = this.selectedProjectId();
     if (!selectedId) {
-      return 'Workspace';
+      return this.t('workspace.pane.title', 'Workspace');
     }
 
     const selectedProject = this.projects().find((project) => project.id === selectedId);
-    return selectedProject?.name ?? 'Workspace';
+    return selectedProject?.name ?? this.t('workspace.pane.title', 'Workspace');
   });
   readonly workspaceTitleEditable = computed(() => {
     const selectedId = this.selectedProjectId();
@@ -294,6 +468,16 @@ export class ProjectsPageComponent {
   );
 
   constructor() {
+    effect(() => {
+      const labelsById = new Map(this.groupingOptions().map((option) => [option.id, option.label]));
+      this.activeGroupings.update((current) =>
+        current.map((entry) => ({
+          ...entry,
+          label: labelsById.get(entry.id) ?? entry.label,
+        })),
+      );
+    });
+
     effect(() => {
       this.persistViewMode(this.viewMode());
     });
@@ -357,6 +541,15 @@ export class ProjectsPageComponent {
   onStatusFilterChange(filter: ProjectStatusFilter): void {
     this.statusFilter.set(filter);
     void this.refreshSearchCounts();
+  }
+
+  onStatusFilterValueChange(value: string | null): void {
+    if (value === 'all' || value === 'active' || value === 'archived') {
+      this.onStatusFilterChange(value);
+      return;
+    }
+
+    this.onStatusFilterChange('all');
   }
 
   onSortModeChange(value: string): void {
@@ -833,24 +1026,39 @@ export class ProjectsPageComponent {
 
   formatRelativeDate(value: string | null): string {
     if (!value) {
-      return 'No activity';
+      return this.t('projects.page.relative.noActivity', 'No activity');
     }
 
     const deltaMs = Date.now() - new Date(value).getTime();
     const dayMs = 24 * 60 * 60 * 1000;
     const days = Math.floor(deltaMs / dayMs);
 
-    if (days <= 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 30) return `${days} days ago`;
+    if (days <= 0) return this.t('projects.page.relative.today', 'Today');
+    if (days === 1) return this.t('projects.page.relative.yesterday', 'Yesterday');
+    if (days < 30) {
+      return this.t('projects.page.relative.daysAgo', '{count} days ago').replace(
+        '{count}',
+        String(days),
+      );
+    }
 
     const months = Math.floor(days / 30);
     if (months < 12) {
-      return `${months} month${months === 1 ? '' : 's'} ago`;
+      return this.t(
+        months === 1
+          ? 'projects.page.relative.monthAgo.single'
+          : 'projects.page.relative.monthAgo.multi',
+        months === 1 ? '1 month ago' : '{count} months ago',
+      ).replace('{count}', String(months));
     }
 
     const years = Math.floor(months / 12);
-    return `${years} year${years === 1 ? '' : 's'} ago`;
+    return this.t(
+      years === 1
+        ? 'projects.page.relative.yearAgo.single'
+        : 'projects.page.relative.yearAgo.multi',
+      years === 1 ? '1 year ago' : '{count} years ago',
+    ).replace('{count}', String(years));
   }
 
   private async refreshSearchCounts(): Promise<void> {
@@ -1074,15 +1282,20 @@ export class ProjectsPageComponent {
   private getProjectGroupingValue(project: ProjectListItem, groupingId: string): string {
     switch (groupingId) {
       case 'status':
-        return project.status === 'archived' ? 'Archived' : 'Active';
+        return project.status === 'archived'
+          ? this.t('projects.page.status.archived', 'Archived')
+          : this.t('projects.page.status.active', 'Active');
       case 'district':
-        return project.district?.trim() || 'Unknown district';
+        return (
+          project.district?.trim() ||
+          this.t('projects.page.value.unknownDistrict', 'Unknown district')
+        );
       case 'city':
-        return project.city?.trim() || 'Unknown city';
+        return project.city?.trim() || this.t('projects.page.value.unknownCity', 'Unknown city');
       case 'color-key':
         return project.colorKey.charAt(0).toUpperCase() + project.colorKey.slice(1);
       default:
-        return 'Other';
+        return this.t('projects.page.value.other', 'Other');
     }
   }
 

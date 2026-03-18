@@ -8,7 +8,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MapShellComponent } from './map-shell.component';
 import { UploadService } from '../../../core/upload.service';
 import { AuthService } from '../../../core/auth.service';
@@ -105,6 +105,14 @@ function buildTestBed() {
         useValue: {
           navigate: vi.fn(),
           getCurrentNavigation: vi.fn().mockReturnValue(null),
+        },
+      },
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            queryParams: {},
+          },
         },
       },
     ],

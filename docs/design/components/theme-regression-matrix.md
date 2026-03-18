@@ -18,16 +18,16 @@ Canonical policy references:
 
 ## Matrix
 
-| Surface             | Variant                                 | Light | Dark | Sandstone | Keyboard/Focus |
-| ------------------- | --------------------------------------- | ----- | ---- | --------- | -------------- |
-| Option menu surface | `option-menu-surface` + `dd-item`       | TODO  | TODO | TODO      | TODO           |
-| Map context menus   | map/radius/marker context menus         | TODO  | TODO | TODO      | TODO           |
-| Detail context menu | image detail overflow menu              | TODO  | TODO | TODO      | TODO           |
-| Toolbar controls    | workspace toolbar dropdown triggers     | TODO  | TODO | TODO      | TODO           |
-| Segmented controls  | `ui-segmented` + `app-segmented-switch` | TODO  | TODO | TODO      | TODO           |
-| Toggle rows         | `ui-toggle-row` + `ui-toggle-switch`    | TODO  | TODO | TODO      | TODO           |
-| Select controls     | `ui-select-control`                     | TODO  | TODO | TODO      | TODO           |
-| Dialog shell        | confirm/input/select shared dialogs     | TODO  | TODO | TODO      | TODO           |
+| Surface             | Variant                                 | Light                                 | Dark                                 | Sandstone                                 | Keyboard/Focus                        |
+| ------------------- | --------------------------------------- | ------------------------------------- | ------------------------------------ | ----------------------------------------- | ------------------------------------- |
+| Option menu surface | `option-menu-surface` + `dd-item`       | BUG(menu-theme-light-unverified)      | BUG(menu-theme-dark-unverified)      | BUG(menu-theme-sandstone-unverified)      | BUG(menu-kbd-spec-failures-open)      |
+| Map context menus   | map/radius/marker context menus         | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Detail context menu | image detail overflow menu              | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Toolbar controls    | workspace toolbar dropdown triggers     | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Segmented controls  | `ui-segmented` + `app-segmented-switch` | BUG(segmented-theme-light-unverified) | BUG(segmented-theme-dark-unverified) | BUG(segmented-theme-sandstone-unverified) | BUG(segmented-kbd-spec-failures-open) |
+| Toggle rows         | `ui-toggle-row` + `ui-toggle-switch`    | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Select controls     | `ui-select-control`                     | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
+| Dialog shell        | confirm/input/select shared dialogs     | TODO                                  | TODO                                 | TODO                                      | TODO                                  |
 
 ## Keyboard Smoke Checks
 
@@ -42,6 +42,14 @@ Canonical policy references:
 - Use `OK` for pass.
 - Use `BUG(<short-id>)` for failures, e.g. `BUG(menu-focus-dark)`.
 - Add issue links or file references in a follow-up line under the table when needed.
+
+Verification notes:
+
+- `vitest.config.ts` now sets `jsdom`, and `src/test/vitest.setup.ts` initializes Angular TestBed + resource resolution; the prior Leaflet `window is not defined` and unresolved `templateUrl/styleUrl` blockers are resolved.
+- Focused run `npx vitest run src/app/features/map/map-shell/map-shell.component.spec.ts` now executes all 57 tests with `36 passed / 21 failed`.
+- Current open failures are now spec-level or fixture-level issues (for example `map.addLayer is not a function`, `NG0303` unknown input bindings on child components, and `NG0950/NG0951` required input/query runtime failures), tracked under `menu-kbd-spec-failures-open` / `segmented-kbd-spec-failures-open` until narrowed to concrete issues.
+- `npx ng test --watch=false --include src/app/features/map/map-shell/map-shell.component.spec.ts` is additionally blocked by unrelated workspace spec compile errors (e.g. `nav.component.spec.ts`, `settings-overlay.component.spec.ts`, `upload.service.spec.ts`).
+- Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.
 
 ## Update Rule
 

@@ -338,6 +338,11 @@ auto.0336.sign_in,Sign in,apps/web/src/app/features/auth/login/login.component.h
 auto.0337.site_map,Site map,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Site map,Baustellenkarte,Mappa del sito
 auto.0338.sitzung,Sitzung,apps/web/src/app/features/account/account.component.html interpolation-literal,Sitzung,Sitzung,Sessione
 auto.0339.smooth,Smooth,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Smooth,Smooth,Liscio
+workspace.thumbnailGrid.emptySelection.title,No photos at this location,apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template empty-selection title,No photos at this location,Keine Fotos an diesem Ort,Nessuna foto in questa posizione
+workspace.thumbnailGrid.emptySelection.hint,Images may not have been uploaded yet for this area.,apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template empty-selection hint,Images may not have been uploaded yet for this area.,Fuer diesen Bereich wurden moeglicherweise noch keine Bilder hochgeladen.,Le immagini potrebbero non essere ancora state caricate per quest'area.
+workspace.thumbnailGrid.empty.selectMarker,Select a marker on the map to see photos.,apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template empty marker hint,Select a marker on the map to see photos.,Waehle einen Marker auf der Karte aus um Fotos zu sehen.,Seleziona un indicatore sulla mappa per vedere le foto.
+workspace.thumbnailGrid.filterEmpty.title,No images match the current filters,apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template filter empty title,No images match the current filters,Keine Bilder entsprechen den aktuellen Filtern,Nessuna immagine corrisponde ai filtri attuali
+workspace.thumbnailGrid.filterEmpty.clear,Clear filters,apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template filter empty action,Clear filters,Filter zuruecksetzen,Cancella filtri
 auto.0340.sort,Sort,apps/web/src/app/features/projects/projects-page.component.html text-node,Sort,Sortieren,Ordinare
 auto.0341.sorted_by_grouping,Sorted by grouping,apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal,Sorted by grouping,Sorted by grouping,Ordinati per raggruppamento
 auto.0342.speichern,Speichern...,apps/web/src/app/features/account/account.component.html interpolation-literal,Speichern...,Speichern...,Salva...
@@ -603,3 +608,40 @@ projects.viewToggle.list.aria,List view,apps/web/src/app/features/projects/proje
 projects.viewToggle.list.title,List view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title,List view,Listenansicht,Vista elenco
 projects.viewToggle.cards.aria,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:aria-label,Card view,Kartenansicht,Vista schede
 projects.viewToggle.cards.title,Card view,apps/web/src/app/features/projects/projects-view-toggle.component.ts attr:title,Card view,Kartenansicht,Vista schede
+projects.page.title,Projects,apps/web/src/app/features/projects/projects-page.component.html text-node,Projects,Projekte,Progetti
+projects.page.search.aria,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Projektsuche,Ricerca progetto
+projects.page.action.newProject,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,Neues Projekt,Nuovo progetto
+projects.toolbar.aria.controls,Project controls,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project controls,Projektsteuerung,Controlli progetto
+projects.toolbar.status.aria,Project status filter,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project status filter,Projektstatus-Filter,Filtro stato progetto
+projects.toolbar.status.all,All,apps/web/src/app/features/projects/projects-page.component.html text-node,All,Alle,Tutti
+projects.toolbar.status.active,Active,apps/web/src/app/features/projects/projects-page.component.html text-node,Active,Aktiv,Attivi
+projects.toolbar.status.archived,Archived,apps/web/src/app/features/projects/projects-page.component.html text-node,Archived,Archiviert,Archiviati
+projects.toolbar.option.name,Name,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Name,Name,Nome
+projects.toolbar.option.status,Status,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Status,Status,Stato
+projects.toolbar.option.primaryDistrict,Primary district,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Primary district,Primarer Bezirk,Distretto principale
+projects.toolbar.option.primaryCity,Primary city,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Primary city,Primare Stadt,Citta principale
+projects.toolbar.option.color,Color,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Color,Farbe,Colore
+projects.toolbar.option.imageCount,Image count,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Image count,Bildanzahl,Numero immagini
+projects.toolbar.option.updated,Updated,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Updated,Aktualisiert,Aggiornato
+projects.toolbar.option.lastActivity,Last activity,apps/web/src/app/features/projects/projects-page.component.ts dropdown-option,Last activity,Letzte Aktivitat,Ultima attivita
+projects.page.loading.aria,Loading projects,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Loading projects,Projekte werden geladen,Caricamento progetti
+projects.page.empty.aria,No projects found,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,No projects found,Keine Projekte gefunden,Nessun progetto trovato
+projects.page.empty.title,No projects match your filters,apps/web/src/app/features/projects/projects-page.component.html text-node,No projects match your filters,Keine Projekte passen zu deinen Filtern,Nessun progetto corrisponde ai tuoi filtri
+projects.page.empty.body,Try another search or reset your status filter.,apps/web/src/app/features/projects/projects-page.component.html text-node,Try another search or reset your status filter.,Versuche eine andere Suche oder setze den Statusfilter zuruck.,Prova un'altra ricerca o reimposta il filtro stato.
+projects.page.list.aria,Projects list,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Projects list,Projektliste,Elenco progetti
+projects.page.cards.aria,Projects card grid,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Projects card grid,Projektkartenraster,Griglia schede progetti
+projects.page.count.single,1 project,apps/web/src/app/features/projects/projects-page.component.ts computed-label,1 project,1 Projekt,1 progetto
+projects.page.count.multi,{count} projects,apps/web/src/app/features/projects/projects-page.component.ts computed-label,{count} projects,{count} Projekte,{count} progetti
+projects.page.relative.noActivity,No activity,apps/web/src/app/features/projects/projects-page.component.ts relative-time,No activity,Keine Aktivitat,Nessuna attivita
+projects.page.relative.today,Today,apps/web/src/app/features/projects/projects-page.component.ts relative-time,Today,Heute,Oggi
+projects.page.relative.yesterday,Yesterday,apps/web/src/app/features/projects/projects-page.component.ts relative-time,Yesterday,Gestern,Ieri
+projects.page.relative.daysAgo,{count} days ago,apps/web/src/app/features/projects/projects-page.component.ts relative-time,{count} days ago,vor {count} Tagen,{count} giorni fa
+projects.page.relative.monthAgo.single,1 month ago,apps/web/src/app/features/projects/projects-page.component.ts relative-time,1 month ago,vor 1 Monat,1 mese fa
+projects.page.relative.monthAgo.multi,{count} months ago,apps/web/src/app/features/projects/projects-page.component.ts relative-time,{count} months ago,vor {count} Monaten,{count} mesi fa
+projects.page.relative.yearAgo.single,1 year ago,apps/web/src/app/features/projects/projects-page.component.ts relative-time,1 year ago,vor 1 Jahr,1 anno fa
+projects.page.relative.yearAgo.multi,{count} years ago,apps/web/src/app/features/projects/projects-page.component.ts relative-time,{count} years ago,vor {count} Jahren,{count} anni fa
+projects.page.status.active,Active,apps/web/src/app/features/projects/projects-page.component.ts grouping-value,Active,Aktiv,Attivo
+projects.page.status.archived,Archived,apps/web/src/app/features/projects/projects-page.component.ts grouping-value,Archived,Archiviert,Archiviato
+projects.page.value.unknownDistrict,Unknown district,apps/web/src/app/features/projects/projects-page.component.ts grouping-value,Unknown district,Unbekannter Bezirk,Distretto sconosciuto
+projects.page.value.unknownCity,Unknown city,apps/web/src/app/features/projects/projects-page.component.ts grouping-value,Unknown city,Unbekannte Stadt,Citta sconosciuta
+projects.page.value.other,Other,apps/web/src/app/features/projects/projects-page.component.ts grouping-value,Other,Sonstiges,Altro
