@@ -121,10 +121,10 @@ This overhaul should be executed as a system migration, not as isolated componen
 ### Phase Status Snapshot (Primitives-Focused)
 
 1. Phase 1: Freeze the Design-System Contract — `95%`
-2. Phase 2: Harden the Primitive Set — `78%`
-3. Phase 3: Migrate High-Visibility Surfaces — `72%`
+2. Phase 2: Harden the Primitive Set — `82%`
+3. Phase 3: Migrate High-Visibility Surfaces — `76%`
 4. Phase 4: Migrate Composition Surfaces — `52%`
-5. Phase 5: Verify, Promote, and Enforce — `38%`
+5. Phase 5: Verify, Promote, and Enforce — `40%`
 
 Status date: 2026-03-18
 
@@ -160,7 +160,7 @@ Remaining:
 
 ### Phase 2: Harden the Primitive Set
 
-Progress: `72%`
+Progress: `82%`
 
 Goal: make the shared primitives good enough that features can adopt them without feature-local redesign.
 
@@ -187,6 +187,7 @@ Done:
 2. Shared menu surface/dropdown shell is broadly adopted.
 3. Button family standardization has started and ghost-border rule is applied.
 4. Segmented primitive now supports detached inactive option + smooth state transitions + reduced-motion fallback.
+5. Map-type switch now consumes the same shared segmented primitive (legacy local switch styles removed).
 
 Remaining:
 
@@ -195,7 +196,7 @@ Remaining:
 
 ### Phase 3: Migrate High-Visibility Surfaces
 
-Progress: `68%`
+Progress: `76%`
 
 Goal: standardize the UI that users see most often.
 
@@ -220,11 +221,13 @@ Done:
 3. Context-menu structure parity improved across map/detail areas.
 4. `/projects` segmented status filter no longer shifts layout when archived state becomes inactive.
 5. `/projects` labels use a robust fallback helper (`text(key, fallback)`) to avoid empty/vanishing strings.
+6. Map and Projects now share one segmented control primitive with aligned behavior.
 
 Remaining:
 
 1. Finish `/projects` page consistency pass (labels, spacing, action-row parity).
 2. Close remaining menu edge cases with strict primitive structure.
+3. Verify segmented primitive parity across all contexts in regression matrix.
 
 ### Phase 4: Migrate Composition Surfaces
 
@@ -257,7 +260,7 @@ Remaining:
 
 ### Phase 5: Verify, Promote, and Enforce
 
-Progress: `34%`
+Progress: `40%`
 
 Goal: turn the overhaul into a stable operating model.
 

@@ -26,11 +26,15 @@
     />
 
     <div class="text-input-dialog__actions">
-      <button class="text-input-dialog__cancel" type="button" (click)="cancelled.emit()">
+      <button
+        class="text-input-dialog__cancel ui-button ui-button--ghost"
+        type="button"
+        (click)="cancelled.emit()"
+      >
         {{ cancelLabel() }}
       </button>
       <button
-        class="text-input-dialog__confirm"
+        class="text-input-dialog__confirm ui-button ui-button--primary"
         type="button"
         [disabled]="nameInput.value.trim().length === 0"
         (click)="emitConfirmed(nameInput.value)"

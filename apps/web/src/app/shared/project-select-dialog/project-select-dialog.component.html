@@ -32,11 +32,15 @@
     </div>
 
     <div class="project-select-dialog__actions">
-      <button class="project-select-dialog__cancel" type="button" (click)="cancelled.emit()">
+      <button
+        class="project-select-dialog__cancel ui-button ui-button--ghost"
+        type="button"
+        (click)="cancelled.emit()"
+      >
         {{ cancelLabel() }}
       </button>
       <button
-        class="project-select-dialog__confirm"
+        class="project-select-dialog__confirm ui-button ui-button--primary"
         type="button"
         [disabled]="!selectedId()"
         (click)="confirmSelection()"

@@ -7,7 +7,11 @@
       <span class="material-icons" aria-hidden="true">warning</span>
       <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
-      <button type="button" class="invite-section__ghost ui-button ui-button--ghost" (click)="retry()">
+      <button
+        type="button"
+        class="invite-section__ghost ui-button ui-button--ghost"
+        (click)="retry()"
+      >
         {{ t('settings.inviteManagement.errorState.retry', 'Try again') }}
       </button>
     </div>
@@ -117,7 +121,7 @@
         <div class="invite-section__share-row">
           <button
             type="button"
-            class="invite-section__icon-button"
+            class="invite-section__icon-button icon-btn-ghost"
             [attr.aria-label]="t('settings.inviteManagement.share.copy.aria', 'Copy invite link')"
             [attr.title]="t('settings.inviteManagement.share.copy.title', 'Copy invite link')"
             [disabled]="isShareDisabled()"
@@ -127,7 +131,7 @@
           </button>
           <button
             type="button"
-            class="invite-section__icon-button"
+            class="invite-section__icon-button icon-btn-ghost"
             [attr.aria-label]="
               t('settings.inviteManagement.share.email.aria', 'Share invite via email')
             "
@@ -139,7 +143,7 @@
           </button>
           <button
             type="button"
-            class="invite-section__icon-button"
+            class="invite-section__icon-button icon-btn-ghost"
             [attr.aria-label]="
               t('settings.inviteManagement.share.whatsapp.aria', 'Share invite via WhatsApp')
             "

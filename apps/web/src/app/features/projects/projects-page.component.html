@@ -24,12 +24,12 @@
             type="button"
             [disabled]="creatingProject()"
             (click)="onNewProject()"
-            [attr.aria-label]="text('projects.page.action.newProject', 'New project')"
-            [attr.title]="text('projects.page.action.newProject', 'New project')"
+            [attr.aria-label]="t('projects.page.action.newProject', 'New project')"
+            [attr.title]="t('projects.page.action.newProject', 'New project')"
           >
             <span class="material-icons" aria-hidden="true">add</span>
             <span class="projects-header__new-label">{{
-              text('projects.page.action.newProject', 'New project')
+              t('projects.page.action.newProject', 'New project')
             }}</span>
           </button>
         </div>
@@ -51,7 +51,7 @@
             (click)="toggleToolbarDropdown('grouping', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">{{
-              text('workspace.toolbar.button.grouping', 'Grouping')
+              t('workspace.toolbar.button.grouping', 'Grouping')
             }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
@@ -66,7 +66,7 @@
             (click)="toggleToolbarDropdown('filter', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">{{
-              text('workspace.toolbar.button.filter', 'Filter')
+              t('workspace.toolbar.button.filter', 'Filter')
             }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
@@ -81,7 +81,7 @@
             (click)="toggleToolbarDropdown('sort', $event); $event.stopPropagation()"
           >
             <span class="toolbar-btn__label">{{
-              text('workspace.toolbar.button.sort', 'Sort')
+              t('workspace.toolbar.button.sort', 'Sort')
             }}</span>
             <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>

@@ -15,61 +15,12 @@
 // ── Map style switch (street/photo/historic) — top-left of map zone ─────────
 
 .map-style-switch {
-  --touch-target-base: 2.75rem; // ~44px desktop
-  --touch-target-mobile: 3rem; // ~48px mobile
-
   position: absolute;
   top: var(--spacing-3);
   left: var(--spacing-3);
   z-index: var(--z-upload-button);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
-  box-shadow: var(--elevation-overlay);
   display: inline-flex;
-  padding: 0.2rem;
-  gap: 0.15rem;
-
-  &__option {
-    min-height: var(--touch-target-base);
-    border: none;
-    border-radius: var(--radius-full);
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: 0.74rem;
-    font-weight: 650;
-    letter-spacing: 0.012em;
-    padding: 0.375rem 0.7rem;
-    cursor: pointer;
-    transition:
-      background 120ms ease-out,
-      color 120ms ease-out,
-      transform 120ms ease-out;
-
-    &:hover {
-      background: color-mix(in srgb, var(--color-bg-elevated) 70%, transparent);
-      color: var(--color-text-primary);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 1px;
-    }
-
-    &--active {
-      background: color-mix(in srgb, var(--color-clay) 16%, var(--color-bg-surface));
-      color: var(--color-clay);
-      box-shadow: var(--elevation-subtle);
-      transform: translateY(-1px);
-    }
-  }
-
-  @media (max-width: 767px) {
-    &__option {
-      min-height: var(--touch-target-mobile);
-      padding-inline: 0.6rem;
-    }
-  }
+  align-items: center;
 }
 
 // ── Upload button zone — fixed top-right, expands into panel ─────────────────

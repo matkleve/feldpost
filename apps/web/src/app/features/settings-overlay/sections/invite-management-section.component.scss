@@ -186,28 +186,10 @@
 .invite-section__icon-button {
   width: 2.75rem;
   height: 2.75rem;
-  border: var(--invite-stroke-width) solid var(--invite-border-muted);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--field-bg) 88%, transparent);
-  color: var(--menu-item-text);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
 }
 
 .invite-section__icon-button .material-icons {
   font-size: 1.1rem;
-}
-
-.invite-section__icon-button:hover:not(:disabled) {
-  background: var(--invite-hover-focus);
-  border-color: var(--action-border-default);
-}
-
-.invite-section__icon-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .invite-section__button {
