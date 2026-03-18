@@ -15,6 +15,7 @@ import { AuthService } from '../../../core/auth.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { MarkerInteractionService } from './marker-interaction.service';
 
 function createMarkerStub() {
   return {
@@ -1708,6 +1709,109 @@ describe('MapShellComponent', () => {
 
     expect(setSpy).toHaveBeenCalled();
     expect(fixture.componentInstance.detailImageId()).toBeNull();
+  });
+
+  it('marker hover links workspace items without selecting marker', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const markerInteractionService = TestBed.inject(MarkerInteractionService);
+    let onEnter: (() => void) | undefined;
+    let onLeave: (() => void) | undefined;
+    vi.spyOn(markerInteractionService, 'bindHover').mockImplementation((_marker, handlers) => {
+      onEnter = handlers.onEnter;
+      onLeave = handlers.onLeave;
+    });
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    workspaceView.rawImages.set([
+      {
+        id: 'img-hovered',
+        latitude: 48.2,
+        longitude: 16.37,
+        thumbnailPath: null,
+        storagePath: null,
+        capturedAt: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        projectId: null,
+        projectName: null,
+        direction: null,
+        exifLatitude: null,
+        exifLongitude: null,
+        addressLabel: null,
+        city: null,
+        district: null,
+        street: null,
+        country: null,
+        userName: null,
+      },
+    ]);
+
+    const component = fixture.componentInstance as unknown as {
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          imageId?: string;
+        }
+      >;
+      bindMarkerHoverInteraction: (markerKey: string, marker: unknown) => void;
+    };
+
+    component.uploadedPhotoMarkers.set('cluster-1', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+      imageId: 'img-hovered',
+    });
+
+    component.bindMarkerHoverInteraction('cluster-1', createMarkerStub());
+    expect(onEnter).toBeTypeOf('function');
+    expect(onLeave).toBeTypeOf('function');
+
+    onEnter?.();
+
+    expect(fixture.componentInstance.selectedMarkerKey()).toBeNull();
+    expect(fixture.componentInstance.selectedMarkerKeys().size).toBe(0);
+    expect(Array.from(fixture.componentInstance.linkedHoveredWorkspaceImageIds())).toEqual([
+      'img-hovered',
+    ]);
+
+    onLeave?.();
+    expect(fixture.componentInstance.linkedHoveredWorkspaceImageIds().size).toBe(0);
+  });
+
+  it('marker hover enter/leave does not refresh marker icons', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const markerInteractionService = TestBed.inject(MarkerInteractionService);
+    let onEnter: (() => void) | undefined;
+    let onLeave: (() => void) | undefined;
+    vi.spyOn(markerInteractionService, 'bindHover').mockImplementation((_marker, handlers) => {
+      onEnter = handlers.onEnter;
+      onLeave = handlers.onLeave;
+    });
+
+    const component = fixture.componentInstance as unknown as {
+      refreshPhotoMarker: ReturnType<typeof vi.fn>;
+      bindMarkerHoverInteraction: (markerKey: string, marker: unknown) => void;
+    };
+
+    component.refreshPhotoMarker = vi.fn();
+
+    component.bindMarkerHoverInteraction('cluster-1', createMarkerStub());
+    expect(onEnter).toBeTypeOf('function');
+    expect(onLeave).toBeTypeOf('function');
+
+    onEnter?.();
+    onLeave?.();
+
+    expect(component.refreshPhotoMarker).not.toHaveBeenCalled();
   });
 
   // ── Photo panel ────────────────────────────────────────────────────────────

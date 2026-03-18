@@ -11,6 +11,25 @@ import { SettingsPaneService } from './core/settings-pane.service';
 import { UploadNotificationService } from './core/upload-notification.service';
 import { DbTranslationService } from './core/i18n/db-translation.service';
 import { DomTranslationService } from './core/i18n/dom-translation.service';
+import { environment } from '../environments/environment';
+
+const LEGACY_I18N_FALLBACK_STORAGE_KEY = 'feldpost.i18n.enableLegacyFallback';
+
+interface I18nDevCommands {
+  enableLegacyFallback: () => void;
+  disableLegacyFallback: () => void;
+  clearLegacyFallbackOverride: () => void;
+  status: () => {
+    environmentDefault: boolean;
+    localStorageOverride: 'true' | 'false' | null;
+  };
+}
+
+declare global {
+  interface Window {
+    __feldpostI18n?: I18nDevCommands;
+  }
+}
 
 @Component({
   selector: 'app-root',
@@ -46,6 +65,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     // Ensure root-level upload error notifications are active.
     void this.uploadNotifications;
+    this.exposeI18nDevCommands();
     this.domTranslationService.start();
     void this.dbTranslationService.preload();
 
@@ -54,5 +74,39 @@ export class App implements OnInit {
     if (this.auth.user()) {
       this.locationResolver.startBackgroundResolution();
     }
+  }
+
+  private exposeI18nDevCommands(): void {
+    if (environment.production || typeof window === 'undefined') {
+      return;
+    }
+
+    window.__feldpostI18n = {
+      enableLegacyFallback: () => this.setLegacyFallbackOverride(true),
+      disableLegacyFallback: () => this.setLegacyFallbackOverride(false),
+      clearLegacyFallbackOverride: () => this.setLegacyFallbackOverride(null),
+      status: () => ({
+        environmentDefault: environment.i18n.enableLegacyDomFallback,
+        localStorageOverride:
+          (window.localStorage.getItem(LEGACY_I18N_FALLBACK_STORAGE_KEY) as
+            | 'true'
+            | 'false'
+            | null) ?? null,
+      }),
+    };
+  }
+
+  private setLegacyFallbackOverride(value: boolean | null): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (value === null) {
+      window.localStorage.removeItem(LEGACY_I18N_FALLBACK_STORAGE_KEY);
+    } else {
+      window.localStorage.setItem(LEGACY_I18N_FALLBACK_STORAGE_KEY, String(value));
+    }
+
+    window.location.reload();
   }
 }

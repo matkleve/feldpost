@@ -236,7 +236,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 ### Features (cross-cutting)
 
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
-- ✅ `language-locale-settings.md` — Language & Locale Settings (English/German switch with persistence and formatting context)
+- ✅ `language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
 - ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
 
 ### Planned / Missing Specs

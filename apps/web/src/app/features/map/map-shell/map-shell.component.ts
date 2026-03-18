@@ -2795,10 +2795,9 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private isMarkerLinkedHovered(markerKey: string): boolean {
-    return (
-      markerKey === this.linkedHoverMarkerFromWorkspaceKey ||
-      markerKey === this.linkedHoverMarkerFromMapKey
-    );
+    // Map hover visuals are handled by CSS :hover to avoid icon re-renders while hovering.
+    // Keep JS-linked hover only for workspace-originated hover state.
+    return markerKey === this.linkedHoverMarkerFromWorkspaceKey;
   }
 
   private setLinkedHoverMarkerFromWorkspace(markerKey: string | null): void {
@@ -2813,13 +2812,9 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private setLinkedHoverMarkerFromMap(markerKey: string | null): void {
-    const previous = this.linkedHoverMarkerFromMapKey;
-    const changed = this.markerSelectionSyncService.applySingleMarkerChange(
-      previous,
-      markerKey,
-      (key) => this.refreshPhotoMarker(key),
-    );
-    if (!changed) return;
+    if (this.linkedHoverMarkerFromMapKey === markerKey) {
+      return;
+    }
     this.linkedHoverMarkerFromMapKey = markerKey;
   }
 

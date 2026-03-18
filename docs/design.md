@@ -1,7 +1,13 @@
 # Feldpost – Product Design
 
 **Who this is for:** designers, frontend engineers, and anyone shaping how Feldpost looks and behaves.  
-**What you'll get:** the always-load design context — principles, dark mode, accessibility, responsive quick reference, design debt, and links to smaller task-specific design files.
+**What you'll get:** an orchestrator for design documentation ownership, plus high-level principles and cross-cutting guidance.
+
+This file is the design orchestrator, not the canonical source for token values or component-level interaction contracts.
+
+- Canonical values: `docs/design/tokens.md`
+- Canonical token architecture: `docs/design/token-layers.md`
+- Canonical interaction policy: `docs/design/components/action-interaction-kernel.md`
 
 See `architecture.md` for technical constraints that affect layout decisions.
 
@@ -11,10 +17,12 @@ See `architecture.md` for technical constraints that affect layout decisions.
 
 - `docs/design/constitution.md` — non-negotiable design rules; always load for visual and product implementation tasks.
 - `docs/design/tokens.md` — load for styling, sizing, colors, typography, radius, shadows, and iconography.
+- `docs/design/token-layers.md` — canonical token layer architecture (Layer A/B/C), alias ownership, and override rules.
 - `docs/design/map-system.md` — load for map hierarchy, marker prominence, clustering, and proximity behavior.
 - `docs/design/layout.md` — load for breakpoints, panel dimensions, and responsive behavior.
 - `docs/design/motion.md` — load for animation, timing, and transitions.
 - `docs/design/components/empty-states.md` — load for empty-state structure and messaging.
+- `docs/design/components/theme-regression-matrix.md` — verification matrix for cross-theme and keyboard/focus regression checks.
 
 Archived design/components/ files have been superseded by their element specs:
 
@@ -119,7 +127,7 @@ Dark mode is inspired directly by Anthropic's approach to Claude: **warm, not co
 
 1. **Backgrounds are warm near-black, never cold blue-black and never pure black.** `--color-bg-base: #0F0E0C`. The slight warm tint (+2 red, -2 blue relative to neutral) is not consciously perceptible but produces a measurably more comfortable reading environment for extended field use.
 2. **Three-level warm surface hierarchy.** `#0F0E0C → #1A1917 → #252320`. Each step is a ~7-8% luminance lift. The warm tint is preserved at each level. This mirrors Anthropic's surface system and avoids the harsh contrast that cold-gray dark themes create between surface layers.
-3. **Primary color brightens slightly.** `--color-primary: #2563EB` (light) → `#3B82F6` (dark). On a dark surface, the lighter blue maintains equivalent perceived contrast without oversaturating.
+3. **Primary and accent behavior are token-driven.** Do not hardcode values in this file; use `docs/design/tokens.md` as the canonical value source and `docs/design/token-layers.md` for override policy.
 4. **Clay accent stays warm in dark mode.** `--color-clay: #D9895A` (dark) — slightly lighter and more saturated than the light-mode value to compensate for the dark background. This is the only warm-hued element in the dark UI; its rarity makes upload CTAs unmistakeable.
 5. **Borders are warm and subtle.** `--color-border: #2E2B27` — a warm dark brown, barely visible but enough to delineate panels without harsh lines.
 6. **Map tile: CartoDB Dark Matter.** The dark tile URL is configured in `LeafletOSMAdapter.darkTileUrl`. The tile's dark neutral palette blends naturally with `--color-bg-base`. Markers with white outlines and shadows read clearly against it.
@@ -161,5 +169,5 @@ These are intentional deferrals, not oversights.
 5. **Onboarding / first-use tour:** defined only at the empty-state level. A guided walkthrough for new users is post-MVP.
 6. **Heatmap / density overlay:** post-MVP. Map layer capability (tile swapping via `MapAdapter`) is already designed to support it.
 7. **Before/after slider component:** post-MVP feature but the full-image viewer layout anticipates it.
-8. **Brand color finalization:** `--color-primary: #2563EB` (blue) is a working default. The warm palette overall (Principle 1.5, Section 7) is confirmed as the design direction. The clay accent (`--color-clay: #CC7A4A`) is confirmed. Primary blue is the only open question before MVP launch.
+8. **Brand color finalization:** maintain brand color decisions in `docs/design/tokens.md` only. This file should reference final decisions but not define raw token values.
 9. **Marker overlap displacement and dynamic pointer tails:** when two or more square markers overlap in screen space, markers should separate so all squares are visible while tails still point to true coordinates. Defer to post-MVP if needed; MVP must keep square body + pointer shape and avoid hidden marker bodies.

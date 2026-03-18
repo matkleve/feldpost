@@ -126,6 +126,7 @@ Use this file to:
 | Search suggestions panel (integrated exception) | Integrated search + suggestion panel pattern       | `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html`, `apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.scss`                                                                                                                                                                                                                                                                                                        | partial       | medium          |
 | Metadata suggestion menu                        | Option menu surface in inline form flow            | `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html`, `apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.scss`                                                                                                                                                                                                                                                                                                | partial       | medium          |
 | Settings form sections                          | Shared settings/form primitives + semantic aliases | `apps/web/src/app/features/settings-overlay/settings-overlay.component.html`, `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                                                                                          | partial       | medium          |
+| Segmented switch (icon + inactive state)        | Shared segmented switch component                  | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`, `apps/web/src/app/shared/segmented-switch/segmented-switch.component.html`, `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss`, `apps/web/src/styles.scss`                                                                                                                                                                                                                                    | present       | medium          |
 | Dialog shell (confirm/input/select)             | Shared modal primitives                            | `apps/web/src/app/shared/confirm-dialog/confirm-dialog.component.ts`, `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`, `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts`                                                                                                                                                                                                                                                            | present       | medium          |
 | Chips and compact selector rows                 | Shared chip behavior + row semantics               | `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.ts`, `apps/web/src/app/shared/quick-info-chips/quick-info-chips.component.scss`, `apps/web/src/app/features/projects/projects-view-toggle.component.ts`                                                                                                                                                                                                                                                                    | partial       | medium          |
 | Slider control                                  | Shared slider primitive                            | `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.ts`, `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.scss`                                                                                                                                                                                                                                                                                                                                            | present       | medium          |
@@ -140,72 +141,13 @@ Notes:
 
 ## Theme Contract (Semantic Token Layer)
 
-Goal: allow new themes by remapping semantic aliases, not by editing each component.
+Canonical source: `docs/design/token-layers.md`.
 
-### Contract layer A: Foundation tokens (already in use)
+Catalog-level enforcement summary:
 
-- Color: `--color-bg-*`, `--color-border*`, `--color-text-*`, `--color-primary`, `--color-clay`, semantic states
-- Radius: `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-full`
-- Elevation: `--elevation-base`, `--elevation-subtle`, `--elevation-overlay`, `--elevation-dropdown`, `--elevation-modal`
-- Spacing/layout: `--spacing-*`, `--container-*`, `--ui-item-*`
-
-### Contract layer B: Interactive semantic aliases (partially in use)
-
-- `--interactive-border-muted`
-- `--interactive-surface-hover`
-- `--interactive-focus-ring`
-- `--interactive-transition-standard`
-
-### Contract layer C: Component-role aliases (to standardize next)
-
-Introduce and migrate to role aliases so primitives can be themed independently from raw palette tokens:
-
-1. Action controls
-
-- `--action-bg-default`
-- `--action-bg-hover`
-- `--action-bg-active`
-- `--action-border-default`
-- `--action-border-active`
-- `--action-text-default`
-- `--action-text-active`
-
-2. Menu and option surfaces
-
-- `--menu-surface-bg`
-- `--menu-surface-border`
-- `--menu-item-bg-hover`
-- `--menu-item-bg-active`
-- `--menu-item-text`
-- `--menu-item-text-active`
-
-3. Form controls
-
-- `--field-bg`
-- `--field-border`
-- `--field-border-focus`
-- `--field-placeholder`
-- `--field-text`
-
-4. Settings sections and cards
-
-- `--section-bg`
-- `--section-border`
-- `--section-title`
-- `--section-text`
-
-5. Feedback states
-
-- `--state-success-bg`
-- `--state-warning-bg`
-- `--state-danger-bg`
-- `--state-info-bg`
-
-### Migration rule
-
-- New or refactored primitives must consume layer C aliases first.
-- Layer C aliases resolve to existing layer A/B tokens in `apps/web/src/styles.scss`.
-- Theme packs only override layer C aliases (and optionally layer A for global rebrand).
+1. New or refactored primitives consume Layer C aliases first.
+2. Runtime alias mapping lives in `apps/web/src/styles.scss`.
+3. Theme packs override Layer C first; Layer A overrides are reserved for global rebranding.
 
 ## Immediate Next Deliverables
 

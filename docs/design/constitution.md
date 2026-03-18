@@ -61,6 +61,7 @@ Load this file for every visual or product implementation task. These rules are 
 
 - `docs/design.md` — always-load index file with principles, dark mode, accessibility, responsive summary, and design debt.
 - `docs/design/tokens.md` — colors, typography, sizing, radius, shadows, iconography.
+- `docs/design/token-layers.md` — canonical Layer A/B/C token architecture and override policy.
 - `docs/design/map-system.md` — map hierarchy, marker prominence, clustering, and proximity rules.
 - `docs/design/layout.md` — breakpoint behavior, panel dimensions, and responsive layout.
 - `docs/design/motion.md` — animation timing and transition rules.

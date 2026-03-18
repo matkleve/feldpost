@@ -189,7 +189,8 @@ sequenceDiagram
 - [ ] Data-backed sections use section-local loading/error/retry UI (no full-overlay lock).
 - [ ] Click-outside/Escape dismiss closes immediately and discards unsaved changes.
 - [ ] Section list is registry-driven and supports adding new sections without shell edits.
-- [ ] Language/Locale section integration provides English and German switching behavior.
+- [ ] Language/Locale section integration is present and wired; detailed language behavior is defined in `language-locale-settings.md`.
+- [ ] Language switch button labels in Settings always remain native (`English`, `Deutsch`, `Italiano`) and do not change with active UI language.
 - [ ] `Konto` section exposes profile identity, email/password management, password recovery, 2FA management, and logout, and does not render a local `Close settings` action.
 - [ ] Profile/preference reads/writes are delegated through `UserProfileService` (Supabase-backed).
 
@@ -197,7 +198,7 @@ sequenceDiagram
 
 - **Theme**: active theme mode and persistence behavior.
 - **Notifications**: preference defaults for in-app feedback and alerts.
-- **Language / Locale**: UI language and regional formatting defaults.
+- **Language / Locale**: UI language and regional formatting defaults; language switch labels stay native (`English`, `Deutsch`, `Italiano`) regardless of active UI language.
 - **Search Tuning**: address/place search filters, ranking weights, penalties, and retry behavior.
 - **Account & Session**: profile identity, email/password security, password recovery, 2FA setup/management, and session termination controls.
 - **Roles & Permissions**: role-based capability visibility and access constraints.

@@ -446,7 +446,21 @@
   }
 }
 
+:host ::ng-deep .map-photo-marker:hover {
+  .map-photo-marker__body {
+    outline: 2px solid color-mix(in srgb, var(--color-clay) 78%, var(--color-border));
+    outline-offset: 1px;
+  }
+}
+
 :host ::ng-deep .map-photo-marker--selected.map-photo-marker--linked-hover {
+  .map-photo-marker__body {
+    outline-color: var(--color-clay);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 32%, transparent);
+  }
+}
+
+:host ::ng-deep .map-photo-marker--selected:hover {
   .map-photo-marker__body {
     outline-color: var(--color-clay);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 32%, transparent);

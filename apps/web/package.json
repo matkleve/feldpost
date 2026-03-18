@@ -9,7 +9,9 @@
     "build:cloudflare": "node ./scripts/write-env.mjs && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "i18n:guard": "node ../../scripts/check-i18n-hardcoded-literals.mjs",
+    "i18n:guard:strict": "node ../../scripts/check-i18n-hardcoded-literals.mjs --strict"
   },
   "prettier": {
     "printWidth": 100,

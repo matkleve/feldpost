@@ -13,6 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { toCanvas } from 'qrcode';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { InviteService } from '../../../core/invites/invite.service';
 import {
   InviteOpenContext,
@@ -31,6 +32,7 @@ import {
 })
 export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   private readonly inviteService = inject(InviteService);
+  private readonly i18nService = inject(I18nService);
 
   private expirationTimer: ReturnType<typeof setInterval> | null = null;
   private qrRenderSequence = 0;
@@ -44,6 +46,7 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
 
   readonly inviteCreated = output<string>();
   readonly inviteRevoked = output<string>();
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly panelMode = signal<InvitePanelMode>('ready');
   readonly targetRole = signal<InviteTargetRole>('worker');
@@ -122,7 +125,11 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
       );
       this.inviteRevoked.emit(invite.inviteId);
     } catch (error) {
-      this.lastError.set(error instanceof Error ? error.message : 'Unable to revoke invite.');
+      this.lastError.set(
+        error instanceof Error
+          ? error.message
+          : this.t('settings.inviteManagement.error.revoke', 'Unable to revoke invite.'),
+      );
     }
   }
 
@@ -135,13 +142,22 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
 
   async onShareEmail(): Promise<void> {
     await this.withShareAction(async (invite) => {
-      const subject = encodeURIComponent('Join my organization');
-      const body = encodeURIComponent(`Use this invite link: ${invite.inviteUrl}`);
+      const subject = encodeURIComponent(
+        this.t('settings.inviteManagement.share.email.subject', 'Join my organization'),
+      );
+      const bodyTemplate = this.t(
+        'settings.inviteManagement.share.email.body',
+        'Use this invite link: {inviteUrl}',
+      );
+      const body = encodeURIComponent(bodyTemplate.replace('{inviteUrl}', invite.inviteUrl));
 
       if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
         await navigator.share({
-          title: 'Organization invite',
-          text: 'Use this invite link to join.',
+          title: this.t('settings.inviteManagement.share.native.title', 'Organization invite'),
+          text: this.t(
+            'settings.inviteManagement.share.native.text',
+            'Use this invite link to join.',
+          ),
           url: invite.inviteUrl,
         });
       } else if (typeof window !== 'undefined') {
@@ -155,7 +171,11 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
   async onShareWhatsApp(): Promise<void> {
     await this.withShareAction(async (invite) => {
       if (typeof window !== 'undefined') {
-        const text = encodeURIComponent(`Join my organization: ${invite.inviteUrl}`);
+        const textTemplate = this.t(
+          'settings.inviteManagement.share.whatsapp.text',
+          'Join my organization: {inviteUrl}',
+        );
+        const text = encodeURIComponent(textTemplate.replace('{inviteUrl}', invite.inviteUrl));
         window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
       }
 
@@ -189,15 +209,15 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
     const status = this.activeInvite()?.status;
     switch (status) {
       case 'active':
-        return 'Active';
+        return this.t('settings.inviteManagement.status.active', 'Active');
       case 'expired':
-        return 'Expired';
+        return this.t('settings.inviteManagement.status.expired', 'Expired');
       case 'revoked':
-        return 'Revoked';
+        return this.t('settings.inviteManagement.status.revoked', 'Revoked');
       case 'accepted':
-        return 'Accepted';
+        return this.t('settings.inviteManagement.status.accepted', 'Accepted');
       default:
-        return 'Pending';
+        return this.t('settings.inviteManagement.status.pending', 'Pending');
     }
   }
 
@@ -239,7 +259,11 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
       this.activeInvite.set(null);
       this.qrLoading.set(false);
       this.panelMode.set('error');
-      this.lastError.set(error instanceof Error ? error.message : 'Unable to create invite.');
+      this.lastError.set(
+        error instanceof Error
+          ? error.message
+          : this.t('settings.inviteManagement.error.create', 'Unable to create invite.'),
+      );
     }
   }
 
@@ -256,7 +280,11 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
       this.inviteCreated.emit(invite.inviteId);
       await this.syncInviteExpiration();
     } catch (error) {
-      this.lastError.set(error instanceof Error ? error.message : 'Unable to regenerate invite.');
+      this.lastError.set(
+        error instanceof Error
+          ? error.message
+          : this.t('settings.inviteManagement.error.regenerate', 'Unable to regenerate invite.'),
+      );
     }
   }
 
@@ -288,7 +316,9 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
 
       this.qrLoading.set(false);
       this.qrVisible.set(false);
-      this.lastError.set('Unable to render QR code.');
+      this.lastError.set(
+        this.t('settings.inviteManagement.error.renderQr', 'Unable to render QR code.'),
+      );
     }
   }
 
@@ -326,7 +356,11 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
     try {
       await action(invite);
     } catch (error) {
-      this.lastError.set(error instanceof Error ? error.message : 'Unable to share invite.');
+      this.lastError.set(
+        error instanceof Error
+          ? error.message
+          : this.t('settings.inviteManagement.error.share', 'Unable to share invite.'),
+      );
     } finally {
       this.shareInFlight.set(false);
     }

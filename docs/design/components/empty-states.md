@@ -1,5 +1,9 @@
 # Feldpost – Component: Empty States
 
+Status: Canonical Component Guidance
+Owner: UI Standardization
+Role: component-specific guidance for empty states. Policy-level rules remain in `docs/design/constitution.md`.
+
 ## 5.7 Empty States
 
 Each empty state includes:
@@ -16,4 +20,4 @@ Each empty state includes:
 | No images in viewport    | "Nothing here yet" + "Try expanding the radius or adjusting your filters." | "Clear filters"     |
 | Empty group tab          | "This group is empty" + "Add images by selecting them on the map."         | "Go to map"         |
 | No search results        | "No address found" + "Try a different address or pin a location manually." | "Drop pin manually" |
-| First login (no uploads) | "Welcome to Feldpost" + "Start by uploading your first site photos."        | "Upload photos"     |
+| First login (no uploads) | "Welcome to Feldpost" + "Start by uploading your first site photos."       | "Upload photos"     |

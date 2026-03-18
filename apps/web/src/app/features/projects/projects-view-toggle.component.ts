@@ -1,18 +1,23 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
 import type { ProjectsViewMode } from '../../core/projects/projects.types';
 
 @Component({
   selector: 'app-projects-view-toggle',
   standalone: true,
   template: `
-    <div class="projects-view-toggle" role="group" aria-label="View mode">
+    <div
+      class="projects-view-toggle"
+      role="group"
+      [attr.aria-label]="t('projects.viewToggle.aria.group', 'View mode')"
+    >
       <button
         type="button"
         class="projects-view-toggle__button"
         [class.projects-view-toggle__button--active]="viewMode() === 'list'"
         (click)="viewModeChange.emit('list')"
-        aria-label="List view"
-        title="List view"
+        [attr.aria-label]="t('projects.viewToggle.list.aria', 'List view')"
+        [attr.title]="t('projects.viewToggle.list.title', 'List view')"
       >
         <span class="material-icons" aria-hidden="true">view_list</span>
       </button>
@@ -21,8 +26,8 @@ import type { ProjectsViewMode } from '../../core/projects/projects.types';
         class="projects-view-toggle__button"
         [class.projects-view-toggle__button--active]="viewMode() === 'cards'"
         (click)="viewModeChange.emit('cards')"
-        aria-label="Card view"
-        title="Card view"
+        [attr.aria-label]="t('projects.viewToggle.cards.aria', 'Card view')"
+        [attr.title]="t('projects.viewToggle.cards.title', 'Card view')"
       >
         <span class="material-icons" aria-hidden="true">grid_view</span>
       </button>
@@ -70,6 +75,9 @@ import type { ProjectsViewMode } from '../../core/projects/projects.types';
   ],
 })
 export class ProjectsViewToggleComponent {
+  private readonly i18nService = inject(I18nService);
+
   readonly viewMode = input.required<ProjectsViewMode>();
   readonly viewModeChange = output<ProjectsViewMode>();
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 }

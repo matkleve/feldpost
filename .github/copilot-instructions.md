@@ -42,6 +42,8 @@ docs/               → Element specs, design tokens, glossary
 
 For every UI text introduced or changed in components/templates:
 
+- Always use deterministic key-based lookups (`t(key, fallback)`) for product UI text.
+- Do not introduce new hardcoded user-facing literals in templates or component strings unless explicitly marked as temporary migration fallback.
 - Add the text to `docs/i18n/translation-workbench.csv` with clear translator context.
 - Ensure translation extraction includes inline templates as well as `.html` templates.
 - Regenerate SQL via `node scripts/import-i18n-csv-to-sql.mjs` and include `supabase/seed_i18n.sql` in the same change.

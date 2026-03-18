@@ -2,6 +2,9 @@
 
 Load this file for any task involving visual styling, sizing, or color.
 
+Layer ownership and alias architecture are defined in `docs/design/token-layers.md`.
+Use this file for concrete values; use `token-layers.md` for layering and override rules.
+
 ## 3.1 Color Tokens
 
 Design tokens are CSS custom properties. All components use tokens — never raw hex or Tailwind arbitrary values in design-sensitive contexts.

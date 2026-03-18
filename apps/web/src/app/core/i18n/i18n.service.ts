@@ -1,7 +1,9 @@
 ﻿import { computed, Injectable, signal } from '@angular/core';
 import { LanguageCode, TRANSLATION_BY_KEY, TRANSLATION_BY_ORIGINAL } from './translation-catalog';
+import { environment } from '../../../environments/environment';
 
 const LANGUAGE_STORAGE_KEY = 'feldpost.settings.language';
+const LEGACY_I18N_FALLBACK_STORAGE_KEY = 'feldpost.i18n.enableLegacyFallback';
 
 interface RuntimeLanguageDictionary {
   byKey: Record<string, string>;
@@ -206,6 +208,7 @@ export class I18nService {
 
   readonly language = this.languageSignal.asReadonly();
   readonly runtimeRevision = this.runtimeRevisionSignal.asReadonly();
+  readonly legacyFallbackEnabled = computed(() => this.readLegacyFallbackEnabled());
   readonly locale = computed(() => {
     switch (this.languageSignal()) {
       case 'de':
@@ -248,6 +251,9 @@ export class I18nService {
         if (entry.it) return entry.it;
         const runtimeByOriginal = runtimeDictionary.byOriginal[entry.original];
         if (runtimeByOriginal) return runtimeByOriginal;
+        if (!this.legacyFallbackEnabled()) {
+          return entry.en;
+        }
         return this.heuristicTranslateToItalian(entry.en);
       }
       default:
@@ -264,6 +270,9 @@ export class I18nService {
 
     const entry = TRANSLATION_BY_ORIGINAL[original];
     if (!entry) {
+      if (!this.legacyFallbackEnabled()) {
+        return fallback || original;
+      }
       if (language === 'de') {
         return this.heuristicTranslateToGerman(original);
       }
@@ -348,5 +357,17 @@ export class I18nService {
   private applyDocumentLanguage(language: LanguageCode): void {
     if (typeof document === 'undefined') return;
     document.documentElement.lang = language;
+  }
+
+  private readLegacyFallbackEnabled(): boolean {
+    if (typeof window === 'undefined') {
+      return environment.i18n.enableLegacyDomFallback;
+    }
+
+    const override = window.localStorage.getItem(LEGACY_I18N_FALLBACK_STORAGE_KEY);
+    if (override === 'true') return true;
+    if (override === 'false') return false;
+
+    return environment.i18n.enableLegacyDomFallback;
   }
 }
