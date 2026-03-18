@@ -11,7 +11,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
   template: `
     <div class="meta-row" [class.meta-row--editing]="editing()">
       <button
-        class="detail-row-action detail-row-action--left"
+        class="detail-row-action icon-btn-ghost detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
         [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
@@ -44,7 +44,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
       }
 
       <button
-        class="detail-row-action detail-row-action--right detail-row-action--danger"
+        class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
         type="button"
         [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
         [attr.title]="t('workspace.metadata.row.removeTitle', 'Remove metadata')"
@@ -104,25 +104,17 @@ import { I18nService } from '../../../core/i18n/i18n.service';
       }
 
       .detail-row-action {
+        --icon-btn-size: 2rem;
+        --icon-btn-radius: var(--radius-sm);
+        --icon-btn-icon-size: 0.9375rem;
+
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2rem;
-        height: 2rem;
-        border: none;
-        border-radius: var(--radius-sm);
-        background: transparent;
         color: var(--color-text-secondary);
         opacity: 0;
         pointer-events: none;
-        cursor: pointer;
-        transition:
-          opacity 120ms ease-out,
-          color 120ms ease-out,
-          background 120ms ease-out;
+        transition: opacity 120ms ease-out;
       }
 
       .detail-row-action .material-icons {

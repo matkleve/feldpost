@@ -669,25 +669,17 @@
 }
 
 .detail-row-action {
+  --icon-btn-size: 2rem;
+  --icon-btn-radius: var(--radius-sm);
+  --icon-btn-icon-size: 0.9375rem;
+
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--action-bg-default);
   color: var(--action-text-default);
   opacity: 0;
   pointer-events: none;
-  cursor: pointer;
-  transition:
-    opacity 80ms ease-out,
-    color 80ms ease-out,
-    background 80ms ease-out;
+  transition: opacity 80ms ease-out;
 
   .material-icons {
     font-size: 0.9375rem;

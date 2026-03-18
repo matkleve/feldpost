@@ -56,6 +56,7 @@ Verification notes:
 - Select/input control migration is now primitive-first in compact filter contexts (`ui-select-control` + `ui-input-control` with tokenized compact sizing); select row promoted from `TODO` to tracked `*-unverified` pending manual theme and keyboard smoke.
 - Dropdown icon search/reset actions now consume shared `icon-btn-ghost` across standard/sort/grouping dropdowns with only dropdown-level size/color overrides left local.
 - Image detail header action buttons (back/more) now consume shared `icon-btn-ghost`, and detail context menu row is promoted from `TODO` to tracked `*-unverified` pending manual multi-theme + keyboard checks.
+- Detail inline action rails and metadata-row action controls now also consume shared `icon-btn-ghost`; remaining local styles in those areas are limited to positioning/visibility behavior.
 - Theme cells marked `*-unverified` require manual browser smoke pass in `light/dark/sandstone` before promotion to `OK`.
 
 ## Update Rule

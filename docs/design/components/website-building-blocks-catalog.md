@@ -122,8 +122,8 @@ This overhaul should be executed as a system migration, not as isolated componen
 
 1. Phase 1: Freeze the Design-System Contract — `95%`
 2. Phase 2: Harden the Primitive Set — `94%`
-3. Phase 3: Migrate High-Visibility Surfaces — `82%`
-4. Phase 4: Migrate Composition Surfaces — `70%`
+3. Phase 3: Migrate High-Visibility Surfaces — `83%`
+4. Phase 4: Migrate Composition Surfaces — `71%`
 5. Phase 5: Verify, Promote, and Enforce — `46%`
 
 Status date: 2026-03-18
@@ -203,7 +203,7 @@ Remaining:
 
 ### Phase 3: Migrate High-Visibility Surfaces
 
-Progress: `82%`
+Progress: `83%`
 
 Goal: standardize the UI that users see most often.
 
@@ -232,6 +232,7 @@ Done:
 7. `/projects` mobile segmented layout now uses segmented primitive variables instead of local per-button selectors.
 8. Toolbar dropdown search/reset actions now share the same icon-ghost primitive baseline in standard/sort/grouping dropdown flows.
 9. Image-detail header action buttons (back/more) now consume `icon-btn-ghost` with component-level size overrides instead of local ghost button base rules.
+10. Detail inline action rails now consume `icon-btn-ghost` across location/metadata interaction rows for consistent icon action behavior in high-use detail workflows.
 
 Remaining:
 
@@ -241,7 +242,7 @@ Remaining:
 
 ### Phase 4: Migrate Composition Surfaces
 
-Progress: `70%`
+Progress: `71%`
 
 Goal: move larger feature flows onto the same primitives so themes and future redesigns scale.
 
@@ -269,6 +270,7 @@ Done:
 7. Projects filter dropdown now consumes shared `ui-select-control` and `ui-input-control` primitives with compact tokenized sizing, replacing duplicate local control-state styling.
 8. Dropdown control composition reduced duplicate action-button state styling by centralizing icon-action base behavior on `icon-btn-ghost`.
 9. Detail-view header composition now keeps only layout/sizing overrides while shared icon-button interaction states come from `icon-btn-ghost`.
+10. Metadata row action controls now consume the shared icon-button primitive with component-level positioning/visibility overrides only.
 
 Remaining:
 
