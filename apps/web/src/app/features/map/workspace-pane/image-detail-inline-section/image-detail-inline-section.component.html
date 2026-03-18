@@ -28,7 +28,9 @@
       <span class="material-icons" aria-hidden="true">content_copy</span>
     </button>
     <span class="material-icons detail-row__icon" aria-hidden="true">schedule</span>
-    <span class="detail-row__label">{{ t('workspace.imageDetail.field.captured', 'Captured') }}</span>
+    <span class="detail-row__label">{{
+      t('workspace.imageDetail.field.captured', 'Captured')
+    }}</span>
     @if (editingField() === 'captured_at') {
       <app-captured-date-editor
         [initialDate]="editDate()"
@@ -63,7 +65,9 @@
       <span class="material-icons" aria-hidden="true">content_copy</span>
     </button>
     <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
-    <span class="detail-row__label">{{ t('workspace.imageDetail.field.projects', 'Projects') }}</span>
+    <span class="detail-row__label">{{
+      t('workspace.imageDetail.field.projects', 'Projects')
+    }}</span>
     @if (editingField() === 'project_ids') {
       <div
         class="detail-tags"
@@ -201,7 +205,11 @@
         </div>
       </div>
     } @else {
-      <button class="detail-row__value" type="button" (click)="fieldEditRequested.emit('project_ids')">
+      <button
+        class="detail-row__value"
+        type="button"
+        (click)="fieldEditRequested.emit('project_ids')"
+      >
         {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
       </button>
       <button
@@ -227,7 +235,9 @@
       <span class="material-icons" aria-hidden="true">content_copy</span>
     </button>
     <span class="material-icons detail-row__icon" aria-hidden="true">cloud_upload</span>
-    <span class="detail-row__label">{{ t('workspace.imageDetail.field.uploaded', 'Uploaded') }}</span>
+    <span class="detail-row__label">{{
+      t('workspace.imageDetail.field.uploaded', 'Uploaded')
+    }}</span>
     <span class="detail-row__value detail-row__value--static">{{
       uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
     }}</span>
@@ -273,7 +283,9 @@
           type="text"
           [value]="fieldValue(fieldDef.name)"
           [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
-          (keydown.enter)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
+          (keydown.enter)="
+            fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })
+          "
           (keydown.escape)="editingCancelled.emit()"
           (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
         />
@@ -287,7 +299,11 @@
           <span class="material-icons" aria-hidden="true">check</span>
         </button>
       } @else {
-        <button class="detail-row__value" type="button" (click)="fieldEditRequested.emit(fieldDef.name)">
+        <button
+          class="detail-row__value"
+          type="button"
+          (click)="fieldEditRequested.emit(fieldDef.name)"
+        >
           {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
         </button>
         <button
@@ -308,7 +324,9 @@
       <button
         class="detail-row-action icon-btn-ghost detail-row-action--left-outer"
         type="button"
-        [attr.aria-label]="t('workspace.imageDetail.action.zoomToLocation.aria', 'Zoom to location')"
+        [attr.aria-label]="
+          t('workspace.imageDetail.action.zoomToLocation.aria', 'Zoom to location')
+        "
         [attr.title]="t('workspace.imageDetail.action.zoomToLocation.title', 'Zoom to location')"
         (click)="zoomToLocationRequested.emit()"
       >
@@ -385,7 +403,9 @@
         <span class="material-icons" aria-hidden="true">content_copy</span>
       </button>
       <span class="material-icons detail-row__icon" aria-hidden="true">gps_off</span>
-      <span class="detail-row__label">{{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}</span>
+      <span class="detail-row__label">{{
+        t('workspace.imageDetail.field.coordinates', 'Coordinates')
+      }}</span>
       <div class="detail-row__value-wrap">
         <span class="detail-row__value detail-row__value--static">{{
           t('workspace.imageDetail.value.noGps', 'No GPS')
