@@ -15,6 +15,7 @@ import {
       [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
       [options]="viewOptions()"
       [value]="viewMode()"
+      [iconOnly]="true"
       (valueChange)="onViewModeSelected($event)"
     />
   `,
@@ -29,19 +30,7 @@ import {
       app-segmented-switch {
         --segmented-host-width: auto;
         --segmented-group-width: auto;
-        --segmented-button-flex: 0 0 auto;
         min-inline-size: auto;
-      }
-
-      :host ::ng-deep app-segmented-switch .segmented-switch__button {
-        width: 2.25rem;
-        min-width: 2.25rem;
-        min-height: 2.25rem;
-        padding: 0;
-      }
-
-      :host ::ng-deep app-segmented-switch .segmented-switch__label {
-        display: none;
       }
     `,
   ],

@@ -22,6 +22,7 @@ export class SegmentedSwitchComponent {
   readonly value = input<string | null>(null);
   readonly disabled = input(false);
   readonly allowDeselect = input(false);
+  readonly iconOnly = input(false);
 
   readonly valueChange = output<string | null>();
 

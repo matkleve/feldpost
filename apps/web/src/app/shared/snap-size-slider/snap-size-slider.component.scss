@@ -1,4 +1,5 @@
-.snap-size-slider {
+:host {
+  display: inline-flex;
   min-inline-size: 11rem;
 }
 
