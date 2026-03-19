@@ -4,16 +4,16 @@
   [class.segmented-switch--has-inactive]="inactiveOptions().length > 0"
 >
   <div
-    class="segmented-switch__group ui-segmented"
+    class="segmented-switch__group"
     role="group"
     [attr.aria-label]="ariaLabel()"
     (keydown)="onSegmentedKeydown($event)"
   >
     @for (option of segmentedOptions(); track option.id) {
       <button
-        class="segmented-switch__button ui-segmented__button"
+        class="segmented-switch__button"
         type="button"
-        [class.ui-segmented__button--active]="isSelected(option)"
+        [class.segmented-switch__button--active]="isSelected(option)"
         [attr.aria-pressed]="isSelected(option)"
         [attr.aria-label]="option.ariaLabel || option.label"
         [attr.title]="option.title || option.label"

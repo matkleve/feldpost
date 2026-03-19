@@ -95,12 +95,11 @@
           (valueChange)="onStatusFilterValueChange($event)"
         />
 
-        <div class="projects-toolbar__view-toggle">
-          <app-projects-view-toggle
-            [viewMode]="viewMode()"
-            (viewModeChange)="onViewModeChange($event)"
-          />
-        </div>
+        <app-projects-view-toggle
+          class="projects-toolbar__view-toggle"
+          [viewMode]="viewMode()"
+          (viewModeChange)="onViewModeChange($event)"
+        />
       </section>
 
       @if (activeToolbarDropdown()) {

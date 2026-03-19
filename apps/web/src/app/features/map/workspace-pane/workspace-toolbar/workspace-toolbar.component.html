@@ -20,7 +20,8 @@
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
   <div class="workspace-toolbar__size-control">
-    <app-snap-size-slider
+    <app-segmented-switch
+      [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
       [options]="thumbnailSizeOptions()"
       [value]="thumbnailSizePreset()"
       (valueChange)="onThumbnailSizeChanged($event)"

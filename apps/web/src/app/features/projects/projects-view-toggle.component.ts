@@ -2,18 +2,17 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { ProjectsViewMode } from '../../core/projects/projects.types';
 import {
-  SnapSizeSliderComponent,
-  type SnapSizeSliderOption,
-} from '../../shared/snap-size-slider/snap-size-slider.component';
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../shared/segmented-switch/segmented-switch.component';
 
 @Component({
   selector: 'app-projects-view-toggle',
   standalone: true,
-  imports: [SnapSizeSliderComponent],
+  imports: [SegmentedSwitchComponent],
   template: `
-    <app-snap-size-slider
-      class="projects-view-toggle"
-      [label]="t('projects.viewToggle.aria.group', 'View mode')"
+    <app-segmented-switch
+      [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
       [options]="viewOptions()"
       [value]="viewMode()"
       (valueChange)="onViewModeSelected($event)"
@@ -21,9 +20,28 @@ import {
   `,
   styles: [
     `
-      .projects-view-toggle {
-        --snap-option-count: 2;
+      :host {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      app-segmented-switch {
+        --segmented-host-width: auto;
+        --segmented-group-width: auto;
+        --segmented-button-flex: 0 0 auto;
         min-inline-size: auto;
+      }
+
+      :host ::ng-deep app-segmented-switch .segmented-switch__button {
+        width: 2.25rem;
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+        padding: 0;
+      }
+
+      :host ::ng-deep app-segmented-switch .segmented-switch__label {
+        display: none;
       }
     `,
   ],
@@ -34,20 +52,24 @@ export class ProjectsViewToggleComponent {
   readonly viewMode = input.required<ProjectsViewMode>();
   readonly viewModeChange = output<ProjectsViewMode>();
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
-  readonly viewOptions = computed<ReadonlyArray<SnapSizeSliderOption>>(() => [
+  readonly viewOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
     {
-      value: 'list',
+      id: 'list',
       label: this.t('projects.viewToggle.list.aria', 'List view'),
       icon: 'view_headline',
+      title: this.t('projects.viewToggle.list.title', 'List view'),
+      ariaLabel: this.t('projects.viewToggle.list.aria', 'List view'),
     },
     {
-      value: 'cards',
+      id: 'cards',
       label: this.t('projects.viewToggle.cards.aria', 'Card view'),
       icon: 'grid_view',
+      title: this.t('projects.viewToggle.cards.title', 'Card view'),
+      ariaLabel: this.t('projects.viewToggle.cards.aria', 'Card view'),
     },
   ]);
 
-  onViewModeSelected(value: string): void {
+  onViewModeSelected(value: string | null): void {
     if (value === 'list' || value === 'cards') {
       this.viewModeChange.emit(value);
     }

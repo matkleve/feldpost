@@ -50,6 +50,11 @@ export class NavComponent {
     { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
     { icon: 'photo_camera', label: this.t('nav.item.photos', 'Photos'), route: '/photos' },
     { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
+    {
+      icon: 'folder_open',
+      label: this.t('nav.item.projects2', 'Projects 2'),
+      route: '/projects-2',
+    },
   ]);
 
   readonly settingsOverlayOpen = this.settingsPaneService.open;

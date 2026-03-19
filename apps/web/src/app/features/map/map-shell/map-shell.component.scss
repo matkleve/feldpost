@@ -16,11 +16,36 @@
 
 .map-style-switch {
   position: absolute;
-  top: var(--spacing-3);
-  left: var(--spacing-3);
+  top: var(--container-inset);
+  left: var(--container-inset);
   z-index: var(--z-upload-button);
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
+
+  @media (max-width: 47.9375rem) {
+    top: calc(var(--container-inset-mobile) + var(--spacing-2));
+    left: var(--container-inset-mobile);
+  }
+}
+
+:host ::ng-deep .map-style-switch .segmented-switch__group {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-1);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-1);
+}
+
+:host ::ng-deep .map-style-switch .segmented-switch__button {
+  justify-content: center;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+}
+
+:host ::ng-deep .map-style-switch .segmented-switch__label {
+  display: none;
 }
 
 // ── Upload button zone — fixed top-right, expands into panel ─────────────────

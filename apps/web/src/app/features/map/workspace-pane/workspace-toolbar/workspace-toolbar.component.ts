@@ -14,9 +14,9 @@ import type {
 } from '../../../../core/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
 import {
-  SnapSizeSliderComponent,
-  type SnapSizeSliderOption,
-} from '../../../../shared/snap-size-slider/snap-size-slider.component';
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../../../shared/segmented-switch/segmented-switch.component';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -30,7 +30,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
-    SnapSizeSliderComponent,
+    SegmentedSwitchComponent,
   ],
 })
 export class WorkspaceToolbarComponent {
@@ -42,28 +42,36 @@ export class WorkspaceToolbarComponent {
   readonly currentLanguage = this.i18nService.language;
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly thumbnailSizeOptions = computed<ReadonlyArray<SnapSizeSliderOption>>(() => {
+  readonly thumbnailSizeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => {
     this.currentLanguage();
     return [
       {
-        value: 'row',
+        id: 'row',
         label: this.t('workspace.toolbar.size.row', 'Rows'),
         icon: 'view_headline',
+        title: this.t('workspace.toolbar.size.row', 'Rows'),
+        ariaLabel: this.t('workspace.toolbar.size.row', 'Rows'),
       },
       {
-        value: 'small',
+        id: 'small',
         label: this.t('workspace.toolbar.size.small', 'Small'),
         icon: 'grid_view',
+        title: this.t('workspace.toolbar.size.small', 'Small'),
+        ariaLabel: this.t('workspace.toolbar.size.small', 'Small'),
       },
       {
-        value: 'medium',
+        id: 'medium',
         label: this.t('workspace.toolbar.size.medium', 'Medium'),
         icon: 'apps',
+        title: this.t('workspace.toolbar.size.medium', 'Medium'),
+        ariaLabel: this.t('workspace.toolbar.size.medium', 'Medium'),
       },
       {
-        value: 'large',
+        id: 'large',
         label: this.t('workspace.toolbar.size.large', 'Large'),
         icon: 'view_agenda',
+        title: this.t('workspace.toolbar.size.large', 'Large'),
+        ariaLabel: this.t('workspace.toolbar.size.large', 'Large'),
       },
     ];
   });
@@ -174,7 +182,7 @@ export class WorkspaceToolbarComponent {
     this.activeDropdown.set(null);
   }
 
-  onThumbnailSizeChanged(value: string): void {
+  onThumbnailSizeChanged(value: string | null): void {
     if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
     this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
   }

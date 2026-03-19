@@ -23,7 +23,12 @@
   }
 
   &__group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
     width: var(--segmented-group-width, auto);
+    border: 1.5px solid var(--action-border-default);
+    border-radius: var(--radius-full);
     padding: 0.15rem;
     background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
     border-color: color-mix(in srgb, var(--menu-surface-border) 86%, transparent);
@@ -39,6 +44,10 @@
 
   &__button {
     min-height: var(--segmented-button-min-height, 2.45rem);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--action-bg-default);
+    color: var(--action-text-default);
     padding-block: var(--segmented-button-padding-block, 0.375rem);
     padding-inline: var(--segmented-button-padding-inline, 0.95rem);
     flex: var(--segmented-button-flex, initial);
@@ -59,6 +68,11 @@
       transform var(--segmented-motion-duration) var(--segmented-motion-ease),
       opacity var(--segmented-motion-duration) var(--segmented-motion-ease);
 
+    &:hover {
+      color: var(--menu-item-text);
+      background: var(--action-bg-hover);
+    }
+
     &:focus-visible {
       box-shadow:
         0 0 0 2px color-mix(in srgb, var(--color-clay) 18%, transparent),
@@ -66,7 +80,7 @@
       outline: none;
     }
 
-    &.ui-segmented__button--active {
+    &.segmented-switch__button--active {
       background: var(--field-bg);
       border-color: color-mix(in srgb, var(--action-border-active) 82%, transparent);
       box-shadow:
