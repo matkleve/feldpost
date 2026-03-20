@@ -4,11 +4,11 @@
 
 ## What It Is
 
-A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. The page reuses the same Search Bar component pattern used on the map page, but the query algorithm is different: it searches across images and metadata and returns grouped project-level result counts. Grouping/filtering/sorting on this page uses a project-level operator profile (not the image-level workspace operator profile).
+A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. Grouping/filtering/sorting on this page uses a project-level operator profile (not the image-level workspace operator profile).
 
 ## What It Looks Like
 
-Full-width page with a header row: title "Projects", total project count, and a primary "New project" button. Below header, the same Search Bar surface pattern is reused (same geometry, icon rhythm, focus behavior), but in Projects mode results are aggregated as project cards/rows with matching-image counts. The center content rail is horizontally centered and constrained to a narrow maximum width of 25rem (400px) so project controls and lists stay focused in a compact management column. A view toggle switches between List view (default, optimized for quick scanning/comparison) and Cards view (optimized for browsing and visual grouping). Each project item shows name, color chip, status, matching image count, total image count, last activity, and quick actions; cards use consistent structure and fixed action zones.
+Full-width page with a single top header row. The header places a primary `New project` button on the left and the page title `Projects` on the right, aligned on the same horizontal line. Directly below sits one toolbar row that contains the existing project operators: status scope (`All`, `Active`, `Archived`), grouping, filter, sort, and the view-mode switch for rows vs. cards. The center content rail is horizontally centered and constrained to a narrow maximum width of 25rem (400px) so project controls and lists stay focused in a compact management column. Each project item shows name, color chip, status, image counts, last activity, and action buttons; cards use stable action zones so active and archived projects expose different actions without shifting layout.
 
 ## Where It Lives
 
@@ -19,57 +19,47 @@ Full-width page with a header row: title "Projects", total project count, and a 
 
 ## Actions
 
-| #   | User Action                            | System Response                                                                                                        | Triggers                         |
-| --- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| 1   | Navigates to `/projects`               | Loads organization projects, image counts, and summary metadata                                                        | Supabase query                   |
-| 2   | Types in shared Search Bar             | Runs image-level search (title/address/custom properties) and groups matches by project with per-project result counts | `searchTerm` state               |
-| 3   | Clicks "New project"                   | Inserts draft project, opens workspace pane, and focuses title text input in pane header                               | Supabase insert                  |
-| 4   | Presses Enter in workspace title input | Persists new name, exits title edit mode, and updates the project label in list/cards                                  | Supabase update                  |
-| 5   | Clicks project row                     | Opens workspace pane in-place and scopes content to that project                                                       | `selectedProjectId` + pane state |
-| 6   | Opens row menu and clicks Rename       | Enables inline rename for that row                                                                                     | Local state                      |
-| 7   | Confirms rename                        | Validates name and updates project row                                                                                 | Supabase update                  |
-| 8   | Opens color picker on project          | Assigns predefined project color token and updates chip/accent                                                         | Supabase update                  |
-| 9   | Opens row menu and clicks Archive      | Asks confirmation, then archives project (not hard delete)                                                             | Supabase update                  |
-| 10  | Uses status filter                     | Restricts grouped results to Active or Archived projects                                                               | `statusFilter` state             |
-| 11  | Toggles view mode                      | Switches between List and Cards layouts without losing search/filter/sort state                                        | `viewMode` state                 |
-| 12  | Hovers project color chip              | Shows a palette affordance on the chip so users discover color editing without opening menus                           | Card/list color-chip hover state |
-| 13  | Clicks project color chip              | Opens anchored color picker with semantic project colors                                                               | `coloringProjectId` state        |
-| 14  | Opens workspace from project card/row  | Opens pane with title set to selected project name instead of generic "Workspace"                                      | `workspacePaneTitle` computed    |
-| 15  | Clicks map button in image details     | Navigates to `/map` and zooms to the selected image location                                                           | Router + map focus payload       |
-| 16  | Opens Grouping dropdown                | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                   | Projects operator profile        |
-| 17  | Activates one or more groupings        | Renders explicit group headers and nests project rows/cards under those sections                                       | `activeGroupings` state          |
-| 18  | Opens Sort dropdown                    | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys)   | Projects operator profile        |
-| 19  | Changes sort direction                 | Reorders grouped or flat project result set deterministically                                                          | `activeProjectSorts` state       |
+| #   | User Action                            | System Response                                                                                                      | Triggers                         |
+| --- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 1   | Navigates to `/projects`               | Loads organization projects, image counts, and summary metadata                                                      | Supabase query                   |
+| 2   | Clicks `New project`                   | Inserts draft project, opens workspace pane, and focuses title text input in pane header                             | Supabase insert                  |
+| 3   | Presses Enter in workspace title input | Persists new name, exits title edit mode, and updates the project label in list/cards                                | Supabase update                  |
+| 4   | Uses status filter                     | Restricts visible projects to `All`, `Active`, or `Archived`                                                         | `statusFilter` state             |
+| 5   | Opens Grouping dropdown                | Shows only project-level grouping fields (`status`, `primary-district`, `primary-city`, `color-key`)                 | Projects operator profile        |
+| 6   | Activates one or more groupings        | Renders explicit group headers and nests project rows/cards under those sections                                     | `activeGroupings` state          |
+| 7   | Opens Filter dropdown                  | Shows only project-level filter fields                                                                               | Projects operator profile        |
+| 8   | Opens Sort dropdown                    | Shows only project-level sort fields (`name`, `updated-at`, `last-activity`, `image-count`, `status`, location keys) | Projects operator profile        |
+| 9   | Changes sort direction                 | Reorders grouped or flat project result set deterministically                                                        | `activeProjectSorts` state       |
+| 10  | Toggles view mode                      | Switches between row/list and card layouts without losing toolbar state                                              | `viewMode` state                 |
+| 11  | Clicks project row or card             | Opens workspace pane in-place and scopes content to that project                                                     | `selectedProjectId` + pane state |
+| 12  | Clicks color button on an active card  | Opens anchored color picker with semantic project colors                                                             | `coloringProjectId` state        |
+| 13  | Selects a new project color            | Persists the new color token and updates chip/accent immediately                                                     | Supabase update                  |
+| 14  | Clicks `Archive` on an active card     | Asks confirmation, then archives project                                                                             | Supabase update                  |
+| 15  | Clicks `Restore` on an archived card   | Asks confirmation, then restores the project to Active                                                               | Supabase update                  |
+| 16  | Clicks `Delete` on an archived card    | Asks confirmation, then permanently deletes the archived project for the organization                                | Supabase delete                  |
+| 17  | Clicks map button in image details     | Navigates to `/map` and zooms to the selected image location                                                         | Router + map focus payload       |
 
 ### Interaction Flowchart
 
 ```mermaid
 flowchart TD
-	A[Open Projects Page] --> B[Load projects + counts + metadata]
-	B --> C{Search term entered?}
-	C -- No --> D[Show full set]
-	C -- Yes --> E[Search images + metadata]
-	E --> E2[Group matches by project]
-	E2 --> E3[Compute matching count per project]
-	D --> F{Status filter}
-	E3 --> F
-	F --> G[Apply project-level grouping/filter/sort operators]
+	A[Open Projects Page] --> B[Load projects + metadata]
+	B --> C[Render header row: New project left, title right]
+	C --> D[Render toolbar row]
+	D --> E{Status / grouping / filter / sort / view mode changed?}
+	E -- Yes --> F[Recompute visible projects]
+	E -- No --> G[Render current project set]
+	F --> G
 	G --> H{View mode}
-	H -- List --> I[Render ProjectsList]
+	H -- Rows --> I[Render ProjectsList]
 	H -- Cards --> J[Render ProjectsCardGrid]
-	I --> I2{Grouping active?}
-	I2 -- Yes --> I3[Render GroupHeader + grouped rows]
-	I2 -- No --> I4[Render flat rows]
-	I3 --> K{Row action}
-	I4 --> K{Row action}
-	J --> K
-	K -- Row/Card click --> L[Open in-page workspace pane + apply project scope]
-	K -- Rename --> M[Inline edit and persist]
-	K -- Color chip hover --> N[Show palette affordance]
-	N --> O[Color chip click opens anchored picker]
-	O --> P[Assign semantic color token]
-	L --> Q{Image details map action}
-	Q -- Clicked --> R[Navigate to /map and zoom to image]
+	J --> K{Card status}
+	K -- Active --> L[Show color action + Archive button]
+	K -- Archived --> M[Show Restore button + Delete button]
+	I --> N[Open workspace pane on row click]
+	J --> N
+	N --> O{Image details map action}
+	O -- Clicked --> P[Navigate to /map and zoom to image]
 ```
 
 ### View Mode State
@@ -97,18 +87,15 @@ stateDiagram-v2
 
 ```
 ProjectsPage                                ← route root, full width
-├── ProjectsHeader                           ← title, count, primary CTA
-│   ├── ProjectsTitle                         ← "Projects"
-│   ├── ProjectCountBadge                     ← "N projects"
-│   └── NewProjectButton                      ← primary action
-├── ProjectsSearchSurface                     ← reuse shared Search Bar component in "projects" mode
-│   └── SearchBarComponent                     ← same component family as map search
-├── ProjectsToolbar                           ← list controls
-│   ├── StatusSegmentedControl                 ← All / Active / Archived
-│   ├── ViewModeToggle                         ← List / Cards
-│   ├── GroupingDropdown                       ← project-level grouping fields only
-│   ├── FilterDropdown                         ← project-level filter fields only
-│   └── SortDropdown                           ← project-level sorting fields only
+├── ProjectsHeader                            ← single top row, no search bar
+│   ├── NewProjectButton                      ← left-aligned primary action
+│   └── ProjectsTitle                         ← right-aligned "Projects"
+├── ProjectsToolbar                           ← row below header
+│   ├── StatusSegmentedControl                ← All / Active / Archived
+│   ├── GroupingDropdown                      ← project-level grouping fields only
+│   ├── FilterDropdown                        ← project-level filter fields only
+│   ├── SortDropdown                          ← project-level sorting fields only
+│   └── ViewModeToggle                        ← Rows / Cards
 ├── ContentRail                                ← centered layout rail, max-width 25rem (400px)
 │   ├── [viewMode=list] ProjectsList (.ui-container)
 │   │   ├── [grouping active] ProjectGroupSection × N
@@ -127,10 +114,11 @@ ProjectsPage                                ← route root, full width
 │       └── ProjectCard × N
 │           ├── ProjectColorChip               ← token color indicator
 │           ├── ProjectName                    ← primary label
-│           ├── MatchingCountBadge             ← query-specific count (e.g., "5 results")
 │           ├── ProjectMeta                    ← total count + status + updated
-│           ├── ProjectColorChipButton          ← larger token chip, hover palette affordance, click opens picker
-│           └── CardActions                     ← Rename, Archive
+│           ├── [status=active] ProjectColorButton ← changes project color
+│           ├── [status=active] ArchiveButton  ← moves project to Archived after confirmation
+│           ├── [status=archived] RestoreButton ← removes project from Archived after confirmation
+│           └── [status=archived] DeleteButton ← permanently deletes archived project after confirmation
 ├── [projectSelected] WorkspacePaneComponent    ← in-page details surface, no route change
 │   ├── ProjectScopedPhotoGrid                  ← selected project photos
 │   └── ImageDetailView                          ← includes MapButton to `/map`
@@ -146,26 +134,33 @@ ProjectsPage                                ← route root, full width
 
 ```mermaid
 flowchart LR
-  UI[UI Component] --> S[Service Layer]
-  S --> DB[(Supabase Tables)]
+  UI[ProjectsPageComponent] --> S[ProjectsService]
+  UI --> F[FilterService]
+  UI --> W[WorkspaceViewService]
+  UI --> R[Router + ActivatedRoute]
+  S --> DB[(Supabase tables / joins)]
   DB --> S
   S --> UI
+  F --> UI
+  W --> UI
+  R --> UI
 ```
 
-| Field                     | Source                                                                                      | Type                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Projects                  | `supabase.from('projects').select('id,name,color_key,archived_at,created_at,updated_at')`   | `Project[]`                             |
-| Image counts              | RPC or aggregated query by `project_id` from `image_projects`                               | `Record<string, number>`                |
-| Last activity             | Max `images.captured_at` per project                                                        | `Record<string, string>`                |
-| Primary city              | Most frequent `images.city` value per project (tie: lexicographic)                          | `string \| null`                        |
-| Primary district          | Most frequent `images.district` value per project (tie: lexicographic)                      | `string \| null`                        |
-| Active scope set          | Workspace project scope state (project IDs)                                                 | `Set<string>`                           |
-| View preference           | User preference store (profile preferences)                                                 | `'list' \| 'cards'`                     |
-| Search matches by project | RPC/search service: image-level query joined with `image_projects`, grouped by `project_id` | `Record<string, number>`                |
-| Search fields             | `images.title`, `images.address_label`, custom metadata key/value pairs (`metadata_values`) | `string` query against normalized index |
+| Field                          | Source                                                                                                        | Type                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Projects                       | `ProjectsService.loadProjects()` → `projects` joined/aggregated with project activity and membership metadata | `ProjectListItem[]`             |
+| Draft project                  | `ProjectsService.createDraftProject()`                                                                        | `ProjectListItem \| null`       |
+| Rename/archive/restore/delete  | `ProjectsService.renameProject()`, `archiveProject()`, `restoreProject()`, `deleteProject()`                  | `Promise<boolean>`              |
+| Project color                  | `ProjectsService.setProjectColor()`                                                                           | `Promise<boolean>`              |
+| Project-scoped workspace media | `ProjectsService.loadProjectWorkspaceImages(projectId)`                                                       | `ProjectScopedWorkspaceImage[]` |
+| Primary city                   | Derived in `ProjectsService` from the most frequent `images.city` per project (tie-break: lexicographic)      | `string \| null`                |
+| Primary district               | Derived in `ProjectsService` from the most frequent `images.district` per project (tie-break: lexicographic)  | `string \| null`                |
+| View preference                | `localStorage['feldpost-projects-view-mode']` via component persistence helper                                | `'list' \| 'cards'`             |
+| Route-scoped project open      | `ActivatedRoute.snapshot.paramMap.get('projectId')`                                                           | `string \| null`                |
+| Filter rules                   | `FilterService.rules()` restricted to the projects operator profile                                           | `FilterRule[]`                  |
 
 `color_key` accepts semantic keys (`clay`, `accent`, `success`, `warning`) and temporary generated brand-hue keys in the format `brand-hue-###` (0-359) used by the one-click random color action.
-Search behavior on this page is explicitly aggregation-first: query images, then group by project; it is not a simple project-name-only filter.
+This page must keep Supabase access behind `ProjectsService`; the component contract must describe service calls, not introduce ad-hoc client queries.
 
 ### Projects Operator Profile
 
@@ -184,93 +179,140 @@ Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 
 ## State
 
-| Name                          | Type                              | Default  | Controls                                                      |
-| ----------------------------- | --------------------------------- | -------- | ------------------------------------------------------------- |
-| `projects`                    | `ProjectListItem[]`               | `[]`     | Rendered project rows/cards                                   |
-| `loading`                     | `boolean`                         | `false`  | Loading skeleton visibility                                   |
-| `searchTerm`                  | `string`                          | `''`     | Search query                                                  |
-| `statusFilter`                | `'all' \| 'active' \| 'archived'` | `'all'`  | Status scoping                                                |
-| `viewMode`                    | `'list' \| 'cards'`               | `'list'` | Active layout mode                                            |
-| `projectMatchCounts`          | `Record<string, number>`          | `{}`     | Search-result count per project                               |
-| `activeGroupings`             | `GroupingProperty[]`              | `[]`     | Grouping hierarchy for list/card rendering                    |
-| `activeProjectSorts`          | `SortConfig[]`                    | `[]`     | Explicit project-level sort criteria                          |
-| `selectedProjectId`           | `string \| null`                  | `null`   | Active project opened in workspace pane                       |
-| `workspacePaneOpen`           | `boolean`                         | `false`  | In-page workspace visibility                                  |
-| `editingProjectId`            | `string \| null`                  | `null`   | Inline rename row                                             |
-| `workspaceTitleEditProjectId` | `string \| null`                  | `null`   | Enables workspace header title input for the selected project |
-| `workspaceTitleEditValue`     | `string`                          | `''`     | Live value for workspace header title input                   |
-| `creatingProject`             | `boolean`                         | `false`  | New-project draft input visibility                            |
-| `archivingProjectId`          | `string \| null`                  | `null`   | Archive confirmation pending state                            |
-| `coloringProjectId`           | `string \| null`                  | `null`   | Color picker visibility target                                |
+| Name                          | Type                                         | Default                  | Controls                                                      |
+| ----------------------------- | -------------------------------------------- | ------------------------ | ------------------------------------------------------------- |
+| `projects`                    | `ProjectListItem[]`                          | `[]`                     | Rendered project rows/cards                                   |
+| `loading`                     | `boolean`                                    | `false`                  | Loading skeleton visibility                                   |
+| `statusFilter`                | `'all' \| 'active' \| 'archived'`            | `'all'`                  | Status scoping                                                |
+| `viewMode`                    | `'list' \| 'cards'`                          | stored value or `'list'` | Active layout mode                                            |
+| `sortMode`                    | `'name' \| 'updated' \| 'image-count'`       | `'updated'`              | Fallback/base project ordering                                |
+| `selectedProjectId`           | `string \| null`                             | `null`                   | Active project opened in workspace pane                       |
+| `workspacePaneOpen`           | `boolean`                                    | `false`                  | In-page workspace visibility                                  |
+| `editingProjectId`            | `string \| null`                             | `null`                   | Inline rename row                                             |
+| `workspaceTitleEditProjectId` | `string \| null`                             | `null`                   | Enables workspace header title input for the selected project |
+| `workspaceTitleEditValue`     | `string`                                     | `''`                     | Live value for workspace header title input                   |
+| `creatingProject`             | `boolean`                                    | `false`                  | New-project draft input visibility                            |
+| `pendingProjectAction`        | `'archive' \| 'restore' \| 'delete' \| null` | `null`                   | Confirmation dialog mode for destructive project actions      |
+| `pendingProjectId`            | `string \| null`                             | `null`                   | Target project for the pending destructive action             |
+| `pendingActionBusy`           | `boolean`                                    | `false`                  | Prevents duplicate archive/restore/delete submissions         |
+| `coloringProjectId`           | `string \| null`                             | `null`                   | Color picker visibility target                                |
+| `detailImageId`               | `string \| null`                             | `null`                   | Selected image inside the project-scoped workspace            |
+| `activeGroupings`             | `GroupingProperty[]`                         | `[]`                     | Grouping hierarchy for list/card rendering                    |
+| `collapsedGroupIds`           | `Set<string>`                                | `new Set()`              | Collapsed grouped sections                                    |
+| `activeProjectSorts`          | `SortConfig[]`                               | `[]`                     | Explicit project-level sort criteria                          |
+| `activeToolbarDropdown`       | `'grouping' \| 'filter' \| 'sort' \| null`   | `null`                   | Which toolbar dropdown is open                                |
+| `isMobile`                    | `boolean`                                    | viewport-derived         | Mobile layout behavior                                        |
 
 ## File Map
 
-| File                                                                   | Purpose                                         |
-| ---------------------------------------------------------------------- | ----------------------------------------------- |
-| `apps/web/src/app/features/projects/projects-page.component.ts`        | Standalone route component                      |
-| `apps/web/src/app/features/projects/projects-page.component.html`      | Page template                                   |
-| `apps/web/src/app/features/projects/projects-page.component.scss`      | Page styles                                     |
-| `apps/web/src/app/features/projects/projects-view-toggle.component.ts` | List/cards toggle control                       |
-| `apps/web/src/app/features/projects/project-card.component.ts`         | Card presentation for cards mode                |
-| `apps/web/src/app/features/projects/project-color-picker.component.ts` | Color selector using semantic tokens            |
-| `apps/web/src/app/core/projects/projects.service.ts`                   | Project read/create/rename/archive data service |
-| `apps/web/src/app/core/projects/projects.types.ts`                     | Shared project page models                      |
-| `apps/web/src/app/features/projects/projects-page.component.spec.ts`   | Component behavior tests                        |
+| File                                                                   | Purpose                                                               |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `apps/web/src/app/features/projects/projects-page.component.ts`        | Standalone route component and page interaction orchestration         |
+| `apps/web/src/app/features/projects/projects-page.component.html`      | Page template for list/cards/workspace states                         |
+| `apps/web/src/app/features/projects/projects-page.component.scss`      | Page styles                                                           |
+| `apps/web/src/app/features/projects/projects-view-toggle.component.ts` | List/cards toggle control                                             |
+| `apps/web/src/app/features/projects/project-color-picker.component.ts` | Color selector using semantic tokens                                  |
+| `apps/web/src/app/core/projects/projects.service.ts`                   | Project read/search/create/rename/archive/restore/delete data service |
+| `apps/web/src/app/core/projects/projects.types.ts`                     | Shared project page models                                            |
+| `apps/web/src/app/features/projects/projects-page.component.spec.ts`   | Component behavior tests                                              |
 
 ## Wiring
+
+### Injected Services
+
+- `I18nService` — resolves all user-facing strings through `t(key, fallback)`.
+- `ProjectsService` — owns all project and project-scoped media reads/writes.
+- `ToastService` — shows create/archive/restore/delete failure and success feedback.
+- `FilterService` — stores project-mode filter rules and exposes the active ruleset.
+- `WorkspaceViewService` — coordinates project-scoped workspace content and image-detail context.
+- `Router` — navigates to `/map` for image handoff and keeps project route state in sync.
+- `ActivatedRoute` — reads optional `projectId` route parameter for direct-open behavior.
+
+### Inputs / Outputs
+
+- Route root component: none.
+- Child bindings are internal template bindings only; this page does not expose public `@Input()` or `@Output()` APIs.
+
+### Subscriptions
+
+- Angular `effect()` keeps active grouping labels synchronized with translated option labels.
+- Angular `effect()` persists `viewMode` to `localStorage` whenever the mode changes.
+- No manual RxJS subscription is required in the page contract; signal/effect lifecycle is owned by Angular.
+
+### Supabase Calls
+
+None — delegated to `ProjectsService`.
 
 ### Wiring Flow (Mermaid)
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  participant U as User
+  participant C as ProjectsPageComponent
+  participant PS as ProjectsService
+  participant FS as FilterService
+  participant WVS as WorkspaceViewService
+  participant R as Router
+
+  U->>C: Open /projects
+  C->>PS: loadProjects()
+  PS-->>C: ProjectListItem[]
+  C-->>U: Render header, toolbar, and project list/cards
+
+  U->>C: Change status/filter/sort/grouping/view mode
+  C->>FS: read/update project-mode filter rules
+  C-->>U: Re-render grouped project results
+
+  U->>C: Create / archive / restore / delete / recolor project
+  C->>PS: perform project mutation
+  alt mutation succeeds
+    PS-->>C: success
+    C-->>U: Update local project state and show toast when needed
+  else mutation fails
+    PS-->>C: failure
+    C-->>U: Preserve current UI state and show error toast
+  end
+
+  U->>C: Open project workspace or image detail
+  C->>WVS: apply project-scoped workspace context
+  U->>C: Click map action in image details
+  C->>R: navigate(['/map'], focus payload)
 ```
 
 - Add route `{ path: 'projects', component: ProjectsPageComponent }` in app routes.
+- Support direct-open route state for a selected project (`/projects/:projectId` or equivalent route param binding) when the router configuration provides it.
 - Add sidebar entry that navigates to `/projects`.
-- Inject `ProjectsService` in `ProjectsPageComponent`.
-- Reuse the existing Search Bar component family by importing a shared search-surface component in Projects mode; do not create a second independent search implementation.
-- The shared search-surface must support mode-specific behavior via inputs/adapter (`map` vs `projects`) while preserving identical keyboard and focus interactions.
-- Projects mode must call the grouped-search endpoint/service (image-level query -> group by project) instead of map-center commit behavior.
 - Projects mode must provide a dedicated project-level operator profile for Grouping/Filter/Sort, instead of exposing the full workspace image-property registry.
 - Grouping in list mode must render explicit group headers and grouped rows/cards; reordering groupings must re-render sections immediately.
 - On row open action, set selected project and open the in-page workspace pane; do not change route.
 - Reuse existing image-details map action to navigate to `/map` with selected image id/coordinates so map zoom/focus can be applied.
 - Keep `Projects Dropdown` behavior consistent with this page by sharing the same source-of-truth project scope state.
 - Constrain the central project content area to max-width 25rem (400px) and center it in the available viewport.
+- Do not add direct Supabase client calls to `ProjectsPageComponent`; keep the security/data contract behind `ProjectsService`.
 
 ## Acceptance Criteria
 
 - [x] Route `/projects` renders a list of projects for the active organization.
-- [x] Projects page reuses the same Search Bar component family as map search (no duplicated search UI implementation).
-- [x] Search uses image-level matching and groups results by project with query-specific counts.
-- [x] Search fields include custom metadata values (for example query `Fang 5`).
-- [x] Query `Fang 5` shows grouped result badges such as `5 results` on matching projects.
-- [x] Keyboard interaction model stays consistent with map search.
+- [x] The top row shows `New project` on the left and the page title `Projects` on the right.
+- [x] The page has no standalone search bar above the toolbar.
+- [x] The second row is a toolbar containing status scope, grouping, filter, sort, and view-mode controls.
 - [x] Status control filters Active vs Archived rows.
 - [x] View toggle switches between List and Cards without resetting search/filter/sort state.
 - [x] List view is default and optimized for scan/compare.
 - [x] Cards view keeps card internals structurally consistent for fast comparison.
 - [x] "New project" creates a draft row, opens workspace pane, and focuses the workspace title input.
 - [x] Pressing Enter in the workspace title input persists the name and updates the project label in list/cards.
-- [x] Rename is inline, validates input, and persists without full-page reload.
-- [x] Each project can be assigned a semantic color token and the color is visible in list and card presentations.
+- [x] Each active card shows a color-change action and an `Archive` button.
 - [x] Archive requires confirmation and removes project from Active view.
+- [x] Each archived card shows exactly two actions: `Restore` and `Delete`.
+- [x] Restoring an archived project requires confirmation and moves it back to Active.
+- [x] Permanent delete is only offered for archived projects and requires confirmation.
 - [x] Clicking project row opens in-page workspace details scoped to that project without leaving `/projects`.
 - [x] Project row/list item click opens the in-page workspace details behavior.
 - [x] Card click opens the same in-page workspace details behavior.
-- [ ] Project color chip is visually larger than status dots and remains readable at a glance.
-- [ ] Hovering the color chip reveals a palette affordance without opening the picker.
-- [ ] Clicking the color chip opens a dedicated anchored color picker.
+- [ ] Clicking the active-card color action opens a dedicated anchored color picker.
 - [ ] Temporary picker variant offers one dropdown-style action to assign a random brand hue (`brand-hue-###`).
 - [ ] Opening workspace from a project shows the project name as pane title.
-- [x] Image-details map action from project-scoped workspace navigates to `/map` and zooms to the selected photo location.
 - [x] Empty state appears when no projects match current filters.
 - [x] Loading state appears during initial fetch and refresh operations.
 - [x] Center content rail is horizontally centered and capped at max-width 25rem (400px).

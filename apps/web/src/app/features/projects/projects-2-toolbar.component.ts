@@ -36,6 +36,14 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   ],
   template: `
     <section class="projects2-toolbar">
+      <app-segmented-switch
+        class="projects2-toolbar__status"
+        [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
+        [options]="statusOptions()"
+        [value]="statusFilter()"
+        (valueChange)="onStatusValueChange($event)"
+      />
+
       <div
         class="projects2-toolbar__controls"
         role="toolbar"
@@ -56,16 +64,6 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
           </button>
         }
       </div>
-
-      <span class="projects2-toolbar__spacer" aria-hidden="true"></span>
-
-      <app-segmented-switch
-        class="projects2-toolbar__status"
-        [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
-        [options]="statusOptions()"
-        [value]="statusFilter()"
-        (valueChange)="onStatusValueChange($event)"
-      />
 
       <app-projects-view-toggle
         class="projects2-toolbar__view-toggle"
@@ -119,6 +117,7 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         align-items: center;
         gap: var(--spacing-3);
         min-width: 0;
+        flex-wrap: wrap;
       }
 
       .projects2-toolbar__controls {
@@ -176,11 +175,6 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
           0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
       }
 
-      .projects2-toolbar__spacer {
-        flex: 1 1 auto;
-        min-width: var(--spacing-2);
-      }
-
       .projects2-toolbar__view-toggle {
         display: inline-flex;
         align-items: center;
@@ -197,10 +191,6 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         .projects2-toolbar__status,
         .projects2-toolbar__view-toggle {
           width: 100%;
-        }
-
-        .projects2-toolbar__spacer {
-          display: none;
         }
       }
     `,

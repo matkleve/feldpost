@@ -79,13 +79,6 @@ export const routes: Routes = [
       {
         path: 'projects',
         loadComponent: () =>
-          import('./features/projects/projects-page.component').then(
-            (m) => m.ProjectsPageComponent,
-          ),
-      },
-      {
-        path: 'projects-2',
-        loadComponent: () =>
           import('./features/projects/projects-2-page.component').then(
             (m) => m.Projects2PageComponent,
           ),
@@ -93,8 +86,8 @@ export const routes: Routes = [
       {
         path: 'projects/:projectId',
         loadComponent: () =>
-          import('./features/projects/projects-page.component').then(
-            (m) => m.ProjectsPageComponent,
+          import('./features/projects/projects-2-page.component').then(
+            (m) => m.Projects2PageComponent,
           ),
       },
       {
