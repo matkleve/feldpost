@@ -38,6 +38,23 @@ src/app/
 - `npm run test` — Vitest test suite
 - `npm run lint` — ESLint
 
+## Design System Gates
+
+When a change touches design-system docs, panel SCSS, or geometry behavior, run this from repository root before PR:
+
+- `npm run design-system:check`
+
+Command details:
+
+- `node scripts/validate-design-system-registry.mjs`
+- `node scripts/audit-panel-breakpoints.mjs`
+
+Related references:
+
+- `../../.github/workflows/design-system-check.yml`
+- `../../.github/pull_request_template.md`
+- `../../CONTRIBUTING.md`
+
 ## i18n Is Required
 
 When implementing components or changing UI copy:

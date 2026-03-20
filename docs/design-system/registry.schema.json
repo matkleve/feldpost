@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://feldpost.local/design-system/registry.schema.json",
+  "title": "Feldpost Design System Registry",
+  "type": "object",
+  "required": ["version", "updatedAt", "families"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "families": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "components"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["planned", "draft", "stable", "deprecated", "replaced"]
+          },
+          "components": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "status",
+                "variants",
+                "states",
+                "responsiveBehavior",
+                "a11y",
+                "migration"
+              ],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "planned",
+                    "draft",
+                    "stable",
+                    "deprecated",
+                    "replaced"
+                  ]
+                },
+                "variants": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                },
+                "states": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "default",
+                      "hover",
+                      "active",
+                      "focus-visible",
+                      "disabled",
+                      "read-only",
+                      "loading",
+                      "error",
+                      "success"
+                    ]
+                  }
+                },
+                "responsiveBehavior": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": ["fixed", "fluid", "collapse", "drawer", "sheet"]
+                  }
+                },
+                "a11y": {
+                  "type": "object",
+                  "required": [
+                    "focusVisible",
+                    "keyboard",
+                    "minTouchTargetDesktop",
+                    "minTouchTargetMobile"
+                  ],
+                  "properties": {
+                    "focusVisible": { "type": "boolean" },
+                    "keyboard": { "type": "boolean" },
+                    "minTouchTargetDesktop": {
+                      "type": "string",
+                      "pattern": "^[0-9]+x[0-9]+$"
+                    },
+                    "minTouchTargetMobile": {
+                      "type": "string",
+                      "pattern": "^[0-9]+x[0-9]+$"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "migration": {
+                  "type": "object",
+                  "required": ["impact", "targetWave"],
+                  "properties": {
+                    "impact": {
+                      "type": "string",
+                      "enum": ["critical", "high", "medium", "low"]
+                    },
+                    "targetWave": { "type": "integer", "minimum": 1 }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

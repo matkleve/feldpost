@@ -134,6 +134,7 @@ const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
 const MAP_MATERIAL_STORAGE_KEY = 'sitesnap.settings.map.material';
+const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePaneWidth';
 const HISTORIC_BASE_PANE = 'historic-base';
 const HISTORIC_LABEL_PANE = 'historic-label';
 
@@ -181,6 +182,10 @@ export class MapShellComponent implements OnDestroy {
   private static readonly HOUSE_PROXIMITY_ZOOM = 19;
   private static readonly STREET_PROXIMITY_ZOOM = 17;
   private static readonly MARKER_LONG_PRESS_MS = 500;
+  private static readonly WORKSPACE_PANE_DEFAULT_WIDTH = 360;
+  private static readonly WORKSPACE_PANE_MIN_WIDTH = 280;
+  private static readonly WORKSPACE_PANE_MAX_WIDTH = 640;
+  private static readonly MAP_SAFE_MIN_WIDTH = 320;
 
   readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
@@ -389,28 +394,24 @@ export class MapShellComponent implements OnDestroy {
   /** Whether the workspace pane (photo panel) is open. */
   readonly photoPanelOpen = this.state.photoPanelOpen;
 
-  /** Current workspace pane width in px. Initialised lazily to golden-ratio default on first open. */
+  /** Current workspace pane width in px. Uses restored user preference or design-system default. */
   readonly workspacePaneWidth = this.state.workspacePaneWidth;
 
   /** Minimum workspace pane width in px (17.5rem). */
-  readonly workspacePaneMinWidth = 280;
+  readonly workspacePaneMinWidth = MapShellComponent.WORKSPACE_PANE_MIN_WIDTH;
 
   /** Maximum workspace pane width: viewport minus map minimum (~320px) minus divider. */
   readonly workspacePaneMaxWidth = computed(() => {
     // Fallback to a reasonable default before DOM is available.
     const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    return Math.max(this.workspacePaneMinWidth, viewportWidth - 320);
+    const safeViewportMax = viewportWidth - MapShellComponent.MAP_SAFE_MIN_WIDTH;
+    const cappedMax = Math.min(MapShellComponent.WORKSPACE_PANE_MAX_WIDTH, safeViewportMax);
+    return Math.max(this.workspacePaneMinWidth, cappedMax);
   });
 
-  /**
-   * Default workspace pane width when opening — golden ratio of the viewport
-   * (viewport × 0.382, i.e. the minor segment of the golden cut), clamped to
-   * [workspacePaneMinWidth, workspacePaneMaxWidth].
-   */
+  /** Default workspace pane width when opening, clamped to [min, max] contract bounds. */
   readonly workspacePaneDefaultWidth = computed(() => {
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    const golden = Math.round(viewportWidth * (1 - 1 / 1.618));
-    return Math.min(Math.max(golden, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
+    return this.clampWorkspacePaneWidth(MapShellComponent.WORKSPACE_PANE_DEFAULT_WIDTH);
   });
   readonly selectedMarkerKey = this.state.selectedMarkerKey;
   readonly selectedMarkerKeys = this.state.selectedMarkerKeys;
@@ -581,9 +582,11 @@ export class MapShellComponent implements OnDestroy {
     requestedAt: number;
   } | null = null;
   private shareTokenResolved = false;
+  private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
 
   constructor() {
     afterNextRender(() => {
+      this.restoreWorkspacePaneWidthPreference();
       this.markerMotionPreference.set(
         this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
       );
@@ -717,7 +720,7 @@ export class MapShellComponent implements OnDestroy {
     this.searchPlacementActive.set(false);
     this.placementActive.set(false);
     if (!this.photoPanelOpen()) {
-      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+      this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
     this.detailImageId.set(null);
@@ -1129,7 +1132,9 @@ export class MapShellComponent implements OnDestroy {
   // ── Workspace pane resize ─────────────────────────────────────────────────
 
   onWorkspaceWidthChange(newWidth: number): void {
-    this.workspacePaneWidth.set(newWidth);
+    const clampedWidth = this.clampWorkspacePaneWidth(newWidth);
+    this.workspacePaneWidth.set(clampedWidth);
+    this.persistWorkspacePaneWidthPreference(clampedWidth);
     // After resize, invalidate the Leaflet map size so tiles re-render.
     this.map?.invalidateSize();
   }
@@ -1165,10 +1170,50 @@ export class MapShellComponent implements OnDestroy {
    */
   openDetailView(imageId: string): void {
     if (!this.photoPanelOpen()) {
-      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+      this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.detailImageId.set(imageId);
     this.photoPanelOpen.set(true);
+  }
+
+  private clampWorkspacePaneWidth(width: number): number {
+    return Math.min(Math.max(width, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
+  }
+
+  private getWorkspacePaneOpeningWidth(): number {
+    const preferredWidth = this.preferredWorkspacePaneWidth();
+    if (typeof preferredWidth === 'number') {
+      return this.clampWorkspacePaneWidth(preferredWidth);
+    }
+    return this.workspacePaneDefaultWidth();
+  }
+
+  private restoreWorkspacePaneWidthPreference(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const rawValue = window.localStorage.getItem(WORKSPACE_PANE_WIDTH_STORAGE_KEY);
+    if (!rawValue) {
+      return;
+    }
+
+    const parsedWidth = Number.parseInt(rawValue, 10);
+    if (Number.isNaN(parsedWidth)) {
+      return;
+    }
+
+    const clampedWidth = this.clampWorkspacePaneWidth(parsedWidth);
+    this.preferredWorkspacePaneWidth.set(clampedWidth);
+    this.workspacePaneWidth.set(clampedWidth);
+  }
+
+  private persistWorkspacePaneWidthPreference(width: number): void {
+    this.preferredWorkspacePaneWidth.set(width);
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.localStorage.setItem(WORKSPACE_PANE_WIDTH_STORAGE_KEY, String(width));
   }
 
   /**
@@ -1687,7 +1732,7 @@ export class MapShellComponent implements OnDestroy {
       this.searchPlacementActive.set(false);
       this.placementActive.set(false);
       if (!this.photoPanelOpen()) {
-        this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+        this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
       }
       this.photoPanelOpen.set(true);
 
@@ -2162,7 +2207,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     if (!this.photoPanelOpen()) {
-      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+      this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
     this.detailImageId.set(null);
@@ -2661,7 +2706,7 @@ export class MapShellComponent implements OnDestroy {
 
   private ensurePhotoPanelOpen(): void {
     if (!this.photoPanelOpen()) {
-      this.workspacePaneWidth.set(this.workspacePaneDefaultWidth());
+      this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
   }

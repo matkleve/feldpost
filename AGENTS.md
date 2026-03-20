@@ -39,6 +39,25 @@ cd apps/web && ng build
 cd apps/web && ng test
 ```
 
+### Design System Gates (Required)
+
+Run from repository root when changes touch design-system docs, panel SCSS, or geometry logic:
+
+```bash
+npm run design-system:check
+```
+
+This command runs:
+
+- `node scripts/validate-design-system-registry.mjs`
+- `node scripts/audit-panel-breakpoints.mjs`
+
+Reference workflow and checklist:
+
+- `.github/workflows/design-system-check.yml`
+- `.github/pull_request_template.md`
+- `CONTRIBUTING.md`
+
 ## Code Conventions
 
 - Use Angular **standalone components** (no NgModules)

@@ -127,6 +127,27 @@
   --layout-sidebar-icon-size: 1.25rem;
   --layout-sidebar-label-size: 0.8125rem;
 
+  // Workspace and overlay geometry scale
+  --layout-workspace-pane-default-width: 22.5rem;
+  --layout-workspace-pane-min-width: 17.5rem;
+  --layout-workspace-pane-max-width: 40rem;
+  --layout-map-safe-min-width: 20rem;
+
+  --overlay-width-small-min: 20rem;
+  --overlay-width-small-max: 25rem;
+  --overlay-width-medium-min: 25rem;
+  --overlay-width-medium-max: 32rem;
+  --overlay-width-large-min: 32rem;
+  --overlay-width-large-max: 40rem;
+
+  --overlay-rail-left-ratio-default: 0.38;
+  --overlay-rail-left-ratio-tablet: 0.35;
+  --overlay-rail-left-min: 14rem;
+  --overlay-rail-left-max: 17rem;
+  --overlay-rail-left-tablet-min: 12rem;
+  --overlay-rail-left-tablet-max: 15rem;
+  --overlay-rail-mobile-left-width: 11.5rem;
+
   // Shared interactive primitives (single source for hover/focus/motion)
   --interactive-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
   --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);

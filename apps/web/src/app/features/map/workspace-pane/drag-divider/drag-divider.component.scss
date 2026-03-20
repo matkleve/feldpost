@@ -121,7 +121,7 @@
 
 // ── Mobile: host is hidden entirely by parent @if, but defensive fallback ────
 
-@media (max-width: 767px) {
+@media (max-width: 47.9375rem) {
   :host {
     display: none;
   }

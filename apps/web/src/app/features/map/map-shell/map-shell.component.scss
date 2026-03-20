@@ -700,7 +700,7 @@
     color: var(--color-clay);
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     width: var(--touch-target-mobile);
     height: var(--touch-target-mobile);
   }
@@ -763,14 +763,14 @@
   background: var(--color-bg-surface);
   box-shadow: var(--elevation-overlay);
 
-  @media (min-width: 768px) {
-    width: 22.5rem; // 360px default; overridden by inline style via workspacePaneWidth signal
+  @media (min-width: 48rem) {
+    width: var(--layout-workspace-pane-default-width);
     height: 100%;
     overflow: hidden;
     animation: map-panel-clip-in-right 200ms ease-out;
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     width: 100% !important; // override inline [style.width.px] from workspacePaneWidth signal
     height: 40vh;
     position: fixed;

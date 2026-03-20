@@ -1,10 +1,20 @@
 :host {
   display: contents;
-  --settings-overlay-width: min(54rem, calc(100vw - (var(--container-inset) * 4)));
+  --settings-overlay-width: clamp(
+    var(--overlay-width-large-min),
+    calc(100vw - (var(--container-inset) * 2)),
+    var(--overlay-width-large-max)
+  );
   --settings-overlay-height: min(44rem, calc(100vh - (var(--container-inset) * 2)));
-  --settings-overlay-left-width: clamp(17rem, 24vw, 21rem);
-  /* Uses the existing narrow-rail step (25rem) and caps near 30rem on desktop. */
-  --settings-overlay-right-width: clamp(25rem, 40vw, 30rem);
+  --settings-overlay-left-ratio: var(--overlay-rail-left-ratio-default);
+  --settings-overlay-left-width: clamp(
+    var(--overlay-rail-left-min),
+    calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)),
+    var(--overlay-rail-left-max)
+  );
+  --settings-overlay-right-width: calc(
+    var(--settings-overlay-width) - var(--settings-overlay-left-width) - 1px
+  );
   --settings-stroke-width: 1.5px;
   --settings-border-muted: var(--interactive-border-muted);
   --settings-hover-focus: var(--interactive-surface-hover);
@@ -270,8 +280,22 @@
 }
 
 @media (max-width: 63.9375rem) {
+  :host {
+    --settings-overlay-width: clamp(
+      var(--overlay-width-medium-min),
+      calc(100vw - (var(--container-inset) * 2)),
+      var(--overlay-width-large-max)
+    );
+    --settings-overlay-left-ratio: var(--overlay-rail-left-ratio-tablet);
+    --settings-overlay-left-width: clamp(
+      var(--overlay-rail-left-tablet-min),
+      calc(var(--settings-overlay-width) * var(--settings-overlay-left-ratio)),
+      var(--overlay-rail-left-tablet-max)
+    );
+  }
+
   .settings-overlay {
-    width: min(46rem, calc(100vw - (var(--container-inset) * 2)));
+    width: var(--settings-overlay-width);
   }
 
   .settings-overlay__shell {
@@ -279,11 +303,15 @@
   }
 
   .settings-overlay__sections {
-    flex-basis: clamp(14rem, 32vw, 17rem);
+    flex-basis: var(--settings-overlay-left-width);
   }
 }
 
 @media (max-width: 47.9375rem) {
+  :host {
+    --settings-overlay-left-width: var(--overlay-rail-mobile-left-width);
+  }
+
   .settings-overlay {
     left: var(--container-inset);
     width: calc(100vw - (var(--container-inset) * 2));
@@ -300,7 +328,7 @@
   }
 
   .settings-overlay__sections {
-    flex-basis: 11.5rem;
+    flex-basis: var(--settings-overlay-left-width);
   }
 
   .settings-overlay__field-row {

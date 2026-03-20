@@ -8,17 +8,21 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage)
 ## 🚀 Quick Start
 
 ### New to Feldpost?
+
 - **[Agent Quick Reference](agent-quick-reference.md)** - Daily work cheat sheet (<30 sec find)
 - **[Glossary](glossary.md)** - Canonical terminology (use exact names)
 - **[Project Structure](#project-structure)** - Where files live
+- **[Contributing Guide](../CONTRIBUTING.md)** - Required local checks before PR
 
 ### Implementing Features?
+
 1. **[Element Specs](element-specs/)** - UI implementation contracts (**SOURCE OF TRUTH**)
 2. **[Implementation Blueprints](implementation-blueprints/)** - Service signatures & data flow
 3. **[Agent Workflows](agent-workflows/)** - Checklists & guides
 4. **[Security Boundaries](security-boundaries.md)** - RLS & security model
 
 ### Debugging Issues?
+
 - **[Agent Quick Reference](agent-quick-reference.md#troubleshooting)** - Common fixes
 - **[Architecture](architecture.md)** - System design & patterns
 - **[Database Schema](database-schema.md)** - Tables & relationships
@@ -54,62 +58,78 @@ feldpost/
 ## 🎯 "I want to..." Quick Navigation
 
 ### **Implement a UI Element**
+
 1. [Find the spec](element-specs/README.md#elements) → Read contract
 2. [Check implementation blueprint](implementation-blueprints/) if exists
 3. [Follow agent workflow](agent-workflows/element-spec-format.md)
 4. [Verify with checklist](agent-workflows/implementation-checklist.md)
 
 ### **Debug Existing Code**
+
 - [Quick Reference troubleshooting](agent-quick-reference.md#troubleshooting)
 - [Security boundaries](security-boundaries.md) for RLS issues
 - [Architecture patterns](architecture.md) for adapter usage
 
 ### **Add New Settings**
+
 1. Add `## Settings` to element spec
 2. Run `node scripts/lint-specs.mjs --fix`
 3. Check [settings registry](settings-registry.md)
 
 ### **Add Internationalization**
+
 1. Update [translation workbench](i18n/translation-workbench.csv)
 2. Run `node scripts/import-i18n-csv-to-sql.mjs`
 3. Commit updated `supabase/seed_i18n.sql`
 
 ### **Understand the System**
+
 - [Glossary](glossary.md) - All domain terms
 - [Architecture](architecture.md) - System design
 - [Database Schema](database-schema.md) - Data model
 - [Security Boundaries](security-boundaries.md) - Access control
 
 ### **Set Up Development**
+
 ```bash
 npm install
 cd apps/web && ng serve
 ```
+
 See [Agent Quick Reference](agent-quick-reference.md#development-commands) for all commands.
+
+### **Before Opening a PR**
+
+- Run [Contributing Guide checks](../CONTRIBUTING.md)
+- Ensure `npm run design-system:check` is green for design-system relevant changes
 
 ---
 
 ## 📚 Key Documentation
 
 ### Core Contracts (Must Read)
+
 - **[Element Specs](element-specs/)** - UI implementation contracts (**SOURCE OF TRUTH**)
 - **[Glossary](glossary.md)** - Canonical terminology
 - **[Security Boundaries](security-boundaries.md)** - RLS security model
 - **[Architecture](architecture.md)** - System design patterns
 
 ### Design & UX
+
 - **[Design Overview](design.md)** - Design principles
 - **[Design Tokens](design/tokens.md)** - CSS variables
 - **[Layout Rules](design/layout.md)** - Layout patterns
 - **[Design Constitution](design/constitution.md)** - Non-negotiable rules
 
 ### Implementation Guides
+
 - **[Agent Quick Reference](agent-quick-reference.md)** - Daily work cheat sheet
 - **[Agent Workflows](agent-workflows/)** - Detailed guides & checklists
 - **[Implementation Blueprints](implementation-blueprints/)** - Service patterns
 - **[Setup Guide](setup-guide.md)** - Environment setup
 
 ### Reference
+
 - **[Database Schema](database-schema.md)** - Tables & relationships
 - **[User Lifecycle](user-lifecycle.md)** - Auth flows
 - **[Role Permissions](role-permissions.md)** - Access control
@@ -143,17 +163,19 @@ npx supabase db reset             # Reset local DB
 ## 🏗️ Architecture Patterns
 
 ### Adapter Pattern (Required)
+
 ```typescript
 // ✅ Use adapters
-import { MapAdapter } from '../core/map.adapter';
-import { SupabaseService } from '../core/supabase.service';
+import { MapAdapter } from "../core/map.adapter";
+import { SupabaseService } from "../core/supabase.service";
 
 // ❌ Never call directly
-import { L } from 'leaflet';
-import { createClient } from '@supabase/supabase-js';
+import { L } from "leaflet";
+import { createClient } from "@supabase/supabase-js";
 ```
 
 ### Component Pattern
+
 - **Standalone components** (no NgModules)
 - **Angular signals** for state
 - **`inject()`** for dependencies
@@ -161,6 +183,7 @@ import { createClient } from '@supabase/supabase-js';
 - **Shared components** from `apps/web/src/app/shared/`
 
 ### Security Model
+
 - **RLS is security boundary** - Frontend is untrusted
 - **Organization-scoped data** - All queries filter by `organization_id`
 - **Adapter pattern** - Never call external services directly
@@ -201,4 +224,4 @@ See [Design Constitution](design/constitution.md) for non-negotiable rules.
 
 ---
 
-*Remember: Specs are contracts. Code must match specs, not the other way around.*
+_Remember: Specs are contracts. Code must match specs, not the other way around._

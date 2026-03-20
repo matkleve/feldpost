@@ -1,5 +1,8 @@
 {
   "scripts": {
+    "design-system:check": "node scripts/validate-design-system-registry.mjs && node scripts/audit-panel-breakpoints.mjs",
+    "design-system:audit-breakpoints": "node scripts/audit-panel-breakpoints.mjs",
+    "design-system:validate-registry": "node scripts/validate-design-system-registry.mjs",
     "i18n:generate-language": "node scripts/generate-i18n-language.mjs",
     "i18n:validate-language": "node scripts/validate-i18n-language.mjs",
     "i18n:guard": "node scripts/check-i18n-hardcoded-literals.mjs",

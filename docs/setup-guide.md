@@ -259,7 +259,14 @@ Failing to ship dark mode for a component is treated as a defect (see D9).
 
 ## 7. Verification Checklist
 
+Run repository quality gates from root before opening a PR (especially for design-system docs, panel SCSS, or geometry logic):
+
+```bash
+npm run design-system:check
+```
+
 - [ ] `SELECT PostGIS_Version();` returns a version string.
+- [ ] `npm run design-system:check` passes when design-system, panel SCSS, or geometry behavior changed.
 - [ ] `organizations` table contains at least one row.
 - [ ] Registration without invite is rejected.
 - [ ] Registration with valid invite creates both `auth.users` and `profiles` (with invite `organization_id`).

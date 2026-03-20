@@ -10,7 +10,7 @@
   overflow: hidden;
   background: var(--color-bg-surface);
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     position: fixed;
     inset: 0;
     z-index: var(--z-modal);
@@ -124,7 +124,7 @@
   color: var(--color-text-secondary);
   flex-shrink: 0;
 
-  @media (max-width: 767px) {
+  @media (max-width: 47.9375rem) {
     --icon-btn-size: 3rem;
   }
 }
@@ -976,7 +976,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 47.9375rem) {
   .detail-content {
     width: 100%;
     max-width: 40rem;
