@@ -1,4 +1,5 @@
 import { Component, input, output } from '@angular/core';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives.directive';
 
 export interface ProjectSelectOption {
   id: string;
@@ -8,6 +9,7 @@ export interface ProjectSelectOption {
 @Component({
   selector: 'app-project-select-dialog',
   standalone: true,
+  imports: [...UI_PRIMITIVE_DIRECTIVES],
   templateUrl: './project-select-dialog.component.html',
   styleUrl: './project-select-dialog.component.scss',
 })

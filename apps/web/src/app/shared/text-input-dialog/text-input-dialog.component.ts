@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives.directive';
 
 @Component({
   selector: 'app-text-input-dialog',
   standalone: true,
+  imports: [...UI_PRIMITIVE_DIRECTIVES],
   templateUrl: './text-input-dialog.component.html',
   styleUrl: './text-input-dialog.component.scss',
 })

@@ -4,6 +4,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PropertyRegistryService } from '../../../../core/property-registry.service';
 import type { PropertyType } from '../../../../core/property-registry.types';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
+import { UI_PRIMITIVE_DIRECTIVES } from '../../../../shared/ui-primitives.directive';
 
 export interface FilterDropdownPropertyOption {
   id: string;
@@ -46,7 +47,9 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   {{ conjunctionLabel(i, rule.conjunction) }}
                 </button>
                 <select
-                  class="filter-rule__select ui-select-control"
+                  uiSelectControl
+                  uiSelectControlCompact
+                  class="filter-rule__select ui-select-control ui-select-control--compact"
                   [value]="rule.property"
                   (change)="updateProperty(rule.id, $any($event.target).value)"
                 >
@@ -58,7 +61,9 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   }
                 </select>
                 <select
-                  class="filter-rule__select ui-select-control"
+                  uiSelectControl
+                  uiSelectControlCompact
+                  class="filter-rule__select ui-select-control ui-select-control--compact"
                   [value]="rule.operator"
                   (change)="updateOperator(rule.id, $any($event.target).value)"
                 >
@@ -70,13 +75,17 @@ function operatorsForType(type: PropertyType | undefined): string[] {
                   }
                 </select>
                 <input
-                  class="filter-rule__value ui-input-control"
+                  uiInputControl
+                  uiInputControlCompact
+                  class="filter-rule__value ui-input-control ui-input-control--compact"
                   [type]="getInputType(rule.property)"
                   [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
                   [value]="rule.value"
                   (input)="updateValue(rule.id, $any($event.target).value)"
                 />
                 <button
+                  uiIconButtonGhost
+                  uiIconButtonGhostDanger
                   class="filter-rule__remove icon-btn-ghost icon-btn-ghost--danger"
                   (click)="removeRule(rule.id)"
                   [attr.aria-label]="t('workspace.filter.remove.aria', 'Remove filter')"
@@ -91,7 +100,7 @@ function operatorsForType(type: PropertyType | undefined): string[] {
     </app-standard-dropdown>
   `,
   styleUrl: './filter-dropdown.component.scss',
-  imports: [StandardDropdownComponent],
+  imports: [StandardDropdownComponent, ...UI_PRIMITIVE_DIRECTIVES],
 })
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);

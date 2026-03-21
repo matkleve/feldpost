@@ -4,6 +4,8 @@
     <p class="dialog__body">{{ message() }}</p>
     <div class="dialog__actions">
       <button
+        uiButton
+        uiButtonGhost
         class="dialog__cancel ui-button ui-button--ghost"
         type="button"
         (click)="cancelled.emit()"
@@ -11,6 +13,7 @@
         {{ cancelLabel() }}
       </button>
       <button
+        uiButton
         class="dialog__confirm ui-button"
         [class.ui-button--danger]="danger()"
         [class.ui-button--primary]="!danger()"

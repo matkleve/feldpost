@@ -45,22 +45,12 @@
 }
 
 .filter-rule__select {
-  --ui-select-min-height: 2rem;
-  --ui-select-padding: var(--spacing-1);
-  --ui-select-font-size: 0.75rem;
-  --ui-select-border: 1px solid var(--color-border);
-
   flex: 1 1 0;
   min-width: 0;
   cursor: pointer;
 }
 
 .filter-rule__value {
-  --ui-input-min-height: 2rem;
-  --ui-input-padding: var(--spacing-1);
-  --ui-input-font-size: 0.75rem;
-  --ui-input-border: 1px solid var(--color-border);
-
   flex: 1.5 1 0;
   min-width: 0;
 }

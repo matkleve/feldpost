@@ -5,7 +5,7 @@
   aria-labelledby="project-select-dialog-title"
   (click)="cancelled.emit()"
 >
-  <div class="project-select-dialog ui-container" (click)="$event.stopPropagation()">
+  <div uiContainer class="project-select-dialog ui-container" (click)="$event.stopPropagation()">
     <h2 id="project-select-dialog-title" class="project-select-dialog__title">{{ title() }}</h2>
 
     @if (message(); as content) {
@@ -15,7 +15,8 @@
     <div class="project-select-dialog__list" role="listbox" [attr.aria-label]="title()">
       @for (option of options(); track option.id) {
         <button
-          class="project-select-dialog__option"
+          uiItem
+          class="project-select-dialog__option ui-item"
           [class.project-select-dialog__option--active]="selectedId() === option.id"
           type="button"
           role="option"
@@ -33,6 +34,8 @@
 
     <div class="project-select-dialog__actions">
       <button
+        uiButton
+        uiButtonGhost
         class="project-select-dialog__cancel ui-button ui-button--ghost"
         type="button"
         (click)="cancelled.emit()"
@@ -40,6 +43,8 @@
         {{ cancelLabel() }}
       </button>
       <button
+        uiButton
+        uiButtonPrimary
         class="project-select-dialog__confirm ui-button ui-button--primary"
         type="button"
         [disabled]="!selectedId()"

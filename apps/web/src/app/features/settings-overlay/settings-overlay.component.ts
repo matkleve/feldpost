@@ -16,6 +16,7 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
+import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives.directive';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
 import { AccountComponent } from '../account/account.component';
 
@@ -58,7 +59,12 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
 @Component({
   selector: 'ss-settings-overlay',
   standalone: true,
-  imports: [SegmentedSwitchComponent, InviteManagementSectionComponent, AccountComponent],
+  imports: [
+    SegmentedSwitchComponent,
+    InviteManagementSectionComponent,
+    AccountComponent,
+    ...UI_PRIMITIVE_DIRECTIVES,
+  ],
   templateUrl: './settings-overlay.component.html',
   styleUrl: './settings-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

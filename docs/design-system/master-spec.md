@@ -38,16 +38,17 @@ Inventory and migration context:
 
 1. [component-inventory.md](./component-inventory.md)
 2. [component-variants-matrix.md](./component-variants-matrix.md)
-3. [segmented-switch-contract.md](./segmented-switch-contract.md)
-4. [dropdown-shell-contract.md](./dropdown-shell-contract.md)
-5. [popover-panel-contract.md](./popover-panel-contract.md)
-6. [table-primitive-contract.md](./table-primitive-contract.md)
-7. [breadcrumbs-contract.md](./breadcrumbs-contract.md)
-8. [usage-patterns-use-cases.md](./usage-patterns-use-cases.md)
-9. [page-composition-map.md](./page-composition-map.md)
-10. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
-11. [governance-adoption.md](./governance-adoption.md)
-12. [external-references-by-family.md](./external-references-by-family.md)
+3. [primitive-variants-registry.md](./primitive-variants-registry.md)
+4. [segmented-switch-contract.md](./segmented-switch-contract.md)
+5. [dropdown-shell-contract.md](./dropdown-shell-contract.md)
+6. [popover-panel-contract.md](./popover-panel-contract.md)
+7. [table-primitive-contract.md](./table-primitive-contract.md)
+8. [breadcrumbs-contract.md](./breadcrumbs-contract.md)
+9. [usage-patterns-use-cases.md](./usage-patterns-use-cases.md)
+10. [page-composition-map.md](./page-composition-map.md)
+11. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
+12. [governance-adoption.md](./governance-adoption.md)
+13. [external-references-by-family.md](./external-references-by-family.md)
 
 ## Phase Completion Summary
 

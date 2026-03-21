@@ -127,54 +127,6 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         flex-wrap: wrap;
       }
 
-      .toolbar-btn {
-        min-height: 2.75rem;
-        padding-inline: 0.95rem;
-        padding-block: 0.375rem;
-        border: 1px solid color-mix(in srgb, var(--action-border-default) 88%, var(--color-border));
-        border-radius: var(--container-radius-control);
-        background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
-        color: var(--action-text-default);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--spacing-2);
-        white-space: nowrap;
-        box-shadow: var(--elevation-subtle);
-        cursor: pointer;
-        transition:
-          border-color 140ms ease,
-          background-color 140ms ease,
-          color 140ms ease,
-          box-shadow 140ms ease;
-      }
-
-      .toolbar-btn__label {
-        display: inline-flex;
-        align-items: center;
-        white-space: nowrap;
-      }
-
-      .toolbar-btn__chevron {
-        font-size: 1rem;
-        line-height: 1;
-      }
-
-      .toolbar-btn:hover {
-        color: var(--color-text-primary);
-        background: color-mix(in srgb, var(--color-clay) 10%, transparent);
-      }
-
-      .toolbar-btn--active,
-      .toolbar-btn--open {
-        border-color: color-mix(in srgb, var(--action-border-active) 82%, transparent);
-        background: var(--field-bg);
-        color: var(--action-text-active);
-        box-shadow:
-          0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
-          0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
-      }
-
       .projects2-toolbar__view-toggle {
         display: inline-flex;
         align-items: center;

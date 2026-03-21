@@ -5,7 +5,7 @@
   aria-labelledby="text-input-dialog-title"
   (click)="cancelled.emit()"
 >
-  <div class="text-input-dialog ui-container" (click)="$event.stopPropagation()">
+  <div uiContainer class="text-input-dialog ui-container" (click)="$event.stopPropagation()">
     <h2 id="text-input-dialog-title" class="text-input-dialog__title">{{ title() }}</h2>
 
     @if (message(); as content) {
@@ -14,7 +14,8 @@
 
     <input
       #nameInput
-      class="text-input-dialog__input"
+      uiInputControl
+      class="text-input-dialog__input ui-input-control"
       type="text"
       [value]="initialValue()"
       [placeholder]="placeholder()"
@@ -27,6 +28,8 @@
 
     <div class="text-input-dialog__actions">
       <button
+        uiButton
+        uiButtonGhost
         class="text-input-dialog__cancel ui-button ui-button--ghost"
         type="button"
         (click)="cancelled.emit()"
@@ -34,6 +37,8 @@
         {{ cancelLabel() }}
       </button>
       <button
+        uiButton
+        uiButtonPrimary
         class="text-input-dialog__confirm ui-button ui-button--primary"
         type="button"
         [disabled]="nameInput.value.trim().length === 0"

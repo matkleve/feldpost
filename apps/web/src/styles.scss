@@ -768,10 +768,11 @@ router-outlet + * {
 
 .ui-toggle-row {
   --ui-item-media-size: 0;
+  --ui-toggle-row-border-width: 1.5px;
 
   grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
-  border: 1.5px solid var(--action-border-default);
+  border: var(--ui-toggle-row-border-width) solid var(--action-border-default);
   background: color-mix(in srgb, var(--field-bg) 90%, transparent);
   text-align: left;
   color: var(--menu-item-text);
@@ -790,11 +791,26 @@ router-outlet + * {
   }
 }
 
+.ui-toggle-row--compact {
+  --ui-item-min-height: 2rem;
+  --ui-item-padding-inline: var(--spacing-2);
+  --ui-item-padding-block: var(--spacing-1);
+  --ui-item-content-gap: var(--spacing-1);
+  --ui-toggle-row-border-width: 1px;
+}
+
 .ui-toggle-switch {
+  --ui-toggle-switch-width: 2.6rem;
+  --ui-toggle-switch-height: 1.5rem;
+  --ui-toggle-switch-thumb-inset-top: 0.15rem;
+  --ui-toggle-switch-thumb-inset-left: 0.17rem;
+  --ui-toggle-switch-thumb-size: 1.2rem;
+  --ui-toggle-switch-thumb-shift: 1.08rem;
+
   position: relative;
   display: inline-flex;
-  width: 2.6rem;
-  height: 1.5rem;
+  width: var(--ui-toggle-switch-width);
+  height: var(--ui-toggle-switch-height);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--action-text-default) 35%, transparent);
 }
@@ -802,10 +818,10 @@ router-outlet + * {
 .ui-toggle-switch::after {
   content: '';
   position: absolute;
-  top: 0.15rem;
-  left: 0.17rem;
-  width: 1.2rem;
-  height: 1.2rem;
+  top: var(--ui-toggle-switch-thumb-inset-top);
+  left: var(--ui-toggle-switch-thumb-inset-left);
+  width: var(--ui-toggle-switch-thumb-size);
+  height: var(--ui-toggle-switch-thumb-size);
   border-radius: var(--radius-full);
   background: var(--field-bg);
   box-shadow: var(--shadow-sm);
@@ -817,7 +833,16 @@ router-outlet + * {
 }
 
 .ui-toggle-switch--on::after {
-  transform: translateX(1.08rem);
+  transform: translateX(var(--ui-toggle-switch-thumb-shift));
+}
+
+.ui-toggle-switch--compact {
+  --ui-toggle-switch-width: 2.3rem;
+  --ui-toggle-switch-height: 1.35rem;
+  --ui-toggle-switch-thumb-inset-top: 0.14rem;
+  --ui-toggle-switch-thumb-inset-left: 0.14rem;
+  --ui-toggle-switch-thumb-size: 1.06rem;
+  --ui-toggle-switch-thumb-shift: 0.96rem;
 }
 
 .ui-select-control {
@@ -835,6 +860,13 @@ router-outlet + * {
     box-shadow: var(--interactive-focus-ring);
     outline: none;
   }
+}
+
+.ui-select-control--compact {
+  --ui-select-min-height: 2rem;
+  --ui-select-padding: var(--spacing-1);
+  --ui-select-font-size: 0.75rem;
+  --ui-select-border: 1px solid var(--color-border);
 }
 
 .ui-input-control {
@@ -856,6 +888,87 @@ router-outlet + * {
     box-shadow: var(--interactive-focus-ring);
     outline: none;
   }
+}
+
+.ui-input-control--compact {
+  --ui-input-min-height: 2rem;
+  --ui-input-padding: var(--spacing-1);
+  --ui-input-font-size: 0.75rem;
+  --ui-input-border: 1px solid var(--color-border);
+}
+
+.ui-range-control {
+  width: 100%;
+  accent-color: var(--color-clay);
+}
+
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-height: 2rem;
+  padding: var(--spacing-1) var(--spacing-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  transition: var(--interactive-transition-standard);
+}
+
+.ui-chip--action {
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    border-color: var(--color-border-strong);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    border-color: var(--action-border-active);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-chip--passive {
+  cursor: default;
+}
+
+.ui-chip--selected {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary);
+}
+
+.ui-choice-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: 2rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.ui-choice-control {
+  inline-size: 1rem;
+  block-size: 1rem;
+  accent-color: var(--color-clay);
+}
+
+.ui-inline-edit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.ui-inline-edit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
 }
 
 // ── Shared button primitives ──────────────────────────────────────────────────
@@ -902,6 +1015,18 @@ router-outlet + * {
 
   &:hover:not(:disabled) {
     background: color-mix(in srgb, var(--color-clay) 16%, var(--field-bg));
+  }
+}
+
+.ui-button--secondary {
+  border-color: var(--action-border-default);
+  background: var(--action-bg-default);
+  color: var(--menu-item-text);
+
+  &:hover:not(:disabled) {
+    border-color: var(--action-border-active);
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
   }
 }
 

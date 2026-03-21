@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives.directive';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
+  imports: [...UI_PRIMITIVE_DIRECTIVES],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
 })
