@@ -181,6 +181,7 @@ export class MapShellComponent implements OnDestroy {
   private static readonly QUICK_RADIUS_METERS = 250;
   private static readonly HOUSE_PROXIMITY_ZOOM = 19;
   private static readonly STREET_PROXIMITY_ZOOM = 17;
+  private static readonly CONTEXT_MENU_SHEET_BREAKPOINT_PX = 768;
   private static readonly MARKER_LONG_PRESS_MS = 500;
   private static readonly WORKSPACE_PANE_DEFAULT_WIDTH = 360;
   private static readonly WORKSPACE_PANE_MIN_WIDTH = 280;
@@ -425,6 +426,9 @@ export class MapShellComponent implements OnDestroy {
   readonly markerContextMenuOpen = this.state.markerContextMenuOpen;
   readonly markerContextMenuPosition = this.state.markerContextMenuPosition;
   readonly markerContextMenuPayload = this.state.markerContextMenuPayload;
+  readonly anyContextMenuOpen = computed(
+    () => this.mapContextMenuOpen() || this.radiusContextMenuOpen() || this.markerContextMenuOpen(),
+  );
   readonly draftMediaMarker = this.state.draftMediaMarker;
   readonly projectSelectionDialogOpen = this.state.projectSelectionDialogOpen;
   readonly projectSelectionDialogTitle = this.state.projectSelectionDialogTitle;
@@ -685,6 +689,23 @@ export class MapShellComponent implements OnDestroy {
     this.focusMapContainer();
   }
 
+  mapMenuPanelClass(viewportWidth?: number): string {
+    return this.isContextMenuSheetViewport(viewportWidth)
+      ? 'map-context-menu option-menu-surface map-context-menu--sheet'
+      : 'map-context-menu option-menu-surface';
+  }
+
+  private isContextMenuSheetViewport(viewportWidth?: number): boolean {
+    const resolvedViewportWidth =
+      typeof viewportWidth === 'number'
+        ? viewportWidth
+        : typeof window !== 'undefined'
+          ? window.innerWidth
+          : 1280;
+
+    return resolvedViewportWidth < MapShellComponent.CONTEXT_MENU_SHEET_BREAKPOINT_PX;
+  }
+
   onMapMenuKeydown(event: KeyboardEvent): void {
     if (!this.isMapMenuNavigationKey(event.key)) {
       return;
@@ -742,13 +763,14 @@ export class MapShellComponent implements OnDestroy {
     const coords = this.mapContextMenuCoords();
     if (!coords || !this.map) return;
     this.map.setView([coords.lat, coords.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   onMapContextZoomStreetHere(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
     this.zoomContextTo(coords.lat, coords.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
+    this.onMapMenuCloseRequested();
   }
 
   private zoomContextTo(lat: number, lng: number, zoomLevel: number): void {
@@ -797,21 +819,21 @@ export class MapShellComponent implements OnDestroy {
     if (!coords) return;
 
     await this.copyAddressWithFeedback(coords.lat, coords.lng);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   async onMapContextCopyGps(): Promise<void> {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
     await this.copyGpsWithFeedback(coords.lat, coords.lng);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   onMapContextOpenGoogleMaps(): void {
     const coords = this.mapContextMenuCoords();
     if (!coords) return;
     this.openGoogleMapsForCoords(coords.lat, coords.lng);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   // Backwards-compatible wrappers kept for existing tests and call sites.
@@ -834,7 +856,7 @@ export class MapShellComponent implements OnDestroy {
     this.clearRadiusSelectionVisuals();
     this.addRadiusSelectionVisual(center, radiusMeters, edge);
     await this.selectRadiusImages(center, radiusMeters, false);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   async onRadiusContextCreateProjectFromSelection(): Promise<void> {
@@ -1036,14 +1058,14 @@ export class MapShellComponent implements OnDestroy {
     const payload = this.markerContextMenuPayload();
     if (!payload || !this.map) return;
     this.map.setView([payload.lat, payload.lng], MapShellComponent.HOUSE_PROXIMITY_ZOOM);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   onMarkerContextZoomStreet(): void {
     const payload = this.markerContextMenuPayload();
     if (!payload || !this.map) return;
     this.map.setView([payload.lat, payload.lng], MapShellComponent.STREET_PROXIMITY_ZOOM);
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   async onMarkerContextCopyAddress(): Promise<void> {
@@ -1063,7 +1085,7 @@ export class MapShellComponent implements OnDestroy {
         dedupe: true,
       });
     }
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   async onMarkerContextCopyGps(): Promise<void> {
@@ -1076,7 +1098,7 @@ export class MapShellComponent implements OnDestroy {
       type: copied ? 'success' : 'info',
       dedupe: true,
     });
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   onMarkerContextOpenGoogleMaps(): void {
@@ -1084,7 +1106,7 @@ export class MapShellComponent implements OnDestroy {
     if (!payload || typeof window === 'undefined') return;
     const url = this.mapContextActionsService.buildGoogleMapsUrl(payload.lat, payload.lng);
     window.open(url, '_blank', 'noopener,noreferrer');
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   // Backwards-compatible wrapper kept for existing tests/call sites.
@@ -1126,7 +1148,7 @@ export class MapShellComponent implements OnDestroy {
     });
 
     this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
-    this.closeContextMenus();
+    this.onMapMenuCloseRequested();
   }
 
   // ── Workspace pane resize ─────────────────────────────────────────────────

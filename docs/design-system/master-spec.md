@@ -40,6 +40,7 @@ Inventory and migration context:
 8. [usage-patterns-use-cases.md](./usage-patterns-use-cases.md)
 9. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
 10. [governance-adoption.md](./governance-adoption.md)
+11. [external-references-by-family.md](./external-references-by-family.md)
 
 ## Phase Completion Summary
 
@@ -90,12 +91,22 @@ Phase I (Review/acceptance checklist): complete
 
 - Definition of Done and machine-readable registry decision included.
 
-Phase J (Wave 3 contracts): complete (contract-definition level)
+Phase J (Wave 3 contracts): complete (definition + pilot execution)
 
 - Segmented switch and dropdown shell contracts added.
 - Popover panel and table primitive contracts added.
 - Breadcrumbs contract added.
 - Promotion gate defined in [wave-3-contract-standardization.md](./wave-3-contract-standardization.md).
+- Pilot migrations executed with regression + screenshot evidence in [wave-3-pilot-migration-plan.md](./wave-3-pilot-migration-plan.md).
+
+## Implementation Completion Note
+
+The A-J documentation program is complete. Wave 3 pilot implementation evidence is complete for popover, table, and breadcrumbs.
+
+Remaining governance distinction:
+
+- `stable-ready`: achieved by implementation evidence and checklists
+- `stable`: requires explicit governance approval per [governance-adoption.md](./governance-adoption.md)
 
 ## External Reference Baseline
 

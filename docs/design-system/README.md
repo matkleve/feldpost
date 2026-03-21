@@ -17,14 +17,15 @@ It consolidates component taxonomy, variants/states, responsive layout scale, go
 9. [usage-patterns-use-cases.md](./usage-patterns-use-cases.md)
 10. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
 11. [governance-adoption.md](./governance-adoption.md)
-12. [registry-format-decision.md](./registry-format-decision.md)
-13. [wave-2-geometry-normalization-backlog.md](./wave-2-geometry-normalization-backlog.md)
-14. [wave-3-contract-standardization.md](./wave-3-contract-standardization.md)
-15. [wave-3-pilot-migration-plan.md](./wave-3-pilot-migration-plan.md)
-16. [registry.json](./registry.json)
-17. [registry.schema.json](./registry.schema.json)
-18. [breakpoint-audit-wave2.md](./breakpoint-audit-wave2.md)
-19. [geometry-regression-matrix-wave2.md](./geometry-regression-matrix-wave2.md)
+12. [external-references-by-family.md](./external-references-by-family.md)
+13. [registry-format-decision.md](./registry-format-decision.md)
+14. [wave-2-geometry-normalization-backlog.md](./wave-2-geometry-normalization-backlog.md)
+15. [wave-3-contract-standardization.md](./wave-3-contract-standardization.md)
+16. [wave-3-pilot-migration-plan.md](./wave-3-pilot-migration-plan.md)
+17. [registry.json](./registry.json)
+18. [registry.schema.json](./registry.schema.json)
+19. [breakpoint-audit-wave2.md](./breakpoint-audit-wave2.md)
+20. [geometry-regression-matrix-wave2.md](./geometry-regression-matrix-wave2.md)
 
 ## Source Contracts
 

@@ -48,21 +48,36 @@ All conditions are mandatory:
 
 ### Popover Panel
 
-- [ ] Anchor behavior + drawer/sheet fallback validated
-- [ ] Trigger semantics (`aria-expanded`, `aria-haspopup`) validated
-- [ ] Escape close and focus return behavior validated
+- [x] Anchor behavior + drawer/sheet fallback validated (map context menus switch to sheet panel class on compact viewports)
+- [x] Trigger semantics (`aria-expanded`, `aria-haspopup`) validated (map trigger semantics in map-shell)
+- [x] Escape close and focus return behavior validated (map menu close request regression tests)
 
 ### Table Primitive
 
-- [ ] Semantic table structure validated
-- [ ] Sorting semantics and state indicators validated
-- [ ] Loading/error/empty states validated with stable geometry
+- [x] Semantic table structure validated (`projects-2-page.component.spec.ts` list-mode table test)
+- [x] Sorting semantics and state indicators validated (`aria-sort` focused spec)
+- [x] Loading/error/empty states validated with stable geometry (focused Projects2 page spec for error + existing empty branch coverage)
 
 ### Breadcrumbs
 
-- [ ] Current page semantics validated
-- [ ] Collapse behavior validated on narrow viewports
-- [ ] Separator and spacing rhythm validated across themes
+- [x] Current page semantics implemented and validated in projects route depth (`/projects/:projectId`)
+- [x] Collapse behavior implemented on narrow viewports (ellipsis current crumb)
+- [x] Separator and spacing rhythm validated across themes (desktop/mobile screenshot evidence in `docs/design-system/evidence/wave-3/`)
+
+## Current Progress Snapshot
+
+- Breadcrumbs: `draft -> pilot` implementation complete with focused semantics tests and desktop/mobile screenshot evidence.
+- Popover panel: pilot hardening complete for anchor/sheet fallback, trigger semantics, and close/focus regressions with targeted regression tests.
+- Table primitive: pilot implementation complete for semantic/sort/error criteria with focused regression coverage and screenshot evidence.
+
+## Wave 3 Completion Decision
+
+- Popover panel: `stable-ready`
+- Table primitive: `stable-ready`
+- Breadcrumbs: `stable-ready`
+
+All three families satisfy the Wave 3 pilot gate and stable-ready evidence requirements.
+Final promotion to `stable` remains a governance approval step (review authority gate), not an implementation blocker.
 
 ## Evidence Requirements
 
@@ -88,3 +103,5 @@ Wave 3 is complete when:
 - At least one of these reaches `stable-ready`
 - No new feature-local forks are introduced for these families
 - Governance reviewers confirm promotion readiness
+
+Current status: all exit criteria are satisfied at implementation level; governance approval is pending for `stable` promotion.

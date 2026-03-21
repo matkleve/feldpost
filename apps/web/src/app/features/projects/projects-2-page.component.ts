@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 import { FilterService } from '../../core/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectsService } from '../../core/projects/projects.service';
@@ -63,6 +65,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     GroupHeaderComponent,
     Projects2ToolbarComponent,
     ProjectColorPickerComponent,
@@ -85,6 +88,23 @@ const SORT_OPTIONS: SortDropdownOption[] = [
           </div>
 
           <div class="projects2-header__title-wrap">
+            @if (currentProjectId()) {
+              <nav
+                class="projects2-breadcrumbs"
+                [attr.aria-label]="t('nav.item.projects', 'Projects')"
+              >
+                <a
+                  class="projects2-breadcrumbs__item projects2-breadcrumbs__item--link"
+                  [routerLink]="['/projects']"
+                >
+                  {{ t('nav.item.projects', 'Projects') }}
+                </a>
+                <span class="projects2-breadcrumbs__separator" aria-hidden="true">/</span>
+                <span class="projects2-breadcrumbs__item projects2-breadcrumbs__item--current">
+                  {{ breadcrumbCurrentLabel() }}
+                </span>
+              </nav>
+            }
             <h1 class="projects2-header__title">{{ t('nav.item.projects', 'Projects') }}</h1>
             <p class="projects2-header__count">{{ projectCountLabel() }}</p>
           </div>
@@ -118,6 +138,18 @@ const SORT_OPTIONS: SortDropdownOption[] = [
             <div class="projects2-loading__row"></div>
             <div class="projects2-loading__row"></div>
           </section>
+        } @else if (loadError()) {
+          <section class="projects2-error" role="alert">
+            <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
+            <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
+            <button
+              type="button"
+              class="ui-button ui-button--secondary"
+              (click)="refreshProjects()"
+            >
+              {{ t('projects.page.error.retry', 'Retry') }}
+            </button>
+          </section>
         } @else if (groupedSections().length === 0) {
           <section class="projects2-empty">
             <h2>{{ t('projects.page.empty.title', 'No projects match your filters') }}</h2>
@@ -142,26 +174,94 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                 }
 
                 @if (viewMode() === 'list') {
-                  <div class="projects2-list">
-                    @for (project of section.projects; track project.id) {
-                      <article
-                        class="project2-row"
-                        [style.--project-item-color]="colorTokenFor(project.colorKey)"
-                      >
-                        <span
-                          class="project2-row__dot"
-                          [style.background]="colorTokenFor(project.colorKey)"
-                        ></span>
-                        <div class="project2-row__content">
-                          <h3 class="project2-row__name">{{ project.name }}</h3>
-                          <p class="project2-row__meta">
-                            {{ project.totalImageCount }}
-                            {{ t('projects.page.metric.photos', 'photos') }} ·
-                            {{ formatRelativeDate(project.lastActivity) }}
-                          </p>
-                        </div>
-                      </article>
-                    }
+                  <div
+                    class="projects2-list"
+                    role="region"
+                    [attr.aria-label]="t('projects.page.table.ariaLabel', 'Projects table')"
+                  >
+                    <table class="projects2-table">
+                      <thead>
+                        <tr>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('name')"
+                            [attr.data-sort-direction]="tableSortDirection('name')"
+                          >
+                            {{ t('projects.toolbar.option.name', 'Name') }}
+                          </th>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('image-count')"
+                            [attr.data-sort-direction]="tableSortDirection('image-count')"
+                          >
+                            {{ t('projects.toolbar.option.imageCount', 'Image count') }}
+                          </th>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('status')"
+                            [attr.data-sort-direction]="tableSortDirection('status')"
+                          >
+                            {{ t('projects.toolbar.option.status', 'Status') }}
+                          </th>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('district')"
+                            [attr.data-sort-direction]="tableSortDirection('district')"
+                          >
+                            {{ t('projects.toolbar.option.primaryDistrict', 'Primary district') }}
+                          </th>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('city')"
+                            [attr.data-sort-direction]="tableSortDirection('city')"
+                          >
+                            {{ t('projects.toolbar.option.primaryCity', 'Primary city') }}
+                          </th>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('updated-at')"
+                            [attr.data-sort-direction]="tableSortDirection('updated-at')"
+                          >
+                            {{ t('projects.toolbar.option.updated', 'Updated') }}
+                          </th>
+                          <th
+                            scope="col"
+                            [attr.aria-sort]="tableAriaSort('last-activity')"
+                            [attr.data-sort-direction]="tableSortDirection('last-activity')"
+                          >
+                            {{ t('projects.toolbar.option.lastActivity', 'Last activity') }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (project of section.projects; track project.id) {
+                          <tr [style.--project-item-color]="colorTokenFor(project.colorKey)">
+                            <th scope="row" class="project2-table__name-cell">
+                              <span
+                                class="project2-row__dot"
+                                [style.background]="colorTokenFor(project.colorKey)"
+                              ></span>
+                              <span class="project2-row__name">{{ project.name }}</span>
+                            </th>
+                            <td>
+                              {{ project.totalImageCount }}
+                              {{ t('projects.page.metric.photos', 'photos') }}
+                            </td>
+                            <td class="project2-row__meta">
+                              {{ projectStatusLabel(project.status) }}
+                            </td>
+                            <td class="project2-row__meta">{{ project.district || '-' }}</td>
+                            <td class="project2-row__meta">{{ project.city || '-' }}</td>
+                            <td class="project2-row__meta">
+                              {{ formatRelativeDate(project.updatedAt) }}
+                            </td>
+                            <td class="project2-row__meta">
+                              {{ formatRelativeDate(project.lastActivity) }}
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
                   </div>
                 } @else {
                   <div class="projects2-grid">
@@ -312,6 +412,36 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         color: var(--color-text-secondary);
       }
 
+      .projects2-breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-1);
+        min-width: 0;
+        color: var(--color-text-secondary);
+        font-size: 0.8125rem;
+      }
+
+      .projects2-breadcrumbs__item {
+        min-width: 0;
+      }
+
+      .projects2-breadcrumbs__item--link {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.15em;
+      }
+
+      .projects2-breadcrumbs__item--current {
+        color: var(--color-text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .projects2-breadcrumbs__separator {
+        flex: 0 0 auto;
+      }
+
       .projects2-header__actions {
         display: inline-flex;
         justify-self: start;
@@ -348,6 +478,15 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         gap: var(--spacing-2);
       }
 
+      .projects2-error {
+        border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+        border-radius: var(--container-radius-panel);
+        background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-warning));
+        padding: var(--spacing-4);
+        display: grid;
+        gap: var(--spacing-2);
+      }
+
       .projects2-content {
         display: grid;
         gap: var(--spacing-3);
@@ -359,19 +498,61 @@ const SORT_OPTIONS: SortDropdownOption[] = [
       }
 
       .projects2-list {
-        display: grid;
-        gap: var(--spacing-2);
-      }
-
-      .project2-row {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        gap: var(--spacing-3);
-        align-items: center;
-        border: 1px solid var(--project-item-color, var(--color-border));
+        overflow-x: auto;
+        border: 1px solid var(--color-border);
         border-radius: var(--container-radius-control);
         background: color-mix(in srgb, var(--color-bg-surface) 94%, var(--color-bg-base));
+      }
+
+      .projects2-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 60rem;
+      }
+
+      .projects2-table thead th {
+        text-align: left;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        padding: var(--spacing-2) var(--spacing-3);
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .projects2-table thead th[data-sort-direction='asc']::after,
+      .projects2-table thead th[data-sort-direction='desc']::after {
+        margin-left: var(--spacing-1);
+        color: var(--color-text-primary);
+      }
+
+      .projects2-table thead th[data-sort-direction='asc']::after {
+        content: '↑';
+      }
+
+      .projects2-table thead th[data-sort-direction='desc']::after {
+        content: '↓';
+      }
+
+      .projects2-table tbody tr {
+        border-left: 3px solid var(--project-item-color, var(--color-border));
+      }
+
+      .projects2-table tbody tr + tr td,
+      .projects2-table tbody tr + tr th {
+        border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+      }
+
+      .projects2-table tbody td,
+      .projects2-table tbody th {
         padding: var(--spacing-3);
+        vertical-align: middle;
+      }
+
+      .project2-table__name-cell {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-2);
+        min-width: 0;
       }
 
       .project2-row__dot,
@@ -504,6 +685,10 @@ const SORT_OPTIONS: SortDropdownOption[] = [
           text-align: left;
         }
 
+        .projects2-breadcrumbs {
+          max-width: 100%;
+        }
+
         .project2-card__actions {
           grid-template-columns: 1fr;
         }
@@ -520,7 +705,21 @@ export class Projects2PageComponent {
   private readonly router = inject(Router);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
+  readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      startWith(null),
+      map(() => this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+  readonly currentProjectId = computed(() => {
+    const match = this.currentUrl().match(/^\/projects\/([^/?#]+)/);
+    return match?.[1] ? decodeURIComponent(match[1]) : null;
+  });
+
   readonly loading = signal(false);
+  readonly loadError = signal<string | null>(null);
   readonly projects = signal<ProjectListItem[]>([]);
   readonly statusFilter = signal<ProjectStatusFilter>('all');
   readonly viewMode = signal<ProjectsViewMode>('cards');
@@ -567,6 +766,17 @@ export class Projects2PageComponent {
 
     return this.projects().find((project) => project.id === projectId) ?? null;
   });
+  readonly currentProject = computed(() => {
+    const projectId = this.currentProjectId();
+    if (!projectId) {
+      return null;
+    }
+
+    return this.projects().find((project) => project.id === projectId) ?? null;
+  });
+  readonly breadcrumbCurrentLabel = computed(
+    () => this.currentProject()?.name ?? this.currentProjectId() ?? '',
+  );
   readonly visibleProjects = computed(() => {
     const status = this.statusFilter();
 
@@ -610,12 +820,35 @@ export class Projects2PageComponent {
 
   async refreshProjects(): Promise<void> {
     this.loading.set(true);
+    this.loadError.set(null);
     try {
       const projects = await this.projectsService.loadProjects();
       this.projects.set(projects);
+    } catch {
+      this.loadError.set(this.t('projects.page.error.title', 'Could not load projects'));
     } finally {
       this.loading.set(false);
     }
+  }
+
+  tableSortDirection(columnKey: string): 'asc' | 'desc' | null {
+    const primarySort = this.activeSorts()[0];
+    if (!primarySort || primarySort.key !== columnKey) {
+      return null;
+    }
+
+    return primarySort.direction;
+  }
+
+  tableAriaSort(columnKey: string): 'ascending' | 'descending' | 'none' {
+    const direction = this.tableSortDirection(columnKey);
+    if (direction === 'asc') {
+      return 'ascending';
+    }
+    if (direction === 'desc') {
+      return 'descending';
+    }
+    return 'none';
   }
 
   onStatusFilterChange(value: ProjectStatusFilter): void {
@@ -845,6 +1078,12 @@ export class Projects2PageComponent {
         : 'projects.page.relative.yearAgo.multi',
       years === 1 ? '1 year ago' : '{count} years ago',
     ).replace('{count}', String(years));
+  }
+
+  projectStatusLabel(status: ProjectListItem['status']): string {
+    return status === 'archived'
+      ? this.t('projects.toolbar.status.archived', 'Archived')
+      : this.t('projects.toolbar.status.active', 'Active');
   }
 
   private showMutationError(key: string, fallback: string): void {

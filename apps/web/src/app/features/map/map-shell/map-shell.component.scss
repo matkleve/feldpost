@@ -170,6 +170,24 @@
   }
 }
 
+.map-context-menu--sheet {
+  width: auto;
+  min-width: 0 !important;
+  max-width: none;
+}
+
+@media (max-width: 47.9375rem) {
+  .map-context-menu--sheet {
+    top: auto !important;
+    left: var(--spacing-2) !important;
+    right: var(--spacing-2);
+    bottom: max(var(--spacing-3), env(safe-area-inset-bottom));
+    width: auto;
+    max-height: min(52vh, 24rem);
+    border-radius: var(--radius-xl);
+  }
+}
+
 // ── Leaflet container ─────────────────────────────────────────────────────────
 
 .map-container {

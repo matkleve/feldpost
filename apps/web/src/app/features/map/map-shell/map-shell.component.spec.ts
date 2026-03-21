@@ -1000,6 +1000,33 @@ describe('MapShellComponent', () => {
     expect(component.mapContextMenuCoords()).toEqual({ lat: 48.2, lng: 16.37 });
   });
 
+  it('tracks whether any context menu is open for trigger semantics', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+
+    const component = fixture.componentInstance as unknown as {
+      mapContextMenuOpen: { set: (value: boolean) => void };
+      radiusContextMenuOpen: { set: (value: boolean) => void };
+      markerContextMenuOpen: { set: (value: boolean) => void };
+      anyContextMenuOpen: () => boolean;
+    };
+
+    component.mapContextMenuOpen.set(false);
+    component.radiusContextMenuOpen.set(false);
+    component.markerContextMenuOpen.set(false);
+    expect(component.anyContextMenuOpen()).toBe(false);
+
+    component.mapContextMenuOpen.set(true);
+    expect(component.anyContextMenuOpen()).toBe(true);
+
+    component.mapContextMenuOpen.set(false);
+    component.radiusContextMenuOpen.set(true);
+    expect(component.anyContextMenuOpen()).toBe(true);
+
+    component.radiusContextMenuOpen.set(false);
+    component.markerContextMenuOpen.set(true);
+    expect(component.anyContextMenuOpen()).toBe(true);
+  });
+
   it('map context create marker action opens draft workspace flow', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
@@ -1020,6 +1047,66 @@ describe('MapShellComponent', () => {
     expect(component.draftMediaMarker()).toEqual({ lat: 48.2, lng: 16.37, uploadCount: 0 });
     expect(component.photoPanelOpen()).toBe(true);
     expect(component.uploadPanelOpen()).toBe(true);
+  });
+
+  it('map context street zoom action closes the menu', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      setView: vi.fn(),
+      getContainer: vi.fn().mockReturnValue({ focus: vi.fn() }),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      mapContextMenuOpen: { set: (value: boolean) => void; (): boolean };
+      mapContextMenuCoords: { set: (value: { lat: number; lng: number } | null) => void };
+      onMapContextZoomStreetHere: () => void;
+    };
+
+    component.map = mapStub;
+    component.mapContextMenuOpen.set(true);
+    component.mapContextMenuCoords.set({ lat: 48.2, lng: 16.37 });
+
+    component.onMapContextZoomStreetHere();
+
+    expect(component.mapContextMenuOpen()).toBe(false);
+    expect(mapStub.setView as ReturnType<typeof vi.fn>).toHaveBeenCalled();
+  });
+
+  it('menu close request closes menus and invokes focus return', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+
+    const component = fixture.componentInstance as unknown as {
+      mapContextMenuOpen: { set: (value: boolean) => void; (): boolean };
+      onMapMenuCloseRequested: () => void;
+      mapContainerRef: () => { nativeElement: { focus: () => void } };
+    };
+
+    const focusSpy = vi.fn();
+    component.mapContainerRef = () => ({ nativeElement: { focus: focusSpy } });
+    component.mapContextMenuOpen.set(true);
+
+    component.onMapMenuCloseRequested();
+
+    expect(component.mapContextMenuOpen()).toBe(false);
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it('uses sheet panel class for context menus on compact viewport widths', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.mapMenuPanelClass(640)).toContain('map-context-menu--sheet');
+  });
+
+  it('uses anchored panel class for context menus on desktop viewport widths', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.mapMenuPanelClass(1200)).toBe('map-context-menu option-menu-surface');
   });
 
   it('left click dismisses empty draft marker and closes workspace pane', () => {

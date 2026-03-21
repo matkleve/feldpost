@@ -3,6 +3,130 @@
 begin;
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.table.ariaLabel', 'Projects table', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Projects table', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.table.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt-Tabelle', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.table.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tabella progetti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.table.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.error.title', 'Could not load projects', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not load projects', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte konnten nicht geladen werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile caricare i progetti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.error.body', 'Please try again in a moment.', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Please try again in a moment.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bitte versuche es in einem Moment erneut.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova tra un momento.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.error.retry', 'Retry', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Retry', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erneut versuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.error.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0001.none', '— None —', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -18102,6 +18226,68 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Ripristinare il progetto?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'projects.page.pending.title.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.message.restore', '{name} will move back to Active and reopen normal project workflows.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{name} will move back to Active and reopen normal project workflows.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{name} wird wieder auf Aktiv gesetzt und kehrt in die normalen Projektabläufe zurück.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{name} tornerà su Attivo e riaprirà i normali flussi di progetto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.message.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.pending.confirm.restore', 'Restore now', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts method:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Restore now', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Jetzt wiederherstellen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.restore'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripristina ora', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.pending.confirm.restore'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

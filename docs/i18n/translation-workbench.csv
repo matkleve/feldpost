@@ -1,4 +1,8 @@
 ﻿key,original,context,en,de,it
+projects.page.table.ariaLabel,Projects table,apps/web/src/app/features/projects/projects-2-page.component.ts inline-template attr:aria-label,Projects table,Projekt-Tabelle,Tabella progetti
+projects.page.error.title,Could not load projects,apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node,Could not load projects,Projekte konnten nicht geladen werden,Impossibile caricare i progetti
+projects.page.error.body,Please try again in a moment.,apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node,Please try again in a moment.,Bitte versuche es in einem Moment erneut.,Riprova tra un momento.
+projects.page.error.retry,Retry,apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node,Retry,Erneut versuchen,Riprova
 auto.0001.none,— None —,apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal,— None —,— None —,- Nessuno -
 auto.0003.2fa,2FA,apps/web/src/app/features/account/account.component.html interpolation-literal,2FA,2FA,2FA
 auto.0004.2fa_best_tigen,2FA bestätigen,apps/web/src/app/features/account/account.component.html interpolation-literal,2FA bestätigen,2FA bestätigen,Bestätigen 2FA
