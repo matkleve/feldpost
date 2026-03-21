@@ -3258,37 +3258,6 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0137.groups', 'Groups', 'en', 'apps/web/src/app/features/groups/groups.component.ts inline-template text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Groups', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0137.groups'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Groups', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0137.groups'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Gruppi', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0137.groups'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0138.hierhin_zoomen_hausnaehe', 'Hierhin zoomen (Hausnaehe)', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -6291,37 +6260,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Arenaria', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0266.sandstone'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0267.saved_groups_coming_in_m_ui7', 'Saved groups — coming in M-UI7.', 'en', 'apps/web/src/app/features/groups/groups.component.ts inline-template text-node')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Saved groups — coming in M-UI7.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0267.saved_groups_coming_in_m_ui7'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Saved groups — coming in M-UI7.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0267.saved_groups_coming_in_m_ui7'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Gruppi salvati: disponibili in M-UI7.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0267.saved_groups_coming_in_m_ui7'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

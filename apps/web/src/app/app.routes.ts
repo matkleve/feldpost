@@ -72,11 +72,6 @@ export const routes: Routes = [
           import('./features/photos/photos.component').then((m) => m.PhotosComponent),
       },
       {
-        path: 'groups',
-        loadComponent: () =>
-          import('./features/groups/groups.component').then((m) => m.GroupsComponent),
-      },
-      {
         path: 'projects',
         loadComponent: () =>
           import('./features/projects/projects-2-page.component').then(
@@ -93,7 +88,17 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () =>
-          import('./features/settings/settings.component').then((m) => m.SettingsComponent),
+          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
+      },
+      {
+        path: 'settings/:section',
+        loadComponent: () =>
+          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
+      },
+      {
+        path: 'settings/:section/:subsection',
+        loadComponent: () =>
+          import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
       },
     ],
   },

@@ -798,7 +798,7 @@ Pages and nav items (in order):
 | ----- | -------- | ----------- | ---------- |
 | 🗺    | Map      | `/`         | Active     |
 | 📷    | Photos   | `/photos`   | Active     |
-| 📁    | Groups   | `/groups`   | Active     |
+| 📁    | Projects | `/projects` | Active     |
 | ⚙️    | Settings | `/settings` | Active     |
 | 👤    | Account  | `/account`  | Active     |
 | (TBD) | Future   | —           | Greyed out |
@@ -813,7 +813,7 @@ TODOs
 
 - [x] Create `NavComponent`: icon-only vertical sidebar, active-link highlight, tooltips on hover. (AI, 2026-03-04)
 - [x] Add a `disabled` variant: greyed-out items with `pointer-events: none` and a "Coming soon" tooltip. (AI, 2026-03-04)
-- [x] Wire lazy-loaded routes for `/photos`, `/groups`, `/settings`, `/account` (placeholder shell components for now). (AI, 2026-03-04)
+- [x] Wire lazy-loaded routes for `/photos`, `/projects`, `/settings`, `/account` (placeholder shell components for now). (AI, 2026-03-04)
 - [x] Nav collapses to a bottom tab bar on mobile (< 768 px breakpoint). (AI, 2026-03-04)
 - [x] Write unit tests for `NavComponent` (active route, disabled state). (AI, 2026-03-04)
 
@@ -1020,12 +1020,11 @@ Acceptance criteria
 
 Goal
 
-- A dedicated page (`/groups`) showing the user's saved groups (collections of images). Groups can be created, renamed, and deleted. Clicking a group shows its images in the same grid layout as the Photos page.
+- A dedicated page (`/projects`) showing the user's saved projects (collections of images). Projects can be created, renamed, and deleted. Clicking a project shows its images in the same grid layout as the Photos page.
 
 Files
 
-- `apps/web/src/app/features/groups/groups.component.ts` (+ html, scss)
-- `apps/web/src/app/features/groups/group-detail/group-detail.component.ts` (+ html, scss)
+- `apps/web/src/app/features/projects/projects-2-page.component.ts` (+ html, scss)
 
 TODOs
 

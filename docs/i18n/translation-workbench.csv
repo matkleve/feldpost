@@ -104,7 +104,6 @@ auto.0132.gps_assignment_is_disabled_for_this_file_type,GPS assignment is disabl
 auto.0133.gps_kopieren,GPS kopieren,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,GPS kopieren,GPS kopieren,Copiare il GPS
 auto.0134.grid_helper_overlay,Grid helper overlay,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Grid helper overlay,Grid helper overlay,Sovrapposizione dell'helper della griglia
 auto.0135.grouped_by,Grouped by,apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal,Grouped by,Grouped by,Raggruppati per
-auto.0137.groups,Groups,apps/web/src/app/features/groups/groups.component.ts inline-template text-node,Groups,Groups,Gruppi
 auto.0138.hierhin_zoomen_hausnaehe,Hierhin zoomen (Hausnaehe),apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Hierhin zoomen (Hausnaehe),Hierhin zoomen (Hausnaehe),Hierhin zoom (Hausnaehe)
 auto.0139.hierhin_zoomen_strassennaehe,Hierhin zoomen (Strassennaehe),apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Hierhin zoomen (Strassennaehe),Hierhin zoomen (Strassennaehe),Zoom qui (vicinanza alla strada)
 auto.0140.historic,Historic,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Historic,Historisch,Storico
@@ -202,7 +201,6 @@ auto.0261.regenerate,Regenerate,apps/web/src/app/features/settings-overlay/secti
 auto.0262.rename_project,Rename project,apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title,Rename project,Projekt umbenennen,Rinominare progetto
 auto.0264.revoke,Revoke,apps/web/src/app/features/settings-overlay/sections/invite-management-section.component.html text-node,Revoke,Widerrufen,Revocare
 auto.0266.sandstone,Sandstone,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Sandstone,Sandstein,Arenaria
-auto.0267.saved_groups_coming_in_m_ui7,Saved groups — coming in M-UI7.,apps/web/src/app/features/groups/groups.component.ts inline-template text-node,Saved groups — coming in M-UI7.,Saved groups — coming in M-UI7.,Gruppi salvati: disponibili in M-UI7.
 auto.0268.search_address,Search address...,apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal,Search address...,Search address...,Cerca indirizzo...
 auto.0269.search_bias,Search bias,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Search bias,Search bias,Distorsioni di ricerca
 auto.0270.search_tuning,Search Tuning,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Search Tuning,Search Tuning,Cerca sintonizzazione

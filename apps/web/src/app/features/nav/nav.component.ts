@@ -18,7 +18,7 @@
  */
 
 import { Component, HostListener, computed, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane.service';
@@ -39,6 +39,7 @@ export interface NavItem {
   styleUrl: './nav.component.scss',
 })
 export class NavComponent {
+  private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
@@ -83,7 +84,7 @@ export class NavComponent {
   });
 
   toggleSettingsOverlay(): void {
-    this.settingsPaneService.toggle();
+    void this.router.navigate(['/settings']);
   }
 
   @HostListener('document:pointerdown', ['$event'])

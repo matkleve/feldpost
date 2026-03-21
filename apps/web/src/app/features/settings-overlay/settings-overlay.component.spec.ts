@@ -39,6 +39,7 @@ describe('SettingsOverlayComponent', () => {
           provide: SettingsPaneService,
           useValue: {
             selectedSectionId: signal<string | null>(null),
+            subsectionRequest: signal({ id: null, requestToken: 0 }),
             inviteSectionRequest: signal({
               requestToken: 0,
               openContext: 'settings',

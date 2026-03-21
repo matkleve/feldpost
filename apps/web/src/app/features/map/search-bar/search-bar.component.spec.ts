@@ -173,7 +173,7 @@ describe('SearchBarComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Addresses');
-    expect(fixture.nativeElement.textContent).toContain('Projects & Groups');
+    expect(fixture.nativeElement.textContent).toContain('Projects');
     expect(fixture.nativeElement.textContent).toContain('Places');
   });
 
@@ -206,7 +206,7 @@ describe('SearchBarComponent', () => {
     });
   });
 
-  it('navigates to the groups route for group content commits', async () => {
+  it('navigates to the projects route for group content commits', async () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     fixture.detectChanges();
 
@@ -220,7 +220,7 @@ describe('SearchBarComponent', () => {
       subtitle: 'Saved group',
     });
 
-    expect(router.navigate).toHaveBeenCalledWith(['/groups'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/projects'], {
       queryParams: {
         search: 'Burg Quote Group',
         type: 'group',

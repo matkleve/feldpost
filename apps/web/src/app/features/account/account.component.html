@@ -27,7 +27,10 @@
     </div>
   </header>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section
+    class="account-card ui-container ui-container--compact"
+    data-settings-subsection="profile"
+  >
     <h2>{{ tr('Profil') }}</h2>
     <p>{{ tr('Aktualisiere deinen sichtbaren Namen.') }}</p>
     <label class="account-field">
@@ -49,7 +52,10 @@
     </button>
   </section>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section
+    class="account-card ui-container ui-container--compact"
+    data-settings-subsection="password"
+  >
     <h2>{{ tr('Anmeldung') }}</h2>
     <p>{{ tr('E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.') }}</p>
 
@@ -121,7 +127,7 @@
     </div>
   </section>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section class="account-card ui-container ui-container--compact" data-settings-subsection="mfa">
     <h2>{{ tr('2FA') }}</h2>
     <p>{{ tr('Aktive Faktoren und TOTP-Setup.') }}</p>
 
@@ -182,7 +188,10 @@
     }
   </section>
 
-  <section class="account-card ui-container ui-container--compact">
+  <section
+    class="account-card ui-container ui-container--compact"
+    data-settings-subsection="session"
+  >
     <h2>{{ tr('Sitzung') }}</h2>
     <p>{{ tr('Beende deine aktuelle Sitzung sicher.') }}</p>
     <button
@@ -195,7 +204,10 @@
     </button>
   </section>
 
-  <section class="account-card account-card--danger ui-container ui-container--compact">
+  <section
+    class="account-card account-card--danger ui-container ui-container--compact"
+    data-settings-subsection="delete"
+  >
     <h2>{{ tr('Konto löschen') }}</h2>
     <p>{{ tr('Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.') }}</p>
     <button

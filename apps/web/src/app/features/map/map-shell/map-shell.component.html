@@ -347,25 +347,23 @@
   }
 </div>
 
-<!-- Drag divider (shown only when workspace pane is open, desktop only) -->
 @if (photoPanelOpen()) {
-  <app-drag-divider
+  <app-workspace-pane-shell
+    [open]="true"
     [currentWidth]="workspacePaneWidth()"
     [minWidth]="workspacePaneMinWidth"
     [maxWidth]="workspacePaneMaxWidth()"
     [defaultWidth]="workspacePaneDefaultWidth()"
     (widthChange)="onWorkspaceWidthChange($event)"
-  />
-
-  <app-workspace-pane
-    [style.width.px]="workspacePaneWidth()"
-    [detailImageId]="detailImageId()"
-    [linkedHoveredImageIds]="linkedHoveredWorkspaceImageIds()"
-    (closed)="closeWorkspacePane()"
-    (detailClosed)="closeDetailView()"
-    (detailRequested)="openDetailView($event)"
-    (zoomToLocationRequested)="onZoomToLocation($event)"
-    (workspaceItemHoverStarted)="onWorkspaceItemHoverStarted($event)"
-    (workspaceItemHoverEnded)="onWorkspaceItemHoverEnded($event)"
-  />
+  >
+    <app-workspace-pane
+      [detailImageId]="detailImageId()"
+      [linkedHoveredImageIds]="linkedHoveredWorkspaceImageIds()"
+      (closed)="closeWorkspacePane()"
+      (detailClosed)="closeDetailView()"
+      (detailRequested)="openDetailView($event)"
+      (workspaceItemHoverStarted)="onWorkspaceItemHoverStarted($event)"
+      (workspaceItemHoverEnded)="onWorkspaceItemHoverEnded($event)"
+    />
+  </app-workspace-pane-shell>
 }

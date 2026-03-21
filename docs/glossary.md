@@ -480,7 +480,6 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 ### Page-Level Components (placeholder)
 
 - **Photos Page** — responsive thumbnail grid + empty state + cursor pagination.
-- **Groups Page** — groups list + detail + create / rename / delete.
 - **Settings Page** — theme control (light / dark / system) with persisted preference.
 - **Account Page** — email / password change + delete-account flow.
 

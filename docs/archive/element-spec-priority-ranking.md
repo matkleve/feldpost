@@ -48,7 +48,6 @@ This ranking is for implementation order, not spec quality. It is based on:
 | 16   | [gps-button.md](./element-specs/gps-button.md)                       | Next     | Already partially implemented and narrower in scope than the missing retrieval and selection flows.                                              |
 | 17   | [sidebar.md](./element-specs/sidebar.md)                             | Next     | Navigation is present enough to move through the app. It should be refined after core map and workspace functionality.                           |
 | 18   | [photos-page.md](./element-specs/photos-page.md)                     | Next     | Page-level experience matters, but the map-first MVP has more urgent missing behavior.                                                           |
-| 19   | [groups-page.md](./element-specs/groups-page.md)                     | Next     | Important, but the underlying workspace/group primitives should be built before the dedicated page.                                              |
 | 20   | [settings-page.md](./element-specs/settings-page.md)                 | Later    | Valuable, but mostly page-level polish compared with missing primary workflows.                                                                  |
 | 21   | [theme-toggle.md](./element-specs/theme-toggle.md)                   | Later    | Theming is important, but not more important than core map retrieval, filtering, and workspace flows.                                            |
 | 22   | [account-page.md](./element-specs/account-page.md)                   | Later    | Needed for completeness, but current MVP blockers sit elsewhere.                                                                                 |
@@ -105,7 +104,6 @@ Finish secondary pages and polish surfaces:
 
 - [sidebar.md](./element-specs/sidebar.md)
 - [photos-page.md](./element-specs/photos-page.md)
-- [groups-page.md](./element-specs/groups-page.md)
 - [settings-page.md](./element-specs/settings-page.md)
 - [theme-toggle.md](./element-specs/theme-toggle.md)
 - [account-page.md](./element-specs/account-page.md)

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   computed,
   effect,
   inject,
@@ -65,6 +66,8 @@ type SettingsLoadState = 'loading' | 'error' | 'populated';
 export class SettingsOverlayComponent {
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly hostRef = inject(ElementRef<HTMLElement>);
+  private highlightedSubsectionToken = 0;
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
@@ -207,6 +210,21 @@ export class SettingsOverlayComponent {
 
     effect(() => {
       this.applyThemeMode(this.settingsModel().themeMode);
+    });
+
+    effect(() => {
+      const subsectionRequest = this.settingsPaneService.subsectionRequest();
+      const selectedSectionId = this.selectedSectionId();
+      const open = this.open();
+      const subsectionId = subsectionRequest.id;
+
+      if (!open || !subsectionId || selectedSectionId !== 'account') {
+        return;
+      }
+
+      queueMicrotask(() => {
+        this.scrollToSubsection(subsectionId, subsectionRequest.requestToken);
+      });
     });
   }
 
@@ -366,5 +384,49 @@ export class SettingsOverlayComponent {
     }
 
     root.setAttribute('data-theme', themeMode);
+  }
+
+  private scrollToSubsection(subsectionId: string, requestToken: number): void {
+    const target = this.findSubsectionElement(subsectionId);
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this.highlightSubsection(target, requestToken);
+  }
+
+  private findSubsectionElement(subsectionId: string): HTMLElement | null {
+    const host = this.hostRef.nativeElement;
+    const candidates = host.querySelectorAll(
+      '[data-settings-subsection]',
+    ) as NodeListOf<HTMLElement>;
+
+    for (const candidate of candidates) {
+      const value = candidate.dataset['settingsSubsection'];
+      if (value && value.toLowerCase() === subsectionId.toLowerCase()) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  private highlightSubsection(target: HTMLElement, requestToken: number): void {
+    const activeToken = Math.max(requestToken, this.highlightedSubsectionToken + 1);
+    this.highlightedSubsectionToken = activeToken;
+
+    target.classList.remove('settings-overlay__subsection-highlight');
+    // Force reflow so repeated deep-links replay the highlight animation.
+    void target.offsetWidth;
+    target.classList.add('settings-overlay__subsection-highlight');
+
+    setTimeout(() => {
+      if (this.highlightedSubsectionToken !== activeToken) {
+        return;
+      }
+
+      target.classList.remove('settings-overlay__subsection-highlight');
+    }, 1800);
   }
 }

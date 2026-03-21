@@ -6,6 +6,12 @@ Back to index: [README.md](./README.md)
 
 Define one enforceable source for component standardization, variant/state contracts, responsive scale, migration priorities, and governance.
 
+Contract hierarchy:
+
+- `docs/element-specs/` defines feature-level behavior and wiring contracts (implementation source of truth).
+- `docs/design-system/` defines reusable primitives, variants, and composition/layout standards used to implement those features consistently.
+- When a design-system page conflicts with an element spec, the design-system documentation must be updated to match the element spec.
+
 Primary outcome: remove geometry drift (pane widths, min-width scatter, breakpoint drift) across map shell, overlays, and future surfaces.
 
 ## Canonical Inputs
@@ -38,9 +44,10 @@ Inventory and migration context:
 6. [table-primitive-contract.md](./table-primitive-contract.md)
 7. [breadcrumbs-contract.md](./breadcrumbs-contract.md)
 8. [usage-patterns-use-cases.md](./usage-patterns-use-cases.md)
-9. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
-10. [governance-adoption.md](./governance-adoption.md)
-11. [external-references-by-family.md](./external-references-by-family.md)
+9. [page-composition-map.md](./page-composition-map.md)
+10. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
+11. [governance-adoption.md](./governance-adoption.md)
+12. [external-references-by-family.md](./external-references-by-family.md)
 
 ## Phase Completion Summary
 

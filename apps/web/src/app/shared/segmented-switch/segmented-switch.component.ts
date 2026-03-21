@@ -17,7 +17,7 @@ export interface SegmentedSwitchOption {
   styleUrl: './segmented-switch.component.scss',
 })
 export class SegmentedSwitchComponent {
-  readonly ariaLabel = input.required<string>();
+  readonly ariaLabel = input('Segmented switch');
   readonly options = input.required<ReadonlyArray<SegmentedSwitchOption>>();
   readonly value = input<string | null>(null);
   readonly disabled = input(false);
@@ -26,8 +26,21 @@ export class SegmentedSwitchComponent {
 
   readonly valueChange = output<string | null>();
 
-  readonly segmentedOptions = computed(() => this.options().filter((option) => !option.inactive));
-  readonly inactiveOptions = computed(() => this.options().filter((option) => !!option.inactive));
+  private readonly safeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => {
+    try {
+      return this.options();
+    } catch {
+      // Required inputs can be read before binding during test-time initial render.
+      return [];
+    }
+  });
+
+  readonly segmentedOptions = computed(() =>
+    this.safeOptions().filter((option) => !option.inactive),
+  );
+  readonly inactiveOptions = computed(() =>
+    this.safeOptions().filter((option) => !!option.inactive),
+  );
 
   isSelected(option: SegmentedSwitchOption): boolean {
     return this.value() === option.id;

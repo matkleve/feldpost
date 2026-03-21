@@ -15,17 +15,18 @@ It consolidates component taxonomy, variants/states, responsive layout scale, go
 7. [table-primitive-contract.md](./table-primitive-contract.md)
 8. [breadcrumbs-contract.md](./breadcrumbs-contract.md)
 9. [usage-patterns-use-cases.md](./usage-patterns-use-cases.md)
-10. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
-11. [governance-adoption.md](./governance-adoption.md)
-12. [external-references-by-family.md](./external-references-by-family.md)
-13. [registry-format-decision.md](./registry-format-decision.md)
-14. [wave-2-geometry-normalization-backlog.md](./wave-2-geometry-normalization-backlog.md)
-15. [wave-3-contract-standardization.md](./wave-3-contract-standardization.md)
-16. [wave-3-pilot-migration-plan.md](./wave-3-pilot-migration-plan.md)
-17. [registry.json](./registry.json)
-18. [registry.schema.json](./registry.schema.json)
-19. [breakpoint-audit-wave2.md](./breakpoint-audit-wave2.md)
-20. [geometry-regression-matrix-wave2.md](./geometry-regression-matrix-wave2.md)
+10. [page-composition-map.md](./page-composition-map.md)
+11. [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md)
+12. [governance-adoption.md](./governance-adoption.md)
+13. [external-references-by-family.md](./external-references-by-family.md)
+14. [registry-format-decision.md](./registry-format-decision.md)
+15. [wave-2-geometry-normalization-backlog.md](./wave-2-geometry-normalization-backlog.md)
+16. [wave-3-contract-standardization.md](./wave-3-contract-standardization.md)
+17. [wave-3-pilot-migration-plan.md](./wave-3-pilot-migration-plan.md)
+18. [registry.json](./registry.json)
+19. [registry.schema.json](./registry.schema.json)
+20. [breakpoint-audit-wave2.md](./breakpoint-audit-wave2.md)
+21. [geometry-regression-matrix-wave2.md](./geometry-regression-matrix-wave2.md)
 
 ## Source Contracts
 
@@ -54,6 +55,13 @@ Out of scope:
 - Runtime code refactors in Angular/SCSS
 - Token renaming in production styles
 - Visual redesign implementation
+
+## Authority Model
+
+- Element specs (`docs/element-specs/`) are the feature behavior source of truth.
+- Design-system docs (`docs/design-system/`) are the reusable UI primitive, variant, and composition source of truth.
+- Composition docs in this folder must map to element-spec contracts and not redefine feature behavior.
+- If divergence appears, align design-system docs to the element spec contract.
 
 ## Status Model
 

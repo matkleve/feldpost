@@ -26,7 +26,7 @@ This document consolidates those ideas and extends them into one implementation-
 Feldpost search is not a single geocoder input. It is a **multi-intent retrieval surface** that must support:
 
 1. **Place intent** — “Take me to this address/place.”
-2. **Evidence intent** — “Find photos/groups/projects matching this term.”
+2. **Evidence intent** — “Find photos/projects matching this term.”
 3. **Action intent** — “Run a quick command (upload, clear filters, go to location, open group).”
 
 The user should not need to decide mode first. The UI infers intent from ranking and result type while staying explicit about result source.
@@ -130,9 +130,9 @@ Search operates as a single component with these states:
    - Debounced query execution.
    - Sections are rendered independently as they return (no list reflow jump).
    - Result sections can include:
-     - DB content matches (photos/groups/projects/metadata)
-     - DB address matches (with image count)
-     - External geocoder matches
+   - DB content matches (photos/projects/metadata)
+   - DB address matches (with image count)
+   - External geocoder matches
 
 4. **ResultsPartial / ResultsComplete**
    - Partial = one source has returned, others still loading.
@@ -182,7 +182,7 @@ flowchart TD
 ### 5.1 Global ranking order
 
 1. DB address candidates (organization-known places)
-2. DB content candidates (photos/groups/projects/metadata)
+2. DB content candidates (photos/projects/metadata)
 3. External geocoder candidates
 4. Command candidates (or promoted in command mode)
 
@@ -412,7 +412,7 @@ flowchart LR
 3. Recent searches in focused-empty state.
 4. Keyboard navigation and accessible listbox semantics.
 5. Map recenter on place commit.
-6. Basic content matching (projects/groups/metadata labels).
+6. Basic content matching (projects/metadata labels).
 7. No-result empty state with manual-location guidance.
 
 ### 10.2 Should-have (next milestone)
@@ -447,7 +447,7 @@ flowchart LR
 
 1. Final debounce value for search UX (`200ms` speed bias vs `300ms` stability bias).
 2. Whether command results are always visible or only in explicit command mode.
-3. Exact scope of DB content search in MVP (projects/groups only vs metadata/file names included).
+3. Exact scope of DB content search in MVP (projects only vs metadata/file names included).
 4. Whether live marker highlight on typing ships in MVP or next milestone.
 
 ---

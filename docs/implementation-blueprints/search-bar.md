@@ -82,7 +82,7 @@ sequenceDiagram
         MapShell->>MapShell: mapAdapter.panTo(action.lat, action.lng)
         MapShell->>MapShell: Place Search Location Marker
     else type === 'open-content'
-        SB->>Router: navigate(['/groups', action.contentId]) or similar
+      SB->>Router: navigate(['/projects', action.contentId]) or similar
     else type === 'run-command'
         SB->>MapShell: emit command-related output
         Note over MapShell: Handle 'upload' → open upload panel, etc.

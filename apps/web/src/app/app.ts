@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -25,6 +25,16 @@ interface I18nDevCommands {
   };
 }
 
+type SettingsSectionId =
+  | 'general'
+  | 'appearance'
+  | 'notifications'
+  | 'map'
+  | 'search'
+  | 'data'
+  | 'account'
+  | 'invite-management';
+
 declare global {
   interface Window {
     __feldpostI18n?: I18nDevCommands;
@@ -45,6 +55,7 @@ export class App implements OnInit {
   private readonly uploadNotifications = inject(UploadNotificationService);
   private readonly dbTranslationService = inject(DbTranslationService);
   private readonly domTranslationService = inject(DomTranslationService);
+  private lastNonSettingsUrl = '/';
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -57,6 +68,31 @@ export class App implements OnInit {
 
   readonly showNav = computed(() => !this.currentUrl().startsWith('/auth'));
   readonly settingsOverlayOpen = this.settingsPaneService.open;
+
+  constructor() {
+    effect(() => {
+      const url = this.currentUrl();
+      const settingsTarget = this.parseSettingsUrl(url);
+
+      if (settingsTarget) {
+        this.settingsPaneService.openFromRoute(settingsTarget.section, settingsTarget.subsection);
+        return;
+      }
+
+      if (!url.startsWith('/auth')) {
+        this.lastNonSettingsUrl = url;
+      }
+    });
+
+    effect(() => {
+      const onSettingsRoute = this.parseSettingsUrl(this.currentUrl()) !== null;
+      const overlayOpen = this.settingsOverlayOpen();
+
+      if (onSettingsRoute && !overlayOpen) {
+        void this.router.navigateByUrl(this.lastNonSettingsUrl || '/');
+      }
+    });
+  }
 
   onSettingsOverlayOpenChange(open: boolean): void {
     this.settingsPaneService.setOpen(open);
@@ -108,5 +144,52 @@ export class App implements OnInit {
     }
 
     window.location.reload();
+  }
+
+  private parseSettingsUrl(
+    url: string,
+  ): { section: SettingsSectionId | null; subsection: string | null } | null {
+    const parsedUrl = this.router.parseUrl(url);
+    const segments =
+      parsedUrl.root.children['primary']?.segments.map((segment) => segment.path) ?? [];
+
+    if (segments[0] !== 'settings') {
+      return null;
+    }
+
+    const section = this.normalizeSettingsSection(segments[1] ?? null);
+    const subsection = this.normalizeSubsection(segments[2] ?? null);
+
+    return { section, subsection };
+  }
+
+  private normalizeSettingsSection(section: string | null): SettingsSectionId | null {
+    if (!section) {
+      return null;
+    }
+
+    if (
+      section === 'general' ||
+      section === 'appearance' ||
+      section === 'notifications' ||
+      section === 'map' ||
+      section === 'search' ||
+      section === 'data' ||
+      section === 'account' ||
+      section === 'invite-management'
+    ) {
+      return section;
+    }
+
+    return null;
+  }
+
+  private normalizeSubsection(subsection: string | null): string | null {
+    if (!subsection) {
+      return null;
+    }
+
+    const normalized = subsection.trim().toLowerCase();
+    return normalized.length > 0 ? normalized : null;
   }
 }

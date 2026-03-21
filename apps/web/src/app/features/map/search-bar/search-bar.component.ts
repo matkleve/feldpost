@@ -497,7 +497,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           break;
         }
 
-        void this.router.navigate([candidate.contentType === 'group' ? '/groups' : '/photos'], {
+        void this.router.navigate([candidate.contentType === 'group' ? '/projects' : '/photos'], {
           queryParams: {
             search: commitAction.query,
             type: candidate.contentType,
@@ -555,7 +555,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private createEmptySections(): SearchSectionsState {
     return {
       dbAddress: this.createSection('db-address', 'Addresses'),
-      dbContent: this.createSection('db-content', 'Projects & Groups'),
+      dbContent: this.createSection('db-content', 'Projects'),
       geocoder: this.createSection('geocoder', 'Places'),
     };
   }

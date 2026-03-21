@@ -47,7 +47,7 @@ import { ToastService } from '../../../core/toast.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
-import { DragDividerComponent } from '../workspace-pane/drag-divider/drag-divider.component';
+import { WorkspacePaneShellComponent } from '../workspace-pane/workspace-pane-shell.component';
 import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card.component';
 import { SettingsPaneService } from '../../../core/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
@@ -144,7 +144,7 @@ const HISTORIC_LABEL_PANE = 'historic-label';
     UploadPanelComponent,
     SearchBarComponent,
     WorkspacePaneComponent,
-    DragDividerComponent,
+    WorkspacePaneShellComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
     SegmentedSwitchComponent,
@@ -226,7 +226,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
 
   /** Reference to the Leaflet map container div. */
-  private readonly mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
+  private readonly mapContainerRef = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
 
   /** Reference to the UploadPanelComponent child (for placeFile calls). */
   private readonly uploadPanelChild = viewChild(UploadPanelComponent);
@@ -590,6 +590,12 @@ export class MapShellComponent implements OnDestroy {
 
   constructor() {
     afterNextRender(() => {
+      const isJsdom =
+        typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom');
+      if (isJsdom) {
+        return;
+      }
+
       this.restoreWorkspacePaneWidthPreference();
       this.markerMotionPreference.set(
         this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
@@ -1554,7 +1560,12 @@ export class MapShellComponent implements OnDestroy {
   // ── Map init ──────────────────────────────────────────────────────────────
 
   private initMap(): void {
-    this.map = L.map(this.mapContainerRef().nativeElement, {
+    const containerRef = this.mapContainerRef();
+    if (!containerRef) {
+      return;
+    }
+
+    this.map = L.map(containerRef.nativeElement, {
       center: [48.2082, 16.3738], // Vienna, Austria (fallback)
       zoom: 13,
       maxZoom: 22,

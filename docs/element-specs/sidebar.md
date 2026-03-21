@@ -152,7 +152,7 @@ Sidebar                                    ← nav element, fixed/absolute left,
 ├── SidebarPanel                           ← `.ui-container`, standard panel radius
 │   ├── NavLink "Map"                      ← icon: map, route: /
 │   ├── NavLink "Photos"                   ← icon: photo_camera, route: /photos
-│   ├── NavLink "Groups"                   ← icon: folder, route: /groups
+│   ├── NavLink "Projects"                 ← icon: folder, route: /projects
 │   ├── NavLink "Settings"                 ← icon: settings, route: /settings
 │   ├── SpacerRow                          ← flex-1 pushes account row to bottom
 │   └── AccountRow                         ← avatar image or initial + account name, links to /account

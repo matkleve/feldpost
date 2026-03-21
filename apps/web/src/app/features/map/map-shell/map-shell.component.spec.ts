@@ -112,6 +112,9 @@ function buildTestBed() {
         useValue: {
           snapshot: {
             queryParams: {},
+            queryParamMap: {
+              get: vi.fn().mockReturnValue(null),
+            },
           },
         },
       },
@@ -1930,18 +1933,22 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.photoPanelOpen.set(true);
     fixture.detectChanges();
 
-    const panel = (fixture.nativeElement as HTMLElement).querySelector('app-workspace-pane');
-    expect(panel).not.toBeNull();
+    const panelShell = (fixture.nativeElement as HTMLElement).querySelector(
+      'app-workspace-pane-shell',
+    );
+    expect(panelShell).not.toBeNull();
   });
 
-  it('drag divider is visible when photoPanelOpen is true', () => {
+  it('workspace pane shell is visible when photoPanelOpen is true', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
     fixture.componentInstance.photoPanelOpen.set(true);
     fixture.detectChanges();
 
-    const divider = (fixture.nativeElement as HTMLElement).querySelector('app-drag-divider');
-    expect(divider).not.toBeNull();
+    const panelShell = (fixture.nativeElement as HTMLElement).querySelector(
+      'app-workspace-pane-shell',
+    );
+    expect(panelShell).not.toBeNull();
   });
 });
