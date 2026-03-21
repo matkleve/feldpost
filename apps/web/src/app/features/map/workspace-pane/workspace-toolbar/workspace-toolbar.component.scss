@@ -23,19 +23,6 @@
   min-inline-size: auto;
 }
 
-.workspace-toolbar__size-control app-segmented-switch {
-  --segmented-host-width: auto;
-  --segmented-group-width: auto;
-  --segmented-button-flex: 0 0 auto;
-}
-
-:host ::ng-deep .workspace-toolbar__size-control .segmented-switch__button {
-  width: 2.25rem;
-  min-width: 2.25rem;
-  min-height: 2.25rem;
-  padding: 0;
-}
-
-:host ::ng-deep .workspace-toolbar__size-control .segmented-switch__label {
-  display: none;
+.workspace-toolbar__size-control app-snap-size-slider {
+  min-inline-size: auto;
 }

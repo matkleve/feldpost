@@ -12,6 +12,12 @@
 
 import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import {
+  UiInlineEditActionsDirective,
+  UiInlineEditRowDirective,
+  UiInputControlDirective,
+  UiSelectControlDirective,
+} from '../../../shared/ui-primitives.directive';
 
 export interface SelectOption {
   id: string;
@@ -23,81 +29,87 @@ export interface SelectOption {
   standalone: true,
   template: `
     <div
-      class="prop-row"
+      uiInlineEditRow
+      class="prop-row ui-inline-edit-row"
       [class.prop-row--editing]="editing()"
       [class.prop-row--readonly]="readonly()"
     >
       <span class="prop-key" [title]="label()">{{ label() }}</span>
-      @if (editing() && !readonly()) {
-        @switch (inputType()) {
-          @case ('date') {
-            <input
-              #editInput
-              class="prop-input"
-              type="datetime-local"
-              [value]="dateInputValue()"
-              [attr.aria-label]="
-                t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
-              "
-              (keydown.enter)="commitEdit($event)"
-              (keydown.escape)="cancelEdit()"
-              (blur)="commitEdit($event)"
-            />
+      <div uiInlineEditActions class="prop-edit ui-inline-edit-actions">
+        @if (editing() && !readonly()) {
+          @switch (inputType()) {
+            @case ('date') {
+              <input
+                #editInput
+                uiInputControl
+                class="prop-input ui-input-control"
+                type="datetime-local"
+                [value]="dateInputValue()"
+                [attr.aria-label]="
+                  t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+                "
+                (keydown.enter)="commitEdit($event)"
+                (keydown.escape)="cancelEdit()"
+                (blur)="commitEdit($event)"
+              />
+            }
+            @case ('select') {
+              <select
+                #editInput
+                uiSelectControl
+                class="prop-input prop-input--select ui-select-control"
+                [attr.aria-label]="
+                  t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+                "
+                (change)="commitSelect($event)"
+                (keydown.escape)="cancelEdit()"
+                (blur)="commitSelect($event)"
+              >
+                <option value="">{{ t('workspace.editableRow.option.none', '— None —') }}</option>
+                @for (opt of options(); track opt.id) {
+                  <option [value]="opt.id" [selected]="opt.id === value()">{{ opt.label }}</option>
+                }
+              </select>
+            }
+            @default {
+              <input
+                #editInput
+                uiInputControl
+                class="prop-input ui-input-control"
+                type="text"
+                [value]="value()"
+                [attr.aria-label]="
+                  t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+                "
+                (keydown.enter)="commitEdit($event)"
+                (keydown.escape)="cancelEdit()"
+                (blur)="commitEdit($event)"
+              />
+            }
           }
-          @case ('select') {
-            <select
-              #editInput
-              class="prop-input prop-input--select"
-              [attr.aria-label]="
-                t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
-              "
-              (change)="commitSelect($event)"
-              (keydown.escape)="cancelEdit()"
-              (blur)="commitSelect($event)"
-            >
-              <option value="">{{ t('workspace.editableRow.option.none', '— None —') }}</option>
-              @for (opt of options(); track opt.id) {
-                <option [value]="opt.id" [selected]="opt.id === value()">{{ opt.label }}</option>
-              }
-            </select>
-          }
-          @default {
-            <input
-              #editInput
-              class="prop-input"
-              type="text"
-              [value]="value()"
-              [attr.aria-label]="
-                t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
-              "
-              (keydown.enter)="commitEdit($event)"
-              (keydown.escape)="cancelEdit()"
-              (blur)="commitEdit($event)"
-            />
-          }
+        } @else {
+          <button
+            class="prop-value"
+            type="button"
+            [title]="
+              readonly()
+                ? label()
+                : t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
+            "
+            [disabled]="readonly()"
+            (click)="startEdit()"
+          >
+            {{ displayValue() || t('workspace.editableRow.value.empty', '—') }}
+          </button>
         }
-      } @else {
-        <button
-          class="prop-value"
-          type="button"
-          [title]="
-            readonly()
-              ? label()
-              : t('workspace.editableRow.action.editPrefix', 'Edit') + ' ' + label()
-          "
-          [disabled]="readonly()"
-          (click)="startEdit()"
-        >
-          {{ displayValue() || t('workspace.editableRow.value.empty', '—') }}
-        </button>
-      }
+      </div>
     </div>
   `,
   styles: [
     `
       .prop-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         align-items: center;
         min-height: 2.5rem;
         padding-block: var(--spacing-2);
@@ -114,6 +126,11 @@ export interface SelectOption {
         &--readonly {
           pointer-events: none;
         }
+      }
+
+      .prop-edit {
+        justify-self: end;
+        width: 100%;
       }
 
       .prop-key {
@@ -157,15 +174,13 @@ export interface SelectOption {
       .prop-input {
         font-size: 0.9375rem;
         color: var(--color-text-primary);
-        background: var(--color-bg-surface);
-        border: 1px solid var(--color-primary);
+        background: transparent;
+        border: none;
         border-radius: var(--radius-sm);
-        padding: 0.125rem var(--spacing-2);
+        padding: 0;
         width: 100%;
         text-align: right;
         font-family: inherit;
-        outline: none;
-        box-shadow: var(--shadow-focus);
 
         &--select {
           cursor: pointer;
@@ -173,6 +188,12 @@ export interface SelectOption {
         }
       }
     `,
+  ],
+  imports: [
+    UiInlineEditRowDirective,
+    UiInlineEditActionsDirective,
+    UiInputControlDirective,
+    UiSelectControlDirective,
   ],
 })
 export class EditablePropertyRowComponent {

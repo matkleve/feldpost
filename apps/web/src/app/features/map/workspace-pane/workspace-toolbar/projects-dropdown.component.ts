@@ -3,6 +3,10 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../../core/projects/projects.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
+import {
+  UiChoiceControlDirective,
+  UiChoiceRowDirective,
+} from '../../../../shared/ui-primitives.directive';
 
 interface Project {
   id: string;
@@ -23,10 +27,11 @@ interface Project {
       (actionRequested)="isCreating.set(true)"
     >
       <div dropdown-items class="projects-list">
-        <label class="dd-item projects-row--all">
+        <label uiChoiceRow class="dd-item projects-row--all ui-choice-row">
           <input
+            uiChoiceControl
             type="checkbox"
-            class="projects-checkbox"
+            class="projects-checkbox ui-choice-control"
             [checked]="allSelected()"
             [indeterminate]="someSelected()"
             (change)="toggleAll()"
@@ -34,10 +39,11 @@ interface Project {
           <span class="dd-item__label">{{ t('workspace.projects.all', 'All projects') }}</span>
         </label>
         @for (project of filteredProjects(); track project.id) {
-          <label class="dd-item">
+          <label uiChoiceRow class="dd-item ui-choice-row">
             <input
+              uiChoiceControl
               type="checkbox"
-              class="projects-checkbox"
+              class="projects-checkbox ui-choice-control"
               [checked]="selectedIds().has(project.id)"
               (change)="toggleProject(project.id)"
             />
@@ -49,7 +55,7 @@ interface Project {
     </app-standard-dropdown>
   `,
   styleUrl: './projects-dropdown.component.scss',
-  imports: [StandardDropdownComponent],
+  imports: [StandardDropdownComponent, UiChoiceRowDirective, UiChoiceControlDirective],
 })
 export class ProjectsDropdownComponent {
   private readonly i18nService = inject(I18nService);

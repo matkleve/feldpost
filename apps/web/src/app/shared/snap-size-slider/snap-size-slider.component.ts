@@ -8,6 +8,7 @@ export interface SnapSizeSliderOption {
 
 @Component({
   selector: 'app-snap-size-slider',
+  standalone: true,
   templateUrl: './snap-size-slider.component.html',
   styleUrl: './snap-size-slider.component.scss',
 })

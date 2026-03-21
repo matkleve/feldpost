@@ -5,8 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { ToastService } from '../../core/toast.service';
-import { Projects2PageComponent } from './projects-2-page.component';
-import { Projects2ToolbarComponent } from './projects-2-toolbar.component';
+import { ProjectsPageComponent } from './projects-page.component';
+import { ProjectsToolbarComponent } from './projects-toolbar.component';
 import type { ProjectListItem } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
 
@@ -30,7 +30,7 @@ function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListIte
   };
 }
 
-describe('Projects2PageComponent', () => {
+describe('ProjectsPageComponent', () => {
   const projectsServiceMock = {
     loadProjects: vi.fn().mockResolvedValue([]),
     createDraftProject: vi.fn().mockResolvedValue(null),
@@ -41,9 +41,9 @@ describe('Projects2PageComponent', () => {
   };
 
   beforeEach(async () => {
-    TestBed.overrideComponent(Projects2PageComponent, {
+    TestBed.overrideComponent(ProjectsPageComponent, {
       remove: {
-        imports: [Projects2ToolbarComponent],
+        imports: [ProjectsToolbarComponent],
       },
       add: {
         schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -51,7 +51,7 @@ describe('Projects2PageComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [Projects2PageComponent],
+      imports: [ProjectsPageComponent],
       providers: [
         {
           provide: Router,
@@ -89,12 +89,12 @@ describe('Projects2PageComponent', () => {
   it('renders an explicit load error state when project loading fails', async () => {
     projectsServiceMock.loadProjects.mockRejectedValueOnce(new Error('load failed'));
 
-    const fixture = TestBed.createComponent(Projects2PageComponent);
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const errorPanel = (fixture.nativeElement as HTMLElement).querySelector('.projects2-error');
+    const errorPanel = (fixture.nativeElement as HTMLElement).querySelector('.projects-error');
     expect(errorPanel).not.toBeNull();
     expect(errorPanel?.textContent).toContain('Could not load projects');
     expect(errorPanel?.textContent).toContain('Retry');
@@ -103,7 +103,7 @@ describe('Projects2PageComponent', () => {
   it('applies aria-sort semantics to table headers from the active primary sort', async () => {
     projectsServiceMock.loadProjects.mockResolvedValueOnce([createProject()]);
 
-    const fixture = TestBed.createComponent(Projects2PageComponent);
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -114,7 +114,7 @@ describe('Projects2PageComponent', () => {
     fixture.detectChanges();
 
     const headers = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      '.projects2-table thead th',
+      '.projects-table thead th',
     );
     expect(headers.length).toBe(7);
     expect(headers[0]?.getAttribute('aria-sort')).toBe('ascending');
@@ -129,7 +129,7 @@ describe('Projects2PageComponent', () => {
   it('renders semantic table structure in list mode', async () => {
     projectsServiceMock.loadProjects.mockResolvedValueOnce([createProject()]);
 
-    const fixture = TestBed.createComponent(Projects2PageComponent);
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -139,14 +139,14 @@ describe('Projects2PageComponent', () => {
     fixture.detectChanges();
 
     const host = fixture.nativeElement as HTMLElement;
-    const table = host.querySelector('.projects2-table');
-    const rowHeaderCell = host.querySelector('.projects2-table tbody th[scope="row"]');
-    const headerLabels = Array.from(host.querySelectorAll('.projects2-table thead th')).map(
+    const table = host.querySelector('.projects-table');
+    const rowHeaderCell = host.querySelector('.projects-table tbody th[scope="row"]');
+    const headerLabels = Array.from(host.querySelectorAll('.projects-table thead th')).map(
       (node) => node.textContent?.trim(),
     );
     expect(table).not.toBeNull();
-    expect(host.querySelector('.projects2-table thead')).not.toBeNull();
-    expect(host.querySelector('.projects2-table tbody')).not.toBeNull();
+    expect(host.querySelector('.projects-table thead')).not.toBeNull();
+    expect(host.querySelector('.projects-table tbody')).not.toBeNull();
     expect(rowHeaderCell?.textContent).toContain('Pilot Project');
     expect(headerLabels).toEqual([
       'Name',
@@ -167,15 +167,15 @@ describe('Projects2PageComponent', () => {
     const router = TestBed.inject(Router) as unknown as { url: string };
     router.url = '/projects/project-42';
 
-    const fixture = TestBed.createComponent(Projects2PageComponent);
+    const fixture = TestBed.createComponent(ProjectsPageComponent);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.componentInstance.projects.set([createProject({ id: 'project-42', name: 'Site 42' })]);
     fixture.detectChanges();
 
     const host = fixture.nativeElement as HTMLElement;
-    const breadcrumb = host.querySelector('.projects2-breadcrumbs');
-    const current = host.querySelector('.projects2-breadcrumbs__item--current');
+    const breadcrumb = host.querySelector('.projects-breadcrumbs');
+    const current = host.querySelector('.projects-breadcrumbs__item--current');
     expect(breadcrumb).not.toBeNull();
     expect(current?.textContent).toContain('Site 42');
   });

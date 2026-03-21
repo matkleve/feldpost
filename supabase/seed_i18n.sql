@@ -3,7 +3,7 @@
 begin;
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.table.ariaLabel', 'Projects table', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template attr:aria-label')
+values (null, 'projects.page.table.ariaLabel', 'Projects table', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts inline-template attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -34,7 +34,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.error.title', 'Could not load projects', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node')
+values (null, 'projects.page.error.title', 'Could not load projects', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -65,7 +65,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.error.body', 'Please try again in a moment.', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node')
+values (null, 'projects.page.error.body', 'Please try again in a moment.', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -96,7 +96,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'projects.page.error.retry', 'Retry', 'en', 'apps/web/src/app/features/projects/projects-2-page.component.ts inline-template text-node')
+values (null, 'projects.page.error.retry', 'Retry', 'en', 'apps/web/src/app/features/projects/projects-page.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,

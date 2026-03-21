@@ -5,7 +5,7 @@
 >
   @for (btn of buttons(); track btn.id) {
     <button
-      class="toolbar-btn"
+      uiToolbarButton
       [class.toolbar-btn--active]="btn.active()"
       [class.toolbar-btn--open]="activeDropdown() === btn.id"
       [attr.aria-expanded]="activeDropdown() === btn.id"
@@ -20,8 +20,8 @@
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
   <div class="workspace-toolbar__size-control">
-    <app-segmented-switch
-      [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+    <app-snap-size-slider
+      [label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
       [options]="thumbnailSizeOptions()"
       [value]="thumbnailSizePreset()"
       (valueChange)="onThumbnailSizeChanged($event)"

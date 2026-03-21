@@ -19,7 +19,7 @@ import { type FilterDropdownPropertyOption } from '../map/workspace-pane/workspa
 import { type SortDropdownOption } from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
 import type { SortConfig } from '../../core/workspace-view.types';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
-import { Projects2ToolbarComponent } from './projects-2-toolbar.component';
+import { ProjectsToolbarComponent } from './projects-toolbar.component';
 
 interface ProjectGroupedSection {
   id: string;
@@ -61,23 +61,23 @@ const SORT_OPTIONS: SortDropdownOption[] = [
 ];
 
 @Component({
-  selector: 'app-projects-2-page',
+  selector: 'app-projects-page',
   standalone: true,
   imports: [
     CommonModule,
     RouterLink,
     GroupHeaderComponent,
-    Projects2ToolbarComponent,
+    ProjectsToolbarComponent,
     ProjectColorPickerComponent,
   ],
   template: `
-    <main class="projects2-page">
-      <section class="projects2-rail">
-        <header class="projects2-header">
-          <div class="projects2-header__actions">
+    <main class="projects-page">
+      <section class="projects-rail">
+        <header class="projects-header">
+          <div class="projects-header__actions">
             <button
               type="button"
-              class="ui-button ui-button--primary projects2-header__new"
+              class="ui-button ui-button--primary projects-header__new"
               [disabled]="loading()"
               (click)="onNewProject()"
               [attr.aria-label]="t('projects.page.action.newProject', 'New project')"
@@ -87,30 +87,30 @@ const SORT_OPTIONS: SortDropdownOption[] = [
             </button>
           </div>
 
-          <div class="projects2-header__title-wrap">
+          <div class="projects-header__title-wrap">
             @if (currentProjectId()) {
               <nav
-                class="projects2-breadcrumbs"
+                class="projects-breadcrumbs"
                 [attr.aria-label]="t('nav.item.projects', 'Projects')"
               >
                 <a
-                  class="projects2-breadcrumbs__item projects2-breadcrumbs__item--link"
+                  class="projects-breadcrumbs__item projects-breadcrumbs__item--link"
                   [routerLink]="['/projects']"
                 >
                   {{ t('nav.item.projects', 'Projects') }}
                 </a>
-                <span class="projects2-breadcrumbs__separator" aria-hidden="true">/</span>
-                <span class="projects2-breadcrumbs__item projects2-breadcrumbs__item--current">
+                <span class="projects-breadcrumbs__separator" aria-hidden="true">/</span>
+                <span class="projects-breadcrumbs__item projects-breadcrumbs__item--current">
                   {{ breadcrumbCurrentLabel() }}
                 </span>
               </nav>
             }
-            <h1 class="projects2-header__title">{{ t('nav.item.projects', 'Projects') }}</h1>
-            <p class="projects2-header__count">{{ projectCountLabel() }}</p>
+            <h1 class="projects-header__title">{{ t('nav.item.projects', 'Projects') }}</h1>
+            <p class="projects-header__count">{{ projectCountLabel() }}</p>
           </div>
         </header>
 
-        <app-projects-2-toolbar
+        <app-projects-toolbar
           [groupingOptions]="groupingOptions()"
           [activeGroupingsInput]="activeGroupings()"
           [filterOptions]="filterOptions()"
@@ -130,16 +130,16 @@ const SORT_OPTIONS: SortDropdownOption[] = [
 
         @if (loading()) {
           <section
-            class="projects2-loading"
+            class="projects-loading"
             role="status"
             [attr.aria-label]="t('projects.page.loading.aria', 'Loading projects')"
           >
-            <div class="projects2-loading__row"></div>
-            <div class="projects2-loading__row"></div>
-            <div class="projects2-loading__row"></div>
+            <div class="projects-loading__row"></div>
+            <div class="projects-loading__row"></div>
+            <div class="projects-loading__row"></div>
           </section>
         } @else if (loadError()) {
-          <section class="projects2-error" role="alert">
+          <section class="projects-error" role="alert">
             <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
             <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
             <button
@@ -151,7 +151,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
             </button>
           </section>
         } @else if (groupedSections().length === 0) {
-          <section class="projects2-empty">
+          <section class="projects-empty">
             <h2>{{ t('projects.page.empty.title', 'No projects match your filters') }}</h2>
             <p>
               {{ t('projects.page.empty.body', 'Try another search or reset your status filter.') }}
@@ -159,11 +159,11 @@ const SORT_OPTIONS: SortDropdownOption[] = [
           </section>
         } @else {
           <section
-            class="projects2-content"
-            [class.projects2-content--cards]="viewMode() === 'cards'"
+            class="projects-content"
+            [class.projects-content--cards]="viewMode() === 'cards'"
           >
             @for (section of groupedSections(); track section.id) {
-              <section class="projects2-section">
+              <section class="projects-section">
                 @if (section.heading) {
                   <app-group-header
                     [heading]="section.heading"
@@ -175,11 +175,11 @@ const SORT_OPTIONS: SortDropdownOption[] = [
 
                 @if (viewMode() === 'list') {
                   <div
-                    class="projects2-list"
+                    class="projects-list"
                     role="region"
                     [attr.aria-label]="t('projects.page.table.ariaLabel', 'Projects table')"
                   >
-                    <table class="projects2-table">
+                    <table class="projects-table">
                       <thead>
                         <tr>
                           <th
@@ -264,7 +264,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                     </table>
                   </div>
                 } @else {
-                  <div class="projects2-grid">
+                  <div class="projects-grid">
                     @for (project of section.projects; track project.id) {
                       <article
                         class="project2-card"
@@ -344,11 +344,11 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         }
 
         @if (hasPendingAction()) {
-          <section class="projects2-confirm" role="dialog" aria-modal="true">
-            <div class="projects2-confirm__surface">
+          <section class="projects-confirm" role="dialog" aria-modal="true">
+            <div class="projects-confirm__surface">
               <h2>{{ pendingActionTitle() }}</h2>
               <p>{{ pendingActionMessage() }}</p>
-              <div class="projects2-confirm__actions">
+              <div class="projects-confirm__actions">
                 <button
                   type="button"
                   class="ui-button ui-button--secondary"
@@ -381,26 +381,26 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         min-height: 100%;
       }
 
-      .projects2-page {
+      .projects-page {
         min-height: 100%;
         padding: var(--spacing-4);
       }
 
-      .projects2-rail {
+      .projects-rail {
         width: min(25rem, 100%);
         margin-inline: auto;
         display: grid;
         gap: var(--spacing-4);
       }
 
-      .projects2-header {
+      .projects-header {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);
         gap: var(--spacing-3);
         align-items: center;
       }
 
-      .projects2-header__title-wrap {
+      .projects-header__title-wrap {
         display: grid;
         gap: var(--spacing-1);
         min-width: 0;
@@ -408,11 +408,11 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         text-align: right;
       }
 
-      .projects2-header__count {
+      .projects-header__count {
         color: var(--color-text-secondary);
       }
 
-      .projects2-breadcrumbs {
+      .projects-breadcrumbs {
         display: flex;
         align-items: center;
         gap: var(--spacing-1);
@@ -421,42 +421,42 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         font-size: 0.8125rem;
       }
 
-      .projects2-breadcrumbs__item {
+      .projects-breadcrumbs__item {
         min-width: 0;
       }
 
-      .projects2-breadcrumbs__item--link {
+      .projects-breadcrumbs__item--link {
         color: inherit;
         text-decoration: underline;
         text-underline-offset: 0.15em;
       }
 
-      .projects2-breadcrumbs__item--current {
+      .projects-breadcrumbs__item--current {
         color: var(--color-text-primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
-      .projects2-breadcrumbs__separator {
+      .projects-breadcrumbs__separator {
         flex: 0 0 auto;
       }
 
-      .projects2-header__actions {
+      .projects-header__actions {
         display: inline-flex;
         justify-self: start;
       }
 
-      .projects2-header__new {
+      .projects-header__new {
         white-space: nowrap;
       }
 
-      .projects2-loading {
+      .projects-loading {
         display: grid;
         gap: var(--spacing-2);
       }
 
-      .projects2-loading__row {
+      .projects-loading__row {
         min-height: 4rem;
         border-radius: var(--container-radius-control);
         background: linear-gradient(
@@ -466,10 +466,10 @@ const SORT_OPTIONS: SortDropdownOption[] = [
           color-mix(in srgb, var(--color-border) 65%, transparent) 100%
         );
         background-size: 200% 100%;
-        animation: projects2-loading-pulse 1.2s ease-in-out infinite;
+        animation: projects-loading-pulse 1.2s ease-in-out infinite;
       }
 
-      .projects2-empty {
+      .projects-empty {
         border: 1px solid var(--color-border);
         border-radius: var(--container-radius-panel);
         background: var(--color-bg-surface);
@@ -478,7 +478,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         gap: var(--spacing-2);
       }
 
-      .projects2-error {
+      .projects-error {
         border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
         border-radius: var(--container-radius-panel);
         background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-warning));
@@ -487,30 +487,30 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         gap: var(--spacing-2);
       }
 
-      .projects2-content {
+      .projects-content {
         display: grid;
         gap: var(--spacing-3);
       }
 
-      .projects2-section {
+      .projects-section {
         display: grid;
         gap: var(--spacing-2);
       }
 
-      .projects2-list {
+      .projects-list {
         overflow-x: auto;
         border: 1px solid var(--color-border);
         border-radius: var(--container-radius-control);
         background: color-mix(in srgb, var(--color-bg-surface) 94%, var(--color-bg-base));
       }
 
-      .projects2-table {
+      .projects-table {
         width: 100%;
         border-collapse: collapse;
         min-width: 60rem;
       }
 
-      .projects2-table thead th {
+      .projects-table thead th {
         text-align: left;
         font-size: 0.8125rem;
         font-weight: 600;
@@ -519,31 +519,31 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         border-bottom: 1px solid var(--color-border);
       }
 
-      .projects2-table thead th[data-sort-direction='asc']::after,
-      .projects2-table thead th[data-sort-direction='desc']::after {
+      .projects-table thead th[data-sort-direction='asc']::after,
+      .projects-table thead th[data-sort-direction='desc']::after {
         margin-left: var(--spacing-1);
         color: var(--color-text-primary);
       }
 
-      .projects2-table thead th[data-sort-direction='asc']::after {
+      .projects-table thead th[data-sort-direction='asc']::after {
         content: '↑';
       }
 
-      .projects2-table thead th[data-sort-direction='desc']::after {
+      .projects-table thead th[data-sort-direction='desc']::after {
         content: '↓';
       }
 
-      .projects2-table tbody tr {
+      .projects-table tbody tr {
         border-left: 3px solid var(--project-item-color, var(--color-border));
       }
 
-      .projects2-table tbody tr + tr td,
-      .projects2-table tbody tr + tr th {
+      .projects-table tbody tr + tr td,
+      .projects-table tbody tr + tr th {
         border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
       }
 
-      .projects2-table tbody td,
-      .projects2-table tbody th {
+      .projects-table tbody td,
+      .projects-table tbody th {
         padding: var(--spacing-3);
         vertical-align: middle;
       }
@@ -581,7 +581,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         font-size: 0.8125rem;
       }
 
-      .projects2-grid {
+      .projects-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
         gap: var(--spacing-3);
@@ -634,7 +634,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         z-index: 10;
       }
 
-      .projects2-confirm {
+      .projects-confirm {
         position: fixed;
         inset: 0;
         background: color-mix(in srgb, var(--color-bg-base) 68%, transparent);
@@ -644,7 +644,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         z-index: 40;
       }
 
-      .projects2-confirm__surface {
+      .projects-confirm__surface {
         width: min(26rem, 100%);
         border: 1px solid var(--color-border);
         border-radius: var(--container-radius-panel);
@@ -655,13 +655,13 @@ const SORT_OPTIONS: SortDropdownOption[] = [
         box-shadow: var(--elevation-floating);
       }
 
-      .projects2-confirm__actions {
+      .projects-confirm__actions {
         display: flex;
         justify-content: flex-end;
         gap: var(--spacing-2);
       }
 
-      @keyframes projects2-loading-pulse {
+      @keyframes projects-loading-pulse {
         0% {
           background-position: 200% 0;
         }
@@ -671,21 +671,21 @@ const SORT_OPTIONS: SortDropdownOption[] = [
       }
 
       @media (max-width: 60rem) {
-        .projects2-header {
+        .projects-header {
           grid-template-columns: 1fr;
         }
 
-        .projects2-header__actions,
-        .projects2-header__new {
+        .projects-header__actions,
+        .projects-header__new {
           width: 100%;
         }
 
-        .projects2-header__title-wrap {
+        .projects-header__title-wrap {
           justify-items: start;
           text-align: left;
         }
 
-        .projects2-breadcrumbs {
+        .projects-breadcrumbs {
           max-width: 100%;
         }
 
@@ -697,7 +697,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
   ],
   providers: [FilterService],
 })
-export class Projects2PageComponent {
+export class ProjectsPageComponent {
   private readonly i18nService = inject(I18nService);
   private readonly projectsService = inject(ProjectsService);
   private readonly filterService = inject(FilterService);

@@ -105,7 +105,7 @@ describe('NavComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('renders three primary nav items plus settings row and no Projects 2 link', () => {
+  it('renders three primary nav items plus settings row', () => {
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
     const links = Array.from<HTMLElement>(
@@ -118,7 +118,6 @@ describe('NavComponent', () => {
 
     expect(links.length).toBe(4);
     expect(hrefs).toContain('/projects');
-    expect(hrefs).not.toContain('/projects-2');
   });
 
   it('highlights Map nav item when router is at root route', async () => {

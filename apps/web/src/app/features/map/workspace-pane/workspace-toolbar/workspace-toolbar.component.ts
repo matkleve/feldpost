@@ -14,9 +14,10 @@ import type {
 } from '../../../../core/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
 import {
-  SegmentedSwitchComponent,
-  type SegmentedSwitchOption,
-} from '../../../../shared/segmented-switch/segmented-switch.component';
+  SnapSizeSliderComponent,
+  type SnapSizeSliderOption,
+} from '../../../../shared/snap-size-slider/snap-size-slider.component';
+import { UiToolbarButtonDirective } from '../../../../shared/ui-primitives.directive';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -30,7 +31,8 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
-    SegmentedSwitchComponent,
+    SnapSizeSliderComponent,
+    UiToolbarButtonDirective,
   ],
 })
 export class WorkspaceToolbarComponent {
@@ -42,36 +44,28 @@ export class WorkspaceToolbarComponent {
   readonly currentLanguage = this.i18nService.language;
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly thumbnailSizeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => {
+  readonly thumbnailSizeOptions = computed<ReadonlyArray<SnapSizeSliderOption>>(() => {
     this.currentLanguage();
     return [
       {
-        id: 'row',
+        value: 'row',
         label: this.t('workspace.toolbar.size.row', 'Rows'),
         icon: 'view_headline',
-        title: this.t('workspace.toolbar.size.row', 'Rows'),
-        ariaLabel: this.t('workspace.toolbar.size.row', 'Rows'),
       },
       {
-        id: 'small',
+        value: 'small',
         label: this.t('workspace.toolbar.size.small', 'Small'),
         icon: 'grid_view',
-        title: this.t('workspace.toolbar.size.small', 'Small'),
-        ariaLabel: this.t('workspace.toolbar.size.small', 'Small'),
       },
       {
-        id: 'medium',
+        value: 'medium',
         label: this.t('workspace.toolbar.size.medium', 'Medium'),
         icon: 'apps',
-        title: this.t('workspace.toolbar.size.medium', 'Medium'),
-        ariaLabel: this.t('workspace.toolbar.size.medium', 'Medium'),
       },
       {
-        id: 'large',
+        value: 'large',
         label: this.t('workspace.toolbar.size.large', 'Large'),
         icon: 'view_agenda',
-        title: this.t('workspace.toolbar.size.large', 'Large'),
-        ariaLabel: this.t('workspace.toolbar.size.large', 'Large'),
       },
     ];
   });

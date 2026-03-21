@@ -1024,7 +1024,7 @@ Goal
 
 Files
 
-- `apps/web/src/app/features/projects/projects-2-page.component.ts` (+ html, scss)
+- `apps/web/src/app/features/projects/projects-page.component.ts` (+ html, scss)
 
 TODOs
 

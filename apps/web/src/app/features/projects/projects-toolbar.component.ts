@@ -17,14 +17,15 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
+import { UiToolbarButtonDirective } from '../../shared/ui-primitives.directive';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
 
-type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
+type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 
 @Component({
-  selector: 'app-projects-2-toolbar',
+  selector: 'app-projects-toolbar',
   standalone: true,
   imports: [
     DropdownShellComponent,
@@ -32,12 +33,13 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     FilterDropdownComponent,
     SortDropdownComponent,
     SegmentedSwitchComponent,
+    UiToolbarButtonDirective,
     ProjectsViewToggleComponent,
   ],
   template: `
-    <section class="projects2-toolbar">
+    <section class="projects-toolbar">
       <app-segmented-switch
-        class="projects2-toolbar__status"
+        class="projects-toolbar__status"
         [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
         [options]="statusOptions()"
         [value]="statusFilter()"
@@ -45,14 +47,14 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
       />
 
       <div
-        class="projects2-toolbar__controls"
+        class="projects-toolbar__controls"
         role="toolbar"
         [attr.aria-label]="t('projects.toolbar.aria.controls', 'Project controls')"
       >
         @for (btn of buttons(); track btn.id) {
           <button
             type="button"
-            class="toolbar-btn"
+            uiToolbarButton
             [class.toolbar-btn--active]="btn.active"
             [class.toolbar-btn--open]="activeDropdown() === btn.id"
             [attr.aria-expanded]="activeDropdown() === btn.id"
@@ -66,7 +68,7 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
       </div>
 
       <app-projects-view-toggle
-        class="projects2-toolbar__view-toggle"
+        class="projects-toolbar__view-toggle"
         [viewMode]="viewMode()"
         (viewModeChange)="viewModeChange.emit($event)"
       />
@@ -74,7 +76,7 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 
     @if (activeDropdown()) {
       <app-dropdown-shell
-        panelClass="projects2-toolbar-dropdown option-menu-surface"
+        panelClass="toolbar-dropdown option-menu-surface"
         [top]="dropdownTop()"
         [left]="dropdownLeft()"
         [outsideCloseEnabled]="!isDragging()"
@@ -112,7 +114,7 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         display: block;
       }
 
-      .projects2-toolbar {
+      .projects-toolbar {
         display: flex;
         align-items: center;
         gap: var(--spacing-3);
@@ -120,14 +122,14 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         flex-wrap: wrap;
       }
 
-      .projects2-toolbar__controls {
+      .projects-toolbar__controls {
         display: inline-flex;
         align-items: center;
         gap: var(--spacing-2);
         flex-wrap: wrap;
       }
 
-      .projects2-toolbar__view-toggle {
+      .projects-toolbar__view-toggle {
         display: inline-flex;
         align-items: center;
         justify-content: flex-end;
@@ -135,20 +137,20 @@ type Projects2ToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
       }
 
       @media (max-width: 60rem) {
-        .projects2-toolbar {
+        .projects-toolbar {
           flex-direction: column;
           align-items: stretch;
         }
 
-        .projects2-toolbar__status,
-        .projects2-toolbar__view-toggle {
+        .projects-toolbar__status,
+        .projects-toolbar__view-toggle {
           width: 100%;
         }
       }
     `,
   ],
 })
-export class Projects2ToolbarComponent {
+export class ProjectsToolbarComponent {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -169,7 +171,7 @@ export class Projects2ToolbarComponent {
   readonly viewModeChange = output<ProjectsViewMode>();
   readonly statusFilterChange = output<ProjectStatusFilter>();
 
-  readonly activeDropdown = signal<Projects2ToolbarDropdown>(null);
+  readonly activeDropdown = signal<ProjectsToolbarDropdown>(null);
   readonly dropdownTop = signal(0);
   readonly dropdownLeft = signal(0);
   readonly isDragging = signal(false);
@@ -222,7 +224,7 @@ export class Projects2ToolbarComponent {
     });
   }
 
-  toggleDropdown(id: Projects2ToolbarDropdown, event: MouseEvent): void {
+  toggleDropdown(id: ProjectsToolbarDropdown, event: MouseEvent): void {
     event.stopPropagation();
     if (this.activeDropdown() === id) {
       this.closeDropdown();

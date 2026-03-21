@@ -54,9 +54,9 @@ All conditions are mandatory:
 
 ### Table Primitive
 
-- [x] Semantic table structure validated (`projects-2-page.component.spec.ts` list-mode table test)
+- [x] Semantic table structure validated (`projects-page.component.spec.ts` list-mode table test)
 - [x] Sorting semantics and state indicators validated (`aria-sort` focused spec)
-- [x] Loading/error/empty states validated with stable geometry (focused Projects2 page spec for error + existing empty branch coverage)
+- [x] Loading/error/empty states validated with stable geometry (focused Projects page spec for error + existing empty branch coverage)
 
 ### Breadcrumbs
 

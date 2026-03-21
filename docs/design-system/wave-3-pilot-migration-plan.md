@@ -73,8 +73,8 @@ Implementation note:
 
 Primary migration files:
 
-- `apps/web/src/app/features/projects/projects-2-page.component.ts`
-- `apps/web/src/app/features/projects/projects-2-toolbar.component.ts`
+- `apps/web/src/app/features/projects/projects-page.component.ts`
+- `apps/web/src/app/features/projects/projects-toolbar.component.ts`
 
 Implementation note:
 
@@ -85,7 +85,7 @@ Implementation note:
 Primary migration files:
 
 - `apps/web/src/app/app.routes.ts`
-- `apps/web/src/app/features/projects/projects-2-page.component.ts`
+- `apps/web/src/app/features/projects/projects-page.component.ts`
 
 Implementation note:
 
@@ -100,7 +100,7 @@ Implementation note:
 ## Execution Status (Live)
 
 - [x] Pilot C started and implemented on projects route depth.
-- [x] Pilot C focused semantics evidence green (`npx vitest run src/app/features/projects/projects-2-page.component.spec.ts`).
+- [x] Pilot C focused semantics evidence green (`npx vitest run src/app/features/projects/projects-page.component.spec.ts`).
 - [x] Pilot C implementation evidence bundle attached: [wave-3-pilot-evidence-bundle.md](./wave-3-pilot-evidence-bundle.md)
 - [x] Pilot C screenshot bundle attached (desktop/mobile): `docs/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-desktop.png`, `docs/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-mobile.png`.
 - [x] Pilot A started with map context-menu focus-return hardening.
@@ -108,16 +108,16 @@ Implementation note:
 - [x] Pilot A full contract checklist complete (anchor->sheet fallback implemented and covered by focused tests).
 - [x] Pilot B started with semantic table structure in projects list-mode.
 - [x] Pilot B includes semantic table + sort semantics (`aria-sort`) + explicit load error state.
-- [x] Pilot B focused regression spec green (`npx vitest run src/app/features/projects/projects-2-page.component.spec.ts`).
+- [x] Pilot B focused regression spec green (`npx vitest run src/app/features/projects/projects-page.component.spec.ts`).
 - [x] Pilot B/C implementation evidence bundle attached: [wave-3-pilot-evidence-bundle.md](./wave-3-pilot-evidence-bundle.md) (code-based evidence with test results).
 - [x] Pilot B screenshot bundle attached (desktop/mobile): `docs/design-system/evidence/wave-3/pilot-b-projects-list-desktop.png`, `docs/design-system/evidence/wave-3/pilot-b-projects-list-mobile.png`.
 
 Current implementation references:
 
-- `apps/web/src/app/features/projects/projects-2-page.component.ts` (route-aware breadcrumbs for `/projects/:projectId`)
+- `apps/web/src/app/features/projects/projects-page.component.ts` (route-aware breadcrumbs for `/projects/:projectId`)
 - `apps/web/src/app/features/map/map-shell/map-shell.component.ts` (context-menu actions route close flow through `onMapMenuCloseRequested()`)
 - `apps/web/src/app/features/map/map-shell/map-shell.component.spec.ts` (street-zoom menu-close regression test)
-- `apps/web/src/app/features/projects/projects-2-page.component.ts` (list-mode migrated to semantic table structure)
+- `apps/web/src/app/features/projects/projects-page.component.ts` (list-mode migrated to semantic table structure)
 - `docs/i18n/translation-workbench.csv` (new table/error text keys)
 - `supabase/seed_i18n.sql` (regenerated from translation workbench)
 

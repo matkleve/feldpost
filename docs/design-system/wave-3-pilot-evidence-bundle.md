@@ -279,7 +279,7 @@ npx vitest run src/app/features/map/map-shell/map-shell.component.spec.ts \
 
 **Contract Reference:** `table-primitive-contract.md`
 
-**Target Component:** [projects-2-page.component.ts](../../apps/web/src/app/features/projects/projects-2-page.component.ts) — list mode
+**Target Component:** [projects-page.component.ts](../../apps/web/src/app/features/projects/projects-page.component.ts) — list mode
 
 ### Implementation Evidence
 
@@ -290,11 +290,11 @@ npx vitest run src/app/features/map/map-shell/map-shell.component.spec.ts \
 ```html
 @if (viewMode() === 'list') {
 <div
-  class="projects2-list"
+  class="projects-list"
   role="region"
   [attr.aria-label]="t('projects.page.table.ariaLabel', 'Projects table')"
 >
-  <table class="projects2-table">
+  <table class="projects-table">
     <thead>
       <tr>
         <th scope="col" [attr.aria-sort]="tableAriaSort('name')">
@@ -341,7 +341,7 @@ npx vitest run src/app/features/map/map-shell/map-shell.component.spec.ts \
 
 ```typescript
 it("renders semantic table structure in list mode", async () => {
-  const fixture = TestBed.createComponent(Projects2PageComponent);
+  const fixture = TestBed.createComponent(ProjectsPageComponent);
   const component = fixture.componentInstance;
 
   component.viewMode.set("list");
@@ -349,11 +349,11 @@ it("renders semantic table structure in list mode", async () => {
   fixture.detectChanges();
 
   const host = fixture.nativeElement as HTMLElement;
-  const table = host.querySelector(".projects2-table");
-  const thead = host.querySelector(".projects2-table thead");
-  const tbody = host.querySelector(".projects2-table tbody");
+  const table = host.querySelector(".projects-table");
+  const thead = host.querySelector(".projects-table thead");
+  const tbody = host.querySelector(".projects-table tbody");
   const rowHeaderCell = host.querySelector(
-    '.projects2-table tbody th[scope="row"]',
+    '.projects-table tbody th[scope="row"]',
   );
 
   expect(table).not.toBeNull();
@@ -401,13 +401,13 @@ tableAriaSort(columnKey: string): 'ascending' | 'descending' | 'none' {
 **SCSS — Visual Indicator (↑/↓):**
 
 ```scss
-.projects2-table thead th[data-sort-direction="asc"]::after {
+.projects-table thead th[data-sort-direction="asc"]::after {
   content: "↑";
   margin-left: var(--spacing-1);
   color: var(--color-text-primary);
 }
 
-.projects2-table thead th[data-sort-direction="desc"]::after {
+.projects-table thead th[data-sort-direction="desc"]::after {
   content: "↓";
   margin-left: var(--spacing-1);
   color: var(--color-text-primary);
@@ -418,7 +418,7 @@ tableAriaSort(columnKey: string): 'ascending' | 'descending' | 'none' {
 
 ```typescript
 it("applies aria-sort semantics to table headers from the active primary sort", async () => {
-  const fixture = TestBed.createComponent(Projects2PageComponent);
+  const fixture = TestBed.createComponent(ProjectsPageComponent);
   const component = fixture.componentInstance;
 
   component.viewMode.set("list");
@@ -427,7 +427,7 @@ it("applies aria-sort semantics to table headers from the active primary sort", 
   fixture.detectChanges();
 
   const headers = (fixture.nativeElement as HTMLElement).querySelectorAll(
-    ".projects2-table thead th",
+    ".projects-table thead th",
   );
 
   // Name column → aria-sort="ascending"
@@ -449,7 +449,7 @@ it("applies aria-sort semantics to table headers from the active primary sort", 
 
 ```html
 } @else if (loadError()) {
-<section class="projects2-error" role="alert">
+<section class="projects-error" role="alert">
   <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
   <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
   <button
@@ -466,7 +466,7 @@ it("applies aria-sort semantics to table headers from the active primary sort", 
 **SCSS Styling:**
 
 ```scss
-.projects2-error {
+.projects-error {
   border: 1px solid
     color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
   border-radius: var(--container-radius-panel);
@@ -489,13 +489,13 @@ it("renders an explicit load error state when project loading fails", async () =
     new Error("load failed"),
   );
 
-  const fixture = TestBed.createComponent(Projects2PageComponent);
+  const fixture = TestBed.createComponent(ProjectsPageComponent);
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
 
   const errorPanel = (fixture.nativeElement as HTMLElement).querySelector(
-    ".projects2-error",
+    ".projects-error",
   );
 
   expect(errorPanel).not.toBeNull();
@@ -523,7 +523,7 @@ it("renders an explicit load error state when project loading fails", async () =
 **Test Command:**
 
 ```bash
-npx vitest run src/app/features/projects/projects-2-page.component.spec.ts \
+npx vitest run src/app/features/projects/projects-page.component.spec.ts \
   -t "semantic table|aria-sort|load error"
 ```
 
@@ -543,7 +543,7 @@ npx vitest run src/app/features/projects/projects-2-page.component.spec.ts \
 
 **Contract Reference:** `breadcrumbs-contract.md`
 
-**Target Component:** [projects-2-page.component.ts](../../apps/web/src/app/features/projects/projects-2-page.component.ts) — breadcrumb nav
+**Target Component:** [projects-page.component.ts](../../apps/web/src/app/features/projects/projects-page.component.ts) — breadcrumb nav
 
 ### Implementation Evidence
 
@@ -554,18 +554,18 @@ npx vitest run src/app/features/projects/projects-2-page.component.spec.ts \
 ```html
 @if (currentProjectId()) {
 <nav
-  class="projects2-breadcrumbs"
+  class="projects-breadcrumbs"
   [attr.aria-label]="t('nav.item.projects', 'Projects')"
 >
   <a
-    class="projects2-breadcrumbs__item projects2-breadcrumbs__item--link"
+    class="projects-breadcrumbs__item projects-breadcrumbs__item--link"
     [routerLink]="['/projects']"
   >
     {{ t('nav.item.projects', 'Projects') }}
   </a>
-  <span class="projects2-breadcrumbs__separator" aria-hidden="true">/</span>
+  <span class="projects-breadcrumbs__separator" aria-hidden="true">/</span>
   <span
-    class="projects2-breadcrumbs__item projects2-breadcrumbs__item--current"
+    class="projects-breadcrumbs__item projects-breadcrumbs__item--current"
   >
     {{ breadcrumbCurrentLabel() }}
   </span>
@@ -600,13 +600,13 @@ Projects / Site 42
 **SCSS:**
 
 ```scss
-.projects2-breadcrumbs__item--link {
+.projects-breadcrumbs__item--link {
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
 
-.projects2-breadcrumbs__item--current {
+.projects-breadcrumbs__item--current {
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -621,7 +621,7 @@ it("shows breadcrumb current-page semantics on detail routes", async () => {
   const router = TestBed.inject(Router) as unknown as { url: string };
   router.url = "/projects/project-42";
 
-  const fixture = TestBed.createComponent(Projects2PageComponent);
+  const fixture = TestBed.createComponent(ProjectsPageComponent);
   fixture.detectChanges();
   await fixture.whenStable();
 
@@ -632,9 +632,9 @@ it("shows breadcrumb current-page semantics on detail routes", async () => {
   fixture.detectChanges();
 
   const host = fixture.nativeElement as HTMLElement;
-  const breadcrumb = host.querySelector(".projects2-breadcrumbs");
-  const current = host.querySelector(".projects2-breadcrumbs__item--current");
-  const link = host.querySelector(".projects2-breadcrumbs__item--link");
+  const breadcrumb = host.querySelector(".projects-breadcrumbs");
+  const current = host.querySelector(".projects-breadcrumbs__item--current");
+  const link = host.querySelector(".projects-breadcrumbs__item--link");
 
   expect(breadcrumb).not.toBeNull();
   expect(current?.textContent).toContain("Site 42");
@@ -663,7 +663,7 @@ readonly currentProjectId = computed(() => {
 
 ```html
 @if (currentProjectId()) {
-<nav class="projects2-breadcrumbs"><!-- shown on /projects/:id --></nav>
+<nav class="projects-breadcrumbs"><!-- shown on /projects/:id --></nav>
 }
 <!-- Not shown on /projects (root breadcrumb hidden) -->
 ```
@@ -671,13 +671,13 @@ readonly currentProjectId = computed(() => {
 **Mobile Styling:**
 
 ```scss
-.projects2-breadcrumbs {
+.projects-breadcrumbs {
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
 }
 
-.projects2-breadcrumbs__item--current {
+.projects-breadcrumbs__item--current {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; /* Truncates on narrow viewports */
@@ -700,7 +700,7 @@ readonly currentProjectId = computed(() => {
 **Test Command:**
 
 ```bash
-npx vitest run src/app/features/projects/projects-2-page.component.spec.ts \
+npx vitest run src/app/features/projects/projects-page.component.spec.ts \
   -t "breadcrumb current-page"
 ```
 
@@ -719,13 +719,13 @@ npx vitest run src/app/features/projects/projects-2-page.component.spec.ts \
 **Pilot B/C (Projects):**
 
 ```bash
-npx vitest run src/app/features/projects/projects-2-page.component.spec.ts -t "semantic|aria-sort|load error|breadcrumb"
+npx vitest run src/app/features/projects/projects-page.component.spec.ts -t "semantic|aria-sort|load error|breadcrumb"
 ```
 
 **Result:**
 
 ```
-✓ src/app/features/projects/projects-2-page.component.spec.ts (4 tests)
+✓ src/app/features/projects/projects-page.component.spec.ts (4 tests)
 
 Test Files  1 passed (1)
 Tests       4 passed (4)
@@ -808,8 +808,8 @@ All three pilots pass design system governance checks.
 - `apps/web/src/app/features/map/map-shell/map-shell.component.html` (Pilot A)
 - `apps/web/src/app/features/map/map-shell/map-shell.component.scss` (Pilot A)
 - `apps/web/src/app/features/map/map-shell/map-shell.component.spec.ts` (Pilot A)
-- `apps/web/src/app/features/projects/projects-2-page.component.ts` (Pilots B, C)
-- `apps/web/src/app/features/projects/projects-2-page.component.spec.ts` (Pilots B, C)
+- `apps/web/src/app/features/projects/projects-page.component.ts` (Pilots B, C)
+- `apps/web/src/app/features/projects/projects-page.component.spec.ts` (Pilots B, C)
 
 **Test Execution:**
 All tests are executable via `npx vitest run` from the workspace root.

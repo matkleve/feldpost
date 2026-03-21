@@ -74,15 +74,15 @@ export const routes: Routes = [
       {
         path: 'projects',
         loadComponent: () =>
-          import('./features/projects/projects-2-page.component').then(
-            (m) => m.Projects2PageComponent,
+          import('./features/projects/projects-page.component').then(
+            (m) => m.ProjectsPageComponent,
           ),
       },
       {
         path: 'projects/:projectId',
         loadComponent: () =>
-          import('./features/projects/projects-2-page.component').then(
-            (m) => m.Projects2PageComponent,
+          import('./features/projects/projects-page.component').then(
+            (m) => m.ProjectsPageComponent,
           ),
       },
       {
