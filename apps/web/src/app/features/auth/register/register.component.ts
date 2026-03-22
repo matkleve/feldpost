@@ -20,6 +20,13 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
+import {
+  UiButtonDirective,
+  UiButtonPrimaryDirective,
+  UiFieldLabelDirective,
+  UiFieldRowDirective,
+  UiInputControlDirective,
+} from '../../../shared/ui-primitives.directive';
 
 /** Custom validator: both password fields must match. */
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -30,7 +37,15 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    UiFieldRowDirective,
+    UiFieldLabelDirective,
+    UiInputControlDirective,
+    UiButtonDirective,
+    UiButtonPrimaryDirective,
+  ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })

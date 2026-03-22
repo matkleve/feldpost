@@ -3,7 +3,7 @@
   --settings-overlay-width: clamp(
     var(--overlay-width-large-min),
     calc(100vw - (var(--container-inset) * 2)),
-    var(--overlay-width-large-max)
+    var(--content-clamp-list)
   );
   --settings-overlay-height: min(44rem, calc(100vh - (var(--container-inset) * 2)));
   --settings-overlay-left-ratio: var(--overlay-rail-left-ratio-default);
@@ -63,6 +63,7 @@
 .settings-overlay__shell {
   display: flex;
   align-items: stretch;
+  min-width: 0;
   min-height: 26rem;
   max-height: var(--settings-overlay-height);
 }
@@ -72,6 +73,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--container-gap);
+  min-height: 0;
   padding: var(--spacing-4) var(--spacing-3) var(--spacing-3) var(--spacing-3);
   background: color-mix(in srgb, var(--color-bg-surface) 80%, transparent);
 }
@@ -102,7 +104,9 @@
 
 .settings-overlay__section-list {
   display: grid;
+  flex: 1 1 auto;
   gap: var(--spacing-1);
+  min-height: 0;
   overflow: auto;
   padding-right: var(--spacing-1);
 }
@@ -168,8 +172,8 @@
 }
 
 .settings-overlay__detail {
-  flex: 0 0 var(--settings-overlay-right-width);
-  max-width: var(--settings-overlay-right-width);
+  flex: 1 1 auto;
+  min-width: 0;
   padding: var(--spacing-4);
   background: var(--color-bg-surface);
   overflow: auto;
@@ -300,7 +304,7 @@
     --settings-overlay-width: clamp(
       var(--overlay-width-medium-min),
       calc(100vw - (var(--container-inset) * 2)),
-      var(--overlay-width-large-max)
+      var(--content-clamp-default)
     );
     --settings-overlay-left-ratio: var(--overlay-rail-left-ratio-tablet);
     --settings-overlay-left-width: clamp(

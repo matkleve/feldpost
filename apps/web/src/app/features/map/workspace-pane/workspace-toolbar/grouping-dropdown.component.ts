@@ -9,6 +9,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { UiIconButtonGhostDirective } from '../../../../shared/ui-primitives.directive';
 
 export interface GroupingProperty {
   id: string;
@@ -28,6 +29,7 @@ export interface GroupingProperty {
             }}</span>
             @if (activeGroupings().length > 0) {
               <button
+                uiIconButtonGhost
                 class="dd-reset-btn icon-btn-ghost"
                 (click)="clearGroupings()"
                 [attr.aria-label]="t('workspace.grouping.reset.aria', 'Reset grouping')"
@@ -110,7 +112,13 @@ export interface GroupingProperty {
     </app-standard-dropdown>
   `,
   styleUrl: './grouping-dropdown.component.scss',
-  imports: [StandardDropdownComponent, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [
+    StandardDropdownComponent,
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
+    UiIconButtonGhostDirective,
+  ],
 })
 export class GroupingDropdownComponent {
   private readonly i18nService = inject(I18nService);

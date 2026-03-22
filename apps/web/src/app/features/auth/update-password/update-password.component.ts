@@ -21,6 +21,13 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
+import {
+  UiButtonDirective,
+  UiButtonPrimaryDirective,
+  UiFieldLabelDirective,
+  UiFieldRowDirective,
+  UiInputControlDirective,
+} from '../../../shared/ui-primitives.directive';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -30,7 +37,14 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-update-password',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    UiFieldRowDirective,
+    UiFieldLabelDirective,
+    UiInputControlDirective,
+    UiButtonDirective,
+    UiButtonPrimaryDirective,
+  ],
   templateUrl: './update-password.component.html',
   styleUrl: './update-password.component.scss',
 })

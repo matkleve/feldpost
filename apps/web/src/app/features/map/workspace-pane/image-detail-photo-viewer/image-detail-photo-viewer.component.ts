@@ -2,11 +2,21 @@ import { Component, ElementRef, inject, input, output, signal, viewChild } from 
 import type { PhotoLoadState } from '../../../../core/photo-load.model';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-lightbox.component';
+import {
+  UiButtonDirective,
+  UiButtonPrimaryDirective,
+  UiIconButtonGhostDirective,
+} from '../../../../shared/ui-primitives.directive';
 
 @Component({
   selector: 'app-image-detail-photo-viewer',
   standalone: true,
-  imports: [PhotoLightboxComponent],
+  imports: [
+    PhotoLightboxComponent,
+    UiIconButtonGhostDirective,
+    UiButtonDirective,
+    UiButtonPrimaryDirective,
+  ],
   templateUrl: './image-detail-photo-viewer.component.html',
   styleUrl: './image-detail-photo-viewer.component.scss',
 })

@@ -1,11 +1,14 @@
 import { Component, input, output } from '@angular/core';
+import { UiTabDirective, UiTabListDirective } from '../../../shared/ui-primitives.directive';
 
 @Component({
     selector: 'app-group-tab-bar',
+    imports: [UiTabListDirective, UiTabDirective],
     template: `
-        <div class="group-tab-bar" role="tablist">
+        <div uiTabList class="group-tab-bar ui-tab-list" role="tablist">
             @for (tab of tabs; track tab.id) {
                 <button
+                    uiTab
                     class="group-tab-bar__tab"
                     role="tab"
                     [class.group-tab-bar__tab--active]="tab.id === activeTabId()"

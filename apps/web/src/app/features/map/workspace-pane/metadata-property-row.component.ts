@@ -4,13 +4,31 @@
 
 import { Component, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import {
+  UiIconButtonGhostDirective,
+  UiInputControlDirective,
+  UiRowShellDirective,
+  UiRowShellSizeSmDirective,
+} from '../../../shared/ui-primitives.directive';
 
 @Component({
   selector: 'app-metadata-property-row',
   standalone: true,
+  imports: [
+    UiIconButtonGhostDirective,
+    UiInputControlDirective,
+    UiRowShellDirective,
+    UiRowShellSizeSmDirective,
+  ],
   template: `
-    <div class="meta-row" [class.meta-row--editing]="editing()">
+    <div
+      uiRowShell
+      uiRowShellSizeSm
+      class="meta-row ui-row-shell ui-row-shell--sm"
+      [class.meta-row--editing]="editing()"
+    >
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
@@ -25,6 +43,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
       @if (editing()) {
         <input
           #editInput
+          uiInputControl
           class="meta-row__input"
           type="text"
           [value]="metaValue()"
@@ -44,6 +63,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
       }
 
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
         type="button"
         [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"

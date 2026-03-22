@@ -1,13 +1,16 @@
 import { Component, signal } from '@angular/core';
+import { UiToolbarButtonDirective } from '../../../shared/ui-primitives.directive';
 
 type SortOption = 'date-desc' | 'date-asc' | 'distance' | 'name';
 
 @Component({
     selector: 'app-sorting-controls',
+    imports: [UiToolbarButtonDirective],
     template: `
         <div class="sorting-controls">
             @for (opt of options; track opt.value) {
                 <button
+                    uiToolbarButton
                     class="sorting-controls__btn"
                     [class.sorting-controls__btn--active]="opt.value === activeSort()"
                     (click)="activeSort.set(opt.value)"

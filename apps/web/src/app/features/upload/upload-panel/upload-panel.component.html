@@ -52,6 +52,7 @@
 
   <div class="upload-panel__intake-actions" role="group" aria-label="Additional upload actions">
     <button
+      uiButton
       class="upload-panel__intake-btn"
       type="button"
       [disabled]="scanning()"
@@ -62,6 +63,7 @@
     </button>
 
     <button
+      uiButton
       class="upload-panel__intake-btn upload-panel__intake-btn--capture"
       type="button"
       (click)="openCapturePicker($event, captureInput)"
@@ -187,6 +189,7 @@
           }}"
         >
           <button
+            uiIconButtonGhost
             class="upload-panel__row-action upload-panel__row-action--left"
             type="button"
             aria-label="Place {{ job.file.name }} on map"
@@ -255,6 +258,7 @@
           </div>
 
           <button
+            uiIconButtonGhost
             class="upload-panel__row-action upload-panel__row-action--right"
             type="button"
             aria-label="Dismiss {{ job.file.name }}"

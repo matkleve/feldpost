@@ -1,5 +1,6 @@
 <div class="detail-header">
   <button
+    uiIconButtonGhost
     class="detail-back-btn icon-btn-ghost"
     type="button"
     [attr.aria-label]="t('workspace.imageDetail.action.back.aria', 'Back to gallery')"
@@ -12,6 +13,7 @@
   @if (editingTitle()) {
     <input
       #titleInput
+      uiInputControl
       class="detail-title-input"
       type="text"
       [value]="titleValue()"
@@ -32,12 +34,15 @@
   }
 
   <span
+    uiStatusPill
+    uiStatusPillSizeSm
     class="detail-kind-chip"
     [attr.aria-label]="t('workspace.imageDetail.fileType.aria', 'File type')"
     >{{ mediaTypeLabel() }}</span
   >
 
   <button
+    uiIconButtonGhost
     #contextMenuTrigger
     class="detail-actions-btn icon-btn-ghost"
     type="button"

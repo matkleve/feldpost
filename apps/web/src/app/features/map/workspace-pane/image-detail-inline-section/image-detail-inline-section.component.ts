@@ -16,6 +16,15 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../image-detail-view.utils';
 import { DetailEditingField, ImageRecord, SelectOption } from '../image-detail-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
+import {
+  UiIconButtonGhostDirective,
+  UiInputControlDirective,
+  UiRowShellDirective,
+  UiRowShellSizeSmDirective,
+  UiStatusBadgeDirective,
+  UiStatusBadgeInfoDirective,
+  UiStatusBadgeSizeSmDirective,
+} from '../../../../shared/ui-primitives.directive';
 
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';
@@ -35,7 +44,18 @@ interface AddressFieldDefinition {
 @Component({
   selector: 'app-image-detail-inline-section',
   standalone: true,
-  imports: [CapturedDateEditorComponent, AddressSearchComponent, DropdownShellComponent],
+  imports: [
+    CapturedDateEditorComponent,
+    AddressSearchComponent,
+    DropdownShellComponent,
+    UiIconButtonGhostDirective,
+    UiInputControlDirective,
+    UiRowShellDirective,
+    UiRowShellSizeSmDirective,
+    UiStatusBadgeDirective,
+    UiStatusBadgeSizeSmDirective,
+    UiStatusBadgeInfoDirective,
+  ],
   templateUrl: './image-detail-inline-section.component.html',
   styleUrl: '../image-detail-view.component.scss',
 })

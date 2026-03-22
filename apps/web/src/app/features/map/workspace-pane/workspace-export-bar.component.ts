@@ -5,9 +5,15 @@ import { ShareSetService } from '../../../core/share-set.service';
 import { ZipExportService } from '../../../core/zip-export.service';
 import { ToastService } from '../../../core/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import {
+  UiButtonDirective,
+  UiButtonPrimaryDirective,
+  UiInputControlDirective,
+} from '../../../shared/ui-primitives.directive';
 
 @Component({
   selector: 'app-workspace-export-bar',
+  imports: [UiButtonDirective, UiButtonPrimaryDirective, UiInputControlDirective],
   templateUrl: './workspace-export-bar.component.html',
   styleUrl: './workspace-export-bar.component.scss',
 })

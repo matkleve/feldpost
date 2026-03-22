@@ -27,6 +27,32 @@ Primary width tokens and values:
 - workspace pane max target: `40rem` (640px)
 - filter panel width: `17.5rem` (280px)
 - narrow content rail: `25rem` (400px)
+- content clamp text: `38rem` (~608px)
+- content clamp default: `45rem` (~720px)
+- content clamp list: `52rem` (~832px)
+
+## Content Clamp Primitive
+
+Canonical token and utility:
+
+- tokens: `--content-clamp-text`, `--content-clamp-default`, `--content-clamp-list`
+- utility: `.content-clamp`
+
+Utility variants:
+
+- `.content-clamp--text`
+- `.content-clamp--default`
+- `.content-clamp--list`
+
+Definition:
+
+- `.content-clamp`: `max-width: var(--content-clamp-default)`
+- `width: 100%`
+- `margin-inline: auto`
+
+Required use:
+
+- Apply the semantic clamp variant by surface type: text/form surfaces use `--text`, balanced detail surfaces use `--default`, list/grid surfaces use `--list`.
 
 ## Overlay Scale
 
@@ -80,6 +106,7 @@ Impact:
 3. Dynamic widths are allowed only when map minimum interaction width must be preserved.
 4. Overlay rail splits should use documented rail ratios, not per-feature clamps.
 5. Mobile sheet heights should map to documented snap model (min/half/full) where applicable.
+6. Core list/form content surfaces must use `.content-clamp` plus the correct semantic variant unless a documented exception exists.
 
 ## Migration Targets
 

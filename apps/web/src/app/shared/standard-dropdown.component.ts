@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { UiIconButtonGhostDirective } from './ui-primitives.directive';
 
 @Component({
   selector: 'app-standard-dropdown',
   standalone: true,
+  imports: [UiIconButtonGhostDirective],
   template: `
     <div class="standard-dropdown">
       @if (showSearch()) {
@@ -17,6 +19,7 @@ import { Component, input, output } from '@angular/core';
 
           @if (showDefaultClearAction() && searchTerm()) {
             <button
+              uiIconButtonGhost
               class="dd-search__action icon-btn-ghost"
               type="button"
               [attr.aria-label]="clearSearchAriaLabel()"

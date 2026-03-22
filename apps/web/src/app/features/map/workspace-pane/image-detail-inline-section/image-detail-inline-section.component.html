@@ -1,8 +1,9 @@
 <div class="detail-section">
   <div class="dd-section-label">{{ detailViewLabel() }}</div>
 
-  <div class="detail-row detail-row--readonly">
+  <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
     <button
+      uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -17,8 +18,14 @@
     <span class="detail-row-action detail-row-action--right" aria-hidden="true"></span>
   </div>
 
-  <div class="detail-row" [class.detail-row--editing]="editingField() === 'captured_at'">
+  <div
+    uiRowShell
+    uiRowShellSizeSm
+    class="detail-row ui-row-shell ui-row-shell--sm"
+    [class.detail-row--editing]="editingField() === 'captured_at'"
+  >
     <button
+      uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -44,6 +51,7 @@
       </button>
     }
     <button
+      uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--right"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
@@ -54,8 +62,14 @@
     </button>
   </div>
 
-  <div class="detail-row" [class.detail-row--editing]="editingField() === 'project_ids'">
+  <div
+    uiRowShell
+    uiRowShellSizeSm
+    class="detail-row ui-row-shell ui-row-shell--sm"
+    [class.detail-row--editing]="editingField() === 'project_ids'"
+  >
     <button
+      uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -102,6 +116,7 @@
 
           <input
             #projectSearchInput
+            uiInputControl
             class="detail-tags__input"
             type="text"
             [value]="projectSearch()"
@@ -223,6 +238,7 @@
         {{ projectName() || t('workspace.imageDetail.value.empty', '—') }}
       </button>
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--right"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.projects.edit.aria', 'Edit projects')"
@@ -234,8 +250,9 @@
     }
   </div>
 
-  <div class="detail-row detail-row--readonly">
+  <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
     <button
+      uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--left"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -252,6 +269,7 @@
       uploadDate() ?? t('workspace.imageDetail.value.empty', '—')
     }}</span>
     <button
+      uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.delete', 'Delete image')"
@@ -274,8 +292,14 @@
   />
 
   @for (fieldDef of addressFields; track fieldDef.name) {
-    <div class="detail-row" [class.detail-row--editing]="editingField() === fieldDef.name">
+    <div
+      uiRowShell
+      uiRowShellSizeSm
+      class="detail-row ui-row-shell ui-row-shell--sm"
+      [class.detail-row--editing]="editingField() === fieldDef.name"
+    >
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -289,6 +313,7 @@
       @if (editingField() === fieldDef.name) {
         <input
           #fieldInput
+          uiInputControl
           class="detail-row__input"
           type="text"
           [value]="fieldValue(fieldDef.name)"
@@ -300,6 +325,7 @@
           (blur)="fieldSaveRequested.emit({ field: fieldDef.name, value: fieldInput.value })"
         />
         <button
+          uiIconButtonGhost
           class="detail-row-action icon-btn-ghost detail-row-action--right"
           type="button"
           [attr.aria-label]="t(fieldDef.saveAriaKey, fieldDef.saveAriaFallback)"
@@ -317,6 +343,7 @@
           {{ fieldValue(fieldDef.name) || t('workspace.imageDetail.value.empty', '—') }}
         </button>
         <button
+          uiIconButtonGhost
           class="detail-row-action icon-btn-ghost detail-row-action--right"
           type="button"
           [attr.aria-label]="t(fieldDef.editAriaKey, fieldDef.editAriaFallback)"
@@ -330,8 +357,9 @@
   }
 
   @if (image().latitude != null) {
-    <div class="detail-row detail-row--readonly">
+    <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left-outer"
         type="button"
         [attr.aria-label]="
@@ -343,6 +371,7 @@
         <span class="material-icons" aria-hidden="true">zoom_in_map</span>
       </button>
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"
@@ -355,15 +384,19 @@
       <span class="detail-row__label">
         {{ t('workspace.imageDetail.field.coordinates', 'Coordinates') }}
         @if (isCorrected()) {
-          <span class="detail-correction-badge">{{
-            t('workspace.imageDetail.badge.corrected', 'Corrected')
-          }}</span>
+          <span
+            uiStatusBadge
+            uiStatusBadgeSizeSm
+            uiStatusBadgeInfo
+            class="detail-correction-badge"
+          >{{ t('workspace.imageDetail.badge.corrected', 'Corrected') }}</span>
         }
       </span>
       <span class="detail-row__value detail-row__value--static detail-row__value--mono">
         {{ formatCoord(image().latitude) }}°, {{ formatCoord(image().longitude) }}°
       </span>
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
         type="button"
         [attr.aria-label]="
@@ -402,8 +435,9 @@
   }
 
   @if (image().latitude == null || image().longitude == null) {
-    <div class="detail-row detail-row--readonly">
+    <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
       <button
+        uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left"
         type="button"
         [attr.aria-label]="t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')"

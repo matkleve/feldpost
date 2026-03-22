@@ -25,6 +25,8 @@
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
     <!-- Icon button (always visible) -->
     <button
+      uiButton
+      uiButtonIconOnly
       class="map-upload-btn"
       type="button"
       aria-label="Upload images"
@@ -280,6 +282,8 @@
 
   <!-- GPS button — bottom-right of map zone -->
   <button
+    uiButton
+    uiButtonIconOnly
     class="map-gps-btn"
     type="button"
     [attr.aria-label]="
@@ -313,7 +317,13 @@
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
       {{ placementActive() ? 'Click the map to place the image' : 'Click the map to drop a pin' }}
-      <button class="map-placement-banner__cancel" type="button" (click)="cancelPlacement()">
+      <button
+        uiButton
+        uiButtonGhost
+        class="map-placement-banner__cancel"
+        type="button"
+        (click)="cancelPlacement()"
+      >
         Cancel
       </button>
     </div>

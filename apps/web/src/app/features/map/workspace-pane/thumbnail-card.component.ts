@@ -2,6 +2,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import type { ThumbnailSizePreset, WorkspaceImage } from '../../../core/workspace-view.types';
 import { PHOTO_PLACEHOLDER_ICON, PHOTO_NO_PHOTO_ICON } from '../../../core/photo-load.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import { UiCardShellDirective } from '../../../shared/ui-primitives.directive';
 
 export interface ThumbnailCardInteraction {
   imageId: string;
@@ -16,9 +17,15 @@ export interface ThumbnailCardHoverEvent {
 
 @Component({
   selector: 'app-thumbnail-card',
+  imports: [UiCardShellDirective],
   template: `
     <article
+      uiCardShell
       class="thumbnail-card"
+      [class.ui-card-shell]="true"
+      [class.ui-card-shell--sm]="viewMode() === 'row'"
+      [class.ui-card-shell--md]="viewMode() === 'medium'"
+      [class.ui-card-shell--lg]="viewMode() === 'large'"
       [class.thumbnail-card--selected]="selected()"
       [class.thumbnail-card--linked-hover]="linkedHovered()"
       [class.thumbnail-card--row]="viewMode() === 'row'"

@@ -20,6 +20,18 @@ import { type SortDropdownOption } from '../map/workspace-pane/workspace-toolbar
 import type { SortConfig } from '../../core/workspace-view.types';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import { ProjectsToolbarComponent } from './projects-toolbar.component';
+import {
+  UiButtonDangerDirective,
+  UiButtonDirective,
+  UiButtonPrimaryDirective,
+  UiCardShellDirective,
+  UiCardShellSizeMdDirective,
+  UiRowShellDirective,
+  UiRowShellSizeSmDirective,
+  UiButtonSecondaryDirective,
+  UiStatusBadgeDirective,
+  UiStatusBadgeSizeSmDirective,
+} from '../../shared/ui-primitives.directive';
 
 interface ProjectGroupedSection {
   id: string;
@@ -69,13 +81,25 @@ const SORT_OPTIONS: SortDropdownOption[] = [
     GroupHeaderComponent,
     ProjectsToolbarComponent,
     ProjectColorPickerComponent,
+    UiButtonDirective,
+    UiButtonPrimaryDirective,
+    UiButtonSecondaryDirective,
+    UiButtonDangerDirective,
+    UiRowShellDirective,
+    UiRowShellSizeSmDirective,
+    UiCardShellDirective,
+    UiCardShellSizeMdDirective,
+    UiStatusBadgeDirective,
+    UiStatusBadgeSizeSmDirective,
   ],
   template: `
     <main class="projects-page">
-      <section class="projects-rail">
+      <section class="projects-rail content-clamp content-clamp--list">
         <header class="projects-header">
           <div class="projects-header__actions">
             <button
+              uiButton
+              uiButtonPrimary
               type="button"
               class="ui-button ui-button--primary projects-header__new"
               [disabled]="loading()"
@@ -143,6 +167,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
             <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
             <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
             <button
+              uiButton
+              uiButtonSecondary
               type="button"
               class="ui-button ui-button--secondary"
               (click)="refreshProjects()"
@@ -159,7 +185,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
           </section>
         } @else {
           <section
-            class="projects-content"
+            class="projects-content content-clamp content-clamp--list"
             [class.projects-content--cards]="viewMode() === 'cards'"
           >
             @for (section of groupedSections(); track section.id) {
@@ -237,6 +263,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                         @for (project of section.projects; track project.id) {
                           <tr [style.--project-item-color]="colorTokenFor(project.colorKey)">
                             <th
+                              uiRowShell
+                              uiRowShellSizeSm
                               scope="row"
                               class="project2-table__name-cell ui-row-shell ui-row-shell--sm"
                             >
@@ -254,6 +282,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                             </td>
                             <td class="project2-row__meta">
                               <span
+                                uiStatusBadge
+                                uiStatusBadgeSizeSm
                                 class="ui-status-badge ui-status-badge--sm"
                                 [class.ui-status-badge--success]="project.status === 'active'"
                                 [class.ui-status-badge--warning]="project.status === 'archived'"
@@ -278,6 +308,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                   <div class="projects-grid">
                     @for (project of section.projects; track project.id) {
                       <article
+                        uiCardShell
+                        uiCardShellSizeMd
                         class="project2-card ui-card-shell ui-card-shell--md"
                         [style.--project-item-color]="colorTokenFor(project.colorKey)"
                       >
@@ -300,6 +332,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                           @if (project.status === 'active') {
                             <div class="project2-card__action-wrap">
                               <button
+                                uiButton
+                                uiButtonSecondary
                                 type="button"
                                 class="ui-button ui-button--secondary project2-card__action"
                                 (click)="toggleColorPicker(project.id)"
@@ -321,6 +355,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                             </div>
 
                             <button
+                              uiButton
+                              uiButtonSecondary
                               type="button"
                               class="ui-button ui-button--secondary project2-card__action"
                               (click)="requestDangerAction(project.id, 'archive')"
@@ -329,6 +365,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                             </button>
                           } @else {
                             <button
+                              uiButton
+                              uiButtonSecondary
                               type="button"
                               class="ui-button ui-button--secondary project2-card__action"
                               (click)="requestDangerAction(project.id, 'restore')"
@@ -337,6 +375,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                             </button>
 
                             <button
+                              uiButton
+                              uiButtonDanger
                               type="button"
                               class="ui-button ui-button--danger project2-card__action"
                               (click)="requestDangerAction(project.id, 'delete')"
@@ -361,6 +401,8 @@ const SORT_OPTIONS: SortDropdownOption[] = [
               <p>{{ pendingActionMessage() }}</p>
               <div class="projects-confirm__actions">
                 <button
+                  uiButton
+                  uiButtonSecondary
                   type="button"
                   class="ui-button ui-button--secondary"
                   [disabled]="pendingActionBusy()"
@@ -369,10 +411,13 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                   {{ t('common.cancel', 'Cancel') }}
                 </button>
                 <button
+                  uiButton
                   type="button"
                   class="ui-button"
                   [class.ui-button--danger]="pendingProjectAction() === 'delete'"
+                  [attr.uiButtonDanger]="pendingProjectAction() === 'delete' ? '' : null"
                   [class.ui-button--primary]="pendingProjectAction() !== 'delete'"
+                  [attr.uiButtonPrimary]="pendingProjectAction() !== 'delete' ? '' : null"
                   [disabled]="pendingActionBusy()"
                   (click)="confirmPendingAction()"
                 >
@@ -398,7 +443,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
       }
 
       .projects-rail {
-        width: min(25rem, 100%);
+        width: 100%;
         margin-inline: auto;
         display: grid;
         gap: var(--spacing-4);

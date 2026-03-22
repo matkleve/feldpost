@@ -98,6 +98,11 @@ import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferre
 import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
+import {
+  UiButtonDirective,
+  UiButtonGhostDirective,
+  UiButtonIconOnlyDirective,
+} from '../../../shared/ui-primitives.directive';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo' | 'historic';
@@ -149,6 +154,9 @@ const HISTORIC_LABEL_PANE = 'historic-label';
     TextInputDialogComponent,
     SegmentedSwitchComponent,
     DropdownShellComponent,
+    UiButtonDirective,
+    UiButtonIconOnlyDirective,
+    UiButtonGhostDirective,
   ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',

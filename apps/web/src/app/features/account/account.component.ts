@@ -11,11 +11,35 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { UserProfileService } from '../../core/user-profile.service';
 import { ToastService } from '../../core/toast.service';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import {
+  UiButtonDangerDirective,
+  UiButtonDirective,
+  UiButtonGhostDirective,
+  UiButtonPrimaryDirective,
+  UiFieldLabelDirective,
+  UiFieldRowDirective,
+  UiFieldRowStackedDirective,
+  UiInputControlDirective,
+  UiStatusBadgeDirective,
+  UiStatusBadgeSizeSmDirective,
+} from '../../shared/ui-primitives.directive';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [ConfirmDialogComponent],
+  imports: [
+    ConfirmDialogComponent,
+    UiButtonDirective,
+    UiButtonPrimaryDirective,
+    UiButtonGhostDirective,
+    UiButtonDangerDirective,
+    UiFieldRowDirective,
+    UiFieldRowStackedDirective,
+    UiFieldLabelDirective,
+    UiInputControlDirective,
+    UiStatusBadgeDirective,
+    UiStatusBadgeSizeSmDirective,
+  ],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

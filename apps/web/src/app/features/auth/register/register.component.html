@@ -25,10 +25,12 @@
       <div class="auth-card-scroll" role="region" aria-label="Create account form">
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <!-- Full name -->
-          <div class="field">
-            <label for="fullName">Full name</label>
+          <div uiFieldRow class="field ui-field-row">
+            <label uiFieldLabel class="ui-field-label" for="fullName">Full name</label>
             <input
+              uiInputControl
               id="fullName"
+              class="ui-input-control"
               type="text"
               formControlName="fullName"
               autocomplete="name"
@@ -40,10 +42,12 @@
           </div>
 
           <!-- Email -->
-          <div class="field">
-            <label for="email">Email</label>
+          <div uiFieldRow class="field ui-field-row">
+            <label uiFieldLabel class="ui-field-label" for="email">Email</label>
             <input
+              uiInputControl
               id="email"
+              class="ui-input-control"
               type="email"
               formControlName="email"
               autocomplete="email"
@@ -57,10 +61,12 @@
           </div>
 
           <!-- Invite code -->
-          <div class="field">
-            <label for="inviteCode">Invite code</label>
+          <div uiFieldRow class="field ui-field-row">
+            <label uiFieldLabel class="ui-field-label" for="inviteCode">Invite code</label>
             <input
+              uiInputControl
               id="inviteCode"
+              class="ui-input-control"
               type="text"
               formControlName="inviteCode"
               autocomplete="off"
@@ -79,10 +85,12 @@
           </div>
 
           <!-- Password -->
-          <div class="field">
-            <label for="password">Password</label>
+          <div uiFieldRow class="field ui-field-row">
+            <label uiFieldLabel class="ui-field-label" for="password">Password</label>
             <input
+              uiInputControl
               id="password"
+              class="ui-input-control"
               type="password"
               formControlName="password"
               autocomplete="new-password"
@@ -100,10 +108,12 @@
           </div>
 
           <!-- Confirm password -->
-          <div class="field">
-            <label for="confirmPassword">Confirm password</label>
+          <div uiFieldRow class="field ui-field-row">
+            <label uiFieldLabel class="ui-field-label" for="confirmPassword">Confirm password</label>
             <input
+              uiInputControl
               id="confirmPassword"
+              class="ui-input-control"
               type="password"
               formControlName="confirmPassword"
               autocomplete="new-password"
@@ -119,7 +129,13 @@
             <div class="alert alert-error" role="alert">{{ errorMessage() }}</div>
           }
 
-          <button type="submit" class="btn-primary" [disabled]="loading()">
+          <button
+            uiButton
+            uiButtonPrimary
+            type="submit"
+            class="btn-primary ui-button ui-button--primary"
+            [disabled]="loading()"
+          >
             @if (loading()) {
               Creating account…
             } @else {

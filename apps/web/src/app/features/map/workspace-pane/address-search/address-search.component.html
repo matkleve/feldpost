@@ -3,6 +3,7 @@
     <span class="material-icons address-search__icon" aria-hidden="true">search</span>
     <input
       #addressSearchInput
+      uiInputControl
       class="address-search__input"
       type="text"
       [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
@@ -14,6 +15,7 @@
     />
     @if (query()) {
       <button
+        uiIconButtonGhost
         class="address-search__clear icon-btn-ghost"
         type="button"
         [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"

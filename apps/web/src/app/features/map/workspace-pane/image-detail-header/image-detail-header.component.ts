@@ -11,11 +11,23 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
+import {
+  UiIconButtonGhostDirective,
+  UiInputControlDirective,
+  UiStatusBadgeDirective,
+  UiStatusBadgeSizeSmDirective,
+} from '../../../../shared/ui-primitives.directive';
 
 @Component({
   selector: 'app-image-detail-header',
   standalone: true,
-  imports: [DropdownShellComponent],
+  imports: [
+    DropdownShellComponent,
+    UiIconButtonGhostDirective,
+    UiInputControlDirective,
+    UiStatusBadgeDirective,
+    UiStatusBadgeSizeSmDirective,
+  ],
   templateUrl: './image-detail-header.component.html',
   styleUrl: '../image-detail-view.component.scss',
 })

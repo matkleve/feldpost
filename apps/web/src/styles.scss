@@ -132,6 +132,10 @@
   --layout-workspace-pane-min-width: 17.5rem;
   --layout-workspace-pane-max-width: 40rem;
   --layout-map-safe-min-width: 20rem;
+  --content-clamp-text: 38rem;
+  --content-clamp-default: 45rem;
+  --content-clamp-list: 52rem;
+  --content-clamp-max: var(--content-clamp-default);
 
   --overlay-width-small-min: 20rem;
   --overlay-width-small-max: 25rem;
@@ -373,6 +377,24 @@ router-outlet + * {
   padding-block: var(--ui-container-padding-block);
   padding-inline: var(--ui-container-padding-inline);
   border-radius: var(--ui-container-radius);
+}
+
+.content-clamp {
+  width: 100%;
+  max-width: var(--content-clamp-default);
+  margin-inline: auto;
+}
+
+.content-clamp--text {
+  max-width: var(--content-clamp-text);
+}
+
+.content-clamp--default {
+  max-width: var(--content-clamp-default);
+}
+
+.content-clamp--list {
+  max-width: var(--content-clamp-list);
 }
 
 .ui-container--compact {

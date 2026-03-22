@@ -20,6 +20,7 @@ import { SearchDropdownItemComponent } from './search-dropdown-item.component';
 import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
 import { SearchBarService, GhostTrieEntry } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding.service';
+import { UiInputControlDirective } from '../../../shared/ui-primitives.directive';
 import {
   SearchCandidate,
   SearchQueryContext,
@@ -53,7 +54,7 @@ type SearchSectionsState = {
 @Component({
   selector: 'ss-search-bar',
   standalone: true,
-  imports: [CommonModule, SearchDropdownItemComponent],
+  imports: [CommonModule, SearchDropdownItemComponent, UiInputControlDirective],
   templateUrl: './search-bar.component.html',
   styleUrl: './search-bar.component.scss',
   host: {

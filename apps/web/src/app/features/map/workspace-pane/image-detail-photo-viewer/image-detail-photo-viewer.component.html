@@ -59,6 +59,7 @@
     </button>
 
     <button
+      uiIconButtonGhost
       class="detail-image-edit-btn"
       type="button"
       [attr.aria-label]="t('workspace.imageDetail.action.replacePhoto.aria', 'Replace photo')"
@@ -86,6 +87,8 @@
       }}</span>
     </div>
     <button
+      uiButton
+      uiButtonPrimary
       class="detail-upload-prompt__button"
       type="button"
       [disabled]="replacing()"

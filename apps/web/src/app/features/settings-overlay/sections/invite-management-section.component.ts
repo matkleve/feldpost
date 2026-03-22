@@ -21,11 +21,27 @@ import {
   InviteTargetRole,
   QrInviteViewModel,
 } from '../../../core/invites/invite.types';
+import {
+  UiButtonDangerDirective,
+  UiButtonDirective,
+  UiButtonGhostDirective,
+  UiIconButtonGhostDirective,
+  UiSelectControlDirective,
+  UiStatusBadgeDirective,
+} from '../../../shared/ui-primitives.directive';
 
 @Component({
   selector: 'ss-invite-management-section',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    UiButtonDirective,
+    UiButtonGhostDirective,
+    UiButtonDangerDirective,
+    UiIconButtonGhostDirective,
+    UiSelectControlDirective,
+    UiStatusBadgeDirective,
+  ],
   templateUrl: './invite-management-section.component.html',
   styleUrl: './invite-management-section.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

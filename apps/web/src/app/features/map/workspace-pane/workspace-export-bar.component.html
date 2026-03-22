@@ -8,15 +8,16 @@
   </div>
 
   <div class="workspace-export__actions">
-    <button type="button" class="workspace-export__btn" (click)="selectAll()">
+    <button uiButton type="button" class="workspace-export__btn" (click)="selectAll()">
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">done_all</span>
       <span>{{ t('workspace.export.action.selectAll', 'Select all') }}</span>
     </button>
-    <button type="button" class="workspace-export__btn" (click)="selectNone()">
+    <button uiButton type="button" class="workspace-export__btn" (click)="selectNone()">
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">deselect</span>
       <span>{{ t('workspace.export.action.selectNone', 'Select none') }}</span>
     </button>
     <button
+      uiButton
       type="button"
       class="workspace-export__btn"
       [disabled]="pending()"
@@ -25,11 +26,19 @@
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">share</span>
       <span>{{ t('workspace.export.action.share', 'Share') }}</span>
     </button>
-    <button type="button" class="workspace-export__btn" [disabled]="pending()" (click)="copyLink()">
+    <button
+      uiButton
+      type="button"
+      class="workspace-export__btn"
+      [disabled]="pending()"
+      (click)="copyLink()"
+    >
       <span class="material-icons workspace-export__btn-icon" aria-hidden="true">content_copy</span>
       <span>{{ t('workspace.export.action.copyLink', 'Link kopieren') }}</span>
     </button>
     <button
+      uiButton
+      uiButtonPrimary
       type="button"
       class="workspace-export__btn workspace-export__btn--primary"
       [disabled]="pending()"
@@ -52,7 +61,9 @@
     <h3>{{ t('workspace.export.dialog.title', 'Download selection') }}</h3>
     <label for="zip-title">{{ t('workspace.export.dialog.field.title', 'Title') }}</label>
     <input
+      uiInputControl
       id="zip-title"
+      class="ui-input-control"
       type="text"
       [value]="zipTitle()"
       (input)="zipTitle.set($any($event.target).value)"
@@ -65,6 +76,7 @@
 
     <div class="workspace-export__dialog-actions">
       <button
+        uiButton
         type="button"
         class="workspace-export__btn"
         [disabled]="pending()"
@@ -73,6 +85,8 @@
         {{ t('workspace.export.dialog.cancel', 'Cancel') }}
       </button>
       <button
+        uiButton
+        uiButtonPrimary
         type="button"
         class="workspace-export__btn workspace-export__btn--primary"
         [disabled]="pending()"

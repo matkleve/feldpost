@@ -1,4 +1,4 @@
-<section class="account-page ui-container" [attr.aria-label]="tr('Account page')">
+<section class="account-page ui-container content-clamp content-clamp--text" [attr.aria-label]="tr('Account page')">
   <header class="account-card account-card--identity ui-container ui-container--compact">
     <div class="account-card__avatar" aria-hidden="true">
       @if (loading()) {
@@ -21,8 +21,8 @@
         <span class="account-chip account-skeleton account-skeleton--chip"></span>
         <span class="account-chip account-skeleton account-skeleton--chip"></span>
       } @else {
-        <span class="account-chip">{{ roleBadgeLabel() }}</span>
-        <span class="account-chip">{{ assuranceLevel() ?? 'aal1' }}</span>
+        <span uiStatusPill uiStatusPillSizeSm class="account-chip">{{ roleBadgeLabel() }}</span>
+        <span uiStatusPill uiStatusPillSizeSm class="account-chip">{{ assuranceLevel() ?? 'aal1' }}</span>
       }
     </div>
   </header>
@@ -33,9 +33,11 @@
   >
     <h2>{{ tr('Profil') }}</h2>
     <p>{{ tr('Aktualisiere deinen sichtbaren Namen.') }}</p>
-    <label class="account-field">
-      <span>{{ tr('Anzeigename') }}</span>
+    <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+      <span uiFieldLabel class="ui-field-label">{{ tr('Anzeigename') }}</span>
       <input
+        uiInputControl
+        class="ui-input-control"
         type="text"
         [value]="pendingDisplayName()"
         [disabled]="loading()"
@@ -43,6 +45,8 @@
       />
     </label>
     <button
+      uiButton
+      uiButtonPrimary
       type="button"
       class="ui-button ui-button--primary"
       (click)="saveDisplayName()"
@@ -59,9 +63,11 @@
     <h2>{{ tr('Anmeldung') }}</h2>
     <p>{{ tr('E-Mail- und Passwortverwaltung mit Sicherheitsprüfung.') }}</p>
 
-    <label class="account-field">
-      <span>{{ tr('Neue E-Mail') }}</span>
+    <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+      <span uiFieldLabel class="ui-field-label">{{ tr('Neue E-Mail') }}</span>
       <input
+        uiInputControl
+        class="ui-input-control"
         type="email"
         [value]="pendingEmail()"
         [disabled]="loading()"
@@ -69,6 +75,7 @@
       />
     </label>
     <button
+      uiButton
       type="button"
       class="ui-button"
       (click)="updateEmail()"
@@ -78,27 +85,33 @@
     </button>
 
     <div class="account-grid">
-      <label class="account-field">
-        <span>{{ tr('Aktuelles Passwort') }}</span>
+      <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+        <span uiFieldLabel class="ui-field-label">{{ tr('Aktuelles Passwort') }}</span>
         <input
+          uiInputControl
+          class="ui-input-control"
           type="password"
           [value]="currentPassword()"
           [disabled]="loading()"
           (input)="currentPassword.set($any($event.target).value)"
         />
       </label>
-      <label class="account-field">
-        <span>{{ tr('Neues Passwort') }}</span>
+      <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+        <span uiFieldLabel class="ui-field-label">{{ tr('Neues Passwort') }}</span>
         <input
+          uiInputControl
+          class="ui-input-control"
           type="password"
           [value]="nextPassword()"
           [disabled]="loading()"
           (input)="nextPassword.set($any($event.target).value)"
         />
       </label>
-      <label class="account-field">
-        <span>{{ tr('Neues Passwort bestätigen') }}</span>
+      <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+        <span uiFieldLabel class="ui-field-label">{{ tr('Neues Passwort bestätigen') }}</span>
         <input
+          uiInputControl
+          class="ui-input-control"
           type="password"
           [value]="confirmPassword()"
           [disabled]="loading()"
@@ -109,6 +122,7 @@
 
     <div class="account-actions">
       <button
+        uiButton
         type="button"
         class="ui-button"
         (click)="updatePassword()"
@@ -117,6 +131,8 @@
         {{ updatingPassword() ? tr('Aktualisiere...') : tr('Passwort ändern') }}
       </button>
       <button
+        uiButton
+        uiButtonGhost
         type="button"
         class="ui-button ui-button--ghost"
         (click)="sendPasswordReset()"
@@ -145,6 +161,8 @@
               <small>{{ factor.factorType }} · {{ factor.status }}</small>
             </div>
             <button
+              uiButton
+              uiButtonGhost
               type="button"
               class="ui-button ui-button--ghost"
               (click)="removeFactor(factor.id)"
@@ -158,6 +176,7 @@
     </div>
 
     <button
+      uiButton
       type="button"
       class="ui-button"
       (click)="startTotpEnrollment()"
@@ -172,11 +191,18 @@
           <img [src]="qrDataUrl" [attr.alt]="tr('2FA QR code')" />
         }
         <p>{{ tr('Secret:') }} {{ mfaSecret() }}</p>
-        <label class="account-field">
-          <span>{{ tr('6-stelligen Code eingeben') }}</span>
-          <input type="text" [value]="mfaCode()" (input)="mfaCode.set($any($event.target).value)" />
+        <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+          <span uiFieldLabel class="ui-field-label">{{ tr('6-stelligen Code eingeben') }}</span>
+          <input
+            uiInputControl
+            class="ui-input-control"
+            type="text"
+            [value]="mfaCode()"
+            (input)="mfaCode.set($any($event.target).value)"
+          />
         </label>
         <button
+          uiButton
           type="button"
           class="ui-button"
           (click)="verifyTotpEnrollment()"
@@ -195,6 +221,8 @@
     <h2>{{ tr('Sitzung') }}</h2>
     <p>{{ tr('Beende deine aktuelle Sitzung sicher.') }}</p>
     <button
+      uiButton
+      uiButtonDanger
       type="button"
       class="ui-button ui-button--danger"
       (click)="openLogoutConfirm()"
@@ -211,6 +239,8 @@
     <h2>{{ tr('Konto löschen') }}</h2>
     <p>{{ tr('Dieser Schritt ist endgültig und entfernt Kontodaten dauerhaft.') }}</p>
     <button
+      uiButton
+      uiButtonDanger
       type="button"
       class="ui-button ui-button--danger"
       (click)="openDeleteConfirm()"
@@ -243,19 +273,29 @@
     <div class="account-delete-dialog ui-container ui-container--compact">
       <h3>{{ tr('Konto löschen') }}</h3>
       <p>{{ tr('Bitte gib DELETE ein, um die Löschung zu bestätigen.') }}</p>
-      <label class="account-field">
-        <span>{{ tr('Bestätigung') }}</span>
+      <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+        <span uiFieldLabel class="ui-field-label">{{ tr('Bestätigung') }}</span>
         <input
+          uiInputControl
+          class="ui-input-control"
           type="text"
           [value]="deletePhrase()"
           (input)="deletePhrase.set($any($event.target).value)"
         />
       </label>
       <div class="account-actions">
-        <button type="button" class="ui-button ui-button--ghost" (click)="closeDeleteConfirm()">
+        <button
+          uiButton
+          uiButtonGhost
+          type="button"
+          class="ui-button ui-button--ghost"
+          (click)="closeDeleteConfirm()"
+        >
           {{ tr('Abbrechen') }}
         </button>
         <button
+          uiButton
+          uiButtonDanger
           type="button"
           class="ui-button ui-button--danger"
           [disabled]="!canConfirmDelete() || deletingAccount()"

@@ -8,6 +8,8 @@
       <h3>{{ t('settings.inviteManagement.errorState.title', 'Invite unavailable') }}</h3>
       <p>{{ lastError() }}</p>
       <button
+        uiButton
+        uiButtonGhost
         type="button"
         class="invite-section__ghost ui-button ui-button--ghost"
         (click)="retry()"
@@ -31,7 +33,11 @@
         </p>
       </div>
       @if (activeInvite(); as invite) {
-        <span class="invite-section__status-chip" [attr.data-status]="invite.status">
+        <span
+          uiStatusBadge
+          class="invite-section__status-chip"
+          [attr.data-status]="invite.status"
+        >
           <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
           <span>{{ statusLabel() }}</span>
         </span>
@@ -52,6 +58,7 @@
         </label>
         <div class="invite-section__role-row">
           <select
+            uiSelectControl
             #roleSelect
             id="invite-role-select"
             class="invite-section__select ui-select-control"
@@ -67,6 +74,8 @@
             </option>
           </select>
           <button
+            uiButton
+            uiButtonGhost
             type="button"
             class="invite-section__button ui-button ui-button--ghost"
             [disabled]="isRegenerateDisabled()"
@@ -75,6 +84,8 @@
             {{ t('settings.inviteManagement.action.regenerate', 'Regenerate') }}
           </button>
           <button
+            uiButton
+            uiButtonDanger
             type="button"
             class="invite-section__button ui-button ui-button--danger"
             [disabled]="activeInvite()?.status !== 'active'"
@@ -120,6 +131,7 @@
       >
         <div class="invite-section__share-row">
           <button
+            uiIconButtonGhost
             type="button"
             class="invite-section__icon-button icon-btn-ghost"
             [attr.aria-label]="t('settings.inviteManagement.share.copy.aria', 'Copy invite link')"
@@ -130,6 +142,7 @@
             <span class="material-icons" aria-hidden="true">content_copy</span>
           </button>
           <button
+            uiIconButtonGhost
             type="button"
             class="invite-section__icon-button icon-btn-ghost"
             [attr.aria-label]="
@@ -142,6 +155,7 @@
             <span class="material-icons" aria-hidden="true">mail</span>
           </button>
           <button
+            uiIconButtonGhost
             type="button"
             class="invite-section__icon-button icon-btn-ghost"
             [attr.aria-label]="
