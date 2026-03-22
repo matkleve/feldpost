@@ -15,6 +15,7 @@ import {
       [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
       [options]="viewOptions()"
       [value]="viewMode()"
+      [size]="'sm'"
       [iconOnly]="true"
       (valueChange)="onViewModeSelected($event)"
     />

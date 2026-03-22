@@ -1079,6 +1079,88 @@ router-outlet + * {
   }
 }
 
+.ui-tab-list {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  border: 1px solid var(--action-border-default);
+  border-radius: var(--radius-full);
+  padding: 0.15rem;
+  background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
+}
+
+.ui-tab {
+  --ui-tab-min-height: 2.25rem;
+  --ui-tab-padding-inline: var(--spacing-3);
+  --ui-tab-font-size: 0.8125rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  min-height: var(--ui-tab-min-height);
+  padding-inline: var(--ui-tab-padding-inline);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--action-text-default);
+  font-size: var(--ui-tab-font-size);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--interactive-transition-standard);
+
+  &:hover:not(:disabled) {
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:active:not(:disabled) {
+    background: color-mix(in srgb, var(--action-bg-active) 84%, var(--action-bg-hover));
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.ui-tab--sm {
+  --ui-tab-min-height: 2rem;
+  --ui-tab-padding-inline: var(--spacing-2);
+  --ui-tab-font-size: 0.75rem;
+}
+
+.ui-tab--md {
+  --ui-tab-min-height: 2.25rem;
+  --ui-tab-padding-inline: var(--spacing-3);
+  --ui-tab-font-size: 0.8125rem;
+}
+
+.ui-tab--lg {
+  --ui-tab-min-height: 2.75rem;
+  --ui-tab-padding-inline: var(--spacing-4);
+  --ui-tab-font-size: 0.875rem;
+}
+
+.ui-tab--active {
+  background: var(--action-bg-active);
+  color: var(--action-text-active);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
+}
+
+.ui-tab__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .ui-chip {
   --ui-chip-min-height: 2rem;
   --ui-chip-padding-inline: var(--spacing-2);
@@ -1164,6 +1246,191 @@ router-outlet + * {
   opacity: 0.55;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.ui-status-badge {
+  --ui-status-badge-min-height: 1.5rem;
+  --ui-status-badge-padding-inline: var(--spacing-2);
+  --ui-status-badge-font-size: 0.6875rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  min-height: var(--ui-status-badge-min-height);
+  padding-inline: var(--ui-status-badge-padding-inline);
+  border: 1px solid color-mix(in srgb, var(--color-border) 84%, transparent);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
+  color: var(--color-text-secondary);
+  font-size: var(--ui-status-badge-font-size);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ui-status-badge--sm {
+  --ui-status-badge-min-height: 1.25rem;
+  --ui-status-badge-padding-inline: var(--spacing-1);
+  --ui-status-badge-font-size: 0.625rem;
+}
+
+.ui-status-badge--md {
+  --ui-status-badge-min-height: 1.5rem;
+  --ui-status-badge-padding-inline: var(--spacing-2);
+  --ui-status-badge-font-size: 0.6875rem;
+}
+
+.ui-status-badge--neutral {
+  border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
+  color: var(--color-text-secondary);
+}
+
+.ui-status-badge--info {
+  border-color: color-mix(in srgb, var(--color-primary) 36%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-surface));
+  color: var(--color-primary);
+}
+
+.ui-status-badge--success {
+  border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-surface));
+  color: color-mix(in srgb, var(--color-success) 74%, var(--color-text-primary));
+}
+
+.ui-status-badge--warning {
+  border-color: color-mix(in srgb, var(--color-warning) 46%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--color-bg-surface));
+  color: color-mix(in srgb, var(--color-warning) 74%, var(--color-text-primary));
+}
+
+.ui-status-badge--error {
+  border-color: color-mix(in srgb, var(--color-danger) 46%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-bg-surface));
+  color: var(--color-danger);
+}
+
+.ui-status-badge__icon {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.ui-row-shell {
+  --ui-row-shell-min-height: 2.5rem;
+  --ui-row-shell-padding-inline: var(--spacing-2);
+  --ui-row-shell-padding-block: var(--spacing-1);
+
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: var(--ui-row-shell-min-height);
+  padding-block: var(--ui-row-shell-padding-block);
+  padding-inline: var(--ui-row-shell-padding-inline);
+  border-radius: var(--radius-sm);
+  transition: var(--interactive-transition-standard);
+
+  &:hover {
+    background: color-mix(in srgb, var(--action-bg-hover) 65%, transparent);
+  }
+
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-row-shell--sm {
+  --ui-row-shell-min-height: 2rem;
+  --ui-row-shell-padding-inline: var(--spacing-1);
+  --ui-row-shell-padding-block: var(--spacing-1);
+}
+
+.ui-row-shell--md {
+  --ui-row-shell-min-height: 2.5rem;
+  --ui-row-shell-padding-inline: var(--spacing-2);
+  --ui-row-shell-padding-block: var(--spacing-1);
+}
+
+.ui-row-shell--lg {
+  --ui-row-shell-min-height: 3rem;
+  --ui-row-shell-padding-inline: var(--spacing-3);
+  --ui-row-shell-padding-block: var(--spacing-2);
+}
+
+.ui-row-shell__leading {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ui-row-shell__label {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ui-row-shell__trailing {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ui-card-shell {
+  --ui-card-shell-min-height: 10rem;
+  --ui-card-shell-padding: var(--spacing-3);
+
+  min-height: var(--ui-card-shell-min-height);
+  padding: var(--ui-card-shell-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-panel);
+  background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
+  display: grid;
+  gap: var(--spacing-2);
+  align-content: start;
+  transition: var(--interactive-transition-standard);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--color-border));
+    background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--color-bg-surface));
+  }
+
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-card-shell--sm {
+  --ui-card-shell-min-height: 8rem;
+  --ui-card-shell-padding: var(--spacing-2);
+}
+
+.ui-card-shell--md {
+  --ui-card-shell-min-height: 10rem;
+  --ui-card-shell-padding: var(--spacing-3);
+}
+
+.ui-card-shell--lg {
+  --ui-card-shell-min-height: 12rem;
+  --ui-card-shell-padding: var(--spacing-4);
+}
+
+.ui-card-shell__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.ui-card-shell__body {
+  min-width: 0;
+}
+
+.ui-card-shell__actions {
+  margin-top: auto;
+  display: grid;
+  gap: var(--spacing-2);
 }
 
 .ui-choice-row {

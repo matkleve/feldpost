@@ -10,6 +10,8 @@ export interface SegmentedSwitchOption {
   inactive?: boolean;
 }
 
+export type SegmentedSwitchSize = 'sm' | 'md' | 'lg';
+
 @Component({
   selector: 'app-segmented-switch',
   standalone: true,
@@ -23,6 +25,7 @@ export class SegmentedSwitchComponent {
   readonly disabled = input(false);
   readonly allowDeselect = input(false);
   readonly iconOnly = input(false);
+  readonly size = input<SegmentedSwitchSize>('md');
 
   readonly valueChange = output<string | null>();
 

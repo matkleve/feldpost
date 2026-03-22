@@ -3,6 +3,9 @@
   [class.segmented-switch--disabled]="disabled()"
   [class.segmented-switch--has-inactive]="inactiveOptions().length > 0"
   [class.segmented-switch--icon-only]="iconOnly()"
+  [class.segmented-switch--sm]="size() === 'sm'"
+  [class.segmented-switch--md]="size() === 'md'"
+  [class.segmented-switch--lg]="size() === 'lg'"
 >
   <div
     class="segmented-switch__group"

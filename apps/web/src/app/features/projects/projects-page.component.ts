@@ -236,19 +236,30 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                       <tbody>
                         @for (project of section.projects; track project.id) {
                           <tr [style.--project-item-color]="colorTokenFor(project.colorKey)">
-                            <th scope="row" class="project2-table__name-cell">
+                            <th
+                              scope="row"
+                              class="project2-table__name-cell ui-row-shell ui-row-shell--sm"
+                            >
                               <span
-                                class="project2-row__dot"
+                                class="project2-row__dot ui-row-shell__leading"
                                 [style.background]="colorTokenFor(project.colorKey)"
                               ></span>
-                              <span class="project2-row__name">{{ project.name }}</span>
+                              <span class="project2-row__name ui-row-shell__label">{{
+                                project.name
+                              }}</span>
                             </th>
                             <td>
                               {{ project.totalImageCount }}
                               {{ t('projects.page.metric.photos', 'photos') }}
                             </td>
                             <td class="project2-row__meta">
-                              {{ projectStatusLabel(project.status) }}
+                              <span
+                                class="ui-status-badge ui-status-badge--sm"
+                                [class.ui-status-badge--success]="project.status === 'active'"
+                                [class.ui-status-badge--warning]="project.status === 'archived'"
+                              >
+                                {{ projectStatusLabel(project.status) }}
+                              </span>
                             </td>
                             <td class="project2-row__meta">{{ project.district || '-' }}</td>
                             <td class="project2-row__meta">{{ project.city || '-' }}</td>
@@ -267,10 +278,10 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                   <div class="projects-grid">
                     @for (project of section.projects; track project.id) {
                       <article
-                        class="project2-card"
+                        class="project2-card ui-card-shell ui-card-shell--md"
                         [style.--project-item-color]="colorTokenFor(project.colorKey)"
                       >
-                        <div class="project2-card__header">
+                        <div class="project2-card__header ui-card-shell__header">
                           <span
                             class="project2-card__dot"
                             [style.background]="colorTokenFor(project.colorKey)"
@@ -285,7 +296,7 @@ const SORT_OPTIONS: SortDropdownOption[] = [
                           {{ formatRelativeDate(project.lastActivity) }}
                         </p>
 
-                        <div class="project2-card__actions">
+                        <div class="project2-card__actions ui-card-shell__actions">
                           @if (project.status === 'active') {
                             <div class="project2-card__action-wrap">
                               <button

@@ -7,6 +7,9 @@
 .segmented-switch {
   --segmented-motion-duration: 180ms;
   --segmented-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --segmented-button-min-height: 2.45rem;
+  --segmented-button-padding-inline: 0.95rem;
+  --segmented-button-font-size: 0.8rem;
 
   display: inline-flex;
   align-items: center;
@@ -24,9 +27,9 @@
 
   &--icon-only {
     .segmented-switch__button {
-      inline-size: 2.25rem;
-      min-inline-size: 2.25rem;
-      min-height: 2.25rem;
+      inline-size: var(--segmented-icon-only-size, 2.25rem);
+      min-inline-size: var(--segmented-icon-only-size, 2.25rem);
+      min-height: var(--segmented-icon-only-size, 2.25rem);
       padding: 0;
       flex: 0 0 auto;
       gap: 0;
@@ -37,12 +40,33 @@
     }
 
     .segmented-switch__inactive-item {
-      inline-size: 2.25rem;
-      min-inline-size: 2.25rem;
-      min-height: 2.25rem;
+      inline-size: var(--segmented-icon-only-size, 2.25rem);
+      min-inline-size: var(--segmented-icon-only-size, 2.25rem);
+      min-height: var(--segmented-icon-only-size, 2.25rem);
       padding: 0;
       gap: 0;
     }
+  }
+
+  &--sm {
+    --segmented-button-min-height: 2rem;
+    --segmented-button-padding-inline: var(--spacing-2);
+    --segmented-button-font-size: 0.75rem;
+    --segmented-icon-only-size: 2rem;
+  }
+
+  &--md {
+    --segmented-button-min-height: 2.45rem;
+    --segmented-button-padding-inline: 0.95rem;
+    --segmented-button-font-size: 0.8rem;
+    --segmented-icon-only-size: 2.25rem;
+  }
+
+  &--lg {
+    --segmented-button-min-height: 2.75rem;
+    --segmented-button-padding-inline: var(--spacing-4);
+    --segmented-button-font-size: 0.875rem;
+    --segmented-icon-only-size: 2.75rem;
   }
 
   &__group {
@@ -78,7 +102,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: var(--segmented-button-font-size, 0.8rem);
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
@@ -146,7 +170,7 @@
     color: color-mix(in srgb, var(--menu-item-text) 84%, var(--color-text-secondary));
     padding: 0.3rem 0.15rem;
     font: inherit;
-    font-size: 0.8rem;
+    font-size: var(--segmented-button-font-size, 0.8rem);
     font-weight: 500;
     white-space: nowrap;
     cursor: default;

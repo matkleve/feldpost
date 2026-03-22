@@ -58,7 +58,7 @@ Building blocks:
 
 - Sidebar navigation rail (`app-nav`)
 - Group tab bar (`app-group-tab-bar`)
-- Tab/segmented navigation
+- Tab/segmented navigation (`ui-tab-list`, `ui-tab`, `app-segmented-switch`)
 - Breadcrumbs
 - Route-level view toggles (`app-projects-view-toggle`)
 - Command palette / quick switcher
@@ -66,7 +66,7 @@ Building blocks:
 Status:
 
 - nav rail + group tabs: `stable`
-- tabs/segmented-nav + view toggles: `draft`
+- tabs/segmented-nav + view toggles: `draft` (tab layer + segmented size axis implemented, migration in progress)
 - breadcrumbs: `draft`
 - command palette: `draft`
 
@@ -102,11 +102,11 @@ Scope:
 
 Building blocks:
 
-- List row primitive
-- Grid card primitive (`thumbnail-card` pattern)
+- List row primitive (`ui-row-shell`)
+- Grid card primitive (`ui-card-shell`, `thumbnail-card` pattern)
 - Group header/collapsible row (`app-group-header`)
 - Key/value metadata row (`app-metadata-property-row`, editable-property-row)
-- Status badge/pill
+- Status badge/pill (`ui-status-badge` / `ui-status-pill`)
 - Table primitive (projects table)
 - Quick-info chips (`app-quick-info-chips`)
 - Stats/summary tiles
@@ -114,7 +114,7 @@ Building blocks:
 Status:
 
 - group header + quick-info chips: `stable`
-- list/grid/metadata/status/table: `draft`
+- list/grid/metadata/status/table: `draft` (status badge + row/card shell primitives implemented; broader migration in progress)
 - stats tiles: `planned`
 
 ### 6) Feedback and System State

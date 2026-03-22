@@ -275,6 +275,21 @@ export class UiSelectControlCompactDirective {}
 @Directive({ selector: 'button[uiToggleRow]', standalone: true, host: { class: 'ui-toggle-row' } })
 export class UiToggleRowDirective {}
 
+@Directive({ selector: '[uiTabList]', standalone: true, host: { class: 'ui-tab-list' } })
+export class UiTabListDirective {}
+
+@Directive({ selector: 'button[uiTab]', standalone: true, host: { class: 'ui-tab' } })
+export class UiTabDirective {}
+
+@Directive({ selector: 'button[uiTabSizeSm]', standalone: true, host: { class: 'ui-tab--sm' } })
+export class UiTabSizeSmDirective {}
+
+@Directive({ selector: 'button[uiTabSizeMd]', standalone: true, host: { class: 'ui-tab--md' } })
+export class UiTabSizeMdDirective {}
+
+@Directive({ selector: 'button[uiTabSizeLg]', standalone: true, host: { class: 'ui-tab--lg' } })
+export class UiTabSizeLgDirective {}
+
 @Directive({
   selector: 'button[uiToggleRowSizeSm]',
   standalone: true,
@@ -366,6 +381,62 @@ export class UiChipErrorDirective {}
 @Directive({ selector: '[uiChipDisabled]', standalone: true, host: { class: 'ui-chip--disabled' } })
 export class UiChipDisabledDirective {}
 
+@Directive({
+  selector: '[uiStatusBadge], [uiStatusPill]',
+  standalone: true,
+  host: { class: 'ui-status-badge' },
+})
+export class UiStatusBadgeDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeSizeSm], [uiStatusPillSizeSm]',
+  standalone: true,
+  host: { class: 'ui-status-badge--sm' },
+})
+export class UiStatusBadgeSizeSmDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeSizeMd], [uiStatusPillSizeMd]',
+  standalone: true,
+  host: { class: 'ui-status-badge--md' },
+})
+export class UiStatusBadgeSizeMdDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeNeutral], [uiStatusPillNeutral]',
+  standalone: true,
+  host: { class: 'ui-status-badge--neutral' },
+})
+export class UiStatusBadgeNeutralDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeInfo], [uiStatusPillInfo]',
+  standalone: true,
+  host: { class: 'ui-status-badge--info' },
+})
+export class UiStatusBadgeInfoDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeSuccess], [uiStatusPillSuccess]',
+  standalone: true,
+  host: { class: 'ui-status-badge--success' },
+})
+export class UiStatusBadgeSuccessDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeWarning], [uiStatusPillWarning]',
+  standalone: true,
+  host: { class: 'ui-status-badge--warning' },
+})
+export class UiStatusBadgeWarningDirective {}
+
+@Directive({
+  selector: '[uiStatusBadgeError], [uiStatusPillError]',
+  standalone: true,
+  host: { class: 'ui-status-badge--error' },
+})
+export class UiStatusBadgeErrorDirective {}
+
 @Directive({ selector: '[uiChipAction]', standalone: true, host: { class: 'ui-chip--action' } })
 export class UiChipActionDirective {}
 
@@ -398,6 +469,54 @@ export class UiInlineEditRowDirective {}
   host: { class: 'ui-inline-edit-actions' },
 })
 export class UiInlineEditActionsDirective {}
+
+@Directive({ selector: '[uiRowShell]', standalone: true, host: { class: 'ui-row-shell' } })
+export class UiRowShellDirective {}
+
+@Directive({
+  selector: '[uiRowShellSizeSm]',
+  standalone: true,
+  host: { class: 'ui-row-shell--sm' },
+})
+export class UiRowShellSizeSmDirective {}
+
+@Directive({
+  selector: '[uiRowShellSizeMd]',
+  standalone: true,
+  host: { class: 'ui-row-shell--md' },
+})
+export class UiRowShellSizeMdDirective {}
+
+@Directive({
+  selector: '[uiRowShellSizeLg]',
+  standalone: true,
+  host: { class: 'ui-row-shell--lg' },
+})
+export class UiRowShellSizeLgDirective {}
+
+@Directive({ selector: '[uiCardShell]', standalone: true, host: { class: 'ui-card-shell' } })
+export class UiCardShellDirective {}
+
+@Directive({
+  selector: '[uiCardShellSizeSm]',
+  standalone: true,
+  host: { class: 'ui-card-shell--sm' },
+})
+export class UiCardShellSizeSmDirective {}
+
+@Directive({
+  selector: '[uiCardShellSizeMd]',
+  standalone: true,
+  host: { class: 'ui-card-shell--md' },
+})
+export class UiCardShellSizeMdDirective {}
+
+@Directive({
+  selector: '[uiCardShellSizeLg]',
+  standalone: true,
+  host: { class: 'ui-card-shell--lg' },
+})
+export class UiCardShellSizeLgDirective {}
 
 export const UI_PRIMITIVE_DIRECTIVES = [
   UiContainerDirective,
@@ -444,6 +563,11 @@ export const UI_PRIMITIVE_DIRECTIVES = [
   UiSelectControlLoadingDirective,
   UiSelectControlErrorDirective,
   UiSelectControlCompactDirective,
+  UiTabListDirective,
+  UiTabDirective,
+  UiTabSizeSmDirective,
+  UiTabSizeMdDirective,
+  UiTabSizeLgDirective,
   UiToggleRowDirective,
   UiToggleRowSizeSmDirective,
   UiToggleRowSizeMdDirective,
@@ -462,6 +586,14 @@ export const UI_PRIMITIVE_DIRECTIVES = [
   UiChipLoadingDirective,
   UiChipErrorDirective,
   UiChipDisabledDirective,
+  UiStatusBadgeDirective,
+  UiStatusBadgeSizeSmDirective,
+  UiStatusBadgeSizeMdDirective,
+  UiStatusBadgeNeutralDirective,
+  UiStatusBadgeInfoDirective,
+  UiStatusBadgeSuccessDirective,
+  UiStatusBadgeWarningDirective,
+  UiStatusBadgeErrorDirective,
   UiChipActionDirective,
   UiChipPassiveDirective,
   UiChipSelectedDirective,
@@ -469,4 +601,12 @@ export const UI_PRIMITIVE_DIRECTIVES = [
   UiChoiceControlDirective,
   UiInlineEditRowDirective,
   UiInlineEditActionsDirective,
+  UiRowShellDirective,
+  UiRowShellSizeSmDirective,
+  UiRowShellSizeMdDirective,
+  UiRowShellSizeLgDirective,
+  UiCardShellDirective,
+  UiCardShellSizeSmDirective,
+  UiCardShellSizeMdDirective,
+  UiCardShellSizeLgDirective,
 ] as const;

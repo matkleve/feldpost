@@ -23,6 +23,7 @@ import {
   UploadBatch,
   ImageUploadedEvent as ManagerImageUploadedEvent,
 } from '../../../core/upload-manager.service';
+import { UiTabDirective, UiTabListDirective } from '../../../shared/ui-primitives.directive';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ type UploadLane = 'uploading' | 'uploaded' | 'issues';
 @Component({
   selector: 'app-upload-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiTabListDirective, UiTabDirective],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
 })

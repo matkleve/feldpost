@@ -125,32 +125,46 @@
         }
       </div>
 
-      <div class="upload-panel__lane-switch" role="tablist" aria-label="Upload lanes">
+      <div
+        uiTabList
+        class="upload-panel__lane-switch ui-tab-list"
+        role="tablist"
+        aria-label="Upload lanes"
+      >
         <button
+          uiTab
+          uiTabSizeSm
           type="button"
           role="tab"
-          class="upload-panel__lane-btn upload-panel__lane-btn--uploading"
+          class="upload-panel__lane-btn upload-panel__lane-btn--uploading ui-tab ui-tab--sm"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploading'"
+          [class.ui-tab--active]="effectiveLane() === 'uploading'"
           [attr.aria-selected]="effectiveLane() === 'uploading'"
           (click)="setSelectedLane('uploading')"
         >
           Uploading ({{ laneCounts().uploading }})
         </button>
         <button
+          uiTab
+          uiTabSizeSm
           type="button"
           role="tab"
-          class="upload-panel__lane-btn upload-panel__lane-btn--uploaded"
+          class="upload-panel__lane-btn upload-panel__lane-btn--uploaded ui-tab ui-tab--sm"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'uploaded'"
+          [class.ui-tab--active]="effectiveLane() === 'uploaded'"
           [attr.aria-selected]="effectiveLane() === 'uploaded'"
           (click)="setSelectedLane('uploaded')"
         >
           Uploaded ({{ laneCounts().uploaded }})
         </button>
         <button
+          uiTab
+          uiTabSizeSm
           type="button"
           role="tab"
-          class="upload-panel__lane-btn upload-panel__lane-btn--issues"
+          class="upload-panel__lane-btn upload-panel__lane-btn--issues ui-tab ui-tab--sm"
           [class.upload-panel__lane-btn--active]="effectiveLane() === 'issues'"
+          [class.ui-tab--active]="effectiveLane() === 'issues'"
           [class.upload-panel__lane-btn--attention]="
             issueAttentionPulse() && laneCounts().issues > 0 && effectiveLane() !== 'issues'
           "

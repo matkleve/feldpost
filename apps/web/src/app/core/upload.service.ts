@@ -14,7 +14,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import * as exifr from 'exifr';
+import * as exifr from 'exifr/dist/lite.esm.js';
 import { AuthService } from './auth.service';
 import { GeocodingService } from './geocoding.service';
 import { SupabaseService } from './supabase.service';
