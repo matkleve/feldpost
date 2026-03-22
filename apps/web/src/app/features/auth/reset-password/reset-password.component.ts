@@ -14,55 +14,55 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 import {
-    UiButtonDirective,
-    UiButtonPrimaryDirective,
-    UiFieldLabelDirective,
-    UiFieldRowDirective,
-    UiInputControlDirective,
+  UiButtonDirective,
+  UiButtonPrimaryDirective,
+  UiFieldLabelDirective,
+  UiFieldRowDirective,
+  UiInputControlDirective,
 } from '../../../shared/ui-primitives.directive';
 
 @Component({
-    selector: 'app-reset-password',
-    imports: [
-        ReactiveFormsModule,
-        RouterLink,
-        UiFieldRowDirective,
-        UiFieldLabelDirective,
-        UiInputControlDirective,
-        UiButtonDirective,
-        UiButtonPrimaryDirective,
-    ],
-    templateUrl: './reset-password.component.html',
-    styleUrl: './reset-password.component.scss',
+  selector: 'app-reset-password',
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    UiFieldRowDirective,
+    UiFieldLabelDirective,
+    UiInputControlDirective,
+    UiButtonDirective,
+    UiButtonPrimaryDirective,
+  ],
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent {
-    private readonly fb = inject(FormBuilder);
-    private readonly auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
 
-    protected readonly form = this.fb.nonNullable.group({
-        email: ['', [Validators.required, Validators.email]],
-    });
+  protected readonly form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
 
-    protected readonly loading = signal(false);
-    protected readonly errorMessage = signal<string | null>(null);
-    protected readonly success = signal(false);
+  protected readonly loading = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly success = signal(false);
 
-    protected async submit(): Promise<void> {
-        if (this.form.invalid) return;
+  protected async submit(): Promise<void> {
+    if (this.form.invalid) return;
 
-        this.loading.set(true);
-        this.errorMessage.set(null);
+    this.loading.set(true);
+    this.errorMessage.set(null);
 
-        const { email } = this.form.getRawValue();
-        const { error } = await this.auth.resetPasswordForEmail(email);
+    const { email } = this.form.getRawValue();
+    const { error } = await this.auth.resetPasswordForEmail(email);
 
-        if (error) {
-            this.errorMessage.set(error.message);
-            this.loading.set(false);
-            return;
-        }
-
-        this.success.set(true);
-        this.loading.set(false);
+    if (error) {
+      this.errorMessage.set(error.message);
+      this.loading.set(false);
+      return;
     }
+
+    this.success.set(true);
+    this.loading.set(false);
+  }
 }

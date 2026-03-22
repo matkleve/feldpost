@@ -1,7 +1,11 @@
 <div class="detail-section">
   <div class="dd-section-label">{{ detailViewLabel() }}</div>
 
-  <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
+  <div
+    uiRowShell
+    uiRowShellSizeSm
+    class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm"
+  >
     <button
       uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--left"
@@ -250,7 +254,11 @@
     }
   </div>
 
-  <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
+  <div
+    uiRowShell
+    uiRowShellSizeSm
+    class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm"
+  >
     <button
       uiIconButtonGhost
       class="detail-row-action icon-btn-ghost detail-row-action--left"
@@ -357,7 +365,11 @@
   }
 
   @if (image().latitude != null) {
-    <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
+    <div
+      uiRowShell
+      uiRowShellSizeSm
+      class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm"
+    >
       <button
         uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left-outer"
@@ -389,7 +401,8 @@
             uiStatusBadgeSizeSm
             uiStatusBadgeInfo
             class="detail-correction-badge"
-          >{{ t('workspace.imageDetail.badge.corrected', 'Corrected') }}</span>
+            >{{ t('workspace.imageDetail.badge.corrected', 'Corrected') }}</span
+          >
         }
       </span>
       <span class="detail-row__value detail-row__value--static detail-row__value--mono">
@@ -435,7 +448,11 @@
   }
 
   @if (image().latitude == null || image().longitude == null) {
-    <div uiRowShell uiRowShellSizeSm class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm">
+    <div
+      uiRowShell
+      uiRowShellSizeSm
+      class="detail-row detail-row--readonly ui-row-shell ui-row-shell--sm"
+    >
       <button
         uiIconButtonGhost
         class="detail-row-action icon-btn-ghost detail-row-action--left"

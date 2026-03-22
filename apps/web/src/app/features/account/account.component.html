@@ -1,4 +1,7 @@
-<section class="account-page ui-container content-clamp content-clamp--text" [attr.aria-label]="tr('Account page')">
+<section
+  class="account-page ui-container content-clamp content-clamp--text"
+  [attr.aria-label]="tr('Account page')"
+>
   <header class="account-card account-card--identity ui-container ui-container--compact">
     <div class="account-card__avatar" aria-hidden="true">
       @if (loading()) {
@@ -22,7 +25,9 @@
         <span class="account-chip account-skeleton account-skeleton--chip"></span>
       } @else {
         <span uiStatusPill uiStatusPillSizeSm class="account-chip">{{ roleBadgeLabel() }}</span>
-        <span uiStatusPill uiStatusPillSizeSm class="account-chip">{{ assuranceLevel() ?? 'aal1' }}</span>
+        <span uiStatusPill uiStatusPillSizeSm class="account-chip">{{
+          assuranceLevel() ?? 'aal1'
+        }}</span>
       }
     </div>
   </header>
@@ -191,7 +196,11 @@
           <img [src]="qrDataUrl" [attr.alt]="tr('2FA QR code')" />
         }
         <p>{{ tr('Secret:') }} {{ mfaSecret() }}</p>
-        <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
+        <label
+          uiFieldRow
+          uiFieldRowStacked
+          class="account-field ui-field-row ui-field-row--stacked"
+        >
           <span uiFieldLabel class="ui-field-label">{{ tr('6-stelligen Code eingeben') }}</span>
           <input
             uiInputControl

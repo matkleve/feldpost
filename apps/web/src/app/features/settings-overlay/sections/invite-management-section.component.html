@@ -33,11 +33,7 @@
         </p>
       </div>
       @if (activeInvite(); as invite) {
-        <span
-          uiStatusBadge
-          class="invite-section__status-chip"
-          [attr.data-status]="invite.status"
-        >
+        <span uiStatusBadge class="invite-section__status-chip" [attr.data-status]="invite.status">
           <span class="material-icons" aria-hidden="true">{{ statusIcon() }}</span>
           <span>{{ statusLabel() }}</span>
         </span>

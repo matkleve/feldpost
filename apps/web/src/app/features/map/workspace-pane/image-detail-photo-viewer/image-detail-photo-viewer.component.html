@@ -14,7 +14,9 @@
       type="button"
       [disabled]="!canOpenLightbox()"
       [class.detail-image-wrap--static]="!canOpenLightbox()"
-      [attr.aria-label]="t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')"
+      [attr.aria-label]="
+        t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')
+      "
       (click)="openLightbox()"
     >
       @if (!imageReady()) {
@@ -38,7 +40,9 @@
         }
       }
 
-      @if (thumbnailUrl() && thumbState() === 'loaded' && (!fullResPreloaded() || !canOpenLightbox())) {
+      @if (
+        thumbnailUrl() && thumbState() === 'loaded' && (!fullResPreloaded() || !canOpenLightbox())
+      ) {
         <img
           class="detail-image"
           [class.detail-image--thumb]="canOpenLightbox()"

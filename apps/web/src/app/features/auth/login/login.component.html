@@ -58,7 +58,13 @@
       }
 
       <!-- Submit -->
-      <button uiButton uiButtonPrimary type="submit" class="btn-primary ui-button ui-button--primary" [disabled]="loading()">
+      <button
+        uiButton
+        uiButtonPrimary
+        type="submit"
+        class="btn-primary ui-button ui-button--primary"
+        [disabled]="loading()"
+      >
         @if (loading()) {
           Signing in…
         } @else {
