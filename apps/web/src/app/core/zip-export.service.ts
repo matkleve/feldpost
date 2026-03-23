@@ -41,7 +41,8 @@ export class ZipExportService {
 
       const blob = await response.blob();
       const extension = this.getFileExtension(storagePath, blob.type);
-      const filename = `${String(i + 1).padStart(3, '0')}-${image.id}.${extension}`;
+      const safeAddress = this.formatAddressForFilename(image);
+      const filename = `${String(i + 1).padStart(3, '0')}-${safeAddress}.${extension}`;
       zip.file(filename, blob);
       onProgress?.((i + 1) / validImages.length);
     }
@@ -93,5 +94,16 @@ export class ZipExportService {
     if (mimeType === 'image/webp') return 'webp';
     if (mimeType === 'image/heic') return 'heic';
     return 'jpg';
+  }
+
+  private formatAddressForFilename(image: WorkspaceImage): string {
+    if (image.addressLabel) {
+      return this.sanitizeTitle(image.addressLabel);
+    }
+    const parts = [image.street, image.city, image.country].filter(Boolean);
+    if (parts.length > 0) {
+      return this.sanitizeTitle(parts.join('-'));
+    }
+    return image.id;
   }
 }
