@@ -22,9 +22,9 @@ Primary width tokens and values:
 
 - sidebar collapsed: `3rem` (48px)
 - sidebar expanded: `15rem` (240px)
-- workspace pane default: `22.5rem` (360px)
-- workspace pane min: `17.5rem` (280px)
-- workspace pane max target: `40rem` (640px)
+- workspace pane default: `61.8%` (Golden Ratio)
+- workspace pane min: `25%`
+- workspace pane max target: `75%`
 - filter panel width: `17.5rem` (280px)
 - narrow content rail: `25rem` (400px)
 - content clamp text: `38rem` (~608px)

@@ -406,22 +406,15 @@ export class MapShellComponent implements OnDestroy {
   /** Current workspace pane width in px. Uses restored user preference or design-system default. */
   readonly workspacePaneWidth = this.state.workspacePaneWidth;
 
-  /** Minimum workspace pane width in px (17.5rem). */
-  readonly workspacePaneMinWidth = MapShellComponent.WORKSPACE_PANE_MIN_WIDTH;
+  private get viewportWidth() {
+    return typeof window !== 'undefined' ? window.innerWidth : 1280;
+  }
 
-  /** Maximum workspace pane width: viewport minus map minimum (~320px) minus divider. */
-  readonly workspacePaneMaxWidth = computed(() => {
-    // Fallback to a reasonable default before DOM is available.
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    const safeViewportMax = viewportWidth - MapShellComponent.MAP_SAFE_MIN_WIDTH;
-    const cappedMax = Math.min(MapShellComponent.WORKSPACE_PANE_MAX_WIDTH, safeViewportMax);
-    return Math.max(this.workspacePaneMinWidth, cappedMax);
-  });
+  readonly workspacePaneMinWidth = computed(() => this.viewportWidth * 0.25);
 
-  /** Default workspace pane width when opening, clamped to [min, max] contract bounds. */
-  readonly workspacePaneDefaultWidth = computed(() => {
-    return this.clampWorkspacePaneWidth(MapShellComponent.WORKSPACE_PANE_DEFAULT_WIDTH);
-  });
+  readonly workspacePaneMaxWidth = computed(() => this.viewportWidth * 0.75);
+
+  readonly workspacePaneDefaultWidth = computed(() => this.viewportWidth * 0.618);
   readonly selectedMarkerKey = this.state.selectedMarkerKey;
   readonly selectedMarkerKeys = this.state.selectedMarkerKeys;
   readonly linkedHoveredWorkspaceImageIds = this.state.linkedHoveredWorkspaceImageIds;
