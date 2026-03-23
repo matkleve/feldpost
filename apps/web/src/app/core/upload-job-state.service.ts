@@ -24,6 +24,7 @@ const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set([
 const ACTIVE_PHASES: ReadonlySet<UploadPhase> = new Set([
   'validating',
   'parsing_exif',
+  'converting_format',
   'hashing',
   'dedup_check',
   'extracting_title',
@@ -43,6 +44,8 @@ function phaseLabel(phase: UploadPhase): string {
       return 'Validating…';
     case 'parsing_exif':
       return 'Reading EXIF…';
+    case 'converting_format':
+      return 'Converting format…';
     case 'hashing':
       return 'Computing hash…';
     case 'dedup_check':

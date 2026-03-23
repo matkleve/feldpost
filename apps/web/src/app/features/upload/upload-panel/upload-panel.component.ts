@@ -382,6 +382,7 @@ export class UploadPanelComponent {
         return 'pending';
       case 'validating':
       case 'parsing_exif':
+      case 'converting_format':
       case 'hashing':
       case 'dedup_check':
       case 'extracting_title':

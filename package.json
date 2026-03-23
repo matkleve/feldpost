@@ -9,6 +9,7 @@
     "i18n:guard:strict": "node scripts/check-i18n-hardcoded-literals.mjs --strict"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.97.0"
+    "@supabase/supabase-js": "^2.97.0",
+    "heic2any": "^0.0.4"
   }
 }

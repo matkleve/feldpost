@@ -20,7 +20,7 @@ const allowedBreakpoints = new Set([
 
 const exceptions = new Set([
   "apps/web/src/app/features/map/gps-button/gps-button.component.scss|max-width: 600px",
-  "apps/web/src/app/features/map/workspace-pane/thumbnail-card.component.scss|max-width: 520px",
+  "apps/web/src/app/features/map/workspace-pane/thumbnail-card/thumbnail-card.component.scss|max-width: 520px",
 ]);
 
 const mediaRegex =

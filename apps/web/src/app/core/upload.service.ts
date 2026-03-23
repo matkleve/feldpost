@@ -15,6 +15,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import * as exifr from 'exifr/dist/lite.esm.js';
+import heic2any from 'heic2any';
 import { AuthService } from './auth.service';
 import { GeocodingService } from './geocoding.service';
 import { SupabaseService } from './supabase.service';
@@ -167,6 +168,40 @@ export class UploadService {
       // prompt the user for manual placement.
       return {};
     }
+  }
+
+  /**
+   * Converts a HEIC/HEIF file to a JPEG File natively in the browser.
+   * Uses `heic2any` under the hood. Returns the new File with `.jpg` extension.
+   */
+  async convertToJpeg(file: File): Promise<File> {
+    if (!this.isHeic(file.type)) {
+      return file;
+    }
+
+    try {
+      const convertedBlobMap = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+      const convertedBlob = Array.isArray(convertedBlobMap)
+        ? convertedBlobMap[0]
+        : convertedBlobMap;
+
+      // Swap the extension
+      let newName = file.name;
+      if (newName.toLowerCase().endsWith('.heic') || newName.toLowerCase().endsWith('.heif')) {
+        newName = newName.replace(/\.hei[cf]$/i, '.jpg');
+      } else {
+        newName += '.jpg';
+      }
+
+      return new File([convertedBlob], newName, { type: 'image/jpeg' });
+    } catch (err) {
+      console.warn('HEIC to JPEG conversion failed, returning original file', err);
+      return file;
+    }
+  }
+
+  isHeic(mimeType: string): boolean {
+    return mimeType === 'image/heic' || mimeType === 'image/heif';
   }
 
   // ── Storage signed URL ─────────────────────────────────────────────────────

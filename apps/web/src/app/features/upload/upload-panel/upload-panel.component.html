@@ -223,6 +223,11 @@
                 [alt]="''"
                 aria-hidden="true"
               />
+            } @else if (job.phase === 'converting_format') {
+              <div
+                class="upload-panel__thumbnail upload-panel__thumbnail--skeleton"
+                aria-hidden="true"
+              ></div>
             } @else {
               <div
                 class="upload-panel__thumbnail upload-panel__thumbnail--placeholder"

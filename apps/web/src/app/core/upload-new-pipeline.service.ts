@@ -34,7 +34,7 @@ export class UploadNewPipelineService {
 
   /** Run the new-upload pipeline for a single job. */
   async run(jobId: string, ctx: PipelineContext): Promise<void> {
-    const job = this.jobState.findJob(jobId)!;
+    let job = this.jobState.findJob(jobId)!;
 
     // If the job already has manually-placed coords (from placeJob),
     // skip validation/EXIF/title phases and go straight to upload.
@@ -73,7 +73,22 @@ export class UploadNewPipelineService {
         direction: parsedExif.direction,
       });
     }
+    if (this.uploadService.isHeic(job.file.type)) {
+      this.jobState.setPhase(jobId, 'converting_format');
+      const convertedFile = await this.uploadService.convertToJpeg(job.file);
 
+      let newThumbnailUrl = job.thumbnailUrl;
+      if (newThumbnailUrl) {
+        URL.revokeObjectURL(newThumbnailUrl);
+      }
+      newThumbnailUrl = URL.createObjectURL(convertedFile);
+
+      this.jobState.updateJob(jobId, {
+        file: convertedFile,
+        thumbnailUrl: newThumbnailUrl,
+      });
+      job = this.jobState.findJob(jobId)!;
+    }
     // ── Phase: hashing ─────────────────────────────────────────────────
     this.jobState.setPhase(jobId, 'hashing');
     const fileHead = await readFileHead(job.file);

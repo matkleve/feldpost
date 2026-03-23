@@ -14,6 +14,7 @@ export type UploadPhase =
   | 'queued'
   | 'validating'
   | 'parsing_exif'
+  | 'converting_format'
   | 'hashing'
   | 'dedup_check'
   | 'skipped'
