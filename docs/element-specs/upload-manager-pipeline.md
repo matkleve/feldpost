@@ -13,21 +13,21 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 ## Where It Lives
 
 - **Parent spec**: `docs/element-specs/upload-manager.md`
-- **Primary implementation**: `core/upload-manager.service.ts` plus pipeline services in `apps/web/src/app/core/`
+- **Primary implementation**: `core/upload/upload-manager.service.ts` plus pipeline services in `core/upload/`
 - **Consumed by**: upload panel, image detail replace/attach flows, map shell, thumbnail views, folder import entry points
 
 ## Actions
 
-| # | Trigger | System Response | Notes |
-| --- | --- | --- | --- |
-| 1 | User selects many files | Creates one batch and one job per file | Standard multi-file flow |
-| 2 | User selects a folder | Scans recursively, creates scanning batch, then queues jobs | Chromium/File System Access only |
-| 3 | Pipeline computes content hash | Checks server for duplicate content | Duplicate jobs become `skipped` |
-| 4 | Duplicate found | Emits `uploadSkipped$` and excludes file from upload path | Resume-safe behavior |
-| 5 | Upload targets photoless row conflict | Pauses in `awaiting_conflict_resolution` and emits popup event | Releases concurrency slot |
-| 6 | User resolves conflict | Resumes with `attach_replace`, `attach_keep`, or `create_new` | Re-queues at front |
-| 7 | User replaces existing photo | Emits replace-specific events so map/detail/grid refresh instantly | Existing image row retained |
-| 8 | User attaches photo to photoless row | Emits attach-specific events so no-photo surfaces update | Existing row gains media |
+| #   | Trigger                               | System Response                                                    | Notes                            |
+| --- | ------------------------------------- | ------------------------------------------------------------------ | -------------------------------- |
+| 1   | User selects many files               | Creates one batch and one job per file                             | Standard multi-file flow         |
+| 2   | User selects a folder                 | Scans recursively, creates scanning batch, then queues jobs        | Chromium/File System Access only |
+| 3   | Pipeline computes content hash        | Checks server for duplicate content                                | Duplicate jobs become `skipped`  |
+| 4   | Duplicate found                       | Emits `uploadSkipped$` and excludes file from upload path          | Resume-safe behavior             |
+| 5   | Upload targets photoless row conflict | Pauses in `awaiting_conflict_resolution` and emits popup event     | Releases concurrency slot        |
+| 6   | User resolves conflict                | Resumes with `attach_replace`, `attach_keep`, or `create_new`      | Re-queues at front               |
+| 7   | User replaces existing photo          | Emits replace-specific events so map/detail/grid refresh instantly | Existing image row retained      |
+| 8   | User attaches photo to photoless row  | Emits attach-specific events so no-photo surfaces update           | Existing row gains media         |
 
 ## Component Hierarchy
 
@@ -59,51 +59,64 @@ Upload Manager Pipeline
 
 ```mermaid
 flowchart TD
-  A[Submission] --> B[Validation and EXIF]
-  B --> C[Content Hash]
-  C --> D{Dedup match?}
-  D -->|Yes| E[Mark skipped and emit uploadSkipped$]
-  D -->|No| F{Conflict candidate?}
-  F -->|Yes| G[Pause and emit locationConflict$]
-  F -->|No| H[Upload and save record]
-  G --> I[User resolution]
-  I --> H
-  H --> J[Optional enrichment]
-  J --> K[Emit image or batch events]
+  A[Submission via UploadPanel or ImageDetail] --> B[UploadManagerService]
+  B --> C[UploadQueueService slot assignment max 3]
+  C --> D[Upload*PipelineService run by job.mode]
+  D --> E[Validation and parsing_exif]
+  E --> F[hashing and dedup_check]
+  F --> G{Dedup match?}
+  G -->|Yes| H[set phase skipped plus emit uploadSkipped$]
+  G -->|No| I{Conflict candidate?}
+  I -->|Yes| J[set awaiting_conflict_resolution plus emit locationConflict$]
+  J --> K[User conflictResolution]
+  K --> D
+  I -->|No| L[uploading then saving_record]
+  L --> M{Needs enrichment?}
+  M -->|coords| N[resolving_address]
+  M -->|title address| O[resolving_coordinates]
+  M -->|manual placement required| P[missing_data]
+  P --> Q[placeJob sets queued]
+  Q --> D
+  N --> R[complete]
+  O --> R
+  L --> R
+  R --> S[Emit image and batch events]
 ```
 
-| Field / Artifact | Source | Type | Notes |
-| --- | --- | --- | --- |
-| Folder batch status | `UploadBatchService` | `UploadBatch` | Starts as `scanning`, then transitions to `uploading` |
-| Content hash | `core/content-hash.util.ts` | `string` | SHA-256 from file head + EXIF-derived metadata |
-| Dedup lookup result | `check_dedup_hashes` RPC | `{ content_hash, image_id }[]` | Used for single and batch duplicate checks |
-| Conflict candidate | `images` table lookup | `ConflictCandidate` | Photoless row near upload coords/address |
-| Replace event | `UploadManagerService.imageReplaced$` | `ImageReplacedEvent` | Drives map/detail/card refresh |
-| Attach event | `UploadManagerService.imageAttached$` | `ImageAttachedEvent` | Upgrades photoless surfaces to media surfaces |
+| Field / Artifact    | Source                                | Type                           | Notes                                                 |
+| ------------------- | ------------------------------------- | ------------------------------ | ----------------------------------------------------- |
+| Folder batch status | `UploadBatchService`                  | `UploadBatch`                  | Starts as `scanning`, then transitions to `uploading` |
+| Content hash        | `core/content-hash.util.ts`           | `string`                       | SHA-256 from file head + EXIF-derived metadata        |
+| Dedup lookup result | `check_dedup_hashes` RPC              | `{ content_hash, image_id }[]` | Used for single and batch duplicate checks            |
+| Conflict candidate  | `images` table lookup                 | `ConflictCandidate`            | Photoless row near upload coords/address              |
+| Replace event       | `UploadManagerService.imageReplaced$` | `ImageReplacedEvent`           | Drives map/detail/card refresh                        |
+| Attach event        | `UploadManagerService.imageAttached$` | `ImageAttachedEvent`           | Upgrades photoless surfaces to media surfaces         |
 
 ## State
 
-| Name | Type | Default | Controls |
-| --- | --- | --- | --- |
-| `batch.status` | `'scanning' \| 'uploading' \| 'complete' \| 'cancelled'` | `'uploading'` | Batch lifecycle during folder submissions |
-| `job.contentHash` | `string \| undefined` | `undefined` | Dedup identity for resume-safe uploads |
-| `job.existingImageId` | `string \| undefined` | `undefined` | Existing image match when dedup skips |
-| `job.conflictCandidate` | `ConflictCandidate \| undefined` | `undefined` | Existing photoless row candidate |
-| `job.conflictResolution` | `ConflictResolution \| undefined` | `undefined` | User choice after conflict popup |
-| `job.mode` | `'new' \| 'replace' \| 'attach'` | `'new'` | Routes pipeline and output events |
+| Name                     | Type                                                     | Default       | Controls                                  |
+| ------------------------ | -------------------------------------------------------- | ------------- | ----------------------------------------- |
+| `batch.status`           | `'scanning' \| 'uploading' \| 'complete' \| 'cancelled'` | `'uploading'` | Batch lifecycle during folder submissions |
+| `job.contentHash`        | `string \| undefined`                                    | `undefined`   | Dedup identity for resume-safe uploads    |
+| `job.existingImageId`    | `string \| undefined`                                    | `undefined`   | Existing image match when dedup skips     |
+| `job.conflictCandidate`  | `ConflictCandidate \| undefined`                         | `undefined`   | Existing photoless row candidate          |
+| `job.conflictResolution` | `ConflictResolution \| undefined`                        | `undefined`   | User choice after conflict popup          |
+| `job.mode`               | `'new' \| 'replace' \| 'attach'`                         | `'new'`       | Routes pipeline and output events         |
 
 ## File Map
 
-| File | Purpose |
-| --- | --- |
-| `docs/element-specs/upload-manager.md` | Parent contract |
-| `docs/element-specs/upload-manager-pipeline.md` | Child spec for deep operational behavior |
+| File                                               | Purpose                                          |
+| -------------------------------------------------- | ------------------------------------------------ |
+| `docs/element-specs/upload-manager.md`             | Parent contract                                  |
+| `docs/element-specs/upload-manager-pipeline.md`    | Child spec for deep operational behavior         |
 | `docs/implementation-blueprints/upload-manager.md` | Blueprint for implementation-level rollout notes |
-| `core/upload-manager.service.ts` | Batch submission, queue draining, event fan-out |
-| `core/upload-new-pipeline.service.ts` | New-upload path |
-| `core/upload-replace-pipeline.service.ts` | Replace path |
-| `core/upload-attach-pipeline.service.ts` | Attach path |
-| `core/content-hash.util.ts` | Content hash generation |
+| `core/upload/upload-manager.service.ts`            | Batch submission, queue draining, event fan-out  |
+| `core/upload/upload-new-pipeline.service.ts`       | New-upload path                                  |
+| `core/upload/upload-replace-pipeline.service.ts`   | Replace path                                     |
+| `core/upload/upload-attach-pipeline.service.ts`    | Attach path                                      |
+| `core/upload/upload-queue.service.ts`              | Concurrency and running-slot management          |
+| `core/upload/upload-job-state.service.ts`          | Job phase state and phase-change events          |
+| `core/content-hash.util.ts`                        | Content hash generation                          |
 
 ## Wiring
 
@@ -139,18 +152,26 @@ flowchart TD
 ```mermaid
 sequenceDiagram
   actor User
-  participant Panel as UploadPanelComponent
+  participant UI as UploadPanel or ImageDetail
   participant Manager as UploadManagerService
+  participant Queue as UploadQueueService
   participant Pipeline as Upload*PipelineService
   participant DB as Supabase
 
-  User->>Panel: select files or folder
-  Panel->>Manager: submit(...) / submitFolder(...)
-  Manager->>Pipeline: run job pipeline
+  User->>UI: select files or folder
+  UI->>Manager: submit(...) / submitFolder(...)
+  Manager->>Queue: reserve slot
+  Queue-->>Manager: slot granted
+  Manager->>Pipeline: run(jobId)
   Pipeline->>DB: dedup check / conflict lookup / save
   DB-->>Pipeline: match or save result
-  Pipeline-->>Manager: phase + event updates
-  Manager-->>Panel: batch and job events
+  alt conflict
+    Pipeline-->>Manager: awaiting_conflict_resolution + locationConflict$
+    UI->>Manager: resolveConflict(...)
+    Manager->>Pipeline: resume queued job
+  end
+  Pipeline-->>Manager: phase and domain events
+  Manager-->>UI: jobs()/batches() updates
 ```
 
 ## Acceptance Criteria

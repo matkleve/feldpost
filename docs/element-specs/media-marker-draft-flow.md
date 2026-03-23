@@ -84,7 +84,7 @@ flowchart LR
 | `apps/web/src/app/features/map/map-shell/map-shell.component.html`         | Render draft marker state and bind workspace draft context           |
 | `apps/web/src/app/features/map/map-shell/map-shell.component.scss`         | Draft marker visual state styles                                     |
 | `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts` | Accept and manage draft workspace context                            |
-| `apps/web/src/app/core/upload-manager.service.ts`                          | Emit upload completion payload used for draft promotion              |
+| `apps/web/src/app/core/upload/upload-manager.service.ts`                   | Emit upload completion payload used for draft promotion              |
 | `docs/use-cases/map-context-menu.md`                                       | Interaction scenarios for draft creation and cancel/persist outcomes |
 
 ## Wiring

@@ -23,6 +23,8 @@ import { ExifCoords, ParsedExif, UploadService } from './upload.service';
 
 @Injectable({ providedIn: 'root' })
 export class UploadNewPipelineService {
+  private static readonly UPLOAD_PHASE_TIMEOUT_MS = 180_000;
+
   private readonly uploadService = inject(UploadService);
   private readonly jobState = inject(UploadJobStateService);
   private readonly queue = inject(UploadQueueService);
@@ -179,7 +181,11 @@ export class UploadNewPipelineService {
     this.jobState.updateJob(jobId, { progress: 0 });
 
     // ── Phase: saving_record (UploadService does upload + insert as one call)
-    const result = await this.uploadService.uploadFile(job.file, coords, parsedExif, job.projectId);
+    const result = await this.withTimeout(
+      this.uploadService.uploadFile(job.file, coords, parsedExif, job.projectId),
+      UploadNewPipelineService.UPLOAD_PHASE_TIMEOUT_MS,
+      'Upload timed out. Please retry.',
+    );
 
     if (result.error !== null) {
       const msg =
@@ -293,6 +299,27 @@ export class UploadNewPipelineService {
 
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthService);
+
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    timeoutMessage: string,
+  ): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    try {
+      return await Promise.race([
+        promise,
+        new Promise<T>((_resolve, reject) => {
+          timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    }
+  }
 
   private async insertDedupHash(imageId: string, contentHash: string): Promise<void> {
     this.supabase.client

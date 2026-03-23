@@ -44,7 +44,7 @@ export class UploadPanelItemComponent {
       case 'complete':
         return 'complete';
       case 'skipped':
-        return 'skipped';
+        return 'complete';
       case 'error':
         return 'error';
       case 'missing_data':

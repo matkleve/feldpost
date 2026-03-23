@@ -127,33 +127,33 @@ export class UploadPanelComponent {
 
   private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
 
+  readonly laneBuckets = computed(() => {
+    const buckets: Record<UploadLane, UploadJob[]> = {
+      uploading: [],
+      uploaded: [],
+      issues: [],
+    };
+
+    for (const job of this.jobs()) {
+      buckets[this.getLaneForJob(job)].push(job);
+    }
+
+    return buckets;
+  });
+
   readonly laneCounts = computed(() => {
-    const jobs = this.jobs();
+    const buckets = this.laneBuckets();
     return {
-      uploading: jobs.filter((job) => this.getLaneForJob(job) === 'uploading').length,
-      uploaded: jobs.filter((job) => this.getLaneForJob(job) === 'uploaded').length,
-      issues: jobs.filter((job) => this.getLaneForJob(job) === 'issues').length,
+      uploading: buckets.uploading.length,
+      uploaded: buckets.uploaded.length,
+      issues: buckets.issues.length,
     };
   });
 
-  readonly effectiveLane = computed<UploadLane>(() => {
-    const lane = this.selectedLane();
-    const counts = this.laneCounts();
-
-    // Auto-switch to a populated lane if the chosen lane is empty,
-    // ensuring "the 3 areas" update effectively and never leave the user staring at an empty list.
-    if (counts[lane] === 0) {
-      if (counts.issues > 0) return 'issues';
-      if (counts.uploading > 0) return 'uploading';
-      if (counts.uploaded > 0) return 'uploaded';
-    }
-
-    return lane;
-  });
+  readonly effectiveLane = computed<UploadLane>(() => this.selectedLane());
 
   readonly laneJobs = computed(() => {
-    const lane = this.effectiveLane();
-    return this.jobs().filter((job) => this.getLaneForJob(job) === lane);
+    return this.laneBuckets()[this.selectedLane()];
   });
 
   readonly dotItems = computed(() => {
@@ -291,10 +291,11 @@ export class UploadPanelComponent {
     this.selectedLane.set(this.getLaneForJob(job));
   }
 
-  requestPlacement(jobId: string, phase: UploadPhase, event: MouseEvent): void {
+  requestPlacement(jobId: string, _phase: UploadPhase, event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    if (phase !== 'missing_data') return;
+    const job = this.jobs().find((entry) => entry.id === jobId);
+    if (!job || job.phase !== 'missing_data') return;
     this.placementRequested.emit(jobId);
   }
 
@@ -377,6 +378,7 @@ export class UploadPanelComponent {
    * Delegates to the manager's placeJob method.
    */
   placeFile(key: string, coords: ExifCoords): void {
+    this.selectedLane.set('uploading');
     this.uploadManager.placeJob(key, coords);
   }
 
@@ -417,7 +419,7 @@ export class UploadPanelComponent {
       case 'complete':
         return 'complete';
       case 'skipped':
-        return 'skipped';
+        return 'complete';
       case 'error':
         return 'error';
       case 'missing_data':

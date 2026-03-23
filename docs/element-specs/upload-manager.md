@@ -2,9 +2,9 @@
 
 ## What It Is
 
-A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, storage upload, database insert, and address resolution. Any component in the app can submit files to the Upload Manager and immediately navigate away — uploads continue in the background until the browser tab is closed or the network is lost.
+A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, deduplication, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
 
-Today, queue management and concurrency live inside `UploadPanelComponent`. When the component is destroyed (e.g., user navigates from image detail view back to map), in-flight uploads are lost. The Upload Manager extracts that responsibility into a long-lived service layer so uploads survive component lifecycle.
+Queue management and concurrency are implemented inside `UploadManagerService` through `UploadQueueService` and pipeline services under `core/upload/`.
 
 ## Child Specs
 
@@ -20,7 +20,7 @@ The Upload Manager is mostly invisible UI infrastructure, but it surfaces as con
 
 ## Where It Lives
 
-- Service: `UploadManagerService` at `core/upload-manager.service.ts`
+- Service: `UploadManagerService` at `core/upload/upload-manager.service.ts`
 - Scope: `providedIn: 'root'` singleton, survives routing
 - Consumers: Upload panel, image detail flows, folder import flows, and global progress UI
 
@@ -56,45 +56,59 @@ Upload Manager System
 ### Data Flow (Mermaid)
 
 ```mermaid
-flowchart LR
-  UI[UI Component] --> S[Service Layer]
-  S --> DB[(Supabase Tables)]
-  DB --> S
-  S --> UI
+flowchart TD
+  UI[UploadPanel or ImageDetail] --> M[UploadManagerService]
+  M --> Q[UploadQueueService max 3 concurrent]
+  Q --> P{job.mode}
+  P -->|new| N[UploadNewPipelineService]
+  P -->|replace| R[UploadReplacePipelineService]
+  P -->|attach| A[UploadAttachPipelineService]
+  N --> S[(Supabase Storage plus images table)]
+  R --> S
+  A --> S
+  N --> E[Event streams]
+  R --> E
+  A --> E
+  E --> UI
 ```
 
-| Field          | Source                                  | Type                    |
-| -------------- | --------------------------------------- | ----------------------- | ------ |
-| Jobs           | `UploadManagerService.jobs()`           | `Signal<UploadJob[]>`   |
-| Active count   | `UploadManagerService.activeCount()`    | `Signal<number>`        |
-| Is busy        | `UploadManagerService.isBusy()`         | `Signal<boolean>`       |
-| Batches        | `UploadManagerService.batches()`        | `Signal<UploadBatch[]>` |
-| Active batch   | `UploadManagerService.activeBatch()`    | `Signal<UploadBatch     | null>` |
-| Per-job events | `UploadManagerService.jobPhaseChanged$` | `Observable<...>`       |
-| Batch events   | `UploadManagerService.batchProgress$`   | `Observable<...>`       |
-| Skip events    | `UploadManagerService.uploadSkipped$`   | `Observable<...>`       |
+| Field          | Source                                  | Type                          |
+| -------------- | --------------------------------------- | ----------------------------- |
+| Jobs           | `UploadManagerService.jobs()`           | `Signal<UploadJob[]>`         |
+| Active count   | `UploadManagerService.activeCount()`    | `Signal<number>`              |
+| Is busy        | `UploadManagerService.isBusy()`         | `Signal<boolean>`             |
+| Batches        | `UploadManagerService.batches()`        | `Signal<UploadBatch[]>`       |
+| Active batch   | `UploadManagerService.activeBatch()`    | `Signal<UploadBatch \| null>` |
+| Per-job events | `UploadManagerService.jobPhaseChanged$` | `Observable<...>`             |
+| Batch events   | `UploadManagerService.batchProgress$`   | `Observable<...>`             |
+| Skip events    | `UploadManagerService.uploadSkipped$`   | `Observable<...>`             |
 
 ## State
 
 | Name          | Type                            | Default | Controls                                     |
-| ------------- | ------------------------------- | ------- | -------------------------------------------- | ------------------------------------------------ |
+| ------------- | ------------------------------- | ------- | -------------------------------------------- |
 | `jobs`        | `WritableSignal<UploadJob[]>`   | `[]`    | Full upload queue + history                  |
 | `activeJobs`  | `Signal<UploadJob[]>`           | `[]`    | Computed: non-terminal jobs                  |
 | `isBusy`      | `Signal<boolean>`               | `false` | Computed: any non-terminal job exists        |
 | `activeCount` | `Signal<number>`                | `0`     | Computed: jobs in uploading/saving/resolving |
 | `batches`     | `WritableSignal<UploadBatch[]>` | `[]`    | All batches (active + completed)             |
-| `activeBatch` | `Signal<UploadBatch             | null>`  | `null`                                       | Computed: first batch with status !== 'complete' |
+| `activeBatch` | `Signal<UploadBatch \| null>`   | `null`  | Active upload/scanning batch                 |
 
 ## File Map
 
 | File                                                     | Purpose                                                                      |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `core/upload-manager.service.ts`                         | Queue management, concurrency, pipeline orchestration                        |
-| `core/upload-manager.service.spec.ts`                    | Unit tests                                                                   |
+| `core/upload/upload-manager.service.ts`                  | Queue management, concurrency, pipeline orchestration                        |
+| `core/upload/upload-manager.types.ts`                    | Shared upload domain types and event contracts                               |
+| `core/upload/upload-job-state.service.ts`                | Job state signal store + phase events                                        |
+| `core/upload/upload-batch.service.ts`                    | Batch lifecycle and progress computation                                     |
+| `core/upload/upload-queue.service.ts`                    | Running-slot tracking and concurrency guard                                  |
+| `core/upload/upload-new-pipeline.service.ts`             | New upload path including missing-data and conflict branching                |
+| `core/upload/upload-replace-pipeline.service.ts`         | Replace existing image path                                                  |
+| `core/upload/upload-attach-pipeline.service.ts`          | Attach media to photoless row path                                           |
 | `core/content-hash.util.ts`                              | `computeContentHash()` — SHA-256 from file head + EXIF                       |
-| `core/content-hash.util.spec.ts`                         | Unit tests for hashing                                                       |
-| `core/upload.service.ts`                                 | Existing — per-file logic (validation, EXIF, storage, DB)                    |
-| `core/geocoding.service.ts`                              | Existing — reverse geocoding                                                 |
+| `core/upload/upload.service.ts`                          | Per-file storage/DB operations and EXIF handling                             |
+| `core/geocoding.service.ts`                              | Reverse/forward geocoding adapter                                            |
 | `docs/element-specs/upload-manager-pipeline.md`          | Child spec for pipeline, deduplication, folder upload, and conflict handling |
 | `features/upload/upload-panel/upload-panel.component.ts` | Refactor — delegate to UploadManagerService                                  |
 
@@ -104,30 +118,32 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent
-  participant C as Component
-  participant S as Service
-  P->>C: Provide inputs and bindings
-  C->>S: Request data or action
-  S-->>C: Return updates
-  C-->>P: Emit outputs/events
+  actor User
+  participant UI as UploadPanelComponent
+  participant Manager as UploadManagerService
+  participant Queue as UploadQueueService
+  participant Pipeline as Upload*PipelineService
+  participant DB as Supabase
+
+  User->>UI: select files/folder
+  UI->>Manager: submit/submitFolder
+  Manager->>Queue: markRunning + slot check
+  Queue-->>Manager: available slot
+  Manager->>Pipeline: run(jobId)
+  Pipeline->>DB: upload/save/conflict checks
+  Pipeline-->>Manager: phase and domain events
+  Manager-->>UI: jobs/batches signals + observables
 ```
 
 - `UploadManagerService` is `providedIn: 'root'` — no module import needed
-- Inject into `UploadPanelComponent` (replace internal queue logic)
+- Inject into `UploadPanelComponent` for intake, lane rows, and placement handoff
 - Inject into `ImageDetailView` for `replaceFile()` and `attachFile()`
-- Subscribe to `imageUploaded$` in `MapShellComponent` to add new markers
-- Subscribe to `imageReplaced$` in `MapShellComponent` to rebuild marker DivIcon with new thumbnail
-- Subscribe to `imageAttached$` in `MapShellComponent` to update marker (add thumbnail to photoless marker)
-- Subscribe to `imageReplaced$` and `imageAttached$` in `ImageDetailView` to refresh signed URLs
-- Subscribe to `imageReplaced$` and `imageAttached$` in `ThumbnailCard` to refresh card thumbnail
-- Subscribe to `uploadFailed$` for toast notifications
-- Subscribe to `batchProgress$` in `UploadButtonZone` to show progress badge on the upload button
-- Subscribe to `jobPhaseChanged$` in `PhotoMarker` (via MapShell) to show/hide PendingRing
-- Subscribe to `jobPhaseChanged$` in `ThumbnailCard` to show uploading overlay
-- Subscribe to `uploadSkipped$` in `UploadPanelComponent` to show "Already uploaded" status
-- Subscribe to `locationConflict$` in `UploadPanelComponent` to show conflict resolution popup
-- `dedup_hashes` table and conflict-handling contract are defined in `upload-manager-pipeline.md`
+- Subscribe to `imageUploaded$` in `MapShellComponent` to upsert map markers
+- Subscribe to `imageReplaced$` and `imageAttached$` in map/detail/grid consumers for immediate thumbnail refresh
+- Subscribe to `uploadFailed$` for user-facing error notifications
+- Subscribe to `batchProgress$` where global progress affordance is shown
+- Consume `locationConflict$` through upload conflict UI flow before resume
+- `dedup_hashes` table and conflict contract remain defined in `upload-manager-pipeline.md`
 
 ### Event Consumers
 
@@ -150,7 +166,7 @@ sequenceDiagram
 | `batchProgress$`    | `UploadPanelComponent` | Updates the batch progress bar                                   |
 | `batchProgress$`    | `UploadButtonZone`     | Shows progress ring or badge on the upload button                |
 | `batchComplete$`    | `UploadPanelComponent` | Shows batch summary                                              |
-| `missingData$`      | `MissingDataManager`   | Queues file for manual placement                                 |
+| `missingData$`      | `UploadPanelComponent` | Emits placement request output to map shell                      |
 
 ## Acceptance Criteria
 
@@ -165,7 +181,7 @@ sequenceDiagram
 - [x] Completed/failed jobs can be dismissed individually or in bulk
 - [x] **Path A**: GPS in EXIF → upload → save → reverse-geocode address (non-blocking)
 - [x] **Path B**: No GPS + address in title → upload → save with address → forward-geocode coords (non-blocking)
-- [x] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for MissingDataManager
+- [x] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for placement flow
 - [x] Address resolution and coordinate resolution are enrichment — failure is silent
 - [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
 - [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)
