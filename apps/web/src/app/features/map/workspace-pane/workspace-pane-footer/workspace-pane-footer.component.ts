@@ -10,6 +10,7 @@ import {
   UiButtonPrimaryDirective,
   UiButtonSizeSmDirective,
   UiButtonIconOnlyDirective,
+  UiButtonIconWithTextDirective,
   UiInputControlDirective,
 } from '../../../../shared/ui-primitives.directive';
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
@@ -22,6 +23,7 @@ import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.
     UiButtonPrimaryDirective,
     UiButtonSizeSmDirective,
     UiButtonIconOnlyDirective,
+    UiButtonIconWithTextDirective,
     UiInputControlDirective,
     PaneFooterComponent,
   ],
