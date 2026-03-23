@@ -5,32 +5,30 @@ import type { WorkspaceImage } from '../../../../../core/workspace-view.types';
   selector: 'app-thumbnail-card-media',
   standalone: true,
   template: `
-    <div class="thumbnail-card-media">
-      @if (image().signedThumbnailUrl) {
-        <img
-          class="thumbnail-card-media__img"
-          [class.thumbnail-card-media__img--loaded]="!imgLoading()"
-          [src]="image().signedThumbnailUrl"
-          [alt]="altText()"
-          loading="lazy"
-          (load)="imgLoaded.emit()"
-          (error)="imgError.emit()"
-        />
-      }
-      @if (!imageReady()) {
-        <div
-          class="thumbnail-card-media__placeholder"
-          [class.thumbnail-card-media__placeholder--loading]="isLoading()"
-          [class.thumbnail-card-media__placeholder--no-photo]="!isLoading()"
-        >
-          <span
-            class="thumbnail-card-media__placeholder-icon"
-            [class.thumbnail-card-media__placeholder-icon--no-photo]="!isLoading()"
-            aria-hidden="true"
-          ></span>
-        </div>
-      }
-    </div>
+    @if (image().signedThumbnailUrl) {
+      <img
+        class="thumbnail-card-media__img"
+        [class.thumbnail-card-media__img--loaded]="!imgLoading()"
+        [src]="image().signedThumbnailUrl"
+        [alt]="altText()"
+        loading="lazy"
+        (load)="imgLoaded.emit()"
+        (error)="imgError.emit()"
+      />
+    }
+    @if (!imageReady()) {
+      <div
+        class="thumbnail-card-media__placeholder"
+        [class.thumbnail-card-media__placeholder--loading]="isLoading()"
+        [class.thumbnail-card-media__placeholder--no-photo]="!isLoading()"
+      >
+        <span
+          class="thumbnail-card-media__placeholder-icon"
+          [class.thumbnail-card-media__placeholder-icon--no-photo]="!isLoading()"
+          aria-hidden="true"
+        ></span>
+      </div>
+    }
   `,
   styleUrl: './thumbnail-card-media.component.scss',
 })

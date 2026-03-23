@@ -13,13 +13,13 @@
   background: transparent;
   box-shadow: none;
   overflow: visible;
-  cursor: pointer;
-}
-.thumbnail-card:focus-visible {
-  outline: 2px solid var(--color-clay);
-  outline-offset: 2px;
 }
 .thumbnail-card--row {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
   aspect-ratio: auto;
   min-block-size: 4rem;
   background: color-mix(in srgb, var(--color-bg-surface) 94%, var(--color-bg-base));
@@ -28,24 +28,26 @@
   aspect-ratio: auto;
   min-block-size: clamp(8.5rem, 20vh, 11.5rem);
 }
-.thumbnail-card__main {
+.thumbnail-card__main-link {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   border-radius: inherit;
   border: 0;
   background: transparent;
   padding: 0;
+  z-index: 1;
+  cursor: pointer;
 }
-.thumbnail-card--row .thumbnail-card__main {
-  display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr);
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-1) var(--spacing-2);
+.thumbnail-card__main-link:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 2px;
 }
 .thumbnail-card__select,
 .thumbnail-card__locate {
   position: absolute;
+  z-index: 2;
   top: var(--spacing-2);
   inline-size: 1.75rem;
   block-size: 1.75rem;

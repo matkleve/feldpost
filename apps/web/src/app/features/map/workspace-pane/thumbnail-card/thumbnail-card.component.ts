@@ -29,8 +29,19 @@ export interface ThumbnailCardHoverEvent {
       (mouseenter)="onHoverStart()"
       (mouseleave)="onHoverEnd()"
     >
+      <app-thumbnail-card-media
+        [image]="image()"
+        [imgLoading]="imgLoading()"
+        [isLoading]="isLoading()"
+        [imageReady]="imageReady()"
+        [altText]="t('workspace.thumbnailCard.photoThumbnail.alt', 'Photo thumbnail')"
+        (imgLoaded)="onImgLoad()"
+        (imgError)="onImgError()"
+      ></app-thumbnail-card-media>
+
+      <!-- Main action covering the card using stretch-link pattern -->
       <button
-        class="thumbnail-card__main"
+        class="thumbnail-card__main-link"
         type="button"
         [attr.aria-label]="
           t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') +
@@ -38,27 +49,17 @@ export interface ThumbnailCardHoverEvent {
           (image().storagePath || displayName())
         "
         (click)="onCardClick($event)"
-      >
-        <app-thumbnail-card-media
-          [image]="image()"
-          [imgLoading]="imgLoading()"
-          [isLoading]="isLoading()"
-          [imageReady]="imageReady()"
-          [altText]="t('workspace.thumbnailCard.photoThumbnail.alt', 'Photo thumbnail')"
-          (imgLoaded)="onImgLoad()"
-          (imgError)="onImgError()"
-        ></app-thumbnail-card-media>
+      ></button>
 
-        @if (viewMode() === 'row') {
-          <div class="thumbnail-card__meta" aria-hidden="true">
-            <div class="thumbnail-card__meta-head">
-              <p class="thumbnail-card__title">{{ displayName() }}</p>
-              <p class="thumbnail-card__date">{{ capturedLabel() }}</p>
-            </div>
-            <p class="thumbnail-card__subtitle">{{ subtitle() }}</p>
+      @if (viewMode() === 'row') {
+        <div class="thumbnail-card__meta" aria-hidden="true">
+          <div class="thumbnail-card__meta-head">
+            <p class="thumbnail-card__title">{{ displayName() }}</p>
+            <p class="thumbnail-card__date">{{ capturedLabel() }}</p>
           </div>
-        }
-      </button>
+          <p class="thumbnail-card__subtitle">{{ subtitle() }}</p>
+        </div>
+      }
 
       <button
         class="thumbnail-card__locate"
