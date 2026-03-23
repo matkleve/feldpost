@@ -16,12 +16,12 @@ import { Subject } from 'rxjs';
 import { UploadPanelComponent } from './upload-panel.component';
 import {
   UploadManagerService,
-  UploadJob,
-  UploadPhase,
-  ImageUploadedEvent as ManagerImageUploadedEvent,
-  MissingDataEvent,
-} from '../../../core/upload-manager.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
+  type UploadJob,
+  type UploadPhase,
+  type ImageUploadedEvent as ManagerImageUploadedEvent,
+  type MissingDataEvent,
+} from '../../core/upload/upload-manager.service';
+import { WorkspaceViewService } from '../../core/workspace-view.service';
 
 // ── Fake UploadManagerService ──────────────────────────────────────────────────
 

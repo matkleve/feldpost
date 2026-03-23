@@ -27,10 +27,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
-import {
-  UploadPanelComponent,
-  ImageUploadedEvent,
-} from '../../upload/upload-panel/upload-panel.component';
+import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel.component';
 import { ExifCoords } from '../../../core/upload/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';

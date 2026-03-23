@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * UploadPanelComponent — drag-and-drop / file-picker upload UI.
  *
@@ -15,20 +16,20 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
-import { ExifCoords } from '../../../core/upload/upload.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import type { ExifCoords } from '../../core/upload/upload.service';
+import { WorkspaceViewService } from '../../core/workspace-view.service';
 import {
   UploadManagerService,
-  UploadJob,
-  UploadPhase,
-  UploadBatch,
-  ImageUploadedEvent as ManagerImageUploadedEvent,
-} from '../../../core/upload/upload-manager.service';
+  type UploadJob,
+  type UploadPhase,
+  type UploadBatch,
+  type ImageUploadedEvent as ManagerImageUploadedEvent,
+} from '../../core/upload/upload-manager.service';
 import {
   UiButtonDirective,
   UiTabDirective,
   UiTabListDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../shared/ui-primitives.directive';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -67,6 +68,29 @@ type UploadLane = 'uploading' | 'uploaded' | 'issues';
   styleUrl: './upload-panel.component.scss',
 })
 export class UploadPanelComponent {
+  private static readonly ISSUE_ATTENTION_RESET_MS = 1500;
+
+  private static readonly PHASE_TO_STATUS_CLASS: Record<UploadPhase, string> = {
+    queued: 'pending',
+    validating: 'parsing',
+    parsing_exif: 'parsing',
+    converting_format: 'parsing',
+    hashing: 'parsing',
+    dedup_check: 'parsing',
+    extracting_title: 'parsing',
+    conflict_check: 'parsing',
+    awaiting_conflict_resolution: 'awaiting_placement',
+    uploading: 'uploading',
+    saving_record: 'uploading',
+    replacing_record: 'uploading',
+    resolving_address: 'uploading',
+    resolving_coordinates: 'uploading',
+    complete: 'complete',
+    skipped: 'complete',
+    error: 'error',
+    missing_data: 'awaiting_placement',
+  };
+
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
 
@@ -396,35 +420,7 @@ export class UploadPanelComponent {
 
   /** Map UploadPhase to a CSS-friendly status class name. */
   phaseToStatusClass(phase: UploadPhase): string {
-    switch (phase) {
-      case 'queued':
-        return 'pending';
-      case 'validating':
-      case 'parsing_exif':
-      case 'converting_format':
-      case 'hashing':
-      case 'dedup_check':
-      case 'extracting_title':
-      case 'conflict_check':
-        return 'parsing';
-      case 'awaiting_conflict_resolution':
-        return 'awaiting_placement';
-      case 'uploading':
-      case 'saving_record':
-      case 'replacing_record':
-        return 'uploading';
-      case 'resolving_address':
-      case 'resolving_coordinates':
-        return 'uploading';
-      case 'complete':
-        return 'complete';
-      case 'skipped':
-        return 'complete';
-      case 'error':
-        return 'error';
-      case 'missing_data':
-        return 'awaiting_placement';
-    }
+    return UploadPanelComponent.PHASE_TO_STATUS_CLASS[phase];
   }
 
   /** TrackBy function used in the template. */
@@ -513,6 +509,6 @@ export class UploadPanelComponent {
     this.issueAttentionTimer = setTimeout(() => {
       this.issueAttentionPulse.set(false);
       this.issueAttentionTimer = null;
-    }, 1500);
+    }, UploadPanelComponent.ISSUE_ATTENTION_RESET_MS);
   }
 }
