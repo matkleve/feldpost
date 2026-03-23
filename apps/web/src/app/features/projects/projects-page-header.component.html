@@ -1,0 +1,38 @@
+<header class="projects-header">
+  <div class="projects-header__title-wrap">
+    @if (currentProjectId()) {
+      <nav
+        class="projects-breadcrumbs"
+        [attr.aria-label]="translate('nav.item.projects', 'Projects')"
+      >
+        <a
+          class="projects-breadcrumbs__item projects-breadcrumbs__item--link"
+          [routerLink]="['/projects']"
+        >
+          {{ translate('nav.item.projects', 'Projects') }}
+        </a>
+        <span class="projects-breadcrumbs__separator" aria-hidden="true">/</span>
+        <span class="projects-breadcrumbs__item projects-breadcrumbs__item--current">
+          {{ breadcrumbCurrentLabel() }}
+        </span>
+      </nav>
+    }
+    <h1 class="projects-header__title">{{ translate('nav.item.projects', 'Projects') }}</h1>
+    <p class="projects-header__count">{{ projectCountLabel() }}</p>
+  </div>
+
+  <div class="projects-header__actions">
+    <button
+      uiButton
+      uiButtonPrimary
+      type="button"
+      class="ui-button ui-button--primary projects-header__new"
+      [disabled]="loading()"
+      (click)="onNewProject()"
+      [attr.aria-label]="translate('projects.page.action.newProject', 'New project')"
+    >
+      <span class="material-icons" aria-hidden="true">add</span>
+      <span>{{ translate('projects.page.action.newProject', 'New project') }}</span>
+    </button>
+  </div>
+</header>

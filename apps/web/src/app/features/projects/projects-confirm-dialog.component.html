@@ -1,0 +1,33 @@
+@if (open()) {
+  <section class="projects-confirm" role="dialog" aria-modal="true">
+    <div class="projects-confirm__surface">
+      <h2>{{ title() }}</h2>
+      <p>{{ message() }}</p>
+      <div class="projects-confirm__actions">
+        <button
+          uiButton
+          uiButtonSecondary
+          type="button"
+          class="ui-button ui-button--secondary"
+          [disabled]="busy()"
+          (click)="onCancel()"
+        >
+          {{ cancelLabel() }}
+        </button>
+        <button
+          uiButton
+          type="button"
+          class="ui-button"
+          [class.ui-button--danger]="danger()"
+          [attr.uiButtonDanger]="danger() ? '' : null"
+          [class.ui-button--primary]="!danger()"
+          [attr.uiButtonPrimary]="!danger() ? '' : null"
+          [disabled]="busy()"
+          (click)="onConfirm()"
+        >
+          {{ confirmLabel() }}
+        </button>
+      </div>
+    </div>
+  </section>
+}

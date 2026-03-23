@@ -19,6 +19,7 @@ import {
 } from '../../shared/segmented-switch/segmented-switch.component';
 import { UiDropdownTriggerDirective } from '../../shared/ui-dropdown-trigger.directive';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
+import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
 
@@ -35,11 +36,14 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     SegmentedSwitchComponent,
     UiDropdownTriggerDirective,
     ProjectsViewToggleComponent,
+    PaneToolbarComponent,
   ],
   template: `
-    <section class="projects-toolbar">
+    <app-pane-toolbar class="projects-toolbar">
       <app-segmented-switch
+        slot="left"
         class="projects-toolbar__status"
+        size="sm"
         [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
         [options]="statusOptions()"
         [value]="statusFilter()"
@@ -47,6 +51,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
       />
 
       <div
+        slot="left"
         class="projects-toolbar__controls"
         role="toolbar"
         [attr.aria-label]="t('projects.toolbar.aria.controls', 'Project controls')"
@@ -62,17 +67,20 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
             (click)="toggleDropdown(btn.id, $event)"
           >
             <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
-            <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true">expand_more</span>
+            <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true"
+              >expand_more</span
+            >
           </button>
         }
       </div>
 
       <app-projects-view-toggle
+        slot="right"
         class="projects-toolbar__view-toggle"
         [viewMode]="viewMode()"
         (viewModeChange)="viewModeChange.emit($event)"
       />
-    </section>
+    </app-pane-toolbar>
 
     @if (activeDropdown()) {
       <app-dropdown-shell
@@ -114,14 +122,6 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         display: block;
       }
 
-      .projects-toolbar {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-3);
-        min-width: 0;
-        flex-wrap: wrap;
-      }
-
       .projects-toolbar__controls {
         display: inline-flex;
         align-items: center;
@@ -134,18 +134,6 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         align-items: center;
         justify-content: flex-end;
         flex: 0 0 auto;
-      }
-
-      @media (max-width: 60rem) {
-        .projects-toolbar {
-          flex-direction: column;
-          align-items: stretch;
-        }
-
-        .projects-toolbar__status,
-        .projects-toolbar__view-toggle {
-          width: 100%;
-        }
       }
     `,
   ],
@@ -187,11 +175,6 @@ export class ProjectsToolbarComponent {
       id: 'all',
       label: this.t('projects.toolbar.status.all', 'All'),
       icon: 'apps',
-    },
-    {
-      id: 'active',
-      label: this.t('projects.toolbar.status.active', 'Active'),
-      icon: 'check_circle',
     },
     {
       id: 'archived',
@@ -270,4 +253,3 @@ export class ProjectsToolbarComponent {
     }
   }
 }
-

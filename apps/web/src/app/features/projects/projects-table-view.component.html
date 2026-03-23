@@ -1,0 +1,98 @@
+<div
+  class="projects-list"
+  role="region"
+  [attr.aria-label]="translate('projects.page.table.ariaLabel', 'Projects table')"
+>
+  <table class="projects-table">
+    <thead>
+      <tr>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('name')"
+          [attr.data-sort-direction]="sortDirection('name')"
+        >
+          {{ translate('projects.toolbar.option.name', 'Name') }}
+        </th>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('image-count')"
+          [attr.data-sort-direction]="sortDirection('image-count')"
+        >
+          {{ translate('projects.toolbar.option.imageCount', 'Image count') }}
+        </th>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('status')"
+          [attr.data-sort-direction]="sortDirection('status')"
+        >
+          {{ translate('projects.toolbar.option.status', 'Status') }}
+        </th>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('district')"
+          [attr.data-sort-direction]="sortDirection('district')"
+        >
+          {{ translate('projects.toolbar.option.primaryDistrict', 'Primary district') }}
+        </th>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('city')"
+          [attr.data-sort-direction]="sortDirection('city')"
+        >
+          {{ translate('projects.toolbar.option.primaryCity', 'Primary city') }}
+        </th>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('updated-at')"
+          [attr.data-sort-direction]="sortDirection('updated-at')"
+        >
+          {{ translate('projects.toolbar.option.updated', 'Updated') }}
+        </th>
+        <th
+          scope="col"
+          [attr.aria-sort]="ariaSort('last-activity')"
+          [attr.data-sort-direction]="sortDirection('last-activity')"
+        >
+          {{ translate('projects.toolbar.option.lastActivity', 'Last activity') }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (project of section().projects; track project.id) {
+        <tr [style.--project-item-color]="itemColor(project.colorKey)">
+          <th
+            uiRowShell
+            uiRowShellSizeSm
+            scope="row"
+            class="project2-table__name-cell ui-row-shell ui-row-shell--sm"
+          >
+            <span
+              class="project2-row__dot ui-row-shell__leading"
+              [style.background]="itemColor(project.colorKey)"
+            ></span>
+            <span class="project2-row__name ui-row-shell__label">{{ project.name }}</span>
+          </th>
+          <td>
+            {{ project.totalImageCount }}
+            {{ translate('projects.page.metric.photos', 'photos') }}
+          </td>
+          <td class="project2-row__meta">
+            <span
+              uiStatusBadge
+              uiStatusBadgeSizeSm
+              class="ui-status-badge ui-status-badge--sm"
+              [class.ui-status-badge--success]="project.status === 'active'"
+              [class.ui-status-badge--warning]="project.status === 'archived'"
+            >
+              {{ statusLabel(project.status) }}
+            </span>
+          </td>
+          <td class="project2-row__meta">{{ project.district || '-' }}</td>
+          <td class="project2-row__meta">{{ project.city || '-' }}</td>
+          <td class="project2-row__meta">{{ relativeDate(project.updatedAt) }}</td>
+          <td class="project2-row__meta">{{ relativeDate(project.lastActivity) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--spacing-3);
+}
+
+.project2-card {
+  min-height: 12rem;
+  padding: var(--spacing-3);
+  border: 1px solid var(--project-item-color, var(--color-border));
+  border-radius: var(--container-radius-panel);
+  background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
+  display: grid;
+  gap: var(--spacing-2);
+  align-content: start;
+  position: relative;
+}
+
+.project2-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.project2-card__badge {
+  font-size: 0.875rem;
+}
+
+.project2-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-2);
+  margin-top: auto;
+}
+
+.project2-card__action,
+.project2-card__actions .ui-button {
+  width: 100%;
+  justify-content: center;
+}
+
+.project2-card__action-wrap {
+  position: relative;
+}
+
+.project2-card__picker {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 10;
+}
+
+@media (max-width: 60rem) {
+  .project2-card__actions {
+    grid-template-columns: 1fr;
+  }
+}

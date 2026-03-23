@@ -1,0 +1,116 @@
+<main class="projects-page">
+  <section class="projects-rail content-clamp content-clamp--list">
+    <app-projects-page-header
+      [currentProjectId]="currentProjectId()"
+      [breadcrumbCurrentLabel]="breadcrumbCurrentLabel()"
+      [projectCountLabel]="projectCountLabel()"
+      [loading]="loading()"
+      [t]="t"
+      (newProject)="onNewProject()"
+    />
+
+    <app-projects-toolbar
+      [groupingOptions]="groupingOptions()"
+      [activeGroupingsInput]="activeGroupings()"
+      [filterOptions]="filterOptions()"
+      [sortOptions]="sortOptions()"
+      [hasGrouping]="hasGrouping()"
+      [hasFilters]="hasFilters()"
+      [hasCustomSort]="hasCustomSort()"
+      [hasArchivedProjects]="hasArchivedProjects()"
+      [viewMode]="viewMode()"
+      [statusFilter]="statusFilter()"
+      [activeSorts]="activeSorts()"
+      (groupingChanged)="activeGroupings.set($event)"
+      (sortChanged)="activeSorts.set($event)"
+      (viewModeChange)="viewMode.set($event)"
+      (statusFilterChange)="onStatusFilterChange($event)"
+    />
+
+    @if (loading()) {
+      <section
+        class="projects-loading"
+        role="status"
+        [attr.aria-label]="t('projects.page.loading.aria', 'Loading projects')"
+      >
+        <div class="projects-loading__row"></div>
+        <div class="projects-loading__row"></div>
+        <div class="projects-loading__row"></div>
+      </section>
+    } @else if (loadError()) {
+      <section class="projects-error" role="alert">
+        <h2>{{ t('projects.page.error.title', 'Could not load projects') }}</h2>
+        <p>{{ t('projects.page.error.body', 'Please try again in a moment.') }}</p>
+        <button
+          uiButton
+          uiButtonSecondary
+          type="button"
+          class="ui-button ui-button--secondary"
+          (click)="refreshProjects()"
+        >
+          {{ t('projects.page.error.retry', 'Retry') }}
+        </button>
+      </section>
+    } @else if (groupedSections().length === 0) {
+      <section class="projects-empty">
+        <h2>{{ t('projects.page.empty.title', 'No projects match your filters') }}</h2>
+        <p>
+          {{ t('projects.page.empty.body', 'Try another search or reset your status filter.') }}
+        </p>
+      </section>
+    } @else {
+      <section
+        class="projects-content content-clamp content-clamp--list"
+        [class.projects-content--cards]="viewMode() === 'cards'"
+      >
+        @for (section of groupedSections(); track section.id) {
+          <section class="projects-section">
+            @if (section.heading) {
+              <app-group-header
+                [heading]="section.heading"
+                [imageCount]="section.projectCount"
+                [level]="section.level"
+                [collapsed]="false"
+              />
+            }
+
+            @if (viewMode() === 'list') {
+              <app-projects-table-view
+                [section]="section"
+                [t]="t"
+                [tableAriaSort]="tableAriaSortFn"
+                [tableSortDirection]="tableSortDirectionFn"
+                [colorTokenFor]="colorTokenForFn"
+                [projectStatusLabel]="projectStatusLabelFn"
+                [formatRelativeDate]="formatRelativeDateFn"
+              />
+            } @else {
+              <app-projects-grid-view
+                [section]="section"
+                [t]="t"
+                [colorTokenFor]="colorTokenForFn"
+                [formatRelativeDate]="formatRelativeDateFn"
+                [coloringProjectId]="coloringProjectId()"
+                (toggleColorPicker)="toggleColorPicker($event)"
+                (colorSelected)="onColorSelected($event.projectId, $event.colorKey)"
+                (dangerAction)="requestDangerAction($event.projectId, $event.action)"
+              />
+            }
+          </section>
+        }
+      </section>
+    }
+
+    <app-projects-confirm-dialog
+      [open]="hasPendingAction()"
+      [title]="pendingActionTitle()"
+      [message]="pendingActionMessage()"
+      [confirmLabel]="pendingActionConfirmLabel()"
+      [cancelLabel]="t('common.cancel', 'Cancel')"
+      [busy]="pendingActionBusy()"
+      [danger]="pendingProjectAction() === 'delete'"
+      (cancel)="cancelPendingAction()"
+      (confirm)="confirmPendingAction()"
+    />
+  </section>
+</main>

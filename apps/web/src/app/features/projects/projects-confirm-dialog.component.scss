@@ -1,0 +1,30 @@
+:host {
+  display: contents;
+}
+
+.projects-confirm {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg-base) 68%, transparent);
+  display: grid;
+  place-items: center;
+  padding: var(--spacing-4);
+  z-index: 40;
+}
+
+.projects-confirm__surface {
+  width: min(26rem, 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-panel);
+  background: var(--color-bg-surface);
+  padding: var(--spacing-4);
+  display: grid;
+  gap: var(--spacing-3);
+  box-shadow: var(--elevation-floating);
+}
+
+.projects-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}

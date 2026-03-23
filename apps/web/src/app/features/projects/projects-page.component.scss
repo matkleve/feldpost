@@ -1,0 +1,71 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.projects-page {
+  min-height: 100%;
+  padding: var(--spacing-4);
+}
+
+.projects-rail {
+  width: 100%;
+  margin-inline: auto;
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.projects-loading {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.projects-loading__row {
+  min-height: 4rem;
+  border-radius: var(--container-radius-control);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-border) 65%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg-surface) 75%, transparent) 50%,
+    color-mix(in srgb, var(--color-border) 65%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: projects-loading-pulse 1.2s ease-in-out infinite;
+}
+
+.projects-empty {
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-panel);
+  background: var(--color-bg-surface);
+  padding: var(--spacing-4);
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.projects-error {
+  border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+  border-radius: var(--container-radius-panel);
+  background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-warning));
+  padding: var(--spacing-4);
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.projects-content {
+  display: grid;
+  gap: var(--spacing-3);
+}
+
+.projects-section {
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+@keyframes projects-loading-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}

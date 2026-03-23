@@ -1,0 +1,76 @@
+<div class="projects-grid">
+  @for (project of section().projects; track project.id) {
+    <article
+      uiCardShell
+      uiCardShellSizeMd
+      class="project2-card ui-card-shell ui-card-shell--md"
+      [style.--project-item-color]="itemColor(project.colorKey)"
+    >
+      <div class="project2-card__header ui-card-shell__header">
+        <span class="project2-card__dot" [style.background]="itemColor(project.colorKey)"></span>
+        <h3 class="project2-card__name">{{ project.name }}</h3>
+      </div>
+      <p class="project2-card__badge">
+        {{ project.totalImageCount }}
+        {{ translate('projects.page.metric.photos', 'photos') }}
+      </p>
+      <p class="project2-card__meta">{{ relativeDate(project.lastActivity) }}</p>
+
+      <div class="project2-card__actions ui-card-shell__actions">
+        @if (project.status === 'active') {
+          <div class="project2-card__action-wrap">
+            <button
+              uiButton
+              uiButtonSecondary
+              type="button"
+              class="ui-button ui-button--secondary project2-card__action"
+              (click)="onToggleColorPicker(project.id)"
+            >
+              <span class="material-icons" aria-hidden="true">palette</span>
+              <span>{{ translate('projects.page.action.changeColor', 'Change color') }}</span>
+            </button>
+
+            @if (coloringProjectId() === project.id) {
+              <div class="project2-card__picker">
+                <app-project-color-picker
+                  [selectedColor]="project.colorKey"
+                  (colorSelected)="onColorSelected(project.id, $event)"
+                />
+              </div>
+            }
+          </div>
+
+          <button
+            uiButton
+            uiButtonSecondary
+            type="button"
+            class="ui-button ui-button--secondary project2-card__action"
+            (click)="onDangerAction(project.id, 'archive')"
+          >
+            <span>{{ translate('projects.page.action.archiveProject', 'Archive') }}</span>
+          </button>
+        } @else {
+          <button
+            uiButton
+            uiButtonSecondary
+            type="button"
+            class="ui-button ui-button--secondary project2-card__action"
+            (click)="onDangerAction(project.id, 'restore')"
+          >
+            <span>{{ translate('projects.page.action.restoreProject', 'Restore') }}</span>
+          </button>
+
+          <button
+            uiButton
+            uiButtonDanger
+            type="button"
+            class="ui-button ui-button--danger project2-card__action"
+            (click)="onDangerAction(project.id, 'delete')"
+          >
+            <span>{{ translate('projects.page.action.deleteProject', 'Delete') }}</span>
+          </button>
+        }
+      </div>
+    </article>
+  }
+</div>
