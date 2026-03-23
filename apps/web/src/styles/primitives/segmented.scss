@@ -1,41 +1,66 @@
 // ---------------------------------------------
 // UI SEGMENTED PRIMITIVE
 // Responsibilities:
-//   Size Modifiers (if applicable):
+//   Size Modifiers (uiSegmentedSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis Modifiers (uiSegmentedButtonActive):
+//   Emphasis Modifiers:
 //     ? background, color, border-color, hover/active states
-//   Layout Modifiers (if applicable):
+//   Layout Modifiers:
 //     ? padding overrides, gap resets
 //     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-segmented {
+  --segmented-motion-duration: 180ms;
+  --segmented-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --segmented-button-height: 2.5rem;
+  --segmented-button-padding-inline: 0.95rem;
+  --segmented-button-font-size: 0.8rem;
+  --segmented-icon-only-size: 2.5rem;
+
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
   border: 1.5px solid var(--action-border-default);
   border-radius: var(--radius-full);
   padding: 0.15rem;
+  background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
+  border-color: color-mix(in srgb, var(--menu-surface-border) 86%, transparent);
+  box-shadow: var(--elevation-subtle);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  max-width: 100%;
+  transition:
+    border-color var(--segmented-motion-duration) var(--segmented-motion-ease),
+    box-shadow var(--segmented-motion-duration) var(--segmented-motion-ease),
+    background-color var(--segmented-motion-duration) var(--segmented-motion-ease);
 }
 
 .ui-segmented__button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  height: var(--segmented-button-height, 2.5rem);
   border: 0;
   border-radius: var(--radius-full);
   background: var(--action-bg-default);
   color: var(--action-text-default);
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--interactive-transition-standard);
-
-  // default to md size config
-  height: 2.5rem;
-  padding-inline: 0.75rem;
-  padding-block: 0;
-  font-size: 0.8125rem;
+  padding-block: var(--segmented-button-padding-block, 0);
+  padding-inline: var(--segmented-button-padding-inline, 0.95rem);
+  flex: var(--segmented-button-flex, initial);
+  gap: var(--spacing-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--segmented-button-font-size, 0.8rem);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateY(0);
+  transition:
+    color var(--segmented-motion-duration) var(--segmented-motion-ease),
+    background-color var(--segmented-motion-duration) var(--segmented-motion-ease),
+    border-color var(--segmented-motion-duration) var(--segmented-motion-ease),
+    box-shadow var(--segmented-motion-duration) var(--segmented-motion-ease),
+    transform var(--segmented-motion-duration) var(--segmented-motion-ease),
+    opacity var(--segmented-motion-duration) var(--segmented-motion-ease);
 
   &:hover {
     color: var(--menu-item-text);
@@ -50,36 +75,66 @@
   }
 }
 
-// Size: defines height and spacing � never overridden by Layout Modifiers
-.ui-segmented__button--sm {
-  height: 2rem;
-  padding-inline: 0.5rem;
-  padding-block: 0;
-  font-size: 0.75rem;
-}
-
-.ui-segmented__button--md {
-  height: 2.5rem;
-  padding-inline: 0.75rem;
-  padding-block: 0;
-  font-size: 0.8125rem;
-}
-
-.ui-segmented__button--lg {
-  height: 3rem;
-  padding-inline: 1rem;
-  padding-block: 0;
-  font-size: 0.875rem;
-}
-
-// Emphasis: color and interaction states � no size properties allowed
-.ui-segmented__button--active {
-  background: var(--action-bg-active);
-  color: var(--action-text-active);
+// Emphasis: Active State
+.ui-segmented__button--active,
+.ui-segmented__button.segmented-switch__button--active {
+  background: var(--field-bg) !important;
+  border-color: color-mix(in srgb, var(--action-border-active) 82%, transparent);
   box-shadow:
     0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
     0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
+  color: var(--action-text-active) !important;
+  transform: translateY(0);
 }
 
-// Layout: arrangement only � NO size or font properties
-// (Currently no specific layout modifiers)
+// Size Modifiers
+// Note: Size modifiers can be applied to the container or button depending on layout constraints.
+.ui-segmented--sm,
+.ui-segmented__button--sm {
+  --segmented-button-height: 2rem;
+  --segmented-button-padding-inline: var(--spacing-2);
+  --segmented-button-font-size: 0.75rem;
+  --segmented-icon-only-size: 2rem;
+  height: var(--segmented-button-height);
+  padding-inline: var(--segmented-button-padding-inline);
+  font-size: var(--segmented-button-font-size);
+}
+
+.ui-segmented--md,
+.ui-segmented__button--md {
+  --segmented-button-height: 2.5rem;
+  --segmented-button-padding-inline: 0.95rem;
+  --segmented-button-font-size: 0.8rem;
+  --segmented-icon-only-size: 2.5rem;
+  height: var(--segmented-button-height);
+  padding-inline: var(--segmented-button-padding-inline);
+  font-size: var(--segmented-button-font-size);
+}
+
+.ui-segmented--lg,
+.ui-segmented__button--lg {
+  --segmented-button-height: 3rem;
+  --segmented-button-padding-inline: var(--spacing-4);
+  --segmented-button-font-size: 0.875rem;
+  --segmented-icon-only-size: 3rem;
+  height: var(--segmented-button-height);
+  padding-inline: var(--segmented-button-padding-inline);
+  font-size: var(--segmented-button-font-size);
+}
+
+// Layout Modifiers: Icon-Only
+.ui-segmented--icon-only .ui-segmented__button,
+.ui-segmented__button--icon-only {
+  width: var(--segmented-icon-only-size, 2.5rem);
+  min-width: var(--segmented-icon-only-size, 2.5rem);
+  padding-inline: 0;
+  gap: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-segmented,
+  .ui-segmented__button {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
