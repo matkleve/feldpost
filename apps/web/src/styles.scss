@@ -944,21 +944,29 @@ router-outlet + * {
   --ui-toggle-switch-thumb-shift: 1.26rem;
 }
 
-.ui-select-control {
-  --ui-select-min-height: 2.5rem;
-  --ui-select-padding: 0.5rem 0.75rem;
-  --ui-select-font-size: 0.875rem;
-  --ui-select-border: 1.5px solid var(--field-border);
+// ─────────────────────────────────────────────
+// UI SELECT CONTROL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiSelectControlSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, border-width
+//   Emphasis-Modifier (uiSelectControlError, uiSelectControlLoading):
+//     → background, color, border-color
+//   Layout-Modifier:
+//     → (aktuell keine spezifischen; zB text-align fallback)
+// ─────────────────────────────────────────────
 
+.ui-select-control {
   position: relative;
-  min-height: var(--ui-select-min-height, 2.5rem);
-  border: var(--ui-select-border, 1.5px solid var(--field-border));
   border-radius: var(--radius-md);
   background: var(--field-bg);
   color: var(--field-text);
-  padding: var(--ui-select-padding, 0.5rem 0.75rem);
-  font-size: var(--ui-select-font-size, 0.875rem);
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 
   &:focus-visible {
     border-color: var(--field-border-focus);
@@ -973,27 +981,36 @@ router-outlet + * {
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-select-control--sm {
-  --ui-select-min-height: 2rem;
-  --ui-select-padding: var(--spacing-1);
-  --ui-select-font-size: 0.75rem;
-  --ui-select-border: 1px solid var(--color-border);
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
 }
 
 .ui-select-control--md {
-  --ui-select-min-height: 2.5rem;
-  --ui-select-padding: 0.5rem 0.75rem;
-  --ui-select-font-size: 0.875rem;
-  --ui-select-border: 1.5px solid var(--field-border);
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 }
 
 .ui-select-control--lg {
-  --ui-select-min-height: 3rem;
-  --ui-select-padding: 0.65rem var(--spacing-3);
-  --ui-select-font-size: 0.9375rem;
-  --ui-select-border: 1.5px solid var(--field-border);
+  min-height: 3rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.65rem var(--spacing-3);
+  font-size: 0.9375rem;
 }
 
+.ui-select-control--compact {
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+// Emphasis: interact states, background, color
 .ui-select-control--loading {
   pointer-events: none;
   cursor: progress;
@@ -1005,28 +1022,29 @@ router-outlet + * {
   background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
 }
 
-.ui-select-control--compact {
-  --ui-select-min-height: 2rem;
-  --ui-select-padding: var(--spacing-1);
-  --ui-select-font-size: 0.75rem;
-  --ui-select-border: 1px solid var(--color-border);
-}
+// ─────────────────────────────────────────────
+// UI INPUT CONTROL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiInputControlSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, border-width
+//   Emphasis-Modifier (uiInputControlError, uiInputControlLoading):
+//     → background, color, border-color
+//   Layout-Modifier:
+//     → (aktuell keine spezifischen)
+// ─────────────────────────────────────────────
 
 .ui-input-control {
-  --ui-input-min-height: 2.5rem;
-  --ui-input-padding: 0.5rem 0.75rem;
-  --ui-input-font-size: 0.875rem;
-  --ui-input-border: 1.5px solid var(--field-border);
-
   position: relative;
-  min-height: var(--ui-input-min-height, 2.5rem);
-  border: var(--ui-input-border, 1.5px solid var(--field-border));
   border-radius: var(--radius-md);
   background: var(--field-bg);
   color: var(--field-text);
-  padding: var(--ui-input-padding, 0.5rem 0.75rem);
-  font-size: var(--ui-input-font-size, 0.875rem);
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 
   &::placeholder {
     color: var(--field-placeholder);
@@ -1046,27 +1064,36 @@ router-outlet + * {
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-input-control--sm {
-  --ui-input-min-height: 2rem;
-  --ui-input-padding: var(--spacing-1);
-  --ui-input-font-size: 0.75rem;
-  --ui-input-border: 1px solid var(--color-border);
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
 }
 
 .ui-input-control--md {
-  --ui-input-min-height: 2.5rem;
-  --ui-input-padding: 0.5rem 0.75rem;
-  --ui-input-font-size: 0.875rem;
-  --ui-input-border: 1.5px solid var(--field-border);
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
 }
 
 .ui-input-control--lg {
-  --ui-input-min-height: 3rem;
-  --ui-input-padding: 0.65rem var(--spacing-3);
-  --ui-input-font-size: 0.9375rem;
-  --ui-input-border: 1.5px solid var(--field-border);
+  min-height: 3rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.65rem var(--spacing-3);
+  font-size: 0.9375rem;
 }
 
+.ui-input-control--compact {
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+// Emphasis: interact states, background, color
 .ui-input-control--loading {
   pointer-events: none;
   cursor: progress;
@@ -1076,13 +1103,6 @@ router-outlet + * {
 .ui-input-control--error {
   border-color: color-mix(in srgb, var(--color-danger) 60%, var(--field-border));
   background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
-}
-
-.ui-input-control--compact {
-  --ui-input-min-height: 2rem;
-  --ui-input-padding: var(--spacing-1);
-  --ui-input-font-size: 0.75rem;
-  --ui-input-border: 1px solid var(--color-border);
 }
 
 .ui-range-control {
@@ -1114,26 +1134,36 @@ router-outlet + * {
   background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
 }
 
-.ui-tab {
-  --ui-tab-min-height: 2.25rem;
-  --ui-tab-padding-inline: var(--spacing-3);
-  --ui-tab-font-size: 0.8125rem;
+// ─────────────────────────────────────────────
+// UI TAB PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiTabSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier (uiTabActive):
+//     → background, color, border-color, hover/active states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
 
+.ui-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-1);
-  min-height: var(--ui-tab-min-height);
-  padding-inline: var(--ui-tab-padding-inline);
   border: 0;
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--action-text-default);
-  font-size: var(--ui-tab-font-size);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.25rem;
+  padding-inline: var(--spacing-3);
+  font-size: 0.8125rem;
+  gap: var(--spacing-1);
 
   &:hover:not(:disabled) {
     background: var(--action-bg-hover);
@@ -1155,24 +1185,29 @@ router-outlet + * {
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-tab--sm {
-  --ui-tab-min-height: 2rem;
-  --ui-tab-padding-inline: var(--spacing-2);
-  --ui-tab-font-size: 0.75rem;
+  min-height: 2rem;
+  padding-inline: var(--spacing-2);
+  font-size: 0.75rem;
+  gap: var(--spacing-1);
 }
 
 .ui-tab--md {
-  --ui-tab-min-height: 2.25rem;
-  --ui-tab-padding-inline: var(--spacing-3);
-  --ui-tab-font-size: 0.8125rem;
+  min-height: 2.25rem;
+  padding-inline: var(--spacing-3);
+  font-size: 0.8125rem;
+  gap: var(--spacing-1);
 }
 
 .ui-tab--lg {
-  --ui-tab-min-height: 2.75rem;
-  --ui-tab-padding-inline: var(--spacing-4);
-  --ui-tab-font-size: 0.875rem;
+  min-height: 2.75rem;
+  padding-inline: var(--spacing-4);
+  font-size: 0.875rem;
+  gap: var(--spacing-2);
 }
 
+// Emphasis: interact states, background, color
 .ui-tab--active {
   background: var(--action-bg-active);
   color: var(--action-text-active);
@@ -1273,39 +1308,53 @@ router-outlet + * {
   pointer-events: none;
 }
 
-.ui-status-badge {
-  --ui-status-badge-min-height: 1.5rem;
-  --ui-status-badge-padding-inline: var(--spacing-2);
-  --ui-status-badge-font-size: 0.6875rem;
+// ─────────────────────────────────────────────
+// UI STATUS BADGE PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiStatusBadgeSizeSm/Md):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier (uiStatusBadgeNeutral/Info/Success/Warning/Error):
+//     → background, color, border-color, hover/active states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
 
+.ui-status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-1);
-  min-height: var(--ui-status-badge-min-height);
-  padding-inline: var(--ui-status-badge-padding-inline);
   border: 1px solid color-mix(in srgb, var(--color-border) 84%, transparent);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
   color: var(--color-text-secondary);
-  font-size: var(--ui-status-badge-font-size);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
+
+  // default to md size config
+  min-height: 1.5rem;
+  padding-inline: var(--spacing-2);
+  font-size: 0.6875rem;
+  gap: var(--spacing-1);
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-status-badge--sm {
-  --ui-status-badge-min-height: 1.25rem;
-  --ui-status-badge-padding-inline: var(--spacing-1);
-  --ui-status-badge-font-size: 0.625rem;
+  min-height: 1.25rem;
+  padding-inline: var(--spacing-1);
+  font-size: 0.625rem;
+  gap: var(--spacing-1);
 }
 
 .ui-status-badge--md {
-  --ui-status-badge-min-height: 1.5rem;
-  --ui-status-badge-padding-inline: var(--spacing-2);
-  --ui-status-badge-font-size: 0.6875rem;
+  min-height: 1.5rem;
+  padding-inline: var(--spacing-2);
+  font-size: 0.6875rem;
+  gap: var(--spacing-1);
 }
 
+// Emphasis: interact states, background, color
 .ui-status-badge--neutral {
   border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
   background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
@@ -1341,19 +1390,29 @@ router-outlet + * {
   line-height: 1;
 }
 
-.ui-row-shell {
-  --ui-row-shell-min-height: 2.5rem;
-  --ui-row-shell-padding-inline: var(--spacing-2);
-  --ui-row-shell-padding-block: var(--spacing-1);
+// ─────────────────────────────────────────────
+// UI ROW SHELL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiRowShellSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier:
+//     → background, color, border-color, interact states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
 
+.ui-row-shell {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  min-height: var(--ui-row-shell-min-height);
-  padding-block: var(--ui-row-shell-padding-block);
-  padding-inline: var(--ui-row-shell-padding-inline);
   border-radius: var(--radius-sm);
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  padding-inline: var(--spacing-2);
+  padding-block: var(--spacing-1);
+  gap: var(--spacing-2);
 
   &:hover {
     background: color-mix(in srgb, var(--action-bg-hover) 65%, transparent);
@@ -1365,22 +1424,26 @@ router-outlet + * {
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-row-shell--sm {
-  --ui-row-shell-min-height: 2rem;
-  --ui-row-shell-padding-inline: var(--spacing-1);
-  --ui-row-shell-padding-block: var(--spacing-1);
+  min-height: 2rem;
+  padding-inline: var(--spacing-1);
+  padding-block: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
 .ui-row-shell--md {
-  --ui-row-shell-min-height: 2.5rem;
-  --ui-row-shell-padding-inline: var(--spacing-2);
-  --ui-row-shell-padding-block: var(--spacing-1);
+  min-height: 2.5rem;
+  padding-inline: var(--spacing-2);
+  padding-block: var(--spacing-1);
+  gap: var(--spacing-2);
 }
 
 .ui-row-shell--lg {
-  --ui-row-shell-min-height: 3rem;
-  --ui-row-shell-padding-inline: var(--spacing-3);
-  --ui-row-shell-padding-block: var(--spacing-2);
+  min-height: 3rem;
+  padding-inline: var(--spacing-3);
+  padding-block: var(--spacing-2);
+  gap: var(--spacing-2);
 }
 
 .ui-row-shell__leading {
@@ -1401,19 +1464,30 @@ router-outlet + * {
   align-items: center;
 }
 
-.ui-card-shell {
-  --ui-card-shell-min-height: 10rem;
-  --ui-card-shell-padding: var(--spacing-3);
+// ─────────────────────────────────────────────
+// UI CARD SHELL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiCardShellSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier:
+//     → background, color, border-color, interact states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
 
-  min-height: var(--ui-card-shell-min-height);
-  padding: var(--ui-card-shell-padding);
+.ui-card-shell {
   border: 1px solid var(--color-border);
   border-radius: var(--container-radius-panel);
   background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
   display: grid;
-  gap: var(--spacing-2);
   align-content: start;
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 10rem;
+  padding: var(--spacing-3);
+  gap: var(--spacing-2);
 
   &:hover {
     border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--color-border));
@@ -1426,19 +1500,23 @@ router-outlet + * {
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-card-shell--sm {
-  --ui-card-shell-min-height: 8rem;
-  --ui-card-shell-padding: var(--spacing-2);
+  min-height: 8rem;
+  padding: var(--spacing-2);
+  gap: var(--spacing-2);
 }
 
 .ui-card-shell--md {
-  --ui-card-shell-min-height: 10rem;
-  --ui-card-shell-padding: var(--spacing-3);
+  min-height: 10rem;
+  padding: var(--spacing-3);
+  gap: var(--spacing-2);
 }
 
 .ui-card-shell--lg {
-  --ui-card-shell-min-height: 12rem;
-  --ui-card-shell-padding: var(--spacing-4);
+  min-height: 12rem;
+  padding: var(--spacing-4);
+  gap: var(--spacing-3);
 }
 
 .ui-card-shell__header {
@@ -1506,30 +1584,37 @@ router-outlet + * {
   min-height: 2rem;
 }
 
-// ── Shared button primitives ──────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// UI BUTTON PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiButtonSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier (uiButtonPrimary/Secondary/Ghost/Danger):
+//     → background, color, border-color, hover/active states
+//   Layout-Modifier (uiButtonIconLeading/Trailing/IconOnly):
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
 
 .ui-button {
-  --ui-button-min-height: 2.5rem;
-  --ui-button-padding-inline: var(--spacing-3);
-  --ui-button-padding-block: 0.45rem;
-  --ui-button-font-size: 0.875rem;
-
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
-  min-height: var(--ui-button-min-height);
-  padding: var(--ui-button-padding-inline);
   border: 1.5px solid var(--action-border-default);
   border-radius: var(--container-radius-control);
   background: var(--action-bg-default);
   color: var(--menu-item-text);
-  font-size: var(--ui-button-font-size);
   font-weight: 600;
   cursor: pointer;
   text-align: center;
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  padding: 0.45rem var(--spacing-3);
+  font-size: 0.875rem;
+  gap: var(--spacing-2);
 
   &:hover:not(:disabled) {
     border-color: var(--action-border-active);
@@ -1553,24 +1638,44 @@ router-outlet + * {
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-button--sm {
-  --ui-button-min-height: 2rem;
-  --ui-button-padding-inline: var(--spacing-2);
-  --ui-button-font-size: 0.8125rem;
+  min-height: 2rem;
+  padding: 0.3rem var(--spacing-2);
+  font-size: 0.8125rem;
+  gap: var(--spacing-1);
+
+  &.ui-button--icon-only {
+    width: 2rem;
+    padding: 0;
+  }
 }
 
 .ui-button--md {
-  --ui-button-min-height: 2.5rem;
-  --ui-button-padding-inline: var(--spacing-3);
-  --ui-button-font-size: 0.875rem;
+  min-height: 2.5rem;
+  padding: 0.45rem var(--spacing-3);
+  font-size: 0.875rem;
+  gap: var(--spacing-2);
+
+  &.ui-button--icon-only {
+    width: 2.5rem;
+    padding: 0;
+  }
 }
 
 .ui-button--lg {
-  --ui-button-min-height: 3rem;
-  --ui-button-padding-inline: var(--spacing-4);
-  --ui-button-font-size: 0.9375rem;
+  min-height: 3rem;
+  padding: 0.55rem var(--spacing-4);
+  font-size: 0.9375rem;
+  gap: var(--spacing-2);
+
+  &.ui-button--icon-only {
+    width: 3rem;
+    padding: 0;
+  }
 }
 
+// Layout: nur Icon/Label Anordnung – KEINE Größen-Properties
 .ui-button--icon-leading {
   flex-direction: row;
 }
@@ -1584,12 +1689,8 @@ router-outlet + * {
 }
 
 .ui-button--icon-only {
-  --ui-button-padding-inline: 0;
-  --ui-button-padding-block: 0;
-
-  min-width: var(--ui-button-min-height);
-  width: var(--ui-button-min-height);
   gap: 0;
+  // width/padding set within size modifiers above
 }
 
 .ui-button--loading {
