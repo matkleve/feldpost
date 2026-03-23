@@ -1,0 +1,13 @@
+
+      :host {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      app-segmented-switch {
+        --segmented-host-width: auto;
+        --segmented-group-width: auto;
+        min-inline-size: auto;
+      }
+    

@@ -10,31 +10,8 @@ import {
   selector: 'app-projects-view-toggle',
   standalone: true,
   imports: [SegmentedSwitchComponent],
-  template: `
-    <app-segmented-switch
-      [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
-      [options]="viewOptions()"
-      [value]="viewMode()"
-      [size]="'sm'"
-      [iconOnly]="true"
-      (valueChange)="onViewModeSelected($event)"
-    />
-  `,
-  styles: [
-    `
-      :host {
-        display: inline-flex;
-        align-items: center;
-        justify-content: flex-end;
-      }
-
-      app-segmented-switch {
-        --segmented-host-width: auto;
-        --segmented-group-width: auto;
-        min-inline-size: auto;
-      }
-    `,
-  ],
+    templateUrl: './projects-view-toggle.component.html',
+  styleUrl: './projects-view-toggle.component.scss',
 })
 export class ProjectsViewToggleComponent {
   private readonly i18nService = inject(I18nService);

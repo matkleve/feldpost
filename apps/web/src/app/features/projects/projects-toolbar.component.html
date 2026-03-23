@@ -1,0 +1,78 @@
+
+    <app-pane-toolbar class="projects-toolbar">
+      <app-segmented-switch
+        slot="left"
+        class="projects-toolbar__status"
+        size="sm"
+        [ariaLabel]="t('projects.toolbar.status.aria', 'Project status filter')"
+        [options]="statusOptions()"
+        [value]="statusFilter()"
+        (valueChange)="onStatusValueChange($event)"
+      />
+
+      <div
+        slot="left"
+        class="projects-toolbar__controls"
+        role="toolbar"
+        [attr.aria-label]="t('projects.toolbar.aria.controls', 'Project controls')"
+      >
+        @for (btn of buttons(); track btn.id) {
+          <button
+            type="button"
+            uiDropdownTrigger
+            [class.ui-button--active]="btn.active"
+            [open]="activeDropdown() === btn.id"
+            [attr.aria-expanded]="activeDropdown() === btn.id"
+            [attr.aria-haspopup]="true"
+            (click)="toggleDropdown(btn.id, $event)"
+          >
+            <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
+            <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true"
+              >expand_more</span
+            >
+          </button>
+        }
+      </div>
+
+      <app-projects-view-toggle
+        slot="right"
+        class="projects-toolbar__view-toggle"
+        [viewMode]="viewMode()"
+        (viewModeChange)="viewModeChange.emit($event)"
+      />
+    </app-pane-toolbar>
+
+    @if (activeDropdown()) {
+      <app-dropdown-shell
+        panelClass="toolbar-dropdown option-menu-surface"
+        [top]="dropdownTop()"
+        [left]="dropdownLeft()"
+        [outsideCloseEnabled]="!isDragging()"
+        (closeRequested)="closeDropdown()"
+      >
+        @switch (activeDropdown()) {
+          @case ('grouping') {
+            <app-grouping-dropdown
+              [activeGroupings]="activeGroupings()"
+              [availableProperties]="availableGroupings()"
+              (groupingsChanged)="onGroupingsChanged($event.active, $event.available)"
+              (dragStarted)="onDragStarted()"
+              (dragEnded)="onDragEnded()"
+            />
+          }
+          @case ('filter') {
+            <app-filter-dropdown [propertyOptionsInput]="filterOptions()" />
+          }
+          @case ('sort') {
+            <app-sort-dropdown
+              [optionsInput]="sortOptions()"
+              [groupingIdsInput]="activeGroupingIds()"
+              [activeSortsInput]="activeSorts()"
+              [defaultSorts]="[]"
+              (sortChanged)="sortChanged.emit($event)"
+            />
+          }
+        }
+      </app-dropdown-shell>
+    }
+  
