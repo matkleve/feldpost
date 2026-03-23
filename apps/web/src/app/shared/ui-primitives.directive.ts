@@ -602,3 +602,4 @@ export const UI_PRIMITIVE_DIRECTIVES = [
   UiCardShellSizeMdDirective,
   UiCardShellSizeLgDirective,
 ] as const;
+

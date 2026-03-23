@@ -5,27 +5,32 @@
 >
   @for (btn of buttons(); track btn.id) {
     <button
-      uiToolbarButton
-      [class.toolbar-btn--active]="btn.active()"
-      [class.toolbar-btn--open]="activeDropdown() === btn.id"
+      uiDropdownTrigger
+      [class.ui-button--active]="btn.active()"
+      [open]="activeDropdown() === btn.id"
       [attr.aria-expanded]="activeDropdown() === btn.id"
       [attr.aria-haspopup]="true"
       (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
     >
-      <span class="toolbar-btn__label">{{ btn.label }}</span>
-      <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
+      <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
+      <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true">expand_more</span>
     </button>
   }
 
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
   <div class="workspace-toolbar__size-control">
-    <app-snap-size-slider
-      [label]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
-      [options]="thumbnailSizeOptions()"
-      [value]="thumbnailSizePreset()"
-      (valueChange)="onThumbnailSizeChanged($event)"
-    />
+    <div class="ui-segmented" role="radiogroup" [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')">
+      @for (option of thumbnailSizeOptions(); track option.value) {
+        <button type="button" class="ui-segmented__button ui-segmented__button--sm"
+                [attr.aria-checked]="thumbnailSizePreset() === option.value"
+                [class.ui-segmented__button--active]="thumbnailSizePreset() === option.value"
+                (click)="onThumbnailSizeChanged(option.value)"
+                [title]="option.label">
+          <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
+        </button>
+      }
+    </div>
   </div>
 </div>
 
@@ -59,3 +64,5 @@
     }
   </app-dropdown-shell>
 }
+
+

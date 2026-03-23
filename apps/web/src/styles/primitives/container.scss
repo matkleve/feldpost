@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI CONTAINER & ITEM PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiContainerCompact, uiItem):
+// Responsibilities:
+//   Size Modifiers (uiContainerCompact, uiItem):
 //     ? min-height, padding, gap, radius
-//   Emphasis-Modifier:
+//   Emphasis Modifiers:
 //     ? background, color, hover/active states
-//   Layout-Modifier:
+//   Layout Modifiers:
 //     ? flex-direction, grid-template, component specific variables
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-container {
@@ -25,14 +25,14 @@
   border-radius: var(--ui-container-radius);
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-container--compact {
   --ui-container-padding-inline: var(--container-padding-inline-compact);
   --ui-container-padding-block: var(--container-padding-block-compact);
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
-// (Container steuert Layout über Flex-Modifier in sich selbst)
+// Layout: arrangement only ï¿½ NO size or font properties
+// (Container steuert Layout ï¿½ber Flex-Modifier in sich selbst)
 
 // ---------------------------------------------
 // UI ITEM PRIMITIVE
@@ -51,7 +51,7 @@
   grid-template-columns: var(--ui-item-media-size) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--ui-item-gap);
-  min-height: var(--ui-item-min-height); // Container/Items content wächst
+  min-height: var(--ui-item-min-height); // Container/Items content wï¿½chst
   padding-block: var(--ui-item-padding-block);
   padding-inline: var(--ui-item-padding-inline);
   border-radius: var(--ui-item-radius);
@@ -67,7 +67,7 @@
   }
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
+// Layout: arrangement only ï¿½ NO size or font properties
 .ui-item-media {
   display: inline-flex;
   align-items: center;

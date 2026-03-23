@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI ROW SHELL PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiRowShellSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiRowShellSizeSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier:
+//   Emphasis Modifiers:
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-row-shell {
@@ -32,7 +32,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-row-shell--sm {
   height: 2rem;
   padding-inline: var(--spacing-1);
@@ -54,10 +54,10 @@
   gap: var(--spacing-2);
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 // (Derzeit nur Hover im Basis-Selektor definiert)
 
-// Layout: nur Anordnung – KEINE Größen-Properties
+// Layout: arrangement only ï¿½ NO size or font properties
 .ui-row-shell__leading {
   flex: 0 0 auto;
   display: inline-flex;

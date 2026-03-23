@@ -13,11 +13,7 @@ import type {
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
-import {
-  SnapSizeSliderComponent,
-  type SnapSizeSliderOption,
-} from '../../../../shared/snap-size-slider/snap-size-slider.component';
-import { UiToolbarButtonDirective } from '../../../../shared/ui-primitives.directive';
+import { UiDropdownTriggerDirective } from '../../../../shared/ui-dropdown-trigger.directive';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -31,8 +27,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     FilterDropdownComponent,
     SortDropdownComponent,
     ProjectsDropdownComponent,
-    SnapSizeSliderComponent,
-    UiToolbarButtonDirective,
+    UiDropdownTriggerDirective,
   ],
 })
 export class WorkspaceToolbarComponent {
@@ -44,7 +39,7 @@ export class WorkspaceToolbarComponent {
   readonly currentLanguage = this.i18nService.language;
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly thumbnailSizeOptions = computed<ReadonlyArray<SnapSizeSliderOption>>(() => {
+  readonly thumbnailSizeOptions = computed<ReadonlyArray<{ value: string, label: string, icon: string }>>(() => {
     this.currentLanguage();
     return [
       {
@@ -186,3 +181,5 @@ export class WorkspaceToolbarComponent {
     this.closeDropdown();
   }
 }
+
+

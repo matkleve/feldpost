@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI TOGGLE ROW PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiToggleRowSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiToggleRowSizeSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier (uiToggleRowError, uiToggleRowLoading):
+//   Emphasis Modifiers (uiToggleRowError, uiToggleRowLoading):
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-toggle-row {
@@ -50,7 +50,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-toggle-row--sm {
   height: 2rem;
   padding-inline: var(--spacing-2);
@@ -83,7 +83,7 @@
   --ui-toggle-row-border-width: 1px;
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 .ui-toggle-row--loading {
   pointer-events: none;
   opacity: 0.72;
@@ -94,8 +94,8 @@
   background: color-mix(in srgb, var(--color-danger) 6%, transparent);
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
-// (Derzeit keine spezifischen Layout-Modifier für Toggle-Row)
+// Layout: arrangement only ï¿½ NO size or font properties
+// (Derzeit keine spezifischen Layout-Modifier fï¿½r Toggle-Row)
 
 // ---------------------------------------------
 // UI TOGGLE SWITCH PRIMITIVE

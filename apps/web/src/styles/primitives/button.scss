@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────
 // UI BUTTON PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiButtonSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiButtonSizeSm/Md/Lg):
 //     → height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier (uiButtonPrimary/Secondary/Ghost/Danger):
+//   Emphasis Modifiers (uiButtonPrimary/Secondary/Ghost/Danger):
 //     → background, color, border-color, hover/active states
-//   Layout-Modifier (uiButtonTextOnly/IconWithText/IconOnly):
+//   Layout Modifiers (uiButtonTextOnly/IconWithText/IconOnly):
 //     → padding overrides, gap resets
-//     → NIEMALS height, font-size
+//     → NEVER height, font-size
 // ─────────────────────────────────────────────
 
 .ui-button {

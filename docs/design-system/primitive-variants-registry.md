@@ -72,3 +72,4 @@ Implementation update (2026-03-21):
 - Segmented switch has horizontal runtime support today; vertical is defined as planned and should be added via a dedicated modifier before broad adoption.
 - Primitive usage in Angular templates should prefer primitive directive attributes from the shared primitive directive file over ad-hoc feature-local utility classes.
 - If a primitive requires extra state (`loading`, `error`, `success`), add an explicit variant class and update this table in the same change.
+- SnapSlider deprecated, replaced by ui-segmented

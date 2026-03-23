@@ -1,0 +1,43 @@
+// ---------------------------------------------
+// UI DROPDOWN TRIGGER PRIMITIVE
+// Builds on ui-button � adds dropdown-specific behavior
+// Responsibilities:
+//   Size Modifiers: inherited from ui-button (uiButtonSizeSm/Md/Lg)
+//     ? height, padding-inline, padding-block, font-size, gap
+//     ? works at ALL sizes, not just sm
+//   Emphasis Modifiers: inherited from ui-button
+//   Layout Modifiers (dropdown-specific):
+//     ? chevron position (always trailing)
+//     ? open state (chevron rotation)
+//     ? responsive collapse behavior
+//     ? NEVER redefines height, font-size, padding from ui-button
+// ---------------------------------------------
+
+// Layout: chevron always trailing, inherits everything else from ui-button
+.ui-dropdown-trigger {
+  flex-direction: row;
+}
+
+.ui-dropdown-trigger__chevron {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 150ms ease-out;
+}
+
+// Emphasis: open state
+.ui-dropdown-trigger--open .ui-dropdown-trigger__chevron {
+  transform: rotate(180deg);
+}
+
+// Layout: responsive collapse modifiers
+// label hidden, icon + chevron visible
+.ui-dropdown-trigger--compact {
+  .ui-dropdown-trigger__label { display: none; }
+}
+
+// icon-only: label and chevron hidden
+.ui-dropdown-trigger--icon-only {
+  .ui-dropdown-trigger__label { display: none; }
+  .ui-dropdown-trigger__chevron { display: none; }
+}

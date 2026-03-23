@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI CHIP PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiChipSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiChipSizeSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier (uiChipAction/Passive/Selected/Error/etc):
+//   Emphasis Modifiers (uiChipAction/Passive/Selected/Error/etc):
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-chip {
@@ -28,7 +28,7 @@
   gap: var(--spacing-1);
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-chip--sm {
   height: 2rem;
   padding-inline: var(--spacing-1);
@@ -53,7 +53,7 @@
   gap: var(--spacing-1);
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 .ui-chip--action {
   cursor: pointer;
 

@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI TAB PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiTabSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiTabSizeSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier (uiTabActive):
+//   Emphasis Modifiers (uiTabActive):
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-tab-list {
@@ -60,7 +60,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-tab--sm {
   height: 2rem;
   padding-inline: var(--spacing-2);
@@ -85,7 +85,7 @@
   gap: var(--spacing-2);
 }
 
-// Emphasis: Eigenschaften für Theme und States, keine Struktur- oder Größen-Properties
+// Emphasis: Eigenschaften fï¿½r Theme und States, keine Struktur- oder Grï¿½ï¿½en-Properties
 .ui-tab--active {
   background: var(--action-bg-active);
   color: var(--action-text-active);
@@ -94,7 +94,7 @@
     0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
+// Layout: arrangement only ï¿½ NO size or font properties
 .ui-tab--icon-only {
   padding-inline: 0;
   width: var(--height); // Not fully robust here but let's keep it structurally sound if existed. 

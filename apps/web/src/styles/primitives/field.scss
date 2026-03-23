@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI SELECT CONTROL PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiSelectControlSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiSelectControlSizeSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, border-width
-//   Emphasis-Modifier (uiSelectControlError, uiSelectControlLoading):
+//   Emphasis Modifiers (uiSelectControlError, uiSelectControlLoading):
 //     ? background, color, border-color
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-select-control {
@@ -36,7 +36,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-select-control--sm {
   height: 2rem;
   border: 1px solid var(--color-border);
@@ -65,7 +65,7 @@
   font-size: 0.75rem;
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 .ui-select-control--loading {
   pointer-events: none;
   cursor: progress;
@@ -77,20 +77,20 @@
   background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
+// Layout: arrangement only ï¿½ NO size or font properties
 // (Derzeit keine Layout-Modifier)
 
 
 // ---------------------------------------------
 // UI INPUT CONTROL PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiInputControlSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiInputControlSizeSm/Md/Lg):
 //     ? height, padding-inline, padding-block, font-size, border-width
-//   Emphasis-Modifier (uiInputControlError, uiInputControlLoading):
+//   Emphasis Modifiers (uiInputControlError, uiInputControlLoading):
 //     ? background, color, border-color
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-input-control {
@@ -124,7 +124,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-input-control--sm {
   height: 2rem;
   border: 1px solid var(--color-border);
@@ -153,7 +153,7 @@
   font-size: 0.75rem;
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 .ui-input-control--loading {
   pointer-events: none;
   cursor: progress;
@@ -165,7 +165,7 @@
   background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
+// Layout: arrangement only ï¿½ NO size or font properties
 // (Derzeit keine Layout-Modifier)
 
 

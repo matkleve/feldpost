@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI SEGMENTED PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (falls vorhanden):
+// Responsibilities:
+//   Size Modifiers (if applicable):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier (uiSegmentedButtonActive):
+//   Emphasis Modifiers (uiSegmentedButtonActive):
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-segmented {
@@ -50,7 +50,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-segmented__button--sm {
   height: 2rem;
   padding-inline: 0.5rem;
@@ -72,7 +72,7 @@
   font-size: 0.875rem;
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 .ui-segmented__button--active {
   background: var(--action-bg-active);
   color: var(--action-text-active);
@@ -81,5 +81,5 @@
     0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
 }
 
-// Layout: nur Anordnung – KEINE Größen-Properties
-// (Derzeit keine spezifischen Layout-Modifier)
+// Layout: arrangement only ï¿½ NO size or font properties
+// (Currently no specific layout modifiers)

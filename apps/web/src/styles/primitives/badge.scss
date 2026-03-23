@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI STATUS BADGE PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiStatusBadgeSizeSm/Md):
+// Responsibilities:
+//   Size Modifiers (uiStatusBadgeSizeSm/Md):
 //     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis-Modifier (uiStatusBadgeNeutral/Info/Success/Warning/Error):
+//   Emphasis Modifiers (uiStatusBadgeNeutral/Info/Success/Warning/Error):
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, gap resets
-//     ? NIEMALS height, font-size
+//     ? NEVER height, font-size
 // ---------------------------------------------
 
 .ui-status-badge {
@@ -30,7 +30,7 @@
   gap: var(--spacing-1);
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-status-badge--sm {
   height: 1.25rem;
   padding-inline: var(--spacing-1);
@@ -47,7 +47,7 @@
   gap: var(--spacing-1);
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 .ui-status-badge--neutral {
   border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
   background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));

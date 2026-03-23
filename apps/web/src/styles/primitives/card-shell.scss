@@ -1,13 +1,13 @@
 // ---------------------------------------------
 // UI CARD SHELL PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiCardShellSizeSm/Md/Lg):
+// Responsibilities:
+//   Size Modifiers (uiCardShellSizeSm/Md/Lg):
 //     ? min-height, padding, font-size, gap
-//   Emphasis-Modifier:
+//   Emphasis Modifiers:
 //     ? background, color, border-color, hover/active states
-//   Layout-Modifier (falls vorhanden):
+//   Layout Modifiers (if applicable):
 //     ? padding overrides, flex-direction, gap resets
-//     ? NIEMALS min-height, font-size
+//     ? NEVER min-height, font-size
 // ---------------------------------------------
 
 .ui-card-shell {
@@ -34,7 +34,7 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: defines height and spacing ï¿½ never overridden by Layout Modifiers
 .ui-card-shell--sm {
   min-height: 8rem;
   padding: var(--spacing-2);
@@ -53,10 +53,10 @@
   gap: var(--spacing-3);
 }
 
-// Emphasis: Farbe und States – keine Größen-Properties
+// Emphasis: color and interaction states ï¿½ no size properties allowed
 // (Derzeit nur Hover im Basis-Selektor definiert)
 
-// Layout: nur Anordnung – KEINE Größen-Properties
+// Layout: arrangement only ï¿½ NO size or font properties
 .ui-card-shell__header {
   display: flex;
   align-items: center;

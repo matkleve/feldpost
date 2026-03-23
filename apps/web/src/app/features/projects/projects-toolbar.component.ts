@@ -17,7 +17,7 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import { UiToolbarButtonDirective } from '../../shared/ui-primitives.directive';
+import { UiDropdownTriggerDirective } from '../../shared/ui-dropdown-trigger.directive';
 import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
@@ -33,7 +33,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     FilterDropdownComponent,
     SortDropdownComponent,
     SegmentedSwitchComponent,
-    UiToolbarButtonDirective,
+    UiDropdownTriggerDirective,
     ProjectsViewToggleComponent,
   ],
   template: `
@@ -54,15 +54,15 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
         @for (btn of buttons(); track btn.id) {
           <button
             type="button"
-            uiToolbarButton
-            [class.toolbar-btn--active]="btn.active"
-            [class.toolbar-btn--open]="activeDropdown() === btn.id"
+            uiDropdownTrigger
+            [class.ui-button--active]="btn.active"
+            [open]="activeDropdown() === btn.id"
             [attr.aria-expanded]="activeDropdown() === btn.id"
             [attr.aria-haspopup]="true"
             (click)="toggleDropdown(btn.id, $event)"
           >
-            <span class="toolbar-btn__label">{{ btn.label }}</span>
-            <span class="toolbar-btn__chevron material-icons" aria-hidden="true">expand_more</span>
+            <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
+            <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true">expand_more</span>
           </button>
         }
       </div>
@@ -270,3 +270,4 @@ export class ProjectsToolbarComponent {
     }
   }
 }
+
