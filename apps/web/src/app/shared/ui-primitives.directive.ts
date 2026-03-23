@@ -64,25 +64,18 @@ export class UiButtonSizeLgDirective {}
 export class UiButtonIconOnlyDirective {}
 
 @Directive({
-  selector: 'button[uiButtonIconLeading]',
+  selector: 'button[uiButtonIconWithText]',
   standalone: true,
-  host: { class: 'ui-button--icon-leading' },
+  host: { class: 'ui-button--icon-with-text' },
 })
-export class UiButtonIconLeadingDirective {}
+export class UiButtonIconWithTextDirective {}
 
 @Directive({
-  selector: 'button[uiButtonIconTrailing]',
+  selector: 'button[uiButtonTextOnly]',
   standalone: true,
-  host: { class: 'ui-button--icon-trailing' },
+  host: { class: 'ui-button--text-only' },
 })
-export class UiButtonIconTrailingDirective {}
-
-@Directive({
-  selector: 'button[uiButtonLabelOnly]',
-  standalone: true,
-  host: { class: 'ui-button--label-only' },
-})
-export class UiButtonLabelOnlyDirective {}
+export class UiButtonTextOnlyDirective {}
 
 @Directive({
   selector: 'button[uiButtonLoading]',
@@ -532,9 +525,8 @@ export const UI_PRIMITIVE_DIRECTIVES = [
   UiButtonSizeMdDirective,
   UiButtonSizeLgDirective,
   UiButtonIconOnlyDirective,
-  UiButtonIconLeadingDirective,
-  UiButtonIconTrailingDirective,
-  UiButtonLabelOnlyDirective,
+  UiButtonIconWithTextDirective,
+  UiButtonTextOnlyDirective,
   UiButtonLoadingDirective,
   UiButtonPrimaryDirective,
   UiButtonSecondaryDirective,

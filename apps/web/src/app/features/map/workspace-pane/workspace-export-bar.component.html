@@ -1,55 +1,51 @@
 <app-pane-footer>
-  <div class="workspace-action__summary" slot="left">
+  <div class="workspace-export__summary" slot="left">
     <strong>{{ selectionService.selectedCount() }}</strong>
     <span>{{ t('workspace.export.summary.selected', 'selected') }}</span>
   </div>
 
-  <div class="workspace-action__actions" slot="right">
+  <div class="workspace-export__actions" slot="right">
     <button
       uiButton
       uiButtonSizeSm
-      uiButtonIconOnly
+      uiButtonIconWithText
       type="button"
       (click)="selectAll()"
-      [attr.aria-label]="t('workspace.export.action.selectAll', 'Select all')"
-      [title]="t('workspace.export.action.selectAll', 'Select all')"
     >
       <span class="material-icons" aria-hidden="true">done_all</span>
+      <span>{{ t('workspace.export.action.selectAll', 'Select all') }}</span>
     </button>
     <button
       uiButton
       uiButtonSizeSm
-      uiButtonIconOnly
+      uiButtonIconWithText
       type="button"
       (click)="selectNone()"
-      [attr.aria-label]="t('workspace.export.action.selectNone', 'Select none')"
-      [title]="t('workspace.export.action.selectNone', 'Select none')"
     >
       <span class="material-icons" aria-hidden="true">deselect</span>
+      <span>{{ t('workspace.export.action.selectNone', 'Select none') }}</span>
     </button>
     <button
       uiButton
       uiButtonSizeSm
-      uiButtonIconOnly
+      uiButtonIconWithText
       type="button"
       [disabled]="pending()"
       (click)="shareLink()"
-      [attr.aria-label]="t('workspace.export.action.share', 'Share')"
-      [title]="t('workspace.export.action.share', 'Share')"
     >
       <span class="material-icons" aria-hidden="true">share</span>
+      <span>{{ t('workspace.export.action.share', 'Share') }}</span>
     </button>
     <button
       uiButton
       uiButtonSizeSm
-      uiButtonIconOnly
+      uiButtonIconWithText
       type="button"
       [disabled]="pending()"
       (click)="copyLink()"
-      [attr.aria-label]="t('workspace.export.action.copyLink', 'Link kopieren')"
-      [title]="t('workspace.export.action.copyLink', 'Link kopieren')"
     >
       <span class="material-icons" aria-hidden="true">content_copy</span>
+      <span>{{ t('workspace.export.action.copyLink', 'Link kopieren') }}</span>
     </button>
     <button
       uiButton
@@ -59,23 +55,22 @@
       type="button"
       [disabled]="pending()"
       (click)="openZipDialog()"
-      [attr.aria-label]="t('workspace.export.action.downloadZip', 'Export')"
-      [title]="t('workspace.export.action.downloadZip', 'Export')"
     >
-      <span class="material-icons" aria-hidden="true">folder_zip</span>
+      <span class="material-icons" aria-hidden="true">download</span>
+      <span>{{ t('workspace.export.action.downloadZip', 'Download ZIP') }}</span>
     </button>
   </div>
 </app-pane-footer>
 
 @if (zipDialogOpen()) {
-  <div class="workspace-action__dialog-backdrop" (click)="closeZipDialog()"></div>
+  <div class="workspace-export__dialog-backdrop" (click)="closeZipDialog()"></div>
   <section
-    class="workspace-action__dialog"
+    class="workspace-export__dialog"
     role="dialog"
     aria-modal="true"
-    [attr.aria-label]="t('workspace.export.dialog.aria', 'Export selection')"
+    [attr.aria-label]="t('workspace.export.dialog.aria', 'Download ZIP')"
   >
-    <h3>{{ t('workspace.export.dialog.title', 'Export selection') }}</h3>
+    <h3>{{ t('workspace.export.dialog.title', 'Download selection') }}</h3>
     <label for="zip-title">{{ t('workspace.export.dialog.field.title', 'Title') }}</label>
     <input
       uiInputControl
@@ -87,15 +82,15 @@
       [disabled]="pending()"
     />
 
-    <div class="workspace-action__progress" [style.--progress]="zipProgress() * 100 + '%'">
+    <div class="workspace-export__progress" [style.--progress]="zipProgress() * 100 + '%'">
       <span>{{ (zipProgress() * 100).toFixed(0) }}%</span>
     </div>
 
-    <div class="workspace-action__dialog-actions">
+    <div class="workspace-export__dialog-actions">
       <button
         uiButton
         type="button"
-        class="workspace-action__btn"
+        class="workspace-export__btn"
         [disabled]="pending()"
         (click)="closeZipDialog()"
       >
@@ -105,14 +100,14 @@
         uiButton
         uiButtonPrimary
         type="button"
-        class="workspace-action__btn workspace-action__btn--primary"
+        class="workspace-export__btn workspace-export__btn--primary"
         [disabled]="pending()"
         (click)="downloadZip()"
       >
         {{
           pending()
             ? t('workspace.export.dialog.pending', 'Preparing...')
-            : t('workspace.export.dialog.confirm', 'Export ZIP')
+            : t('workspace.export.dialog.confirm', 'Download')
         }}
       </button>
     </div>
