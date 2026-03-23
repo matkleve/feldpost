@@ -66,6 +66,7 @@ Reference workflow and checklist:
 - **SCSS** for component styling
 - Prefer standardized shared UI components from `apps/web/src/app/shared/` (especially dialogs/modals) before building feature-local variants
 - Avoid browser-native UI primitives (`window.prompt`, `window.confirm`, native context UI) for product flows when a shared component exists
+- When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting
 

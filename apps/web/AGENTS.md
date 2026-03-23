@@ -31,6 +31,7 @@ src/app/
 - Floating/overlay elements go in Map Zone, not outside Map Shell
 - Prefer shared standardized UI components in `src/app/shared/` before implementing feature-local duplicates
 - Prefer app dialogs/modals over browser-native `window.prompt` / `window.confirm` for product interactions
+- When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
 
 ## Build & Test
 
