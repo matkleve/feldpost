@@ -26,7 +26,7 @@
 
   // default to md size config
   min-height: 2.5rem;
-  padding: 0.45rem var(--spacing-3);
+  padding: var(--spacing-3);
   font-size: 0.875rem;
   gap: var(--spacing-2);
 
@@ -55,7 +55,7 @@
 // Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-button--sm {
   min-height: 2rem;
-  padding: 0.3rem var(--spacing-2);
+  padding: var(--spacing-2);
   font-size: 0.8125rem;
   gap: var(--spacing-1);
 
@@ -69,7 +69,7 @@
 
 .ui-button--md {
   min-height: 2.5rem;
-  padding: 0.45rem var(--spacing-3);
+  padding: var(--spacing-3);
   font-size: 0.875rem;
   gap: var(--spacing-2);
 
@@ -83,7 +83,7 @@
 
 .ui-button--lg {
   min-height: 3rem;
-  padding: 0.55rem var(--spacing-4);
+  padding: var(--spacing-4);
   font-size: 0.9375rem;
   gap: var(--spacing-2);
 
