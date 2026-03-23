@@ -12,7 +12,7 @@
   background: var(--color-bg-base);
 }
 
-// ── Map style switch (street/photo/historic) — top-left of map zone ─────────
+// ── Map style switch (street/photo) — top-left of map zone ─────────
 
 .map-style-switch {
   position: absolute;
@@ -227,82 +227,6 @@
   transform: translate(-50%, -50%) rotate(var(--radius-label-rotation, 0deg));
   transform-origin: center;
   white-space: nowrap;
-}
-
-// Applies only to historic base tiles; labels are handled in a separate pane.
-:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane {
-  filter: sepia(0.78) saturate(0.82) hue-rotate(-26deg) contrast(1.2) brightness(0.9)
-    grayscale(0.04);
-  position: relative;
-  background: color-mix(
-    in srgb,
-    var(--color-clay) 10%,
-    color-mix(in srgb, var(--color-text-secondary) 8%, var(--color-bg-base))
-  );
-}
-
-:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane .leaflet-tile {
-  opacity: 0.97;
-  mix-blend-mode: normal;
-}
-
-// Parchment grain and edge aging, constrained to tile pane.
-:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane::before {
-  content: '';
-  position: absolute;
-  inset: -8%;
-  pointer-events: none;
-  z-index: 430;
-  background:
-    radial-gradient(
-      150% 95% at 18% 8%,
-      color-mix(in srgb, var(--color-clay) 22%, transparent) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      120% 80% at 85% 92%,
-      color-mix(in srgb, var(--color-text-secondary) 22%, transparent) 0%,
-      transparent 68%
-    ),
-    repeating-linear-gradient(
-      31deg,
-      color-mix(in srgb, var(--color-text-primary) 6%, transparent) 0 2px,
-      transparent 2px 5px
-    );
-  opacity: 0.22;
-  mix-blend-mode: multiply;
-}
-
-:host ::ng-deep .map-container--analog-material .leaflet-historic-base-pane::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 431;
-  background:
-    radial-gradient(
-      circle at center,
-      transparent 64%,
-      color-mix(in srgb, var(--color-text-primary) 34%, transparent) 100%
-    ),
-    linear-gradient(
-      8deg,
-      color-mix(in srgb, var(--color-clay) 16%, transparent) 0%,
-      transparent 38%,
-      color-mix(in srgb, var(--color-text-secondary) 18%, transparent) 100%
-    );
-  opacity: 0.28;
-  mix-blend-mode: multiply;
-}
-
-:host ::ng-deep .map-container--analog-material .leaflet-historic-label-pane {
-  filter: sepia(0.42) saturate(0.8) hue-rotate(-20deg) contrast(1.34) brightness(0.84);
-  opacity: 0.96;
-}
-
-:host ::ng-deep .map-container--analog-material .leaflet-historic-label-pane .leaflet-tile {
-  opacity: 0.98;
-  mix-blend-mode: multiply;
 }
 
 :host ::ng-deep .map-user-location-marker {

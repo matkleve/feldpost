@@ -85,11 +85,7 @@ import { MarkerContextPhotoDeleteService } from './marker-context-photo-delete.s
 import { PhotoMarkerIconStateService } from './photo-marker-icon-state.service';
 import { MarkerSelectionSyncService } from './marker-selection-sync.service';
 import { MarkerMotionService } from './marker-motion.service';
-import {
-  MapBasemapPreference,
-  MapMaterialPreference,
-  MapPreferencesService,
-} from './map-preferences.service';
+import { MapBasemapPreference, MapPreferencesService } from './map-preferences.service';
 import { MapBasemapLayerService } from './map-basemap-layer.service';
 import { MapFocusPayloadService } from './map-focus-payload.service';
 import { ShareTokenSelectionService } from './share-token-selection.service';
@@ -105,7 +101,7 @@ import {
 } from '../../../shared/ui-primitives.directive';
 
 type MarkerMotionPreference = 'off' | 'smooth';
-type MapViewMode = 'street' | 'photo' | 'historic';
+type MapViewMode = 'street' | 'photo';
 
 type ViewportMarkerRow = {
   cluster_lat: number;
@@ -138,10 +134,7 @@ type MarkerRenderSnapshot = {
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
-const MAP_MATERIAL_STORAGE_KEY = 'sitesnap.settings.map.material';
 const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePaneWidth';
-const HISTORIC_BASE_PANE = 'historic-base';
-const HISTORIC_LABEL_PANE = 'historic-label';
 
 @Component({
   selector: 'app-map-shell',
@@ -362,12 +355,6 @@ export class MapShellComponent implements OnDestroy {
   readonly mapBasemap = signal<MapBasemapPreference>(
     this.mapPreferencesService.readBasemapPreference(MAP_BASEMAP_STORAGE_KEY),
   );
-  readonly mapMaterial = signal<MapMaterialPreference>(
-    this.mapPreferencesService.readMaterialPreference(MAP_MATERIAL_STORAGE_KEY),
-  );
-  readonly analogMaterialActive = computed(
-    () => this.mapBasemap() === 'default' && this.mapMaterial() === 'analog',
-  );
   readonly mapViewOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
     {
       id: 'street',
@@ -383,19 +370,12 @@ export class MapShellComponent implements OnDestroy {
       ariaLabel: 'Photo map',
       title: 'Photo map',
     },
-    {
-      id: 'historic',
-      label: 'Historic',
-      icon: 'history_edu',
-      ariaLabel: 'Historic map',
-      title: 'Historic map',
-    },
   ]);
   readonly mapViewMode = computed<MapViewMode>(() => {
     if (this.mapBasemap() === 'satellite') {
       return 'photo';
     }
-    return this.mapMaterial() === 'analog' ? 'historic' : 'street';
+    return 'street';
   });
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
@@ -499,7 +479,6 @@ export class MapShellComponent implements OnDestroy {
   /** LayerGroup for all photo markers — enables batch add/remove. */
   private photoMarkerLayer: L.LayerGroup | null = null;
   private activeBaseTileLayer: L.TileLayer | null = null;
-  private activeHistoricLabelTileLayer: L.TileLayer | null = null;
   private radiusDrawStartLatLng: L.LatLng | null = null;
   private radiusDrawActive = false;
   private radiusDrawAdditive = false;
@@ -1490,22 +1469,7 @@ export class MapShellComponent implements OnDestroy {
   toggleMapBasemap(): void {
     const next: MapBasemapPreference = this.mapBasemap() === 'default' ? 'satellite' : 'default';
     this.mapBasemap.set(next);
-    if (next === 'satellite') {
-      this.mapMaterial.set('default');
-      this.mapPreferencesService.persistMaterialPreference(MAP_MATERIAL_STORAGE_KEY, 'default');
-    }
     this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, next);
-    this.applyMapBasemapLayer();
-  }
-
-  toggleMapMaterial(): void {
-    const next: MapMaterialPreference = this.mapMaterial() === 'default' ? 'analog' : 'default';
-    if (this.mapBasemap() === 'satellite') {
-      this.mapBasemap.set('default');
-      this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, 'default');
-    }
-    this.mapMaterial.set(next);
-    this.mapPreferencesService.persistMaterialPreference(MAP_MATERIAL_STORAGE_KEY, next);
     this.applyMapBasemapLayer();
   }
 
@@ -1514,28 +1478,19 @@ export class MapShellComponent implements OnDestroy {
 
     if (mode === 'photo') {
       this.mapBasemap.set('satellite');
-      this.mapMaterial.set('default');
-    } else if (mode === 'historic') {
-      this.mapBasemap.set('default');
-      this.mapMaterial.set('analog');
     } else {
       this.mapBasemap.set('default');
-      this.mapMaterial.set('default');
     }
 
     this.mapPreferencesService.persistBasemapPreference(MAP_BASEMAP_STORAGE_KEY, this.mapBasemap());
-    this.mapPreferencesService.persistMaterialPreference(
-      MAP_MATERIAL_STORAGE_KEY,
-      this.mapMaterial(),
-    );
 
-    if (this.mapBasemap() !== previousBasemap || mode === 'historic' || mode === 'street') {
+    if (this.mapBasemap() !== previousBasemap) {
       this.applyMapBasemapLayer();
     }
   }
 
   onMapViewModeChange(mode: string | null): void {
-    if (mode === 'street' || mode === 'photo' || mode === 'historic') {
+    if (mode === 'street' || mode === 'photo') {
       this.setMapViewMode(mode);
     }
   }
@@ -1572,13 +1527,6 @@ export class MapShellComponent implements OnDestroy {
       maxZoom: 22,
       zoomControl: false,
     });
-
-    const historicBasePane = this.map.createPane(HISTORIC_BASE_PANE);
-    historicBasePane.style.zIndex = '210';
-
-    const historicLabelPane = this.map.createPane(HISTORIC_LABEL_PANE);
-    historicLabelPane.style.zIndex = '211';
-    historicLabelPane.style.pointerEvents = 'none';
 
     this.applyMapBasemapLayer();
 
@@ -1696,14 +1644,9 @@ export class MapShellComponent implements OnDestroy {
     const result = this.mapBasemapLayerService.applyBasemapLayer({
       map: this.map,
       activeBaseTileLayer: this.activeBaseTileLayer,
-      activeHistoricLabelTileLayer: this.activeHistoricLabelTileLayer,
       basemap: this.mapBasemap(),
-      material: this.mapMaterial(),
-      historicBasePane: HISTORIC_BASE_PANE,
-      historicLabelPane: HISTORIC_LABEL_PANE,
     });
     this.activeBaseTileLayer = result.activeBaseTileLayer;
-    this.activeHistoricLabelTileLayer = result.activeHistoricLabelTileLayer;
   }
 
   private applyPendingMapFocus(): void {

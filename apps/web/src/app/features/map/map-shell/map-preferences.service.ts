@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 
 export type MapBasemapPreference = 'default' | 'satellite';
-export type MapMaterialPreference = 'default' | 'analog';
 
 @Injectable({ providedIn: 'root' })
 export class MapPreferencesService {
@@ -12,17 +11,6 @@ export class MapPreferencesService {
   }
 
   persistBasemapPreference(storageKey: string, value: MapBasemapPreference): void {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(storageKey, value);
-  }
-
-  readMaterialPreference(storageKey: string): MapMaterialPreference {
-    if (typeof window === 'undefined') return 'default';
-    const stored = window.localStorage.getItem(storageKey);
-    return stored === 'analog' ? 'analog' : 'default';
-  }
-
-  persistMaterialPreference(storageKey: string, value: MapMaterialPreference): void {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(storageKey, value);
   }

@@ -205,25 +205,11 @@ describe('MapShellComponent', () => {
     expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('default');
   });
 
-  it('setMapViewMode("historic") enables analog material and persists preferences', () => {
-    const fixture = TestBed.createComponent(MapShellComponent);
-    fixture.detectChanges();
-
-    fixture.componentInstance.setMapViewMode('historic');
-
-    expect(fixture.componentInstance.mapBasemap()).toBe('default');
-    expect(fixture.componentInstance.mapMaterial()).toBe('analog');
-    expect(fixture.componentInstance.analogMaterialActive()).toBe(true);
-    expect(fixture.componentInstance.mapViewMode()).toBe('historic');
-    expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
-    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('analog');
-  });
-
   it('setMapViewMode("street") resets analog material', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.setMapViewMode('historic');
+    fixture.componentInstance.setMapViewMode('photo');
     fixture.componentInstance.setMapViewMode('street');
 
     expect(fixture.componentInstance.mapBasemap()).toBe('default');
@@ -249,7 +235,7 @@ describe('MapShellComponent', () => {
       map: { removeLayer: ReturnType<typeof vi.fn> };
       activeBaseTileLayer: { addTo: ReturnType<typeof vi.fn> } | null;
       createMapBasemapLayer: (mode: 'default' | 'satellite') => { addTo: ReturnType<typeof vi.fn> };
-      setMapViewMode: (mode: 'street' | 'photo' | 'historic') => void;
+      setMapViewMode: (mode: 'street' | 'photo') => void;
     };
 
     component.map = mapStub;
