@@ -1,24 +1,20 @@
-.thumbnail-card {
-  --ui-card-shell-min-height: 0;
-  --ui-card-shell-padding: 0;
+.ui-media-tile {
+  min-height: 0;
+  padding: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--container-radius-panel);
+  overflow: hidden;
+}
 
+.thumbnail-card {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-elevated, var(--color-bg-surface));
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
   cursor: pointer;
-  padding: 0;
-  transition:
-    box-shadow 200ms ease,
-    border-color 200ms ease;
-
-  &:hover {
-    border-color: var(--color-clay);
-    box-shadow: var(--shadow-md);
-  }
 
   &:focus-visible {
     outline: 2px solid var(--color-clay);
@@ -38,20 +34,18 @@
 }
 
 .thumbnail-card--selected {
-  border-color: var(--color-clay);
-  box-shadow: var(--shadow-md);
+  border: none;
+  box-shadow: none;
 }
 
 .thumbnail-card--linked-hover {
-  border-color: color-mix(in srgb, var(--color-clay) 78%, var(--color-border));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
+  border: none;
+  box-shadow: none;
 }
 
 .thumbnail-card--selected.thumbnail-card--linked-hover {
-  border-color: var(--color-clay);
-  box-shadow:
-    var(--shadow-md),
-    0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
+  border: none;
+  box-shadow: none;
 }
 
 .thumbnail-card__main {
@@ -76,8 +70,9 @@
   inline-size: 100%;
   block-size: 100%;
   border-radius: inherit;
+  border: none;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .thumbnail-card--row .thumbnail-card__media {
@@ -201,15 +196,43 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: inherit;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
   background: transparent;
+  filter: brightness(1);
   display: block;
   opacity: 0;
-  transition: opacity 200ms ease;
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.thumbnail-card:hover .thumbnail-card__img {
+  filter: brightness(1.06);
+}
+
+.thumbnail-card--selected .thumbnail-card__img {
+  border-color: var(--color-clay);
+  box-shadow: var(--shadow-md);
+}
+
+.thumbnail-card--linked-hover .thumbnail-card__img {
+  border-color: color-mix(in srgb, var(--color-clay) 78%, var(--color-border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
+}
+
+.thumbnail-card--selected.thumbnail-card--linked-hover .thumbnail-card__img {
+  border-color: var(--color-clay);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
 }
 
 .thumbnail-card--row .thumbnail-card__img {
   object-fit: cover;
+  border: 0;
 }
 
 .thumbnail-card__meta {

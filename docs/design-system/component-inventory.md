@@ -103,7 +103,7 @@ Scope:
 Building blocks:
 
 - List row primitive (`ui-row-shell`)
-- Grid card primitive (`ui-card-shell`, `thumbnail-card` pattern)
+- Grid/media tile primitives (`ui-card-shell`, `ui-media-tile`, `thumbnail-card` pattern)
 - Group header/collapsible row (`app-group-header`)
 - Key/value metadata row (`app-metadata-property-row`, editable-property-row)
 - Status badge/pill (`ui-status-badge` / `ui-status-pill`)
