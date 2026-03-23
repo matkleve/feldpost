@@ -22,29 +22,29 @@ export class ZipExportService {
   }
 
   async exportSelectionAsZip(
-    images: WorkspaceImage[],
+    mediaItems: WorkspaceImage[],
     title: string,
     onProgress?: (value: number) => void,
   ): Promise<void> {
     const zip = new JSZip();
     const cleanedTitle = this.sanitizeTitle(title);
-    const validImages = images.filter((img) => !!img.storagePath);
+    const validMedia = mediaItems.filter((media) => !!media.storagePath);
 
-    for (let i = 0; i < validImages.length; i++) {
-      const image = validImages[i];
-      const storagePath = image.storagePath as string;
+    for (let i = 0; i < validMedia.length; i++) {
+      const media = validMedia[i];
+      const storagePath = media.storagePath as string;
       const downloadUrl = await this.createSignedUrl(storagePath);
       const response = await fetch(downloadUrl);
       if (!response.ok) {
-        throw new Error(`Failed to download file for ${image.id}`);
+        throw new Error(`Failed to download file for ${media.id}`);
       }
 
       const blob = await response.blob();
       const extension = this.getFileExtension(storagePath, blob.type);
-      const safeAddress = this.formatAddressForFilename(image);
-      const filename = `${String(i + 1).padStart(3, '0')}-${safeAddress}.${extension}`;
+      const safeName = this.formatMediaName(media);
+      const filename = `${String(i + 1).padStart(3, '0')}-${safeName}.${extension}`;
       zip.file(filename, blob);
-      onProgress?.((i + 1) / validImages.length);
+      onProgress?.((i + 1) / validMedia.length);
     }
 
     const content = await zip.generateAsync({ type: 'blob' });
@@ -96,14 +96,42 @@ export class ZipExportService {
     return 'jpg';
   }
 
-  private formatAddressForFilename(image: WorkspaceImage): string {
-    if (image.addressLabel) {
-      return this.sanitizeTitle(image.addressLabel);
+  private formatMediaName(media: WorkspaceImage): string {
+    // 1. Try to use an explicit title/filename from metadata or the file itself
+    const metadataName =
+      media.metadata?.['title'] || media.metadata?.['filename'] || media.metadata?.['name'];
+
+    if (metadataName && typeof metadataName === 'string') {
+      return this.sanitizeTitle(metadataName);
     }
-    const parts = [image.street, image.city, image.country].filter(Boolean);
+
+    // 2. Extract from storage path if it retains a real name (e.g. org/user/uuid/MyReport.pdf)
+    if (media.storagePath) {
+      const pathParts = media.storagePath.split('/');
+      const lastPart = pathParts[pathParts.length - 1];
+      // if it's not simply a UUID string
+      if (
+        lastPart &&
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\.[a-zA-Z0-9]+)?$/i.test(
+          lastPart,
+        )
+      ) {
+        return this.sanitizeTitle(lastPart.split('.')[0]);
+      }
+    }
+
+    // 3. Try to use address parts. Note: full precision (like ZIP code and house numbers)
+    // is usually pre-aggregated into addressLabel or street/city properties by the geocoding service.
+    if (media.addressLabel) {
+      return this.sanitizeTitle(media.addressLabel);
+    }
+
+    const parts = [media.street, media.city, media.country].filter(Boolean);
     if (parts.length > 0) {
       return this.sanitizeTitle(parts.join('-'));
     }
-    return image.id;
+
+    // 4. Fallback to generic ID
+    return `media-${media.id}`;
   }
 }
