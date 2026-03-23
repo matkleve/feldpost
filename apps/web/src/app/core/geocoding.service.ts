@@ -23,6 +23,8 @@ export interface ReverseGeocodeResult {
   city: string | null;
   district: string | null;
   street: string | null;
+  streetNumber: string | null;
+  zip: string | null;
   country: string | null;
   countryCode: string | null;
 }
@@ -57,6 +59,8 @@ export interface ForwardGeocodeResult {
   city: string | null;
   district: string | null;
   street: string | null;
+  streetNumber: string | null;
+  zip: string | null;
   country: string | null;
 }
 
@@ -433,11 +437,11 @@ export class GeocodingService {
   }
 
   private parseReverseResponse(data: NominatimReverseResponse): ReverseGeocodeResult {
-    const { city, district, street, country, countryCode } = this.extractAddressFields(
-      data.address!,
-    );
-    const addressLabel = this.buildAddressLabel(data.address, street, city, data.display_name);
-    return { addressLabel, city, district, street, country, countryCode };
+    const { city, district, streetName, streetNumber, zip, country, countryCode } =
+      this.extractAddressFields(data.address!);
+    const street = this.combineStreet(streetName, streetNumber);
+    const addressLabel = this.buildAddressLabel(street, city, zip, data.display_name);
+    return { addressLabel, city, district, street, streetNumber, zip, country, countryCode };
   }
 
   private parseForwardResponse(hit: NominatimSearchResponse): ForwardGeocodeResult | null {
@@ -445,9 +449,12 @@ export class GeocodingService {
     const lng = parseFloat(hit.lon!);
     if (isNaN(lat) || isNaN(lng)) return null;
 
-    const { city, district, street, country } = this.extractAddressFields(hit.address);
-    const addressLabel = this.buildAddressLabel(hit.address, street, city, hit.display_name);
-    return { lat, lng, addressLabel, city, district, street, country };
+    const { city, district, streetName, streetNumber, zip, country } = this.extractAddressFields(
+      hit.address,
+    );
+    const street = this.combineStreet(streetName, streetNumber);
+    const addressLabel = this.buildAddressLabel(street, city, zip, hit.display_name);
+    return { lat, lng, addressLabel, city, district, street, streetNumber, zip, country };
   }
 
   /**
@@ -455,13 +462,12 @@ export class GeocodingService {
    * Falls back to display_name only when structured fields are missing.
    */
   private buildAddressLabel(
-    addr: NominatimReverseResponse['address'] | undefined,
     street: string | null,
     city: string | null,
+    zip: string | null,
     displayName?: string,
   ): string {
-    const postcode = addr?.postcode;
-    const cityPart = postcode && city ? `${postcode} ${city}` : city || null;
+    const cityPart = zip && city ? `${zip} ${city}` : city || null;
 
     if (street && cityPart) return `${street}, ${cityPart}`;
     if (street) return street;
@@ -501,24 +507,40 @@ export class GeocodingService {
   private extractAddressFields(addr?: NominatimReverseResponse['address']): {
     city: string | null;
     district: string | null;
-    street: string | null;
+    streetName: string | null;
+    streetNumber: string | null;
+    zip: string | null;
     country: string | null;
     countryCode: string | null;
   } {
     if (!addr)
-      return { city: null, district: null, street: null, country: null, countryCode: null };
+      return {
+        city: null,
+        district: null,
+        streetName: null,
+        streetNumber: null,
+        zip: null,
+        country: null,
+        countryCode: null,
+      };
 
     const city = this.firstOf(addr.city, addr.town, addr.village, addr.municipality);
     const district = this.firstOf(addr.city_district, addr.suburb, addr.borough, addr.quarter);
-    const streetParts = [addr.road, addr.house_number].filter(Boolean);
 
     return {
       city,
       district,
-      street: streetParts.length > 0 ? streetParts.join(' ') : null,
+      streetName: addr.road ?? null,
+      streetNumber: addr.house_number ?? null,
+      zip: addr.postcode ?? null,
       country: addr.country ?? null,
       countryCode: addr.country_code?.toLowerCase() ?? null,
     };
+  }
+
+  private combineStreet(streetName: string | null, streetNumber: string | null): string | null {
+    if (streetName && streetNumber) return `${streetName} ${streetNumber}`;
+    return streetName ?? streetNumber;
   }
 
   /** Returns the first non-nullish value, or null. */

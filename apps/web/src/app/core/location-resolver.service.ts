@@ -121,6 +121,8 @@ export class LocationResolverService {
           city: result.city,
           district: result.district,
           street: result.street,
+          streetNumber: result.streetNumber,
+          zip: result.zip,
           country: result.country,
         });
       } catch {
@@ -210,6 +212,8 @@ export class LocationResolverService {
     city: string | null;
     district: string | null;
     street: string | null;
+    streetNumber?: string | null;
+    zip?: string | null;
     country: string | null;
   }): boolean {
     return (
@@ -245,6 +249,8 @@ export class LocationResolverService {
         city: result.city,
         district: result.district,
         street: result.street,
+        streetNumber: result.streetNumber,
+        zip: result.zip,
         country: result.country,
       });
       return true;
@@ -310,6 +316,8 @@ export class LocationResolverService {
       city: string | null;
       district: string | null;
       street: string | null;
+      streetNumber?: string | null;
+      zip?: string | null;
       country: string | null;
     },
   ): Promise<void> {
@@ -392,5 +400,7 @@ interface UnresolvedRow {
   city: string | null;
   district: string | null;
   street: string | null;
+  street_number?: string | null;
+  zip?: string | null;
   country: string | null;
 }

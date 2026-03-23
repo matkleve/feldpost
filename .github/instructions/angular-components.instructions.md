@@ -16,6 +16,8 @@ applyTo: "**/*.component.ts"
 - File naming: `kebab-case.component.ts`, `.html`, `.scss`, `.spec.ts`
 - Component class: `PascalCaseComponent`
 - Use canonical names from `docs/glossary.md`
+- Prefer domain terms `media` / `file` over `image` in new symbols unless a DB/API contract is explicitly image-named.
+- For compatibility migrations, keep legacy names as aliases instead of ambiguous mixed semantics.
 
 ## Structure
 
@@ -24,6 +26,8 @@ applyTo: "**/*.component.ts"
 - Each component gets its own directory
 - Prefer reusable components from `src/app/shared/` (dialogs, modals, action sheets) before creating feature-local variants
 - Avoid browser-native `window.prompt` / `window.confirm` in user-facing flows when a shared dialog component can be used
+- When using slot-based content projection (`<ng-content select="[slot=...]">`), keep projection chains flat.
+- Do not introduce single-use wrapper components between slot provider and slot consumer unless every slot is explicitly re-projected.
 
 ## Templates (applies to `.component.html`)
 

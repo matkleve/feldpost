@@ -5,6 +5,7 @@ import { LocationResolverService } from './location-resolver.service';
 import { PropertyRegistryService } from './property-registry.service';
 import { PhotoLoadService } from './photo-load.service';
 import type {
+  WorkspaceMediaCustomMetadata,
   WorkspaceImage,
   GroupedSection,
   SortConfig,
@@ -332,6 +333,7 @@ export class WorkspaceViewService {
         : null;
       const primaryProjectId = projectIds[0] ?? row.project_id;
       const primaryProjectName = projectNames[0] ?? fallbackProjectName;
+      const derivedAddress = deriveStreetNumberAndZip(row.street, row.address_label);
 
       imageById.set(row.id, {
         id: row.id,
@@ -352,6 +354,8 @@ export class WorkspaceViewService {
         city: row.city,
         district: row.district,
         street: row.street,
+        streetNumber: row.street_number ?? derivedAddress.streetNumber,
+        zip: row.zip ?? derivedAddress.zip,
         country: row.country,
         userName: row.user_id ? (profileNameById.get(row.user_id) ?? null) : null,
       });
@@ -463,6 +467,8 @@ export class WorkspaceViewService {
               city: resolved.city,
               district: resolved.district,
               street: resolved.street,
+              streetNumber: resolved.streetNumber,
+              zip: resolved.zip,
               country: resolved.country,
             }
           : existing;
@@ -513,7 +519,7 @@ export class WorkspaceViewService {
     if (error || !data || data.length === 0) return;
 
     // Build map: imageId → { metadataKeyId → value }
-    const metadataMap = new Map<string, Record<string, string>>();
+    const metadataMap = new Map<string, WorkspaceMediaCustomMetadata>();
     for (const row of data as Array<{
       image_id: string;
       metadata_key_id: string;
@@ -613,6 +619,8 @@ interface RawClusterRow {
   city: string | null;
   district: string | null;
   street: string | null;
+  street_number?: string | null;
+  zip?: string | null;
   country: string | null;
   user_name: string | null;
 }
@@ -633,6 +641,8 @@ interface RawSharedImageRow {
   city: string | null;
   district: string | null;
   street: string | null;
+  street_number?: string | null;
+  zip?: string | null;
   country: string | null;
   user_id: string | null;
 }
@@ -646,6 +656,7 @@ interface RawImageProjectMembershipRow {
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {
   const membershipIds = Array.isArray(row.project_ids) ? row.project_ids : [];
   const membershipNames = Array.isArray(row.project_names) ? row.project_names : [];
+  const derivedAddress = deriveStreetNumberAndZip(row.street, row.address_label);
 
   return {
     id: row.image_id,
@@ -666,7 +677,22 @@ function mapClusterRow(row: RawClusterRow): WorkspaceImage {
     city: row.city,
     district: row.district,
     street: row.street,
+    streetNumber: row.street_number ?? derivedAddress.streetNumber,
+    zip: row.zip ?? derivedAddress.zip,
     country: row.country,
     userName: row.user_name,
+  };
+}
+
+function deriveStreetNumberAndZip(
+  street: string | null,
+  addressLabel: string | null,
+): { streetNumber: string | null; zip: string | null } {
+  const streetNumberMatch = street?.trim().match(/(\d+[a-zA-Z0-9/-]*)$/);
+  const zipMatch = addressLabel?.match(/(?:^|,\s*)(\d{4,6})\b/);
+
+  return {
+    streetNumber: streetNumberMatch?.[1] ?? null,
+    zip: zipMatch?.[1] ?? null,
   };
 }

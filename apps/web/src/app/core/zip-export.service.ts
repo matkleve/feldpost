@@ -1,7 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import JSZip from 'jszip';
 import { SupabaseService } from './supabase.service';
-import type { WorkspaceImage } from './workspace-view.types';
+import type { WorkspaceMedia } from './workspace-view.types';
+import {
+  composeStreetWithNumber,
+  extractFilenameFromStoragePath,
+  getFileExtension,
+  readMetadataFilename,
+  sanitizeExportTitle,
+  SIGNED_URL_TTL_SECONDS,
+  ZIP_INDEX_PAD_LENGTH,
+} from './zip-export.helpers';
 
 export interface ZipExportContext {
   selectedProjectName?: string | null;
@@ -16,18 +25,18 @@ export class ZipExportService {
   buildDefaultTitle(context: ZipExportContext): string {
     const date = this.formatDate(context.now ?? new Date());
     if (context.selectedProjectName) {
-      return `${this.sanitizeTitle(context.selectedProjectName)}-${date}`;
+      return `${sanitizeExportTitle(context.selectedProjectName)}-${date}`;
     }
     return `workspace-selection-${date}`;
   }
 
   async exportSelectionAsZip(
-    mediaItems: WorkspaceImage[],
+    mediaItems: WorkspaceMedia[],
     title: string,
     onProgress?: (value: number) => void,
   ): Promise<void> {
     const zip = new JSZip();
-    const cleanedTitle = this.sanitizeTitle(title);
+    const cleanedTitle = sanitizeExportTitle(title);
     const validMedia = mediaItems.filter((media) => !!media.storagePath);
 
     for (let i = 0; i < validMedia.length; i++) {
@@ -40,9 +49,9 @@ export class ZipExportService {
       }
 
       const blob = await response.blob();
-      const extension = this.getFileExtension(storagePath, blob.type);
+      const extension = getFileExtension(storagePath, blob.type);
       const safeName = this.formatMediaName(media);
-      const filename = `${String(i + 1).padStart(3, '0')}-${safeName}.${extension}`;
+      const filename = `${String(i + 1).padStart(ZIP_INDEX_PAD_LENGTH, '0')}-${safeName}.${extension}`;
       zip.file(filename, blob);
       onProgress?.((i + 1) / validMedia.length);
     }
@@ -56,22 +65,13 @@ export class ZipExportService {
     URL.revokeObjectURL(url);
   }
 
-  sanitizeTitle(value: string): string {
-    const trimmed = value.trim() || 'workspace-export';
-    return trimmed
-      .replace(/[\\/:*?"<>|]+/g, '-')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .slice(0, 100);
-  }
-
   private async createSignedUrl(storagePath: string): Promise<string> {
     const { data, error } = await this.supabase.client.storage
       .from('images')
-      .createSignedUrl(storagePath, 60 * 10);
+      .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
 
     if (error || !data?.signedUrl) {
-      throw new Error(error?.message ?? 'Failed to sign image URL.');
+      throw new Error(error?.message ?? 'Failed to sign media URL.');
     }
 
     return data.signedUrl;
@@ -84,54 +84,19 @@ export class ZipExportService {
     return `${year}${month}${day}`;
   }
 
-  private getFileExtension(storagePath: string, mimeType: string): string {
-    const fromPath = storagePath.split('.').pop()?.toLowerCase();
-    if (fromPath && fromPath.length <= 5) {
-      return fromPath;
-    }
+  private formatMediaName(media: WorkspaceMedia): string {
+    const metadataName = readMetadataFilename(media.fileMetadata, media.metadata);
+    if (metadataName) return sanitizeExportTitle(metadataName);
 
-    if (mimeType === 'image/png') return 'png';
-    if (mimeType === 'image/webp') return 'webp';
-    if (mimeType === 'image/heic') return 'heic';
-    return 'jpg';
-  }
+    const fromStoragePath = extractFilenameFromStoragePath(media.storagePath);
+    if (fromStoragePath) return sanitizeExportTitle(fromStoragePath);
 
-  private formatMediaName(media: WorkspaceImage): string {
-    // 1. Try to use an explicit title/filename from metadata or the file itself
-    const metadataName =
-      media.metadata?.['title'] || media.metadata?.['filename'] || media.metadata?.['name'];
+    if (media.addressLabel) return sanitizeExportTitle(media.addressLabel);
 
-    if (metadataName && typeof metadataName === 'string') {
-      return this.sanitizeTitle(metadataName);
-    }
+    const streetWithNumber = composeStreetWithNumber(media.street, media.streetNumber);
+    const parts = [streetWithNumber, media.city, media.zip, media.country].filter(Boolean);
+    if (parts.length > 0) return sanitizeExportTitle(parts.join('-'));
 
-    // 2. Extract from storage path if it retains a real name (e.g. org/user/uuid/MyReport.pdf)
-    if (media.storagePath) {
-      const pathParts = media.storagePath.split('/');
-      const lastPart = pathParts[pathParts.length - 1];
-      // if it's not simply a UUID string
-      if (
-        lastPart &&
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\.[a-zA-Z0-9]+)?$/i.test(
-          lastPart,
-        )
-      ) {
-        return this.sanitizeTitle(lastPart.split('.')[0]);
-      }
-    }
-
-    // 3. Try to use address parts. Note: full precision (like ZIP code and house numbers)
-    // is usually pre-aggregated into addressLabel or street/city properties by the geocoding service.
-    if (media.addressLabel) {
-      return this.sanitizeTitle(media.addressLabel);
-    }
-
-    const parts = [media.street, media.city, media.country].filter(Boolean);
-    if (parts.length > 0) {
-      return this.sanitizeTitle(parts.join('-'));
-    }
-
-    // 4. Fallback to generic ID
     return `media-${media.id}`;
   }
 }
