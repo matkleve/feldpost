@@ -9,7 +9,11 @@ import { WorkspaceExportBarComponent } from '../workspace-export-bar.component';
   imports: [PaneFooterComponent, WorkspaceExportBarComponent],
   template: `
     <app-pane-footer class="workspace-pane-footer">
-      <app-workspace-export-bar slot="left" [scopeIds]="scopeIds()" [images]="images()"></app-workspace-export-bar>
+      <app-workspace-export-bar
+        slot="left"
+        [scopeIds]="scopeIds()"
+        [images]="images()"
+      ></app-workspace-export-bar>
     </app-pane-footer>
   `,
   styleUrl: './workspace-pane-footer.component.scss',
