@@ -1206,7 +1206,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private clampWorkspacePaneWidth(width: number): number {
-    return Math.min(Math.max(width, this.workspacePaneMinWidth), this.workspacePaneMaxWidth());
+    return Math.min(Math.max(width, this.workspacePaneMinWidth()), this.workspacePaneMaxWidth());
   }
 
   private getWorkspacePaneOpeningWidth(): number {
