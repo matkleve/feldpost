@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "eslint.config.*",
+        "action": "block",
+        "message": "ESLint-Config ist schreibgeschuetzt - keine AI-Edits erlaubt"
+      }
+    ]
+  }
+}
