@@ -8,7 +8,7 @@ import { LocationResolverService } from './core/location-resolver.service';
 import { AuthService } from './core/auth.service';
 import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
 import { SettingsPaneService } from './core/settings-pane.service';
-import { UploadNotificationService } from './core/upload-notification.service';
+import { UploadNotificationService } from './core/upload/upload-notification.service';
 import { DbTranslationService } from './core/i18n/db-translation.service';
 import { DomTranslationService } from './core/i18n/dom-translation.service';
 import { environment } from '../environments/environment';

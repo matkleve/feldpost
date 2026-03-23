@@ -16,9 +16,9 @@
 import { Injectable, inject } from '@angular/core';
 import * as exifr from 'exifr/dist/lite.esm.js';
 import heic2any from 'heic2any';
-import { AuthService } from './auth.service';
-import { GeocodingService } from './geocoding.service';
-import { SupabaseService } from './supabase.service';
+import { AuthService } from '../auth.service';
+import { GeocodingService } from '../geocoding.service';
+import { SupabaseService } from '../supabase.service';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -122,39 +122,23 @@ export class UploadService {
 
     const ext = file.name.split('.').pop()?.toLowerCase();
     switch (ext) {
-      case 'heic':
-        return 'image/heic';
-      case 'heif':
-        return 'image/heif';
+      case 'heic': return 'image/heic';
+      case 'heif': return 'image/heif';
       case 'jpeg':
-      case 'jpg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'webp':
-        return 'image/webp';
-      case 'mp4':
-        return 'video/mp4';
-      case 'mov':
-        return 'video/quicktime';
-      case 'webm':
-        return 'video/webm';
-      case 'pdf':
-        return 'application/pdf';
-      case 'doc':
-        return 'application/msword';
-      case 'docx':
-        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      case 'xls':
-        return 'application/vnd.ms-excel';
-      case 'xlsx':
-        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      case 'ppt':
-        return 'application/vnd.ms-powerpoint';
-      case 'pptx':
-        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-      default:
-        return '';
+      case 'jpg': return 'image/jpeg';
+      case 'png': return 'image/png';
+      case 'webp': return 'image/webp';
+      case 'mp4': return 'video/mp4';
+      case 'mov': return 'video/quicktime';
+      case 'webm': return 'video/webm';
+      case 'pdf': return 'application/pdf';
+      case 'doc': return 'application/msword';
+      case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'xls': return 'application/vnd.ms-excel';
+      case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'ppt': return 'application/vnd.ms-powerpoint';
+      case 'pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      default: return '';
     }
   }
 

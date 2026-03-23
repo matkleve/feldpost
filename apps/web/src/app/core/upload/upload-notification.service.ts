@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UploadFailedEvent, UploadManagerService } from './upload-manager.service';
-import { ToastService } from './toast.service';
+import { ToastService } from '../toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class UploadNotificationService {

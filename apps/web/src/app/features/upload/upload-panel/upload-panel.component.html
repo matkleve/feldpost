@@ -183,96 +183,15 @@
   @if (laneJobs().length > 0) {
     <ul class="upload-panel__file-list" aria-label="Upload queue">
       @for (job of laneJobs(); track trackByJobId($index, job)) {
-        <li
-          class="upload-panel__file-item upload-panel__file-item--{{
-            phaseToStatusClass(job.phase)
-          }}"
-        >
-          <button
-            uiIconButtonGhost
-            class="upload-panel__row-action upload-panel__row-action--left"
-            type="button"
-            aria-label="Place {{ job.file.name }} on map"
-            title="Place on map"
-            [disabled]="job.phase !== 'missing_data'"
-            (click)="requestPlacement(job.id, job.phase, $event)"
-          >
-            <span class="material-icons" aria-hidden="true">my_location</span>
-          </button>
-
-          <div
-            class="upload-panel__file-main"
-            [class.upload-panel__file-main--interactive]="isRowInteractive(job)"
-            [attr.role]="isRowInteractive(job) ? 'button' : null"
-            [attr.tabindex]="isRowInteractive(job) ? '0' : null"
-            [attr.aria-label]="
-              job.phase === 'missing_data'
-                ? 'Place ' + job.file.name + ' on map'
-                : canZoomToJob(job)
-                  ? 'Zoom map to ' + job.file.name
-                  : null
-            "
-            (click)="onRowMainClick(job)"
-            (keydown)="onRowMainKeydown(job, $event)"
-          >
-            <!-- Thumbnail preview -->
-            @if (job.thumbnailUrl) {
-              <img
-                class="upload-panel__thumbnail"
-                [src]="job.thumbnailUrl"
-                [alt]="''"
-                aria-hidden="true"
-              />
-            } @else if (job.phase === 'converting_format') {
-              <div
-                class="upload-panel__thumbnail upload-panel__thumbnail--skeleton"
-                aria-hidden="true"
-              ></div>
-            } @else {
-              <div
-                class="upload-panel__thumbnail upload-panel__thumbnail--placeholder"
-                aria-hidden="true"
-              >
-                @if (documentFallbackLabel(job); as fallbackLabel) {
-                  <span class="upload-panel__thumbnail-fallback">{{ fallbackLabel }}</span>
-                } @else {
-                  <span class="material-icons">image</span>
-                }
-              </div>
-            }
-
-            <div class="upload-panel__file-meta">
-              <span class="upload-panel__file-name" [title]="job.file.name" aria-label="File name">
-                {{ job.file.name }}
-              </span>
-
-              <p
-                class="upload-panel__file-status upload-panel__file-status--{{
-                  phaseToStatusClass(job.phase)
-                }}"
-              >
-                @if (job.phase === 'error' && job.error) {
-                  {{ job.error }}
-                } @else if (job.phase === 'missing_data') {
-                  Missing GPS - click map marker icon to place
-                } @else {
-                  {{ job.statusLabel }}
-                }
-              </p>
-            </div>
-          </div>
-
-          <button
-            uiIconButtonGhost
-            class="upload-panel__row-action upload-panel__row-action--right"
-            type="button"
-            aria-label="Dismiss {{ job.file.name }}"
-            title="Dismiss"
-            (click)="dismissFile(job.id)"
-          >
-            <span class="material-icons" aria-hidden="true">close</span>
-          </button>
-        </li>
+        <app-upload-panel-item
+          [job]="job"
+          [interactive]="isRowInteractive(job)"
+          [documentFallbackLabel]="documentFallbackLabel(job)"
+          (requestPlacement)="requestPlacement(job.id, job.phase, $event.event)"
+          (dismissFile)="dismissFile(job.id)"
+          (rowMainClick)="onRowMainClick(job)"
+          (rowMainKeydown)="onRowMainKeydown(job, $event.event)"
+        ></app-upload-panel-item>
       }
     </ul>
   }

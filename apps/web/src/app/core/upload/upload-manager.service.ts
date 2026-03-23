@@ -20,10 +20,10 @@
 
 import { Injectable, Signal, effect, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { AuthService } from './auth.service';
-import { FolderScanService } from './folder-scan.service';
-import { MediaPreviewService } from './media-preview.service';
-import { SupabaseService } from './supabase.service';
+import { AuthService } from '../auth.service';
+import { FolderScanService } from '../folder-scan.service';
+import { MediaPreviewService } from '../media-preview.service';
+import { SupabaseService } from '../supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';

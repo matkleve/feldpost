@@ -14,7 +14,8 @@
 
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExifCoords } from '../../../core/upload.service';
+import { UploadPanelItemComponent } from './upload-panel-item.component';
+import { ExifCoords } from '../../../core/upload/upload.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import {
   UploadManagerService,
@@ -22,10 +23,9 @@ import {
   UploadPhase,
   UploadBatch,
   ImageUploadedEvent as ManagerImageUploadedEvent,
-} from '../../../core/upload-manager.service';
+} from '../../../core/upload/upload-manager.service';
 import {
   UiButtonDirective,
-  UiIconButtonGhostDirective,
   UiTabDirective,
   UiTabListDirective,
 } from '../../../shared/ui-primitives.directive';
@@ -58,10 +58,10 @@ type UploadLane = 'uploading' | 'uploaded' | 'issues';
   standalone: true,
   imports: [
     CommonModule,
+    UploadPanelItemComponent,
     UiTabListDirective,
     UiTabDirective,
     UiButtonDirective,
-    UiIconButtonGhostDirective,
   ],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
@@ -136,7 +136,20 @@ export class UploadPanelComponent {
     };
   });
 
-  readonly effectiveLane = computed<UploadLane>(() => this.selectedLane());
+  readonly effectiveLane = computed<UploadLane>(() => {
+    const lane = this.selectedLane();
+    const counts = this.laneCounts();
+
+    // Auto-switch to a populated lane if the chosen lane is empty,
+    // ensuring "the 3 areas" update effectively and never leave the user staring at an empty list.
+    if (counts[lane] === 0) {
+      if (counts.issues > 0) return 'issues';
+      if (counts.uploading > 0) return 'uploading';
+      if (counts.uploaded > 0) return 'uploaded';
+    }
+
+    return lane;
+  });
 
   readonly laneJobs = computed(() => {
     const lane = this.effectiveLane();
@@ -225,6 +238,7 @@ export class UploadPanelComponent {
 
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
+      this.selectedLane.set('uploading');
       this.uploadManager.submit(Array.from(files), { projectId: this.activeProjectId() });
     }
   }
@@ -234,6 +248,7 @@ export class UploadPanelComponent {
   onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
+      this.selectedLane.set('uploading');
       this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
       // Reset so the same file can be re-selected if needed
       input.value = '';
@@ -243,6 +258,7 @@ export class UploadPanelComponent {
   onCaptureInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
+      this.selectedLane.set('uploading');
       this.uploadManager.submit([input.files[0]], { projectId: this.activeProjectId() });
       input.value = '';
     }
@@ -342,6 +358,7 @@ export class UploadPanelComponent {
   onFolderInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
+      this.selectedLane.set('uploading');
       this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
       input.value = '';
     }

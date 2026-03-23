@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 export class MediaPreviewService {
   createImmediatePreviewUrl(file: File): string | undefined {
     // Browsers cannot natively display HEIC/HEIF files, so we defer object URL creation until after conversion.
-    if (this.isHeic(file.type)) {
+    if (this.isHeic(file)) {
       return undefined;
     }
     if (this.isImage(file.type)) {
@@ -73,8 +73,10 @@ export class MediaPreviewService {
     return mimeType.startsWith('image/');
   }
 
-  private isHeic(mimeType: string): boolean {
-    return mimeType === 'image/heic' || mimeType === 'image/heif';
+  private isHeic(file: File): boolean {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext === 'heic' || ext === 'heif') return true;
+    return file.type === 'image/heic' || file.type === 'image/heif';
   }
 
   private isPdf(mimeType: string): boolean {

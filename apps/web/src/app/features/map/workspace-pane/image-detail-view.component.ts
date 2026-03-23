@@ -3,14 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { DateSaveEvent } from './captured-date-editor.component';
 import { SupabaseService } from '../../../core/supabase.service';
-import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload.service';
+import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload/upload.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import {
   ImageAttachedEvent,
   ImageReplacedEvent,
   UploadFailedEvent,
   UploadManagerService,
-} from '../../../core/upload-manager.service';
+} from '../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { ToastService } from '../../../core/toast.service';
 import {

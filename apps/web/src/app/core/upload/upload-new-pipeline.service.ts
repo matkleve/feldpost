@@ -8,11 +8,11 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { AuthService } from './auth.service';
-import { computeContentHash, readFileHead } from './content-hash.util';
-import { FilenameParserService } from './filename-parser.service';
-import { PhotoLoadService } from './photo-load.service';
-import { SupabaseService } from './supabase.service';
+import { AuthService } from '../auth.service';
+import { computeContentHash, readFileHead } from '../content-hash.util';
+import { FilenameParserService } from '../filename-parser.service';
+import { PhotoLoadService } from '../photo-load.service';
+import { SupabaseService } from '../supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadConflictService } from './upload-conflict.service';
 import { UploadEnrichmentService } from './upload-enrichment.service';

@@ -10,7 +10,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapShellComponent } from './map-shell.component';
-import { UploadService } from '../../../core/upload.service';
+import { UploadService } from '../../../core/upload/upload.service';
 import { AuthService } from '../../../core/auth.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';

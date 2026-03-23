@@ -31,7 +31,7 @@ import {
   UploadPanelComponent,
   ImageUploadedEvent,
 } from '../../upload/upload-panel/upload-panel.component';
-import { ExifCoords } from '../../../core/upload.service';
+import { ExifCoords } from '../../../core/upload/upload.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 import {
@@ -39,7 +39,7 @@ import {
   ImageReplacedEvent,
   ImageAttachedEvent,
   UploadFailedEvent,
-} from '../../../core/upload-manager.service';
+} from '../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';

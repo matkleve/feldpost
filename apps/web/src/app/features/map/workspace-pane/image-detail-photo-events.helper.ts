@@ -2,7 +2,7 @@ import { WritableSignal } from '@angular/core';
 import {
   ImageAttachedEvent,
   ImageReplacedEvent,
-} from '../../../core/upload-manager.service';
+} from '../../../core/upload/upload-manager.service';
 import { PhotoLoadService } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
