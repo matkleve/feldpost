@@ -1,3 +1,15 @@
+// ---------------------------------------------
+// UI TOGGLE ROW PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiToggleRowSizeSm/Md/Lg):
+//     ? height, padding-inline, padding-block, font-size, gap
+//   Emphasis-Modifier (uiToggleRowError, uiToggleRowLoading):
+//     ? background, color, border-color, hover/active states
+//   Layout-Modifier (falls vorhanden):
+//     ? padding overrides, gap resets
+//     ? NIEMALS height, font-size
+// ---------------------------------------------
+
 .ui-toggle-row {
   --ui-item-media-size: 0;
   --ui-toggle-row-border-width: 1.5px;
@@ -10,6 +22,12 @@
   color: var(--menu-item-text);
   cursor: pointer;
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  height: 2.5rem;
+  padding-inline: var(--spacing-2);
+  padding-block: 0;
+  gap: var(--spacing-2);
 
   &:hover {
     border-color: var(--action-border-active);
@@ -32,38 +50,40 @@
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-toggle-row--sm {
-  --ui-item-min-height: 2rem;
-  --ui-item-padding-inline: var(--spacing-2);
-  --ui-item-padding-block: var(--spacing-1);
-  --ui-item-content-gap: var(--spacing-1);
+  height: 2rem;
+  padding-inline: var(--spacing-2);
+  padding-block: 0;
+  gap: var(--spacing-1);
   --ui-toggle-row-border-width: 1px;
 }
 
 .ui-toggle-row--md {
-  --ui-item-min-height: 2.5rem;
-  --ui-item-padding-inline: var(--container-padding-inline-compact);
-  --ui-item-padding-block: var(--container-padding-block-compact);
-  --ui-item-content-gap: var(--container-gap-panel);
+  height: 2.5rem;
+  padding-inline: var(--container-padding-inline-compact);
+  padding-block: 0;
+  gap: var(--container-gap-panel);
   --ui-toggle-row-border-width: 1.5px;
 }
 
 .ui-toggle-row--lg {
-  --ui-item-min-height: 3rem;
-  --ui-item-padding-inline: var(--spacing-3);
-  --ui-item-padding-block: var(--spacing-2);
-  --ui-item-content-gap: var(--spacing-2);
+  height: 3rem;
+  padding-inline: var(--spacing-3);
+  padding-block: 0;
+  gap: var(--spacing-2);
   --ui-toggle-row-border-width: 1.5px;
 }
 
 .ui-toggle-row--compact {
-  --ui-item-min-height: 2rem;
-  --ui-item-padding-inline: var(--spacing-2);
-  --ui-item-padding-block: var(--spacing-1);
-  --ui-item-content-gap: var(--spacing-1);
+  height: 2rem;
+  padding-inline: var(--spacing-2);
+  padding-block: 0;
+  gap: var(--spacing-1);
   --ui-toggle-row-border-width: 1px;
 }
 
+// Emphasis: Farbe und States – keine Größen-Properties
 .ui-toggle-row--loading {
   pointer-events: none;
   opacity: 0.72;
@@ -73,6 +93,13 @@
   border-color: color-mix(in srgb, var(--color-danger) 52%, var(--action-border-default));
   background: color-mix(in srgb, var(--color-danger) 6%, transparent);
 }
+
+// Layout: nur Anordnung – KEINE Größen-Properties
+// (Derzeit keine spezifischen Layout-Modifier für Toggle-Row)
+
+// ---------------------------------------------
+// UI TOGGLE SWITCH PRIMITIVE
+// ---------------------------------------------
 
 .ui-toggle-switch {
   --ui-toggle-switch-width: 2.6rem;

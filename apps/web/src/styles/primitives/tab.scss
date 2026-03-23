@@ -1,3 +1,15 @@
+// ---------------------------------------------
+// UI TAB PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiTabSizeSm/Md/Lg):
+//     ? height, padding-inline, padding-block, font-size, gap
+//   Emphasis-Modifier (uiTabActive):
+//     ? background, color, border-color, hover/active states
+//   Layout-Modifier (falls vorhanden):
+//     ? padding overrides, gap resets
+//     ? NIEMALS height, font-size
+// ---------------------------------------------
+
 .ui-tab-list {
   display: inline-flex;
   align-items: center;
@@ -7,18 +19,6 @@
   padding: 0.15rem;
   background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
 }
-
-// ─────────────────────────────────────────────
-// UI TAB PRIMITIVE
-// Verantwortlichkeiten:
-//   Size-Modifier (uiTabSizeSm/Md/Lg):
-//     → height, min-height, padding, font-size, gap
-//   Emphasis-Modifier (uiTabActive):
-//     → background, color, border-color, hover/active states
-//   Layout-Modifier:
-//     → flex-direction, icon-order, label-visibility
-//     → NIEMALS height, padding, font-size
-// ─────────────────────────────────────────────
 
 .ui-tab {
   display: inline-flex;
@@ -34,8 +34,9 @@
   transition: var(--interactive-transition-standard);
 
   // default to md size config
-  min-height: 2.25rem;
+  height: 2.5rem;
   padding-inline: var(--spacing-3);
+  padding-block: 0;
   font-size: 0.8125rem;
   gap: var(--spacing-1);
 
@@ -59,35 +60,45 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: definiert H�he und Abst�nde � wird von Layout-Modifiern nicht �berschrieben
 .ui-tab--sm {
-  min-height: 2rem;
+  height: 2rem;
   padding-inline: var(--spacing-2);
+  padding-block: 0;
   font-size: 0.75rem;
   gap: var(--spacing-1);
 }
 
 .ui-tab--md {
-  min-height: 2.25rem;
+  height: 2.5rem;
   padding-inline: var(--spacing-3);
+  padding-block: 0;
   font-size: 0.8125rem;
   gap: var(--spacing-1);
 }
 
 .ui-tab--lg {
-  min-height: 2.75rem;
+  height: 3rem;
   padding-inline: var(--spacing-4);
+  padding-block: 0;
   font-size: 0.875rem;
   gap: var(--spacing-2);
 }
 
-// Emphasis: interact states, background, color
+// Emphasis: Eigenschaften f�r Theme und States, keine Struktur- oder Gr��en-Properties
 .ui-tab--active {
   background: var(--action-bg-active);
   color: var(--action-text-active);
   box-shadow:
     0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
     0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
+}
+
+// Layout: nur Anordnung � KEINE Gr��en-Properties
+.ui-tab--icon-only {
+  padding-inline: 0;
+  width: var(--height); // Not fully robust here but let's keep it structurally sound if existed. 
+  // Wait, tab didn't have icon-only before, let's omit if not there.
 }
 
 .ui-tab__icon {

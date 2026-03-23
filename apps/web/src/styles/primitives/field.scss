@@ -1,13 +1,14 @@
-// ─────────────────────────────────────────────
+// ---------------------------------------------
 // UI SELECT CONTROL PRIMITIVE
 // Verantwortlichkeiten:
 //   Size-Modifier (uiSelectControlSizeSm/Md/Lg):
-//     → height, min-height, padding, font-size, border-width
+//     ? height, padding-inline, padding-block, font-size, border-width
 //   Emphasis-Modifier (uiSelectControlError, uiSelectControlLoading):
-//     → background, color, border-color
-//   Layout-Modifier:
-//     → (aktuell keine spezifischen; zB text-align fallback)
-// ─────────────────────────────────────────────
+//     ? background, color, border-color
+//   Layout-Modifier (falls vorhanden):
+//     ? padding overrides, gap resets
+//     ? NIEMALS height, font-size
+// ---------------------------------------------
 
 .ui-select-control {
   position: relative;
@@ -17,9 +18,9 @@
   transition: var(--interactive-transition-standard);
 
   // default to md size config
-  min-height: 2.5rem;
+  height: 2.5rem;
   border: 1.5px solid var(--field-border);
-  padding: 0.5rem 0.75rem;
+  padding: 0 0.75rem;
   font-size: 0.875rem;
 
   &:focus-visible {
@@ -35,36 +36,36 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: definiert H�he und Abst�nde � wird von Layout-Modifiern nicht �berschrieben
 .ui-select-control--sm {
-  min-height: 2rem;
+  height: 2rem;
   border: 1px solid var(--color-border);
-  padding: var(--spacing-1);
+  padding: 0 var(--spacing-1);
   font-size: 0.75rem;
 }
 
 .ui-select-control--md {
-  min-height: 2.5rem;
+  height: 2.5rem;
   border: 1.5px solid var(--field-border);
-  padding: 0.5rem 0.75rem;
+  padding: 0 0.75rem;
   font-size: 0.875rem;
 }
 
 .ui-select-control--lg {
-  min-height: 3rem;
+  height: 3rem;
   border: 1.5px solid var(--field-border);
-  padding: 0.65rem var(--spacing-3);
+  padding: 0 var(--spacing-3);
   font-size: 0.9375rem;
 }
 
 .ui-select-control--compact {
-  min-height: 2rem;
+  height: 2rem;
   border: 1px solid var(--color-border);
-  padding: var(--spacing-1);
+  padding: 0 var(--spacing-1);
   font-size: 0.75rem;
 }
 
-// Emphasis: interact states, background, color
+// Emphasis: Farbe und States � keine Gr��en-Properties
 .ui-select-control--loading {
   pointer-events: none;
   cursor: progress;
@@ -76,16 +77,21 @@
   background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
 }
 
-// ─────────────────────────────────────────────
+// Layout: nur Anordnung � KEINE Gr��en-Properties
+// (Derzeit keine Layout-Modifier)
+
+
+// ---------------------------------------------
 // UI INPUT CONTROL PRIMITIVE
 // Verantwortlichkeiten:
 //   Size-Modifier (uiInputControlSizeSm/Md/Lg):
-//     → height, min-height, padding, font-size, border-width
+//     ? height, padding-inline, padding-block, font-size, border-width
 //   Emphasis-Modifier (uiInputControlError, uiInputControlLoading):
-//     → background, color, border-color
-//   Layout-Modifier:
-//     → (aktuell keine spezifischen)
-// ─────────────────────────────────────────────
+//     ? background, color, border-color
+//   Layout-Modifier (falls vorhanden):
+//     ? padding overrides, gap resets
+//     ? NIEMALS height, font-size
+// ---------------------------------------------
 
 .ui-input-control {
   position: relative;
@@ -95,9 +101,9 @@
   transition: var(--interactive-transition-standard);
 
   // default to md size config
-  min-height: 2.5rem;
+  height: 2.5rem;
   border: 1.5px solid var(--field-border);
-  padding: 0.5rem 0.75rem;
+  padding: 0 0.75rem;
   font-size: 0.875rem;
 
   &::placeholder {
@@ -118,36 +124,36 @@
   }
 }
 
-// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+// Size: definiert H�he und Abst�nde � wird von Layout-Modifiern nicht �berschrieben
 .ui-input-control--sm {
-  min-height: 2rem;
+  height: 2rem;
   border: 1px solid var(--color-border);
-  padding: var(--spacing-1);
+  padding: 0 var(--spacing-1);
   font-size: 0.75rem;
 }
 
 .ui-input-control--md {
-  min-height: 2.5rem;
+  height: 2.5rem;
   border: 1.5px solid var(--field-border);
-  padding: 0.5rem 0.75rem;
+  padding: 0 0.75rem;
   font-size: 0.875rem;
 }
 
 .ui-input-control--lg {
-  min-height: 3rem;
+  height: 3rem;
   border: 1.5px solid var(--field-border);
-  padding: 0.65rem var(--spacing-3);
+  padding: 0 var(--spacing-3);
   font-size: 0.9375rem;
 }
 
 .ui-input-control--compact {
-  min-height: 2rem;
+  height: 2rem;
   border: 1px solid var(--color-border);
-  padding: var(--spacing-1);
+  padding: 0 var(--spacing-1);
   font-size: 0.75rem;
 }
 
-// Emphasis: interact states, background, color
+// Emphasis: Farbe und States � keine Gr��en-Properties
 .ui-input-control--loading {
   pointer-events: none;
   cursor: progress;
@@ -158,6 +164,14 @@
   border-color: color-mix(in srgb, var(--color-danger) 60%, var(--field-border));
   background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
 }
+
+// Layout: nur Anordnung � KEINE Gr��en-Properties
+// (Derzeit keine Layout-Modifier)
+
+
+// ---------------------------------------------
+// UI RANGE CONTROL PRIMITIVE
+// ---------------------------------------------
 
 .ui-range-control {
   width: 100%;
@@ -178,11 +192,15 @@
   }
 }
 
+// ---------------------------------------------
+// UI CHOICE ROW PRIMITIVE
+// ---------------------------------------------
+
 .ui-choice-row {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-2);
-  min-height: 2rem;
+  height: 2rem; // Fixed height logic
   color: var(--color-text-primary);
   cursor: pointer;
 
@@ -195,6 +213,10 @@
     border-radius: var(--radius-sm);
   }
 }
+
+// ---------------------------------------------
+// UI CHOICE CONTROL PRIMITIVE
+// ---------------------------------------------
 
 .ui-choice-control {
   inline-size: 1rem;

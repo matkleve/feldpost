@@ -1,3 +1,15 @@
+// ---------------------------------------------
+// UI SEGMENTED PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (falls vorhanden):
+//     ? height, padding-inline, padding-block, font-size, gap
+//   Emphasis-Modifier (uiSegmentedButtonActive):
+//     ? background, color, border-color, hover/active states
+//   Layout-Modifier (falls vorhanden):
+//     ? padding overrides, gap resets
+//     ? NIEMALS height, font-size
+// ---------------------------------------------
+
 .ui-segmented {
   display: inline-flex;
   align-items: center;
@@ -8,16 +20,22 @@
 }
 
 .ui-segmented__button {
-  min-height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: var(--radius-full);
   background: var(--action-bg-default);
   color: var(--action-text-default);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
   transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  height: 2.5rem;
+  padding-inline: 0.75rem;
+  padding-block: 0;
+  font-size: 0.8125rem;
 
   &:hover {
     color: var(--menu-item-text);
@@ -32,6 +50,29 @@
   }
 }
 
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-segmented__button--sm {
+  height: 2rem;
+  padding-inline: 0.5rem;
+  padding-block: 0;
+  font-size: 0.75rem;
+}
+
+.ui-segmented__button--md {
+  height: 2.5rem;
+  padding-inline: 0.75rem;
+  padding-block: 0;
+  font-size: 0.8125rem;
+}
+
+.ui-segmented__button--lg {
+  height: 3rem;
+  padding-inline: 1rem;
+  padding-block: 0;
+  font-size: 0.875rem;
+}
+
+// Emphasis: Farbe und States – keine Größen-Properties
 .ui-segmented__button--active {
   background: var(--action-bg-active);
   color: var(--action-text-active);
@@ -39,3 +80,6 @@
     0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
     0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
 }
+
+// Layout: nur Anordnung – KEINE Größen-Properties
+// (Derzeit keine spezifischen Layout-Modifier)
