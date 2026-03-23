@@ -1,0 +1,35 @@
+.ui-section-card {
+  border: 1.5px solid var(--section-border);
+  background: var(--section-bg);
+}
+
+.ui-field-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 12rem) 1fr;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.ui-field-row--stacked {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+.ui-field-label {
+  font-size: 0.875rem;
+  color: var(--section-text);
+}
+
+.ui-inline-edit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.ui-inline-edit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-height: 2rem;
+}

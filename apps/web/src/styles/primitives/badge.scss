@@ -1,0 +1,81 @@
+// ─────────────────────────────────────────────
+// UI STATUS BADGE PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiStatusBadgeSizeSm/Md):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier (uiStatusBadgeNeutral/Info/Success/Warning/Error):
+//     → background, color, border-color, hover/active states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
+
+.ui-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--color-border) 84%, transparent);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+
+  // default to md size config
+  min-height: 1.5rem;
+  padding-inline: var(--spacing-2);
+  font-size: 0.6875rem;
+  gap: var(--spacing-1);
+}
+
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-status-badge--sm {
+  min-height: 1.25rem;
+  padding-inline: var(--spacing-1);
+  font-size: 0.625rem;
+  gap: var(--spacing-1);
+}
+
+.ui-status-badge--md {
+  min-height: 1.5rem;
+  padding-inline: var(--spacing-2);
+  font-size: 0.6875rem;
+  gap: var(--spacing-1);
+}
+
+// Emphasis: interact states, background, color
+.ui-status-badge--neutral {
+  border-color: color-mix(in srgb, var(--color-border) 86%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
+  color: var(--color-text-secondary);
+}
+
+.ui-status-badge--info {
+  border-color: color-mix(in srgb, var(--color-primary) 36%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-surface));
+  color: var(--color-primary);
+}
+
+.ui-status-badge--success {
+  border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-bg-surface));
+  color: color-mix(in srgb, var(--color-success) 74%, var(--color-text-primary));
+}
+
+.ui-status-badge--warning {
+  border-color: color-mix(in srgb, var(--color-warning) 46%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--color-bg-surface));
+  color: color-mix(in srgb, var(--color-warning) 74%, var(--color-text-primary));
+}
+
+.ui-status-badge--error {
+  border-color: color-mix(in srgb, var(--color-danger) 46%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-bg-surface));
+  color: var(--color-danger);
+}
+
+.ui-status-badge__icon {
+  font-size: 0.875rem;
+  line-height: 1;
+}

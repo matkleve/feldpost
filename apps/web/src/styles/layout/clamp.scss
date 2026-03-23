@@ -1,0 +1,17 @@
+.content-clamp {
+  width: 100%;
+  max-width: var(--content-clamp-default);
+  margin-inline: auto;
+}
+
+.content-clamp--text {
+  max-width: var(--content-clamp-text);
+}
+
+.content-clamp--default {
+  max-width: var(--content-clamp-default);
+}
+
+.content-clamp--list {
+  max-width: var(--content-clamp-list);
+}

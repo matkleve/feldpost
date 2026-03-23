@@ -1,0 +1,86 @@
+.ui-chip {
+  --ui-chip-min-height: 2rem;
+  --ui-chip-padding-inline: var(--spacing-2);
+  --ui-chip-font-size: 0.75rem;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-height: var(--ui-chip-min-height);
+  padding: var(--spacing-1) var(--ui-chip-padding-inline);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--ui-chip-font-size);
+  line-height: 1.3;
+  transition: var(--interactive-transition-standard);
+}
+
+.ui-chip--sm {
+  --ui-chip-min-height: 1.75rem;
+  --ui-chip-padding-inline: var(--spacing-1);
+  --ui-chip-font-size: 0.6875rem;
+}
+
+.ui-chip--md {
+  --ui-chip-min-height: 2rem;
+  --ui-chip-padding-inline: var(--spacing-2);
+  --ui-chip-font-size: 0.75rem;
+}
+
+.ui-chip--lg {
+  --ui-chip-min-height: 2.5rem;
+  --ui-chip-padding-inline: var(--spacing-3);
+  --ui-chip-font-size: 0.8125rem;
+}
+
+.ui-chip--action {
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 8%, transparent);
+    border-color: var(--color-border-strong);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    border-color: var(--action-border-active);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:active:not(.ui-chip--disabled) {
+    background: color-mix(in srgb, var(--action-bg-active) 70%, transparent);
+  }
+}
+
+.ui-chip--passive {
+  cursor: default;
+}
+
+.ui-chip--selected {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  }
+}
+
+.ui-chip--loading {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.ui-chip--error {
+  border-color: color-mix(in srgb, var(--color-danger) 60%, var(--color-border));
+  color: var(--color-danger);
+}
+
+.ui-chip--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}

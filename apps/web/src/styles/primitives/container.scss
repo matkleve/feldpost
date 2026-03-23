@@ -1,0 +1,74 @@
+.ui-container {
+  --ui-container-padding-inline: var(--container-padding-inline-panel);
+  --ui-container-padding-block: var(--container-padding-block-panel);
+  --ui-container-gap: var(--container-gap-panel);
+  --ui-container-radius: var(--container-radius-panel);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-container-gap);
+  padding-block: var(--ui-container-padding-block);
+  padding-inline: var(--ui-container-padding-inline);
+  border-radius: var(--ui-container-radius);
+}
+
+.ui-container--compact {
+  --ui-container-padding-inline: var(--container-padding-inline-compact);
+  --ui-container-padding-block: var(--container-padding-block-compact);
+}
+
+.ui-item {
+  --ui-item-min-height: 2.5rem;
+  --ui-item-padding-inline: var(--container-padding-inline-compact);
+  --ui-item-padding-block: var(--container-padding-block-compact);
+  --ui-item-gap: var(--container-gap);
+  --ui-item-radius: var(--container-radius-control);
+  --ui-item-media-size: var(--ui-item-media-size-default);
+  --ui-item-content-gap: var(--container-gap-panel);
+
+  display: grid;
+  grid-template-columns: var(--ui-item-media-size) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--ui-item-gap);
+  min-height: var(--ui-item-min-height);
+  padding-block: var(--ui-item-padding-block);
+  padding-inline: var(--ui-item-padding-inline);
+  border-radius: var(--ui-item-radius);
+
+  &:hover {
+    background: color-mix(in srgb, var(--action-bg-hover) 65%, transparent);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+.ui-item-media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-item-media-size);
+  block-size: var(--ui-item-media-size);
+  min-inline-size: var(--ui-item-media-size);
+  flex-shrink: 0;
+}
+
+.ui-item-label {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ui-item-content-gap);
+}
+
+.ui-item-label > * {
+  min-width: 0;
+}
+
+.ui-spacer {
+  flex: 1 1 auto;
+  min-block-size: var(--spacing-2);
+}

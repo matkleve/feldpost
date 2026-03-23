@@ -1,0 +1,213 @@
+// ─────────────────────────────────────────────
+// UI SELECT CONTROL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiSelectControlSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, border-width
+//   Emphasis-Modifier (uiSelectControlError, uiSelectControlLoading):
+//     → background, color, border-color
+//   Layout-Modifier:
+//     → (aktuell keine spezifischen; zB text-align fallback)
+// ─────────────────────────────────────────────
+
+.ui-select-control {
+  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--field-bg);
+  color: var(--field-text);
+  transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+
+  &:focus-visible {
+    border-color: var(--field-border-focus);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:disabled {
+    color: var(--color-text-disabled);
+    background: color-mix(in srgb, var(--field-bg) 72%, var(--color-border));
+    cursor: not-allowed;
+  }
+}
+
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-select-control--sm {
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+.ui-select-control--md {
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.ui-select-control--lg {
+  min-height: 3rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.65rem var(--spacing-3);
+  font-size: 0.9375rem;
+}
+
+.ui-select-control--compact {
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+// Emphasis: interact states, background, color
+.ui-select-control--loading {
+  pointer-events: none;
+  cursor: progress;
+  background: color-mix(in srgb, var(--field-bg) 78%, var(--color-border));
+}
+
+.ui-select-control--error {
+  border-color: color-mix(in srgb, var(--color-danger) 60%, var(--field-border));
+  background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
+}
+
+// ─────────────────────────────────────────────
+// UI INPUT CONTROL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiInputControlSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, border-width
+//   Emphasis-Modifier (uiInputControlError, uiInputControlLoading):
+//     → background, color, border-color
+//   Layout-Modifier:
+//     → (aktuell keine spezifischen)
+// ─────────────────────────────────────────────
+
+.ui-input-control {
+  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--field-bg);
+  color: var(--field-text);
+  transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+
+  &::placeholder {
+    color: var(--field-placeholder);
+  }
+
+  &:focus-visible {
+    border-color: var(--field-border-focus);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:disabled,
+  &:read-only {
+    color: var(--color-text-disabled);
+    background: color-mix(in srgb, var(--field-bg) 72%, var(--color-border));
+    cursor: not-allowed;
+  }
+}
+
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-input-control--sm {
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+.ui-input-control--md {
+  min-height: 2.5rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.ui-input-control--lg {
+  min-height: 3rem;
+  border: 1.5px solid var(--field-border);
+  padding: 0.65rem var(--spacing-3);
+  font-size: 0.9375rem;
+}
+
+.ui-input-control--compact {
+  min-height: 2rem;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+// Emphasis: interact states, background, color
+.ui-input-control--loading {
+  pointer-events: none;
+  cursor: progress;
+  background: color-mix(in srgb, var(--field-bg) 78%, var(--color-border));
+}
+
+.ui-input-control--error {
+  border-color: color-mix(in srgb, var(--color-danger) 60%, var(--field-border));
+  background: color-mix(in srgb, var(--color-danger) 4%, var(--field-bg));
+}
+
+.ui-range-control {
+  width: 100%;
+  accent-color: var(--color-clay);
+
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:active {
+    accent-color: var(--action-text-active);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.ui-choice-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: 2rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--menu-item-text);
+  }
+
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+    border-radius: var(--radius-sm);
+  }
+}
+
+.ui-choice-control {
+  inline-size: 1rem;
+  block-size: 1rem;
+  accent-color: var(--color-clay);
+
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}

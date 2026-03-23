@@ -1,0 +1,265 @@
+// ─────────────────────────────────────────────
+// UI BUTTON PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiButtonSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier (uiButtonPrimary/Secondary/Ghost/Danger):
+//     → background, color, border-color, hover/active states
+//   Layout-Modifier (uiButtonIconLeading/Trailing/IconOnly):
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
+
+.ui-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--action-border-default);
+  border-radius: var(--container-radius-control);
+  background: var(--action-bg-default);
+  color: var(--menu-item-text);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  padding: 0.45rem var(--spacing-3);
+  font-size: 0.875rem;
+  gap: var(--spacing-2);
+
+  &:hover:not(:disabled) {
+    border-color: var(--action-border-active);
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
+  }
+
+  &:focus-visible {
+    border-color: var(--action-border-active);
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:active:not(:disabled) {
+    background: var(--action-bg-active);
+  }
+
+  &:disabled {
+    opacity: 0.66;
+    cursor: not-allowed;
+  }
+}
+
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-button--sm {
+  min-height: 2rem;
+  padding: 0.3rem var(--spacing-2);
+  font-size: 0.8125rem;
+  gap: var(--spacing-1);
+
+  &.ui-button--icon-only {
+    width: 2rem;
+    height: 2rem;
+    min-height: unset;
+    padding: 0;
+  }
+}
+
+.ui-button--md {
+  min-height: 2.5rem;
+  padding: 0.45rem var(--spacing-3);
+  font-size: 0.875rem;
+  gap: var(--spacing-2);
+
+  &.ui-button--icon-only {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-height: unset;
+    padding: 0;
+  }
+}
+
+.ui-button--lg {
+  min-height: 3rem;
+  padding: 0.55rem var(--spacing-4);
+  font-size: 0.9375rem;
+  gap: var(--spacing-2);
+
+  &.ui-button--icon-only {
+    width: 3rem;
+    height: 3rem;
+    min-height: unset;
+    padding: 0;
+  }
+}
+
+// Layout: nur Icon/Label Anordnung – KEINE Größen-Properties
+.ui-button--icon-leading {
+  flex-direction: row;
+}
+
+.ui-button--icon-trailing {
+  flex-direction: row-reverse;
+}
+
+.ui-button--label-only {
+  gap: 0;
+}
+
+.ui-button--icon-only {
+  gap: 0;
+  // width/padding set within size modifiers above
+}
+
+.ui-button--loading {
+  pointer-events: none;
+}
+
+.ui-button--loading > * {
+  visibility: hidden;
+}
+
+.ui-button--loading::after {
+  content: '';
+  position: absolute;
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: ui-spin 700ms linear infinite;
+}
+
+.ui-button--primary {
+  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
+  background: color-mix(in srgb, var(--color-clay) 10%, var(--field-bg));
+  color: var(--action-text-active);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-clay) 16%, var(--field-bg));
+  }
+}
+
+.ui-button--secondary {
+  border-color: var(--action-border-default);
+  background: var(--action-bg-default);
+  color: var(--menu-item-text);
+
+  &:hover:not(:disabled) {
+    border-color: var(--action-border-active);
+    background: var(--action-bg-hover);
+    color: var(--menu-item-text);
+  }
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: var(--menu-item-text);
+}
+
+.ui-button--danger {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--field-bg));
+  color: var(--color-danger);
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-danger) 14%, var(--field-bg));
+    color: var(--color-danger);
+  }
+}
+
+// ── Shared icon ghost button primitives ─────────────────────────────────────
+
+.icon-btn-ghost {
+  --icon-btn-size: 2rem;
+  --icon-btn-radius: var(--radius-sm);
+  --icon-btn-icon-size: 1rem;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn-size);
+  height: var(--icon-btn-size);
+  border: 1px solid var(--interactive-border-muted);
+  border-radius: var(--icon-btn-radius);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  transition: var(--interactive-transition-standard);
+
+  .material-icons,
+  .material-symbols-outlined {
+    font-size: var(--icon-btn-icon-size);
+    line-height: 1;
+  }
+
+  &:hover {
+    background: var(--interactive-surface-hover);
+    color: var(--color-text-primary);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  &:active:not(:disabled) {
+    background: color-mix(in srgb, var(--interactive-surface-hover) 72%, var(--action-bg-active));
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.icon-btn-ghost--sm {
+  --icon-btn-size: 1.75rem;
+  --icon-btn-icon-size: 0.875rem;
+}
+
+.icon-btn-ghost--md {
+  --icon-btn-size: 2rem;
+  --icon-btn-icon-size: 1rem;
+}
+
+.icon-btn-ghost--lg {
+  --icon-btn-size: 2.5rem;
+  --icon-btn-icon-size: 1.125rem;
+}
+
+.icon-btn-ghost--loading {
+  pointer-events: none;
+}
+
+.icon-btn-ghost--loading .material-icons,
+.icon-btn-ghost--loading .material-symbols-outlined {
+  visibility: hidden;
+}
+
+.icon-btn-ghost--loading::after {
+  content: '';
+  position: absolute;
+  width: calc(var(--icon-btn-icon-size) + 0.15rem);
+  height: calc(var(--icon-btn-icon-size) + 0.15rem);
+  border: 2px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: ui-spin 700ms linear infinite;
+}
+
+.icon-btn-ghost--danger {
+  border-color: color-mix(in srgb, var(--color-danger) 36%, var(--interactive-border-muted));
+  color: var(--color-danger);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    color: var(--color-danger);
+  }
+}
+
+// ── Shared focus-ring primitive ─────────────────────────────────────────────

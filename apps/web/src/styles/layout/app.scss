@@ -1,0 +1,19 @@
+// ── App layout helpers ─────────────────────────────────────────────────────────
+// router-outlet host needs full height. Nav is floating (position: fixed),
+// so no margin offset is needed for the map view.
+// Non-map pages (photos, groups…) add their own padding if needed.
+router-outlet + * {
+  display: block;
+  height: 100%;
+}
+
+.focus-ring-primary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@keyframes ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

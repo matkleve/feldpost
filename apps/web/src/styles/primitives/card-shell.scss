@@ -1,0 +1,71 @@
+// ─────────────────────────────────────────────
+// UI CARD SHELL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiCardShellSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier:
+//     → background, color, border-color, interact states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
+
+.ui-card-shell {
+  border: 1px solid var(--color-border);
+  border-radius: var(--container-radius-panel);
+  background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
+  display: grid;
+  align-content: start;
+  transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 10rem;
+  padding: var(--spacing-3);
+  gap: var(--spacing-2);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--action-border-active) 58%, var(--color-border));
+    background: color-mix(in srgb, var(--action-bg-hover) 18%, var(--color-bg-surface));
+  }
+
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-card-shell--sm {
+  min-height: 8rem;
+  padding: var(--spacing-2);
+  gap: var(--spacing-2);
+}
+
+.ui-card-shell--md {
+  min-height: 10rem;
+  padding: var(--spacing-3);
+  gap: var(--spacing-2);
+}
+
+.ui-card-shell--lg {
+  min-height: 12rem;
+  padding: var(--spacing-4);
+  gap: var(--spacing-3);
+}
+
+.ui-card-shell__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.ui-card-shell__body {
+  min-width: 0;
+}
+
+.ui-card-shell__actions {
+  margin-top: auto;
+  display: grid;
+  gap: var(--spacing-2);
+}

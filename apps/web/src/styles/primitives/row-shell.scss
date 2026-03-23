@@ -1,0 +1,73 @@
+// ─────────────────────────────────────────────
+// UI ROW SHELL PRIMITIVE
+// Verantwortlichkeiten:
+//   Size-Modifier (uiRowShellSizeSm/Md/Lg):
+//     → height, min-height, padding, font-size, gap
+//   Emphasis-Modifier:
+//     → background, color, border-color, interact states
+//   Layout-Modifier:
+//     → flex-direction, icon-order, label-visibility
+//     → NIEMALS height, padding, font-size
+// ─────────────────────────────────────────────
+
+.ui-row-shell {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  transition: var(--interactive-transition-standard);
+
+  // default to md size config
+  min-height: 2.5rem;
+  padding-inline: var(--spacing-2);
+  padding-block: var(--spacing-1);
+  gap: var(--spacing-2);
+
+  &:hover {
+    background: color-mix(in srgb, var(--action-bg-hover) 65%, transparent);
+  }
+
+  &:focus-within {
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+}
+
+// Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
+.ui-row-shell--sm {
+  min-height: 2rem;
+  padding-inline: var(--spacing-1);
+  padding-block: var(--spacing-1);
+  gap: var(--spacing-2);
+}
+
+.ui-row-shell--md {
+  min-height: 2.5rem;
+  padding-inline: var(--spacing-2);
+  padding-block: var(--spacing-1);
+  gap: var(--spacing-2);
+}
+
+.ui-row-shell--lg {
+  min-height: 3rem;
+  padding-inline: var(--spacing-3);
+  padding-block: var(--spacing-2);
+  gap: var(--spacing-2);
+}
+
+.ui-row-shell__leading {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ui-row-shell__label {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ui-row-shell__trailing {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
