@@ -14,6 +14,7 @@ import type {
 } from '../../../../core/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
 import { UiDropdownTriggerDirective } from '../../../../shared/ui-dropdown-trigger.directive';
+import { SegmentedSwitchComponent, type SegmentedSwitchOption } from '../../../../shared/segmented-switch/segmented-switch.component';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -28,6 +29,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     SortDropdownComponent,
     ProjectsDropdownComponent,
     UiDropdownTriggerDirective,
+    SegmentedSwitchComponent,
   ],
 })
 export class WorkspaceToolbarComponent {
@@ -39,26 +41,26 @@ export class WorkspaceToolbarComponent {
   readonly currentLanguage = this.i18nService.language;
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly thumbnailSizeOptions = computed<ReadonlyArray<{ value: string, label: string, icon: string }>>(() => {
+  readonly thumbnailSizeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => {
     this.currentLanguage();
     return [
       {
-        value: 'row',
+        id: 'row', value: 'row',
         label: this.t('workspace.toolbar.size.row', 'Rows'),
         icon: 'view_headline',
       },
       {
-        value: 'small',
+        id: 'small', value: 'small',
         label: this.t('workspace.toolbar.size.small', 'Small'),
         icon: 'grid_view',
       },
       {
-        value: 'medium',
+        id: 'medium', value: 'medium',
         label: this.t('workspace.toolbar.size.medium', 'Medium'),
         icon: 'apps',
       },
       {
-        value: 'large',
+        id: 'large', value: 'large',
         label: this.t('workspace.toolbar.size.large', 'Large'),
         icon: 'view_agenda',
       },
@@ -181,5 +183,9 @@ export class WorkspaceToolbarComponent {
     this.closeDropdown();
   }
 }
+
+
+
+
 
 

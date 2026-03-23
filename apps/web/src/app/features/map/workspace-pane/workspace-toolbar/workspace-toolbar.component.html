@@ -20,17 +20,14 @@
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
   <div class="workspace-toolbar__size-control">
-    <div class="ui-segmented" role="radiogroup" [attr.aria-label]="t('workspace.toolbar.size.aria', 'Thumbnail size')">
-      @for (option of thumbnailSizeOptions(); track option.value) {
-        <button type="button" class="ui-segmented__button ui-segmented__button--sm"
-                [attr.aria-checked]="thumbnailSizePreset() === option.value"
-                [class.ui-segmented__button--active]="thumbnailSizePreset() === option.value"
-                (click)="onThumbnailSizeChanged(option.value)"
-                [title]="option.label">
-          <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
-        </button>
-      }
-    </div>
+    <app-segmented-switch
+      [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+      [options]="thumbnailSizeOptions()"
+      [value]="thumbnailSizePreset()"
+      size="sm"
+      [iconOnly]="true"
+      (valueChange)="onThumbnailSizeChanged($event)"
+    />
   </div>
 </div>
 
@@ -64,5 +61,7 @@
     }
   </app-dropdown-shell>
 }
+
+
 
 

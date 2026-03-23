@@ -8,16 +8,16 @@
   [class.segmented-switch--lg]="size() === 'lg'"
 >
   <div
-    class="ui-segmented segmented-switch__group"
+    class="segmented-switch__group"
     role="group"
     [attr.aria-label]="ariaLabel()"
     (keydown)="onSegmentedKeydown($event)"
   >
     @for (option of segmentedOptions(); track option.id) {
       <button
-        class="ui-segmented__button segmented-switch__button" [class.ui-segmented__button--sm]="size() === 'sm'" [class.ui-segmented__button--md]="size() === 'md'" [class.ui-segmented__button--lg]="size() === 'lg'" [class.ui-segmented__button--icon-only]="iconOnly()"
+        class="segmented-switch__button"
         type="button"
-        [class.ui-segmented__button--active]="isSelected(option)"
+        [class.segmented-switch__button--active]="isSelected(option)"
         [attr.aria-pressed]="isSelected(option)"
         [attr.aria-label]="option.ariaLabel || option.label"
         [attr.title]="option.title || option.label"
@@ -37,7 +37,7 @@
   @if (inactiveOptions().length > 0) {
     <div class="segmented-switch__inactive-group" aria-hidden="true">
       @for (option of inactiveOptions(); track option.id) {
-        <button class="ui-segmented__button segmented-switch__inactive-item" [class.ui-segmented__button--sm]="size() === 'sm'" [class.ui-segmented__button--md]="size() === 'md'" [class.ui-segmented__button--lg]="size() === 'lg'" [class.ui-segmented__button--icon-only]="iconOnly()" type="button" disabled>
+        <button class="segmented-switch__inactive-item" type="button" disabled>
           @if (option.icon) {
             <span class="material-icons segmented-switch__icon" aria-hidden="true">{{
               option.icon
@@ -49,4 +49,3 @@
     </div>
   }
 </div>
-
