@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.pane-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.pane-toolbar__left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.pane-toolbar__center {
+  flex: 0 auto;
+}
+
+.pane-toolbar__right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.pane-toolbar__left:empty,
+.pane-toolbar__center:empty,
+.pane-toolbar__right:empty {
+  display: none;
+}

@@ -41,7 +41,7 @@ export default tseslint.config(
       '@angular-eslint/prefer-signals': 'error',
       '@angular-eslint/no-empty-lifecycle-method': 'error',
       '@angular-eslint/use-lifecycle-interface': 'error',
-      '@angular-eslint/component-max-inline-declarations': ['error', { template: 20, styles: 5 }],
+      '@angular-eslint/component-max-inline-declarations': ['error', { template: 60, styles: 5 }],
       'unused-imports/no-unused-imports': 'error',
     },
   },

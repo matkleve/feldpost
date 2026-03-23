@@ -4,7 +4,7 @@
   role="region"
   [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
 >
-  <app-pane-header
+  <app-workspace-pane-header
     [title]="resolvedTitle()"
     [editable]="titleEditable()"
     [editEnabled]="titleEditEnabled()"
@@ -17,7 +17,7 @@
     (editRequested)="onTitleEditRequest()"
     (colorPickerRequested)="onColorPickerRequest()"
     (close)="close()"
-  ></app-pane-header>
+  ></app-workspace-pane-header>
 
   @if (detailImageId()) {
     <app-image-detail-view
@@ -26,7 +26,7 @@
       (zoomToLocationRequested)="onZoomToLocation($event)"
     />
   } @else {
-    <app-workspace-toolbar />
+    <app-workspace-pane-toolbar />
     <app-thumbnail-grid
       [linkedHoveredImageIds]="linkedHoveredImageIds()"
       (thumbnailClicked)="onThumbnailClick($event)"
@@ -36,10 +36,10 @@
     />
 
     @if (selectionService.selectedCount() > 0) {
-      <app-workspace-export-bar
+      <app-workspace-pane-footer
         [scopeIds]="exportScopeIds()"
         [images]="exportScopeImages()"
-      ></app-workspace-export-bar>
+      ></app-workspace-pane-footer>
     }
   }
 </div>

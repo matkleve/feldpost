@@ -48,7 +48,7 @@ import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { WorkspacePaneShellComponent } from '../workspace-pane/workspace-pane-shell.component';
-import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card.component';
+import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card/thumbnail-card.component';
 import { SettingsPaneService } from '../../../core/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';

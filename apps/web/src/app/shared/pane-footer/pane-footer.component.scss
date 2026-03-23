@@ -1,0 +1,20 @@
+:host {
+  display: block;
+}
+
+.pane-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-bg-surface);
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  z-index: 1;
+}
+
+.pane-footer__spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
