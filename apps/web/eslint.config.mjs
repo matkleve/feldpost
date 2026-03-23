@@ -12,14 +12,17 @@ const maintainabilityGuidance = {
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'src/**/*.spec.ts'],
+    ignores: ['dist/**', 'coverage/**', 'node_modules/**'],
     linterOptions: {
       noInlineConfig: false,
       reportUnusedDisableDirectives: 'warn',
     },
   },
+
+  // ── TypeScript source files ───────────────────────────────────────────────
   {
     files: ['src/**/*.ts'],
+    ignores: ['src/**/*.spec.ts'],
     languageOptions: {
       parser: tseslint.parser,
       ecmaVersion: 'latest',
@@ -45,6 +48,33 @@ export default tseslint.config(
       'unused-imports/no-unused-imports': 'error',
     },
   },
+
+  // ── Spec files — relaxed rules ────────────────────────────────────────────
+  {
+    files: ['src/**/*.spec.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+    plugins: {
+      '@typescript-eslint': tseslint.plugin,
+      'unused-imports': unusedImports,
+    },
+    rules: {
+      // Specs can be longer — each scenario adds lines
+      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 60 }],
+      // No magic numbers rule in specs — test values are explicit by nature
+      'no-magic-numbers': 'off',
+      // any is sometimes needed in mocks
+      '@typescript-eslint/no-explicit-any': 'warn',
+      // unused imports still important
+      'unused-imports/no-unused-imports': 'error',
+    },
+  },
+
+  // ── HTML templates ────────────────────────────────────────────────────────
   {
     files: ['src/**/*.html'],
     languageOptions: {
@@ -60,6 +90,8 @@ export default tseslint.config(
       'max-lines': ['warn', { max: 60, skipBlankLines: true, skipComments: true }],
     },
   },
+
+  // ── ESLint config itself ──────────────────────────────────────────────────
   {
     files: ['eslint.config.mjs'],
     rules: {

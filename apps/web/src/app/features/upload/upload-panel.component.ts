@@ -26,6 +26,11 @@ import {
   type ImageUploadedEvent as ManagerImageUploadedEvent,
 } from '../../core/upload/upload-manager.service';
 import {
+  getLaneForJob as mapJobToLane,
+  phaseToStatusClass as mapPhaseToStatusClass,
+  type UploadLane,
+} from './upload-phase.helpers';
+import {
   UiButtonDirective,
   UiTabDirective,
   UiTabListDirective,
@@ -50,8 +55,6 @@ export interface ZoomToLocationEvent {
   lng: number;
 }
 
-type UploadLane = 'uploading' | 'uploaded' | 'issues';
-
 // ── Component ──────────────────────────────────────────────────────────────────
 
 @Component({
@@ -68,28 +71,8 @@ type UploadLane = 'uploading' | 'uploaded' | 'issues';
   styleUrl: './upload-panel.component.scss',
 })
 export class UploadPanelComponent {
+  // eslint-disable-next-line no-magic-numbers
   private static readonly ISSUE_ATTENTION_RESET_MS = 1500;
-
-  private static readonly PHASE_TO_STATUS_CLASS: Record<UploadPhase, string> = {
-    queued: 'pending',
-    validating: 'parsing',
-    parsing_exif: 'parsing',
-    converting_format: 'parsing',
-    hashing: 'parsing',
-    dedup_check: 'parsing',
-    extracting_title: 'parsing',
-    conflict_check: 'parsing',
-    awaiting_conflict_resolution: 'awaiting_placement',
-    uploading: 'uploading',
-    saving_record: 'uploading',
-    replacing_record: 'uploading',
-    resolving_address: 'uploading',
-    resolving_coordinates: 'uploading',
-    complete: 'complete',
-    skipped: 'complete',
-    error: 'error',
-    missing_data: 'awaiting_placement',
-  };
 
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
@@ -420,7 +403,7 @@ export class UploadPanelComponent {
 
   /** Map UploadPhase to a CSS-friendly status class name. */
   phaseToStatusClass(phase: UploadPhase): string {
-    return UploadPanelComponent.PHASE_TO_STATUS_CLASS[phase];
+    return mapPhaseToStatusClass(phase);
   }
 
   /** TrackBy function used in the template. */
@@ -453,9 +436,7 @@ export class UploadPanelComponent {
   }
 
   private getLaneForJob(job: UploadJob): UploadLane {
-    if (job.phase === 'complete' || job.phase === 'skipped') return 'uploaded';
-    if (job.phase === 'error' || job.phase === 'missing_data') return 'issues';
-    return 'uploading';
+    return mapJobToLane(job);
   }
 
   private getDotStatusClass(job: UploadJob): string {
