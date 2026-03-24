@@ -14,6 +14,21 @@
   font-size: var(--font-size-xs);
 }
 
+.upload-panel__file-item--pending .upload-panel__file-main {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 16%, var(--color-border));
+}
+
+.upload-panel__file-item--parsing .upload-panel__file-main {
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+}
+
+.upload-panel__file-item--uploading .upload-panel__file-main {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+}
+
 .upload-panel__file-item--complete .upload-panel__file-main {
   background: color-mix(in srgb, var(--color-success) 10%, var(--color-bg-surface));
 }
