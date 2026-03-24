@@ -46,11 +46,6 @@
   grid-template-columns: 2.1rem minmax(0, 1fr);
   gap: var(--spacing-2);
   align-items: center;
-  min-height: var(--upload-row-height, 3.25rem);
-  padding: 0.35rem var(--spacing-2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-bg-base) 86%, var(--color-bg-elevated));
 }
 
 .upload-panel__file-main--interactive {
@@ -104,7 +99,8 @@
 }
 
 @keyframes map-photo-marker-placeholder-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
   }
   50% {

@@ -18,7 +18,7 @@ export class UploadPanelItemComponent {
   readonly job = input.required<UploadJob>();
   readonly interactive = input<boolean>(false);
   readonly documentFallbackLabel = input<string | null>(null);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly requestPlacement = output<{ jobId: string; phase: UploadPhase; event: MouseEvent }>();
   readonly dismissFile = output<string>();
