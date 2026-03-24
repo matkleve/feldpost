@@ -40,7 +40,6 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
   ],
   templateUrl: './projects-toolbar.component.html',
   styleUrl: './projects-toolbar.component.scss',
-
 })
 export class ProjectsToolbarComponent {
   private readonly i18nService = inject(I18nService);
@@ -162,5 +161,3 @@ export class ProjectsToolbarComponent {
     }
   }
 }
-
-

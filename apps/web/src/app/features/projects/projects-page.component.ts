@@ -370,5 +370,3 @@ export class ProjectsPageComponent {
     });
   }
 }
-
-
