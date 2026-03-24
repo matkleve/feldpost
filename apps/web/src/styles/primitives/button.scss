@@ -25,6 +25,8 @@
   transition: var(--interactive-transition-standard);
 
   // default to md size config
+  --ui-button-icon-size: 1rem;
+
   height: 2.5rem;
   padding-inline: var(--spacing-3);
   padding-block: 0;
@@ -55,6 +57,8 @@
 
 // Size: definiert Höhe und Abstände – wird von Layout-Modifiern nicht überschrieben
 .ui-button--sm {
+  --ui-button-icon-size: 0.875rem;
+
   height: 2rem;
   padding-inline: var(--spacing-2);
   padding-block: 0;
@@ -65,12 +69,14 @@
     width: 2rem;
   }
   &.ui-button--icon-with-text {
-    padding-inline-start: var(--spacing-1);
+    padding-inline-start: var(--spacing-2);
     padding-inline-end: var(--spacing-2);
   }
 }
 
 .ui-button--md {
+  --ui-button-icon-size: 1rem;
+
   height: 2.5rem;
   padding-inline: var(--spacing-3);
   padding-block: 0;
@@ -87,6 +93,8 @@
 }
 
 .ui-button--lg {
+  --ui-button-icon-size: 1.125rem;
+
   height: 3rem;
   padding-inline: var(--spacing-4);
   padding-block: 0;
@@ -102,20 +110,26 @@
   }
 }
 
-// Layout: nur Padding-Overrides – KEINE Höhen/Schrift-Properties
-.ui-button--text-only {
-  // Symmetric padding applies naturally from size class
-}
-
-.ui-button--icon-with-text {
-  // Asymmetrical padding handled within size classes
-}
+// Layout: text-only and icon-with-text use size modifiers without additional base overrides.
 
 .ui-button--icon-only {
   padding-inline: 0;
   padding-block: 0;
   gap: 0;
+  font-size: 0;
+  line-height: 0;
   // width set within size modifiers above
+
+  .ui-button__label {
+    display: none;
+  }
+
+  .material-icons,
+  .material-symbols-outlined,
+  .ui-button__icon {
+    font-size: var(--ui-button-icon-size);
+    line-height: var(--line-height-solid);
+  }
 }
 
 .ui-button--loading {

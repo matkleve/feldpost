@@ -1,14 +1,25 @@
 import { Component, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
-import { UiIconButtonGhostDirective } from '../../shared/ui-primitives/ui-primitives.directive';
+import {
+  UiButtonDirective,
+  UiButtonGhostDirective,
+  UiButtonIconOnlyDirective,
+  UiButtonSizeSmDirective,
+} from '../../shared/ui-primitives/ui-primitives.directive';
 import { getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-upload-panel-item',
   standalone: true,
-  imports: [CommonModule, UiIconButtonGhostDirective],
+  imports: [
+    CommonModule,
+    UiButtonDirective,
+    UiButtonSizeSmDirective,
+    UiButtonIconOnlyDirective,
+    UiButtonGhostDirective,
+  ],
   templateUrl: './upload-panel-item.component.html',
   styleUrl: './upload-panel-item.component.scss',
 })

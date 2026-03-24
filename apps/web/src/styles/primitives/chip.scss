@@ -103,3 +103,35 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+
+// Compact numeric count chip for tab counters and similar metadata.
+// Color inherits from surrounding context (e.g., active tab state).
+.ui-chip--count {
+  border: none;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, currentColor 14%, var(--field-bg));
+  color: currentColor;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-solid);
+  justify-content: center;
+  min-width: 1.3rem;
+  pointer-events: none;
+}
+
+.ui-chip--count.ui-chip--sm {
+  height: 1.1rem;
+  padding-inline: var(--spacing-1);
+  font-size: 0.72em;
+}
+
+.ui-chip--count.ui-chip--md {
+  height: 1.25rem;
+  padding-inline: var(--spacing-1);
+  font-size: 0.76em;
+}
+
+.ui-chip--count.ui-chip--lg {
+  height: 1.4rem;
+  padding-inline: var(--spacing-2);
+  font-size: 0.8em;
+}

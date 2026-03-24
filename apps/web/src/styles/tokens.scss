@@ -40,18 +40,22 @@
   --color-map-search-marker: var(--color-clay);
 
   // Border radius
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-md-plus: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-lg-plus: 1.25rem;
+  --radius-xl: 1.75rem;
   --radius-full: 9999px;
 
   // Shadows — warm-tinted black (not cold blue)
   // Physical shadow scale: sm → md → lg → xl
-  --shadow-sm: 0 1px 3px rgba(15, 14, 12, 0.12), 0 1px 2px rgba(15, 14, 12, 0.08);
-  --shadow-md: 0 4px 12px rgba(15, 14, 12, 0.15), 0 2px 4px rgba(15, 14, 12, 0.1);
-  --shadow-lg: 0 8px 24px rgba(15, 14, 12, 0.18), 0 4px 8px rgba(15, 14, 12, 0.12);
-  --shadow-xl: 0 16px 48px rgba(15, 14, 12, 0.22), 0 6px 16px rgba(15, 14, 12, 0.14);
-  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  --shadow-sm:
+    0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.12), 0 0.0625rem 0.125rem rgba(15, 14, 12, 0.08);
+  --shadow-md: 0 0.25rem 0.75rem rgba(15, 14, 12, 0.15), 0 0.125rem 0.25rem rgba(15, 14, 12, 0.1);
+  --shadow-lg: 0 0.5rem 1.5rem rgba(15, 14, 12, 0.18), 0 0.25rem 0.5rem rgba(15, 14, 12, 0.12);
+  --shadow-xl: 0 1rem 3rem rgba(15, 14, 12, 0.22), 0 0.375rem 1rem rgba(15, 14, 12, 0.14);
+  --shadow-focus: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 15%, transparent);
 
   // Elevation layers — semantic aliases; every element uses a layer, not a raw shadow.
   // All elements at the same visual plane share the same layer → same shadow.
@@ -71,15 +75,15 @@
   --z-toast: 450;
   --z-modal: 500;
 
-  // Spacing scale — 4 px base unit
-  --spacing-1: 4px;
-  --spacing-2: 8px;
-  --spacing-3: 12px;
-  --spacing-4: 16px;
-  --spacing-5: 24px;
-  --spacing-6: 32px;
-  --spacing-7: 48px;
-  --spacing-8: 64px;
+  // Spacing scale — 0.25rem base unit (4px @ 16px root)
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.5rem;
+  --spacing-6: 2rem;
+  --spacing-7: 3rem;
+  --spacing-8: 4rem;
 
   // Typography scale
   --font-size-3xs: 0.52rem;
@@ -142,14 +146,22 @@
   --container-radius-panel: var(--radius-lg);
   --container-radius-pill: var(--radius-full);
 
+  // Tab geometry radii (list radius = option radius + list padding)
+  --tab-radius-option-sm: var(--radius-md);
+  --tab-radius-option-md: var(--radius-lg);
+  --tab-radius-option-lg: var(--radius-lg-plus);
+  --tab-radius-list-sm: var(--radius-md-plus);
+  --tab-radius-list-md: var(--radius-lg-plus);
+  --tab-radius-list-lg: var(--radius-xl);
+
   // Shared media sizing primitives
   --ui-item-media-size-default: var(--spacing-6);
 
   // Photo marker geometry derives from the shared media token system.
   --photo-marker-body-size: calc(var(--ui-item-media-size-default) * 1.25);
   --photo-marker-hit-size: 2.5rem;
-  --photo-marker-correction-dot-size: 8px;
-  --photo-marker-drop-shadow: 0 1px 3px rgba(15, 14, 12, 0.45);
+  --photo-marker-correction-dot-size: 0.5rem;
+  --photo-marker-drop-shadow: 0 0.0625rem 0.1875rem rgba(15, 14, 12, 0.45);
   --photo-marker-selected-scale: 1.05;
   --photo-marker-cluster-font-size: var(--font-size-md);
 
@@ -197,7 +209,7 @@
   // Shared interactive primitives (single source for hover/focus/motion)
   --interactive-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
   --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  --interactive-focus-ring: 0 0 0 2px color-mix(in srgb, var(--color-clay) 16%, transparent);
+  --interactive-focus-ring: 0 0 0 0.125rem color-mix(in srgb, var(--color-clay) 16%, transparent);
   --interactive-transition-standard:
     border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
@@ -270,11 +282,11 @@
   --color-map-search-marker: var(--color-clay);
 
   // Shadows — higher opacity so they punch through dark surfaces
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.18);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.38), 0 2px 4px rgba(0, 0, 0, 0.22);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.48), 0 4px 8px rgba(0, 0, 0, 0.28);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.56), 0 6px 16px rgba(0, 0, 0, 0.32);
-  --photo-marker-drop-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
+  --shadow-sm: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.28), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.18);
+  --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
+  --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
+  --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
+  --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
 }
 
 // Optional custom profile to validate themeability of semantic aliases.
@@ -357,10 +369,11 @@
     --color-map-search-marker: var(--color-clay);
 
     // Shadows — higher opacity so they punch through dark surfaces
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.18);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.38), 0 2px 4px rgba(0, 0, 0, 0.22);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.48), 0 4px 8px rgba(0, 0, 0, 0.28);
-    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.56), 0 6px 16px rgba(0, 0, 0, 0.32);
-    --photo-marker-drop-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
+    --shadow-sm:
+      0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.28), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.18);
+    --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
+    --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
+    --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
+    --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
   }
 }

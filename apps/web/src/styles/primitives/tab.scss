@@ -1,107 +1,242 @@
-// ---------------------------------------------
+﻿// ---------------------------------------------
 // UI TAB PRIMITIVE
-// Responsibilities:
-//   Size Modifiers (uiTabSizeSm/Md/Lg):
-//     ? height, padding-inline, padding-block, font-size, gap
-//   Emphasis Modifiers (uiTabActive):
-//     ? background, color, border-color, hover/active states
-//   Layout Modifiers (if applicable):
-//     ? padding overrides, gap resets
-//     ? NEVER height, font-size
+// Built from the same foundation as ui-button
+// (md defaults, control radius, interactive tokens).
 // ---------------------------------------------
 
 .ui-tab-list {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
-  border: 1px solid var(--action-border-default);
-  border-radius: var(--radius-full);
-  padding: 0.15rem;
+  padding: var(--spacing-1);
+  border: 1.5px solid color-mix(in srgb, var(--menu-surface-border) 86%, transparent);
+  border-radius: var(--tab-radius-list-md);
   background: color-mix(in srgb, var(--menu-surface-bg) 92%, var(--color-bg-base));
+  box-shadow: var(--elevation-subtle);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    border-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ui-tab-list--sm {
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+  border-radius: var(--tab-radius-list-sm);
+}
+
+.ui-tab-list--md {
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+  border-radius: var(--tab-radius-list-md);
+}
+
+.ui-tab-list--lg {
+  gap: var(--spacing-1);
+  padding: var(--spacing-2);
+  border-radius: var(--tab-radius-list-lg);
+}
+
+.ui-tab-list--fill {
+  width: 100%;
+
+  .ui-tab {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 .ui-tab {
+  --ui-tab-icon-size: 1rem;
+
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: var(--radius-full);
+  border: 1.5px solid transparent;
+  border-radius: var(--tab-radius-option-md);
   background: transparent;
   color: var(--action-text-default);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
+  text-align: center;
   white-space: nowrap;
-  transition: var(--interactive-transition-standard);
-
-  // default to md size config
-  height: 2.5rem;
-  padding-inline: var(--spacing-3);
-  padding-block: 0;
-  font-size: var(--font-size-sm);
-  gap: var(--spacing-1);
+  transition:
+    color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
   &:hover:not(:disabled) {
-    background: var(--action-bg-hover);
     color: var(--menu-item-text);
+    background: var(--action-bg-hover);
   }
 
   &:focus-visible {
-    box-shadow: var(--interactive-focus-ring);
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-clay) 18%, transparent),
+      0 1px 2px color-mix(in srgb, var(--color-clay) 12%, transparent);
     outline: none;
   }
 
   &:active:not(:disabled) {
-    background: color-mix(in srgb, var(--action-bg-active) 84%, var(--action-bg-hover));
+    background: var(--action-bg-active);
   }
 
   &:disabled {
-    opacity: 0.55;
+    opacity: 0.66;
     cursor: not-allowed;
   }
 }
 
-// Size: defines height and spacing � never overridden by Layout Modifiers
 .ui-tab--sm {
+  --ui-tab-icon-size: 0.875rem;
+
   height: 2rem;
   padding-inline: var(--spacing-2);
-  padding-block: 0;
   font-size: var(--font-size-xs);
   gap: var(--spacing-1);
+  border-radius: var(--tab-radius-option-sm);
+
+  &.ui-tab--icon-only {
+    width: 2rem;
+  }
 }
 
 .ui-tab--md {
-  height: 2.5rem;
-  padding-inline: var(--spacing-3);
-  padding-block: 0;
-  font-size: var(--font-size-sm);
-  gap: var(--spacing-1);
+  --ui-tab-icon-size: 1rem;
+
+  height: 2.45rem;
+  padding-inline: 0.95rem;
+  font-size: var(--font-size-sm-tight);
+  gap: var(--spacing-2);
+  border-radius: var(--tab-radius-option-md);
+
+  &.ui-tab--icon-only {
+    width: 2.45rem;
+  }
 }
 
 .ui-tab--lg {
-  height: 3rem;
+  --ui-tab-icon-size: 1.125rem;
+
+  height: 2.75rem;
   padding-inline: var(--spacing-4);
-  padding-block: 0;
   font-size: var(--font-size-md);
   gap: var(--spacing-2);
+  border-radius: var(--tab-radius-option-lg);
+
+  &.ui-tab--icon-only {
+    width: 2.75rem;
+  }
 }
 
-// Emphasis: Eigenschaften f�r Theme und States, keine Struktur- oder Gr��en-Properties
 .ui-tab--active {
-  background: var(--action-bg-active);
-  color: var(--action-text-active);
+  background: var(--field-bg);
+  border-color: color-mix(in srgb, var(--action-border-active) 82%, transparent);
   box-shadow:
     0 1px 2px color-mix(in srgb, var(--color-clay) 16%, transparent),
     0 0 0 1px color-mix(in srgb, var(--color-clay) 22%, transparent) inset;
+  color: var(--action-text-active);
+
+  &:hover:not(:disabled) {
+    background: var(--field-bg);
+  }
 }
 
-// Layout: arrangement only � NO size or font properties
+// State variants for upload lanes
+.ui-tab--uploading {
+  color: color-mix(in srgb, var(--color-uploading) 70%, var(--color-text-secondary));
+
+  &.ui-tab--active {
+    background: var(--field-bg);
+    border-color: color-mix(in srgb, var(--color-uploading) 30%, var(--color-border));
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--color-uploading) 16%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-uploading) 22%, transparent) inset;
+    color: var(--color-uploading);
+
+    &:hover:not(:disabled) {
+      background: var(--field-bg);
+    }
+  }
+}
+
+.ui-tab--uploaded {
+  color: color-mix(in srgb, var(--color-success) 72%, var(--color-text-secondary));
+
+  &.ui-tab--active {
+    background: var(--field-bg);
+    border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--color-success) 16%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-success) 22%, transparent) inset;
+    color: var(--color-success);
+
+    &:hover:not(:disabled) {
+      background: var(--field-bg);
+    }
+  }
+}
+
+.ui-tab--issues {
+  color: color-mix(in srgb, var(--color-warning) 70%, var(--color-text-secondary));
+
+  &.ui-tab--active {
+    background: var(--field-bg);
+    border-color: color-mix(in srgb, var(--color-warning) 32%, var(--color-border));
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--color-warning) 16%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-warning) 22%, transparent) inset;
+    color: var(--color-warning);
+
+    &:hover:not(:disabled) {
+      background: var(--field-bg);
+    }
+  }
+}
+
+.ui-tab--attention {
+  animation: ui-tab-issues-attention 650ms ease-out 2;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-warning) 38%, transparent);
+}
+
 .ui-tab--icon-only {
   padding-inline: 0;
-  width: var(--height); // Not fully robust here but let's keep it structurally sound if existed. 
-  // Wait, tab didn't have icon-only before, let's omit if not there.
+  gap: 0;
+  font-size: 0;
+  line-height: 0;
+
+  .ui-tab__label {
+    display: none;
+  }
+
+  .material-icons,
+  .material-symbols-outlined,
+  .ui-tab__icon {
+    font-size: var(--ui-tab-icon-size);
+    line-height: var(--line-height-solid);
+  }
 }
 
 .ui-tab__icon {
-  font-size: var(--font-size-base);
+  font-size: var(--ui-tab-icon-size);
   line-height: var(--line-height-solid);
+}
+
+// Animation for attention state (e.g., issues lane pulsing)
+@keyframes ui-tab-issues-attention {
+  0% {
+    transform: scale(1);
+    background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+  }
+  45% {
+    transform: scale(1.02);
+    background: color-mix(in srgb, var(--color-warning) 24%, transparent);
+  }
+  100% {
+    transform: scale(1);
+    background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+  }
 }

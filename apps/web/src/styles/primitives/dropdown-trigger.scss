@@ -33,11 +33,27 @@
 // Layout: responsive collapse modifiers
 // label hidden, icon + chevron visible
 .ui-dropdown-trigger--compact {
-  .ui-dropdown-trigger__label { display: none; }
+  .ui-dropdown-trigger__label {
+    display: none;
+  }
 }
 
 // icon-only: label and chevron hidden
 .ui-dropdown-trigger--icon-only {
-  .ui-dropdown-trigger__label { display: none; }
-  .ui-dropdown-trigger__chevron { display: none; }
+  font-size: 0;
+  line-height: 0;
+
+  .ui-dropdown-trigger__label {
+    display: none;
+  }
+  .ui-dropdown-trigger__chevron {
+    display: none;
+  }
+
+  .material-icons,
+  .material-symbols-outlined,
+  .ui-dropdown-trigger__icon {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-solid);
+  }
 }
