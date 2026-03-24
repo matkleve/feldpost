@@ -137,7 +137,7 @@
     background 80ms ease-out;
 
   .material-icons {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   &:hover {
@@ -173,7 +173,7 @@
 .detail-replace-error {
   margin-top: var(--spacing-1);
   padding: var(--spacing-1) var(--spacing-2);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-danger);
   text-align: center;
 }
@@ -208,7 +208,7 @@
   }
 
   &__text {
-    font-size: 0.875rem;
+    font-size: var(--font-size-md);
     color: var(--color-text-secondary);
   }
 
@@ -221,8 +221,8 @@
     border-radius: var(--radius-md);
     background: var(--color-clay);
     color: var(--color-bg-surface);
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
     transition:
       background 80ms ease-out,

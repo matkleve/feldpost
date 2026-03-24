@@ -9,7 +9,7 @@
   --segmented-motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --segmented-button-min-height: 2.45rem;
   --segmented-button-padding-inline: 0.95rem;
-  --segmented-button-font-size: 0.8rem;
+  --segmented-button-font-size: var(--font-size-sm-tight);
 
   display: inline-flex;
   align-items: center;
@@ -51,21 +51,21 @@
   &--sm {
     --segmented-button-min-height: 2rem;
     --segmented-button-padding-inline: var(--spacing-2);
-    --segmented-button-font-size: 0.75rem;
+    --segmented-button-font-size: var(--font-size-xs);
     --segmented-icon-only-size: 2rem;
   }
 
   &--md {
     --segmented-button-min-height: 2.45rem;
     --segmented-button-padding-inline: 0.95rem;
-    --segmented-button-font-size: 0.8rem;
+    --segmented-button-font-size: var(--font-size-sm-tight);
     --segmented-icon-only-size: 2.25rem;
   }
 
   &--lg {
     --segmented-button-min-height: 2.75rem;
     --segmented-button-padding-inline: var(--spacing-4);
-    --segmented-button-font-size: 0.875rem;
+    --segmented-button-font-size: var(--font-size-md);
     --segmented-icon-only-size: 2.75rem;
   }
 
@@ -103,8 +103,8 @@
     align-items: center;
     justify-content: center;
     font-size: var(--segmented-button-font-size, 0.8rem);
-    font-weight: 600;
-    line-height: 1;
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-solid);
     white-space: nowrap;
     transform: translateY(0);
     transition:
@@ -140,14 +140,14 @@
 
   &__icon {
     display: block;
-    font-size: 1.2rem;
-    line-height: 1;
+    font-size: var(--font-size-lg-emphasis);
+    line-height: var(--line-height-solid);
   }
 
   &__label {
     display: inline-flex;
     align-items: center;
-    line-height: 1;
+    line-height: var(--line-height-solid);
     letter-spacing: 0.01em;
   }
 
@@ -171,7 +171,7 @@
     padding: 0.3rem 0.15rem;
     font: inherit;
     font-size: var(--segmented-button-font-size, 0.8rem);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     white-space: nowrap;
     cursor: default;
     transition:
@@ -194,7 +194,7 @@
     }
 
     &__icon {
-      font-size: 1.05rem;
+      font-size: var(--font-size-base-strong);
     }
 
     &__inactive-item {
@@ -202,7 +202,7 @@
     }
 
     &__label {
-      font-size: 0.76rem;
+      font-size: var(--font-size-xs-soft);
     }
   }
 }

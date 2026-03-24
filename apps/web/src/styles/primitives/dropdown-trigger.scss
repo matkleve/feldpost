@@ -19,8 +19,8 @@
 }
 
 .ui-dropdown-trigger__chevron {
-  font-size: 1rem;
-  line-height: 1;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-solid);
   flex-shrink: 0;
   transition: transform 150ms ease-out;
 }

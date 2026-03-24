@@ -137,14 +137,14 @@
 
 // Headings
 .auth-title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
   margin: 0 0 0.25rem;
   color: var(--color-text-primary);
 }
 
 .auth-subtitle {
-  font-size: 0.9rem;
+  font-size: var(--font-size-md-soft);
   color: var(--color-text-secondary);
   margin: 0 0 1.75rem;
 }
@@ -159,8 +159,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: var(--font-size-md-compact);
+    font-weight: var(--font-weight-medium);
     color: var(--color-text-primary);
     margin-bottom: 0.35rem;
   }
@@ -169,7 +169,7 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: 0.6rem 0.75rem;
-    font-size: 0.95rem;
+    font-size: var(--font-size-md-emphasis);
     outline: none;
     transition: border-color 0.15s;
     background: var(--color-bg-surface);
@@ -187,15 +187,15 @@
 }
 
 .field-error {
-  font-size: 0.78rem;
+  font-size: var(--font-size-sm-compact);
   color: var(--color-danger);
   margin-top: 0.3rem;
 }
 
 // Forgot password link inside label
 .forgot-link {
-  font-size: 0.8rem;
-  font-weight: 400;
+  font-size: var(--font-size-sm-tight);
+  font-weight: var(--font-weight-regular);
   color: var(--color-primary);
   text-decoration: none;
 
@@ -208,7 +208,7 @@
 .alert {
   border-radius: var(--radius-md);
   padding: 0.65rem 0.85rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   margin-bottom: 1rem;
 }
 
@@ -226,8 +226,8 @@
   border: none;
   border-radius: var(--radius-md);
   padding: 0.7rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: var(--font-size-md-emphasis);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: background 0.15s;
   margin-top: 0.5rem;
@@ -245,7 +245,7 @@
 // Footer links
 .auth-footer {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
   margin-top: 1.5rem;
 
@@ -280,6 +280,6 @@
 
   p {
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: var(--line-height-relaxed);
   }
 }

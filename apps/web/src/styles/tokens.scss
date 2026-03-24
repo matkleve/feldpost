@@ -75,13 +75,34 @@
   --spacing-8: 64px;
 
   // Typography scale
+  --font-size-3xs: 0.52rem;
+  --font-size-2xs: 0.56rem;
+  --font-size-caption: 0.625rem;
+  --font-size-label: 0.6875rem;
+  --font-size-label-soft: 0.68rem;
+  --font-size-xs-soft: 0.76rem;
   --font-size-xs: 0.75rem;
+  --font-size-sm-soft: 0.82rem;
+  --font-size-sm-strong: 0.84rem;
   --font-size-sm: 0.8125rem;
+  --font-size-md-compact: 0.85rem;
   --font-size-md: 0.875rem;
+  --font-size-md-soft: 0.9rem;
+  --font-size-md-emphasis: 0.95rem;
+  --font-size-md-plus: 0.9375rem;
+  --font-size-sm-compact: 0.78rem;
+  --font-size-sm-tight: 0.8rem;
   --font-size-base: 1rem;
+  --font-size-base-strong: 1.05rem;
+  --font-size-base-plus: 1.0625rem;
+  --font-size-base-emphasis: 1.1rem;
   --font-size-lg: 1.125rem;
+  --font-size-lg-emphasis: 1.2rem;
   --font-size-xl: 1.25rem;
+  --font-size-5xl: 1.9rem;
   --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.75rem;
+  --font-size-4xl: 2rem;
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -89,7 +110,15 @@
   --font-weight-bold: 700;
 
   --line-height-tight: 1.2;
+  --line-height-solid: 1;
+  --line-height-snug: 1.1;
+  --line-height-dense: 1.25;
+  --line-height-cozy: 1.3;
+  --line-height-reading: 1.4;
+  --line-height-compact: 1.35;
   --line-height-normal: 1.45;
+  --line-height-open: 1.5;
+  --line-height-comfortable: 1.55;
   --line-height-relaxed: 1.6;
 
   // Container geometry — containers define the alignment boundaries that
@@ -115,7 +144,7 @@
   --photo-marker-correction-dot-size: 8px;
   --photo-marker-drop-shadow: 0 1px 3px rgba(15, 14, 12, 0.45);
   --photo-marker-selected-scale: 1.05;
-  --photo-marker-cluster-font-size: 0.875rem;
+  --photo-marker-cluster-font-size: var(--font-size-md);
 
   // Sidebar layout dimensions — standardized from docs/design/tokens.md.
   --layout-sidebar-width-collapsed: var(--spacing-7);

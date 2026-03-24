@@ -30,7 +30,7 @@
     transition: background 80ms ease-out;
 
     .material-icons {
-      font-size: 1.25rem;
+      font-size: var(--font-size-xl);
     }
 
     &:hover {

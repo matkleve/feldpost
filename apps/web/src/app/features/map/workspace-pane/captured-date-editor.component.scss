@@ -25,7 +25,7 @@
   &__time-input {
     flex: 1 1 50%;
     min-width: 0;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--field-text);
     background: var(--field-bg);
     border: 1px solid var(--field-border);
@@ -60,14 +60,14 @@
   }
 
   &__month-label {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
     flex: 1 1 auto;
   }
 
   &__now-btn {
-    font-size: 0.6875rem;
+    font-size: var(--font-size-label);
     color: var(--color-text-secondary);
     background: none;
     border: none;
@@ -101,7 +101,7 @@
       background 80ms ease-out;
 
     .material-icons {
-      font-size: 1rem;
+      font-size: var(--font-size-base);
     }
 
     &:hover {
@@ -120,8 +120,8 @@
   }
 
   &__weekday {
-    font-size: 0.625rem;
-    font-weight: 500;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
     padding: 0.125rem 0;
     text-transform: uppercase;
@@ -135,7 +135,7 @@
     width: 1.625rem;
     height: 1.625rem;
     margin: 0 auto;
-    font-size: 0.6875rem;
+    font-size: var(--font-size-label);
     color: var(--color-text-primary);
     background: none;
     border: none;
@@ -161,7 +161,7 @@
     &--selected {
       background: var(--action-text-active);
       color: #fff;
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
     }
   }
 
@@ -177,7 +177,7 @@
 
   &__clear-btn,
   &__done-btn {
-    font-size: 0.6875rem;
+    font-size: var(--font-size-label);
     font-family: inherit;
     background: none;
     border: none;
@@ -200,7 +200,7 @@
 
   &__done-btn {
     color: var(--action-text-active);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
 
     &:hover {
       background: var(--action-bg-hover);

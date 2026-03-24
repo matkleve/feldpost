@@ -22,9 +22,9 @@
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-solid);
   opacity: 0;
   transition:
     opacity 80ms ease-out,

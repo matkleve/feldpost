@@ -34,7 +34,7 @@
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--field-text);
   padding: var(--spacing-1) 0;
 
@@ -74,7 +74,7 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--menu-item-text);
   cursor: pointer;
   transition: background 80ms ease-out;
@@ -101,7 +101,7 @@
 }
 
 .dd-item__icon {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
   flex-shrink: 0;
 
@@ -123,8 +123,8 @@
 
 .dd-section-label {
   padding: var(--spacing-1) var(--spacing-2);
-  font-size: 0.6875rem;
-  font-weight: 600;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-disabled);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -138,7 +138,7 @@
 
 .dd-empty {
   padding: var(--spacing-3) var(--spacing-2);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-disabled);
   text-align: center;
 }
@@ -152,13 +152,13 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--action-text-default);
   cursor: pointer;
   transition: var(--interactive-transition-standard);
 
   .material-icons {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   &:hover {
@@ -174,7 +174,7 @@
 .dd-drag-handle {
   opacity: 0;
   margin-left: auto;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
   cursor: grab;
   transition: opacity 80ms ease-out;

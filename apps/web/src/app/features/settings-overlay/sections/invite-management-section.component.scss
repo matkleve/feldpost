@@ -26,19 +26,19 @@
 }
 
 .invite-section__title-wrap h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   color: var(--color-text-primary);
 }
 
 .invite-section__title-wrap p {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }
 
 .invite-section__expires {
   grid-column: 1 / -1;
   margin-top: var(--spacing-1);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
@@ -50,14 +50,14 @@
   padding: 0.2rem 0.7rem;
   border-radius: var(--radius-full);
   border: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .invite-section__status-chip .material-icons {
-  font-size: 0.95rem;
+  font-size: var(--font-size-md-emphasis);
 }
 
 .invite-section__status-chip[data-status='active'] {
@@ -89,7 +89,7 @@
 .invite-section__label {
   display: block;
   margin-bottom: var(--spacing-2);
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }
 
@@ -160,7 +160,7 @@
 }
 
 .invite-section__link-label {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
@@ -170,8 +170,8 @@
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--color-bg-surface) 76%, transparent);
   color: var(--color-text-primary);
-  font-size: 0.8125rem;
-  line-height: 1.4;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-reading);
   word-break: break-all;
 }
 
@@ -188,12 +188,12 @@
 }
 
 .invite-section__icon-button .material-icons {
-  font-size: 1.1rem;
+  font-size: var(--font-size-base-emphasis);
 }
 
 .invite-section__button {
   padding: 0.45rem 0.8rem;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
 }
 
 .invite-section__state {
@@ -223,7 +223,7 @@
 
 .invite-section__inline-error {
   color: var(--color-danger);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
 }
 
 @media (max-width: 47.9375rem) {

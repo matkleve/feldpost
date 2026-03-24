@@ -1,4 +1,4 @@
-﻿:host {
+:host {
   display: contents;
 }
 
@@ -11,7 +11,7 @@
   padding: 0;
   margin-block: 0.0625rem;
   margin-inline: 0;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .upload-panel__file-item--complete .upload-panel__file-main {
@@ -74,7 +74,7 @@
 }
 
 .upload-panel__thumbnail--placeholder .material-icons {
-  font-size: 0.82rem;
+  font-size: var(--font-size-sm-soft);
 }
 
 .upload-panel__thumbnail--skeleton {
@@ -102,9 +102,9 @@
 }
 
 .upload-panel__thumbnail-fallback {
-  font-size: 0.56rem;
-  line-height: 1;
-  font-weight: 700;
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-solid);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.03em;
   color: var(--color-text-secondary);
 }
@@ -118,20 +118,20 @@
 
 .upload-panel__file-name {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: var(--font-size-sm-strong);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--color-text-primary);
-  font-weight: 600;
-  line-height: 1.1;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
 }
 
 .upload-panel__file-status {
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: 0.78rem;
-  line-height: 1.2;
+  font-size: var(--font-size-sm-compact);
+  line-height: var(--line-height-tight);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -185,8 +185,8 @@
 }
 
 .upload-panel__row-action .material-icons {
-  font-size: 1.05rem;
-  line-height: 1;
+  font-size: var(--font-size-base-strong);
+  line-height: var(--line-height-solid);
 }
 
 @keyframes upload-panel-shimmer {

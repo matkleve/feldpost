@@ -31,12 +31,12 @@
 }
 
 .account-card h2 {
-  font-size: 1.05rem;
+  font-size: var(--font-size-base-strong);
   color: var(--color-text-primary);
 }
 
 .account-card > p {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }
 
@@ -53,19 +53,19 @@
   border-radius: var(--radius-full);
   display: grid;
   place-items: center;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   background: color-mix(in srgb, var(--color-clay) 18%, var(--color-bg-surface));
   color: var(--color-clay);
 }
 
 .account-card__identity-copy h1 {
   min-width: 0;
-  font-size: 1.1rem;
+  font-size: var(--font-size-base-emphasis);
   color: var(--color-text-primary);
 }
 
 .account-card__identity-copy p {
-  font-size: 0.85rem;
+  font-size: var(--font-size-md-compact);
   color: var(--color-text-secondary);
 }
 
@@ -82,7 +82,7 @@
   border: 1px solid var(--color-border);
   display: inline-flex;
   align-items: center;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .account-field span {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
@@ -196,19 +196,19 @@
 
 .account-factor strong {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-primary);
 }
 
 .account-factor small {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .account-muted {
   color: var(--color-text-secondary);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
 }
 
 .account-enroll {

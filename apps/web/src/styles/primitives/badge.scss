@@ -18,15 +18,15 @@
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
   color: var(--color-text-secondary);
-  font-weight: 600;
-  line-height: 1;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-solid);
   white-space: nowrap;
 
   // default to md size config
   height: 1.5rem;
   padding-inline: var(--spacing-2);
   padding-block: 0;
-  font-size: 0.6875rem;
+  font-size: var(--font-size-label);
   gap: var(--spacing-1);
 }
 
@@ -35,7 +35,7 @@
   height: 1.25rem;
   padding-inline: var(--spacing-1);
   padding-block: 0;
-  font-size: 0.625rem;
+  font-size: var(--font-size-caption);
   gap: var(--spacing-1);
 }
 
@@ -43,7 +43,7 @@
   height: 1.5rem;
   padding-inline: var(--spacing-2);
   padding-block: 0;
-  font-size: 0.6875rem;
+  font-size: var(--font-size-label);
   gap: var(--spacing-1);
 }
 
@@ -79,6 +79,6 @@
 }
 
 .ui-status-badge__icon {
-  font-size: 0.875rem;
-  line-height: 1;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-solid);
 }

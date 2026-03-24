@@ -21,7 +21,7 @@
   height: 2.5rem;
   border: 1.5px solid var(--field-border);
   padding: 0 0.75rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
 
   &:focus-visible {
     border-color: var(--field-border-focus);
@@ -41,28 +41,28 @@
   height: 2rem;
   border: 1px solid var(--color-border);
   padding: 0 var(--spacing-1);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .ui-select-control--md {
   height: 2.5rem;
   border: 1.5px solid var(--field-border);
   padding: 0 0.75rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
 }
 
 .ui-select-control--lg {
   height: 3rem;
   border: 1.5px solid var(--field-border);
   padding: 0 var(--spacing-3);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-md-plus);
 }
 
 .ui-select-control--compact {
   height: 2rem;
   border: 1px solid var(--color-border);
   padding: 0 var(--spacing-1);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 // Emphasis: color and interaction states � no size properties allowed
@@ -104,7 +104,7 @@
   height: 2.5rem;
   border: 1.5px solid var(--field-border);
   padding: 0 0.75rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
 
   &::placeholder {
     color: var(--field-placeholder);
@@ -129,28 +129,28 @@
   height: 2rem;
   border: 1px solid var(--color-border);
   padding: 0 var(--spacing-1);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .ui-input-control--md {
   height: 2.5rem;
   border: 1.5px solid var(--field-border);
   padding: 0 0.75rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
 }
 
 .ui-input-control--lg {
   height: 3rem;
   border: 1.5px solid var(--field-border);
   padding: 0 var(--spacing-3);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-md-plus);
 }
 
 .ui-input-control--compact {
   height: 2rem;
   border: 1px solid var(--color-border);
   padding: 0 var(--spacing-1);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 // Emphasis: color and interaction states � no size properties allowed

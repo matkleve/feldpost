@@ -96,7 +96,7 @@
 }
 
 .drag-divider__grip-icon {
-  font-size: 1rem; // 16px — inline-with-text icon size
+  font-size: var(--font-size-base); // 16px — inline-with-text icon size
   color: var(--color-text-disabled);
   transition: color 80ms ease-out;
   user-select: none;

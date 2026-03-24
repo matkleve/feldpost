@@ -84,21 +84,21 @@
 }
 
 .settings-overlay__kicker {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
 }
 
 .settings-overlay__title {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
 .settings-overlay__subtitle {
-  font-size: 0.8125rem;
-  line-height: 1.45;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
   color: var(--color-text-secondary);
 }
 
@@ -152,17 +152,17 @@
 }
 
 .settings-overlay__section-label strong {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: var(--font-size-md-soft);
+  font-weight: var(--font-weight-semibold);
 }
 
 .settings-overlay__section-label small {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .settings-overlay__section-chevron {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
 }
 
@@ -184,17 +184,17 @@
 }
 
 .settings-overlay__detail-card h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   color: var(--color-text-primary);
 }
 
 .settings-overlay__detail-card > p {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }
 
 .settings-overlay__field-row .ui-field-label {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }
 
@@ -215,11 +215,11 @@
 }
 
 .settings-overlay__toggle-row .ui-item-label strong {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
 }
 
 .settings-overlay__toggle-row .ui-item-label small {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
@@ -239,18 +239,18 @@
 }
 
 .settings-overlay__identity .material-icons {
-  font-size: 2rem;
+  font-size: var(--font-size-4xl);
   color: var(--color-clay);
 }
 
 .settings-overlay__identity strong {
   display: block;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-md-plus);
   color: var(--color-text-primary);
 }
 
 .settings-overlay__identity p {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
@@ -263,24 +263,24 @@
 }
 
 .settings-overlay__state .material-icons {
-  font-size: 1.75rem;
+  font-size: var(--font-size-3xl);
   color: var(--color-clay);
   justify-self: center;
 }
 
 .settings-overlay__state h3 {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
 }
 
 .settings-overlay__state p {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
 }
 
 .settings-overlay__logout-error {
   color: var(--color-danger);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
 }
 
 .settings-overlay__subsection-highlight {

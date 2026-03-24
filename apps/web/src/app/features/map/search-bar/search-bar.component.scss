@@ -94,7 +94,7 @@
 
 .search-bar__icon,
 .search-bar__clear .material-icons {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .search-bar__icon {
@@ -107,8 +107,8 @@
   border: 0;
   background: transparent;
   color: var(--color-text-primary);
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  font-size: var(--font-size-md-plus);
+  line-height: var(--line-height-reading);
   outline: 0;
   padding-block: 0;
 
@@ -126,8 +126,8 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  font-size: var(--font-size-md-plus);
+  line-height: var(--line-height-reading);
   color: transparent;
   overflow: hidden;
   white-space: nowrap;
@@ -149,8 +149,8 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  font-size: var(--font-size-md-plus);
+  line-height: var(--line-height-reading);
   color: var(--color-text-disabled);
   overflow: hidden;
   white-space: nowrap;
@@ -234,8 +234,8 @@
 .search-bar__section-label {
   padding: 0;
   color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -255,15 +255,15 @@
 .search-bar__empty-title {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  font-size: var(--font-size-md-plus);
+  line-height: var(--line-height-reading);
 }
 
 .search-bar__empty-copy {
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-open);
 }
 
 .search-bar__ghost-action {

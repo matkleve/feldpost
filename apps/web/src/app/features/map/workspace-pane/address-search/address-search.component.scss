@@ -20,7 +20,7 @@
   }
 
   &__icon {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     color: var(--color-text-secondary);
     flex-shrink: 0;
   }
@@ -31,7 +31,7 @@
     border: none;
     outline: none;
     background: transparent;
-    font-size: 0.8125rem;
+    font-size: var(--font-size-sm);
     color: var(--field-text);
     font-family: inherit;
     padding: 0;
@@ -58,7 +58,7 @@
 
   &__loading {
     padding: var(--spacing-2);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-disabled);
     text-align: center;
   }

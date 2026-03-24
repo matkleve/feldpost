@@ -8,8 +8,8 @@
   background: var(--group-header-bg, var(--color-bg-surface));
   color: var(--color-text-primary);
   cursor: pointer;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -27,7 +27,7 @@
 }
 
 .group-header__chevron {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   transition: transform 200ms ease;
   color: var(--color-text-secondary);
 
@@ -44,7 +44,7 @@
 
 .group-header__count {
   color: var(--color-text-secondary);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   white-space: nowrap;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }

@@ -104,8 +104,8 @@
 }
 
 .toast-icon {
-  font-size: 1rem;
-  line-height: 1;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-solid);
 }
 
 :host(.success) .toast-icon-wrap {
@@ -133,8 +133,8 @@
 .toast-message {
   flex: 1;
   margin-top: 0.08rem;
-  font-size: 0.875rem;
-  line-height: 1.35;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-compact);
   color: var(--color-text-primary);
   word-break: break-word;
   display: -webkit-box;
@@ -160,7 +160,7 @@
   transition: color 120ms;
 
   .material-symbols-outlined {
-    font-size: 0.95rem;
+    font-size: var(--font-size-md-emphasis);
   }
 
   &:hover {

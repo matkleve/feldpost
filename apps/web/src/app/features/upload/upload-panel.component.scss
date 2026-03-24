@@ -28,7 +28,7 @@
   &__scan-status {
     margin: 0;
     padding: var(--spacing-2) var(--spacing-3);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--color-primary);
     background: color-mix(in srgb, var(--color-primary) 8%, transparent);
     border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
@@ -37,17 +37,17 @@
 
   &__title {
     margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.2;
+    font-size: var(--font-size-md-emphasis);
+    line-height: var(--line-height-tight);
     color: var(--color-text-primary);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
   }
 
   &__subtitle {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
-    line-height: 1.35;
+    line-height: var(--line-height-compact);
   }
 
   // ── Drop zone ──────────────────────────────────────────────────────────────
@@ -82,16 +82,16 @@
   }
 
   &__dropzone-icon {
-    font-size: 1.9rem;
-    line-height: 1;
+    font-size: var(--font-size-5xl);
+    line-height: var(--line-height-solid);
     color: var(--color-text-secondary);
   }
 
   &__dropzone-label {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: var(--font-size-md-emphasis);
     color: var(--color-text-primary);
-    line-height: 1.5;
+    line-height: var(--line-height-open);
   }
 
   &__dropzone-sub {
@@ -101,7 +101,7 @@
 
   &__dropzone-hint {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
   }
 
@@ -123,8 +123,8 @@
     border-radius: var(--radius-sm);
     background: var(--color-bg-surface);
     color: var(--color-text-primary);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
     transition:
       background 120ms ease-out,
@@ -146,8 +146,8 @@
     }
 
     &-icon {
-      font-size: 1rem;
-      line-height: 1;
+      font-size: var(--font-size-base);
+      line-height: var(--line-height-solid);
     }
 
     &--capture {
@@ -186,13 +186,13 @@
   }
 
   &__last-upload-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
   }
 
   &__last-upload-value {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
   }
 
@@ -207,16 +207,16 @@
   }
 
   &__empty-title {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
   }
 
   &__empty-text {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
-    line-height: 1.4;
+    line-height: var(--line-height-reading);
   }
 
   &__progress-board {
@@ -293,8 +293,8 @@
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--color-text-secondary);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     text-wrap: nowrap;
     cursor: pointer;
     transition:
@@ -376,7 +376,7 @@
     padding: 0;
     margin-block: 0.0625rem;
     margin-inline: 0;
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
 
     &--complete .upload-panel__file-main {
       background: color-mix(in srgb, var(--color-success) 10%, var(--color-bg-surface));
@@ -437,7 +437,7 @@
       border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
 
       .material-icons {
-        font-size: 0.82rem;
+        font-size: var(--font-size-sm-soft);
       }
     }
 
@@ -467,9 +467,9 @@
   }
 
   &__thumbnail-fallback {
-    font-size: 0.56rem;
-    line-height: 1;
-    font-weight: 700;
+    font-size: var(--font-size-2xs);
+    line-height: var(--line-height-solid);
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.03em;
     color: var(--color-text-secondary);
   }
@@ -483,20 +483,20 @@
 
   &__file-name {
     margin: 0;
-    font-size: 0.84rem;
+    font-size: var(--font-size-sm-strong);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--color-text-primary);
-    font-weight: 600;
-    line-height: 1.1;
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
   }
 
   &__file-status {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: 0.78rem;
-    line-height: 1.2;
+    font-size: var(--font-size-sm-compact);
+    line-height: var(--line-height-tight);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -545,8 +545,8 @@
     }
 
     .material-icons {
-      font-size: 1.05rem;
-      line-height: 1;
+      font-size: var(--font-size-base-strong);
+      line-height: var(--line-height-solid);
     }
   }
 }

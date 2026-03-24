@@ -221,7 +221,7 @@
 
 .nav__icon {
   font-size: var(--sidebar-icon-size);
-  line-height: 1;
+  line-height: var(--line-height-solid);
   flex-shrink: 0;
   text-align: center;
 }
@@ -236,9 +236,9 @@
 
 .nav__label {
   font-size: var(--sidebar-label-size);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
-  line-height: 1;
+  line-height: var(--line-height-solid);
   color: inherit;
   min-width: 0;
   opacity: 0;
@@ -273,7 +273,7 @@
   background: var(--color-clay, var(--color-primary));
   color: #fff;
   font-size: var(--sidebar-label-size);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   transition:
     background 80ms ease-out,
     transform 80ms ease-out;
@@ -293,7 +293,7 @@
 }
 
 .nav__avatar-initial {
-  line-height: 1;
+  line-height: var(--line-height-solid);
 }
 
 .nav__account-name {

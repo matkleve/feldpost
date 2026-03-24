@@ -60,7 +60,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: var(--font-size-md-soft);
   color: #fff;
   opacity: 0.9;
   pointer-events: none;
@@ -82,9 +82,9 @@
 }
 
 .pane-header__title {
-  font-weight: 600;
-  font-size: 1.0625rem;
-  line-height: 1.2;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base-plus);
+  line-height: var(--line-height-tight);
   color: var(--color-text-primary);
   text-align: center;
   max-width: calc(100% - 6rem);
@@ -94,8 +94,8 @@
 }
 
 .pane-header__title-input {
-  font-weight: 600;
-  font-size: 1.0625rem;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base-plus);
   color: var(--color-text-primary);
   text-align: center;
   width: min(30rem, calc(100% - 6rem));
@@ -139,6 +139,6 @@
   }
 
   .material-icons {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 }

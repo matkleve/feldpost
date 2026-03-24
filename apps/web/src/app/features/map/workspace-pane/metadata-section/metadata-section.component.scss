@@ -22,7 +22,7 @@
 }
 
 .add-metadata-input {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
   color: var(--field-text);
   background: var(--field-bg);
   border: 1px solid var(--field-border);
@@ -53,7 +53,7 @@
     color 80ms ease-out;
 
   .material-icons {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   &:hover {

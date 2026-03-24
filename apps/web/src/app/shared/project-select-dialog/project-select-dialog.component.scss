@@ -28,15 +28,15 @@
 
 .project-select-dialog__title {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.4;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-reading);
   color: var(--color-text-primary);
 }
 
 .project-select-dialog__message {
   margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.55;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-comfortable);
   color: var(--color-text-secondary);
 }
 
@@ -81,12 +81,12 @@
 }
 
 .project-select-dialog__check {
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
 }
 
 .project-select-dialog__name {
-  font-size: 0.875rem;
-  line-height: 1.4;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-reading);
 }
 
 .project-select-dialog__actions {

@@ -10,8 +10,8 @@
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-weight: 500;
-  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xs);
   cursor: pointer;
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-sm);
