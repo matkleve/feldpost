@@ -18354,4 +18354,128 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.dropzone.label.dragAndDrop', 'Drag & drop files here', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Drag & drop files here', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.dropzone.label.dragAndDrop'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien hierher ziehen und ablegen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.dropzone.label.dragAndDrop'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Trascina e rilascia i file qui', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.dropzone.label.dragAndDrop'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.dropzone.label.clickHere', 'or click here', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'or click here', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.dropzone.label.clickHere'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'oder hier klicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.dropzone.label.clickHere'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'oppure clicca qui', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.dropzone.label.clickHere'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.status.missingGps', 'GPS missing', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'GPS missing', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.status.missingGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'GPS fehlt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.status.missingGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'GPS mancante', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.status.missingGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.action.place', 'Place', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Place', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.action.place'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Verorten', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.action.place'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posiziona', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.action.place'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

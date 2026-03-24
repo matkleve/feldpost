@@ -28,14 +28,23 @@
     (click)="openFilePicker(fileInput)"
     (keydown)="onDropZoneKeydown($event, fileInput)"
   >
-    <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">photo_camera</span>
+    <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
     <p class="upload-panel__dropzone-label">
-      Drag &amp; drop files here<br />
-      <span class="upload-panel__dropzone-sub">or click to select files</span>
+      {{ t('upload.dropzone.label.dragAndDrop', 'Dateien hierher ziehen und ablegen') }}<br />
+      <span class="upload-panel__dropzone-sub">{{
+        t('upload.dropzone.label.clickHere', 'oder hier klicken')
+      }}</span>
     </p>
-    <p class="upload-panel__dropzone-hint">
-      JPEG · PNG · HEIC · WebP · MP4 · MOV · WebM · PDF · DOCX · XLSX · PPTX · max 25 MB
-    </p>
+    <div class="upload-panel__file-type-chips" aria-hidden="true">
+      @for (chip of fileTypeChips; track chip.type) {
+        <app-chip
+          [icon]="chip.icon"
+          [text]="chip.type"
+          [variant]="chip.variant"
+          [size]="'sm'"
+        ></app-chip>
+      }
+    </div>
 
     <!-- Hidden file input; trigger by clicking the drop zone -->
     <input
@@ -50,64 +59,39 @@
     />
   </div>
 
-  <div class="upload-panel__intake-actions" role="group" aria-label="Additional upload actions">
-    <button
-      uiButton
-      class="upload-panel__intake-btn"
-      type="button"
-      [disabled]="scanning()"
-      (click)="onSelectFolder($event, folderInput)"
-    >
-      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-      Upload folder
-    </button>
+  <button
+    uiButton
+    class="upload-panel__intake-btn"
+    type="button"
+    [disabled]="scanning()"
+    (click)="onSelectFolder($event, folderInput)"
+  >
+    <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
+    Upload folder
+  </button>
 
-    <button
-      uiButton
-      class="upload-panel__intake-btn upload-panel__intake-btn--capture"
-      type="button"
-      (click)="openCapturePicker($event, captureInput)"
-    >
-      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
-        >photo_camera</span
-      >
-      Take photo
-    </button>
-
-    <input
-      #captureInput
-      type="file"
-      class="upload-panel__capture-input"
-      accept="image/*"
-      capture="environment"
-      aria-hidden="true"
-      tabindex="-1"
-      (change)="onCaptureInputChange($event)"
-    />
-
-    <input
-      #folderInput
-      type="file"
-      class="upload-panel__folder-input"
-      multiple
-      webkitdirectory
-      directory
-      aria-hidden="true"
-      tabindex="-1"
-      (change)="onFolderInputChange($event)"
-    />
-  </div>
+  <input
+    #folderInput
+    type="file"
+    class="upload-panel__folder-input"
+    multiple
+    webkitdirectory
+    directory
+    aria-hidden="true"
+    tabindex="-1"
+    (change)="onFolderInputChange($event)"
+  />
 
   @if (showLastUpload() && lastUploadLabel(); as lastLabel) {
     <section class="upload-panel__last-upload" aria-label="Last upload summary">
-      <span class="upload-panel__last-upload-label">Last upload</span>
+      <label class="upload-panel__last-upload-label">Last upload</label>
       <strong class="upload-panel__last-upload-value">{{ lastLabel }}</strong>
     </section>
   }
 
   @if (!showProgressBoard() && !showLastUpload()) {
     <section class="upload-panel__empty" aria-label="Upload idle state">
-      <span class="upload-panel__empty-title">No uploads yet</span>
+      <h4 class="upload-panel__empty-title">No uploads yet</h4>
       <p class="upload-panel__empty-text">
         Add files to start. Status dots and lane filters appear once files enter the queue.
       </p>

@@ -24,6 +24,7 @@ export class UploadPanelLifecycleService {
 
   private imageUploadedCallback?: (event: ImageUploadedEvent) => void;
   private placementRequestedCallback?: (jobId: string) => void;
+  private autoSwitchCallback?: () => void;
 
   setImageUploadedCallback(cb: (event: ImageUploadedEvent) => void): void {
     this.imageUploadedCallback = cb;
@@ -31,6 +32,10 @@ export class UploadPanelLifecycleService {
 
   setPlacementRequestedCallback(cb: (jobId: string) => void): void {
     this.placementRequestedCallback = cb;
+  }
+
+  setAutoSwitchCallback(cb: () => void): void {
+    this.autoSwitchCallback = cb;
   }
 
   // ── Initialize subscriptions ───────────────────────────────────────────────
@@ -55,6 +60,10 @@ export class UploadPanelLifecycleService {
         event.previousPhase !== 'missing_data';
       if (becameIssue) {
         this.triggerIssueAttentionPulse();
+        // Auto-switch to issues lane when error occurs (no alert/modal)
+        if (this.autoSwitchCallback) {
+          this.autoSwitchCallback();
+        }
       }
     });
   }

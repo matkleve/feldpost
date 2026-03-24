@@ -1,0 +1,27 @@
+<div
+  [class]="chipClass()"
+  [style.--chip-color]="chipColorValue()"
+  [style.max-width]="maxWidth()"
+  tabindex="0"
+>
+  @if (icon()) {
+    <span class="chip__icon chip__icon--leading material-icons" aria-hidden="true">{{
+      icon()
+    }}</span>
+  }
+
+  @if (text()) {
+    <span class="chip__text" [title]="text()">{{ text() }}</span>
+  }
+
+  @if (dismissible()) {
+    <button
+      type="button"
+      class="chip__dismiss"
+      [attr.aria-label]="computedDismissAriaLabel()"
+      (click)="onDismiss($event)"
+    >
+      <span class="material-icons" aria-hidden="true">close</span>
+    </button>
+  }
+</div>

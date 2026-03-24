@@ -1,0 +1,167 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.chip {
+  --chip-height: 1.375rem;
+  --chip-padding-inline: var(--spacing-2);
+  --chip-padding-block: 0.125rem;
+  --chip-icon-size: 1.125rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  min-height: var(--chip-height);
+  height: var(--chip-height);
+  padding: var(--chip-padding-block) var(--chip-padding-inline);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-border) 48%, transparent);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-solid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.chip:hover {
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-color: var(--color-border-strong);
+}
+
+.chip__icon {
+  flex-shrink: 0;
+  font-size: var(--chip-icon-size);
+  line-height: var(--line-height-solid);
+}
+
+.chip__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--chip-height) - (var(--chip-padding-block) * 2));
+  height: calc(var(--chip-height) - (var(--chip-padding-block) * 2));
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 0;
+  margin-left: calc(var(--spacing-1) * 0.5);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.72;
+  transition:
+    background 120ms ease-out,
+    opacity 120ms ease-out;
+}
+
+.chip__dismiss .material-icons {
+  font-size: calc(var(--chip-icon-size) * 0.7);
+  line-height: var(--line-height-solid);
+}
+
+.chip__dismiss:hover,
+.chip__dismiss:focus-visible {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  outline: none;
+}
+
+.chip--icon-only {
+  width: var(--chip-height);
+  min-width: var(--chip-height);
+  padding-inline: 0;
+  gap: 0;
+}
+
+.chip--sm {
+  --chip-height: 1.375rem;
+  --chip-padding-inline: var(--spacing-2);
+  --chip-padding-block: 0.125rem;
+  --chip-icon-size: 1.125rem;
+
+  font-size: var(--font-size-xs);
+}
+
+.chip--md {
+  --chip-height: 1.625rem;
+  --chip-padding-inline: var(--spacing-3);
+  --chip-padding-block: 0.1875rem;
+  --chip-icon-size: 1.25rem;
+
+  font-size: var(--font-size-sm-soft);
+}
+
+.chip--lg {
+  --chip-height: 2rem;
+  --chip-padding-inline: var(--spacing-3);
+  --chip-padding-block: 0.25rem;
+  --chip-icon-size: 1.5rem;
+
+  font-size: var(--font-size-md-compact);
+}
+
+.chip--dismissible.chip--icon-only {
+  width: auto;
+  min-width: var(--chip-height);
+  padding-inline: var(--chip-padding-block);
+  gap: var(--spacing-1);
+}
+
+.chip--default {
+  background: color-mix(in srgb, var(--color-border) 48%, transparent);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.chip--default:hover {
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-color: var(--color-border-strong);
+}
+
+.chip--primary,
+.chip--status-success,
+.chip--status-warning,
+.chip--status-danger,
+.chip--filetype-image,
+.chip--filetype-video,
+.chip--filetype-document,
+.chip--filetype-spreadsheet,
+.chip--filetype-presentation,
+.chip--custom {
+  background: color-mix(in srgb, var(--chip-color) 12%, var(--color-bg-surface));
+  color: var(--chip-color);
+  border-color: color-mix(in srgb, var(--chip-color) 28%, var(--color-border));
+}
+
+.chip--primary:hover,
+.chip--status-success:hover,
+.chip--status-warning:hover,
+.chip--status-danger:hover,
+.chip--filetype-image:hover,
+.chip--filetype-video:hover,
+.chip--filetype-document:hover,
+.chip--filetype-spreadsheet:hover,
+.chip--filetype-presentation:hover,
+.chip--custom:hover {
+  background: color-mix(in srgb, var(--chip-color) 18%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--chip-color) 38%, var(--color-border));
+}

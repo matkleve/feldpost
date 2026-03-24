@@ -29,6 +29,12 @@
   --color-danger: #dc2626;
   --color-uploading: #2f6fdb;
   --color-accent: #7c3aed;
+  --filetype-image: var(--color-uploading);
+  --filetype-video: var(--color-accent);
+  --filetype-document: #4f5d95;
+  --filetype-spreadsheet: var(--color-success);
+  --filetype-presentation: #d97706;
+  --filetype-office: color-mix(in srgb, var(--color-text-secondary) 92%, black 8%);
   --color-clay: #cc7a4a; // upload CTA, active selection — used sparingly
   --color-map-user-marker: #2f6fdb;
   --color-map-search-marker: var(--color-clay);
@@ -253,6 +259,12 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-accent: #a78bfa;
+  --filetype-image: #60a5fa;
+  --filetype-video: var(--color-accent);
+  --filetype-document: #a5b4fc;
+  --filetype-spreadsheet: var(--color-success);
+  --filetype-presentation: #f59e0b;
+  --filetype-office: color-mix(in srgb, var(--color-text-secondary) 90%, white 10%);
   --color-clay: #d9895a;
   --color-map-user-marker: #60a5fa;
   --color-map-search-marker: var(--color-clay);
@@ -334,6 +346,12 @@
     --color-warning: #f59e0b;
     --color-danger: #ef4444;
     --color-accent: #a78bfa;
+    --filetype-image: #60a5fa;
+    --filetype-video: var(--color-accent);
+    --filetype-document: #a5b4fc;
+    --filetype-spreadsheet: var(--color-success);
+    --filetype-presentation: #f59e0b;
+    --filetype-office: color-mix(in srgb, var(--color-text-secondary) 90%, white 10%);
     --color-clay: #d9895a;
     --color-map-user-marker: #60a5fa;
     --color-map-search-marker: var(--color-clay);
