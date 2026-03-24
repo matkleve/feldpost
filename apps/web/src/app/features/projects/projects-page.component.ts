@@ -72,7 +72,12 @@ export class ProjectsPageComponent {
   private readonly filterService = inject(FilterService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => {
+    const value = this.i18nService.t(key, fallback);
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+    if (fallback.trim().length > 0) return fallback;
+    return key;
+  };
 
   readonly currentUrl = toSignal(
     this.router.events.pipe(

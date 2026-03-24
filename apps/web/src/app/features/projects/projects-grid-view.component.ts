@@ -35,7 +35,12 @@ export class ProjectsGridViewComponent {
   private readonly i18nService = inject(I18nService);
 
   readonly section = input.required<ProjectGroupedSection>();
-  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => {
+    const value = this.i18nService.t(key, fallback);
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+    if (fallback.trim().length > 0) return fallback;
+    return key;
+  };
   readonly colorTokenFor = input.required<(key: ProjectColorKey) => string>();
   readonly formatRelativeDate = input.required<(value: string | null) => string>();
   readonly coloringProjectId = input<string | null>(null);

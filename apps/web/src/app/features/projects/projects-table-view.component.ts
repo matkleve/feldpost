@@ -25,7 +25,12 @@ export class ProjectsTableViewComponent {
   private readonly i18nService = inject(I18nService);
 
   readonly section = input.required<ProjectGroupedSection>();
-  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => {
+    const value = this.i18nService.t(key, fallback);
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+    if (fallback.trim().length > 0) return fallback;
+    return key;
+  };
   readonly tableAriaSort =
     input.required<(columnKey: string) => 'ascending' | 'descending' | 'none'>();
   readonly tableSortDirection = input.required<(columnKey: string) => 'asc' | 'desc' | null>();

@@ -17,8 +17,8 @@
 
 .projects-table thead th {
   text-align: left;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   padding: var(--spacing-2) var(--spacing-3);
   border-bottom: 1px solid var(--color-border);
@@ -78,10 +78,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
 }
 
 .project2-row__meta,
 .project2-card__meta {
   color: var(--color-text-secondary);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
 }

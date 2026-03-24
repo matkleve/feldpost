@@ -23,6 +23,8 @@
 html,
 body {
   height: 100%;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
   font-family:
     Inter,
     ui-sans-serif,

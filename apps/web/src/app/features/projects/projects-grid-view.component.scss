@@ -28,7 +28,19 @@
 }
 
 .project2-card__badge {
-  font-size: 0.875rem;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.project2-card__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.project2-card__meta {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
 }
 
 .projects-card-action-shell {

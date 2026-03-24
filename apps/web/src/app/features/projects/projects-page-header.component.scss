@@ -19,6 +19,14 @@
 
 .projects-header__count {
   color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.projects-header__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
 }
 
 .projects-breadcrumbs {
@@ -27,7 +35,8 @@
   gap: var(--spacing-1);
   min-width: 0;
   color: var(--color-text-secondary);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .projects-breadcrumbs__item {

@@ -44,7 +44,12 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 })
 export class ProjectsToolbarComponent {
   private readonly i18nService = inject(I18nService);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => {
+    const value = this.i18nService.t(key, fallback);
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+    if (fallback.trim().length > 0) return fallback;
+    return key;
+  };
 
   readonly groupingOptions = input.required<GroupingProperty[]>();
   readonly activeGroupingsInput = input.required<GroupingProperty[]>();

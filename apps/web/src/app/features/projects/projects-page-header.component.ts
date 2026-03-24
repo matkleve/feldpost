@@ -22,7 +22,12 @@ export class ProjectsPageHeaderComponent {
   readonly projectCountLabel = input<string>('');
   readonly loading = input<boolean>(false);
 
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => {
+    const value = this.i18nService.t(key, fallback);
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+    if (fallback.trim().length > 0) return fallback;
+    return key;
+  };
 
   readonly newProject = output<void>();
 
