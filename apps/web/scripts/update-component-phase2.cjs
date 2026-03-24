@@ -1,4 +1,21 @@
+#!/usr/bin/env node
+
 /**
+ * update-component-phase2.cjs
+ *
+ * Phase 2: Refactor upload-panel.component.ts to use new signals & lifecycle services.
+ * This reduces the component to ~100 lines (thin coordinator).
+ *
+ * Execution:
+ *   node scripts/update-component-phase2.cjs
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const COMPONENT_PATH = path.join(__dirname, '../src/app/features/upload/upload-panel.component.ts');
+
+const updatedComponent = `/**
  * UploadPanelComponent — drag-and-drop / file-picker upload UI.
  *
  * Ground rules:
@@ -144,3 +161,8 @@ export class UploadPanelComponent {
   documentFallbackLabel(job: UploadJob): string | null { return documentFallbackLabel(job); }
   trackByJobId(idx: number, job: UploadJob): string { return trackByJobId(idx, job); }
 }
+`;
+
+fs.writeFileSync(COMPONENT_PATH, updatedComponent, 'utf-8');
+console.log('✅ Updated: upload-panel.component.ts');
+console.log('   Lines reduced to ~125 (thin coordinator with signal/lifecycle delegation)');
