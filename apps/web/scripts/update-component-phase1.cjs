@@ -1,4 +1,16 @@
+#!/usr/bin/env node
 /**
+ * update-component-phase1.cjs
+ *
+ * Refactor upload-panel.component.ts to use injected services.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const componentPath = path.join(__dirname, '../src/app/features/upload/upload-panel.component.ts');
+
+const newContent = `/**
  * UploadPanelComponent — drag-and-drop / file-picker upload UI.
  *
  * Ground rules:
@@ -12,26 +24,14 @@ import { Component, effect, inject, input, output, signal, computed } from '@ang
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
 import type { ExifCoords } from '../../core/upload/upload.service';
-import {
-  UploadManagerService,
-  type UploadJob,
-  type UploadPhase,
-  type ImageUploadedEvent as ManagerImageUploadedEvent,
-} from '../../core/upload/upload-manager.service';
+import { UploadManagerService, type UploadJob, type UploadPhase, type ImageUploadedEvent as ManagerImageUploadedEvent } from '../../core/upload/upload-manager.service';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelStateService } from './upload-panel-state.service';
 import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
 import { UploadPanelLaneHandlersService } from './upload-panel-lane-handlers';
-import {
-  UploadPanelRowHandlersService,
-  type ZoomToLocationEvent,
-} from './upload-panel-row-handlers';
+import { UploadPanelRowHandlersService, type ZoomToLocationEvent } from './upload-panel-row-handlers';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
-import {
-  UiButtonDirective,
-  UiTabDirective,
-  UiTabListDirective,
-} from '../../shared/ui-primitives/ui-primitives.directive';
+import { UiButtonDirective, UiTabDirective, UiTabListDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -44,13 +44,7 @@ export interface ImageUploadedEvent {
 @Component({
   selector: 'app-upload-panel',
   standalone: true,
-  imports: [
-    CommonModule,
-    UploadPanelItemComponent,
-    UiTabListDirective,
-    UiTabDirective,
-    UiButtonDirective,
-  ],
+  imports: [CommonModule, UploadPanelItemComponent, UiTabListDirective, UiTabDirective, UiButtonDirective],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
 })
@@ -96,7 +90,7 @@ export class UploadPanelComponent {
   readonly laneJobs = computed(() => this.state.laneBuckets()[this.selectedLane()]);
 
   // Private
-  readonly issueAttentionPulse = signal(false);
+  private issueAttentionPulse = signal(false);
   private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
@@ -258,3 +252,7 @@ export class UploadPanelComponent {
     }, UploadPanelComponent.ISSUE_ATTENTION_RESET_MS);
   }
 }
+`;
+
+fs.writeFileSync(componentPath, newContent, 'utf-8');
+console.log('✅ Updated: upload-panel.component.ts (refactored to thin coordinator)');

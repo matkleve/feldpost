@@ -227,17 +227,16 @@
 
   &__dot-matrix {
     display: grid;
-    grid-template-columns: repeat(10, minmax(0, 0.5rem));
+    grid-template-columns: repeat(10, minmax(0, 0.75rem));
     gap: 0.25rem;
-    justify-content: start;
-    padding: 0 var(--spacing-1);
+    justify-content: center;
   }
 
   &__dot {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: 0.75rem;
+    height: 1rem;
     border: none;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     background: var(--color-bg-muted, var(--color-border));
     cursor: pointer;
     padding: 0;
@@ -318,7 +317,7 @@
     }
 
     &--uploading {
-      color: color-mix(in srgb, var(--color-primary) 70%, var(--color-text-secondary));
+      color: color-mix(in srgb, var(--color-uploading) 70%, var(--color-text-secondary));
     }
 
     &--uploaded {
@@ -326,9 +325,9 @@
     }
 
     &--uploading.upload-panel__lane-btn--active {
-      background: color-mix(in srgb, var(--color-primary) 16%, transparent);
-      color: var(--color-primary);
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent);
+      background: color-mix(in srgb, var(--color-uploading) 16%, transparent);
+      color: var(--color-uploading);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-uploading) 30%, transparent);
     }
 
     &--uploaded.upload-panel__lane-btn--active {
