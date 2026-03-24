@@ -30,10 +30,7 @@
   >
     <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
     <p class="upload-panel__dropzone-label">
-      {{ t('upload.dropzone.label.dragAndDrop', 'Dateien hierher ziehen und ablegen') }}<br />
-      <span class="upload-panel__dropzone-sub">{{
-        t('upload.dropzone.label.clickHere', 'oder hier klicken')
-      }}</span>
+      {{ t('upload.dropzone.label.dragAndDrop', 'Dateien hierher ziehen und ablegen') }}
     </p>
     <div class="upload-panel__file-type-chips" aria-hidden="true">
       @for (chip of fileTypeChips; track chip.type) {

@@ -5,8 +5,10 @@ import {
   UiButtonDirective,
   UiButtonGhostDirective,
   UiButtonIconOnlyDirective,
+  UiButtonPrimaryDirective,
   UiButtonSizeSmDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
+import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 import { getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 
@@ -18,7 +20,9 @@ import { I18nService } from '../../core/i18n/i18n.service';
     UiButtonDirective,
     UiButtonSizeSmDirective,
     UiButtonIconOnlyDirective,
+    UiButtonPrimaryDirective,
     UiButtonGhostDirective,
+    ChipComponent,
   ],
   templateUrl: './upload-panel-item.component.html',
   styleUrl: './upload-panel-item.component.scss',
@@ -60,5 +64,176 @@ export class UploadPanelItemComponent {
     event.preventDefault();
     event.stopPropagation();
     this.dismissFile.emit(this.job().id);
+  }
+
+  fileTypeBadge(): string | null {
+    const file = this.job().file;
+    const extension = this.fileExtension(file.name);
+    const type = file.type.toLowerCase();
+
+    if (type.startsWith('image/')) return this.imageBadge(extension);
+    if (type.startsWith('video/')) return this.videoBadge(extension);
+
+    switch (type) {
+      case 'application/pdf':
+        return 'PDF';
+      case 'application/msword':
+        return 'DOC';
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return 'DOCX';
+      case 'application/vnd.ms-excel':
+        return 'XLS';
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        return 'XLSX';
+      case 'application/vnd.ms-powerpoint':
+        return 'PPT';
+      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        return 'PPTX';
+      default:
+        break;
+    }
+
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'JPEG';
+      case 'png':
+        return 'PNG';
+      case 'heic':
+        return 'HEIC';
+      case 'heif':
+        return 'HEIF';
+      case 'webp':
+        return 'WebP';
+      case 'mp4':
+        return 'MP4';
+      case 'mov':
+        return 'MOV';
+      case 'webm':
+        return 'WebM';
+      case 'pdf':
+        return 'PDF';
+      case 'doc':
+        return 'DOC';
+      case 'docx':
+        return 'DOCX';
+      case 'xls':
+        return 'XLS';
+      case 'xlsx':
+        return 'XLSX';
+      case 'ppt':
+        return 'PPT';
+      case 'pptx':
+        return 'PPTX';
+      default:
+        return null;
+    }
+  }
+
+  fileTypeChipVariant(): ChipVariant {
+    const file = this.job().file;
+    const extension = this.fileExtension(file.name);
+    const type = file.type.toLowerCase();
+
+    if (type.startsWith('image/')) return 'filetype-image';
+    if (type.startsWith('video/')) return 'filetype-video';
+    if (type === 'application/pdf') return 'filetype-document';
+    if (
+      type === 'application/msword' ||
+      type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      return 'filetype-document';
+    }
+    if (
+      type === 'application/vnd.ms-excel' ||
+      type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ) {
+      return 'filetype-spreadsheet';
+    }
+    if (
+      type === 'application/vnd.ms-powerpoint' ||
+      type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ) {
+      return 'filetype-presentation';
+    }
+
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'heic':
+      case 'heif':
+      case 'webp':
+        return 'filetype-image';
+      case 'mp4':
+      case 'mov':
+      case 'webm':
+        return 'filetype-video';
+      case 'pdf':
+      case 'doc':
+      case 'docx':
+        return 'filetype-document';
+      case 'xls':
+      case 'xlsx':
+        return 'filetype-spreadsheet';
+      case 'ppt':
+      case 'pptx':
+        return 'filetype-presentation';
+      default:
+        return 'default';
+    }
+  }
+
+  fileTypeIcon(): string {
+    const variant = this.fileTypeChipVariant();
+    switch (variant) {
+      case 'filetype-image':
+        return 'image';
+      case 'filetype-video':
+        return 'videocam';
+      case 'filetype-spreadsheet':
+        return 'table_chart';
+      case 'filetype-presentation':
+        return 'slideshow';
+      case 'filetype-document':
+      default:
+        return 'description';
+    }
+  }
+
+  private fileExtension(fileName: string): string {
+    const parts = fileName.toLowerCase().split('.');
+    return parts.length > 1 ? (parts[parts.length - 1] ?? '') : '';
+  }
+
+  private imageBadge(extension: string): string {
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'JPEG';
+      case 'png':
+        return 'PNG';
+      case 'heic':
+        return 'HEIC';
+      case 'heif':
+        return 'HEIF';
+      case 'webp':
+        return 'WebP';
+      default:
+        return 'IMG';
+    }
+  }
+
+  private videoBadge(extension: string): string {
+    switch (extension) {
+      case 'mp4':
+        return 'MP4';
+      case 'mov':
+        return 'MOV';
+      case 'webm':
+        return 'WebM';
+      default:
+        return 'VID';
+    }
   }
 }

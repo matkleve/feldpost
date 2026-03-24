@@ -152,12 +152,20 @@
 }
 
 .ui-button--primary {
-  border-color: color-mix(in srgb, var(--color-clay) 42%, var(--color-border));
-  background: color-mix(in srgb, var(--color-clay) 10%, var(--field-bg));
-  color: var(--action-text-active);
+  border-color: var(--color-clay);
+  background: var(--color-clay);
+  color: #fff;
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-clay) 16%, var(--field-bg));
+    border-color: color-mix(in srgb, var(--color-clay) 86%, #000);
+    background: color-mix(in srgb, var(--color-clay) 86%, #000);
+    color: #fff;
+  }
+
+  &:active:not(:disabled) {
+    border-color: color-mix(in srgb, var(--color-clay) 76%, #000);
+    background: color-mix(in srgb, var(--color-clay) 76%, #000);
+    color: #fff;
   }
 }
 

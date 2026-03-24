@@ -11,7 +11,7 @@ describe('UploadPanelComponent missing_data prompt', () => {
 
     const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
     expect(status).not.toBeNull();
-    expect(status.nativeElement.textContent).toContain('Missing GPS');
+    expect(status.nativeElement.textContent).toContain('Missing location');
   });
 
   it('enables left placement action for missing_data jobs', async () => {
@@ -43,7 +43,7 @@ describe('UploadPanelComponent missing_data prompt', () => {
     fixture.detectChanges();
 
     const status = fixture.debugElement.query(By.css('.upload-panel__file-status'));
-    expect(status.nativeElement.textContent).not.toContain('Missing GPS');
+    expect(status.nativeElement.textContent).not.toContain('Missing location');
   });
 });
 
