@@ -7,9 +7,9 @@ import {
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
-import { StandardDropdownComponent } from '../../../../shared/standard-dropdown.component';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import { UiIconButtonGhostDirective } from '../../../../shared/ui-primitives.directive';
+import { StandardDropdownComponent } from './standard-dropdown.component';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { UiIconButtonGhostDirective } from '../ui-primitives/ui-primitives.directive';
 
 export interface GroupingProperty {
   id: string;

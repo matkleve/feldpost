@@ -5,7 +5,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 import { NavComponent } from './features/nav/nav.component';
 import { ToastContainerComponent } from './core/toast-container.component';
 import { LocationResolverService } from './core/location-resolver.service';
-import { AuthService } from './core/auth.service';
+import { AuthService } from './core/auth/auth.service';
 import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
 import { SettingsPaneService } from './core/settings-pane.service';
 import { UploadNotificationService } from './core/upload/upload-notification.service';
@@ -44,10 +44,10 @@ declare global {
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, NavComponent, SettingsOverlayComponent, ToastContainerComponent],
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
 })
-export class App implements OnInit {
+export class AppComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly locationResolver = inject(LocationResolverService);
   private readonly auth = inject(AuthService);

@@ -12,8 +12,8 @@
 
 import { TestBed } from '@angular/core/testing';
 import { UploadService, MAX_FILE_SIZE, ALLOWED_MIME_TYPES } from '../upload.service';
-import { SupabaseService } from '../supabase.service';
-import { AuthService } from '../auth.service';
+import { SupabaseService } from '../supabase/supabase.service';
+import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding.service';
 
 // ── Mock exifr ─────────────────────────────────────────────────────────────────

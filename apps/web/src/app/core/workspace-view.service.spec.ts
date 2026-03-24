@@ -10,7 +10,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { WorkspaceViewService } from './workspace-view.service';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 import { FilterService } from './filter.service';
 import { GeocodingService } from './geocoding.service';
 import { PropertyRegistryService } from './property-registry.service';
@@ -905,3 +905,4 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     expect(allImages.every((img) => img.metadata?.['uuid-bauphase'] === 'Rohbau')).toBe(true);
   });
 });
+

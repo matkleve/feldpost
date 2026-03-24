@@ -9,16 +9,23 @@ import {
   output,
   signal,
 } from '@angular/core';
+import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { LanguageCode } from '../../core/i18n/translation-catalog';
 import { SettingsPaneService } from '../../core/settings-pane.service';
 import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives.directive';
+import { UI_PRIMITIVE_DIRECTIVES } from '../../shared/ui-primitives/ui-primitives.directive';
 import { InviteManagementSectionComponent } from './sections/invite-management-section.component';
-import { AccountComponent } from '../account/account.component';
+import { AccountComponent } from '../../shared/account/account.component';
+import { buildSettingsSectionList } from './settings-sections.const';
+import {
+  buildLanguageOptions,
+  buildDensityOptions,
+  buildThemeModeOptions,
+  buildMarkerMotionOptions,
+} from './settings-options.const';
 
 type ThemeMode = 'light' | 'dark' | 'system' | 'sandstone';
 
@@ -31,8 +38,9 @@ type MarkerMotionPreference = 'off' | 'smooth';
 const MAP_MARKER_MOTION_STORAGE_KEY = 'feldpost.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'feldpost:map-marker-motion-changed';
 const THEME_MODE_STORAGE_KEY = 'feldpost.settings.themeMode';
+const SUBSECTION_HIGHLIGHT_DURATION_MS = 1800;
 
-interface SettingsSection {
+export interface SettingsSection {
   id: string;
   icon: string;
   title: string;
@@ -77,114 +85,25 @@ export class SettingsOverlayComponent {
 
   readonly open = input(false);
   readonly openChange = output<boolean>();
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
-  readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() => [
-    {
-      id: 'general',
-      icon: 'tune',
-      title: this.t('settings.overlay.section.general.title', 'General'),
-      subtitle: this.t(
-        'settings.overlay.section.general.subtitle',
-        'Language, density, and defaults',
-      ),
-    },
-    {
-      id: 'appearance',
-      icon: 'palette',
-      title: this.t('settings.overlay.section.appearance.title', 'Appearance'),
-      subtitle: this.t('settings.overlay.section.appearance.subtitle', 'Theme and visual behavior'),
-    },
-    {
-      id: 'notifications',
-      icon: 'notifications',
-      title: this.t('settings.overlay.section.notifications.title', 'Notifications'),
-      subtitle: this.t(
-        'settings.overlay.section.notifications.subtitle',
-        'In-app status and alerts',
-      ),
-    },
-    {
-      id: 'map',
-      icon: 'map',
-      title: this.t('settings.overlay.section.map.title', 'Map Preferences'),
-      subtitle: this.t('settings.overlay.section.map.subtitle', 'Map behaviors and helper layers'),
-    },
-    {
-      id: 'search',
-      icon: 'manage_search',
-      title: this.t('settings.overlay.section.search.title', 'Search Tuning'),
-      subtitle: this.t('settings.overlay.section.search.subtitle', 'Ranking and fallback tuning'),
-    },
-    {
-      id: 'data',
-      icon: 'storage',
-      title: this.t('settings.overlay.section.data.title', 'Data and Privacy'),
-      subtitle: this.t('settings.overlay.section.data.subtitle', 'Retention and telemetry'),
-    },
-    {
-      id: 'account',
-      icon: 'person',
-      title: this.t('settings.overlay.section.account.title', 'Account'),
-      subtitle: this.t('settings.overlay.section.account.subtitle', 'Identity and sign-in context'),
-    },
-    {
-      id: 'invite-management',
-      icon: 'qr_code_2',
-      title: this.t('settings.overlay.section.invites.title', 'Invite Management'),
-      subtitle: this.t(
-        'settings.overlay.section.invites.subtitle',
-        'Role-scoped QR and share links',
-      ),
-    },
-  ]);
+  readonly sectionList = computed<ReadonlyArray<SettingsSection>>(() =>
+    buildSettingsSectionList(this.t),
+  );
 
-  readonly languageOptions: ReadonlyArray<SegmentedSwitchOption> = [
-    { id: 'en', label: 'English' },
-    { id: 'de', label: 'Deutsch' },
-    { id: 'it', label: 'Italiano' },
-  ];
+  readonly languageOptions: ReadonlyArray<SegmentedSwitchOption> = buildLanguageOptions();
 
-  readonly densityOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
-    {
-      id: 'compact',
-      label: this.t('settings.overlay.general.density.option.compact', 'Compact'),
-    },
-    {
-      id: 'comfortable',
-      label: this.t('settings.overlay.general.density.option.comfortable', 'Comfortable'),
-    },
-  ]);
+  readonly densityOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() =>
+    buildDensityOptions(this.t),
+  );
 
-  readonly themeModeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
-    {
-      id: 'light',
-      label: this.t('settings.overlay.appearance.themeMode.option.light', 'Light'),
-    },
-    {
-      id: 'dark',
-      label: this.t('settings.overlay.appearance.themeMode.option.dark', 'Dark'),
-    },
-    {
-      id: 'system',
-      label: this.t('settings.overlay.appearance.themeMode.option.system', 'System'),
-    },
-    {
-      id: 'sandstone',
-      label: this.t('settings.overlay.appearance.themeMode.option.sandstone', 'Sandstone'),
-    },
-  ]);
+  readonly themeModeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() =>
+    buildThemeModeOptions(this.t),
+  );
 
-  readonly markerMotionOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
-    {
-      id: 'off',
-      label: this.t('settings.overlay.map.markerMotion.option.off', 'Off'),
-    },
-    {
-      id: 'smooth',
-      label: this.t('settings.overlay.map.markerMotion.option.smooth', 'Smooth'),
-    },
-  ]);
+  readonly markerMotionOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() =>
+    buildMarkerMotionOptions(this.t),
+  );
 
   readonly selectedSectionId = signal<string>('general');
   readonly loadState = signal<SettingsLoadState>('populated');
@@ -433,6 +352,6 @@ export class SettingsOverlayComponent {
       }
 
       target.classList.remove('settings-overlay__subsection-highlight');
-    }, 1800);
+    }, SUBSECTION_HIGHLIGHT_DURATION_MS);
   }
 }

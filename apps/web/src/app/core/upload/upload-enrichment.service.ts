@@ -7,7 +7,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { GeocodingService } from '../geocoding.service';
-import { SupabaseService } from '../supabase.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import { ExifCoords } from './upload.service';
 
 export interface ForwardGeocodeResult {

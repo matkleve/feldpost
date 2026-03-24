@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 import {
   UiButtonDirective,
   UiButtonSecondaryDirective,
-} from '../../shared/ui-primitives.directive';
+} from '../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-projects-confirm-dialog',
@@ -31,3 +31,4 @@ export class ProjectsConfirmDialogComponent {
     this.confirm.emit();
   }
 }
+

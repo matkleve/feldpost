@@ -1,0 +1,108 @@
+// Grouping dropdown — grouping-specific: drop zones, selected state, CDK drag, clear button
+// Generic row/icon/label/divider/section-label styles come from global dd-* classes.
+
+:host {
+  display: block;
+}
+
+.grouping-dropdown {
+  padding-block: 0;
+  max-height: 24rem;
+}
+
+// --- Sections (grouping-specific layout) ---
+.grouping-section {
+  padding-inline: 0;
+}
+
+.grouping-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// --- Empty slot (positioned absolutely inside drop zone) ---
+.grouping-empty-slot {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: 0.8125rem;
+  color: var(--color-text-disabled);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out;
+}
+
+// --- Drop zones (CDK drag-drop targets) ---
+.grouping-drop-zone {
+  min-height: 0.25rem;
+  position: relative;
+
+  &--empty {
+    min-height: 2rem;
+    border-radius: var(--radius-sm);
+    transition:
+      background 80ms ease-out,
+      outline-color 80ms ease-out;
+  }
+
+  &--empty.grouping-drop-zone--dragging {
+    background: color-mix(in srgb, var(--color-clay) 4%, transparent);
+    outline: 1.5px dashed var(--color-border);
+    outline-offset: -1.5px;
+
+    .grouping-empty-slot {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &--empty.cdk-drop-list-receiving,
+  &--empty.grouping-drop-zone--dragging.cdk-drop-list-receiving {
+    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
+    outline: 1.5px dashed var(--color-clay);
+    outline-offset: -1.5px;
+
+    .grouping-empty-slot {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+// --- Selected row (multi-select via Ctrl+Click) ---
+.grouping-row--selected {
+  background: color-mix(in srgb, var(--color-clay) 14%, transparent);
+  border-left: 2px solid var(--color-clay);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-clay) 18%, transparent);
+  }
+}
+
+// --- CDK drag placeholder (ghost in source list) ---
+.cdk-drag-placeholder {
+  opacity: 0.4;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+// --- CDK drag preview (floating element while dragging) ---
+.cdk-drag-preview {
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--elevation-modal);
+  opacity: 0.9;
+
+  .dd-drag-handle {
+    opacity: 1;
+    cursor: grabbing;
+  }
+}
+
+// --- CDK drag animating ---
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}

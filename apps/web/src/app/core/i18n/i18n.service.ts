@@ -1,5 +1,6 @@
 ﻿import { computed, Injectable, signal } from '@angular/core';
-import { LanguageCode, TRANSLATION_BY_KEY, TRANSLATION_BY_ORIGINAL } from './translation-catalog';
+import { TRANSLATION_BY_KEY, TRANSLATION_BY_ORIGINAL } from './translation-catalog';
+import type { LanguageCode } from './translation-catalog';
 import { environment } from '../../../environments/environment';
 
 const LANGUAGE_STORAGE_KEY = 'feldpost.settings.language';
@@ -240,24 +241,31 @@ export class I18nService {
     // non-catalog keys or for missing Italian catalog values.
     if (!entry) {
       const runtimeByKey = runtimeDictionary.byKey[key];
-      if (runtimeByKey) return runtimeByKey;
-      return fallback || key;
+      return this.firstNonEmpty(runtimeByKey, fallback, key) ?? '';
     }
 
     switch (language) {
       case 'de':
-        return entry.de;
+        return this.firstNonEmpty(entry.de, fallback, entry.en, key) ?? '';
       case 'it': {
-        if (entry.it) return entry.it;
+        const italianCatalogValue = this.firstNonEmpty(entry.it);
+        if (italianCatalogValue) return italianCatalogValue;
+
         const runtimeByOriginal = runtimeDictionary.byOriginal[entry.original];
-        if (runtimeByOriginal) return runtimeByOriginal;
+        const runtimeValue = this.firstNonEmpty(runtimeByOriginal);
+        if (runtimeValue) return runtimeValue;
+
         if (!this.legacyFallbackEnabled()) {
-          return entry.en;
+          return this.firstNonEmpty(fallback, entry.en, key) ?? '';
         }
-        return this.heuristicTranslateToItalian(entry.en);
+
+        return (
+          this.firstNonEmpty(fallback, this.heuristicTranslateToItalian(entry.en), entry.en, key) ??
+          ''
+        );
       }
       default:
-        return entry.en;
+        return this.firstNonEmpty(entry.en, fallback, key) ?? '';
     }
   }
 
@@ -320,6 +328,15 @@ export class I18nService {
 
   formatNumber(value: number, options?: Intl.NumberFormatOptions): string {
     return new Intl.NumberFormat(this.locale(), options).format(value);
+  }
+
+  private firstNonEmpty(...values: Array<string | undefined | null>): string | undefined {
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return value;
+      }
+    }
+    return undefined;
   }
 
   private readInitialLanguage(): LanguageCode {

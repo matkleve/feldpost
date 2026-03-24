@@ -9,7 +9,7 @@ import {
   UiInputControlDirective,
   UiRowShellDirective,
   UiRowShellSizeSmDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-metadata-property-row',
@@ -219,3 +219,4 @@ export class MetadataPropertyRowComponent {
     this.editing.set(false);
   }
 }
+

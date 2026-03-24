@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 
 export interface ShareSetCreateResult {
   shareSetId: string;
@@ -62,3 +62,4 @@ export class ShareSetService {
     }));
   }
 }
+

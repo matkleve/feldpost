@@ -3,7 +3,7 @@
     <article
       uiCardShell
       uiCardShellSizeMd
-      class="project2-card ui-card-shell ui-card-shell--md"
+      class="ui-card-shell ui-card-shell--md"
       [style.--project-item-color]="itemColor(project.colorKey)"
     >
       <div class="project2-card__header ui-card-shell__header">
@@ -16,37 +16,39 @@
       </p>
       <p class="project2-card__meta">{{ relativeDate(project.lastActivity) }}</p>
 
-      <div class="project2-card__actions ui-card-shell__actions">
+      <div class="projects-card-action-shell">
         @if (project.status === 'active') {
-          <div class="project2-card__action-wrap">
-            <button
-              uiButton
-              uiButtonSecondary
-              type="button"
-              class="ui-button ui-button--secondary project2-card__action"
-              (click)="onToggleColorPicker(project.id)"
-            >
-              <span class="material-icons" aria-hidden="true">palette</span>
-              <span>{{ translate('projects.page.action.changeColor', 'Change color') }}</span>
-            </button>
+          <button
+            uiButton
+            uiButtonSizeMd
+            uiButtonSecondary
+            uiButtonIconOnly
+            type="button"
+            class="ui-button ui-button--secondary"
+            (click)="onToggleColorPicker(project.id)"
+          >
+            <span class="material-icons" aria-hidden="true">palette</span>
+          </button>
 
-            @if (coloringProjectId() === project.id) {
-              <div class="project2-card__picker">
-                <app-project-color-picker
-                  [selectedColor]="project.colorKey"
-                  (colorSelected)="onColorSelected(project.id, $event)"
-                />
-              </div>
-            }
-          </div>
+          @if (coloringProjectId() === project.id) {
+            <div class="project2-card__picker">
+              <app-project-color-picker
+                [selectedColor]="project.colorKey"
+                (colorSelected)="onColorSelected(project.id, $event)"
+              />
+            </div>
+          }
 
           <button
             uiButton
+            uiButtonSizeMd
             uiButtonSecondary
+            uiButtonIconWithText
             type="button"
-            class="ui-button ui-button--secondary project2-card__action"
+            class="ui-button ui-button--secondary"
             (click)="onDangerAction(project.id, 'archive')"
           >
+            <span class="material-icons" aria-hidden="true">archive</span>
             <span>{{ translate('projects.page.action.archiveProject', 'Archive') }}</span>
           </button>
         } @else {

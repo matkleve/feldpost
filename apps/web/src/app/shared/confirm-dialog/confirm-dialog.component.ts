@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives.directive';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -17,3 +17,4 @@ export class ConfirmDialogComponent {
   readonly confirmed = output<void>();
   readonly cancelled = output<void>();
 }
+

@@ -12,14 +12,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
   UiFieldLabelDirective,
   UiFieldRowDirective,
   UiInputControlDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-reset-password',
@@ -66,3 +66,4 @@ export class ResetPasswordComponent {
     this.loading.set(false);
   }
 }
+

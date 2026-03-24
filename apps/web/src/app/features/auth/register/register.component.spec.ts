@@ -14,7 +14,7 @@ import {
   withNavigationErrorHandler,
 } from '@angular/router';
 import { RegisterComponent } from './register.component';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 function buildFakeAuth(signUpError: Error | null = null) {
   return {

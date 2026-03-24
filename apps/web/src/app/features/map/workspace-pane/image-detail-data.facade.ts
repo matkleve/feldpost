@@ -1,7 +1,7 @@
 import { WritableSignal } from '@angular/core';
 import { ImageDetailProjectMembershipHelper } from './image-detail-project-membership.helper';
 import { PhotoLoadService } from '../../../core/photo-load.service';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ImageRecord, MetadataEntry, SelectOption } from './image-detail-view.types';
 import {
   isImageLikeMedia,

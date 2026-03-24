@@ -19,7 +19,7 @@
 
 import { Component, HostListener, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsPaneService } from '../../core/settings-pane.service';
 

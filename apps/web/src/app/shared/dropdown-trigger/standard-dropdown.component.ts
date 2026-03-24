@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { UiIconButtonGhostDirective } from './ui-primitives.directive';
+import { UiIconButtonGhostDirective } from '../ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-standard-dropdown',

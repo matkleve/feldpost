@@ -34,7 +34,7 @@ import {
   UiButtonDirective,
   UiTabDirective,
   UiTabListDirective,
-} from '../../shared/ui-primitives.directive';
+} from '../../shared/ui-primitives/ui-primitives.directive';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -493,3 +493,4 @@ export class UploadPanelComponent {
     }, UploadPanelComponent.ISSUE_ATTENTION_RESET_MS);
   }
 }
+

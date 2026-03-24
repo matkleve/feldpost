@@ -7,10 +7,10 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { computeContentHash, readFileHead } from '../content-hash.util';
 import { PhotoLoadService } from '../photo-load.service';
-import { SupabaseService } from '../supabase.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import { UploadEnrichmentService } from './upload-enrichment.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';

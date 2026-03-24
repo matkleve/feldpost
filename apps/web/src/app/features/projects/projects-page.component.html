@@ -76,7 +76,6 @@
             @if (viewMode() === 'list') {
               <app-projects-table-view
                 [section]="section"
-                [t]="t"
                 [tableAriaSort]="tableAriaSortFn"
                 [tableSortDirection]="tableSortDirectionFn"
                 [colorTokenFor]="colorTokenForFn"
@@ -86,7 +85,6 @@
             } @else {
               <app-projects-grid-view
                 [section]="section"
-                [t]="t"
                 [colorTokenFor]="colorTokenForFn"
                 [formatRelativeDate]="formatRelativeDateFn"
                 [coloringProjectId]="coloringProjectId()"

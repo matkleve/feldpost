@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { GeocodingService } from '../geocoding.service';
-import { SupabaseService } from '../supabase.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import { SearchBarService } from './search-bar.service';
 
 function createQueryBuilder(result: { data: unknown[]; error: unknown }) {

@@ -18,7 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
 import {
   UiButtonDirective,
@@ -26,7 +26,7 @@ import {
   UiFieldLabelDirective,
   UiFieldRowDirective,
   UiInputControlDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 /** Custom validator: both password fields must match. */
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -96,3 +96,4 @@ export class RegisterComponent {
     this.loading.set(false);
   }
 }
+

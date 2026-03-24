@@ -14,7 +14,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Session, User, AuthError } from '@supabase/supabase-js';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from '../supabase/supabase.service';
 
 export type AuthResult = { error: AuthError | Error | null };
 

@@ -15,7 +15,7 @@ import { ForwardGeocodeResult } from '../../../../core/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../image-detail-view.utils';
 import { DetailEditingField, ImageRecord, SelectOption } from '../image-detail-view.types';
-import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
@@ -24,7 +24,7 @@ import {
   UiStatusBadgeDirective,
   UiStatusBadgeInfoDirective,
   UiStatusBadgeSizeSmDirective,
-} from '../../../../shared/ui-primitives.directive';
+} from '../../../../shared/ui-primitives/ui-primitives.directive';
 
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';
@@ -342,3 +342,4 @@ export class ImageDetailInlineSectionComponent {
     ) as HTMLButtonElement[];
   }
 }
+

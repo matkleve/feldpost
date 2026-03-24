@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
-import { App } from './app';
-import { AuthService } from './core/auth.service';
-import { SupabaseService } from './core/supabase.service';
+import { AppComponent } from './app.component';
+import { AuthService } from './core/auth/auth.service';
+import { SupabaseService } from './core/supabase/supabase.service';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [AppComponent],
       providers: [
         provideRouter([]),
         // Mock AuthService and SupabaseService so NavComponent (now inside App)
@@ -42,7 +42,7 @@ describe('App', () => {
   });
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
+    const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });

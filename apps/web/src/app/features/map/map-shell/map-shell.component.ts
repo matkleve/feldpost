@@ -29,7 +29,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
 import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel.component';
 import { ExifCoords } from '../../../core/upload/upload.service';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 import {
   UploadManagerService,
@@ -53,7 +53,7 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../../shared/segmented-switch/segmented-switch.component';
-import { DropdownShellComponent } from '../../../shared/dropdown-shell.component';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
@@ -95,7 +95,7 @@ import {
   UiButtonDirective,
   UiButtonGhostDirective,
   UiButtonIconOnlyDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 type MarkerMotionPreference = 'off' | 'smooth';
 type MapViewMode = 'street' | 'photo';
@@ -3394,3 +3394,4 @@ export class MapShellComponent implements OnDestroy {
     return `${lat.toFixed(7)}:${lng.toFixed(7)}`;
   }
 }
+

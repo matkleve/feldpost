@@ -1,10 +1,7 @@
 <header class="projects-header">
   <div class="projects-header__title-wrap">
     @if (currentProjectId()) {
-      <nav
-        class="projects-breadcrumbs"
-        [attr.aria-label]="t('nav.item.projects', 'Projects')"
-      >
+      <nav class="projects-breadcrumbs" [attr.aria-label]="t('nav.item.projects', 'Projects')">
         <a
           class="projects-breadcrumbs__item projects-breadcrumbs__item--link"
           [routerLink]="['/projects']"

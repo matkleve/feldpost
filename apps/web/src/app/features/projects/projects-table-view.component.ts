@@ -1,11 +1,12 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
 import type { ProjectColorKey, ProjectListItem } from '../../core/projects/projects.types';
 import {
   UiRowShellDirective,
   UiRowShellSizeSmDirective,
   UiStatusBadgeDirective,
   UiStatusBadgeSizeSmDirective,
-} from '../../shared/ui-primitives.directive';
+} from '../../shared/ui-primitives/ui-primitives.directive';
 import type { ProjectGroupedSection } from './projects-page.config';
 
 @Component({
@@ -21,8 +22,10 @@ import type { ProjectGroupedSection } from './projects-page.config';
   styleUrl: './projects-table-view.component.scss',
 })
 export class ProjectsTableViewComponent {
+  private readonly i18nService = inject(I18nService);
+
   readonly section = input.required<ProjectGroupedSection>();
-  readonly t = input.required<(key: string, fallback?: string) => string>();
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly tableAriaSort =
     input.required<(columnKey: string) => 'ascending' | 'descending' | 'none'>();
   readonly tableSortDirection = input.required<(columnKey: string) => 'asc' | 'desc' | null>();
@@ -31,7 +34,7 @@ export class ProjectsTableViewComponent {
   readonly formatRelativeDate = input.required<(value: string | null) => string>();
 
   translate(key: string, fallback = ''): string {
-    return this.t()(key, fallback);
+    return this.t(key, fallback);
   }
 
   ariaSort(columnKey: string): 'ascending' | 'descending' | 'none' {

@@ -12,7 +12,7 @@ import {
   UiButtonIconOnlyDirective,
   UiButtonIconWithTextDirective,
   UiInputControlDirective,
-} from '../../../../shared/ui-primitives.directive';
+} from '../../../../shared/ui-primitives/ui-primitives.directive';
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
 
 @Component({
@@ -190,3 +190,4 @@ export class WorkspacePaneFooterComponent {
     }
   }
 }
+

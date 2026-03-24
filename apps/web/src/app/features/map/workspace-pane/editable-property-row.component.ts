@@ -17,7 +17,7 @@ import {
   UiInlineEditRowDirective,
   UiInputControlDirective,
   UiSelectControlDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 export interface SelectOption {
   id: string;
@@ -254,3 +254,4 @@ export class EditablePropertyRowComponent {
     this.editing.set(false);
   }
 }
+

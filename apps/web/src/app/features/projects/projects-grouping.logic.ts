@@ -1,5 +1,5 @@
 import type { ProjectListItem } from '../../core/projects/projects.types';
-import type { GroupingProperty } from '../map/workspace-pane/workspace-toolbar/grouping-dropdown.component';
+import type { GroupingProperty } from '../../shared/dropdown-trigger/grouping-dropdown.component';
 import type { ProjectGroupedSection } from './projects-page.config';
 
 export function buildGroupedSections(
@@ -76,3 +76,4 @@ function getGroupingValue(
       return t('projects.page.value.other', 'Other');
   }
 }
+

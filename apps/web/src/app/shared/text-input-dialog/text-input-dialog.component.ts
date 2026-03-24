@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives.directive';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-text-input-dialog',
@@ -27,3 +27,4 @@ export class TextInputDialogComponent {
     this.confirmed.emit(value);
   }
 }
+

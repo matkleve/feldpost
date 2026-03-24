@@ -1,8 +1,8 @@
 import { Injectable, effect, inject } from '@angular/core';
-import { AuthService } from '../auth.service';
-import { SupabaseService } from '../supabase.service';
+import { AuthService } from '../auth/auth.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import { I18nService } from './i18n.service';
-import { LanguageCode } from './translation-catalog';
+import type { LanguageCode } from './translation-catalog';
 
 const DB_TRANSLATION_CACHE_PREFIX = 'feldpost.i18n.runtime';
 const DB_TRANSLATION_CACHE_TTL_MS = 10 * 60 * 1000;

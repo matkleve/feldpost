@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, type WritableSignal } from '@angular/core';
 import { Subject } from 'rxjs';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 import type {
   PhotoLoadState,
   PhotoSize,
@@ -290,3 +290,4 @@ export class PhotoLoadService {
     this.stateChanged$.next({ imageId, size, state: newState });
   }
 }
+

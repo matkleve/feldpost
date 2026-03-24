@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { LocationResolverService } from './location-resolver.service';
 import { GeocodingService } from './geocoding.service';
-import { SupabaseService } from './supabase.service';
-import { AuthService } from './auth.service';
+import { SupabaseService } from './supabase/supabase.service';
+import { AuthService } from './auth/auth.service';
 import type { WorkspaceImage } from './workspace-view.types';
 
 describe('LocationResolverService', () => {
@@ -87,3 +87,4 @@ describe('LocationResolverService', () => {
     expect((service as unknown as { pending: Set<string> }).pending.size).toBe(0);
   });
 });
+

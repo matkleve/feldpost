@@ -4,7 +4,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
-} from '../../../../shared/ui-primitives.directive';
+} from '../../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-address-search',
@@ -70,3 +70,4 @@ export class AddressSearchComponent {
     this.suggestions.set(result ? [result] : []);
   }
 }
+

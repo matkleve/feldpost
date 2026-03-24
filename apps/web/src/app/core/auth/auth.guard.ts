@@ -22,17 +22,17 @@ import { AuthService } from './auth.service';
  * inside this helper (only the calling guard needs injection context).
  */
 function waitForAuth(auth: AuthService): Promise<void> {
-    if (!auth.loading()) {
-        return Promise.resolve();
-    }
-    return new Promise((resolve) => {
-        toObservable(auth.loading)
-            .pipe(
-                filter((loading) => !loading),
-                take(1),
-            )
-            .subscribe(() => resolve());
-    });
+  if (!auth.loading()) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    toObservable(auth.loading)
+      .pipe(
+        filter((loading) => !loading),
+        take(1),
+      )
+      .subscribe(() => resolve());
+  });
 }
 
 /**
@@ -40,17 +40,17 @@ function waitForAuth(auth: AuthService): Promise<void> {
  * Usage: canActivate: [authGuard]
  */
 export const authGuard: CanActivateFn = async () => {
-    const auth = inject(AuthService);
-    const router = inject(Router);
+  const auth = inject(AuthService);
+  const router = inject(Router);
 
-    await waitForAuth(auth);
+  await waitForAuth(auth);
 
-    if (auth.session()) {
-        return true;
-    }
+  if (auth.session()) {
+    return true;
+  }
 
-    // Redirect to login, preserving nothing — user must re-authenticate
-    return router.createUrlTree(['/auth/login']);
+  // Redirect to login, preserving nothing — user must re-authenticate
+  return router.createUrlTree(['/auth/login']);
 };
 
 /**
@@ -58,15 +58,15 @@ export const authGuard: CanActivateFn = async () => {
  * Usage: canActivate: [guestGuard]
  */
 export const guestGuard: CanActivateFn = async () => {
-    const auth = inject(AuthService);
-    const router = inject(Router);
+  const auth = inject(AuthService);
+  const router = inject(Router);
 
-    await waitForAuth(auth);
+  await waitForAuth(auth);
 
-    if (!auth.session()) {
-        return true;
-    }
+  if (!auth.session()) {
+    return true;
+  }
 
-    // Already logged in — go to the main app
-    return router.createUrlTree(['/']);
+  // Already logged in — go to the main app
+  return router.createUrlTree(['/']);
 };

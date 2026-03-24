@@ -20,7 +20,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
 import { NavComponent } from './nav.component';
-import { AuthService } from '../../core/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 function collectCssRules(): CSSStyleRule[] {
   const rules: CSSStyleRule[] = [];

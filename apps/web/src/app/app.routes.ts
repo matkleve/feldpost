@@ -9,7 +9,7 @@
  */
 
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/auth.guard';
+import { authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   // ── Auth routes (unauthenticated only) ────────────────────────────────────

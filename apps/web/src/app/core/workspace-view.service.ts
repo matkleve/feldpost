@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 import { FilterService } from './filter.service';
 import { LocationResolverService } from './location-resolver.service';
 import { PropertyRegistryService } from './property-registry.service';
@@ -696,3 +696,4 @@ function deriveStreetNumberAndZip(
     zip: zipMatch?.[1] ?? null,
   };
 }
+

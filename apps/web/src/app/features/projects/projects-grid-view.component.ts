@@ -1,13 +1,17 @@
-import { Component, input, output } from '@angular/core';
-import type { ProjectColorKey, ProjectListItem } from '../../core/projects/projects.types';
+import { Component, inject, input, output } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
+import type { ProjectColorKey } from '../../core/projects/projects.types';
 import { ProjectColorPickerComponent } from './project-color-picker.component';
 import {
   UiButtonDangerDirective,
   UiButtonDirective,
   UiButtonSecondaryDirective,
+  UiButtonIconOnlyDirective,
+  UiButtonIconWithTextDirective,
+  UiButtonSizeMdDirective,
   UiCardShellDirective,
   UiCardShellSizeMdDirective,
-} from '../../shared/ui-primitives.directive';
+} from '../../shared/ui-primitives/ui-primitives.directive';
 import type { ProjectGroupedSection } from './projects-page.config';
 
 @Component({
@@ -18,15 +22,20 @@ import type { ProjectGroupedSection } from './projects-page.config';
     UiButtonDirective,
     UiButtonSecondaryDirective,
     UiButtonDangerDirective,
+    UiButtonIconOnlyDirective,
+    UiButtonIconWithTextDirective,
     UiCardShellDirective,
     UiCardShellSizeMdDirective,
+    UiButtonSizeMdDirective,
   ],
   templateUrl: './projects-grid-view.component.html',
   styleUrl: './projects-grid-view.component.scss',
 })
 export class ProjectsGridViewComponent {
+  private readonly i18nService = inject(I18nService);
+
   readonly section = input.required<ProjectGroupedSection>();
-  readonly t = input.required<(key: string, fallback?: string) => string>();
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly colorTokenFor = input.required<(key: ProjectColorKey) => string>();
   readonly formatRelativeDate = input.required<(value: string | null) => string>();
   readonly coloringProjectId = input<string | null>(null);
@@ -48,7 +57,7 @@ export class ProjectsGridViewComponent {
   }
 
   translate(key: string, fallback = ''): string {
-    return this.t()(key, fallback);
+    return this.t(key, fallback);
   }
 
   itemColor(key: ProjectColorKey): string {

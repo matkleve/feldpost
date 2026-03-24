@@ -11,7 +11,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router, withNavigationErrorHandler } from '@angular/router';
 import { LoginComponent } from './login.component';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

@@ -23,9 +23,9 @@ import {
   ImageAttachedEvent,
   UploadFailedEvent,
 } from '../../../core/upload/upload-manager.service';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { UploadService } from '../../../core/upload/upload.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { PhotoLoadService } from '../../../core/photo-load.service';

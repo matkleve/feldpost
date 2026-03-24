@@ -13,8 +13,8 @@ import type {
   ProjectStatusFilter,
   ProjectsViewMode,
 } from '../../core/projects/projects.types';
-import { GroupHeaderComponent } from '../map/workspace-pane/group-header.component';
-import { type GroupingProperty } from '../map/workspace-pane/workspace-toolbar/grouping-dropdown.component';
+import { GroupHeaderComponent } from '../../shared/ui-primitives/group-header.component';
+import { type GroupingProperty } from '../../shared/dropdown-trigger/grouping-dropdown.component';
 import type { SortConfig } from '../../core/workspace-view.types';
 import { ProjectsConfirmDialogComponent } from './projects-confirm-dialog.component';
 import { ProjectsGridViewComponent } from './projects-grid-view.component';
@@ -38,7 +38,7 @@ import { ProjectsToolbarComponent } from './projects-toolbar.component';
 import {
   UiButtonDirective,
   UiButtonSecondaryDirective,
-} from '../../shared/ui-primitives.directive';
+} from '../../shared/ui-primitives/ui-primitives.directive';
 
 import {
   FILTER_OPTIONS,
@@ -365,3 +365,5 @@ export class ProjectsPageComponent {
     });
   }
 }
+
+

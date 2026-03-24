@@ -28,7 +28,7 @@ import {
   UiIconButtonGhostDirective,
   UiSelectControlDirective,
   UiStatusBadgeDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'ss-invite-management-section',
@@ -382,3 +382,4 @@ export class InviteManagementSectionComponent implements OnInit, OnDestroy {
     }
   }
 }
+

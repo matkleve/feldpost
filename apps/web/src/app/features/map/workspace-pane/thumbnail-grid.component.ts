@@ -21,7 +21,7 @@ import {
   ThumbnailCardHoverEvent,
   ThumbnailCardInteraction,
 } from './thumbnail-card/thumbnail-card.component';
-import { GroupHeaderComponent } from './group-header.component';
+import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
 
 /** Flat renderable item — either a group header or a grid of images. */
 type RenderItem =

@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives.directive';
+import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
 
 export interface ProjectSelectOption {
   id: string;
@@ -37,3 +37,4 @@ export class ProjectSelectDialogComponent {
     this.confirmed.emit(selectedId);
   }
 }
+

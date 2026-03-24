@@ -2,7 +2,7 @@ import { Component, OnDestroy, computed, effect, inject, input, output, signal }
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { DateSaveEvent } from './captured-date-editor.component';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload/upload.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import {

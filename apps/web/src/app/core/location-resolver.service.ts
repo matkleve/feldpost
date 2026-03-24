@@ -16,8 +16,8 @@
 
 import { Injectable, inject } from '@angular/core';
 import { GeocodingService, type ReverseGeocodeResult } from './geocoding.service';
-import { SupabaseService } from './supabase.service';
-import { AuthService } from './auth.service';
+import { SupabaseService } from './supabase/supabase.service';
+import { AuthService } from './auth/auth.service';
 import type { WorkspaceImage } from './workspace-view.types';
 
 const BATCH_SIZE = 50;
@@ -404,3 +404,4 @@ interface UnresolvedRow {
   zip?: string | null;
   country: string | null;
 }
+

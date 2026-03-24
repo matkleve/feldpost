@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { SearchBarComponent } from './search-bar.component';
 import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 
 function createQueryBuilder(result: { data: unknown[]; error: unknown }) {

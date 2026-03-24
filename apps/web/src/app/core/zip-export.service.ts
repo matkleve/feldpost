@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import JSZip from 'jszip';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 import type { WorkspaceMedia } from './workspace-view.types';
 import {
   composeStreetWithNumber,
@@ -100,3 +100,4 @@ export class ZipExportService {
     return `media-${media.id}`;
   }
 }
+

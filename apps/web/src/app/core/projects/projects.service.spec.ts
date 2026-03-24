@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ProjectsService } from './projects.service';
-import { SupabaseService } from '../supabase.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import type { ProjectStatusFilter } from './projects.types';
 
 type QueryResult = { data: unknown; error: unknown };

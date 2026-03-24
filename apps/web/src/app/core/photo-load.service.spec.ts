@@ -4,7 +4,7 @@ import {
   PHOTO_PLACEHOLDER_ICON,
   PHOTO_NO_PHOTO_ICON,
 } from './photo-load.service';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -292,3 +292,4 @@ describe('PhotoLoadService', () => {
     });
   });
 });
+

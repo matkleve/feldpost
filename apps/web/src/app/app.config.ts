@@ -23,7 +23,7 @@ import {
   withPreloading,
 } from '@angular/router';
 import { routes } from './app.routes';
-import { AuthService } from './core/auth.service';
+import { AuthService } from './core/auth/auth.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [

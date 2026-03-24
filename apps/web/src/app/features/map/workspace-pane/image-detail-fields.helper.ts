@@ -1,6 +1,6 @@
 import { WritableSignal } from '@angular/core';
 import { ForwardGeocodeResult } from '../../../core/geocoding.service';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast.service';
 import { DateSaveEvent } from './captured-date-editor.component';
 import { DetailEditingField, ImageRecord } from './image-detail-view.types';

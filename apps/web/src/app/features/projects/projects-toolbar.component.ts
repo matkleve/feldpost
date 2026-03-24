@@ -1,24 +1,24 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { DropdownShellComponent } from '../../shared/dropdown-shell.component';
+import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
-} from '../map/workspace-pane/workspace-toolbar/grouping-dropdown.component';
+} from '../../shared/dropdown-trigger/grouping-dropdown.component';
 import {
   FilterDropdownComponent,
   type FilterDropdownPropertyOption,
-} from '../map/workspace-pane/workspace-toolbar/filter-dropdown.component';
+} from '../../shared/dropdown-trigger/filter-dropdown.component';
 import {
   SortDropdownComponent,
   type SortDropdownOption,
-} from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
+} from '../../shared/dropdown-trigger/sort-dropdown.component';
 import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import { UiDropdownTriggerDirective } from '../../shared/ui-dropdown-trigger.directive';
-import { ProjectsViewToggleComponent } from './projects-view-toggle.component';
+import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import { ProjectsViewToggleComponent } from '../../shared/view-toggle/projects-view-toggle.component';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
@@ -157,3 +157,5 @@ export class ProjectsToolbarComponent {
     }
   }
 }
+
+

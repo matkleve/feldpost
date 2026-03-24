@@ -20,7 +20,7 @@ import { SearchDropdownItemComponent } from './search-dropdown-item.component';
 import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
 import { SearchBarService, GhostTrieEntry } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding.service';
-import { UiInputControlDirective } from '../../../shared/ui-primitives.directive';
+import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
 import {
   SearchCandidate,
   SearchQueryContext,
@@ -628,3 +628,4 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 }
+

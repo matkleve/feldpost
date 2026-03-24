@@ -19,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { passwordStrengthValidators } from '../../../core/auth/password-policy';
 import {
   UiButtonDirective,
@@ -27,7 +27,7 @@ import {
   UiFieldLabelDirective,
   UiFieldRowDirective,
   UiInputControlDirective,
-} from '../../../shared/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -83,3 +83,4 @@ export class UpdatePasswordComponent {
     this.router.navigate(['/auth/login']);
   }
 }
+

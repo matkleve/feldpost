@@ -18,9 +18,9 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { parseTimeInput } from '../../../shared/parse-time-input';
+import { parseTimeInput } from '../../../shared/ui-primitives/parse-time-input';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { UiInputControlDirective } from '../../../shared/ui-primitives.directive';
+import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
 
 export interface DateSaveEvent {
   date: string | null; // YYYY-MM-DD or null
@@ -337,3 +337,4 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
     return '';
   }
 }
+

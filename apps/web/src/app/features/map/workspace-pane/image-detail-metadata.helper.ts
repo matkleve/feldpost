@@ -1,5 +1,5 @@
 import { WritableSignal } from '@angular/core';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ImageRecord, MetadataEntry } from './image-detail-view.types';
 
 interface ImageDetailMetadataHelperDeps {

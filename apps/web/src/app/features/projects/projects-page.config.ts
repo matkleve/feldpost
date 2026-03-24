@@ -1,6 +1,6 @@
-import type { GroupingProperty } from '../map/workspace-pane/workspace-toolbar/grouping-dropdown.component';
-import type { FilterDropdownPropertyOption } from '../map/workspace-pane/workspace-toolbar/filter-dropdown.component';
-import type { SortDropdownOption } from '../map/workspace-pane/workspace-toolbar/sort-dropdown.component';
+import type { GroupingProperty } from '../../shared/dropdown-trigger/grouping-dropdown.component';
+import type { FilterDropdownPropertyOption } from '../../shared/dropdown-trigger/filter-dropdown.component';
+import type { SortDropdownOption } from '../../shared/dropdown-trigger/sort-dropdown.component';
 import type { ProjectListItem } from '../../core/projects/projects.types';
 
 export interface ProjectGroupedSection {
@@ -41,4 +41,5 @@ export const SORT_OPTIONS: SortDropdownOption[] = [
   { id: 'city', icon: 'location_city', defaultDirection: 'asc', label: 'Primary city' },
   { id: 'color-key', icon: 'palette', defaultDirection: 'asc', label: 'Color' },
 ];
+
 

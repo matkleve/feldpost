@@ -6,7 +6,7 @@ import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
   UiIconButtonGhostDirective,
-} from '../../../../shared/ui-primitives.directive';
+} from '../../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-image-detail-photo-viewer',
@@ -66,3 +66,4 @@ export class ImageDetailPhotoViewerComponent {
     }
   }
 }
+

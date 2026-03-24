@@ -1,7 +1,10 @@
 import { Component, signal, computed, HostListener, inject } from '@angular/core';
-import { GroupingDropdownComponent, type GroupingProperty } from './grouping-dropdown.component';
-import { FilterDropdownComponent } from './filter-dropdown.component';
-import { SortDropdownComponent } from './sort-dropdown.component';
+import {
+  GroupingDropdownComponent,
+  type GroupingProperty,
+} from '../../../../shared/dropdown-trigger/grouping-dropdown.component';
+import { FilterDropdownComponent } from '../../../../shared/dropdown-trigger/filter-dropdown.component';
+import { SortDropdownComponent } from '../../../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { FilterService } from '../../../../core/filter.service';
@@ -12,9 +15,12 @@ import type {
   SortConfig,
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view.types';
-import { DropdownShellComponent } from '../../../../shared/dropdown-shell.component';
-import { UiDropdownTriggerDirective } from '../../../../shared/ui-dropdown-trigger.directive';
-import { SegmentedSwitchComponent, type SegmentedSwitchOption } from '../../../../shared/segmented-switch/segmented-switch.component';
+import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import {
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../../../shared/segmented-switch/segmented-switch.component';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -45,22 +51,26 @@ export class WorkspaceToolbarComponent {
     this.currentLanguage();
     return [
       {
-        id: 'row', value: 'row',
+        id: 'row',
+        value: 'row',
         label: this.t('workspace.toolbar.size.row', 'Rows'),
         icon: 'view_headline',
       },
       {
-        id: 'small', value: 'small',
+        id: 'small',
+        value: 'small',
         label: this.t('workspace.toolbar.size.small', 'Small'),
         icon: 'grid_view',
       },
       {
-        id: 'medium', value: 'medium',
+        id: 'medium',
+        value: 'medium',
         label: this.t('workspace.toolbar.size.medium', 'Medium'),
         icon: 'apps',
       },
       {
-        id: 'large', value: 'large',
+        id: 'large',
+        value: 'large',
         label: this.t('workspace.toolbar.size.large', 'Large'),
         icon: 'view_agenda',
       },
@@ -183,9 +193,3 @@ export class WorkspaceToolbarComponent {
     this.closeDropdown();
   }
 }
-
-
-
-
-
-

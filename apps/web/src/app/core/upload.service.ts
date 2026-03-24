@@ -16,9 +16,9 @@
 import { Injectable, inject } from '@angular/core';
 import * as exifr from 'exifr/dist/lite.esm.js';
 import heic2any from 'heic2any';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { GeocodingService } from './geocoding.service';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -517,3 +517,4 @@ export class UploadService {
     return mediaType === 'document' ? 'no_gps' : 'unresolved';
   }
 }
+

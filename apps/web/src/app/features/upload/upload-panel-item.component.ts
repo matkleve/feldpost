@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
-import { UiIconButtonGhostDirective } from '../../shared/ui-primitives.directive';
+import { UiIconButtonGhostDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 import { getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 
 @Component({
@@ -39,3 +39,4 @@ export class UploadPanelItemComponent {
     this.requestPlacement.emit({ jobId: this.job().id, phase: this.job().phase, event });
   }
 }
+

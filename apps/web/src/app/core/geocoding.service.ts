@@ -13,7 +13,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from './supabase/supabase.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -548,3 +548,4 @@ export class GeocodingService {
     return values.find((v) => v != null) ?? null;
   }
 }
+
