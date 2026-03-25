@@ -4,10 +4,10 @@
  * Workspace pane is mounted globally by AppShell, not here.
  *
  * Layout mirrors projects-page pattern:
- * PageContainer > Header + Content Sections
+ * main > section.content-clamp > header + content
  */
 import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
-import { PageContainerComponent, VStackComponent } from '../../shared/containers';
+import { VStackComponent } from '../../shared/containers';
 import { MediaPageHeaderComponent } from './media-page-header.component';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
@@ -18,139 +18,153 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
 @Component({
   selector: 'app-photos',
   standalone: true,
-  imports: [PageContainerComponent, VStackComponent, MediaPageHeaderComponent],
+  imports: [VStackComponent, MediaPageHeaderComponent],
   template: `
-    <app-page-container>
-      <app-vstack [spacing]="4">
-        <!-- Page Header with Breadcrumb -->
-        <app-media-page-header
-          [title]="t('media.page.title', 'Media')"
-          [mediaCount]="mediaItems().length"
-          [loading]="loading()"
-        />
+    <main class="media-page" data-i18n-skip>
+      <section class="media-rail content-clamp content-clamp--list">
+        <app-vstack [spacing]="4">
+          <!-- Page Header with Breadcrumb -->
+          <app-media-page-header
+            [title]="t('media.page.title', 'Media')"
+            [mediaCount]="mediaItems().length"
+            [loading]="loading()"
+          />
 
-        <!-- Content Section -->
-        <section class="media-content">
-          @if (loading()) {
-            <div
-              class="media-content__loading"
-              role="status"
-              [attr.aria-label]="t('common.loading', 'Loading media...')"
-            >
-              <p>{{ t('common.loading', 'Loading media...') }}</p>
-            </div>
-          } @else if (loadError()) {
-            <div class="media-content__error" role="alert">
-              <p>{{ t('media.page.error', 'Failed to load media') }}</p>
-              <button (click)="loadMedia()" class="media-content__retry">
-                {{ t('media.page.retry', 'Retry') }}
-              </button>
-            </div>
-          } @else if (mediaItems().length === 0) {
-            <div class="media-content__empty">
-              <p>{{ t('media.page.empty', 'No media found') }}</p>
-            </div>
-          } @else {
-            <ul class="media-grid">
-              @for (item of mediaItems(); track item.id) {
-                <li
-                  class="media-grid__item"
-                  (click)="onMediaItemClicked(item.id)"
-                  [class.media-grid__item--selected]="workspaceSelectionService.isSelected(item.id)"
-                  tabindex="0"
-                  role="option"
-                  [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)"
-                >
-                  <div class="media-card">
-                    <img
-                      [src]="item.thumbnail_path || ''"
-                      [alt]="item.address_label || 'Media item'"
-                    />
-                    <div class="media-card__info">
-                      <p class="media-card__title">{{ item.address_label }}</p>
-                      <p class="media-card__date">{{ formatDate(item.captured_at) }}</p>
+          <!-- Content Section -->
+          <section class="media-content">
+            @if (loading()) {
+              <div
+                class="media-loading"
+                role="status"
+                [attr.aria-label]="t('common.loading', 'Loading media...')"
+              >
+                <p>{{ t('common.loading', 'Loading media...') }}</p>
+              </div>
+            } @else if (loadError()) {
+              <div class="media-error" role="alert">
+                <p>{{ t('media.page.error', 'Failed to load media') }}</p>
+                <button (click)="loadMedia()" class="media-error__retry">
+                  {{ t('media.page.retry', 'Retry') }}
+                </button>
+              </div>
+            } @else if (mediaItems().length === 0) {
+              <div class="media-empty">
+                <p>{{ t('media.page.empty', 'No media found') }}</p>
+              </div>
+            } @else {
+              <ul class="media-grid">
+                @for (item of mediaItems(); track item.id) {
+                  <li
+                    class="media-grid__item"
+                    (click)="onMediaItemClicked(item.id)"
+                    [class.media-grid__item--selected]="
+                      workspaceSelectionService.isSelected(item.id)
+                    "
+                    tabindex="0"
+                    role="option"
+                    [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)"
+                  >
+                    <div class="media-card">
+                      <img
+                        [src]="item.thumbnail_path || ''"
+                        [alt]="item.address_label || 'Media item'"
+                      />
+                      <div class="media-card__info">
+                        <p class="media-card__title">{{ item.address_label }}</p>
+                        <p class="media-card__date">{{ formatDate(item.captured_at) }}</p>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              }
-            </ul>
-          }
-        </section>
-      </app-vstack>
-    </app-page-container>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </app-vstack>
+      </section>
+    </main>
   `,
   styles: [
     `
-      .media-page {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        gap: 1rem;
-        padding: 1rem;
-        overflow: hidden;
+      :host {
+        display: block;
+        min-height: 100%;
       }
 
-      .media-page__breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
+      .media-page {
+        min-height: 100%;
+        padding: var(--spacing-4);
+      }
+
+      .media-rail {
+        width: 100%;
+        margin-inline: auto;
+        display: grid;
+        gap: var(--spacing-4);
+      }
+
+      .media-loading {
+        border: 1px solid var(--color-border);
+        border-radius: var(--container-radius-panel);
+        background: var(--color-bg-surface);
+        padding: var(--spacing-4);
+        display: grid;
+        gap: var(--spacing-2);
+        text-align: center;
         color: var(--color-text-muted);
       }
 
-      .media-page__breadcrumb a {
-        color: inherit;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .media-page__breadcrumb a:hover {
-        color: var(--color-text-primary);
-      }
-
-      .media-page__content {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
-      }
-
-      .media-page__loading,
-      .media-page__empty {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: var(--color-text-secondary);
-      }
-
-      .media-page__error {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        gap: 1rem;
-        color: var(--color-text-secondary);
-      }
-
-      .media-page__retry {
-        padding: 0.5rem 1rem;
+      .media-empty {
         border: 1px solid var(--color-border);
-        border-radius: 0.5rem;
+        border-radius: var(--container-radius-panel);
+        background: var(--color-bg-surface);
+        padding: var(--spacing-4);
+        display: grid;
+        gap: var(--spacing-2);
+        text-align: center;
+        color: var(--color-text-muted);
+      }
+
+      .media-error {
+        border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+        border-radius: var(--container-radius-panel);
+        background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-warning));
+        padding: var(--spacing-4);
+        display: grid;
+        gap: var(--spacing-2);
+        text-align: center;
+
+        p {
+          margin: 0;
+          color: var(--color-text-secondary);
+        }
+      }
+
+      .media-error__retry {
+        max-width: fit-content;
+        margin-inline: auto;
+        padding: var(--spacing-2) var(--spacing-3);
+        border: 1px solid var(--color-border);
+        border-radius: var(--container-radius-control);
         background: var(--color-bg-base);
         color: var(--color-text-primary);
         cursor: pointer;
         font-size: 0.875rem;
+        transition: background-color 0.2s;
 
         &:hover {
           background: var(--color-bg-surface);
         }
       }
 
+      .media-content {
+        display: grid;
+        gap: var(--spacing-3);
+      }
+
       .media-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-        gap: 1rem;
+        gap: var(--spacing-3);
         list-style: none;
         margin: 0;
         padding: 0;
@@ -158,7 +172,7 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
 
       .media-grid__item {
         cursor: pointer;
-        border-radius: 0.5rem;
+        border-radius: var(--container-radius-control);
         outline: 2px solid transparent;
         outline-offset: 2px;
         transition: outline-color 0.2s;
@@ -167,22 +181,18 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
           outline-color: var(--color-brand);
         }
 
-        &:hover {
-          .media-card {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-          }
+        &:hover .media-card {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
 
-        &--selected {
-          .media-card {
-            outline: 2px solid var(--color-brand);
-          }
+        &--selected .media-card {
+          outline: 2px solid var(--color-brand);
         }
       }
 
       .media-card {
         position: relative;
-        border-radius: 0.5rem;
+        border-radius: var(--container-radius-control);
         overflow: hidden;
         aspect-ratio: 1;
         background: var(--color-bg-secondary);
@@ -200,7 +210,7 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 0.5rem;
+        padding: var(--spacing-2);
         background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
         color: white;
       }
@@ -215,7 +225,7 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
       }
 
       .media-card__date {
-        margin: 0.25rem 0 0 0;
+        margin: var(--spacing-1) 0 0 0;
         font-size: 0.625rem;
         opacity: 0.8;
       }
