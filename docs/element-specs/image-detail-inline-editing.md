@@ -5,13 +5,13 @@
 
 ## What It Is
 
-The inline editing system for image properties in the Image Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup.
+The inline editing system for image properties in the Image Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup, read-only location evidence breakdown (active coordinates, address-derived coordinates, EXIF coordinates), and parser notes for unresolved address fragments so no location information is lost.
 
 ## What It Looks Like
 
 Each property row has a **leading Material icon** (1rem, `--color-text-secondary`), a label (`--text-small`, 13px), and a value (`--text-body`, 15px, `--color-text-primary`). On hover, a warm clay tint background appears (`color-mix(in srgb, var(--color-clay) 8%, transparent)`) and an edit pencil icon fades in on the right (hidden → visible on parent hover, like `dd-drag-handle`). Clicking the value replaces it with an inline input. Row geometry follows `dd-item` pattern: `gap: --spacing-2`, `padding: --spacing-1 --spacing-2`, `--radius-sm`.
 
-Read-only rows (Location, Uploaded) display with `--color-text-secondary` value text and no edit icon.
+Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-text-secondary` value text and no edit icon.
 
 ## Where It Lives
 
@@ -20,17 +20,20 @@ Read-only rows (Location, Uploaded) display with `--color-text-secondary` value 
 
 ## Actions
 
-| #   | User Action                               | System Response                                          | Triggers                         |
-| --- | ----------------------------------------- | -------------------------------------------------------- | -------------------------------- |
-| 1   | Clicks address label (title)              | Title becomes an inline text input                       | `editingField` → `address_label` |
-| 2   | Presses Enter or blurs title input        | Saves updated address_label to `images` table            | Supabase update                  |
-| 3   | Clicks captured date value                | Date becomes a `datetime-local` input                    | `editingField` → `captured_at`   |
-| 4   | Picks new date/time, blurs                | Saves updated captured_at to `images` table              | Supabase update                  |
-| 5   | Clicks project value                      | Value becomes a multi-select checklist with org projects | `editingField` → `project_ids`   |
-| 6   | Checks/unchecks projects                  | Upserts/deletes memberships in `image_projects`          | Supabase write batch             |
-| 7   | Clicks street/city/district/country value | Value becomes an inline text input                       | `editingField` → field name      |
-| 8   | Presses Enter or blurs address input      | Saves updated address component to `images` table        | Supabase update                  |
-| 9   | Presses Escape during any edit            | Cancels edit, restores original value, no DB write       | `editingField` → null            |
+| #   | User Action                                        | System Response                                                                              | Triggers                         |
+| --- | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------- |
+| 1   | Clicks address label (title)                       | Title becomes an inline text input                                                           | `editingField` → `address_label` |
+| 2   | Presses Enter or blurs title input                 | Saves updated address_label to `images` table                                                | Supabase update                  |
+| 3   | Clicks captured date value                         | Date becomes a `datetime-local` input                                                        | `editingField` → `captured_at`   |
+| 4   | Picks new date/time, blurs                         | Saves updated captured_at to `images` table                                                  | Supabase update                  |
+| 5   | Clicks project value                               | Value becomes a multi-select checklist with org projects                                     | `editingField` → `project_ids`   |
+| 6   | Checks/unchecks projects                           | Upserts/deletes memberships in `image_projects`                                              | Supabase write batch             |
+| 7   | Clicks street/city/district/country value          | Value becomes an inline text input                                                           | `editingField` → field name      |
+| 8   | Presses Enter or blurs address input               | Saves updated address component to `images` table                                            | Supabase update                  |
+| 9   | Presses Escape during any edit                     | Cancels edit, restores original value, no DB write                                           | `editingField` → null            |
+| 10  | Opens location section for mixed-source media      | Sees separate rows for active coordinates, address-derived coordinates, and EXIF coordinates | location evidence model          |
+| 11  | EXIF and address-derived coordinates differ (>15m) | Shows mismatch badge with distance and keeps both sources visible                            | reconciliation metadata          |
+| 12  | Address parser kept unresolved fragments           | Sees read-only "Address notes" list in location evidence group                               | parser residual notes            |
 
 ## Inline Editing Flow
 
@@ -94,18 +97,25 @@ LocationSection                        ← dd-section-label "Location"
 ├── IconPropertyRow "City"             ← location_city icon, text input on edit
 ├── IconPropertyRow "District"         ← map icon, text input on edit
 ├── IconPropertyRow "Country"          ← public icon, text input on edit
-├── IconPropertyRow "Coordinates"      ← my_location icon, read-only mono
-│   └── [corrected] CorrectionBadge
+├── LocationEvidenceGroup               ← read-only source-separated coordinate rows
+│   ├── IconPropertyRow "Coordinates (active)"        ← my_location icon, read-only mono
+│   ├── IconPropertyRow "Coordinates (address-derived)" ← location_searching icon, read-only mono
+│   ├── IconPropertyRow "Coordinates (EXIF)"          ← photo_camera icon, read-only mono
+│   ├── [if notes exist] AddressParsingNotesList         ← sticky_note_2 icon, read-only multiline
+│   └── [mismatch >15m] LocationMismatchBadge
 └── [corrected] CorrectionHistory      ← original EXIF vs corrected, accent tint
 ```
 
 ## State
 
-| Name             | Type                             | Default | Controls                                     |
-| ---------------- | -------------------------------- | ------- | -------------------------------------------- |
-| `editingField`   | `string \| null`                 | `null`  | Which field is currently being edited inline |
-| `saving`         | `boolean`                        | `false` | Whether a save operation is in progress      |
-| `projectOptions` | `{ id: string, name: string }[]` | `[]`    | Available projects for the membership picker |
+| Name               | Type                                                | Default      | Controls                                     |
+| ------------------ | --------------------------------------------------- | ------------ | -------------------------------------------- |
+| `editingField`     | `string \| null`                                    | `null`       | Which field is currently being edited inline |
+| `saving`           | `boolean`                                           | `false`      | Whether a save operation is in progress      |
+| `projectOptions`   | `{ id: string, name: string }[]`                    | `[]`         | Available projects for the membership picker |
+| `locationEvidence` | `{ active?:string; address?:string; exif?:string }` | empty object | Read-only coordinate evidence rendering      |
+| `locationMismatch` | `{ distanceMeters:number } \| null`                 | `null`       | Controls mismatch badge visibility           |
+| `addressNotes`     | `string[]`                                          | `[]`         | Read-only unresolved parser fragments        |
 
 ## Acceptance Criteria
 
@@ -125,4 +135,8 @@ LocationSection                        ← dd-section-label "Location"
 - [ ] Selecting a search result fills all address fields at once
 - [ ] Coordinates displayed with correction indicator if corrected
 - [ ] Original EXIF coordinates shown when correction exists
+- [ ] Location section shows separate read-only rows for active coordinates, address-derived coordinates, and EXIF coordinates when available
+- [ ] If address-derived coordinates and EXIF coordinates differ by more than 15m, mismatch badge is shown with distance
+- [ ] EXIF coordinates remain visible and never get replaced by address-derived coordinates in detail UI
+- [ ] If parser residual fragments exist, location section renders a read-only "Address notes" list so unparsed information remains visible.
 - [ ] Projects dropdown loads from `projects` table filtered by `organization_id`

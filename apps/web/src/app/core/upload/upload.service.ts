@@ -42,6 +42,10 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.oasis.opendocument.text',
+  'application/vnd.oasis.opendocument.spreadsheet',
+  'application/vnd.oasis.opendocument.presentation',
+  'application/vnd.oasis.opendocument.graphics',
 ]);
 
 const PHOTO_MIME_TYPES = new Set([
@@ -122,23 +126,47 @@ export class UploadService {
 
     const ext = file.name.split('.').pop()?.toLowerCase();
     switch (ext) {
-      case 'heic': return 'image/heic';
-      case 'heif': return 'image/heif';
+      case 'heic':
+        return 'image/heic';
+      case 'heif':
+        return 'image/heif';
       case 'jpeg':
-      case 'jpg': return 'image/jpeg';
-      case 'png': return 'image/png';
-      case 'webp': return 'image/webp';
-      case 'mp4': return 'video/mp4';
-      case 'mov': return 'video/quicktime';
-      case 'webm': return 'video/webm';
-      case 'pdf': return 'application/pdf';
-      case 'doc': return 'application/msword';
-      case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      case 'xls': return 'application/vnd.ms-excel';
-      case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      case 'ppt': return 'application/vnd.ms-powerpoint';
-      case 'pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-      default: return '';
+      case 'jpg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'mp4':
+        return 'video/mp4';
+      case 'mov':
+        return 'video/quicktime';
+      case 'webm':
+        return 'video/webm';
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'odt':
+        return 'application/vnd.oasis.opendocument.text';
+      case 'xls':
+        return 'application/vnd.ms-excel';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'ods':
+        return 'application/vnd.oasis.opendocument.spreadsheet';
+      case 'ppt':
+        return 'application/vnd.ms-powerpoint';
+      case 'pptx':
+        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      case 'odp':
+        return 'application/vnd.oasis.opendocument.presentation';
+      case 'odg':
+        return 'application/vnd.oasis.opendocument.graphics';
+      default:
+        return '';
     }
   }
 
@@ -161,7 +189,7 @@ export class UploadService {
     if (!ALLOWED_MIME_TYPES.has(mimeType)) {
       return {
         valid: false,
-        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, XLS, XLSX, PPT, or PPTX.`,
+        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, ODT, ODG, XLS, XLSX, ODS, PPT, PPTX, or ODP.`,
       };
     }
     return { valid: true };

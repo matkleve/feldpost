@@ -62,8 +62,12 @@ const FILE_TYPE_LOOKUP: Record<string, UploadFileTypeChip> = {
   webm: { type: 'WebM', icon: 'videocam', variant: 'filetype-video', order: 8 },
   pdf: { type: 'PDF', icon: 'description', variant: 'filetype-document', order: 9 },
   docx: { type: 'DOCX', icon: 'description', variant: 'filetype-document', order: 10 },
-  xlsx: { type: 'XLSX', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 11 },
-  pptx: { type: 'PPTX', icon: 'bar_chart', variant: 'filetype-presentation', order: 12 },
+  odt: { type: 'ODT', icon: 'description', variant: 'filetype-document', order: 11 },
+  odg: { type: 'ODG', icon: 'description', variant: 'filetype-document', order: 12 },
+  xlsx: { type: 'XLSX', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 13 },
+  ods: { type: 'ODS', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 14 },
+  pptx: { type: 'PPTX', icon: 'bar_chart', variant: 'filetype-presentation', order: 15 },
+  odp: { type: 'ODP', icon: 'bar_chart', variant: 'filetype-presentation', order: 16 },
 };
 
 const DEFAULT_FILE_TYPE_CHIPS: UploadFileTypeChip[] = [
@@ -76,8 +80,12 @@ const DEFAULT_FILE_TYPE_CHIPS: UploadFileTypeChip[] = [
   FILE_TYPE_LOOKUP['webm'],
   FILE_TYPE_LOOKUP['pdf'],
   FILE_TYPE_LOOKUP['docx'],
+  FILE_TYPE_LOOKUP['odt'],
+  FILE_TYPE_LOOKUP['odg'],
   FILE_TYPE_LOOKUP['xlsx'],
+  FILE_TYPE_LOOKUP['ods'],
   FILE_TYPE_LOOKUP['pptx'],
+  FILE_TYPE_LOOKUP['odp'],
 ].filter((chip): chip is UploadFileTypeChip => !!chip);
 
 @Component({

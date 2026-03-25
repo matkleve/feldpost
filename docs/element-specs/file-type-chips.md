@@ -7,7 +7,6 @@ Visual chip-based display of the file types present in the current upload batch.
 ## What It Looks Like
 
 Horizontally scrolling (or wrapping) row of small chips below the upload dropzone. Each chip displays a **unique file type only once** (deduplicated). Chips are color-coded by neutral file-type categories: image (blue), video (purple), document (indigo/blue-grey), spreadsheet (green), presentation (amber). Icons are Material Icons matching file type (e.g., `image`, `videocam`, `description`, `table_chart`, `bar_chart`).
-
 Chips follow a subtle visual style: very light tinted background (10-15%), full-color icon/text for legibility, and an optional thin border derived from the same token.
 
 Example layout:
@@ -18,16 +17,45 @@ Example layout:
 └──────┴──────┴──────┴──────┴──────┘
 ```
 
+## Where It Lives
+
+- **Route context**: Any route where `UploadPanelComponent` is rendered
+- **Parent component**: `upload-area.component.ts`
+- **Placement trigger**: Upload area is visible and `uploadManager.jobs()` contains at least one supported file
+- **Layout slot**: Below dropzone and above upload-intake controls (or below "Last upload" when that block is prioritized)
+
+## Actions
+
+| #   | User Action                                         | System Response                                                            | Notes                                  |
+| --- | --------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| 1   | User opens upload panel with no queued files        | File-type chip container is hidden                                         | Empty state                            |
+| 2   | User adds files via dropzone/picker/folder          | Chip list is computed from unique normalized extensions                    | Trigger: `uploadManager.jobs()` change |
+| 3   | Batch includes duplicate extensions (`jpg`, `jpeg`) | Single normalized chip (`JPEG`) is shown                                   | Deduplication contract                 |
+| 4   | Batch contains multiple categories                  | Chips are sorted by category order and rendered with category token colors | Deterministic rendering                |
+| 5   | User removes files from queue                       | Chip list recomputes and removed types disappear                           | Reactive update                        |
+| 6   | Unsupported extension only                          | No unknown chip is rendered                                                | `filter(Boolean)` path                 |
+| 7   | Small viewport width                                | Chip row wraps or scrolls horizontally without overflow                    | Mobile behavior                        |
+
+## Component Hierarchy
+
+```
+UploadAreaComponent
+└── FileTypeChipsSection
+  ├── FileTypeChipList
+  │   └── ChipComponent x N (deduplicated by normalized type)
+  └── [optional] EmptyState (hidden when no jobs)
+```
+
 ## File-Type Categorization & Color Mapping
 
-| Category           | File Types                                | Icon          | Primary Token             | Variant               | Notes                                               |
-| ------------------ | ----------------------------------------- | ------------- | ------------------------- | --------------------- | --------------------------------------------------- |
-| **Image**          | JPEG, JPG, PNG, HEIC, HEIF, WebP, TIFF    | `image`       | `--filetype-image`        | filetype-image        | Neutral technical blue for photos/images            |
-| **Video**          | MP4, MOV, WebM, AVI, MKV                  | `videocam`    | `--filetype-video`        | filetype-video        | Distinct from image while staying non-alarmist      |
-| **Document**       | PDF, DOCX, DOC, TXT                       | `description` | `--filetype-document`     | filetype-document     | Office-style indigo/blue-grey; no warning semantics |
-| **Spreadsheet**    | XLSX, XLS, CSV, ODS                       | `table_chart` | `--filetype-spreadsheet`  | filetype-spreadsheet  | Green, aligned with spreadsheet mental model        |
-| **Presentation**   | PPTX, PPT, ODP, KEY                       | `bar_chart`   | `--filetype-presentation` | filetype-presentation | Warm amber/orange; avoids red error signal          |
-| **Office Generic** | DOCX, DOC, XLSX, XLS, PPTX, PPT, ODP, ODS | `article`     | `--filetype-office`       | custom                | Fallback if type-specific mapping unavailable       |
+| Category           | File Types                                          | Icon          | Primary Token             | Variant               | Notes                                               |
+| ------------------ | --------------------------------------------------- | ------------- | ------------------------- | --------------------- | --------------------------------------------------- |
+| **Image**          | JPEG, JPG, PNG, HEIC, HEIF, WebP, TIFF              | `image`       | `--filetype-image`        | filetype-image        | Neutral technical blue for photos/images            |
+| **Video**          | MP4, MOV, WebM, AVI, MKV                            | `videocam`    | `--filetype-video`        | filetype-video        | Distinct from image while staying non-alarmist      |
+| **Document**       | PDF, DOCX, DOC, TXT, ODT, ODG                       | `description` | `--filetype-document`     | filetype-document     | Office-style indigo/blue-grey; no warning semantics |
+| **Spreadsheet**    | XLSX, XLS, CSV, ODS                                 | `table_chart` | `--filetype-spreadsheet`  | filetype-spreadsheet  | Green, aligned with spreadsheet mental model        |
+| **Presentation**   | PPTX, PPT, ODP, KEY                                 | `bar_chart`   | `--filetype-presentation` | filetype-presentation | Warm amber/orange; avoids red error signal          |
+| **Office Generic** | DOCX, DOC, ODT, ODG, XLSX, XLS, ODS, PPTX, PPT, ODP | `article`     | `--filetype-office`       | custom                | Fallback if type-specific mapping unavailable       |
 
 **Rationale:**
 
@@ -296,6 +324,18 @@ const FILE_TYPE_MAP: Record<
     category: "document",
     color: "--filetype-document",
   },
+  odt: {
+    type: "ODT",
+    icon: "description",
+    category: "document",
+    color: "--filetype-document",
+  },
+  odg: {
+    type: "ODG",
+    icon: "description",
+    category: "document",
+    color: "--filetype-document",
+  },
   txt: {
     type: "TXT",
     icon: "description",
@@ -364,12 +404,3 @@ const FILE_TYPE_MAP: Record<
   },
 };
 ```
-
-## Next Steps (After Approval)
-
-1. Implement `ChipComponent` primitive (Phase 3)
-2. Add file-type chip display to `upload-area.component.ts/html`
-3. Integrate with `uploadManager.jobs()` signal
-4. Test with real file batches
-5. Visual review of all 5 color variants in context
-6. Accessibility audit (keyboard nav, screen reader)

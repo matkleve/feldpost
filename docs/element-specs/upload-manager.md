@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, deduplication, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
+A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, media-only deduplication, duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
 
 Queue management and concurrency are implemented inside `UploadManagerService` through `UploadQueueService` and pipeline services under `core/upload/`.
 
@@ -16,7 +16,7 @@ This parent spec owns the top-level contract. Deep pipeline behavior is split in
 
 ## What It Looks Like
 
-The Upload Manager is mostly invisible UI infrastructure, but it surfaces as consistent upload state across the app: upload rows progress through explicit phases, global progress can be shown from any route, and image detail actions can continue after navigation. Jobs expose stable phase labels and progress percentages, with non-blocking enrichment phases for reverse and forward geocoding. Conflict resolution states are modeled as explicit paused phases instead of silent failures.
+The Upload Manager is mostly invisible UI infrastructure, but it surfaces as consistent upload state across the app: upload rows progress through explicit phases, global progress can be shown from any route, and image detail actions can continue after navigation. Jobs expose stable phase labels and progress percentages, with non-blocking enrichment phases for reverse and forward geocoding. Conflict resolution states are modeled as explicit paused phases instead of silent failures. When folder or file titles contain addresses, textual location is reconciled with EXIF data without ever discarding EXIF coordinates.
 
 ## Where It Lives
 
@@ -26,14 +26,17 @@ The Upload Manager is mostly invisible UI infrastructure, but it surfaces as con
 
 ## Actions
 
-| #   | Trigger                       | System Response                                          | Notes                        |
-| --- | ----------------------------- | -------------------------------------------------------- | ---------------------------- |
-| 1   | Any entry point submits files | Creates jobs and batch, starts queued execution          | Service-owned lifecycle      |
-| 2   | A job starts processing       | Runs validation, EXIF parse, dedup, upload, DB write     | Max 3 concurrent active jobs |
-| 3   | Geocoding enrichment needed   | Runs reverse or forward enrichment as non-blocking phase | Failure remains non-fatal    |
-| 4   | Conflict detected             | Job pauses in awaiting conflict resolution               | Resumes on user decision     |
-| 5   | User retries failed job       | Requeues from start with new phase transitions           | Job id retained              |
-| 6   | User cancels job or batch     | Stops work and performs cleanup as needed                | Emits cancellation events    |
+| #   | Trigger                                 | System Response                                          | Notes                              |
+| --- | --------------------------------------- | -------------------------------------------------------- | ---------------------------------- |
+| 1   | Any entry point submits files           | Creates jobs and batch, starts queued execution          | Service-owned lifecycle            |
+| 2   | A job starts processing                 | Runs validation, EXIF parse, dedup, upload, DB write     | Max 3 concurrent active jobs       |
+| 3   | Folder/file title provides address text | Resolves textual location source with precedence rules   | File title overrides folder title  |
+| 4   | EXIF and textual location both exist    | Performs tolerance-based reconciliation (15m)            | Keeps both coordinate sources      |
+| 5   | Duplicate hash match for image/video    | Opens duplicate-resolution flow and moves item to issues | Supports batch-wide decision apply |
+| 6   | Geocoding enrichment needed             | Runs reverse or forward enrichment as non-blocking phase | Failure remains non-fatal          |
+| 7   | Conflict detected                       | Job pauses in awaiting conflict resolution               | Resumes on user decision           |
+| 8   | User retries failed job                 | Requeues from start with new phase transitions           | Job id retained                    |
+| 9   | User cancels job or batch               | Stops work and performs cleanup as needed                | Emits cancellation events          |
 
 ## Component Hierarchy
 
@@ -147,26 +150,26 @@ sequenceDiagram
 
 ### Event Consumers
 
-| Event               | Consumer               | Reaction                                                         |
-| ------------------- | ---------------------- | ---------------------------------------------------------------- |
-| `imageUploaded$`    | `MapShellComponent`    | Adds optimistic marker to the map                                |
-| `imageUploaded$`    | `ThumbnailGrid`        | Refreshes grid if the uploaded image belongs to the active group |
-| `imageReplaced$`    | `MapShellComponent`    | Rebuilds marker DivIcon with the replacement thumbnail           |
-| `imageReplaced$`    | `ThumbnailCard`        | Resets thumbnail loading cycle to the new local object URL       |
-| `imageReplaced$`    | `ImageDetailView`      | Refreshes signed URLs and hero image                             |
-| `imageAttached$`    | `MapShellComponent`    | Updates a formerly photoless marker with thumbnail content       |
-| `imageAttached$`    | `ThumbnailCard`        | Replaces no-photo state with uploaded thumbnail                  |
-| `imageAttached$`    | `ImageDetailView`      | Switches from upload prompt to photo display                     |
-| `uploadFailed$`     | `MapShellComponent`    | Shows toast notification                                         |
-| `uploadSkipped$`    | `UploadPanelComponent` | Shows "Already uploaded" label on the file item                  |
-| `locationConflict$` | `UploadPanelComponent` | Shows conflict resolution popup                                  |
-| `jobPhaseChanged$`  | `UploadPanelComponent` | Updates per-file status label and icon                           |
-| `jobPhaseChanged$`  | `PhotoMarker`          | Shows or hides pending indicator on markers                      |
-| `jobPhaseChanged$`  | `ThumbnailCard`        | Shows or hides uploading overlay                                 |
-| `batchProgress$`    | `UploadPanelComponent` | Updates the batch progress bar                                   |
-| `batchProgress$`    | `UploadButtonZone`     | Shows progress ring or badge on the upload button                |
-| `batchComplete$`    | `UploadPanelComponent` | Shows batch summary                                              |
-| `missingData$`      | `UploadPanelComponent` | Emits placement request output to map shell                      |
+| Event               | Consumer               | Reaction                                                                    |
+| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| `imageUploaded$`    | `MapShellComponent`    | Adds optimistic marker to the map                                           |
+| `imageUploaded$`    | `ThumbnailGrid`        | Refreshes grid if the uploaded image belongs to the active group            |
+| `imageReplaced$`    | `MapShellComponent`    | Rebuilds marker DivIcon with the replacement thumbnail                      |
+| `imageReplaced$`    | `ThumbnailCard`        | Resets thumbnail loading cycle to the new local object URL                  |
+| `imageReplaced$`    | `ImageDetailView`      | Refreshes signed URLs and hero image                                        |
+| `imageAttached$`    | `MapShellComponent`    | Updates a formerly photoless marker with thumbnail content                  |
+| `imageAttached$`    | `ThumbnailCard`        | Replaces no-photo state with uploaded thumbnail                             |
+| `imageAttached$`    | `ImageDetailView`      | Switches from upload prompt to photo display                                |
+| `uploadFailed$`     | `MapShellComponent`    | Shows toast notification                                                    |
+| `uploadSkipped$`    | `UploadPanelComponent` | Shows skip reason (`duplicate_reject`, `already_uploaded`, `policy_denied`) |
+| `locationConflict$` | `UploadPanelComponent` | Shows conflict resolution popup                                             |
+| `jobPhaseChanged$`  | `UploadPanelComponent` | Updates per-file status label and icon                                      |
+| `jobPhaseChanged$`  | `PhotoMarker`          | Shows or hides pending indicator on markers                                 |
+| `jobPhaseChanged$`  | `ThumbnailCard`        | Shows or hides uploading overlay                                            |
+| `batchProgress$`    | `UploadPanelComponent` | Updates the batch progress bar                                              |
+| `batchProgress$`    | `UploadButtonZone`     | Shows progress ring or badge on the upload button                           |
+| `batchComplete$`    | `UploadPanelComponent` | Shows batch summary                                                         |
+| `missingData$`      | `UploadPanelComponent` | Emits placement request output to map shell                                 |
 
 ## Acceptance Criteria
 
@@ -182,6 +185,16 @@ sequenceDiagram
 - [x] **Path A**: GPS in EXIF → upload → save → reverse-geocode address (non-blocking)
 - [x] **Path B**: No GPS + address in title → upload → save with address → forward-geocode coords (non-blocking)
 - [x] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for placement flow
+- [ ] Folder-level title addresses are applied as defaults to files without file-level title addresses.
+- [ ] File-level title addresses override folder-level defaults.
+- [ ] EXIF GPS is preserved even when textual location is present.
+- [ ] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
+- [ ] Hash dedupe runs only for images and videos (not PDF/Office docs).
+- [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
+- [ ] Duplicate resolution supports a batch apply option for matching items.
+- [ ] Duplicate issue rows expose navigation to the existing placed media.
+- [ ] Ambiguous street+house matches are auto-assigned only when disambiguation probability is at or above threshold (default `0.95`).
+- [ ] Parser residual fragments are preserved as address notes and remain visible in media details.
 - [x] Address resolution and coordinate resolution are enrichment — failure is silent
 - [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
 - [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)

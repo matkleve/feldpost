@@ -2,11 +2,13 @@
 
 ## What It Is
 
-The right-side panel for reviewing and organizing photos. It is currently implemented as a standalone `WorkspacePaneComponent` mounted by `MapShellComponent`.
+The workspace pane is a cross-page, AppShell-owned panel for selected-items context and upload operations.
+It persists across route changes and exposes two tabs: `selected-items` (context-bound) and `upload` (global queue visibility).
+Current detail/grid behavior remains map-compatible while the same contract is reused by `/media`, `/projects`, and future routes.
 
 ## What It Looks Like
 
-**Desktop:** right-side pane rendered inside the Map Shell layout. It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between thumbnail-grid mode and image-detail mode.
+**Desktop:** right-side pane rendered by the App Shell layout (not map-specific). It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between thumbnail-grid mode and image-detail mode.
 
 The currently implemented pane shows `PaneHeaderComponent`, then either `ImageDetailViewComponent` or `WorkspaceToolbarComponent` plus `ThumbnailGridComponent`. When one or more media items are selected, `WorkspaceExportBarComponent` appears at the bottom of grid mode.
 
@@ -14,28 +16,35 @@ The currently implemented pane shows `PaneHeaderComponent`, then either `ImageDe
 
 ## Where It Lives
 
-- **Parent**: `MapShellComponent` template
-- **Appears when**: `MapShellComponent` opens workspace content after marker, detail, or selection flows
+- **Parent**: `AppShellComponent` template (NOT page-specific)
+- **Position**: Right side of main content area, always visible (unless user closes it)
+- **Scope**: Seitenübergreifend — persists across route navigation (`/map`, `/media`, `/projects`, etc.)
+- **Lifespan**: Survives page unmount/remount; upload queue never interrupted
+- **Pages it appears on**: ALL pages that render into MainContentArea
 
 ## Actions
 
-| #   | User Action                                 | System Response                                                                                                                        | Triggers                                           |
-| --- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| 1   | Clicks a single photo marker on map         | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                         | `workspacePaneOpen` → true, `detailImageId` set    |
-| 1b  | Clicks a cluster marker on map              | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null) | `workspacePaneOpen` → true, `detailImageId` → null |
-| 2   | Drags the Drag Divider                      | Resizes workspace pane width                                                                                                           | Parent shell layout change                         |
-| 3   | Clicks close button                         | Workspace pane slides out                                                                                                              | `workspacePaneOpen` → false                        |
-| 4   | Swipes down on bottom sheet handle (mobile) | Snaps to lower position or closes                                                                                                      | Snap point logic                                   |
-| 5   | Swipes up on bottom sheet handle (mobile)   | Snaps to higher position                                                                                                               | Snap point logic                                   |
-| 6   | Clicks a thumbnail in the grid              | Image Detail View replaces grid, back arrow to return                                                                                  | Detail view state                                  |
-| 7   | Updates workspace toolbar controls          | Workspace view re-groups, re-sorts, or re-filters current raw images                                                                   | `WorkspaceViewService` reactive recompute          |
-| 8   | Clicks pane-header close button             | Workspace pane emits `closed` to parent shell                                                                                          | `closed` output                                    |
-| 10  | Selects one or more media items             | Workspace Export Bar animates in at pane bottom                                                                                        | `selectedMediaIds.size > 0`                        |
-| 11  | Clears last selected item                   | Workspace Export Bar animates out                                                                                                      | `selectedMediaIds.size === 0`                      |
-| 12  | Uses export bar actions                     | Opens curation/share/download flows for selected media                                                                                 | Workspace export wiring                            |
-| 15  | Hovers media item in workspace list/grid    | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer    | `hoveredWorkspaceImageId`                          |
-| 16  | Hovers marker on map                        | Matching workspace media item receives linked-hover highlight state                                                                    | `hoveredMarkerImageId` / cluster hover payload     |
-| 17  | Leaves hover (either side)                  | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                          | hover clear events                                 |
+| #       | User Action                                 | System Response                                                                                                                                                         | Triggers                                                 |
+| ------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| 1       | Clicks a single photo marker on map         | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                                                          | `workspacePaneOpen` → true, `detailImageId` set          |
+| 1b      | Clicks a cluster marker on map              | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null)                                  | `workspacePaneOpen` → true, `detailImageId` → null       |
+| **NEW** | **Clicks "Upload" tab button**              | **Tab switches to Upload; UploadPanelComponent fully visible; all upload jobs/lanes visible**                                                                           | **`activeTab` → `'upload'`**                             |
+| **NEW** | **Clicks "Selected Items" tab button**      | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
+| **NEW** | **Navigates from /map → /media**            | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
+| **NEW** | **Navigates from /media → /map**            | **Pane stays open on globally persisted tab; selected-items content rebinds to map context only if selected-items tab is active; upload queue continues in background** | **Route change, no pane close, context rebind hook**     |
+| 2       | Drags the Drag Divider                      | Resizes workspace pane width                                                                                                                                            | Parent shell layout change                               |
+| 3       | Clicks close button                         | Workspace pane slides out (can be reopened from any page)                                                                                                               | `workspacePaneOpen` → false                              |
+| 4       | Swipes down on bottom sheet handle (mobile) | Snaps to lower position or closes                                                                                                                                       | Snap point logic                                         |
+| 5       | Swipes up on bottom sheet handle (mobile)   | Snaps to higher position                                                                                                                                                | Snap point logic                                         |
+| 6       | Clicks a thumbnail in the grid              | Image Detail View replaces grid, back arrow to return                                                                                                                   | Detail view state                                        |
+| 7       | Updates workspace toolbar controls          | Workspace view re-groups, re-sorts, or re-filters current raw images                                                                                                    | `WorkspaceViewService` reactive recompute                |
+| 8       | Clicks pane-header close button             | Workspace pane emits `closed` to parent shell                                                                                                                           | `closed` output                                          |
+| 10      | Selects one or more media items             | Workspace Export Bar animates in at pane bottom                                                                                                                         | `selectedMediaIds.size > 0`                              |
+| 11      | Clears last selected item                   | Workspace Export Bar animates out                                                                                                                                       | `selectedMediaIds.size === 0`                            |
+| 12      | Uses export bar actions                     | Opens curation/share/download flows for selected media                                                                                                                  | Workspace export wiring                                  |
+| 15      | Hovers media item in workspace list/grid    | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer                                     | `hoveredWorkspaceImageId`                                |
+| 16      | Hovers marker on map                        | Matching workspace media item receives linked-hover highlight state                                                                                                     | `hoveredMarkerImageId` / cluster hover payload           |
+| 17      | Leaves hover (either side)                  | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                                                           | hover clear events                                       |
 
 ### Interaction Flowchart
 
@@ -70,12 +79,23 @@ stateDiagram-v2
 ```
 WorkspacePane                              ← `.ui-container` right panel rendered by `WorkspacePaneComponent`
 ├── PaneHeaderComponent                    ← title, title editing, color token, close action
-└── ContentArea                            ← switches between:
-    ├── [detailImageId set] ImageDetailViewComponent
-    └── GridMode
-        ├── WorkspaceToolbarComponent
-        ├── ThumbnailGridComponent
-        └── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent
+├── TabSelectorComponent                  ← NEW: Two-button toggle: "Selected Items" | "Upload"
+└── ContentArea @switch(activeTab)        ← Conditional rendering based on which tab
+    ├── [activeTab === 'selected-items'] SelectedItemsContentComponent
+    │   └── Page-specific content
+    │       ├── [/map route] WorkspaceToolbarComponent + ThumbnailGridComponent
+    │       ├── [/media route] ThumbnailGridComponent (media grid for this page)
+    │       └── [/projects route] ProjectSelectionGrid / etc.
+    │
+    └── [activeTab === 'upload'] UploadTabComponent
+        └── UploadPanelComponent (1:1 embed, same on every page)
+            ├── Drop Zone
+            ├── Lane Tab Selector (Uploading / Uploaded / Issues)
+            └── Upload Job List
+
+[In both tabs]
+├── [detailImageId set] ImageDetailViewComponent (overlay on top, full-pane modal)
+└── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (bottom bar)
 ```
 
 ### Bottom Sheet (mobile variant)
@@ -107,21 +127,53 @@ flowchart LR
 
 ## State
 
-| Name                      | Type                                      | Default       | Controls                                                                                                         |
-| ------------------------- | ----------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `isOpen`                  | `boolean`                                 | `false`       | Pane visibility in parent shell                                                                                  |
-| `width`                   | `number`                                  | `320`         | Desktop pane width in parent shell                                                                               |
-| `activeTabId`             | `string`                                  | `'selection'` | Internal tab tracking inside `WorkspacePaneComponent`                                                            |
-| `detailImageId`           | `string \| null`                          | `null`        | If set, show detail view instead of grid                                                                         |
-| `activeClusterImageIds`   | `string[] \| null`                        | `null`        | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
-| `mobileSnapPoint`         | `'minimized' \| 'half' \| 'full'`         | `'minimized'` | Planned mobile bottom-sheet position                                                                             |
-| `isFullscreen`            | `boolean`                                 | `false`       | Planned fullscreen workspace mode                                                                                |
-| `restoreWidth`            | `number \| null`                          | `null`        | Planned restore width after fullscreen                                                                           |
-| `restoreSnapPoint`        | `'minimized' \| 'half' \| 'full' \| null` | `null`        | Planned restore snap point after fullscreen                                                                      |
-| `selectedMediaIds`        | `Set<string>`                             | empty set     | Current media selection that drives Workspace Export Bar visibility and actions                                  |
-| `hoveredWorkspaceImageId` | `string \| null`                          | `null`        | Current workspace item under pointer for map-linked hover highlight                                              |
-| `hoveredMarkerImageId`    | `string \| null`                          | `null`        | Current map marker image reference mirrored into workspace linked-hover                                          |
-| `hoveredMarkerClusterKey` | `string \| null`                          | `null`        | Current hovered cluster marker key used to highlight all matching workspace items                                |
+| Name                      | Type                                      | Default            | Controls                                                                                                         |
+| ------------------------- | ----------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `isOpen`                  | `boolean`                                 | `true`             | Pane visibility in parent shell (now defaults to open since it's persistent)                                     |
+| `activeTab`               | `'selected-items' \| 'upload'`            | `'selected-items'` | NEW: Which tab is currently visible (persists within session)                                                    |
+| `width`                   | `number`                                  | `320`              | Desktop pane width in parent shell                                                                               |
+| `detailImageId`           | `string \| null`                          | `null`             | If set, show detail view instead of grid                                                                         |
+| `activeClusterImageIds`   | `string[] \| null`                        | `null`             | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
+| `mobileSnapPoint`         | `'minimized' \| 'half' \| 'full'`         | `'minimized'`      | Planned mobile bottom-sheet position                                                                             |
+| `isFullscreen`            | `boolean`                                 | `false`            | Planned fullscreen workspace mode                                                                                |
+| `restoreWidth`            | `number \| null`                          | `null`             | Planned restore width after fullscreen                                                                           |
+| `restoreSnapPoint`        | `'minimized' \| 'half' \| 'full' \| null` | `null`             | Planned restore snap point after fullscreen                                                                      |
+| `selectedMediaIds`        | `Set<string>`                             | empty set          | Current media selection that drives Workspace Export Bar visibility and actions                                  |
+| `hoveredWorkspaceImageId` | `string \| null`                          | `null`             | Current workspace item under pointer for map-linked hover highlight                                              |
+| `hoveredMarkerImageId`    | `string \| null`                          | `null`             | Current map marker image reference mirrored into workspace linked-hover                                          |
+| `hoveredMarkerClusterKey` | `string \| null`                          | `null`             | Current hovered cluster marker key used to highlight all matching workspace items                                |
+
+## Module Interfaces (Schnittstellen)
+
+### Input/Output Contract
+
+```ts
+export type WorkspacePaneTab = "selected-items" | "upload";
+export type WorkspacePageContextKey = "map" | "media" | "projects";
+
+export interface SelectedItemsContextPort {
+  contextKey: WorkspacePageContextKey;
+  selectedMediaIds$: Signal<Set<string>>;
+  requestOpenDetail: (mediaId: string) => void;
+  requestSetHover: (mediaId: string | null) => void;
+}
+
+export interface WorkspacePaneHostPort {
+  isOpen$: Signal<boolean>;
+  activeTab$: Signal<WorkspacePaneTab>;
+  setActiveTab: (tab: WorkspacePaneTab) => void;
+  bindSelectedItemsContext: (context: SelectedItemsContextPort) => void;
+}
+```
+
+### Observer/Hooks Contract
+
+| Hook                        | Owner           | Input         | Output                                     | Cleanup                       |
+| --------------------------- | --------------- | ------------- | ------------------------------------------ | ----------------------------- |
+| `onRouteEnter(contextKey)`  | app shell host  | route key     | bind page context to selected-items tab    | unbind previous context first |
+| `onRouteLeave(contextKey)`  | app shell host  | route key     | detach context, keep global tab state      | clear transient hover only    |
+| `onUploadJobsChanged(jobs)` | upload observer | `UploadJob[]` | update upload lane state, counts, progress | unsubscribe in pane destroy   |
+| `onPaneDestroyed()`         | pane            | none          | release all observer subscriptions         | must be idempotent            |
 
 ## File Map
 
@@ -130,6 +182,9 @@ flowchart LR
 | `features/map/workspace-pane/workspace-pane.component.ts`            | Main pane component                                      |
 | `features/map/workspace-pane/workspace-pane.component.html`          | Template                                                 |
 | `features/map/workspace-pane/workspace-pane.component.scss`          | Desktop pane styles                                      |
+| `core/workspace-pane-context.port.ts`                                | Selected-items provider contract per route context       |
+| `core/workspace-pane-host.port.ts`                                   | Host ownership contract for pane lifecycle and tab state |
+| `core/workspace-pane-observer.adapter.ts`                            | Route/upload observer lifecycle orchestration            |
 | `features/map/workspace-pane/drag-divider/drag-divider.component.ts` | Resize handle (see [drag-divider spec](drag-divider.md)) |
 | `features/map/workspace-pane/pane-header.component.ts`               | Header actions and title surface                         |
 | `core/workspace-selection.service.ts`                                | Selection state used by export bar visibility/actions    |
@@ -141,13 +196,16 @@ flowchart LR
 ```mermaid
 sequenceDiagram
   participant User
-  participant Shell as MapShellComponent
+  participant Shell as AppShellComponent
   participant Pane as WorkspacePaneComponent
+  participant Ctx as SelectedItemsContextPort
   participant View as WorkspaceViewService
   participant Sel as WorkspaceSelectionService
   participant Export as WorkspaceExportBarComponent
 
-  User->>Shell: Open workspace
+  User->>Shell: Enter route (/map, /media, /projects)
+  Shell->>Ctx: Resolve selected-items provider for route
+  Shell->>Pane: bindSelectedItemsContext(Ctx)
   Shell->>Pane: isOpen=true, width=320
   User->>Pane: Select one media item
   Pane->>Sel: toggleSelection(mediaId)
@@ -186,14 +244,23 @@ sequenceDiagram
   Shell-->>Pane: clear hovered marker state
 ```
 
-- Imported in `MapShellComponent` template, placed alongside the map layout
-- Receives `detailImageId`, title, title-edit props, color props, and linked-hover inputs from parent
-- Emits close/detail/zoom/title/color/hover outputs back to `MapShellComponent`
+- Mounted by `AppShellComponent`, independent from page route components
+- Receives selected-items context via `SelectedItemsContextPort`
+- Emits pane-level events to shell host through `WorkspacePaneHostPort`
 - Uses `WorkspaceViewService` for current image scope and `WorkspaceSelectionService` for selection/export state
 
 ## Acceptance Criteria
 
 - [x] Desktop pane is implemented as `WorkspacePaneComponent`
+- [ ] **NEW:** Pane is mounted by `AppShellComponent` (not page-specific, seitenübergreifend)
+- [ ] **NEW:** Pane persists across all route changes (`/map` → `/media` → `/projects` → etc.)
+- [ ] **NEW:** Tab selector visible at top of pane with two buttons: "Selected Items" | "Upload"
+- [ ] **NEW:** "Selected Items" tab displays context-aware content (workspace grid on `/map`, media grid on `/media`, etc.)
+- [ ] **NEW:** "Upload" tab displays UploadPanelComponent 1:1 (same on every page)
+- [ ] **NEW:** Switching tabs preserves both tab state and page content
+- [ ] **NEW:** Navigating to different page rebinds selected-items context while preserving global tab state
+- [ ] **NEW:** Uploads continue in background when "Selected Items" tab is active
+- [ ] **NEW:** Uploads not cancelled when navigating away from current page
 - [x] Desktop: resizable via Drag Divider (280–640px range)
 - [x] Desktop shell uses `.ui-container` for shared panel geometry
 - [ ] Mobile: bottom sheet with 3 snap points (64px, 50vh, 100vh)
@@ -219,3 +286,6 @@ sequenceDiagram
 - [x] Map does NOT zoom or re-center when a cluster is clicked
 - [x] Closing the pane clears `activeClusterImageIds`
 - [ ] Thumbnails for large clusters (> 50 images) load progressively as the user scrolls
+- [ ] Single source of truth for tab state (`activeTab`) with no duplicate state key
+- [ ] In/out contracts documented for route context provider and pane host
+- [ ] Observer hooks define subscription lifecycle and cleanup semantics

@@ -236,6 +236,24 @@ describe('UploadService', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('accepts ODT files', () => {
+      const { service } = setup();
+      const file = makeFile('notes.odt', 'application/vnd.oasis.opendocument.text', 4096);
+
+      const result = service.validateFile(file);
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('accepts ODG files', () => {
+      const { service } = setup();
+      const file = makeFile('diagram.odg', 'application/vnd.oasis.opendocument.graphics', 4096);
+
+      const result = service.validateFile(file);
+
+      expect(result.valid).toBe(true);
+    });
+
     it('ALLOWED_MIME_TYPES covers image, video, and document types', () => {
       expect(ALLOWED_MIME_TYPES.has('image/jpeg')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('image/png')).toBe(true);
@@ -246,6 +264,10 @@ describe('UploadService', () => {
       expect(ALLOWED_MIME_TYPES.has('video/quicktime')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('video/webm')).toBe(true);
       expect(ALLOWED_MIME_TYPES.has('application/pdf')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('application/vnd.oasis.opendocument.text')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('application/vnd.oasis.opendocument.spreadsheet')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('application/vnd.oasis.opendocument.presentation')).toBe(true);
+      expect(ALLOWED_MIME_TYPES.has('application/vnd.oasis.opendocument.graphics')).toBe(true);
     });
   });
 

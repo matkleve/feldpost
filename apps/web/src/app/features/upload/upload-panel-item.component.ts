@@ -81,14 +81,22 @@ export class UploadPanelItemComponent {
         return 'DOC';
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         return 'DOCX';
+      case 'application/vnd.oasis.opendocument.text':
+        return 'ODT';
+      case 'application/vnd.oasis.opendocument.graphics':
+        return 'ODG';
       case 'application/vnd.ms-excel':
         return 'XLS';
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         return 'XLSX';
+      case 'application/vnd.oasis.opendocument.spreadsheet':
+        return 'ODS';
       case 'application/vnd.ms-powerpoint':
         return 'PPT';
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
         return 'PPTX';
+      case 'application/vnd.oasis.opendocument.presentation':
+        return 'ODP';
       default:
         break;
     }
@@ -117,14 +125,22 @@ export class UploadPanelItemComponent {
         return 'DOC';
       case 'docx':
         return 'DOCX';
+      case 'odt':
+        return 'ODT';
+      case 'odg':
+        return 'ODG';
       case 'xls':
         return 'XLS';
       case 'xlsx':
         return 'XLSX';
+      case 'ods':
+        return 'ODS';
       case 'ppt':
         return 'PPT';
       case 'pptx':
         return 'PPTX';
+      case 'odp':
+        return 'ODP';
       default:
         return null;
     }
@@ -140,19 +156,23 @@ export class UploadPanelItemComponent {
     if (type === 'application/pdf') return 'filetype-document';
     if (
       type === 'application/msword' ||
-      type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      type === 'application/vnd.oasis.opendocument.text' ||
+      type === 'application/vnd.oasis.opendocument.graphics'
     ) {
       return 'filetype-document';
     }
     if (
       type === 'application/vnd.ms-excel' ||
-      type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      type === 'application/vnd.oasis.opendocument.spreadsheet'
     ) {
       return 'filetype-spreadsheet';
     }
     if (
       type === 'application/vnd.ms-powerpoint' ||
-      type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      type === 'application/vnd.oasis.opendocument.presentation'
     ) {
       return 'filetype-presentation';
     }
@@ -172,12 +192,16 @@ export class UploadPanelItemComponent {
       case 'pdf':
       case 'doc':
       case 'docx':
+      case 'odt':
+      case 'odg':
         return 'filetype-document';
       case 'xls':
       case 'xlsx':
+      case 'ods':
         return 'filetype-spreadsheet';
       case 'ppt':
       case 'pptx':
+      case 'odp':
         return 'filetype-presentation';
       default:
         return 'default';

@@ -8,6 +8,9 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | 2FA | account-page.md | enrollment defaults, factor visibility, and removal safeguards. |
 | 2FA | account-settings-section.md | allowed factor types, enrollment flow defaults, assurance indicator display, and removal constraints. |
 | Account & Session | settings-overlay.md | profile identity, email/password security, password recovery, 2FA setup/management, and session termination controls. |
+| Address Auto-Assign Threshold | location-path-parser.md | Probability threshold (default `0.95`) above which the top-ranked city is selected automatically. |
+| Address Disambiguation Strategy | location-path-parser.md | Selects ranking mode (`cluster-majority`, `distance-weighted`, `bayesian-context`) for ambiguous street+house matches. |
+| Address Review Lower Bound | location-path-parser.md | Probability lower bound (default `0.70`) below which an issue is emitted instead of soft review. |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
 | Email Change Security | account-page.md | verification requirements and pending-state copy. |

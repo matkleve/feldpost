@@ -40,6 +40,8 @@ describe('UploadPanelComponent DOM basic inputs', () => {
     expect(input.accept).toContain('image/heic');
     expect(input.accept).toContain('video/mp4');
     expect(input.accept).toContain('application/pdf');
+    expect(input.accept).toContain('application/vnd.oasis.opendocument.text');
+    expect(input.accept).toContain('application/vnd.oasis.opendocument.graphics');
   });
 
   it('file input has multiple attribute', async () => {
