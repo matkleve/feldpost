@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types';
+import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaLoadingComponent } from './media-loading.component';
 import { MediaErrorComponent } from './media-error.component';
 import { MediaEmptyComponent } from './media-empty.component';
@@ -18,7 +19,11 @@ import { MediaGridComponent } from './media-grid.component';
       } @else if (items().length === 0) {
         <app-media-empty />
       } @else {
-        <app-media-grid [items]="items()" (itemClicked)="itemClicked.emit($event)" />
+        <app-media-grid
+          [items]="items()"
+          [variant]="cardVariant()"
+          (itemClicked)="itemClicked.emit($event)"
+        />
       }
     </section>
   `,
@@ -35,6 +40,7 @@ export class MediaContentComponent {
   readonly loading = input.required<boolean>();
   readonly error = input.required<boolean>();
   readonly items = input.required<ImageRecord[]>();
+  readonly cardVariant = input<CardVariant>('medium');
 
   readonly itemClicked = output<string>();
   readonly retry = output<void>();

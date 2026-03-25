@@ -6,21 +6,30 @@
  * Layout mirrors projects-page pattern:
  * main > section.content-clamp > header + content
  */
-import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+import type { OnDestroy } from '@angular/core';
 import { VStackComponent } from '../../shared/containers';
 import { MediaPageHeaderComponent } from './media-page-header.component';
 import { MediaContentComponent } from './media-content.component';
+import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
 import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
+import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types';
 
 @Component({
   selector: 'app-media',
   standalone: true,
-  imports: [VStackComponent, MediaPageHeaderComponent, MediaContentComponent],
+  imports: [
+    VStackComponent,
+    MediaPageHeaderComponent,
+    MediaContentComponent,
+    CardVariantSwitchComponent,
+  ],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
 })
@@ -29,10 +38,13 @@ export class MediaComponent implements OnDestroy {
   protected readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly supabaseService = inject(SupabaseService);
   private readonly i18nService = inject(I18nService);
+  private readonly cardVariantSettings = inject(CardVariantSettingsService);
 
   readonly loading = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly mediaItems = signal<ImageRecord[]>([]);
+  readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('media'));
+  readonly allowedCardVariants = CARD_VARIANTS;
 
   constructor() {
     // Load media from database
@@ -47,7 +59,7 @@ export class MediaComponent implements OnDestroy {
     const mediaSelectedItemsContext: SelectedItemsContextPort = {
       contextKey: 'media',
       selectedMediaIds$: this.workspaceSelectionService.selectedMediaIds,
-      requestOpenDetail: (mediaId: string) => {
+      requestOpenDetail: () => {
         // Detail view is managed by workspace pane directly
         // Media page just provides selection; pane handles detail overlay
       },
@@ -57,6 +69,10 @@ export class MediaComponent implements OnDestroy {
     };
 
     this.workspacePaneObserver.onContextRebind(mediaSelectedItemsContext);
+
+    effect(() => {
+      this.cardVariantSettings.setVariant('media', this.cardVariant());
+    });
   }
 
   ngOnDestroy(): void {

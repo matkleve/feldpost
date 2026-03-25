@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+.media-card {
+  position: relative;
+  border-radius: var(--container-radius-control);
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--color-bg-secondary);
+  transition: box-shadow 0.2s;
+
+  &--row {
+    aspect-ratio: auto;
+    min-block-size: 6rem;
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+
+  &--large {
+    min-block-size: 12rem;
+  }
+}
+
+.media-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-card__info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-2);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: white;
+}
+
+.media-card__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-card__date,
+.media-card__context {
+  margin: var(--spacing-1) 0 0 0;
+  font-size: 0.625rem;
+  opacity: 0.85;
+}

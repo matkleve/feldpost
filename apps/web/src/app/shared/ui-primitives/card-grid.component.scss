@@ -6,6 +6,23 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-grid-min-column-width), 1fr));
   gap: var(--card-grid-gap);
+
+  &--row {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &--small {
+    grid-template-columns: repeat(auto-fill, minmax(max(7rem, var(--card-grid-min-column-width)), 1fr));
+  }
+
+  &--medium {
+    grid-template-columns: repeat(auto-fill, minmax(max(9rem, var(--card-grid-min-column-width)), 1fr));
+  }
+
+  &--large {
+    grid-template-columns: repeat(auto-fill, minmax(max(12rem, var(--card-grid-min-column-width)), 1fr));
+  }
 }
 
 .card-grid--list {

@@ -20,11 +20,11 @@
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
   <div class="workspace-toolbar__size-control">
-    <app-segmented-switch
+    <app-card-variant-switch
       [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
-      [options]="thumbnailSizeOptions()"
       [value]="thumbnailSizePreset()"
-      size="sm"
+      [allowed]="allowedCardVariants"
+      [size]="'sm'"
       [iconOnly]="true"
       (valueChange)="onThumbnailSizeChanged($event)"
     />
@@ -44,7 +44,7 @@
         <app-grouping-dropdown
           [activeGroupings]="activeGroupings()"
           [availableProperties]="availableGroupings()"
-          (groupingsChanged)="onGroupingsChanged($event.active, $event.available)"
+          (groupingsChanged)="onGroupingsChanged($event.active)"
           (dragStarted)="onDragStarted()"
           (dragEnded)="onDragEnded()"
         />

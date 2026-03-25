@@ -17,11 +17,15 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
+import {
+  CardVariantSwitchComponent,
+} from '../../shared/ui-primitives/card-variant-switch.component';
 import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import { ProjectsViewToggleComponent } from '../../shared/view-toggle/projects-view-toggle.component';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
+import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
 
@@ -34,6 +38,7 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     FilterDropdownComponent,
     SortDropdownComponent,
     SegmentedSwitchComponent,
+    CardVariantSwitchComponent,
     UiDropdownTriggerDirective,
     ProjectsViewToggleComponent,
     PaneToolbarComponent,
@@ -59,12 +64,15 @@ export class ProjectsToolbarComponent {
   readonly hasCustomSort = input.required<boolean>();
   readonly hasArchivedProjects = input.required<boolean>();
   readonly viewMode = input.required<ProjectsViewMode>();
+  readonly cardVariant = input<CardVariant>('medium');
+  readonly allowedCardVariants = input<ReadonlyArray<CardVariant>>(CARD_VARIANTS);
   readonly statusFilter = input.required<ProjectStatusFilter>();
   readonly activeSorts = input.required<SortConfig[]>();
 
   readonly groupingChanged = output<GroupingProperty[]>();
   readonly sortChanged = output<SortConfig[]>();
   readonly viewModeChange = output<ProjectsViewMode>();
+  readonly cardVariantChange = output<CardVariant>();
   readonly statusFilterChange = output<ProjectStatusFilter>();
 
   readonly activeDropdown = signal<ProjectsToolbarDropdown>(null);
@@ -150,7 +158,7 @@ export class ProjectsToolbarComponent {
     setTimeout(() => this.isDragging.set(false));
   }
 
-  onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
+  onGroupingsChanged(active: GroupingProperty[]): void {
     this.activeGroupings.set(active);
     this.groupingChanged.emit(active);
   }
@@ -159,5 +167,9 @@ export class ProjectsToolbarComponent {
     if (value === 'all' || value === 'active' || value === 'archived') {
       this.statusFilterChange.emit(value);
     }
+  }
+
+  onCardVariantChanged(value: CardVariant): void {
+    this.cardVariantChange.emit(value);
   }
 }

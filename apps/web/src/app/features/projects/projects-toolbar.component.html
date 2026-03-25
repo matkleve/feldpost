@@ -40,6 +40,15 @@
         [viewMode]="viewMode()"
         (viewModeChange)="viewModeChange.emit($event)"
       />
+
+      <app-card-variant-switch
+        slot="right"
+        class="projects-toolbar__card-variant"
+        [value]="cardVariant()"
+        [allowed]="allowedCardVariants()"
+        [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+        (valueChange)="onCardVariantChanged($event)"
+      />
     </app-pane-toolbar>
 
     @if (activeDropdown()) {
@@ -55,7 +64,7 @@
             <app-grouping-dropdown
               [activeGroupings]="activeGroupings()"
               [availableProperties]="availableGroupings()"
-              (groupingsChanged)="onGroupingsChanged($event.active, $event.available)"
+              (groupingsChanged)="onGroupingsChanged($event.active)"
               (dragStarted)="onDragStarted()"
               (dragEnded)="onDragEnded()"
             />

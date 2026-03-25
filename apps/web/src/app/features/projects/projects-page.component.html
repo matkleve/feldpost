@@ -18,11 +18,14 @@
       [hasCustomSort]="hasCustomSort()"
       [hasArchivedProjects]="hasArchivedProjects()"
       [viewMode]="viewMode()"
+      [cardVariant]="cardVariant()"
+      [allowedCardVariants]="allowedCardVariants"
       [statusFilter]="statusFilter()"
       [activeSorts]="activeSorts()"
       (groupingChanged)="activeGroupings.set($event)"
       (sortChanged)="activeSorts.set($event)"
       (viewModeChange)="viewMode.set($event)"
+      (cardVariantChange)="cardVariant.set($event)"
       (statusFilterChange)="onStatusFilterChange($event)"
     />
 
@@ -85,6 +88,7 @@
             } @else {
               <app-projects-grid-view
                 [section]="section"
+                [cardVariant]="cardVariant()"
                 [colorTokenFor]="colorTokenForFn"
                 [formatRelativeDate]="formatRelativeDateFn"
                 [coloringProjectId]="coloringProjectId()"

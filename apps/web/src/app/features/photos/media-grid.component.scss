@@ -13,51 +13,11 @@
     outline-color: var(--color-brand);
   }
 
-  &:hover .media-card {
+  &:hover app-media-card {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   }
 
-  &--selected .media-card {
+  &--selected app-media-card {
     outline: 2px solid var(--color-brand);
   }
-}
-
-.media-card {
-  position: relative;
-  border-radius: var(--container-radius-control);
-  overflow: hidden;
-  aspect-ratio: 1;
-  background: var(--color-bg-secondary);
-  transition: box-shadow 0.2s;
-}
-
-.media-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.media-card__info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: var(--spacing-2);
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: white;
-}
-
-.media-card__title {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.media-card__date {
-  margin: var(--spacing-1) 0 0 0;
-  font-size: 0.625rem;
-  opacity: 0.8;
 }

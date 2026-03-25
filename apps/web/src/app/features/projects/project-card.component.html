@@ -1,0 +1,93 @@
+<article
+  uiCardShell
+  uiCardShellSizeMd
+  class="ui-card-shell ui-card-shell--md project-card"
+  [class.project-card--row]="variant() === 'row'"
+  [class.project-card--small]="variant() === 'small'"
+  [class.project-card--medium]="variant() === 'medium'"
+  [class.project-card--large]="variant() === 'large'"
+  [style.--project-item-color]="colorTokenFor()(project().colorKey)"
+>
+  <div class="project-card__header ui-card-shell__header">
+    <span class="project-card__dot" [style.background]="colorTokenFor()(project().colorKey)"></span>
+    <h3 class="project-card__name">{{ project().name }}</h3>
+    @if (variant() === 'large') {
+      <span class="project-card__status">{{ project().status }}</span>
+    }
+  </div>
+
+  <p class="project-card__badge">
+    {{ project().totalImageCount }}
+    {{ t()('projects.page.metric.photos', 'photos') }}
+  </p>
+
+  @if (variant() !== 'small') {
+    <p class="project-card__meta">{{ formatRelativeDate()(project().lastActivity) }}</p>
+  }
+
+  @if (variant() === 'large') {
+    <p class="project-card__context">
+      {{ project().district || project().city || t()('projects.page.meta.noLocation', 'No location') }}
+    </p>
+  }
+
+  <div class="project-card__actions">
+    @if (project().status === 'active') {
+      <button
+        uiButton
+        uiButtonSizeMd
+        uiButtonSecondary
+        uiButtonIconOnly
+        type="button"
+        class="ui-button ui-button--secondary"
+        (click)="onToggleColorPicker(project().id)"
+      >
+        <span class="material-icons" aria-hidden="true">palette</span>
+      </button>
+
+      @if (coloringProjectId() === project().id) {
+        <div class="project-card__picker">
+          <app-project-color-picker
+            [selectedColor]="project().colorKey"
+            (colorSelected)="onColorSelected(project().id, $event)"
+          />
+        </div>
+      }
+
+      @if (variant() !== 'small') {
+        <button
+          uiButton
+          uiButtonSizeMd
+          uiButtonSecondary
+          uiButtonIconWithText
+          type="button"
+          class="ui-button ui-button--secondary"
+          (click)="onDangerAction(project().id, 'archive')"
+        >
+          <span class="material-icons" aria-hidden="true">archive</span>
+          <span>{{ t()('projects.page.action.archiveProject', 'Archive') }}</span>
+        </button>
+      }
+    } @else {
+      <button
+        uiButton
+        uiButtonSecondary
+        type="button"
+        class="ui-button ui-button--secondary"
+        (click)="onDangerAction(project().id, 'restore')"
+      >
+        <span>{{ t()('projects.page.action.restoreProject', 'Restore') }}</span>
+      </button>
+
+      <button
+        uiButton
+        uiButtonDanger
+        type="button"
+        class="ui-button ui-button--danger"
+        (click)="onDangerAction(project().id, 'delete')"
+      >
+        <span>{{ t()('projects.page.action.deleteProject', 'Delete') }}</span>
+      </button>
+    }
+  </div>
+</article>

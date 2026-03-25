@@ -225,6 +225,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
   - ✅ `image-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
 - ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)
 - ✅ `grouping-dropdown.md` — Grouping Dropdown (thumbnail group-by)
+- ✅ `card-variant-system.md` — Cross-feature card variant contract (`row`, `small`, `medium`, `large`) for media/project cards
 
 ### Controls
 

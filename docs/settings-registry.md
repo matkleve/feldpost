@@ -11,6 +11,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Address Auto-Assign Threshold | location-path-parser.md | Probability threshold (default `0.95`) above which the top-ranked city is selected automatically. |
 | Address Disambiguation Strategy | location-path-parser.md | Selects ranking mode (`cluster-majority`, `distance-weighted`, `bayesian-context`) for ambiguous street+house matches. |
 | Address Review Lower Bound | location-path-parser.md | Probability lower bound (default `0.70`) below which an issue is emitted instead of soft review. |
+| Card Variant Presets | card-variant-system.md | default and persisted card layout variant per scope (`map`, `media`, `projects`) including allowed options (`row`, `small`, `medium`, `large`). |
 | Custom Properties | settings-overlay.md | organization metadata key configuration defaults. |
 | Data & Storage | settings-overlay.md | data retention/export/cache/storage defaults. |
 | Email Change Security | account-page.md | verification requirements and pending-state copy. |
@@ -29,11 +30,13 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Map Basemap | map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
 | Map Marker Motion | photo-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
 | Map Preferences | settings-overlay.md | map tile and map-behavior defaults. |
+| Media Card Information Density | card-variant-system.md | controls which metadata blocks are visible at each media card size. |
 | Notifications | settings-overlay.md | preference defaults for in-app feedback and alerts. |
 | Password Recovery | account-page.md | reset email behavior and redirect target. |
 | Password Recovery | account-settings-section.md | reset email trigger behavior and redirect target handling. |
 | Password Security | account-page.md | policy messaging and re-auth requirement handling. |
 | Password Security | account-settings-section.md | change policy, re-auth requirement behavior, and minimum validation messaging. |
+| Project Card Information Density | card-variant-system.md | controls which metadata blocks are visible at each project card size. |
 | Project Color Palette | project-color-picker.md | temporary one-click random brand-hue generation (`brand-hue-###`) derived from brand orange by varying hue. |
 | Project Color Palette | projects-page.md | enabled semantic project color options and default fallback color. |
 | Projects View Mode | projects-page.md | default layout mode (`list` or `cards`) and persistence behavior. |

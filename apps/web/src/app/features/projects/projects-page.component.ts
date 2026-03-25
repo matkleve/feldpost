@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import type { OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
@@ -37,6 +38,8 @@ import {
 } from './projects-page.logic';
 import { ProjectsTableViewComponent } from './projects-table-view.component';
 import { ProjectsToolbarComponent } from './projects-toolbar.component';
+import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
+import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import {
   UiButtonDirective,
   UiButtonSecondaryDirective,
@@ -75,6 +78,7 @@ export class ProjectsPageComponent implements OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly cardVariantSettings = inject(CardVariantSettingsService);
 
   // Project-scoped media selection for workspace pane
   private readonly projectMediaIds = signal<Set<string>>(new Set());
@@ -103,6 +107,7 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly projects = signal<ProjectListItem[]>([]);
   readonly statusFilter = signal<ProjectStatusFilter>('all');
   readonly viewMode = signal<ProjectsViewMode>('cards');
+  readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('projects'));
   readonly activeGroupings = signal<GroupingProperty[]>([]);
   readonly activeSorts = signal<SortConfig[]>([]);
   readonly creatingProject = signal(false);
@@ -138,6 +143,7 @@ export class ProjectsPageComponent implements OnDestroy {
   readonly hasPendingAction = computed(
     () => !!this.pendingProjectAction() && !!this.pendingProjectId(),
   );
+  readonly allowedCardVariants = CARD_VARIANTS;
   readonly pendingProject = computed(() => {
     const projectId = this.pendingProjectId();
     if (!projectId) {
@@ -198,6 +204,10 @@ export class ProjectsPageComponent implements OnDestroy {
 
   constructor() {
     effect(() => {
+      this.cardVariantSettings.setVariant('projects', this.cardVariant());
+    });
+
+    effect(() => {
       const labelsById = new Map(this.groupingOptions().map((option) => [option.id, option.label]));
       this.activeGroupings.update((current) =>
         current.map((entry) => ({ ...entry, label: labelsById.get(entry.id) ?? entry.label })),
@@ -212,10 +222,10 @@ export class ProjectsPageComponent implements OnDestroy {
         const projectsSelectedItemsContext: SelectedItemsContextPort = {
           contextKey: 'projects',
           selectedMediaIds$: this.projectMediaIds,
-          requestOpenDetail: (mediaId: string) => {
+          requestOpenDetail: () => {
             // TODO: Open detail view for project media
           },
-          requestSetHover: (mediaId: string | null) => {
+          requestSetHover: () => {
             // TODO: Set hover state for project media
           },
         };

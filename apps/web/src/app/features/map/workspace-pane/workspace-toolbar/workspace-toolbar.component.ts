@@ -17,10 +17,9 @@ import type {
 } from '../../../../core/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
-import {
-  SegmentedSwitchComponent,
-  type SegmentedSwitchOption,
-} from '../../../../shared/segmented-switch/segmented-switch.component';
+import { CardVariantSwitchComponent } from '../../../../shared/ui-primitives/card-variant-switch.component';
+import { CardVariantSettingsService } from '../../../../shared/ui-primitives/card-variant-settings.service';
+import { CARD_VARIANTS, type CardVariant } from '../../../../shared/ui-primitives/card-variant.types';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -35,7 +34,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     SortDropdownComponent,
     ProjectsDropdownComponent,
     UiDropdownTriggerDirective,
-    SegmentedSwitchComponent,
+    CardVariantSwitchComponent,
   ],
 })
 export class WorkspaceToolbarComponent {
@@ -43,40 +42,13 @@ export class WorkspaceToolbarComponent {
   private readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
   private readonly registry = inject(PropertyRegistryService);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  private readonly cardVariantSettings = inject(CardVariantSettingsService);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
-  readonly thumbnailSizeOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => {
-    this.currentLanguage();
-    return [
-      {
-        id: 'row',
-        value: 'row',
-        label: this.t('workspace.toolbar.size.row', 'Rows'),
-        icon: 'view_headline',
-      },
-      {
-        id: 'small',
-        value: 'small',
-        label: this.t('workspace.toolbar.size.small', 'Small'),
-        icon: 'grid_view',
-      },
-      {
-        id: 'medium',
-        value: 'medium',
-        label: this.t('workspace.toolbar.size.medium', 'Medium'),
-        icon: 'apps',
-      },
-      {
-        id: 'large',
-        value: 'large',
-        label: this.t('workspace.toolbar.size.large', 'Large'),
-        icon: 'view_agenda',
-      },
-    ];
-  });
   readonly thumbnailSizePreset = computed(() => this.viewService.thumbnailSizePreset());
+  readonly allowedCardVariants = CARD_VARIANTS;
 
   // Dropdown position (fixed, computed from button rect)
   readonly dropdownTop = signal(0);
@@ -141,7 +113,7 @@ export class WorkspaceToolbarComponent {
     setTimeout(() => this.isDragging.set(false));
   }
 
-  onGroupingsChanged(active: GroupingProperty[], _available: GroupingProperty[]): void {
+  onGroupingsChanged(active: GroupingProperty[]): void {
     this.activeGroupings.set(active);
     // Push to WorkspaceViewService
     this.viewService.activeGroupings.set(
@@ -186,6 +158,7 @@ export class WorkspaceToolbarComponent {
   onThumbnailSizeChanged(value: string | null): void {
     if (value !== 'row' && value !== 'small' && value !== 'medium' && value !== 'large') return;
     this.viewService.setThumbnailSizePreset(value as ThumbnailSizePreset);
+    this.cardVariantSettings.setVariant('map', value as CardVariant);
   }
 
   @HostListener('document:keydown.escape')

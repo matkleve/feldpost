@@ -8,11 +8,19 @@
         [loading]="loading()"
       />
 
+      <app-card-variant-switch
+        [value]="cardVariant()"
+        [allowed]="allowedCardVariants"
+        [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+        (valueChange)="cardVariant.set($event)"
+      />
+
       <!-- Content Wrapper -->
       <app-media-content
         [loading]="loading()"
         [error]="!!loadError()"
         [items]="mediaItems()"
+        [cardVariant]="cardVariant()"
         (itemClicked)="onMediaItemClicked($event)"
         (retry)="onRetryLoad()"
       />
