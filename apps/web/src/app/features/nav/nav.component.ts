@@ -49,7 +49,7 @@ export class NavComponent {
    *  out and non-interactive — reserved for future features. */
   readonly navItems = computed<NavItem[]>(() => [
     { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
-    { icon: 'photo_camera', label: this.t('nav.item.photos', 'Photos'), route: '/photos' },
+    { icon: 'photo_camera', label: this.t('nav.item.media', 'Media'), route: '/media' },
     { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
   ]);
 

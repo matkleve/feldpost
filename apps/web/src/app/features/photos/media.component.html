@@ -1,0 +1,21 @@
+<main class="media-page" data-i18n-skip>
+  <section class="media-rail content-clamp content-clamp--list">
+    <app-vstack [spacing]="4">
+      <!-- Page Header with Breadcrumb -->
+      <app-media-page-header
+        [title]="t('media.page.title', 'Media')"
+        [mediaCount]="mediaItems().length"
+        [loading]="loading()"
+      />
+
+      <!-- Content Wrapper -->
+      <app-media-content
+        [loading]="loading()"
+        [error]="!!loadError()"
+        [items]="mediaItems()"
+        (itemClicked)="onMediaItemClicked($event)"
+        (retry)="onRetryLoad()"
+      />
+    </app-vstack>
+  </section>
+</main>

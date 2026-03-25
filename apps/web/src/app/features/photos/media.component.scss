@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.media-page {
+  min-height: 100%;
+  padding: var(--spacing-4);
+}
+
+.media-rail {
+  width: 100%;
+  margin-inline: auto;
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.media-content {
+  display: grid;
+  gap: var(--spacing-3);
+}

@@ -12,6 +12,7 @@ import {
   UiCardShellDirective,
   UiCardShellSizeMdDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
+import { CardGridComponent } from '../../shared/ui-primitives/card-grid.component';
 import type { ProjectGroupedSection } from './projects-page.config';
 
 @Component({
@@ -27,6 +28,7 @@ import type { ProjectGroupedSection } from './projects-page.config';
     UiCardShellDirective,
     UiCardShellSizeMdDirective,
     UiButtonSizeMdDirective,
+    CardGridComponent,
   ],
   templateUrl: './projects-grid-view.component.html',
   styleUrl: './projects-grid-view.component.scss',

@@ -67,9 +67,9 @@ export const routes: Routes = [
 
       // M-UI2: placeholder routes — full pages implemented in M-UI6–9
       {
-        path: 'photos',
+        path: 'media',
         loadComponent: () =>
-          import('./features/photos/photos.component').then((m) => m.PhotosComponent),
+          import('./features/photos/media.component').then((m) => m.MediaComponent),
       },
       {
         path: 'projects',

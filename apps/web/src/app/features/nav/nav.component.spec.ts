@@ -78,7 +78,7 @@ function buildTestBed(emailOverride: string | null = null, metadata: Record<stri
     providers: [
       provideRouter([
         { path: '', component: NavComponent },
-        { path: 'photos', component: NavComponent },
+        { path: 'media', component: NavComponent },
         { path: 'groups', component: NavComponent },
         { path: 'settings', component: NavComponent },
       ]),
@@ -137,12 +137,12 @@ describe('NavComponent', () => {
     expect(mapLink?.classList).toContain('nav__link--active');
   });
 
-  it('does not highlight Map when router is at /photos', async () => {
+  it('does not highlight Map when router is at /media', async () => {
     const router = TestBed.inject(Router);
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
 
-    await router.navigate(['/photos']);
+    await router.navigate(['/media']); async componentFixes (routing + terminology) in 3 files
     await fixture.whenStable();
     fixture.detectChanges();
 

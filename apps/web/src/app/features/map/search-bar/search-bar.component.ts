@@ -498,7 +498,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           break;
         }
 
-        void this.router.navigate([candidate.contentType === 'group' ? '/projects' : '/photos'], {
+        void this.router.navigate([candidate.contentType === 'group' ? '/projects' : '/media'], {
           queryParams: {
             search: commitAction.query,
             type: candidate.contentType,

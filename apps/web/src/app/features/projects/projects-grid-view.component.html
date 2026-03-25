@@ -1,4 +1,4 @@
-<div class="projects-grid">
+<app-card-grid class="projects-grid" minColumnWidth="16rem">
   @for (project of section().projects; track project.id) {
     <article
       uiCardShell
@@ -75,4 +75,4 @@
       </div>
     </article>
   }
-</div>
+</app-card-grid>

@@ -1,0 +1,19 @@
+@if (tag() === 'ul') {
+  <ul
+    class="card-grid card-grid--list"
+    [style.--card-grid-min-column-width]="minColumnWidth()"
+    [style.--card-grid-gap]="gap()"
+    [attr.role]="role()"
+  >
+    <ng-content />
+  </ul>
+} @else {
+  <div
+    class="card-grid"
+    [style.--card-grid-min-column-width]="minColumnWidth()"
+    [style.--card-grid-gap]="gap()"
+    [attr.role]="role()"
+  >
+    <ng-content />
+  </div>
+}

@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-grid-min-column-width), 1fr));
+  gap: var(--card-grid-gap);
+}
+
+.card-grid--list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
