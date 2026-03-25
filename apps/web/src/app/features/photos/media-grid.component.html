@@ -10,10 +10,7 @@
       [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)"
     >
       <div class="media-card">
-        <img
-          [src]="item.thumbnail_path || ''"
-          [alt]="item.address_label || 'Media item'"
-        />
+        <img [src]="item.thumbnail_path || ''" [alt]="item.address_label || 'Media item'" />
         <div class="media-card__info">
           <p class="media-card__title">{{ item.address_label }}</p>
           <p class="media-card__date">{{ formatDate(item.captured_at) }}</p>

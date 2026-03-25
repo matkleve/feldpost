@@ -20,11 +20,7 @@ import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types'
 @Component({
   selector: 'app-media',
   standalone: true,
-  imports: [
-    VStackComponent,
-    MediaPageHeaderComponent,
-     MediaContentComponent,
-  ],
+  imports: [VStackComponent, MediaPageHeaderComponent, MediaContentComponent],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
 })
