@@ -64,10 +64,12 @@ const FILE_TYPE_LOOKUP: Record<string, UploadFileTypeChip> = {
   docx: { type: 'DOCX', icon: 'description', variant: 'filetype-document', order: 10 },
   odt: { type: 'ODT', icon: 'description', variant: 'filetype-document', order: 11 },
   odg: { type: 'ODG', icon: 'description', variant: 'filetype-document', order: 12 },
-  xlsx: { type: 'XLSX', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 13 },
-  ods: { type: 'ODS', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 14 },
-  pptx: { type: 'PPTX', icon: 'bar_chart', variant: 'filetype-presentation', order: 15 },
-  odp: { type: 'ODP', icon: 'bar_chart', variant: 'filetype-presentation', order: 16 },
+  txt: { type: 'TXT', icon: 'description', variant: 'filetype-document', order: 13 },
+  xlsx: { type: 'XLSX', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 14 },
+  ods: { type: 'ODS', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 15 },
+  csv: { type: 'CSV', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 16 },
+  pptx: { type: 'PPTX', icon: 'bar_chart', variant: 'filetype-presentation', order: 17 },
+  odp: { type: 'ODP', icon: 'bar_chart', variant: 'filetype-presentation', order: 18 },
 };
 
 const DEFAULT_FILE_TYPE_CHIPS: UploadFileTypeChip[] = [
@@ -82,8 +84,10 @@ const DEFAULT_FILE_TYPE_CHIPS: UploadFileTypeChip[] = [
   FILE_TYPE_LOOKUP['docx'],
   FILE_TYPE_LOOKUP['odt'],
   FILE_TYPE_LOOKUP['odg'],
+  FILE_TYPE_LOOKUP['txt'],
   FILE_TYPE_LOOKUP['xlsx'],
   FILE_TYPE_LOOKUP['ods'],
+  FILE_TYPE_LOOKUP['csv'],
   FILE_TYPE_LOOKUP['pptx'],
   FILE_TYPE_LOOKUP['odp'],
 ].filter((chip): chip is UploadFileTypeChip => !!chip);
@@ -115,6 +119,7 @@ export class UploadPanelComponent {
 
   // Component I/O
   readonly visible = input<boolean>(false);
+  readonly embeddedInPane = input<boolean>(false);
   readonly imageUploaded = output<ImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly zoomToLocationRequested = output<ZoomToLocationEvent>();

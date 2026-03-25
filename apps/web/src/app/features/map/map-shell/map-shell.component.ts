@@ -91,6 +91,8 @@ import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferre
 import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
+import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
+import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
 import {
   UiButtonDirective,
   UiButtonGhostDirective,
@@ -222,6 +224,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapProjectActionsService = inject(MapProjectActionsService);
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
@@ -245,6 +248,7 @@ export class MapShellComponent implements OnDestroy {
 
   /** Final visibility state: click-pinned open only. */
   readonly uploadPanelOpen = this.uploadPanelPinned;
+  readonly workspacePaneActiveTab = this.workspacePaneObserver.activeTab$;
   readonly uploadBatch = this.uploadManagerService.activeBatch;
   readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
   readonly uploadBatchActive = computed(() => {
@@ -564,8 +568,22 @@ export class MapShellComponent implements OnDestroy {
   } | null = null;
   private shareTokenResolved = false;
   private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
+  private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
+    contextKey: 'map',
+    selectedMediaIds$: this.workspaceSelectionService.selectedMediaIds,
+    requestOpenDetail: (mediaId: string) => this.openDetailView(mediaId),
+    requestSetHover: (mediaId: string | null) => {
+      if (!mediaId) {
+        this.setLinkedHoverMarkerFromWorkspace(null);
+        return;
+      }
+      this.setLinkedHoverMarkerFromWorkspace(this.markersByImageId.get(mediaId) ?? null);
+    },
+  };
 
   constructor() {
+    this.workspacePaneObserver.onContextRebind(this.mapSelectedItemsContext);
+
     afterNextRender(() => {
       const isJsdom =
         typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom');
@@ -588,6 +606,7 @@ export class MapShellComponent implements OnDestroy {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
+    this.workspacePaneObserver.onRouteLeave('map');
     this.cleanupGpsAndTracking();
     this.cleanupDeferredAndQueryState();
     this.detachGlobalListeners();
@@ -1259,6 +1278,10 @@ export class MapShellComponent implements OnDestroy {
       this.activeWorkspaceHover = null;
     }
     this.setLinkedHoverMarkerFromWorkspace(null);
+  }
+
+  onWorkspacePaneActiveTabChange(tab: 'selected-items' | 'upload'): void {
+    this.workspacePaneObserver.setActiveTab(tab);
   }
 
   private highlightZoomTargetMarker(imageId: string, lat: number, lng: number, attempt = 0): void {
@@ -3394,4 +3417,3 @@ export class MapShellComponent implements OnDestroy {
     return `${lat.toFixed(7)}:${lng.toFixed(7)}`;
   }
 }
-

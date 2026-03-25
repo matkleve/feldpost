@@ -4,19 +4,24 @@ import { WorkspacePaneToolbarComponent } from './workspace-pane-toolbar/workspac
 import { ThumbnailGridComponent } from './thumbnail-grid.component';
 import { ImageDetailViewComponent } from './image-detail-view.component';
 import { WorkspacePaneFooterComponent } from './workspace-pane-footer/workspace-pane-footer.component';
+import { UploadPanelComponent, type ImageUploadedEvent } from '../../upload/upload-panel.component';
+import { MaxWidthContainerComponent } from '../../../shared/containers';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import type { ThumbnailCardHoverEvent } from './thumbnail-card/thumbnail-card.component';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import type { WorkspacePaneTab } from '../../../core/workspace-pane-host.port';
 
 @Component({
   selector: 'app-workspace-pane',
   imports: [
+    MaxWidthContainerComponent,
     WorkspacePaneHeaderComponent,
     WorkspacePaneToolbarComponent,
     ThumbnailGridComponent,
     ImageDetailViewComponent,
     WorkspacePaneFooterComponent,
+    UploadPanelComponent,
   ],
   templateUrl: './workspace-pane.component.html',
   styleUrl: './workspace-pane.component.scss',
@@ -29,6 +34,7 @@ export class WorkspacePaneComponent {
 
   // ── Inputs from MapShell ──────────────────────────────────────────────────
   readonly detailImageId = input<string | null>(null);
+  readonly activeTab = input<WorkspacePaneTab>('selected-items');
   readonly title = input('');
   readonly titleEditable = input(false);
   readonly titleEditEnabled = input(false);
@@ -42,7 +48,10 @@ export class WorkspacePaneComponent {
   readonly closed = output<void>();
   readonly detailClosed = output<void>();
   readonly detailRequested = output<string>();
+  readonly activeTabChange = output<WorkspacePaneTab>();
   readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly imageUploaded = output<ImageUploadedEvent>();
+  readonly placementRequested = output<string>();
   readonly titleEditValueChange = output<string>();
   readonly titleSubmitRequested = output<string>();
   readonly titleEditRequested = output<void>();
@@ -98,5 +107,17 @@ export class WorkspacePaneComponent {
 
   onWorkspaceItemHoverEnded(imageId: string): void {
     this.workspaceItemHoverEnded.emit(imageId);
+  }
+
+  setActiveTab(tab: WorkspacePaneTab): void {
+    this.activeTabChange.emit(tab);
+  }
+
+  onImageUploaded(event: ImageUploadedEvent): void {
+    this.imageUploaded.emit(event);
+  }
+
+  onPlacementRequested(jobId: string): void {
+    this.placementRequested.emit(jobId);
   }
 }

@@ -1,45 +1,87 @@
 <!-- Workspace Pane — right panel (desktop), bottom sheet (mobile, future) -->
-<div
-  class="workspace-pane ui-container"
-  role="region"
-  [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
->
-  <app-workspace-pane-header
-    [title]="resolvedTitle()"
-    [editable]="titleEditable()"
-    [editEnabled]="titleEditEnabled()"
-    [editValue]="titleEditValue()"
-    [colorToken]="projectColorToken()"
-    [colorPickerEnabled]="colorPickerEnabled()"
-    [colorPickerOpen]="colorPickerOpen()"
-    (editValueChange)="onTitleEditValueChange($event)"
-    (editSubmitted)="onTitleSubmit($event)"
-    (editRequested)="onTitleEditRequest()"
-    (colorPickerRequested)="onColorPickerRequest()"
-    (close)="close()"
-  ></app-workspace-pane-header>
+<app-max-width-container>
+  <div
+    class="workspace-pane ui-container"
+    role="region"
+    [attr.aria-label]="t('workspace.pane.aria.region', 'Workspace pane')"
+  >
+    <app-workspace-pane-header
+      [title]="resolvedTitle()"
+      [editable]="titleEditable()"
+      [editEnabled]="titleEditEnabled()"
+      [editValue]="titleEditValue()"
+      [colorToken]="projectColorToken()"
+      [colorPickerEnabled]="colorPickerEnabled()"
+      [colorPickerOpen]="colorPickerOpen()"
+      (editValueChange)="onTitleEditValueChange($event)"
+      (editSubmitted)="onTitleSubmit($event)"
+      (editRequested)="onTitleEditRequest()"
+      (colorPickerRequested)="onColorPickerRequest()"
+      (close)="close()"
+    ></app-workspace-pane-header>
 
-  @if (detailImageId()) {
-    <app-image-detail-view
-      [imageId]="detailImageId()"
-      (closed)="onDetailClose()"
-      (zoomToLocationRequested)="onZoomToLocation($event)"
-    />
-  } @else {
-    <app-workspace-pane-toolbar />
-    <app-thumbnail-grid
-      [linkedHoveredImageIds]="linkedHoveredImageIds()"
-      (thumbnailClicked)="onThumbnailClick($event)"
-      (zoomToLocationRequested)="onZoomToLocation($event)"
-      (hoverStarted)="onWorkspaceItemHoverStarted($event)"
-      (hoverEnded)="onWorkspaceItemHoverEnded($event)"
-    />
+    <div
+      class="workspace-pane__tabs"
+      role="tablist"
+      [attr.aria-label]="t('workspace.pane.tabs.aria', 'Workspace tabs')"
+    >
+      <button
+        type="button"
+        role="tab"
+        class="workspace-pane__tab"
+        [class.workspace-pane__tab--active]="activeTab() === 'selected-items'"
+        [attr.aria-selected]="activeTab() === 'selected-items'"
+        (click)="setActiveTab('selected-items')"
+      >
+        {{ t('workspace.pane.tab.selectedItems', 'Selected Items') }}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="workspace-pane__tab"
+        [class.workspace-pane__tab--active]="activeTab() === 'upload'"
+        [attr.aria-selected]="activeTab() === 'upload'"
+        (click)="setActiveTab('upload')"
+      >
+        {{ t('workspace.pane.tab.upload', 'Upload') }}
+      </button>
+    </div>
 
-    @if (selectionService.selectedCount() > 0) {
-      <app-workspace-pane-footer
-        [scopeIds]="exportScopeIds()"
-        [images]="exportScopeImages()"
-      ></app-workspace-pane-footer>
+    @if (detailImageId()) {
+      <app-image-detail-view
+        [imageId]="detailImageId()"
+        (closed)="onDetailClose()"
+        (zoomToLocationRequested)="onZoomToLocation($event)"
+      />
+    } @else if (activeTab() === 'selected-items') {
+      <app-workspace-pane-toolbar />
+      <app-thumbnail-grid
+        [linkedHoveredImageIds]="linkedHoveredImageIds()"
+        (thumbnailClicked)="onThumbnailClick($event)"
+        (zoomToLocationRequested)="onZoomToLocation($event)"
+        (hoverStarted)="onWorkspaceItemHoverStarted($event)"
+        (hoverEnded)="onWorkspaceItemHoverEnded($event)"
+      />
+
+      @if (selectionService.selectedCount() > 0) {
+        <app-workspace-pane-footer
+          [scopeIds]="exportScopeIds()"
+          [images]="exportScopeImages()"
+        ></app-workspace-pane-footer>
+      }
+    } @else {
+      <section
+        class="workspace-pane__upload-tab"
+        [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
+      >
+        <app-upload-panel
+          [visible]="true"
+          [embeddedInPane]="true"
+          (imageUploaded)="onImageUploaded($event)"
+          (zoomToLocationRequested)="onZoomToLocation($event)"
+          (placementRequested)="onPlacementRequested($event)"
+        />
+      </section>
     }
-  }
-</div>
+  </div>
+</app-max-width-container>

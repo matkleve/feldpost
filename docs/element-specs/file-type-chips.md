@@ -38,6 +38,8 @@ Example layout:
 
 ## Component Hierarchy
 
+**STRICT PRIMITIVE REQUIREMENT:** The section must use shared layout primitives from `src/styles/primitives/container.scss`. The chips host should be a `.ui-container` variant and repeated chip rows should rely on `.ui-item` semantics where applicable. Do not add extra wrapper `div`s for spacing-only behavior.
+
 ```
 UploadAreaComponent
 └── FileTypeChipsSection
@@ -52,9 +54,9 @@ UploadAreaComponent
 | ------------------ | --------------------------------------------------- | ------------- | ------------------------- | --------------------- | --------------------------------------------------- |
 | **Image**          | JPEG, JPG, PNG, HEIC, HEIF, WebP, TIFF              | `image`       | `--filetype-image`        | filetype-image        | Neutral technical blue for photos/images            |
 | **Video**          | MP4, MOV, WebM, AVI, MKV                            | `videocam`    | `--filetype-video`        | filetype-video        | Distinct from image while staying non-alarmist      |
-| **Document**       | PDF, DOCX, DOC, TXT, ODT, ODG                       | `description` | `--filetype-document`     | filetype-document     | Office-style indigo/blue-grey; no warning semantics |
-| **Spreadsheet**    | XLSX, XLS, CSV, ODS                                 | `table_chart` | `--filetype-spreadsheet`  | filetype-spreadsheet  | Green, aligned with spreadsheet mental model        |
-| **Presentation**   | PPTX, PPT, ODP, KEY                                 | `bar_chart`   | `--filetype-presentation` | filetype-presentation | Warm amber/orange; avoids red error signal          |
+| **Document**       | PDF, DOCX, DOC, ODT, ODG, TXT                       | `description` | `--filetype-document`     | filetype-document     | Office-style indigo/blue-grey; no warning semantics |
+| **Spreadsheet**    | XLSX, XLS, ODS, CSV                                 | `table_chart` | `--filetype-spreadsheet`  | filetype-spreadsheet  | Green, aligned with spreadsheet mental model        |
+| **Presentation**   | PPTX, PPT, ODP                                      | `bar_chart`   | `--filetype-presentation` | filetype-presentation | Warm amber/orange; avoids red error signal          |
 | **Office Generic** | DOCX, DOC, ODT, ODG, XLSX, XLS, ODS, PPTX, PPT, ODP | `article`     | `--filetype-office`       | custom                | Fallback if type-specific mapping unavailable       |
 
 **Rationale:**
@@ -221,6 +223,8 @@ fileTypeChips = computed(() => {
 - [ ] Accessibility: `aria-label` on container, semantic role
 - [x] Visual testing: all 5 color variants render at correct size (sm)
 - [x] No new hardcoded text; all labels (type abbreviations) use tokens or constants
+- [ ] File-type chips section uses standardized layout primitives (`.ui-container` / `.ui-item`) and keeps DOM hierarchy flat
+- [ ] Interactive/hover states do not change chip geometry (height, padding, alignment)
 
 ## File-Type Lookup Table (Implementation Reference)
 
@@ -356,14 +360,14 @@ const FILE_TYPE_MAP: Record<
     category: "spreadsheet",
     color: "--filetype-spreadsheet",
   },
-  csv: {
-    type: "CSV",
+  ods: {
+    type: "ODS",
     icon: "table_chart",
     category: "spreadsheet",
     color: "--filetype-spreadsheet",
   },
-  ods: {
-    type: "ODS",
+  csv: {
+    type: "CSV",
     icon: "table_chart",
     category: "spreadsheet",
     color: "--filetype-spreadsheet",
@@ -384,12 +388,6 @@ const FILE_TYPE_MAP: Record<
   },
   odp: {
     type: "ODP",
-    icon: "bar_chart",
-    category: "presentation",
-    color: "--filetype-presentation",
-  },
-  key: {
-    type: "KEY",
     icon: "bar_chart",
     category: "presentation",
     color: "--filetype-presentation",

@@ -111,16 +111,15 @@ AppShell (top-level, persistent across routes)
 
 ## Component Hierarchy
 
-```
+**STRICT PRIMITIVE REQUIREMENT:** The Media Page and its grid structural components must strictly rely on `.ui-container` and `.ui-item`. Do not create deep nested `div` elements for the grid sections; the group headers and thumbnail cards should be structurally flat siblings or one-level deep inside a standard container.
+
+```text
 MediaPageComponent (new route component, flex 1)
 ├── BreadcrumbComponent
 │   └── "/" > "Media" > [Project filter]?
 ├── [Optional] MediaToolbarComponent
-│   ├── Grouping Selector (Phase 2)
-│   ├── Sorting Selector (Phase 2)
-│   ├── Filter Operator (Phase 2)
-│   └── Search Box (Phase 2)
-└── MediaGridComponent (new)
+│   ├── Standard dropdown/segmented primitives
+└── MediaGridComponent (new - flat structure using .ui-container/.ui-item equivalents)
     ├── GroupSectionHeader × N (if grouping active)
     │   └── ThumbnailCard × N (reused from workspace)
     │       ├── Image/video/doc preview
@@ -195,13 +194,13 @@ flowchart LR
 
 **WorkspacePaneComponent (extended):**
 
-| Name              | Type                           | Default            | Controls                                        |
-| ----------------- | ------------------------------ | ------------------ | ----------------------------------------------- |
-| `activeTab`       | `'selected-items' \| 'upload'` | `'selected-items'` | Which workspace pane tab is shown               |
-| `isOpen`          | `boolean`                      | `true`             | Pane visibility; same close button as existing  |
-| `detailImageId`   | `string \| null`               | `null`             | If set, detail modal opens on any tab/page      |
-| `width`           | `number`                       | `320`              | Desktop pane width (unchanged)                  |
-| `selectedItemIds` | `Set<string>`                  | empty set          | Current selection from active page's media grid |
+| Name               | Type                           | Default            | Controls                                        |
+| ------------------ | ------------------------------ | ------------------ | ----------------------------------------------- |
+| `activeTab`        | `'selected-items' \| 'upload'` | `'selected-items'` | Which workspace pane tab is shown               |
+| `isOpen`           | `boolean`                      | `true`             | Pane visibility; same close button as existing  |
+| `detailImageId`    | `string \| null`               | `null`             | If set, detail modal opens on any tab/page      |
+| `width`            | `number`                       | `320`              | Desktop pane width (unchanged)                  |
+| `selectedMediaIds` | `Set<string>`                  | empty set          | Current selection from active page's media grid |
 
 ## Module Interfaces (Schnittstellen)
 
@@ -213,7 +212,7 @@ export type WorkspacePageContextKey = "map" | "media" | "projects";
 
 export interface SelectedItemsContextPort {
   contextKey: WorkspacePageContextKey;
-  selectedIds$: Signal<Set<string>>;
+  selectedMediaIds$: Signal<Set<string>>;
   openDetail: (mediaId: string) => void;
   clearDetail: () => void;
   setHover: (mediaId: string | null) => void;
@@ -223,8 +222,16 @@ export interface WorkspacePaneHostPort {
   activeTab$: Signal<WorkspacePaneTab>;
   setActiveTab: (tab: WorkspacePaneTab) => void;
   bindContext: (port: SelectedItemsContextPort) => void;
+  unbindContext: () => void;
 }
 ```
+
+### Contract Invariants
+
+- `activeTabGlobal` is the single source of truth across routes; per-page state must not duplicate the tab key.
+- Route transition contract: `unbindContext` runs before `bindContext` when context key changes.
+- Upload tab visibility is globally persistent; selected-items provider is route-scoped and hot-swappable.
+- Naming contract is canonical: `selectedMediaIds` in page, pane, and service interfaces.
 
 ### Observer/Hooks Contract
 
@@ -232,6 +239,7 @@ export interface WorkspacePaneHostPort {
 | --------------------------------- | ----------------------- | ------------- | --------------------------------- | ---------------------------------------- |
 | `onRouteContextEnter(contextKey)` | App shell route host    | route key     | binds selected-items port         | unbind previous port before binding next |
 | `onRouteContextLeave(contextKey)` | App shell route host    | route key     | detaches selected-items port      | clear transient hover only               |
+| `onContextSwap(nextContextKey)`   | App shell route host    | route key     | unbind + bind in one transition   | no duplicate observers                   |
 | `onUploadJobsChanged(jobs)`       | upload observer adapter | `UploadJob[]` | updates upload tab lanes/progress | unsubscribe in pane destroy              |
 | `onActiveTabChanged(tab)`         | workspace pane          | selected tab  | persists `activeTabGlobal`        | none                                     |
 
@@ -385,6 +393,10 @@ sequenceDiagram
 - [ ] Module interfaces are documented for pane host and selected-items provider
 - [ ] Observer lifecycle (bind/unbind/subscribe/unsubscribe) is documented with cleanup behavior
 - [ ] Selection naming is canonical (`selectedMediaIds`) across page, pane, and service contracts
+- [ ] Context swap is atomic on route change (`unbindContext` before `bindContext`) with no duplicate observer subscriptions
+- [ ] Global tab persistence uses only `activeTabGlobal` (no per-route duplicate tab state key)
+- [ ] Media page containers and list-like rows use shared layout primitives (`.ui-container`, `.ui-item`) instead of ad-hoc wrappers
+- [ ] Hover/selected visual states never change card/list geometry (no padding/height jitter)
 
 ---
 
@@ -396,6 +408,23 @@ sequenceDiagram
 - **Pane Width:** Same as map workspace (default 320px, 280–640px range)
 - **Pane Close Button:** Top-right, consistent with map/projects
 - **Tab Selector Style:** Simple segmented control or button toggle at pane top
+
+## Delivery Slices
+
+### MVP Delivery (first implementation wave)
+
+- Route activation for `/media` and page-level media grid render
+- Workspace pane integration through existing AppShell ownership
+- Stable two-tab behavior (`selected-items` / `upload`) with global tab persistence
+- Reuse of existing thumbnail/detail/upload components and shared primitives (`.ui-container`, `.ui-item`)
+- No early feature-local wrappers or media-page-specific pane forks
+
+### Expansion Delivery (post-MVP)
+
+- Advanced operators (grouping, sorting, filtering)
+- Mobile bottom-sheet behavior and snap-point refinements
+- Progressive loading for very large clusters or group buckets
+- Additional linked-hover polish and non-critical UX refinements
 
 ---
 

@@ -366,11 +366,16 @@
     (widthChange)="onWorkspaceWidthChange($event)"
   >
     <app-workspace-pane
+      [activeTab]="workspacePaneActiveTab()"
       [detailImageId]="detailImageId()"
       [linkedHoveredImageIds]="linkedHoveredWorkspaceImageIds()"
+      (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
       (closed)="closeWorkspacePane()"
       (detailClosed)="closeDetailView()"
       (detailRequested)="openDetailView($event)"
+      (imageUploaded)="onImageUploaded($event)"
+      (zoomToLocationRequested)="onZoomToLocation($event)"
+      (placementRequested)="enterPlacementMode($event)"
       (workspaceItemHoverStarted)="onWorkspaceItemHoverStarted($event)"
       (workspaceItemHoverEnded)="onWorkspaceItemHoverEnded($event)"
     />

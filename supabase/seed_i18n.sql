@@ -902,6 +902,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.pane.tabs.aria', 'Workspace tabs', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Workspace tabs', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tabs.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Workspace-Tabs', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tabs.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Schede workspace', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tabs.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.pane.tab.selectedItems', 'Selected Items', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Selected Items', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tab.selectedItems'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausgewaehlte Elemente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tab.selectedItems'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elementi selezionati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tab.selectedItems'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.pane.tab.upload', 'Upload', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tab.upload'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Upload', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tab.upload'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Carica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.pane.tab.upload'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0031.appearance', 'Appearance', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -18474,6 +18567,161 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Posiziona', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.action.place'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.title', 'Media', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.empty', 'No media found', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No media found', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Medien gefunden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun file multimediale trovato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.error', 'Failed to load media', 'en', 'apps/web/src/app/features/photos/photos.component.ts ts-prop:loadError')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Failed to load media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien konnten nicht geladen werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile caricare i file multimediali', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.retry', 'Retry', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Retry', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Erneut versuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Riprova', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.retry'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'common.loading', 'Loading media...', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading media...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien werden geladen...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.loading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento file multimediali...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'common.loading'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

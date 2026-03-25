@@ -18,6 +18,8 @@ This parent spec owns the top-level contract. Deep pipeline behavior is split in
 
 The Upload Manager is mostly invisible UI infrastructure, but it surfaces as consistent upload state across the app: upload rows progress through explicit phases, global progress can be shown from any route, and image detail actions can continue after navigation. Jobs expose stable phase labels and progress percentages, with non-blocking enrichment phases for reverse and forward geocoding. Conflict resolution states are modeled as explicit paused phases instead of silent failures. When folder or file titles contain addresses, textual location is reconciled with EXIF data without ever discarding EXIF coordinates.
 
+Canonical document/office upload catalog for this manager contract is: `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`.
+
 ## Where It Lives
 
 - Service: `UploadManagerService` at `core/upload/upload-manager.service.ts`
@@ -189,7 +191,7 @@ sequenceDiagram
 - [ ] File-level title addresses override folder-level defaults.
 - [ ] EXIF GPS is preserved even when textual location is present.
 - [ ] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
-- [ ] Hash dedupe runs only for images and videos (not PDF/Office docs).
+- [ ] Hash dedupe runs only for images and videos (never for `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`).
 - [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
 - [ ] Duplicate resolution supports a batch apply option for matching items.
 - [ ] Duplicate issue rows expose navigation to the existing placed media.

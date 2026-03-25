@@ -18,6 +18,25 @@
   box-shadow: var(--elevation-overlay);
   border: 1px solid var(--color-border);
 
+  &--embedded {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    --ui-container-padding-inline: var(--spacing-3);
+    --ui-container-padding-block: var(--spacing-3);
+
+    .upload-panel__file-list {
+      flex: 1;
+      min-height: 0;
+      max-height: none;
+    }
+  }
+
   &__header {
     display: flex;
     flex-direction: column;

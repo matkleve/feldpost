@@ -76,11 +76,13 @@ stateDiagram-v2
 
 ## Component Hierarchy
 
-```
+**STRICT PRIMITIVE REQUIREMENT:** The Workspace Pane architecture must explicitly use `src/styles/primitives/container.scss`. The root element MUST be a `.ui-container`. Content areas (grid items, lists, export bar) MUST rely on `.ui-item` where row-based layouts are needed. No custom flex/grid wrapper `div`s should be generated; use standard `ng-content` slot projection for headers, footers, and standard dropdowns to keep the DOM flat.
+
+```text
 WorkspacePane                              ← `.ui-container` right panel rendered by `WorkspacePaneComponent`
-├── PaneHeaderComponent                    ← title, title editing, color token, close action
-├── TabSelectorComponent                  ← NEW: Two-button toggle: "Selected Items" | "Upload"
-└── ContentArea @switch(activeTab)        ← Conditional rendering based on which tab
+├── PaneHeaderComponent                    ← standard slot projection
+├── TabSelectorComponent                  ← standard segmented switch primitive
+└── ContentArea @switch(activeTab)        ← flat routing container
     ├── [activeTab === 'selected-items'] SelectedItemsContentComponent
     │   └── Page-specific content
     │       ├── [/map route] WorkspaceToolbarComponent + ThumbnailGridComponent
@@ -88,14 +90,14 @@ WorkspacePane                              ← `.ui-container` right panel rende
     │       └── [/projects route] ProjectSelectionGrid / etc.
     │
     └── [activeTab === 'upload'] UploadTabComponent
-        └── UploadPanelComponent (1:1 embed, same on every page)
+        └── UploadPanelComponent (1:1 embed, uses its own .ui-container primitive)
             ├── Drop Zone
-            ├── Lane Tab Selector (Uploading / Uploaded / Issues)
+            ├── Lane Tab Selector
             └── Upload Job List
 
 [In both tabs]
 ├── [detailImageId set] ImageDetailViewComponent (overlay on top, full-pane modal)
-└── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (bottom bar)
+└── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (slot-based footer)
 ```
 
 ### Bottom Sheet (mobile variant)
@@ -163,8 +165,16 @@ export interface WorkspacePaneHostPort {
   activeTab$: Signal<WorkspacePaneTab>;
   setActiveTab: (tab: WorkspacePaneTab) => void;
   bindSelectedItemsContext: (context: SelectedItemsContextPort) => void;
+  unbindSelectedItemsContext: () => void;
 }
 ```
+
+### Contract Invariants
+
+- `activeTab$` is the only writable tab state source for the pane; route-level mirrors are read-only observers.
+- `bindSelectedItemsContext` must be preceded by `unbindSelectedItemsContext` when changing routes.
+- Upload tab state is global/persistent; selected-items context is route-bound and replaceable.
+- Cleanup must be idempotent: repeated detach/destroy calls do not produce duplicate subscriptions.
 
 ### Observer/Hooks Contract
 
@@ -173,6 +183,7 @@ export interface WorkspacePaneHostPort {
 | `onRouteEnter(contextKey)`  | app shell host  | route key     | bind page context to selected-items tab    | unbind previous context first |
 | `onRouteLeave(contextKey)`  | app shell host  | route key     | detach context, keep global tab state      | clear transient hover only    |
 | `onUploadJobsChanged(jobs)` | upload observer | `UploadJob[]` | update upload lane state, counts, progress | unsubscribe in pane destroy   |
+| `onContextRebind()`         | app shell host  | none          | unbind previous + bind new context         | must be atomic                |
 | `onPaneDestroyed()`         | pane            | none          | release all observer subscriptions         | must be idempotent            |
 
 ## File Map
@@ -289,3 +300,8 @@ sequenceDiagram
 - [ ] Single source of truth for tab state (`activeTab`) with no duplicate state key
 - [ ] In/out contracts documented for route context provider and pane host
 - [ ] Observer hooks define subscription lifecycle and cleanup semantics
+- [ ] Route context swap is atomic (`unbindSelectedItemsContext` before `bindSelectedItemsContext`) with no transient double-bind.
+- [ ] Upload tab persistence and selected-items route-binding responsibilities are explicitly separated in host wiring.
+- [ ] Base structural layout rigidly uses `.ui-container` without custom utility wrappers.
+- [ ] All repeated rows or standard content strips use `.ui-item` class.
+- [ ] Tab switching relies on standard segmented components; prevents excessive DOM nesting.

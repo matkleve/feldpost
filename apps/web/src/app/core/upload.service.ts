@@ -46,6 +46,9 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'application/vnd.oasis.opendocument.spreadsheet',
   'application/vnd.oasis.opendocument.presentation',
   'application/vnd.oasis.opendocument.graphics',
+  'text/plain',
+  'text/csv',
+  'application/csv',
 ]);
 
 const PHOTO_MIME_TYPES = new Set([
@@ -165,6 +168,10 @@ export class UploadService {
         return 'application/vnd.oasis.opendocument.presentation';
       case 'odg':
         return 'application/vnd.oasis.opendocument.graphics';
+      case 'txt':
+        return 'text/plain';
+      case 'csv':
+        return 'text/csv';
       default:
         return '';
     }

@@ -2,7 +2,7 @@
  * MediaPageComponent — /media page shell.
  * Displays media (images, videos, documents) with grid layout.
  * Workspace pane is mounted globally by AppShell, not here.
- *
+ * 
  * Layout mirrors projects-page pattern:
  * PageContainer > Header + Content Sections
  */
@@ -21,7 +21,7 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
   imports: [PageContainerComponent, VStackComponent, MediaPageHeaderComponent],
   template: `
     <app-page-container>
-      <app-vstack [spacing]="4">
+      <app-vstack spacing="4">
         <!-- Page Header with Breadcrumb -->
         <app-media-page-header
           [title]="t('media.page.title', 'Media')"
@@ -31,12 +31,9 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
 
         <!-- Content Section -->
         <section class="media-content">
+
           @if (loading()) {
-            <div
-              class="media-content__loading"
-              role="status"
-              [attr.aria-label]="t('common.loading', 'Loading media...')"
-            >
+            <div class="media-content__loading" role="status" [attr.aria-label]="t('common.loading', 'Loading media...')">
               <p>{{ t('common.loading', 'Loading media...') }}</p>
             </div>
           } @else if (loadError()) {
@@ -52,26 +49,21 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
             </div>
           } @else {
             <ul class="media-grid">
-              @for (item of mediaItems(); track item.id) {
-                <li
-                  class="media-grid__item"
+            @for (item of mediaItems(); track item.id) {
+              <li class="media-grid__item"
                   (click)="onMediaItemClicked(item.id)"
                   [class.media-grid__item--selected]="workspaceSelectionService.isSelected(item.id)"
                   tabindex="0"
                   role="option"
-                  [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)"
-                >
-                  <div class="media-card">
-                    <img
-                      [src]="item.thumbnail_path || ''"
-                      [alt]="item.address_label || 'Media item'"
-                    />
-                    <div class="media-card__info">
-                      <p class="media-card__title">{{ item.address_label }}</p>
-                      <p class="media-card__date">{{ formatDate(item.captured_at) }}</p>
-                    </div>
+                  [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)">
+                <div class="media-card">
+                  <img [src]="item.thumbnail_path || ''" [alt]="item.address_label || 'Media item'" />
+                  <div class="media-card__info">
+                    <p class="media-card__title">{{ item.address_label }}</p>
+                    <p class="media-card__date">{{ formatDate(item.captured_at) }}</p>
                   </div>
-                </li>
+                </div>
+              </li>
               }
             </ul>
           }
@@ -79,148 +71,146 @@ import type { ImageRecord } from '../../features/map/workspace-pane/image-detail
       </app-vstack>
     </app-page-container>
   `,
-  styles: [
-    `
-      .media-page {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        gap: 1rem;
-        padding: 1rem;
-        overflow: hidden;
+  styles: [`
+    .media-page {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 1rem;
+      padding: 1rem;
+      overflow: hidden;
+    }
+
+    .media-page__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    .media-page__breadcrumb a {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .media-page__breadcrumb a:hover {
+      color: var(--color-text-primary);
+    }
+
+    .media-page__content {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .media-page__loading,
+    .media-page__empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--color-text-secondary);
+    }
+
+    .media-page__error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 1rem;
+      color: var(--color-text-secondary);
+    }
+
+    .media-page__retry {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.5rem;
+      background: var(--color-bg-base);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      font-size: 0.875rem;
+
+      &:hover {
+        background: var(--color-bg-surface);
+      }
+    }
+
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+      gap: 1rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .media-grid__item {
+      cursor: pointer;
+      border-radius: 0.5rem;
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      transition: outline-color 0.2s;
+
+      &:focus-visible {
+        outline-color: var(--color-brand);
       }
 
-      .media-page__breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        color: var(--color-text-muted);
-      }
-
-      .media-page__breadcrumb a {
-        color: inherit;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .media-page__breadcrumb a:hover {
-        color: var(--color-text-primary);
-      }
-
-      .media-page__content {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
-      }
-
-      .media-page__loading,
-      .media-page__empty {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: var(--color-text-secondary);
-      }
-
-      .media-page__error {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        gap: 1rem;
-        color: var(--color-text-secondary);
-      }
-
-      .media-page__retry {
-        padding: 0.5rem 1rem;
-        border: 1px solid var(--color-border);
-        border-radius: 0.5rem;
-        background: var(--color-bg-base);
-        color: var(--color-text-primary);
-        cursor: pointer;
-        font-size: 0.875rem;
-
-        &:hover {
-          background: var(--color-bg-surface);
+      &:hover {
+        .media-card {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
       }
 
-      .media-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-        gap: 1rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      }
-
-      .media-grid__item {
-        cursor: pointer;
-        border-radius: 0.5rem;
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-        transition: outline-color 0.2s;
-
-        &:focus-visible {
-          outline-color: var(--color-brand);
-        }
-
-        &:hover {
-          .media-card {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-          }
-        }
-
-        &--selected {
-          .media-card {
-            outline: 2px solid var(--color-brand);
-          }
+      &--selected {
+        .media-card {
+          outline: 2px solid var(--color-brand);
         }
       }
+    }
 
-      .media-card {
-        position: relative;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        aspect-ratio: 1;
-        background: var(--color-bg-secondary);
-        transition: box-shadow 0.2s;
-      }
+    .media-card {
+      position: relative;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--color-bg-secondary);
+      transition: box-shadow 0.2s;
+    }
 
-      .media-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+    .media-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-      .media-card__info {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 0.5rem;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-        color: white;
-      }
+    .media-card__info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.5rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      color: white;
+    }
 
-      .media-card__title {
-        margin: 0;
-        font-size: 0.75rem;
-        font-weight: 500;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
+    .media-card__title {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-      .media-card__date {
-        margin: 0.25rem 0 0 0;
-        font-size: 0.625rem;
-        opacity: 0.8;
-      }
-    `,
-  ],
+    .media-card__date {
+      margin: 0.25rem 0 0 0;
+      font-size: 0.625rem;
+      opacity: 0.8;
+    }
+  `],
 })
 export class PhotosComponent implements OnDestroy {
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
@@ -235,12 +225,9 @@ export class PhotosComponent implements OnDestroy {
 
   constructor() {
     // Load media from database
-    effect(
-      () => {
-        void this.loadMedia();
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      void this.loadMedia();
+    }, { allowSignalWrites: true });
 
     // Bind media context to workspace pane
     const mediaSelectedItemsContext: SelectedItemsContextPort = {
@@ -273,9 +260,7 @@ export class PhotosComponent implements OnDestroy {
     this.loading.set(true);
     try {
       // Get current user from Supabase auth
-      const {
-        data: { user },
-      } = await this.supabaseService.client.auth.getUser();
+      const { data: { user } } = await this.supabaseService.client.auth.getUser();
       if (!user) {
         throw new Error('User not authenticated');
       }

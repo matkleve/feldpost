@@ -8,7 +8,7 @@ The Upload Panel is the compact upload workspace that appears from the Upload Bu
 
 The panel is a single `.ui-container` surface that feels like the button expanded into a small control card. The top section is a dashed Drop Zone, followed by a Last Upload summary when no active queue exists. When uploads are running, a progress board appears under the Drop Zone with a dense dot matrix and a segmented 3-option switch.
 
-Primary upload intake supports photos, videos, PDFs, and office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`). Document-like files render thumbnail previews as generated cover snapshots when available; otherwise they fall back to deterministic type icons (`DOC`, `DOCX`, `ODT`, `ODG`, `XLS`, `XLSX`, `ODS`, `PPT`, `PPTX`, `ODP`, `PDF`) in lane rows. For folder uploads, a parseable address in the folder name acts as the default location hint for all files unless a file provides its own parseable address in its name.
+Primary upload intake supports photos, videos, PDFs, office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`), plain text (`.txt`), and CSV (`.csv`). Document-like files render thumbnail previews as generated cover snapshots when available; otherwise they fall back to deterministic type icons (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`) in lane rows. For folder uploads, a parseable address in the folder name acts as the default location hint for all files unless a file provides its own parseable address in its name.
 
 The matrix defaults to a square board using up to 10 columns by 10 rows per visible page; each dot is 0.5rem (8px) with 0.25rem (4px) gap. Dot colors use design tokens: idle/queued `--color-bg-muted`, uploading `--color-primary` with pulse, uploaded `--color-success`, and issue `--color-warning`.
 
@@ -30,7 +30,7 @@ The matrix defaults to a square board using up to 10 columns by 10 rows per visi
 | 5b  | Folder name contains parseable address                | Uses folder address as default location hint for queued files                   | folder-title parser in upload pipeline                  |
 | 5c  | A file inside folder has its own parseable address    | File-level address overrides inherited folder address                           | filename parser precedence                              |
 | 6   | Clicks Take Photo                                     | Opens camera-capable file capture path and submits captured file                | Native capture input                                    |
-| 6b  | Uploads DOCX/XLSX/PPTX/ODT/ODS/ODP/ODG                | File is accepted, classified as `document`, and queued for preview generation   | `UploadService.validateFile()` + preview worker         |
+| 6b  | Uploads DOCX/XLSX/PPTX/ODT/ODS/ODP/ODG/TXT/CSV        | File is accepted, classified as `document`, and queued for preview generation   | `UploadService.validateFile()` + preview worker         |
 | 7   | Viewer attempts upload action                         | Upload is denied by RLS; UI shows permission error feedback                     | Supabase policy deny                                    |
 | 8   | No active jobs and no queued jobs                     | Shows Last Upload summary line                                                  | `lastCompletedBatch()`                                  |
 | 9   | Active or queued jobs exist                           | Shows dot matrix board under Drop Zone                                          | `jobs().length > 0`                                     |
@@ -54,7 +54,9 @@ The matrix defaults to a square board using up to 10 columns by 10 rows per visi
 
 ## Component Hierarchy
 
-```
+**STRICT PRIMITIVE REQUIREMENT:** This component and all its children must explicitly use the standardized layout primitives from `src/styles/primitives/container.scss`. Do not introduce custom wrapper `div`s for basic flex or grid layouts. Use flatter DOM structures. The lane list items MUST use `.ui-item` without modifying its base geometry.
+
+```text
 UploadPanel                                              ← compact `.ui-container` surface from button morph
 ├── PanelHeader                                          ← title "Upload" + collapse icon + busy counter
 ├── DropZone                                             ← dashed drag target, click to select files
@@ -75,11 +77,11 @@ UploadPanel                                              ← compact `.ui-contai
 │   │   ├── UploadingLaneButton                          ← active jobs
 │   │   ├── UploadedLaneButton                           ← successful jobs
 │   │   └── IssuesLaneButton                             ← failed/needs-attention jobs
-├── [selected lane has items] LaneList                   ← list for selected lane
-│   └── UploadPanelItem × N                              ← left action + preview + title + status + dismiss
-├── [duplicate issue selected] DuplicateResolutionModal   ← decision: use existing / upload anyway / reject
-│   └── ApplyToBatchCheckbox                              ← applies decision to all matching items in active batch
-└── [selected lane empty] No list rows                   ← lane stays selectable with zero rows
+├── [selected lane has items] LaneList                   ← `.ui-container` (or list equivalent)
+│   └── UploadPanelItem × N                              ← strict `.ui-item` row (left action + preview + title/status wrapper + dismiss)
+├── [duplicate issue selected] DuplicateResolutionModal  ← standardized modal primitive
+│   └── ApplyToBatchCheckbox
+└── [selected lane empty] No list rows
 ```
 
 ## Data
@@ -248,5 +250,7 @@ sequenceDiagram
 - [ ] Users can switch to an empty lane and keep that lane selected
 - [ ] Closing panel does not cancel active uploads
 - [ ] Viewer upload attempts are blocked by RLS and shown as a clear error state
-- [ ] Upload intake accepts office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`) in addition to photo/video/PDF types
-- [ ] Document uploads without preview show deterministic type fallback badge (`DOC`, `DOCX`, `ODT`, `ODG`, `XLS`, `XLSX`, `ODS`, `PPT`, `PPTX`, `ODP`, `PDF`)
+- [ ] Upload intake accepts office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`) plus `.txt` and `.csv` in addition to photo/video/PDF types
+- [ ] Document uploads without preview show deterministic type fallback badge (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`)
+- [ ] Panel rigidly adheres to `.ui-container` and `.ui-item` class primitives for all list rendering and top-level shells.
+- [ ] Visual state changes (hover, active, selected) do NOT impact layout geometry or spacing.

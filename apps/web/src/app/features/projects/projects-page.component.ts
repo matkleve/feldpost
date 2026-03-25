@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
@@ -7,6 +7,8 @@ import { FilterService } from '../../core/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { ToastService } from '../../core/toast.service';
+import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
+import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import type {
   ProjectColorKey,
   ProjectListItem,
@@ -66,12 +68,16 @@ import {
   styleUrl: './projects-page.component.scss',
   providers: [FilterService],
 })
-export class ProjectsPageComponent {
+export class ProjectsPageComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
   private readonly projectsService = inject(ProjectsService);
   private readonly filterService = inject(FilterService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+
+  // Project-scoped media selection for workspace pane
+  private readonly projectMediaIds = signal<Set<string>>(new Set());
   readonly t = (key: string, fallback = ''): string => {
     const value = this.i18nService.t(key, fallback);
     if (typeof value === 'string' && value.trim().length > 0) return value;
@@ -197,7 +203,34 @@ export class ProjectsPageComponent {
         current.map((entry) => ({ ...entry, label: labelsById.get(entry.id) ?? entry.label })),
       );
     });
+
+    // Bind/unbind workspace pane context when project is selected
+    effect(() => {
+      const projectId = this.currentProjectId();
+      if (projectId) {
+        // Project selected: bind project-scoped context
+        const projectsSelectedItemsContext: SelectedItemsContextPort = {
+          contextKey: 'projects',
+          selectedMediaIds$: this.projectMediaIds,
+          requestOpenDetail: (mediaId: string) => {
+            // TODO: Open detail view for project media
+          },
+          requestSetHover: (mediaId: string | null) => {
+            // TODO: Set hover state for project media
+          },
+        };
+        this.workspacePaneObserver.onContextRebind(projectsSelectedItemsContext);
+      } else {
+        // No project selected: keep context unbound (workspace pane empty)
+        // onRouteLeave will be called in ngOnDestroy
+      }
+    });
+
     void this.refreshProjects();
+  }
+
+  ngOnDestroy(): void {
+    this.workspacePaneObserver.onRouteLeave('projects');
   }
 
   async refreshProjects(): Promise<void> {

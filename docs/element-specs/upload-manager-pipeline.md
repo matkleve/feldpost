@@ -19,25 +19,25 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 
 ## Actions
 
-| #   | Trigger                                                  | System Response                                                                   | Notes                                  |
-| --- | -------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------- |
-| 1   | User selects many files                                  | Creates one batch and one job per file                                            | Standard multi-file flow               |
-| 2   | User selects a folder                                    | Scans recursively, creates scanning batch, then queues jobs                       | Chromium/File System Access only       |
-| 3   | Folder name contains parseable address                   | Stores batch-level folder address hint and applies it to jobs without own address | Default only, never forced override    |
-| 4   | Individual file name contains parseable address          | File-level address overrides inherited folder hint                                | Most-specific textual source wins      |
-| 4b  | Street+house resolves to multiple cities                 | Runs disambiguation algorithm and computes ranked candidate probabilities         | Auto-assign only above threshold       |
-| 5   | EXIF GPS and text-derived address both available         | Geocodes text address and compares distance to EXIF GPS using 15m tolerance       | Keeps both coordinate sources          |
-| 6   | Distance between text-derived and EXIF coordinates > 15m | Marks location source mismatch for detail UI and audit fields                     | Upload still continues                 |
-| 7   | Job media type is image or video                         | Computes content hash and checks server for duplicate content                     | Hash dedupe does not run for documents |
-| 8   | Job media type is document                               | Skips dedupe check and continues normal upload path                               | PDF/Office are not hash-blocked        |
-| 9   | Duplicate hash found (image/video)                       | Moves job to issues lane and opens duplicate-resolution modal                     | Not auto-skipped                       |
-| 10  | User clicks secondary GPS button in duplicate issue row  | Opens/focuses already placed existing media item                                  | Uses existing media reference          |
-| 11  | User resolves duplicate modal                            | Chooses `use_existing`, `upload_anyway`, or `reject`                              | Optional "apply to all in batch"       |
-| 11b | Parser leaves residual address fragments                 | Persists `addressNotes[]` on job/media metadata                                   | Nothing parsed is lost                 |
-| 12  | Upload targets photoless row conflict                    | Pauses in `awaiting_conflict_resolution` and emits popup event                    | Releases concurrency slot              |
-| 13  | User resolves conflict                                   | Resumes with `attach_replace`, `attach_keep`, or `create_new`                     | Re-queues at front                     |
-| 14  | User replaces existing photo                             | Emits replace-specific events so map/detail/grid refresh instantly                | Existing image row retained            |
-| 15  | User attaches photo to photoless row                     | Emits attach-specific events so no-photo surfaces update                          | Existing row gains media               |
+| #   | Trigger                                                  | System Response                                                                   | Notes                                                                                                             |
+| --- | -------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 1   | User selects many files                                  | Creates one batch and one job per file                                            | Standard multi-file flow                                                                                          |
+| 2   | User selects a folder                                    | Scans recursively, creates scanning batch, then queues jobs                       | Chromium/File System Access only                                                                                  |
+| 3   | Folder name contains parseable address                   | Stores batch-level folder address hint and applies it to jobs without own address | Default only, never forced override                                                                               |
+| 4   | Individual file name contains parseable address          | File-level address overrides inherited folder hint                                | Most-specific textual source wins                                                                                 |
+| 4b  | Street+house resolves to multiple cities                 | Runs disambiguation algorithm and computes ranked candidate probabilities         | Auto-assign only above threshold                                                                                  |
+| 5   | EXIF GPS and text-derived address both available         | Geocodes text address and compares distance to EXIF GPS using 15m tolerance       | Keeps both coordinate sources                                                                                     |
+| 6   | Distance between text-derived and EXIF coordinates > 15m | Marks location source mismatch for detail UI and audit fields                     | Upload still continues                                                                                            |
+| 7   | Job media type is image or video                         | Computes content hash and checks server for duplicate content                     | Hash dedupe does not run for documents                                                                            |
+| 8   | Job media type is document                               | Skips dedupe check and continues normal upload path                               | `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF` are not hash-blocked |
+| 9   | Duplicate hash found (image/video)                       | Moves job to issues lane and opens duplicate-resolution modal                     | Not auto-skipped                                                                                                  |
+| 10  | User clicks secondary GPS button in duplicate issue row  | Opens/focuses already placed existing media item                                  | Uses existing media reference                                                                                     |
+| 11  | User resolves duplicate modal                            | Chooses `use_existing`, `upload_anyway`, or `reject`                              | Optional "apply to all in batch"                                                                                  |
+| 11b | Parser leaves residual address fragments                 | Persists `addressNotes[]` on job/media metadata                                   | Nothing parsed is lost                                                                                            |
+| 12  | Upload targets photoless row conflict                    | Pauses in `awaiting_conflict_resolution` and emits popup event                    | Releases concurrency slot                                                                                         |
+| 13  | User resolves conflict                                   | Resumes with `attach_replace`, `attach_keep`, or `create_new`                     | Re-queues at front                                                                                                |
+| 14  | User replaces existing photo                             | Emits replace-specific events so map/detail/grid refresh instantly                | Existing image row retained                                                                                       |
+| 15  | User attaches photo to photoless row                     | Emits attach-specific events so no-photo surfaces update                          | Existing row gains media                                                                                          |
 
 ## Component Hierarchy
 
@@ -115,24 +115,24 @@ flowchart TD
   AA --> AB[Emit image and batch events]
 ```
 
-| Field / Artifact       | Source                                | Type                                            | Notes                                                  |
-| ---------------------- | ------------------------------------- | ----------------------------------------------- | ------------------------------------------------------ |
-| Folder batch status    | `UploadBatchService`                  | `UploadBatch`                                   | Starts as `scanning`, then transitions to `uploading`  |
-| Folder address hint    | Folder name parser                    | `string \| null`                                | Batch default address for jobs without file-level hint |
-| File title address     | Filename parser                       | `string \| null`                                | Overrides folder address hint                          |
-| Title geocode          | `GeocodingService.forward()`          | `ExifCoords \| null`                            | Used for source reconciliation                         |
-| EXIF/title distance    | Haversine compare                     | `number \| null`                                | Mismatch if `distanceMeters > 15`                      |
-| Location sources       | Upload persistence (`images/media`)   | structured fields                               | Keeps EXIF and text-derived coordinates separately     |
-| Address disambiguation | `LocationPathParserService` ranking   | `{ algorithm, probability, candidates }`        | Used for ambiguous city assignment                     |
-| Address notes          | Parser residual fragments             | `string[]`                                      | Preserved on job + media metadata                      |
-| Content hash           | `core/content-hash.util.ts`           | `string`                                        | SHA-256 from file head + EXIF-derived metadata         |
-| Dedup lookup result    | `check_dedup_hashes` RPC              | `{ content_hash, image_id }[]`                  | Used for single and batch duplicate checks             |
-| Dedupe scope           | Media type gate                       | `'image' \| 'video'`                            | Documents are excluded from hash dedupe                |
-| Duplicate decision     | Duplicate-resolution modal            | `'use_existing' \| 'upload_anyway' \| 'reject'` | Can be batch-applied                                   |
-| Duplicate apply mode   | Modal checkbox                        | `boolean`                                       | Apply chosen decision to all matching jobs in batch    |
-| Conflict candidate     | `images` table lookup                 | `ConflictCandidate`                             | Photoless row near upload coords/address               |
-| Replace event          | `UploadManagerService.imageReplaced$` | `ImageReplacedEvent`                            | Drives map/detail/card refresh                         |
-| Attach event           | `UploadManagerService.imageAttached$` | `ImageAttachedEvent`                            | Upgrades photoless surfaces to media surfaces          |
+| Field / Artifact       | Source                                | Type                                            | Notes                                                                                                                                  |
+| ---------------------- | ------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Folder batch status    | `UploadBatchService`                  | `UploadBatch`                                   | Starts as `scanning`, then transitions to `uploading`                                                                                  |
+| Folder address hint    | Folder name parser                    | `string \| null`                                | Batch default address for jobs without file-level hint                                                                                 |
+| File title address     | Filename parser                       | `string \| null`                                | Overrides folder address hint                                                                                                          |
+| Title geocode          | `GeocodingService.forward()`          | `ExifCoords \| null`                            | Used for source reconciliation                                                                                                         |
+| EXIF/title distance    | Haversine compare                     | `number \| null`                                | Mismatch if `distanceMeters > 15`                                                                                                      |
+| Location sources       | Upload persistence (`images/media`)   | structured fields                               | Keeps EXIF and text-derived coordinates separately                                                                                     |
+| Address disambiguation | `LocationPathParserService` ranking   | `{ algorithm, probability, candidates }`        | Used for ambiguous city assignment                                                                                                     |
+| Address notes          | Parser residual fragments             | `string[]`                                      | Preserved on job + media metadata                                                                                                      |
+| Content hash           | `core/content-hash.util.ts`           | `string`                                        | SHA-256 from file head + EXIF-derived metadata                                                                                         |
+| Dedup lookup result    | `check_dedup_hashes` RPC              | `{ content_hash, image_id }[]`                  | Used for single and batch duplicate checks                                                                                             |
+| Dedupe scope           | Media type gate                       | `'image' \| 'video'`                            | Documents (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`) are excluded from hash dedupe |
+| Duplicate decision     | Duplicate-resolution modal            | `'use_existing' \| 'upload_anyway' \| 'reject'` | Can be batch-applied                                                                                                                   |
+| Duplicate apply mode   | Modal checkbox                        | `boolean`                                       | Apply chosen decision to all matching jobs in batch                                                                                    |
+| Conflict candidate     | `images` table lookup                 | `ConflictCandidate`                             | Photoless row near upload coords/address                                                                                               |
+| Replace event          | `UploadManagerService.imageReplaced$` | `ImageReplacedEvent`                            | Drives map/detail/card refresh                                                                                                         |
+| Attach event           | `UploadManagerService.imageAttached$` | `ImageAttachedEvent`                            | Upgrades photoless surfaces to media surfaces                                                                                          |
 
 ## State
 

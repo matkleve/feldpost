@@ -18,6 +18,40 @@
   --ui-container-radius: 0;
 }
 
+.workspace-pane__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.workspace-pane__tab {
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.workspace-pane__tab--active {
+  background: var(--color-bg-surface);
+  border-color: var(--color-clay);
+}
+
+.workspace-pane__upload-tab {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.workspace-pane__upload-tab > app-upload-panel {
+  flex: 1;
+  min-height: 0;
+}
+
 app-thumbnail-grid {
   flex: 1;
   min-height: 0;

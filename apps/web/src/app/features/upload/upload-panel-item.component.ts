@@ -85,12 +85,17 @@ export class UploadPanelItemComponent {
         return 'ODT';
       case 'application/vnd.oasis.opendocument.graphics':
         return 'ODG';
+      case 'text/plain':
+        return 'TXT';
       case 'application/vnd.ms-excel':
         return 'XLS';
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         return 'XLSX';
       case 'application/vnd.oasis.opendocument.spreadsheet':
         return 'ODS';
+      case 'text/csv':
+      case 'application/csv':
+        return 'CSV';
       case 'application/vnd.ms-powerpoint':
         return 'PPT';
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
@@ -129,12 +134,16 @@ export class UploadPanelItemComponent {
         return 'ODT';
       case 'odg':
         return 'ODG';
+      case 'txt':
+        return 'TXT';
       case 'xls':
         return 'XLS';
       case 'xlsx':
         return 'XLSX';
       case 'ods':
         return 'ODS';
+      case 'csv':
+        return 'CSV';
       case 'ppt':
         return 'PPT';
       case 'pptx':
@@ -158,14 +167,17 @@ export class UploadPanelItemComponent {
       type === 'application/msword' ||
       type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       type === 'application/vnd.oasis.opendocument.text' ||
-      type === 'application/vnd.oasis.opendocument.graphics'
+      type === 'application/vnd.oasis.opendocument.graphics' ||
+      type === 'text/plain'
     ) {
       return 'filetype-document';
     }
     if (
       type === 'application/vnd.ms-excel' ||
       type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      type === 'application/vnd.oasis.opendocument.spreadsheet'
+      type === 'application/vnd.oasis.opendocument.spreadsheet' ||
+      type === 'text/csv' ||
+      type === 'application/csv'
     ) {
       return 'filetype-spreadsheet';
     }
@@ -194,10 +206,12 @@ export class UploadPanelItemComponent {
       case 'docx':
       case 'odt':
       case 'odg':
+      case 'txt':
         return 'filetype-document';
       case 'xls':
       case 'xlsx':
       case 'ods':
+      case 'csv':
         return 'filetype-spreadsheet';
       case 'ppt':
       case 'pptx':
