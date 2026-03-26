@@ -18,7 +18,7 @@ export class UploadStorageService {
    * Upload a file to Supabase Storage and return the storage path.
    * Returns null on failure.
    */
-  async upload(file: File): Promise<string | null> {
+  async upload(file: File, abortSignal?: AbortSignal): Promise<string | null> {
     console.log('[upload-storage] upload called:', {
       fileName: file.name,
       fileSize: file.size,
@@ -32,11 +32,14 @@ export class UploadStorageService {
     }
     console.log('[upload-storage] user:', user.id);
 
-    const { data: profile, error: profileError } = await this.supabase.client
+    const profileQuery = this.supabase.client
       .from('profiles')
       .select('organization_id')
-      .eq('id', user.id)
-      .single();
+      .eq('id', user.id);
+    const { data: profile, error: profileError } = await this.withAbort(
+      profileQuery,
+      abortSignal,
+    ).single();
 
     if (!profile) {
       console.error('[upload-storage] ✗ profile fetch failed:', profileError);
@@ -49,9 +52,11 @@ export class UploadStorageService {
     const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
     console.log('[upload-storage] uploading to path:', storagePath);
 
-    const { error } = await this.supabase.client.storage
-      .from('images')
-      .upload(storagePath, file, { contentType: file.type, upsert: false });
+    const { error } = await this.supabase.client.storage.from('images').upload(storagePath, file, {
+      contentType: file.type,
+      upsert: false,
+      ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
+    });
 
     if (error) {
       console.error('[upload-storage] ✗ Supabase storage.upload error:', error);
@@ -59,5 +64,16 @@ export class UploadStorageService {
     }
     console.log('[upload-storage] ✓ upload succeeded:', storagePath);
     return storagePath;
+  }
+
+  private withAbort<T extends { abortSignal?: (signal: AbortSignal) => T }>(
+    builder: T,
+    signal?: AbortSignal,
+  ): T {
+    if (!signal) return builder;
+    if (typeof builder.abortSignal === 'function') {
+      return builder.abortSignal(signal);
+    }
+    return builder;
   }
 }

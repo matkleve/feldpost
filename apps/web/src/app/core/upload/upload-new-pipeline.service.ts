@@ -161,6 +161,15 @@ export class UploadNewPipelineService {
     ctx.drainQueue();
   }
 
+  private isCancelled(jobId: string): boolean {
+    const current = this.jobState.findJob(jobId);
+    return (
+      current?.phase === 'error' &&
+      typeof current.error === 'string' &&
+      /cancelled/i.test(current.error)
+    );
+  }
+
   // ── Upload + save + enrich ─────────────────────────────────────────────────
 
   /**
@@ -175,6 +184,8 @@ export class UploadNewPipelineService {
   ): Promise<void> {
     const job = this.jobState.findJob(jobId);
     if (!job) return;
+    if (this.isCancelled(jobId)) return;
+    const abortSignal = ctx.getAbortSignal(jobId);
 
     // ── Phase: uploading ───────────────────────────────────────────────
     this.jobState.setPhase(jobId, 'uploading');
@@ -182,10 +193,24 @@ export class UploadNewPipelineService {
 
     // ── Phase: saving_record (UploadService does upload + insert as one call)
     const result = await this.withTimeout(
-      this.uploadService.uploadFile(job.file, coords, parsedExif, job.projectId),
+      this.uploadService.uploadFile(job.file, coords, parsedExif, job.projectId, abortSignal),
       UploadNewPipelineService.UPLOAD_PHASE_TIMEOUT_MS,
       'Upload timed out. Please retry.',
     );
+
+    if (this.isCancelled(jobId)) {
+      if (result.error === null) {
+        await this.supabase.client.storage.from('images').remove([result.storagePath]);
+        await this.supabase.client.from('images').delete().eq('id', result.id);
+      }
+      const cancelledJob = this.jobState.findJob(jobId);
+      this.queue.markDone(jobId);
+      if (cancelledJob) {
+        ctx.emitBatchProgress(cancelledJob.batchId);
+      }
+      ctx.drainQueue();
+      return;
+    }
 
     if (result.error !== null) {
       const msg =
@@ -210,6 +235,12 @@ export class UploadNewPipelineService {
 
     // ── Insert dedup hash ──────────────────────────────────────────────
     const savedJob = this.jobState.findJob(jobId)!;
+    if (this.isCancelled(jobId)) {
+      this.queue.markDone(jobId);
+      ctx.emitBatchProgress(savedJob.batchId);
+      ctx.drainQueue();
+      return;
+    }
     if (savedJob.contentHash && savedJob.imageId) {
       // Dedup insert is best-effort — fire and forget via the manager's checkDedupHash approach
       // but we need supabase here. We'll handle it through the upload service pattern.
@@ -220,6 +251,12 @@ export class UploadNewPipelineService {
 
     // ── Post-upload enrichment ─────────────────────────────────────────
     const updatedJob = this.jobState.findJob(jobId)!;
+    if (this.isCancelled(jobId)) {
+      this.queue.markDone(jobId);
+      ctx.emitBatchProgress(updatedJob.batchId);
+      ctx.drainQueue();
+      return;
+    }
 
     if (updatedJob.coords && !updatedJob.titleAddress) {
       // Path A: has GPS → reverse-geocode to get address
@@ -242,6 +279,11 @@ export class UploadNewPipelineService {
     this.queue.markDone(jobId);
 
     const finalJob = this.jobState.findJob(jobId)!;
+    if (this.isCancelled(jobId)) {
+      ctx.emitBatchProgress(finalJob.batchId);
+      ctx.drainQueue();
+      return;
+    }
 
     if (finalJob.thumbnailUrl && finalJob.imageId) {
       this.photoLoad.setLocalUrl(finalJob.imageId, finalJob.thumbnailUrl);

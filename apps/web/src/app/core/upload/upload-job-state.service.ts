@@ -134,18 +134,19 @@ export class UploadJobStateService {
 
   setPhase(jobId: string, phase: UploadPhase): void {
     const job = this.findJob(jobId);
+    if (!job) return;
+    if (TERMINAL_PHASES.has(job.phase)) return;
+
     const previousPhase = job?.phase ?? 'queued';
     this.updateJob(jobId, { phase, statusLabel: phaseLabel(phase) });
 
-    if (job) {
-      this._jobPhaseChanged$.next({
-        jobId,
-        batchId: job.batchId,
-        previousPhase,
-        currentPhase: phase,
-        fileName: job.file.name,
-      });
-    }
+    this._jobPhaseChanged$.next({
+      jobId,
+      batchId: job.batchId,
+      previousPhase,
+      currentPhase: phase,
+      fileName: job.file.name,
+    });
   }
 
   failJob(jobId: string, failedAt: UploadPhase, error: string): void {

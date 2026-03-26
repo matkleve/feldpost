@@ -15,7 +15,6 @@
 
 import { Injectable, inject } from '@angular/core';
 import * as exifr from 'exifr/dist/lite.esm.js';
-import heic2any from 'heic2any';
 import { AuthService } from './auth/auth.service';
 import { GeocodingService } from './geocoding.service';
 import { SupabaseService } from './supabase/supabase.service';
@@ -247,6 +246,7 @@ export class UploadService {
     }
 
     try {
+      const { default: heic2any } = await import('heic2any');
       const convertedBlobMap = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
       const convertedBlob = Array.isArray(convertedBlobMap)
         ? convertedBlobMap[0]

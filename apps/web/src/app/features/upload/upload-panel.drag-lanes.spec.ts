@@ -109,7 +109,7 @@ describe('UploadPanelComponent lanes', () => {
     ]);
     fixture.detectChanges();
 
-    const buttons = fixture.debugElement.queryAll(By.css('.upload-panel__lane-btn'));
+    const buttons = fixture.debugElement.queryAll(By.css('.ui-tab[role="tab"]'));
     (buttons[2].nativeElement as HTMLButtonElement).click();
     fixture.detectChanges();
 

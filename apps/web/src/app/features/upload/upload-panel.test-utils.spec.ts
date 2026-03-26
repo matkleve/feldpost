@@ -25,7 +25,7 @@ export function buildFakeUploadManager() {
     activeJobs: signal<ReadonlyArray<UploadJob>>([]).asReadonly(),
     isBusy: signal(false).asReadonly(),
     activeBatch: activeBatchSignal.asReadonly(),
-    isFolderImportSupported: false,
+    isFolderImportSupported: true,
     activeCount: signal(0).asReadonly(),
     imageUploaded$: imageUploaded$.asObservable(),
     uploadFailed$: new Subject().asObservable(),

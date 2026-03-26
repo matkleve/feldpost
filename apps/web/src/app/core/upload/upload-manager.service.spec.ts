@@ -10,7 +10,7 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { UploadManagerService, UploadJob, UploadPhase } from './upload-manager.service';
-import { UploadService } from '../upload.service';
+import { UploadService } from './upload.service';
 import { GeocodingService } from '../geocoding.service';
 import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -21,6 +21,8 @@ function buildFakeUploadService() {
   return {
     validateFile: vi.fn().mockReturnValue({ valid: true }),
     parseExif: vi.fn().mockResolvedValue({ coords: { lat: 48.2, lng: 16.37 }, direction: 90 }),
+    isHeic: vi.fn().mockReturnValue(false),
+    convertToJpeg: vi.fn().mockImplementation(async (file: File) => file),
     uploadFile: vi.fn().mockResolvedValue({
       id: 'img-123',
       storagePath: 'org/user/uuid.jpg',
@@ -356,6 +358,63 @@ describe('UploadManagerService', () => {
       const cancelled = service.jobs().find((j) => j.id === allIds[3]);
       expect(cancelled?.phase).toBe('error');
       expect(cancelled?.error).toContain('cancelled');
+    });
+
+    it('aborts in-flight upload and ignores late success resolution', async () => {
+      const { service, fakeUpload } = await setup();
+
+      let resolveUpload!: (result: {
+        id: string;
+        storagePath: string;
+        coords: { lat: number; lng: number };
+        direction: number;
+        error: null;
+      }) => void;
+      let capturedSignal: AbortSignal | undefined;
+
+      fakeUpload.uploadFile.mockImplementation(
+        (
+          _file: File,
+          _manualCoords?: unknown,
+          _parsedExif?: unknown,
+          _projectId?: string,
+          signal?: AbortSignal,
+        ) => {
+          capturedSignal = signal;
+          return new Promise((resolve) => {
+            resolveUpload = resolve;
+          });
+        },
+      );
+
+      const uploadedEvents: string[] = [];
+      service.imageUploaded$.subscribe((e) => uploadedEvents.push(e.jobId));
+
+      service.submit([makeFile('cancel-race.jpg')]);
+      const jobId = service.jobs()[0].id;
+
+      await vi.waitFor(() => {
+        expect(capturedSignal).toBeDefined();
+      });
+
+      service.cancelJob(jobId);
+
+      expect(capturedSignal?.aborted).toBe(true);
+
+      resolveUpload({
+        id: 'img-late',
+        storagePath: 'org/user/late.jpg',
+        coords: { lat: 48.2, lng: 16.37 },
+        direction: 90,
+        error: null,
+      });
+
+      await new Promise((r) => setTimeout(r, 25));
+
+      const cancelled = service.jobs().find((j) => j.id === jobId);
+      expect(cancelled?.phase).toBe('error');
+      expect(cancelled?.error?.toLowerCase()).toContain('cancelled');
+      expect(uploadedEvents).toHaveLength(0);
     });
   });
 

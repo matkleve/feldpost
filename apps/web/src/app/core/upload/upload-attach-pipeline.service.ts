@@ -32,6 +32,7 @@ export class UploadAttachPipelineService {
   /** Run the attach pipeline for a single job. */
   async run(jobId: string, ctx: PipelineContext): Promise<void> {
     let job = this.jobState.findJob(jobId)!;
+    const abortSignal = ctx.getAbortSignal(jobId);
     console.log('[attach-pipeline] ▶ START:', {
       jobId: jobId.slice(0, 8),
       targetImageId: job.targetImageId,
@@ -128,10 +129,20 @@ export class UploadAttachPipelineService {
     console.log('[attach-pipeline] phase: uploading');
     this.jobState.updateJob(jobId, { progress: 0 });
 
-    const storagePath = await this.storage.upload(job.file);
+    const storagePath = await this.storage.upload(job.file, abortSignal);
     if (!storagePath) {
       console.error('[attach-pipeline] ✗ storage upload returned null');
       ctx.failJob(jobId, 'uploading', 'Storage upload failed.');
+      return;
+    }
+    if (this.isCancelled(jobId)) {
+      await this.supabase.client.storage.from('images').remove([storagePath]);
+      const cancelledJob = this.jobState.findJob(jobId);
+      this.queue.markDone(jobId);
+      if (cancelledJob) {
+        ctx.emitBatchProgress(cancelledJob.batchId);
+      }
+      ctx.drainQueue();
       return;
     }
     console.log('[attach-pipeline] ✓ uploaded to storage:', storagePath);
@@ -202,6 +213,17 @@ export class UploadAttachPipelineService {
       .update(updateData)
       .eq('id', job.targetImageId!);
 
+    if (this.isCancelled(jobId)) {
+      await this.supabase.client.storage.from('images').remove([storagePath]);
+      const cancelledJob = this.jobState.findJob(jobId);
+      this.queue.markDone(jobId);
+      if (cancelledJob) {
+        ctx.emitBatchProgress(cancelledJob.batchId);
+      }
+      ctx.drainQueue();
+      return;
+    }
+
     if (updateError) {
       console.error('[attach-pipeline] ✗ DB update failed:', updateError);
       await this.supabase.client.storage.from('images').remove([storagePath]);
@@ -271,6 +293,11 @@ export class UploadAttachPipelineService {
     this.queue.markDone(jobId);
 
     const finalJob = this.jobState.findJob(jobId)!;
+    if (this.isCancelled(jobId)) {
+      ctx.emitBatchProgress(finalJob.batchId);
+      ctx.drainQueue();
+      return;
+    }
 
     console.log('[attach-pipeline] phase: complete', {
       thumbnailUrl: finalJob.thumbnailUrl,
@@ -301,5 +328,14 @@ export class UploadAttachPipelineService {
     ctx.emitBatchProgress(finalJob.batchId);
     console.log('[attach-pipeline] ▶ DONE');
     ctx.drainQueue();
+  }
+
+  private isCancelled(jobId: string): boolean {
+    const current = this.jobState.findJob(jobId);
+    return (
+      current?.phase === 'error' &&
+      typeof current.error === 'string' &&
+      /cancelled/i.test(current.error)
+    );
   }
 }

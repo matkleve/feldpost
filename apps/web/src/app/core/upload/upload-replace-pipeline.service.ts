@@ -29,6 +29,7 @@ export class UploadReplacePipelineService {
   /** Run the replace pipeline for a single job. */
   async run(jobId: string, ctx: PipelineContext): Promise<void> {
     let job = this.jobState.findJob(jobId)!;
+    const abortSignal = ctx.getAbortSignal(jobId);
 
     // ── Phase: validating ──────────────────────────────────────────────
     this.jobState.setPhase(jobId, 'validating');
@@ -104,9 +105,19 @@ export class UploadReplacePipelineService {
     this.jobState.setPhase(jobId, 'uploading');
     this.jobState.updateJob(jobId, { progress: 0 });
 
-    const storagePath = await this.storage.upload(job.file);
+    const storagePath = await this.storage.upload(job.file, abortSignal);
     if (!storagePath) {
       ctx.failJob(jobId, 'uploading', 'Storage upload failed.');
+      return;
+    }
+    if (this.isCancelled(jobId)) {
+      await this.supabase.client.storage.from('images').remove([storagePath]);
+      const cancelledJob = this.jobState.findJob(jobId);
+      this.queue.markDone(jobId);
+      if (cancelledJob) {
+        ctx.emitBatchProgress(cancelledJob.batchId);
+      }
+      ctx.drainQueue();
       return;
     }
     this.jobState.updateJob(jobId, { storagePath, progress: 100 });
@@ -136,6 +147,17 @@ export class UploadReplacePipelineService {
       .from('images')
       .update(updateData)
       .eq('id', job.targetImageId!);
+
+    if (this.isCancelled(jobId)) {
+      await this.supabase.client.storage.from('images').remove([storagePath]);
+      const cancelledJob = this.jobState.findJob(jobId);
+      this.queue.markDone(jobId);
+      if (cancelledJob) {
+        ctx.emitBatchProgress(cancelledJob.batchId);
+      }
+      ctx.drainQueue();
+      return;
+    }
 
     if (updateError) {
       await this.supabase.client.storage.from('images').remove([storagePath]);
@@ -175,6 +197,11 @@ export class UploadReplacePipelineService {
     this.queue.markDone(jobId);
 
     const finalJob = this.jobState.findJob(jobId)!;
+    if (this.isCancelled(jobId)) {
+      ctx.emitBatchProgress(finalJob.batchId);
+      ctx.drainQueue();
+      return;
+    }
 
     if (finalJob.thumbnailUrl) {
       this.photoLoad.setLocalUrl(finalJob.targetImageId!, finalJob.thumbnailUrl);
@@ -191,5 +218,14 @@ export class UploadReplacePipelineService {
 
     ctx.emitBatchProgress(finalJob.batchId);
     ctx.drainQueue();
+  }
+
+  private isCancelled(jobId: string): boolean {
+    const current = this.jobState.findJob(jobId);
+    return (
+      current?.phase === 'error' &&
+      typeof current.error === 'string' &&
+      /cancelled/i.test(current.error)
+    );
   }
 }

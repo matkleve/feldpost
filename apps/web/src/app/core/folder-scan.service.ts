@@ -26,6 +26,13 @@ export class FolderScanService {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-powerpoint',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/vnd.oasis.opendocument.text',
+    'application/vnd.oasis.opendocument.spreadsheet',
+    'application/vnd.oasis.opendocument.presentation',
+    'application/vnd.oasis.opendocument.graphics',
+    'text/plain',
+    'text/csv',
+    'application/csv',
   ]);
 
   private static readonly SUPPORTED_EXTENSIONS = new Set([
@@ -47,6 +54,12 @@ export class FolderScanService {
     '.xlsx',
     '.ppt',
     '.pptx',
+    '.odt',
+    '.ods',
+    '.odp',
+    '.odg',
+    '.txt',
+    '.csv',
   ]);
 
   /** Whether the File System Access API is available (Chromium only). */

@@ -93,6 +93,7 @@ export class UploadManagerService {
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
+  private readonly abortControllers = new Map<string, AbortController>();
 
   // ── Delegated state ────────────────────────────────────────────────────────
 
@@ -134,6 +135,7 @@ export class UploadManagerService {
     failJob: (jobId, failedAt, error) => this.failJob(jobId, failedAt, error),
     emitBatchProgress: (batchId) => this.emitBatchProgress(batchId),
     drainQueue: () => this.drainQueue(),
+    getAbortSignal: (jobId) => this.abortControllers.get(jobId)?.signal,
     checkDedupHash: (hash) => this.checkDedupHash(hash),
     emitUploadSkipped: (e) => this._uploadSkipped$.next(e),
     emitImageUploaded: (e) => this._imageUploaded$.next(e),
@@ -311,6 +313,7 @@ export class UploadManagerService {
     const job = this.jobState.findJob(jobId);
     if (!job || TERMINAL_PHASES.has(job.phase)) return;
 
+    this.abortJobRequest(jobId);
     this.queue.markDone(jobId);
 
     // Attempt to clean up orphaned storage file if upload was already started.
@@ -520,6 +523,7 @@ export class UploadManagerService {
     );
 
     for (const job of toStart) {
+      this.ensureAbortController(job.id);
       this.queue.markRunning(job.id);
       this.runPipeline(job.id);
     }
@@ -552,17 +556,32 @@ export class UploadManagerService {
     } catch (err) {
       console.error(`[upload-manager] runPipeline: job ${jobId.slice(0, 8)} threw:`, err);
       const current = this.jobState.findJob(jobId);
+      if (
+        current?.phase === 'error' &&
+        typeof current.error === 'string' &&
+        /cancelled/i.test(current.error)
+      ) {
+        this.queue.markDone(jobId);
+        if (current) {
+          this.emitBatchProgress(current.batchId);
+        }
+        this.drainQueue();
+        return;
+      }
       this.failJob(
         jobId,
         current?.phase ?? 'queued',
         err instanceof Error ? err.message : String(err),
       );
+    } finally {
+      this.abortControllers.delete(jobId);
     }
   }
 
   // ── Internal helpers ───────────────────────────────────────────────────────
 
   private failJob(jobId: string, failedAt: UploadPhase, error: string): void {
+    this.abortJobRequest(jobId);
     this.queue.markDone(jobId);
     this.jobState.failJob(jobId, failedAt, error);
     const job = this.jobState.findJob(jobId);
@@ -575,6 +594,7 @@ export class UploadManagerService {
   private cancelAllActive(): void {
     const active = this.jobState.snapshot().filter((j) => !TERMINAL_PHASES.has(j.phase));
     for (const job of active) {
+      this.abortJobRequest(job.id);
       this.queue.markDone(job.id);
       if (job.storagePath) {
         this.supabase.client.storage.from('images').remove([job.storagePath]);
@@ -586,6 +606,27 @@ export class UploadManagerService {
         failedAt: job.phase,
       });
     }
+  }
+
+  private ensureAbortController(jobId: string): AbortController {
+    const existing = this.abortControllers.get(jobId);
+    if (existing) {
+      return existing;
+    }
+    const controller = new AbortController();
+    this.abortControllers.set(jobId, controller);
+    return controller;
+  }
+
+  private abortJobRequest(jobId: string): void {
+    const controller = this.abortControllers.get(jobId);
+    if (!controller) {
+      return;
+    }
+    if (!controller.signal.aborted) {
+      controller.abort();
+    }
+    this.abortControllers.delete(jobId);
   }
 
   /** Emit batch progress and check for batch completion. */

@@ -15,7 +15,6 @@
 
 import { Injectable, inject } from '@angular/core';
 import * as exifr from 'exifr/dist/lite.esm.js';
-import heic2any from 'heic2any';
 import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -46,6 +45,9 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'application/vnd.oasis.opendocument.spreadsheet',
   'application/vnd.oasis.opendocument.presentation',
   'application/vnd.oasis.opendocument.graphics',
+  'text/plain',
+  'text/csv',
+  'application/csv',
 ]);
 
 const PHOTO_MIME_TYPES = new Set([
@@ -165,6 +167,10 @@ export class UploadService {
         return 'application/vnd.oasis.opendocument.presentation';
       case 'odg':
         return 'application/vnd.oasis.opendocument.graphics';
+      case 'txt':
+        return 'text/plain';
+      case 'csv':
+        return 'text/csv';
       default:
         return '';
     }
@@ -189,7 +195,7 @@ export class UploadService {
     if (!ALLOWED_MIME_TYPES.has(mimeType)) {
       return {
         valid: false,
-        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, ODT, ODG, XLS, XLSX, ODS, PPT, PPTX, or ODP.`,
+        error: `"${file.name}" has unsupported type "${file.type}". Use JPEG, PNG, HEIC, HEIF, WebP, MP4, MOV, WebM, PDF, DOC, DOCX, ODT, ODG, XLS, XLSX, ODS, PPT, PPTX, ODP, TXT, or CSV.`,
       };
     }
     return { valid: true };
@@ -240,6 +246,7 @@ export class UploadService {
     }
 
     try {
+      const { default: heic2any } = await import('heic2any');
       const convertedBlobMap = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
       const convertedBlob = Array.isArray(convertedBlobMap)
         ? convertedBlobMap[0]
@@ -306,6 +313,7 @@ export class UploadService {
     manualCoords?: ExifCoords,
     parsedExif?: ParsedExif,
     projectId?: string,
+    abortSignal?: AbortSignal,
   ): Promise<UploadResult> {
     // ── 0. Auth guard ──────────────────────────────────────────────────────
     const user = this.auth.user();
@@ -319,12 +327,20 @@ export class UploadService {
       return { error: validation.error! };
     }
 
+    if (abortSignal?.aborted) {
+      return { error: 'Upload cancelled by user.' };
+    }
+
     // ── 2. Fetch org ID from profiles ─────────────────────────────────────
-    const { data: profile, error: profileError } = await this.supabase.client
+    const profileQuery = this.supabase.client
       .from('profiles')
       .select('organization_id')
-      .eq('id', user.id)
-      .single();
+      .eq('id', user.id);
+
+    const { data: profile, error: profileError } = await this.withAbort(
+      profileQuery,
+      abortSignal,
+    ).single();
 
     if (profileError || !profile) {
       return { error: profileError ?? new Error('Profile not found.') };
@@ -337,13 +353,26 @@ export class UploadService {
     const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
     const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
 
+    if (abortSignal?.aborted) {
+      return { error: 'Upload cancelled by user.' };
+    }
+
     // ── 4. Upload to Supabase Storage ──────────────────────────────────────
     const { error: storageError } = await this.supabase.client.storage
       .from('images')
-      .upload(storagePath, file, { contentType: file.type, upsert: false });
+      .upload(storagePath, file, {
+        contentType: file.type,
+        upsert: false,
+        ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
+      });
 
     if (storageError) {
       return { error: this.mapStorageError(storageError) };
+    }
+
+    if (abortSignal?.aborted) {
+      await this.supabase.client.storage.from('images').remove([storagePath]);
+      return { error: 'Upload cancelled by user.' };
     }
 
     // ── 5. Parse EXIF ──────────────────────────────────────────────────────
@@ -361,7 +390,7 @@ export class UploadService {
     const finalCoords: ExifCoords | undefined = exifCoords ?? manualCoords;
 
     // ── 6. Insert images row ───────────────────────────────────────────────
-    const { data: imageRow, error: dbError } = await this.supabase.client
+    const imageInsertQuery = this.supabase.client
       .from('images')
       .insert({
         user_id: user.id,
@@ -376,11 +405,24 @@ export class UploadService {
         location_unresolved: finalCoords != null,
         project_id: projectId ?? null,
       })
-      .select('id')
-      .single();
+      .select('id');
+
+    const { data: imageRow, error: dbError } = await this.withAbort(
+      imageInsertQuery,
+      abortSignal,
+    ).single();
 
     if (dbError) {
       return { error: dbError };
+    }
+
+    if (abortSignal?.aborted) {
+      await this.supabase.client.storage.from('images').remove([storagePath]);
+      await this.supabase.client
+        .from('images')
+        .delete()
+        .eq('id', imageRow.id as string);
+      return { error: 'Upload cancelled by user.' };
     }
 
     // Shadow write into mixed-media tables when upload context has a primary project.
@@ -388,7 +430,7 @@ export class UploadService {
       const mediaType = this.resolveMediaType(file.type);
       const locationStatus = this.resolveLocationStatus(mediaType, finalCoords);
 
-      const { error: mediaError } = await this.supabase.client.from('media_items').insert({
+      const mediaInsertQuery = this.supabase.client.from('media_items').insert({
         organization_id: orgId,
         primary_project_id: projectId,
         created_by: user.id,
@@ -406,6 +448,8 @@ export class UploadService {
         gps_assignment_allowed: mediaType !== 'document',
         source_image_id: imageRow.id as string,
       });
+
+      const { error: mediaError } = await this.withAbort(mediaInsertQuery, abortSignal);
 
       if (mediaError) {
         return { error: mediaError };
@@ -527,5 +571,16 @@ export class UploadService {
   private resolveLocationStatus(mediaType: MediaType, coords?: ExifCoords): LocationStatus {
     if (coords) return 'gps';
     return mediaType === 'document' ? 'no_gps' : 'unresolved';
+  }
+
+  private withAbort<T extends { abortSignal?: (signal: AbortSignal) => T }>(
+    builder: T,
+    signal?: AbortSignal,
+  ): T {
+    if (!signal) return builder;
+    if (typeof builder.abortSignal === 'function') {
+      return builder.abortSignal(signal);
+    }
+    return builder;
   }
 }

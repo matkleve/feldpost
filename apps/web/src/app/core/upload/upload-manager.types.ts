@@ -219,6 +219,7 @@ export interface PipelineContext {
   failJob(jobId: string, failedAt: UploadPhase, error: string): void;
   emitBatchProgress(batchId: string): void;
   drainQueue(): void;
+  getAbortSignal(jobId: string): AbortSignal | undefined;
   checkDedupHash(contentHash: string): Promise<string | null>;
   emitUploadSkipped(event: UploadSkippedEvent): void;
   emitImageUploaded(event: ImageUploadedEvent): void;

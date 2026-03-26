@@ -19,6 +19,7 @@ export class UploadPanelLifecycleService {
 
   readonly issueAttentionPulse = signal(false);
   private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
+  private subscriptionsInitialized = false;
 
   // ── Public API callback for component to emit events ─────────────────────
 
@@ -41,6 +42,11 @@ export class UploadPanelLifecycleService {
   // ── Initialize subscriptions ───────────────────────────────────────────────
 
   initializeSubscriptions(): void {
+    if (this.subscriptionsInitialized) {
+      return;
+    }
+    this.subscriptionsInitialized = true;
+
     this.uploadManager.imageUploaded$.subscribe((event: ManagerImageUploadedEvent) => {
       if (event.coords && this.imageUploadedCallback) {
         this.imageUploadedCallback({

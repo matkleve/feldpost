@@ -57,16 +57,42 @@
     />
   </div>
 
+  @if (folderImportSupported) {
+    <button
+      uiButton
+      class="upload-panel__intake-btn upload-panel__intake-btn--folder"
+      type="button"
+      [disabled]="scanning()"
+      (click)="onSelectFolder($event, folderInput)"
+    >
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
+      Upload folder
+    </button>
+  }
+
   <button
     uiButton
-    class="upload-panel__intake-btn"
+    class="upload-panel__intake-btn upload-panel__intake-btn--capture"
     type="button"
     [disabled]="scanning()"
-    (click)="onSelectFolder($event, folderInput)"
+    (click)="openCapturePicker($event, captureInput)"
   >
-    <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-    Upload folder
+    <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
+      >photo_camera</span
+    >
+    Take photo
   </button>
+
+  <input
+    #captureInput
+    type="file"
+    class="upload-panel__capture-input"
+    accept="image/*"
+    capture="environment"
+    aria-hidden="true"
+    tabindex="-1"
+    (change)="onCaptureInputChange($event)"
+  />
 
   <input
     #folderInput
