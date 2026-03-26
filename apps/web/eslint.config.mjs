@@ -10,6 +10,11 @@ const maintainabilityGuidance = {
   complexity: ['warn', 15],
 };
 
+const operationalNumberGuidance = {
+  ignore: [0, 1, -1, 2, 8, 60, 90, 120, 180, 300, 360, 1000, 1024, 1500, 3600, 180000],
+  ignoreArrayIndexes: true,
+};
+
 export default tseslint.config(
   {
     ignores: ['dist/**', 'coverage/**', 'node_modules/**'],
@@ -39,7 +44,7 @@ export default tseslint.config(
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
-      'no-magic-numbers': ['warn', { ignore: [0, 1, -1, 2], ignoreArrayIndexes: true }],
+      'no-magic-numbers': ['warn', operationalNumberGuidance],
       'no-warning-comments': ['warn', { terms: ['FIXME', 'HACK'], location: 'anywhere' }],
       '@angular-eslint/prefer-signals': 'error',
       '@angular-eslint/no-empty-lifecycle-method': 'error',

@@ -21,6 +21,7 @@ Use this workflow for high-risk file splitting where behavior must remain identi
 3. No mixed changes: never combine split work with bug fixes/features.
 4. Preserve execution order exactly in orchestrators and pipelines.
 5. Keep cancellation/abort/event semantics identical where applicable.
+6. Do not delete documentation comments just to satisfy line-count lint rules.
 
 ## Split Method (Mechanical)
 
@@ -57,6 +58,15 @@ Use this workflow for high-risk file splitting where behavior must remain identi
 - Relevant tests remain green
 - No state/event/order changes unless explicitly approved
 - For panel/component files: baseline and post-change test sets must match exactly.
+
+### Gate Command Template
+
+Use explicit, reproducible commands per step (adapt paths as needed):
+
+- Lint (targeted): `npx eslint <touched-file-1> <touched-file-2> ...`
+- Core upload regression: `npx vitest run src/app/core/upload/upload.service.spec.ts src/app/core/upload/upload-manager.service.spec.ts`
+
+If `rg` is unavailable in the shell, use PowerShell `Get-ChildItem` / Node API fallback and continue with the same lint/test gate commands.
 
 ## Stop Conditions
 
