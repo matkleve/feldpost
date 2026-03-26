@@ -18726,4 +18726,190 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.status.active', 'Active', 'en', 'apps/web/src/app/features/projects/project-card.component.html html:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Active', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktiv', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Attivo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.status.active'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.status.archived', 'Archived', 'en', 'apps/web/src/app/features/projects/project-card.component.html html:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Archived', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.status.archived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Archiviert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.status.archived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Archiviato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.status.archived'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.meta.type.image', 'Image', 'en', 'apps/web/src/app/features/photos/media-card.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Image', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.image'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bild', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.image'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagine', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.image'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.meta.type.video', 'Video', 'en', 'apps/web/src/app/features/photos/media-card.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Video', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Video', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Video', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.video'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.meta.type.pdf', 'PDF', 'en', 'apps/web/src/app/features/photos/media-card.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'PDF', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.meta.type.pdf'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.card.alt.missing', 'Image', 'en', 'apps/web/src/app/features/photos/media-card.component.html html:alt')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Image', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.card.alt.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bild', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.card.alt.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Immagine', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.card.alt.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

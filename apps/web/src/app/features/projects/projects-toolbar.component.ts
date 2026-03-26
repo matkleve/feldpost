@@ -17,9 +17,7 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import {
-  CardVariantSwitchComponent,
-} from '../../shared/ui-primitives/card-variant-switch.component';
+import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
 import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import { ProjectsViewToggleComponent } from '../../shared/view-toggle/projects-view-toggle.component';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';

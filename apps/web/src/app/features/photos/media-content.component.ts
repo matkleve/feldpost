@@ -22,6 +22,7 @@ import { MediaGridComponent } from './media-grid.component';
         <app-media-grid
           [items]="items()"
           [variant]="cardVariant()"
+          [projectNameFor]="projectNameFor()"
           (itemClicked)="itemClicked.emit($event)"
         />
       }
@@ -41,6 +42,7 @@ export class MediaContentComponent {
   readonly error = input.required<boolean>();
   readonly items = input.required<ImageRecord[]>();
   readonly cardVariant = input<CardVariant>('medium');
+  readonly projectNameFor = input.required<(projectId: string | null) => string>();
 
   readonly itemClicked = output<string>();
   readonly retry = output<void>();

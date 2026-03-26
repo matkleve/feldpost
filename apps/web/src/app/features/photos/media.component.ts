@@ -15,11 +15,11 @@ import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-vari
 import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
 import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
-import { SupabaseService } from '../../core/supabase/supabase.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types';
+import { MediaQueryService } from '../../core/media-query.service';
 
 @Component({
   selector: 'app-media',
@@ -36,36 +36,28 @@ import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types'
 export class MediaComponent implements OnDestroy {
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   protected readonly workspaceSelectionService = inject(WorkspaceSelectionService);
-  private readonly supabaseService = inject(SupabaseService);
+  private readonly mediaQueryService = inject(MediaQueryService);
   private readonly i18nService = inject(I18nService);
   private readonly cardVariantSettings = inject(CardVariantSettingsService);
 
   readonly loading = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly mediaItems = signal<ImageRecord[]>([]);
+  readonly projectNameById = signal<ReadonlyMap<string, string>>(new Map<string, string>());
   readonly cardVariant = signal<CardVariant>(this.cardVariantSettings.getVariant('media'));
   readonly allowedCardVariants = CARD_VARIANTS;
+  readonly projectNameForFn = (projectId: string | null): string => this.projectNameFor(projectId);
 
   constructor() {
-    // Load media from database
-    effect(
-      () => {
-        void this.loadMedia();
-      },
-      { allowSignalWrites: true },
-    );
+    void this.loadMedia();
 
     // Bind media context to workspace pane
     const mediaSelectedItemsContext: SelectedItemsContextPort = {
       contextKey: 'media',
       selectedMediaIds$: this.workspaceSelectionService.selectedMediaIds,
-      requestOpenDetail: () => {
-        // Detail view is managed by workspace pane directly
-        // Media page just provides selection; pane handles detail overlay
-      },
-      requestSetHover: () => {
-        // Hover state not used in media page (only needed for map linked-hover)
-      },
+      requestOpenDetail: (mediaId: string) => this.onMediaItemClicked(mediaId),
+      requestSetHover: (mediaId: string | null) =>
+        this.workspacePaneObserver.setDetailImageId(mediaId),
     };
 
     this.workspacePaneObserver.onContextRebind(mediaSelectedItemsContext);
@@ -96,29 +88,27 @@ export class MediaComponent implements OnDestroy {
     void this.loadMedia();
   }
 
+  projectNameFor(projectId: string | null): string {
+    if (!projectId) {
+      return this.t('workspace.quickFilter.chip.noProject', 'No project');
+    }
+
+    return (
+      this.projectNameById().get(projectId) ??
+      this.t('workspace.quickFilter.chip.noProject', 'No project')
+    );
+  }
+
   async loadMedia(): Promise<void> {
     this.loading.set(true);
     try {
-      // Get current user from Supabase auth
-      const {
-        data: { user },
-      } = await this.supabaseService.client.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const { data, error } = await this.supabaseService.client
-        .from('images')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      this.mediaItems.set((data as ImageRecord[]) || []);
-    } catch (err) {
-      console.error('Failed to load media:', err);
-      this.loadError.set('Failed to load media');
+      const result = await this.mediaQueryService.loadCurrentUserMedia();
+      this.mediaItems.set(result.items);
+      this.projectNameById.set(result.projectNameById);
+    } catch {
+      this.loadError.set(this.t('media.page.error', 'Failed to load media'));
       this.mediaItems.set([]);
+      this.projectNameById.set(new Map<string, string>());
     } finally {
       this.loading.set(false);
     }

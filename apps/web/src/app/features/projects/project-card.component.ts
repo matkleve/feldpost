@@ -12,6 +12,8 @@ import {
   UiCardShellDirective,
   UiCardShellSizeMdDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-project-card',
@@ -37,7 +39,9 @@ export class ProjectCardComponent {
   readonly coloringProjectId = input<string | null>(null);
   readonly colorTokenFor = input.required<(key: ProjectColorKey) => string>();
   readonly formatRelativeDate = input.required<(value: string | null) => string>();
-  readonly t = input.required<(key: string, fallback?: string) => string>();
+
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly toggleColorPicker = output<string>();
   readonly colorSelected = output<{ projectId: string; colorKey: ProjectColorKey }>();

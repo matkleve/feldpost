@@ -1,3 +1,4 @@
+<!-- eslint-disable max-lines -->
 <article
   uiCardShell
   uiCardShellSizeMd
@@ -12,13 +13,15 @@
     <span class="project-card__dot" [style.background]="colorTokenFor()(project().colorKey)"></span>
     <h3 class="project-card__name">{{ project().name }}</h3>
     @if (variant() === 'large') {
-      <span class="project-card__status">{{ project().status }}</span>
+      <span class="project-card__status">{{
+        t('projects.status.' + project().status, project().status)
+      }}</span>
     }
   </div>
 
   <p class="project-card__badge">
     {{ project().totalImageCount }}
-    {{ t()('projects.page.metric.photos', 'photos') }}
+    {{ t('projects.page.metric.photos', 'photos') }}
   </p>
 
   @if (variant() !== 'small') {
@@ -27,7 +30,9 @@
 
   @if (variant() === 'large') {
     <p class="project-card__context">
-      {{ project().district || project().city || t()('projects.page.meta.noLocation', 'No location') }}
+      {{
+        project().district || project().city || t('projects.page.meta.noLocation', 'No location')
+      }}
     </p>
   }
 
@@ -65,7 +70,7 @@
           (click)="onDangerAction(project().id, 'archive')"
         >
           <span class="material-icons" aria-hidden="true">archive</span>
-          <span>{{ t()('projects.page.action.archiveProject', 'Archive') }}</span>
+          <span>{{ t('projects.page.action.archiveProject', 'Archive') }}</span>
         </button>
       }
     } @else {
@@ -76,7 +81,7 @@
         class="ui-button ui-button--secondary"
         (click)="onDangerAction(project().id, 'restore')"
       >
-        <span>{{ t()('projects.page.action.restoreProject', 'Restore') }}</span>
+        <span>{{ t('projects.page.action.restoreProject', 'Restore') }}</span>
       </button>
 
       <button
@@ -86,7 +91,7 @@
         class="ui-button ui-button--danger"
         (click)="onDangerAction(project().id, 'delete')"
       >
-        <span>{{ t()('projects.page.action.deleteProject', 'Delete') }}</span>
+        <span>{{ t('projects.page.action.deleteProject', 'Delete') }}</span>
       </button>
     }
   </div>

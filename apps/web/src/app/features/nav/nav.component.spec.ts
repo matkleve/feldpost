@@ -142,7 +142,7 @@ describe('NavComponent', () => {
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
 
-    await router.navigate(['/media']); async componentFixes (routing + terminology) in 3 files
+    await router.navigate(['/media']);
     await fixture.whenStable();
     fixture.detectChanges();
 

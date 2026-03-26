@@ -603,3 +603,18 @@ media.page.empty,No media found,apps/web/src/app/features/photos/photos.componen
 media.page.error,Failed to load media,apps/web/src/app/features/photos/photos.component.ts ts-prop:loadError,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i file multimediali
 media.page.retry,Retry,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Retry,Erneut versuchen,Riprova
 common.loading,Loading media...,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Loading media...,Medien werden geladen...,Caricamento file multimediali...
+projects.status.active,Active,apps/web/src/app/features/projects/project-card.component.html html:content,Active,Aktiv,Attivo
+projects.status.archived,Archived,apps/web/src/app/features/projects/project-card.component.html html:content,Archived,Archiviert,Archiviato
+media.meta.type.image,Image,apps/web/src/app/features/photos/media-card.component.ts ts:content,Image,Bild,Immagine
+media.meta.type.video,Video,apps/web/src/app/features/photos/media-card.component.ts ts:content,Video,Video,Video
+media.meta.type.pdf,PDF,apps/web/src/app/features/photos/media-card.component.ts ts:content,PDF,PDF,PDF
+media.card.alt.missing,Image,apps/web/src/app/features/photos/media-card.component.html html:alt,Image,Bild,Immagine
+projects.page.meta.noLocation,No location,apps/web/src/app/features/projects/project-card.component.html html:content,No location,Kein Standort,Nessuna posizione
+workspace.toolbar.size.aria,Thumbnail size,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Thumbnail size,Thumbnail-Größe,Dimensione miniatura
+workspace.toolbar.size.row,List,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,List,Liste,Elenco
+workspace.toolbar.size.small,Small,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Small,Klein,Piccolo
+workspace.toolbar.size.medium,Medium,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Medium,Mittel,Medio
+workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Large,Groß,Grande
+media.page.header.item,item,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,item,Element,elemento
+media.page.header.items,items,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,items,Elemente,elementi
+nav.home,Home,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,Home,Startseite,Home

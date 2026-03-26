@@ -13,7 +13,9 @@
       (click)="toggleDropdown(btn.id, $event); $event.stopPropagation()"
     >
       <span class="ui-dropdown-trigger__label">{{ btn.label }}</span>
-      <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true">expand_more</span>
+      <span class="ui-dropdown-trigger__chevron material-icons" aria-hidden="true"
+        >expand_more</span
+      >
     </button>
   }
 
@@ -61,7 +63,3 @@
     }
   </app-dropdown-shell>
 }
-
-
-
-

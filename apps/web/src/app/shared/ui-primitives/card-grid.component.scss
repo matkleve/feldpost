@@ -13,15 +13,24 @@
   }
 
   &--small {
-    grid-template-columns: repeat(auto-fill, minmax(max(7rem, var(--card-grid-min-column-width)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(max(7rem, var(--card-grid-min-column-width)), 1fr)
+    );
   }
 
   &--medium {
-    grid-template-columns: repeat(auto-fill, minmax(max(9rem, var(--card-grid-min-column-width)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(max(9rem, var(--card-grid-min-column-width)), 1fr)
+    );
   }
 
   &--large {
-    grid-template-columns: repeat(auto-fill, minmax(max(12rem, var(--card-grid-min-column-width)), 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(max(12rem, var(--card-grid-min-column-width)), 1fr)
+    );
   }
 }
 

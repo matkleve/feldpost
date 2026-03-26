@@ -19,7 +19,10 @@ import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/drop
 import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import { CardVariantSwitchComponent } from '../../../../shared/ui-primitives/card-variant-switch.component';
 import { CardVariantSettingsService } from '../../../../shared/ui-primitives/card-variant-settings.service';
-import { CARD_VARIANTS, type CardVariant } from '../../../../shared/ui-primitives/card-variant.types';
+import {
+  CARD_VARIANTS,
+  type CardVariant,
+} from '../../../../shared/ui-primitives/card-variant.types';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -45,6 +48,14 @@ export class WorkspaceToolbarComponent {
   private readonly cardVariantSettings = inject(CardVariantSettingsService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
+
+  ngOnInit(): void {
+    // Restore persisted variant for map scope
+    const savedVariant = this.cardVariantSettings.getVariant('map');
+    if (savedVariant) {
+      this.viewService.setThumbnailSizePreset(savedVariant as ThumbnailSizePreset);
+    }
+  }
 
   readonly activeDropdown = signal<ToolbarDropdown>(null);
   readonly thumbnailSizePreset = computed(() => this.viewService.thumbnailSizePreset());

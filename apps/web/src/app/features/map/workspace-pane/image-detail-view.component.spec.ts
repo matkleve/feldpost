@@ -740,6 +740,8 @@ describe('ImageDetailViewComponent', () => {
         city: 'Graz',
         district: 'Innere Stadt',
         country: 'Austria',
+        streetNumber: '',
+        zip: '',
       });
 
       expect(component.image()!.street).toBe('Hauptplatz');
@@ -760,6 +762,8 @@ describe('ImageDetailViewComponent', () => {
         city: 'Graz',
         district: 'Innere Stadt',
         country: 'Austria',
+        streetNumber: '',
+        zip: '',
       });
 
       expect(fake.client.from).toHaveBeenCalledWith('images');

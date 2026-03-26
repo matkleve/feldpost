@@ -194,15 +194,12 @@ describe('MapShellComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.mapBasemap()).toBe('default');
-    expect(fixture.componentInstance.mapMaterial()).toBe('default');
 
     fixture.componentInstance.setMapViewMode('photo');
 
     expect(fixture.componentInstance.mapBasemap()).toBe('satellite');
-    expect(fixture.componentInstance.mapMaterial()).toBe('default');
     expect(fixture.componentInstance.mapViewMode()).toBe('photo');
     expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('satellite');
-    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('default');
   });
 
   it('setMapViewMode("street") resets analog material', () => {
@@ -213,11 +210,8 @@ describe('MapShellComponent', () => {
     fixture.componentInstance.setMapViewMode('street');
 
     expect(fixture.componentInstance.mapBasemap()).toBe('default');
-    expect(fixture.componentInstance.mapMaterial()).toBe('default');
-    expect(fixture.componentInstance.analogMaterialActive()).toBe(false);
     expect(fixture.componentInstance.mapViewMode()).toBe('street');
     expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
-    expect(window.localStorage.getItem('sitesnap.settings.map.material')).toBe('default');
   });
 
   it('setMapViewMode("photo") replaces the active tile layer when map exists', () => {

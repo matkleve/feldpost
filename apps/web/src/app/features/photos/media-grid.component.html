@@ -1,15 +1,31 @@
-<app-card-grid tag="ul" minColumnWidth="128px" role="listbox" [variant]="variant()">
+<app-card-grid
+  tag="ul"
+  minColumnWidth="128px"
+  role="listbox"
+  [variant]="variant()"
+  [attr.aria-activedescendant]="activeDescendantId()"
+>
   @for (item of items(); track item.id) {
     <li
       class="media-grid__item"
       (click)="onItemClicked(item.id)"
       (keydown)="onItemKeydown($event, item.id)"
+      (focus)="onItemFocused(item.id)"
       [class.media-grid__item--selected]="workspaceSelectionService.isSelected(item.id)"
       tabindex="0"
       role="option"
+      [attr.id]="'media-option-' + item.id"
+      [attr.data-media-id]="item.id"
       [attr.aria-selected]="workspaceSelectionService.isSelected(item.id)"
     >
-      <app-media-card [item]="item" [variant]="variant()" />
+      <app-media-card
+        [item]="item"
+        [variant]="variant()"
+        [projectName]="projectNameFor()(item.project_id)"
+        (select)="onItemClicked(item.id)"
+        (open)="onItemClicked(item.id)"
+        (locate)="onItemClicked(item.id)"
+      />
     </li>
   }
 </app-card-grid>

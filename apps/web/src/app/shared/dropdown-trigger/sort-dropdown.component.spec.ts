@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { SortDropdownComponent } from './sort-dropdown.component';
-import { WorkspaceViewService } from '../../../../core/workspace-view.service';
-import { PropertyRegistryService } from '../../../../core/property-registry.service';
-import type { SortConfig, PropertyRef } from '../../../../core/workspace-view.types';
+import { WorkspaceViewService } from '../../core/workspace-view.service';
+import { PropertyRegistryService } from '../../core/property-registry.service';
+import type { SortConfig, PropertyRef } from '../../core/workspace-view.types';
 
 function buildFakeViewService() {
   return {

@@ -21,6 +21,7 @@
         [error]="!!loadError()"
         [items]="mediaItems()"
         [cardVariant]="cardVariant()"
+        [projectNameFor]="projectNameForFn"
         (itemClicked)="onMediaItemClicked($event)"
         (retry)="onRetryLoad()"
       />

@@ -3,7 +3,8 @@
  *
  * Displays breadcrumb navigation and media count.
  */
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-media-page-header',
@@ -11,12 +12,19 @@ import { Component, input } from '@angular/core';
   template: `
     <header class="media-page-header">
       <nav class="media-page-header__breadcrumb" aria-label="Breadcrumb">
-        <a href="/">Home</a>
+        <a href="/">{{ t('nav.home', 'Home') }}</a>
         <span aria-hidden="true">/</span>
         <span>{{ title() }}</span>
       </nav>
       @if (mediaCount() !== null && !loading()) {
-        <p class="media-page-header__count">{{ mediaCount() }} items</p>
+        <p class="media-page-header__count">
+          {{ mediaCount() }}
+          {{
+            mediaCount() === 1
+              ? t('media.page.header.item', 'item')
+              : t('media.page.header.items', 'items')
+          }}
+        </p>
       }
     </header>
   `,
@@ -55,6 +63,9 @@ import { Component, input } from '@angular/core';
   ],
 })
 export class MediaPageHeaderComponent {
+  private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
   title = input('Media');
   mediaCount = input<number | null>(null);
   loading = input(false);

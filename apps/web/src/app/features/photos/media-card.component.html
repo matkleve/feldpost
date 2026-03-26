@@ -5,14 +5,52 @@
   [class.media-card--medium]="variant() === 'medium'"
   [class.media-card--large]="variant() === 'large'"
 >
-  <img [src]="item().thumbnail_path || ''" [alt]="item().address_label || 'Media item'" />
+  <img
+    [src]="item().thumbnail_path || ''"
+    [alt]="item().address_label || t('media.card.alt.missing', 'Image')"
+  />
   <div class="media-card__info">
     <p class="media-card__title">{{ item().address_label }}</p>
     @if (variant() !== 'small') {
-      <p class="media-card__date">{{ formatDate(item().captured_at) }}</p>
+      <p class="media-card__date">{{ formattedCapturedAt }}</p>
     }
-    @if (variant() === 'large' && item().city) {
-      <p class="media-card__context">{{ item().city }}</p>
+
+    @if (variant() === 'large') {
+      @if (item().address_label) {
+        <p class="media-card__context">{{ item().address_label }}</p>
+      }
+
+      <div class="media-card__meta-chips">
+        @if (projectName().length > 0) {
+          <span class="media-card__chip">{{ projectName() }}</span>
+        }
+        @if (mediaTypeLabel.length > 0) {
+          <span class="media-card__chip">{{ mediaTypeLabel }}</span>
+        }
+      </div>
+
+      <div
+        class="media-card__actions"
+        role="group"
+        [attr.aria-label]="t('workspace.detailActions.section.title', 'Actions')"
+      >
+        <button type="button" class="media-card__action" (click)="onSelect($event)">
+          <span class="material-icons" aria-hidden="true">done</span>
+          <span>{{ t('workspace.quickFilter.statusLabel.done', 'Done') }}</span>
+        </button>
+        <button type="button" class="media-card__action" (click)="onOpen($event)">
+          <span class="material-icons" aria-hidden="true">open_in_new</span>
+          <span>{{ t('workspace.detailActions.action.addToProject', 'Add to project') }}</span>
+        </button>
+        @if (hasLocation) {
+          <button type="button" class="media-card__action" (click)="onLocate($event)">
+            <span class="material-icons" aria-hidden="true">my_location</span>
+            <span>{{
+              t('workspace.detailActions.action.zoomToLocation', 'Zoom to location')
+            }}</span>
+          </button>
+        }
+      </div>
     }
   </div>
 </div>

@@ -11,7 +11,9 @@ export class CardVariantSettingsService {
   getVariant(scope: CardVariantScope): CardVariant {
     try {
       const raw = localStorage.getItem(this.storageKey(scope));
-      return CARD_VARIANTS.includes(raw as CardVariant) ? (raw as CardVariant) : CARD_VARIANT_DEFAULT;
+      return CARD_VARIANTS.includes(raw as CardVariant)
+        ? (raw as CardVariant)
+        : CARD_VARIANT_DEFAULT;
     } catch {
       return CARD_VARIANT_DEFAULT;
     }
