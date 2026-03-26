@@ -10,9 +10,13 @@ import { AuthService } from '../auth/auth.service';
 import { computeContentHash, readFileHead } from '../content-hash.util';
 import { PhotoLoadService } from '../photo-load.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { isCancelledUploadJob } from './upload-cancelled.util';
+import { handleDedupSkip } from './upload-dedup-skip.util';
+import { insertDedupHashFireAndForget } from './upload-db-postwrite.util';
 import { UploadJobStateService } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
 import { UploadQueueService } from './upload-queue.service';
+import { buildReplaceUpdateData } from './upload-replace-update-data.util';
 import { UploadStorageService } from './upload-storage.service';
 import { UploadService } from './upload.service';
 
@@ -86,18 +90,16 @@ export class UploadReplacePipelineService {
     this.jobState.setPhase(jobId, 'dedup_check');
     const dedupResult = await ctx.checkDedupHash(contentHash);
     if (dedupResult) {
-      this.jobState.setPhase(jobId, 'skipped');
-      this.jobState.updateJob(jobId, { existingImageId: dedupResult });
-      this.queue.markDone(jobId);
-      ctx.emitUploadSkipped({
+      handleDedupSkip({
         jobId,
-        batchId: job.batchId,
-        fileName: job.file.name,
+        job,
         contentHash,
         existingImageId: dedupResult,
+        setPhase: (id, phase) => this.jobState.setPhase(id, phase),
+        updateJob: (id, patch) => this.jobState.updateJob(id, patch),
+        markDone: (id) => this.queue.markDone(id),
+        ctx,
       });
-      ctx.emitBatchProgress(job.batchId);
-      ctx.drainQueue();
       return;
     }
 
@@ -128,20 +130,7 @@ export class UploadReplacePipelineService {
     // Parse EXIF from new file for metadata update
     const parsedExif = await this.uploadService.parseExif(job.file);
 
-    const updateData: Record<string, unknown> = {
-      storage_path: storagePath,
-      thumbnail_path: null,
-    };
-    if (parsedExif.coords) {
-      updateData['exif_latitude'] = parsedExif.coords.lat;
-      updateData['exif_longitude'] = parsedExif.coords.lng;
-    }
-    if (parsedExif.capturedAt) {
-      updateData['captured_at'] = parsedExif.capturedAt;
-    }
-    if (parsedExif.direction != null) {
-      updateData['direction'] = parsedExif.direction;
-    }
+    const updateData = buildReplaceUpdateData(storagePath, parsedExif);
 
     const { error: updateError } = await this.supabase.client
       .from('images')
@@ -175,16 +164,12 @@ export class UploadReplacePipelineService {
     }
 
     // Insert dedup hash
-    if (updatedJob.contentHash) {
-      this.supabase.client
-        .from('dedup_hashes')
-        .insert({
-          image_id: updatedJob.targetImageId,
-          content_hash: updatedJob.contentHash,
-          user_id: this.auth.user()?.id,
-        })
-        .then();
-    }
+    insertDedupHashFireAndForget({
+      contentHash: updatedJob.contentHash,
+      imageId: updatedJob.targetImageId,
+      userId: this.auth.user()?.id,
+      insert: (payload) => this.supabase.client.from('dedup_hashes').insert(payload),
+    });
 
     this.jobState.updateJob(jobId, {
       imageId: updatedJob.targetImageId,
@@ -221,11 +206,6 @@ export class UploadReplacePipelineService {
   }
 
   private isCancelled(jobId: string): boolean {
-    const current = this.jobState.findJob(jobId);
-    return (
-      current?.phase === 'error' &&
-      typeof current.error === 'string' &&
-      /cancelled/i.test(current.error)
-    );
+    return isCancelledUploadJob(this.jobState.findJob(jobId));
   }
 }

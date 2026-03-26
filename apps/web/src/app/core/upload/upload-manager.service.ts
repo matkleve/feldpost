@@ -28,8 +28,10 @@ import { MediaPreviewService } from '../media-preview.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
+import { isCancelledUploadJob } from './upload-cancelled.util';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
+import { selectQueuedJobsForStart } from './upload-manager-queue.util';
 import { UploadNewPipelineService } from './upload-new-pipeline.service';
 import { UploadQueueService } from './upload-queue.service';
 import { UploadReplacePipelineService } from './upload-replace-pipeline.service';
@@ -85,6 +87,8 @@ export { TERMINAL_PHASES, ACTIVE_PHASES, phaseLabel } from './upload-job-state.s
 
 @Injectable({ providedIn: 'root' })
 export class UploadManagerService {
+  private static readonly LOG_JOB_ID_PREFIX_LEN = '00000000'.length;
+
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
   private readonly jobState = inject(UploadJobStateService);
@@ -508,20 +512,21 @@ export class UploadManagerService {
     console.log('[upload-manager] drainQueue:', {
       totalJobs: jobs.length,
       slotsAvailable,
-      phases: jobs.map((j) => `${j.id.slice(0, 8)}:${j.phase}:${j.mode}`),
+      phases: jobs.map(
+        (j) => `${j.id.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)}:${j.phase}:${j.mode}`,
+      ),
     });
     if (slotsAvailable <= 0) {
       console.log('[upload-manager] drainQueue: no slots available, exiting');
       return;
     }
 
-    const queued = jobs.filter((j) => j.phase === 'queued');
-    const toStart = queued.slice(0, slotsAvailable);
+    const toStart = selectQueuedJobsForStart(jobs, slotsAvailable);
     console.log(
       '[upload-manager] drainQueue: starting',
       toStart.length,
       'jobs:',
-      toStart.map((j) => `${j.id.slice(0, 8)}:${j.mode}`),
+      toStart.map((j) => `${j.id.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)}:${j.mode}`),
     );
 
     for (const job of toStart) {
@@ -541,7 +546,7 @@ export class UploadManagerService {
       }
 
       console.log(
-        `[upload-manager] runPipeline: routing job ${jobId.slice(0, 8)} via mode=${job.mode}, targetImageId=${job.targetImageId}`,
+        `[upload-manager] runPipeline: routing job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} via mode=${job.mode}, targetImageId=${job.targetImageId}`,
       );
 
       if (job.mode === 'replace') {
@@ -554,15 +559,16 @@ export class UploadManagerService {
         console.log('[upload-manager] → newPipeline.run()');
         await this.newPipeline.run(jobId, this.pipelineCtx);
       }
-      console.log(`[upload-manager] runPipeline: job ${jobId.slice(0, 8)} pipeline finished`);
+      console.log(
+        `[upload-manager] runPipeline: job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} pipeline finished`,
+      );
     } catch (err) {
-      console.error(`[upload-manager] runPipeline: job ${jobId.slice(0, 8)} threw:`, err);
+      console.error(
+        `[upload-manager] runPipeline: job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} threw:`,
+        err,
+      );
       const current = this.jobState.findJob(jobId);
-      if (
-        current?.phase === 'error' &&
-        typeof current.error === 'string' &&
-        /cancelled/i.test(current.error)
-      ) {
+      if (isCancelledUploadJob(current)) {
         this.queue.markDone(jobId);
         if (current) {
           this.emitBatchProgress(current.batchId);

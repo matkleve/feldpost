@@ -5,6 +5,7 @@ import { UploadPanelComponent } from './upload-panel.component';
 import {
   UploadManagerService,
   type ImageUploadedEvent as ManagerImageUploadedEvent,
+  type JobPhaseChangedEvent,
   type MissingDataEvent,
   type UploadBatch,
   type UploadJob,
@@ -18,6 +19,7 @@ export function buildFakeUploadManager() {
   const activeBatchSignal = signal<UploadBatch | null>(null);
   const imageUploaded$ = new Subject<ManagerImageUploadedEvent>();
   const missingData$ = new Subject<MissingDataEvent>();
+  const jobPhaseChanged$ = new Subject<JobPhaseChangedEvent>();
 
   return {
     jobs: jobsSignal.asReadonly(),
@@ -28,6 +30,7 @@ export function buildFakeUploadManager() {
     isFolderImportSupported: true,
     activeCount: signal(0).asReadonly(),
     imageUploaded$: imageUploaded$.asObservable(),
+    jobPhaseChanged$: jobPhaseChanged$.asObservable(),
     uploadFailed$: new Subject().asObservable(),
     missingData$: missingData$.asObservable(),
     submit: vi.fn().mockReturnValue([]),
@@ -42,6 +45,7 @@ export function buildFakeUploadManager() {
     _activeBatchSignal: activeBatchSignal,
     _imageUploaded$: imageUploaded$,
     _missingData$: missingData$,
+    _jobPhaseChanged$: jobPhaseChanged$,
   };
 }
 
