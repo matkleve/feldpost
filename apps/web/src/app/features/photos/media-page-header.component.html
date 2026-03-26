@@ -1,0 +1,22 @@
+<header class="media-page-header">
+  <nav class="media-page-header__breadcrumb" [attr.aria-label]="t('media.page.title', 'Media')">
+    <a [routerLink]="['/']">{{ t('nav.home', 'Home') }}</a>
+    <span aria-hidden="true">/</span>
+    <span>{{ title() }}</span>
+  </nav>
+  <h1 class="media-page-header__title">{{ title() }}</h1>
+  <p class="media-page-header__count">
+    @if (loading()) {
+      {{ t('common.loading', 'Loading media...') }}
+    } @else if (showLoadedOfTotal()) {
+      {{ loadedOfTotalLabel() }}
+    } @else {
+      {{ mediaCount() }}
+      {{
+        mediaCount() === 1
+          ? t('media.page.header.item', 'item')
+          : t('media.page.header.items', 'items')
+      }}
+    }
+  </p>
+</header>

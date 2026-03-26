@@ -13,47 +13,8 @@ import {
   selector: 'app-media-empty',
   standalone: true,
   imports: [UiButtonDirective, UiButtonSecondaryDirective],
-  template: `
-    <div class="media-empty">
-      <h2 class="media-empty__title">{{ titleText() }}</h2>
-      <p class="media-empty__body">{{ bodyText() }}</p>
-      <button
-        uiButton
-        uiButtonSecondary
-        type="button"
-        class="ui-button ui-button--secondary media-empty__retry"
-        (click)="onPrimaryAction()"
-      >
-        {{ actionLabel() }}
-      </button>
-    </div>
-  `,
-  styles: [
-    `
-      .media-empty {
-        border: 1px solid var(--color-border);
-        border-radius: var(--container-radius-panel);
-        background: var(--color-bg-surface);
-        padding: var(--spacing-4);
-        display: grid;
-        gap: var(--spacing-2);
-      }
-
-      .media-empty__title {
-        margin: 0;
-        color: var(--color-text-secondary);
-      }
-
-      .media-empty__body {
-        margin: 0;
-        color: var(--color-text-secondary);
-      }
-
-      .media-empty__retry {
-        justify-self: start;
-      }
-    `,
-  ],
+  templateUrl: './media-empty.component.html',
+  styleUrl: './media-empty.component.scss',
 })
 export class MediaEmptyComponent {
   readonly reason = input<'auth-required' | 'no-results'>('no-results');

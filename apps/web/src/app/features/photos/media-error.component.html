@@ -1,0 +1,15 @@
+<div class="media-error" role="alert">
+  <h2 class="media-error__title">{{ t('media.page.error', 'Failed to load media') }}</h2>
+  <p class="media-error__body">
+    {{ t('projects.page.error.body', 'Please try again in a moment.') }}
+  </p>
+  <button
+    uiButton
+    uiButtonSecondary
+    type="button"
+    class="ui-button ui-button--secondary media-error__retry"
+    (click)="retry.emit()"
+  >
+    {{ t('media.page.retry', 'Retry') }}
+  </button>
+</div>

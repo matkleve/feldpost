@@ -10,32 +10,8 @@ import { MediaGridComponent } from './media-grid.component';
   selector: 'app-media-content',
   standalone: true,
   imports: [MediaLoadingComponent, MediaErrorComponent, MediaEmptyComponent, MediaGridComponent],
-  template: `
-    <section class="media-content">
-      @if (loading()) {
-        <app-media-loading [variant]="cardVariant()" />
-      } @else if (error()) {
-        <app-media-error (retry)="retry.emit()" />
-      } @else if (items().length === 0) {
-        <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
-      } @else {
-        <app-media-grid
-          [items]="items()"
-          [variant]="cardVariant()"
-          [projectNameFor]="projectNameFor()"
-          (itemClicked)="itemClicked.emit($event)"
-        />
-      }
-    </section>
-  `,
-  styles: [
-    `
-      .media-content {
-        display: grid;
-        gap: var(--spacing-3);
-      }
-    `,
-  ],
+  templateUrl: './media-content.component.html',
+  styleUrl: './media-content.component.scss',
 })
 export class MediaContentComponent {
   readonly loading = input.required<boolean>();

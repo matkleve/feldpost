@@ -1,0 +1,23 @@
+.media-error {
+  border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
+  border-radius: var(--container-radius-panel);
+  background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-warning));
+  padding: var(--spacing-4);
+  display: grid;
+  gap: var(--spacing-2);
+}
+
+.media-error__title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+}
+
+.media-error__body {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.media-error__retry {
+  justify-self: start;
+}

@@ -1,0 +1,13 @@
+<div class="media-empty">
+  <h2 class="media-empty__title">{{ titleText() }}</h2>
+  <p class="media-empty__body">{{ bodyText() }}</p>
+  <button
+    uiButton
+    uiButtonSecondary
+    type="button"
+    class="ui-button ui-button--secondary media-empty__retry"
+    (click)="onPrimaryAction()"
+  >
+    {{ actionLabel() }}
+  </button>
+</div>
