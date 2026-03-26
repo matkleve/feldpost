@@ -5,26 +5,37 @@
       <app-media-page-header
         [title]="t('media.page.title', 'Media')"
         [mediaCount]="mediaItems().length"
+        [totalCount]="mediaTotalCount()"
         [loading]="loading()"
       />
 
-      <app-card-variant-switch
-        [value]="cardVariant()"
-        [allowed]="allowedCardVariants"
-        [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
-        (valueChange)="cardVariant.set($event)"
-      />
+      <app-pane-toolbar class="media-toolbar">
+        <app-card-variant-switch
+          slot="right"
+          [value]="cardVariant()"
+          [allowed]="allowedCardVariants"
+          [ariaLabel]="t('workspace.toolbar.size.aria', 'Thumbnail size')"
+          (valueChange)="cardVariant.set($event)"
+        />
+      </app-pane-toolbar>
 
       <!-- Content Wrapper -->
       <app-media-content
         [loading]="loading()"
         [error]="!!loadError()"
         [items]="mediaItems()"
+        [emptyReason]="emptyReason()"
         [cardVariant]="cardVariant()"
         [projectNameFor]="projectNameForFn"
         (itemClicked)="onMediaItemClicked($event)"
         (retry)="onRetryLoad()"
       />
+
+      @if (loadingMore()) {
+        <p class="media-page__loading-more">
+          {{ t('media.page.loading.more', 'Loading more media...') }}
+        </p>
+      }
     </app-vstack>
   </section>
 </main>

@@ -13,11 +13,11 @@ import { MediaGridComponent } from './media-grid.component';
   template: `
     <section class="media-content">
       @if (loading()) {
-        <app-media-loading />
+        <app-media-loading [variant]="cardVariant()" />
       } @else if (error()) {
         <app-media-error (retry)="retry.emit()" />
       } @else if (items().length === 0) {
-        <app-media-empty />
+        <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
       } @else {
         <app-media-grid
           [items]="items()"
@@ -41,6 +41,7 @@ export class MediaContentComponent {
   readonly loading = input.required<boolean>();
   readonly error = input.required<boolean>();
   readonly items = input.required<ImageRecord[]>();
+  readonly emptyReason = input<'auth-required' | 'no-results'>('no-results');
   readonly cardVariant = input<CardVariant>('medium');
   readonly projectNameFor = input.required<(projectId: string | null) => string>();
 

@@ -19,3 +19,14 @@
   display: grid;
   gap: var(--spacing-3);
 }
+
+.media-toolbar {
+  width: 100%;
+}
+
+.media-page__loading-more {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}

@@ -18634,6 +18634,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.empty.authRequired.title', 'Sign in required', 'en', 'apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sign in required', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.authRequired.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anmeldung erforderlich', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.authRequired.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Accesso richiesto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.authRequired.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.empty.authRequired.body', 'You need to sign in to view media.', 'en', 'apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You need to sign in to view media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.authRequired.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du musst dich anmelden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.authRequired.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'um Medien anzuzeigen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.authRequired.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.empty.org.body', 'No media is available for your organization yet.', 'en', 'apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No media is available for your organization yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.org.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fuer deine Organisation sind noch keine Medien verfuegbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.org.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non sono ancora disponibili contenuti multimediali per la tua organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.empty.org.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'media.page.error', 'Failed to load media', 'en', 'apps/web/src/app/features/photos/photos.component.ts ts-prop:loadError')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -18908,6 +19001,347 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Immagine', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'media.card.alt.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.page.meta.noLocation', 'No location', 'en', 'apps/web/src/app/features/projects/project-card.component.html html:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.meta.noLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kein Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.meta.noLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessuna posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.page.meta.noLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.size.aria', 'Thumbnail size', 'en', 'apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Thumbnail size', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Thumbnail-Gr��e', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Dimensione miniatura', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.size.row', 'List', 'en', 'apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'List', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.row'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Liste', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.row'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elenco', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.row'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.size.small', 'Small', 'en', 'apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Small', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.small'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Klein', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.small'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Piccolo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.small'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.size.medium', 'Medium', 'en', 'apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Medium', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.medium'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mittel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.medium'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Medio', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.medium'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.size.large', 'Large', 'en', 'apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Large', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.large'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gro�', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.large'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Grande', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.size.large'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.header.item', 'item', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'item', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.item'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Element', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.item'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'elemento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.item'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.header.items', 'items', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'items', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.items'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Elemente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.items'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'elementi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.items'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.header.loadedOfTotal', '{loaded} of {total} items loaded', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts inline-template text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{loaded} of {total} items loaded', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.loadedOfTotal'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{loaded} von {total} Elementen geladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.loadedOfTotal'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{loaded} di {total} elementi caricati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.header.loadedOfTotal'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'media.page.loading.more', 'Loading more media...', 'en', 'apps/web/src/app/features/photos/media.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Loading more media...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.loading.more'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Weitere Medien werden geladen...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.loading.more'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento di altri contenuti multimediali...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'media.page.loading.more'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'nav.home', 'Home', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts ts:content')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Home', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'nav.home'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Startseite', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'nav.home'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Home', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'nav.home'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

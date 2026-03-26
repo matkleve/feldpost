@@ -600,6 +600,9 @@ upload.item.status.missingGps,GPS missing,apps/web/src/app/features/upload/uploa
 upload.item.action.place,Place,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Place,Verorten,Posiziona
 media.page.title,Media,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Media,Medien,Media
 media.page.empty,No media found,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,No media found,Keine Medien gefunden,Nessun file multimediale trovato
+media.page.empty.authRequired.title,Sign in required,apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node,Sign in required,Anmeldung erforderlich,Accesso richiesto
+media.page.empty.authRequired.body,You need to sign in to view media.,apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node,You need to sign in to view media.,Du musst dich anmelden, um Medien anzuzeigen.,Devi accedere per visualizzare i contenuti multimediali.
+media.page.empty.org.body,No media is available for your organization yet.,apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node,No media is available for your organization yet.,Fuer deine Organisation sind noch keine Medien verfuegbar.,Non sono ancora disponibili contenuti multimediali per la tua organizzazione.
 media.page.error,Failed to load media,apps/web/src/app/features/photos/photos.component.ts ts-prop:loadError,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i file multimediali
 media.page.retry,Retry,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Retry,Erneut versuchen,Riprova
 common.loading,Loading media...,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Loading media...,Medien werden geladen...,Caricamento file multimediali...
@@ -610,11 +613,13 @@ media.meta.type.video,Video,apps/web/src/app/features/photos/media-card.componen
 media.meta.type.pdf,PDF,apps/web/src/app/features/photos/media-card.component.ts ts:content,PDF,PDF,PDF
 media.card.alt.missing,Image,apps/web/src/app/features/photos/media-card.component.html html:alt,Image,Bild,Immagine
 projects.page.meta.noLocation,No location,apps/web/src/app/features/projects/project-card.component.html html:content,No location,Kein Standort,Nessuna posizione
-workspace.toolbar.size.aria,Thumbnail size,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Thumbnail size,Thumbnail-Größe,Dimensione miniatura
+workspace.toolbar.size.aria,Thumbnail size,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Thumbnail size,Thumbnail-Grï¿½ï¿½e,Dimensione miniatura
 workspace.toolbar.size.row,List,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,List,Liste,Elenco
 workspace.toolbar.size.small,Small,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Small,Klein,Piccolo
 workspace.toolbar.size.medium,Medium,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Medium,Mittel,Medio
-workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Large,Groß,Grande
+workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Large,Groï¿½,Grande
 media.page.header.item,item,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,item,Element,elemento
 media.page.header.items,items,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,items,Elemente,elementi
+media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/photos/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati
+media.page.loading.more,Loading more media...,apps/web/src/app/features/photos/media.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
 nav.home,Home,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,Home,Startseite,Home

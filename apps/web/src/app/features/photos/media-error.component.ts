@@ -1,14 +1,28 @@
 import { Component, input, output } from '@angular/core';
 import { inject } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
+import {
+  UiButtonDirective,
+  UiButtonSecondaryDirective,
+} from '../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-media-error',
   standalone: true,
+  imports: [UiButtonDirective, UiButtonSecondaryDirective],
   template: `
     <div class="media-error" role="alert">
-      <p>{{ t('media.page.error', 'Failed to load media') }}</p>
-      <button (click)="retry.emit()" class="media-error__retry">
+      <h2 class="media-error__title">{{ t('media.page.error', 'Failed to load media') }}</h2>
+      <p class="media-error__body">
+        {{ t('projects.page.error.body', 'Please try again in a moment.') }}
+      </p>
+      <button
+        uiButton
+        uiButtonSecondary
+        type="button"
+        class="ui-button ui-button--secondary media-error__retry"
+        (click)="retry.emit()"
+      >
         {{ t('media.page.retry', 'Retry') }}
       </button>
     </div>
@@ -22,29 +36,21 @@ import { I18nService } from '../../core/i18n/i18n.service';
         padding: var(--spacing-4);
         display: grid;
         gap: var(--spacing-2);
-        text-align: center;
+      }
 
-        p {
-          margin: 0;
-          color: var(--color-text-secondary);
-        }
+      .media-error__title {
+        margin: 0;
+        color: var(--color-text-primary);
+        font-size: var(--font-size-lg);
+      }
+
+      .media-error__body {
+        margin: 0;
+        color: var(--color-text-secondary);
       }
 
       .media-error__retry {
-        max-width: fit-content;
-        margin-inline: auto;
-        padding: var(--spacing-2) var(--spacing-3);
-        border: 1px solid var(--color-border);
-        border-radius: var(--container-radius-control);
-        background: var(--color-bg-base);
-        color: var(--color-text-primary);
-        cursor: pointer;
-        font-size: 0.875rem;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background: var(--color-bg-surface);
-        }
+        justify-self: start;
       }
     `,
   ],

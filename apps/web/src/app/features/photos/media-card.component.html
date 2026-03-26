@@ -5,12 +5,21 @@
   [class.media-card--medium]="variant() === 'medium'"
   [class.media-card--large]="variant() === 'large'"
 >
-  <img
-    [src]="item().thumbnail_path || ''"
-    [alt]="item().address_label || t('media.card.alt.missing', 'Image')"
-  />
+  @if (thumbnailUrl().length > 0 && !thumbnailFailed()) {
+    <img
+      [src]="thumbnailUrl()"
+      [alt]="item().address_label || t('media.card.alt.missing', 'Image')"
+      (error)="onThumbnailError()"
+    />
+  } @else {
+    <div class="media-card__thumb-fallback" aria-hidden="true">
+      <span class="material-icons">{{ fallbackIcon }}</span>
+      <span class="media-card__thumb-fallback-label">{{ mediaTypeLabel || 'FILE' }}</span>
+    </div>
+  }
+
   <div class="media-card__info">
-    <p class="media-card__title">{{ item().address_label }}</p>
+    <p class="media-card__title">{{ item().address_label || t('media.page.title', 'Media') }}</p>
     @if (variant() !== 'small') {
       <p class="media-card__date">{{ formattedCapturedAt }}</p>
     }

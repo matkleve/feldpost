@@ -4,20 +4,40 @@ import type { ImageRecord } from '../features/map/workspace-pane/image-detail-vi
 
 export interface MediaLoadResult {
   items: ImageRecord[];
+  totalCount: number | null;
   projectNameById: ReadonlyMap<string, string>;
+}
+
+export interface MediaLoadOptions {
+  offset?: number;
+  limit?: number;
+  includeCount?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
 export class MediaQueryService {
   private readonly supabase = inject(SupabaseService);
 
-  async loadCurrentUserMedia(): Promise<MediaLoadResult> {
+  async loadCurrentUserMedia(options: MediaLoadOptions = {}): Promise<MediaLoadResult> {
+    const offset = Math.max(0, options.offset ?? 0);
+    const limit = Math.max(1, options.limit ?? 72);
+    const includeCount = options.includeCount ?? false;
+
     const {
       data: { user },
     } = await this.supabase.client.auth.getUser();
 
     if (!user) {
-      return { items: [], projectNameById: new Map<string, string>() };
+      return { items: [], totalCount: 0, projectNameById: new Map<string, string>() };
+    }
+
+    let totalCount: number | null = null;
+    if (includeCount) {
+      const { count, error: countError } = await this.supabase.client
+        .from('images')
+        .select('id', { count: 'exact', head: true });
+
+      totalCount = countError ? null : (count ?? null);
     }
 
     const { data, error } = await this.supabase.client
@@ -25,7 +45,7 @@ export class MediaQueryService {
       .select(
         'id, user_id, organization_id, project_id, storage_path, thumbnail_path, latitude, longitude, exif_latitude, exif_longitude, captured_at, has_time, created_at, address_label, street, city, district, country, direction, location_unresolved',
       )
-      .eq('user_id', user.id)
+      .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -42,7 +62,7 @@ export class MediaQueryService {
     );
 
     if (projectIds.length === 0) {
-      return { items, projectNameById: new Map<string, string>() };
+      return { items, totalCount, projectNameById: new Map<string, string>() };
     }
 
     const { data: projectsData, error: projectsError } = await this.supabase.client
@@ -51,7 +71,7 @@ export class MediaQueryService {
       .in('id', projectIds);
 
     if (projectsError) {
-      return { items, projectNameById: new Map<string, string>() };
+      return { items, totalCount, projectNameById: new Map<string, string>() };
     }
 
     const projectNameById = new Map<string, string>();
@@ -63,6 +83,6 @@ export class MediaQueryService {
       }
     }
 
-    return { items, projectNameById };
+    return { items, totalCount, projectNameById };
   }
 }

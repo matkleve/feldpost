@@ -49,6 +49,25 @@
   object-fit: cover;
 }
 
+.media-card__thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  gap: var(--spacing-1);
+  background: color-mix(in srgb, var(--color-bg-surface) 82%, var(--color-bg-base));
+  color: var(--color-text-secondary);
+}
+
+.media-card__thumb-fallback .material-icons {
+  font-size: 1.5rem;
+}
+
+.media-card__thumb-fallback-label {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.04em;
+}
+
 .media-card__info {
   position: absolute;
   bottom: 0;
