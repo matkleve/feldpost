@@ -5,9 +5,11 @@
  * and emits batch-level events (progress, complete).
  */
 
-import { Injectable, Signal, computed, signal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import {
+import { Injectable, computed, signal } from '@angular/core';
+import { Subject } from 'rxjs';
+import type { Signal } from '@angular/core';
+import type { Observable } from 'rxjs';
+import type {
   BatchCompleteEvent,
   BatchProgressEvent,
   UploadBatch,

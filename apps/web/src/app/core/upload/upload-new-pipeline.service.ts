@@ -19,7 +19,8 @@ import { UploadEnrichmentService } from './upload-enrichment.service';
 import { UploadJobStateService } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
 import { UploadQueueService } from './upload-queue.service';
-import { ExifCoords, ParsedExif, UploadService } from './upload.service';
+import { UploadService } from './upload.service';
+import type { ExifCoords, ParsedExif } from './upload.service';
 
 @Injectable({ providedIn: 'root' })
 export class UploadNewPipelineService {

@@ -8,7 +8,7 @@
 import { Injectable, inject } from '@angular/core';
 import { GeocodingService } from '../geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { ExifCoords } from './upload.service';
+import type { ExifCoords } from './upload.service';
 
 export interface ForwardGeocodeResult {
   coords: ExifCoords;
@@ -24,7 +24,8 @@ export class UploadEnrichmentService {
    * UploadService.uploadFile already calls resolveAddress() internally,
    * so this is currently a no-op placeholder for state tracking.
    */
-  async enrichWithReverseGeocode(_imageId: string): Promise<void> {
+  async enrichWithReverseGeocode(imageId: string): Promise<void> {
+    void imageId;
     // UploadService.uploadFile already fires reverse-geocode as fire-and-forget.
     // This method exists for future standalone usage.
   }

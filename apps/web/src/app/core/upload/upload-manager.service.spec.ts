@@ -9,7 +9,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { UploadManagerService, UploadJob, UploadPhase } from './upload-manager.service';
+import { UploadManagerService } from './upload-manager.service';
 import { UploadService } from './upload.service';
 import { GeocodingService } from '../geocoding.service';
 import { AuthService } from '../auth/auth.service';

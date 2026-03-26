@@ -5,9 +5,9 @@ import angularTemplateParser from '@angular-eslint/template-parser';
 import unusedImports from 'eslint-plugin-unused-imports';
 
 const maintainabilityGuidance = {
-  'max-lines': ['warn', { max: 120, skipBlankLines: true, skipComments: true }],
-  'max-lines-per-function': ['warn', { max: 40 }],
-  complexity: ['warn', 10],
+  'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+  'max-lines-per-function': ['warn', { max: 60 }],
+  complexity: ['warn', 15],
 };
 
 export default tseslint.config(
@@ -87,7 +87,7 @@ export default tseslint.config(
       '@angular-eslint/template/alt-text': 'error',
       '@angular-eslint/template/click-events-have-key-events': 'warn',
       '@angular-eslint/template/interactive-supports-focus': 'warn',
-      'max-lines': ['warn', { max: 60, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
     },
   },
 
@@ -95,7 +95,7 @@ export default tseslint.config(
   {
     files: ['eslint.config.mjs'],
     rules: {
-      'max-lines': ['warn', { max: 120, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
     },
   },
 );

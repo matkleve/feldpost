@@ -5,9 +5,11 @@
  * Emits domain events when jobs change phase, fail, skip, or complete.
  */
 
-import { Injectable, Signal, computed, signal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import {
+import { Injectable, computed, signal } from '@angular/core';
+import { Subject } from 'rxjs';
+import type { Signal } from '@angular/core';
+import type { Observable } from 'rxjs';
+import type {
   JobPhaseChangedEvent,
   UploadFailedEvent,
   UploadJob,

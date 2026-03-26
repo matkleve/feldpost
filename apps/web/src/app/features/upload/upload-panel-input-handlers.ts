@@ -6,6 +6,10 @@ import { Injectable, inject, signal } from '@angular/core';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../core/workspace-view.service';
 
+interface DirectoryPickerWindow extends Window {
+  showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UploadPanelInputHandlersService {
   private readonly uploadManager = inject(UploadManagerService);
@@ -71,7 +75,7 @@ export class UploadPanelInputHandlersService {
   async onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): Promise<void> {
     event.preventDefault();
     event.stopPropagation();
-    const picker = (window as any).showDirectoryPicker;
+    const picker = (window as DirectoryPickerWindow).showDirectoryPicker;
     if (!picker) {
       folderInput.click();
       return;

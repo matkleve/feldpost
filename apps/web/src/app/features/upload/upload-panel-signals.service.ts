@@ -1,5 +1,4 @@
 import { Injectable, inject, computed, signal } from '@angular/core';
-import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelStateService } from './upload-panel-state.service';

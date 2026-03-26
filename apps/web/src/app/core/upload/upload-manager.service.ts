@@ -18,8 +18,10 @@
  *  - beforeunload warning when uploads are in progress.
  */
 
-import { Injectable, Signal, effect, inject } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Injectable, effect, inject } from '@angular/core';
+import { Subject } from 'rxjs';
+import type { Signal } from '@angular/core';
+import type { Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { FolderScanService } from '../folder-scan.service';
 import { MediaPreviewService } from '../media-preview.service';
