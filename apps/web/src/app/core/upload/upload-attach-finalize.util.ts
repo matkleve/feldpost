@@ -5,7 +5,7 @@ type FinalizeAttachCompletionArgs = {
   finalJob: UploadJob;
   storagePath: string;
   hadExistingCoords: boolean;
-  isCancelled: boolean;
+  isCancelled: () => boolean;
   setLocalUrl: (imageId: string, localUrl: string) => void;
   emitImageAttached: (event: {
     jobId: string;
@@ -37,7 +37,7 @@ export function finalizeAttachCompletion(args: FinalizeAttachCompletionArgs): vo
     warn,
   } = args;
 
-  if (isCancelled) {
+  if (isCancelled()) {
     emitBatchProgress(finalJob.batchId);
     drainQueue();
     return;

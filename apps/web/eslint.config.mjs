@@ -79,6 +79,16 @@ export default tseslint.config(
     },
   },
 
+  // ── Upload orchestrator exception ─────────────────────────────────────────
+  {
+    files: ['src/app/core/upload/upload-manager.service.ts'],
+    rules: {
+      // Singleton orchestrator coordinates many pipelines and delegated streams.
+      // Keep max-lines rule active globally; disable only for this service file.
+      'max-lines': 'off',
+    },
+  },
+
   // ── HTML templates ────────────────────────────────────────────────────────
   {
     files: ['src/**/*.html'],

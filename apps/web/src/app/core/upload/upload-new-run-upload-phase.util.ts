@@ -120,27 +120,19 @@ async function handleUploadResult(args: {
   const { jobId, result, ctx, isCancelled, jobState, queue, supabaseClient, getUserId } = args;
 
   if (isCancelled()) {
-    if (result.error === null) {
-      await supabaseClient.storage.from('images').remove([result.storagePath]);
-      await supabaseClient.from('images').delete().eq('id', result.id);
-    }
-    const cancelledJob = jobState.findJob(jobId);
-    queue.markDone(jobId);
-    if (cancelledJob) {
-      ctx.emitBatchProgress(cancelledJob.batchId);
-    }
-    ctx.drainQueue();
+    await handleCancelledResultBeforeFinalize({
+      jobId,
+      result,
+      ctx,
+      jobState,
+      queue,
+      supabaseClient,
+    });
     return null;
   }
 
   if (result.error !== null) {
-    const msg =
-      result.error instanceof Error
-        ? result.error.message
-        : typeof result.error === 'object'
-          ? ((result.error as { message?: string }).message ?? String(result.error))
-          : String(result.error);
-
+    const msg = getUploadErrorMessage(result.error);
     ctx.failJob(jobId, 'saving_record', msg);
     return null;
   }
@@ -156,9 +148,7 @@ async function handleUploadResult(args: {
 
   const savedJob = jobState.findJob(jobId)!;
   if (isCancelled()) {
-    queue.markDone(jobId);
-    ctx.emitBatchProgress(savedJob.batchId);
-    ctx.drainQueue();
+    handleCancelledSavedJob(jobId, savedJob.batchId, ctx, queue);
     return null;
   }
 
@@ -172,6 +162,50 @@ async function handleUploadResult(args: {
   }
 
   return savedJob;
+}
+
+async function handleCancelledResultBeforeFinalize(args: {
+  jobId: string;
+  result: UploadResult;
+  ctx: PipelineContext;
+  jobState: UploadJobStateService;
+  queue: UploadQueueService;
+  supabaseClient: SupabaseService['client'];
+}): Promise<void> {
+  const { jobId, result, ctx, jobState, queue, supabaseClient } = args;
+
+  if (result.error === null) {
+    await supabaseClient.storage.from('images').remove([result.storagePath]);
+    await supabaseClient.from('images').delete().eq('id', result.id);
+  }
+
+  const cancelledJob = jobState.findJob(jobId);
+  queue.markDone(jobId);
+  if (cancelledJob) {
+    ctx.emitBatchProgress(cancelledJob.batchId);
+  }
+  ctx.drainQueue();
+}
+
+function handleCancelledSavedJob(
+  jobId: string,
+  batchId: string,
+  ctx: PipelineContext,
+  queue: UploadQueueService,
+): void {
+  queue.markDone(jobId);
+  ctx.emitBatchProgress(batchId);
+  ctx.drainQueue();
+}
+
+function getUploadErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'object') {
+    return (error as { message?: string }).message ?? String(error);
+  }
+  return String(error);
 }
 
 async function withTimeout<T>(

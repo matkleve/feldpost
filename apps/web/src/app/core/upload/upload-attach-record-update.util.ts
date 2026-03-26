@@ -32,9 +32,9 @@ type AttachRecordUpdateArgs = {
   onCancelled: () => Promise<boolean>;
   insertDedupHash: (payload: {
     content_hash: string;
-    image_id: string;
-    owner_id?: string;
-  }) => Promise<unknown>;
+    image_id: string | undefined;
+    user_id?: string;
+  }) => PromiseLike<unknown>;
   logInfo: (...args: unknown[]) => void;
   logError: (...args: unknown[]) => void;
 };

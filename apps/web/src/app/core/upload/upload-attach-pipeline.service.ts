@@ -47,6 +47,19 @@ export class UploadAttachPipelineService {
       return;
     }
 
+    const handleCancelled = (): Promise<boolean> =>
+      handleCancelledStorageCleanup({
+        cancelled: this.isCancelled(jobId),
+        storagePath,
+        removeStoragePath: async (cleanupPath) => {
+          await this.supabase.client.storage.from('images').remove([cleanupPath]);
+        },
+        findJob: () => this.jobState.findJob(jobId),
+        markDone: () => this.queue.markDone(jobId),
+        emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
+        drainQueue: () => ctx.drainQueue(),
+      });
+
     const recordUpdate = await runAttachRecordUpdate({
       jobId,
       job,
@@ -57,7 +70,7 @@ export class UploadAttachPipelineService {
       supabaseClient: this.supabase.client,
       setPhase: (phase) => this.jobState.setPhase(jobId, phase),
       failJob: (phase, error) => ctx.failJob(jobId, phase, error),
-      onCancelled: async () => handleCancelled(storagePath),
+      onCancelled: handleCancelled,
       logInfo: (...logArgs) => console.log(...logArgs),
       logError: (...logArgs) => console.error(...logArgs),
     });
@@ -165,8 +178,9 @@ export class UploadAttachPipelineService {
       handleCancelledStorageCleanup({
         cancelled: this.isCancelled(jobId),
         storagePath: path,
-        removeStoragePath: (cleanupPath) =>
-          this.supabase.client.storage.from('images').remove([cleanupPath]),
+        removeStoragePath: async (cleanupPath) => {
+          await this.supabase.client.storage.from('images').remove([cleanupPath]);
+        },
         findJob: () => this.jobState.findJob(jobId),
         markDone: () => this.queue.markDone(jobId),
         emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),

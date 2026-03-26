@@ -8,7 +8,7 @@ type InsertDedupHashArgs = {
   contentHash: string | undefined;
   imageId: string | undefined;
   userId: string | undefined;
-  insert: (payload: DedupInsertPayload) => Promise<unknown>;
+  insert: (payload: DedupInsertPayload) => PromiseLike<unknown>;
 };
 
 export function insertDedupHashFireAndForget(args: InsertDedupHashArgs): void {

@@ -69,9 +69,11 @@ export async function runAttachRecordUpdate(
     removeStoragePath: async (path) => {
       await supabaseClient.storage.from('images').remove([path]);
     },
-    onFail: (phase, error) => failJob(phase, error),
+    onFail: (_phase, error) => failJob('replacing_record', error),
     onCancelled,
-    insertDedupHash: (payload) => supabaseClient.from('dedup_hashes').insert(payload),
+    insertDedupHash: async (payload) => {
+      await supabaseClient.from('dedup_hashes').insert(payload);
+    },
     logInfo: (...logArgs) => logInfo(...logArgs),
     logError: (...logArgs) => logError(...logArgs),
   });
