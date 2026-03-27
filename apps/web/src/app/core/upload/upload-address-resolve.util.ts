@@ -2,7 +2,7 @@ import type { GeocodingService } from '../geocoding.service';
 import type { SupabaseService } from '../supabase/supabase.service';
 
 export async function resolveUploadAddress(args: {
-  imageId: string;
+  mediaItemId: string;
   lat: number;
   lng: number;
   geocoding: GeocodingService;
@@ -16,13 +16,13 @@ export async function resolveUploadAddress(args: {
     bodySnippet: string | null;
   };
 }): Promise<void> {
-  const { imageId, lat, lng, geocoding, supabaseClient, describePersistError } = args;
+  const { mediaItemId, lat, lng, geocoding, supabaseClient, describePersistError } = args;
   try {
     const result = await geocoding.reverse(lat, lng);
     if (!result) return;
 
-    const { error } = await supabaseClient.rpc('bulk_update_image_addresses', {
-      p_image_ids: [imageId],
+    const { error } = await supabaseClient.rpc('bulk_update_media_addresses', {
+      p_media_item_ids: [mediaItemId],
       p_address_label: result.addressLabel,
       p_city: result.city,
       p_district: result.district,
@@ -31,8 +31,8 @@ export async function resolveUploadAddress(args: {
     });
 
     if (error) {
-      console.error('Failed to persist address for image', imageId, {
-        imageId,
+      console.error('Failed to persist address for media item', mediaItemId, {
+        mediaItemId,
         ...describePersistError(error),
       });
     }

@@ -606,11 +606,11 @@ describe('UploadService', () => {
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
       const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
-        (c: string[]) => c[0] === 'bulk_update_image_addresses',
+        (c: string[]) => c[0] === 'bulk_update_media_addresses',
       )!;
       expect(rpcCall).toBeDefined();
       expect(rpcCall[1]).toMatchObject({
-        p_image_ids: ['img-uuid'],
+        p_media_item_ids: ['img-uuid'],
         p_address_label: 'Burgstraße 7, 8001 Zürich, Switzerland',
         p_city: 'Zürich',
         p_district: 'Altstadt',

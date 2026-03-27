@@ -159,10 +159,7 @@ export class MapMarkerReconcileFacade {
       existing.signedAt = undefined;
     }
 
-    const newImageId =
-      count === 1
-        ? ((row.media_item_id ?? row.image_id ?? undefined) as string | undefined)
-        : undefined;
+    const newImageId = count === 1 ? this.resolveMarkerMediaItemId(row) : undefined;
     if (existing.imageId !== newImageId) {
       if (existing.imageId) deps.markersByImageId.delete(existing.imageId);
       if (newImageId) deps.markersByImageId.set(newImageId, key);
@@ -225,10 +222,7 @@ export class MapMarkerReconcileFacade {
     }
 
     const previousImageId = reusableState.imageId;
-    const nextImageId =
-      count === 1
-        ? ((row.media_item_id ?? row.image_id ?? undefined) as string | undefined)
-        : undefined;
+    const nextImageId = count === 1 ? this.resolveMarkerMediaItemId(row) : undefined;
     if (previousImageId !== nextImageId) {
       if (previousImageId) deps.markersByImageId.delete(previousImageId);
       if (nextImageId) deps.markersByImageId.set(nextImageId, key);
@@ -310,15 +304,16 @@ export class MapMarkerReconcileFacade {
       corrected,
       thumbnailSourcePath,
       fallbackLabel,
-      imageId:
-        count === 1
-          ? ((row.media_item_id ?? row.image_id ?? undefined) as string | undefined)
-          : undefined,
+      imageId: count === 1 ? this.resolveMarkerMediaItemId(row) : undefined,
     });
 
-    const markerMediaItemId = row.media_item_id ?? row.image_id;
+    const markerMediaItemId = this.resolveMarkerMediaItemId(row);
     if (count === 1 && markerMediaItemId) {
       deps.markersByImageId.set(markerMediaItemId, key);
     }
+  }
+
+  private resolveMarkerMediaItemId(row: ReconcileIncomingRow): string | undefined {
+    return row.media_item_id ?? row.image_id ?? undefined;
   }
 }

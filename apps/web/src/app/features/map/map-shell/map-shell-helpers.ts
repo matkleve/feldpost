@@ -47,6 +47,7 @@ export type ViewportRow = {
   cluster_lng: number;
   image_count: number;
   image_id: string | null;
+  media_item_id?: string | null;
   direction: number | null;
   storage_path: string | null;
   thumbnail_path: string | null;
@@ -195,12 +196,14 @@ export function mergeOverlappingClusters(
     }
 
     const isSingle = totalCount === 1;
+    const resolvedMediaItemId = rows[i].media_item_id ?? rows[i].image_id;
     result.push({
       ...rows[i],
       cluster_lat: weightedLat / totalCount,
       cluster_lng: weightedLng / totalCount,
       image_count: totalCount,
-      image_id: isSingle ? rows[i].image_id : null,
+      image_id: isSingle ? (rows[i].image_id ?? resolvedMediaItemId) : null,
+      media_item_id: isSingle ? resolvedMediaItemId : null,
       direction: isSingle ? rows[i].direction : null,
       storage_path: isSingle ? rows[i].storage_path : null,
       thumbnail_path: isSingle ? rows[i].thumbnail_path : null,

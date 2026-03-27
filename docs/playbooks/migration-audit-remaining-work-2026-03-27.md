@@ -50,7 +50,7 @@ Hinweis:
 | P1: Legacy Tabellen entfernen | image_projects, saved_groups, saved_group_images                                                              | Erledigt                                                                             |
 | P2: Legacy Spalten entfernen  | image_id in coordinate_corrections, dedup_hashes, media_metadata, share_set_items; media_item_id auf NOT NULL | Erledigt (alle vier Tabellen auf media_item_id umgestellt, Legacy image_id entfernt) |
 | P2: Naming Cleanup            | image_metadata -> media_metadata                                                                              | Erledigt (Tabellenname)                                                              |
-| P3: Letzte Übergangsreste     | source_image_id in media_items und optional v_media_backfill_audit                                            | In Arbeit (cluster/viewport RPCs emittieren jetzt auch media_item_id)                |
+| P3: Letzte Übergangsreste     | source_image_id in media_items und optional v_media_backfill_audit                                            | In Arbeit (cluster/viewport + location RPCs haben jetzt media_item_id/media_* Vertrag) |
 
 ## Freigabekriterien vor DROP
 

@@ -97,13 +97,14 @@ export class MapMarkerClusterMergeService {
       }
 
       const isSingle = totalCount === 1;
+      const resolvedMediaItemId = rows[i].media_item_id ?? rows[i].image_id;
       result.push({
         ...rows[i],
         cluster_lat: wLat / totalCount,
         cluster_lng: wLng / totalCount,
         image_count: totalCount,
-        image_id: isSingle ? rows[i].image_id : null,
-        media_item_id: isSingle ? (rows[i].media_item_id ?? rows[i].image_id) : null,
+        image_id: isSingle ? (rows[i].image_id ?? resolvedMediaItemId) : null,
+        media_item_id: isSingle ? resolvedMediaItemId : null,
         direction: isSingle ? rows[i].direction : null,
         storage_path: isSingle ? rows[i].storage_path : null,
         thumbnail_path: isSingle ? rows[i].thumbnail_path : null,

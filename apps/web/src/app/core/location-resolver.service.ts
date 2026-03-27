@@ -170,7 +170,7 @@ export class LocationResolverService {
 
   /** Fetch and process one batch of unresolved images. Returns count resolved. */
   private async processNextBatch(): Promise<number> {
-    const { data, error } = await this.supabase.client.rpc('get_unresolved_images', {
+    const { data, error } = await this.supabase.client.rpc('get_unresolved_media', {
       p_limit: BATCH_SIZE,
     });
 
@@ -185,15 +185,17 @@ export class LocationResolverService {
     let resolved = 0;
     for (const row of rows) {
       if (!this.auth.user() || !this.backgroundRunning) break;
-      if (this.pending.has(row.image_id)) continue;
+      const mediaItemId = this.resolveUnresolvedRowId(row);
+      if (!mediaItemId) continue;
+      if (this.pending.has(mediaItemId)) continue;
 
-      this.pending.add(row.image_id);
+      this.pending.add(mediaItemId);
       try {
-        if (await this.resolveRow(row)) resolved++;
+        if (await this.resolveRow(row, mediaItemId)) resolved++;
       } catch {
         // Skip this image, continue with next
       } finally {
-        this.pending.delete(row.image_id);
+        this.pending.delete(mediaItemId);
       }
     }
     return resolved;
@@ -226,7 +228,7 @@ export class LocationResolverService {
   }
 
   /** Resolve a single unresolved row — returns true if resolved. */
-  private async resolveRow(row: UnresolvedRow): Promise<boolean> {
+  private async resolveRow(row: UnresolvedRow, mediaItemId: string): Promise<boolean> {
     const hasGps = row.latitude != null && row.longitude != null;
     const hasAddress = row.address_label != null;
 
@@ -235,7 +237,7 @@ export class LocationResolverService {
       const result = await this.geocoding.reverse(row.latitude!, row.longitude!);
       if (!result) return false;
 
-      await this.persistAddressSingle(row.image_id, result);
+      await this.persistAddressSingle(mediaItemId, result);
       return true;
     }
 
@@ -244,7 +246,7 @@ export class LocationResolverService {
       const result = await this.geocoding.forward(row.address_label!);
       if (!result) return false;
 
-      await this.persistGpsAndAddress(row.image_id, result.lat, result.lng, {
+      await this.persistGpsAndAddress(mediaItemId, result.lat, result.lng, {
         addressLabel: result.addressLabel,
         city: result.city,
         district: result.district,
@@ -269,10 +271,14 @@ export class LocationResolverService {
     );
   }
 
+  private resolveUnresolvedRowId(row: UnresolvedRow): string | null {
+    return row.media_item_id ?? row.image_id ?? null;
+  }
+
   /** Persist address fields for multiple images sharing the same address. */
-  private async persistAddress(imageIds: string[], result: ReverseGeocodeResult): Promise<void> {
-    const { error } = await this.supabase.client.rpc('bulk_update_image_addresses', {
-      p_image_ids: imageIds,
+  private async persistAddress(mediaItemIds: string[], result: ReverseGeocodeResult): Promise<void> {
+    const { error } = await this.supabase.client.rpc('bulk_update_media_addresses', {
+      p_media_item_ids: mediaItemIds,
       p_address_label: result.addressLabel,
       p_city: result.city,
       p_district: result.district,
@@ -281,8 +287,8 @@ export class LocationResolverService {
     });
     if (error) {
       console.error('[LocationResolver] Failed to persist address:', {
-        imageCount: imageIds.length,
-        imageIds: imageIds.slice(0, 5),
+        imageCount: mediaItemIds.length,
+        imageIds: mediaItemIds.slice(0, 5),
         ...this.describeError(error),
       });
     }
@@ -290,8 +296,8 @@ export class LocationResolverService {
 
   /** Persist address for a single image via the individual RPC. */
   private async persistAddressSingle(imageId: string, result: ReverseGeocodeResult): Promise<void> {
-    const { error } = await this.supabase.client.rpc('resolve_image_location', {
-      p_image_id: imageId,
+    const { error } = await this.supabase.client.rpc('resolve_media_location', {
+      p_media_item_id: imageId,
       p_address_label: result.addressLabel,
       p_city: result.city,
       p_district: result.district,
@@ -321,8 +327,8 @@ export class LocationResolverService {
       country: string | null;
     },
   ): Promise<void> {
-    const { error } = await this.supabase.client.rpc('resolve_image_location', {
-      p_image_id: imageId,
+    const { error } = await this.supabase.client.rpc('resolve_media_location', {
+      p_media_item_id: imageId,
       p_latitude: lat,
       p_longitude: lng,
       p_address_label: address.addressLabel,
@@ -393,7 +399,8 @@ export class LocationResolverService {
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface UnresolvedRow {
-  image_id: string;
+  media_item_id: string | null;
+  image_id?: string | null;
   latitude: number | null;
   longitude: number | null;
   address_label: string | null;

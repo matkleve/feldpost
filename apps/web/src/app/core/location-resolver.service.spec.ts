@@ -73,9 +73,9 @@ describe('LocationResolverService', () => {
     });
     expect(geocodingMock.reverse).toHaveBeenCalledTimes(1);
     expect(supabaseMock.client.rpc).toHaveBeenCalledWith(
-      'bulk_update_image_addresses',
+      'bulk_update_media_addresses',
       expect.objectContaining({
-        p_image_ids: ['img-1'],
+        p_media_item_ids: ['img-1'],
       }),
     );
     expect(errorSpy).toHaveBeenCalledWith(

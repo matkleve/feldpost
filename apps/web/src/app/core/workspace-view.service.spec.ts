@@ -126,7 +126,13 @@ describe('WorkspaceViewService — address resolution', () => {
   it('skips images that already have addressLabel', async () => {
     const { service, fakeGeocoding } = setup();
 
-    const img = makeImage({ addressLabel: 'Already resolved' });
+    const img = makeImage({
+      addressLabel: 'Already resolved',
+      city: 'Zurich',
+      district: 'Altstadt',
+      street: 'Burgstrasse 7',
+      country: 'Switzerland',
+    });
     service.setActiveSelectionImages([img]);
 
     await new Promise((r) => setTimeout(r, 50));
@@ -192,15 +198,15 @@ describe('WorkspaceViewService — address resolution', () => {
     // Allow the RPC call to fire.
     await vi.waitFor(() => {
       const rpcCalls = fakeSupabase.client.rpc.mock.calls.filter(
-        (c: string[]) => c[0] === 'bulk_update_image_addresses',
+        (c: string[]) => c[0] === 'bulk_update_media_addresses',
       );
       expect(rpcCalls.length).toBeGreaterThan(0);
     });
 
     const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
-      (c: string[]) => c[0] === 'bulk_update_image_addresses',
+      (c: string[]) => c[0] === 'bulk_update_media_addresses',
     )!;
-    expect(rpcCall[1].p_image_ids).toEqual(expect.arrayContaining(['img-1', 'img-2']));
+    expect(rpcCall[1].p_media_item_ids).toEqual(expect.arrayContaining(['img-1', 'img-2']));
     expect(rpcCall[1].p_address_label).toBe('Burgstra\u00dfe 7, 8001 Z\u00fcrich, Switzerland');
   });
 

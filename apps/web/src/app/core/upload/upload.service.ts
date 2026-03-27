@@ -225,7 +225,7 @@ export class UploadService {
 
     if (finalCoords) {
       resolveUploadAddress({
-        imageId: imageRow.id as string,
+        mediaItemId: imageRow.id as string,
         lat: finalCoords.lat,
         lng: finalCoords.lng,
         geocoding: this.geocoding,
