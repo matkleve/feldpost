@@ -160,6 +160,7 @@ export class UploadService {
 
     const mediaType = resolveUploadMediaType(file.type);
     const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords);
+    const gpsAssignmentAllowed = mediaType !== 'document' || finalCoords != null;
 
     const mediaInsertQuery = this.supabase.client
       .from('media_items')
@@ -177,7 +178,7 @@ export class UploadService {
         latitude: finalCoords?.lat ?? null,
         longitude: finalCoords?.lng ?? null,
         location_status: locationStatus,
-        gps_assignment_allowed: mediaType !== 'document',
+        gps_assignment_allowed: gpsAssignmentAllowed,
       })
       .select('id');
 
@@ -192,7 +193,10 @@ export class UploadService {
 
     if (abortSignal?.aborted) {
       await this.supabase.client.storage.from('media').remove([storagePath]);
-      await this.supabase.client.from('media_items').delete().eq('id', mediaRow.id as string);
+      await this.supabase.client
+        .from('media_items')
+        .delete()
+        .eq('id', mediaRow.id as string);
       return { error: 'Upload cancelled by user.' };
     }
 

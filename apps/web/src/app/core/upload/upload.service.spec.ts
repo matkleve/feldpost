@@ -474,6 +474,23 @@ describe('UploadService', () => {
       expect(insertCall.longitude).toBe(2.3522);
     });
 
+    it('allows document uploads with provided coordinates by enabling GPS assignment on insert', async () => {
+      vi.mocked(exifr.gps).mockResolvedValue(null as any);
+      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+
+      const { service, fakeSupabase } = setup();
+      const documentFile = makeFile('report.pdf', 'application/pdf');
+
+      const result = await service.uploadFile(documentFile, { lat: 48.2082, lng: 16.3738 });
+
+      expect(result.error).toBeNull();
+      const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
+      expect(insertCall.media_type).toBe('document');
+      expect(insertCall.gps_assignment_allowed).toBe(true);
+      expect(insertCall.latitude).toBe(48.2082);
+      expect(insertCall.longitude).toBe(16.3738);
+    });
+
     it('builds the storage path using org_id / user_id segments', async () => {
       const { service, fakeSupabase } = setup();
 

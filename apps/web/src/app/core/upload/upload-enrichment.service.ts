@@ -43,29 +43,18 @@ export class UploadEnrichmentService {
       const result = await this.geocoding.forward(titleAddress);
       if (!result) return undefined;
 
-      // Update the DB row with the resolved coordinates.
-      const { error } = await this.supabase.client
-        .from('media_items')
-        .update({
-          latitude: result.lat,
-          longitude: result.lng,
-          location_status: 'gps',
-        })
-        .or(`id.eq.${imageId},source_image_id.eq.${imageId}`);
+      const { error } = await this.supabase.client.rpc('resolve_media_location', {
+        p_media_item_id: imageId,
+        p_latitude: result.lat,
+        p_longitude: result.lng,
+        p_address_label: result.addressLabel,
+        p_city: result.city,
+        p_district: result.district,
+        p_street: result.street,
+        p_country: result.country,
+      });
 
       if (error) return undefined;
-
-      // Update the DB row with address fields from forward geocoding.
-      await this.supabase.client
-        .from('media_items')
-        .update({
-          address_label: result.addressLabel,
-          city: result.city,
-          district: result.district,
-          street: result.street,
-          country: result.country,
-        })
-        .or(`id.eq.${imageId},source_image_id.eq.${imageId}`);
 
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {

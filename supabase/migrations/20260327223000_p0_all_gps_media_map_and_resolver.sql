@@ -1,0 +1,344 @@
+-- =============================================================================
+-- P0 fix: map + resolver must include all eligible media items (not photo-only)
+-- =============================================================================
+-- Goal:
+-- - Show all media items with GPS on map markers.
+-- - Run address resolution for all unresolved media items.
+--
+-- This removes the photo-only runtime filter introduced in previous migration.
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION public.bulk_update_media_addresses(
+  p_media_item_ids uuid[],
+  p_address_label text,
+  p_city text DEFAULT NULL::text,
+  p_district text DEFAULT NULL::text,
+  p_street text DEFAULT NULL::text,
+  p_country text DEFAULT NULL::text
+)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  _org_id uuid;
+  _updated int;
+BEGIN
+  SELECT organization_id INTO _org_id
+    FROM public.profiles
+   WHERE id = auth.uid();
+
+  IF _org_id IS NULL THEN
+    RAISE EXCEPTION 'User profile or organization not found';
+  END IF;
+
+  UPDATE public.media_items m
+     SET address_label      = p_address_label,
+         city               = p_city,
+         district           = p_district,
+         street             = p_street,
+         country            = p_country,
+         location_status    = 'resolved',
+         updated_at         = now()
+   WHERE m.organization_id = _org_id
+     AND (
+       m.id = ANY(p_media_item_ids)
+       OR m.source_image_id = ANY(p_media_item_ids)
+     );
+
+  GET DIAGNOSTICS _updated = ROW_COUNT;
+  RETURN _updated;
+END;
+$function$;
+
+
+CREATE OR REPLACE FUNCTION public.get_unresolved_media(p_limit integer DEFAULT 50)
+RETURNS TABLE(
+  media_item_id uuid,
+  image_id uuid,
+  latitude numeric,
+  longitude numeric,
+  address_label text,
+  city text,
+  district text,
+  street text,
+  country text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+  SELECT
+    m.id AS media_item_id,
+    COALESCE(m.source_image_id, m.id) AS image_id,
+    m.latitude,
+    m.longitude,
+    m.address_label,
+    m.city,
+    m.district,
+    m.street,
+    m.country
+  FROM public.media_items m
+  WHERE m.organization_id = public.user_org_id()
+    AND (
+      (
+        m.latitude IS NOT NULL AND m.longitude IS NOT NULL
+        AND (m.address_label IS NULL OR m.city IS NULL OR m.district IS NULL OR m.street IS NULL OR m.country IS NULL)
+      )
+      OR
+      (
+        m.latitude IS NULL AND m.longitude IS NULL
+        AND m.address_label IS NOT NULL
+      )
+    )
+  ORDER BY m.created_at DESC
+  LIMIT p_limit;
+$function$;
+
+
+CREATE OR REPLACE FUNCTION public.resolve_media_location(
+  p_media_item_id uuid,
+  p_latitude numeric DEFAULT NULL::numeric,
+  p_longitude numeric DEFAULT NULL::numeric,
+  p_address_label text DEFAULT NULL::text,
+  p_city text DEFAULT NULL::text,
+  p_district text DEFAULT NULL::text,
+  p_street text DEFAULT NULL::text,
+  p_country text DEFAULT NULL::text
+)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  _org_id uuid;
+BEGIN
+  SELECT organization_id INTO _org_id
+    FROM public.profiles
+   WHERE id = auth.uid();
+
+  IF _org_id IS NULL THEN
+    RAISE EXCEPTION 'User profile or organization not found';
+  END IF;
+
+  UPDATE public.media_items m
+     SET latitude        = COALESCE(p_latitude, m.latitude),
+         longitude       = COALESCE(p_longitude, m.longitude),
+         address_label   = COALESCE(p_address_label, m.address_label),
+         city            = COALESCE(p_city, m.city),
+         district        = COALESCE(p_district, m.district),
+         street          = COALESCE(p_street, m.street),
+         country         = COALESCE(p_country, m.country),
+         location_status = 'resolved',
+         updated_at      = now()
+   WHERE m.organization_id = _org_id
+     AND (
+       m.id = p_media_item_id
+       OR m.source_image_id = p_media_item_id
+     );
+
+  RETURN FOUND;
+END;
+$function$;
+
+
+CREATE OR REPLACE FUNCTION public.cluster_images(
+  p_cluster_lat numeric,
+  p_cluster_lng numeric,
+  p_zoom integer
+)
+RETURNS TABLE(
+  image_id uuid,
+  media_item_id uuid,
+  latitude numeric,
+  longitude numeric,
+  thumbnail_path text,
+  storage_path text,
+  captured_at timestamp with time zone,
+  created_at timestamp with time zone,
+  project_id uuid,
+  project_name text,
+  project_ids uuid[],
+  project_names text[],
+  direction numeric,
+  exif_latitude numeric,
+  exif_longitude numeric,
+  address_label text,
+  city text,
+  district text,
+  street text,
+  country text,
+  user_name text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+  WITH grid AS (
+    SELECT
+      CASE
+        WHEN p_zoom >= 19 THEN 0::numeric
+        ELSE (80.0 * 360.0) / (256.0 * power(2, p_zoom))
+      END AS cell_size
+  ),
+  snapped_input AS (
+    SELECT
+      CASE WHEN g.cell_size > 0
+        THEN ROUND(p_cluster_lat / g.cell_size) * g.cell_size
+        ELSE p_cluster_lat
+      END AS snap_lat,
+      CASE WHEN g.cell_size > 0
+        THEN ROUND(p_cluster_lng / g.cell_size) * g.cell_size
+        ELSE p_cluster_lng
+      END AS snap_lng
+    FROM grid g
+  )
+  SELECT
+    COALESCE(m.source_image_id, m.id) AS image_id,
+    m.id AS media_item_id,
+    m.latitude,
+    m.longitude,
+    m.thumbnail_path,
+    m.storage_path,
+    m.captured_at,
+    m.created_at,
+    mp.project_ids[1] AS project_id,
+    mp.project_names[1] AS project_name,
+    COALESCE(mp.project_ids, '{}'::uuid[]) AS project_ids,
+    COALESCE(mp.project_names, '{}'::text[]) AS project_names,
+    NULL::numeric AS direction,
+    m.exif_latitude,
+    m.exif_longitude,
+    m.address_label,
+    m.city,
+    m.district,
+    m.street,
+    m.country,
+    pr.full_name AS user_name
+  FROM public.media_items m
+  CROSS JOIN grid g
+  CROSS JOIN snapped_input si
+  LEFT JOIN LATERAL (
+    SELECT
+      array_agg(p.id ORDER BY p.name) AS project_ids,
+      array_agg(p.name ORDER BY p.name) AS project_names
+    FROM public.media_projects mp
+    JOIN public.projects p ON p.id = mp.project_id
+    WHERE mp.media_item_id = m.id
+  ) mp ON TRUE
+  LEFT JOIN public.profiles pr ON pr.id = m.created_by
+  WHERE m.organization_id = public.user_org_id()
+    AND m.latitude IS NOT NULL
+    AND m.longitude IS NOT NULL
+    AND (
+      (g.cell_size > 0 AND
+       ROUND(m.latitude  / g.cell_size) * g.cell_size = si.snap_lat AND
+       ROUND(m.longitude / g.cell_size) * g.cell_size = si.snap_lng)
+      OR
+      (g.cell_size = 0 AND
+       ROUND(m.latitude, 7) = p_cluster_lat AND
+       ROUND(m.longitude, 7) = p_cluster_lng)
+    )
+  ORDER BY COALESCE(m.captured_at, m.created_at) DESC
+  LIMIT 500;
+$function$;
+
+
+CREATE OR REPLACE FUNCTION public.viewport_markers(
+  min_lat numeric,
+  min_lng numeric,
+  max_lat numeric,
+  max_lng numeric,
+  zoom integer
+)
+RETURNS TABLE(
+  cluster_lat numeric,
+  cluster_lng numeric,
+  image_count bigint,
+  image_id uuid,
+  media_item_id uuid,
+  direction numeric,
+  storage_path text,
+  thumbnail_path text,
+  exif_latitude numeric,
+  exif_longitude numeric,
+  created_at timestamp with time zone
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'public', 'extensions'
+AS $function$
+  WITH grid AS (
+    SELECT
+      CASE
+        WHEN zoom >= 19 THEN 0::numeric
+        ELSE (80.0 * 360.0) / (256.0 * power(2, zoom))
+      END AS cell_size,
+      extensions.ST_MakeEnvelope(min_lng, min_lat, max_lng, max_lat, 4326)::extensions.geography AS viewport_geog
+  ),
+  filtered AS (
+    SELECT
+      m.id,
+      m.source_image_id,
+      m.latitude,
+      m.longitude,
+      m.storage_path AS s_path,
+      m.thumbnail_path AS t_path,
+      m.exif_latitude  AS exif_lat,
+      m.exif_longitude AS exif_lng,
+      m.created_at     AS c_at,
+      CASE WHEN g.cell_size > 0
+        THEN ROUND(m.latitude  / g.cell_size) * g.cell_size
+        ELSE m.latitude
+      END AS snap_lat,
+      CASE WHEN g.cell_size > 0
+        THEN ROUND(m.longitude / g.cell_size) * g.cell_size
+        ELSE m.longitude
+      END AS snap_lng
+    FROM public.media_items m, grid g
+    WHERE m.organization_id = public.user_org_id()
+      AND m.geog IS NOT NULL
+      AND extensions.ST_Intersects(m.geog, g.viewport_geog)
+  ),
+  clustered AS (
+    SELECT
+      snap_lat,
+      snap_lng,
+      COUNT(*) AS cnt,
+      CASE WHEN COUNT(*) = 1 THEN MIN(COALESCE(source_image_id, id)::text)::uuid END AS single_id,
+      CASE WHEN COUNT(*) = 1 THEN MIN(id::text)::uuid END AS single_media_item_id,
+      CASE WHEN COUNT(*) = 1 THEN MIN(s_path) END AS single_s_path,
+      CASE WHEN COUNT(*) = 1 THEN MIN(t_path) END AS single_t_path,
+      CASE WHEN COUNT(*) = 1 THEN MIN(exif_lat) END AS single_exif_lat,
+      CASE WHEN COUNT(*) = 1 THEN MIN(exif_lng) END AS single_exif_lng,
+      CASE WHEN COUNT(*) = 1 THEN MIN(c_at) END AS single_c_at,
+      AVG(latitude) AS avg_lat,
+      AVG(longitude) AS avg_lng
+    FROM filtered
+    GROUP BY snap_lat, snap_lng
+  )
+  SELECT
+    ROUND(avg_lat, 7) AS cluster_lat,
+    ROUND(avg_lng, 7) AS cluster_lng,
+    cnt AS image_count,
+    single_id AS image_id,
+    single_media_item_id AS media_item_id,
+    NULL::numeric AS direction,
+    single_s_path AS storage_path,
+    single_t_path AS thumbnail_path,
+    single_exif_lat AS exif_latitude,
+    single_exif_lng AS exif_longitude,
+    single_c_at AS created_at
+  FROM clustered
+  ORDER BY cnt DESC, cluster_lat, cluster_lng
+  LIMIT 2000;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.cluster_images(numeric, numeric, integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.cluster_images_multi(jsonb, int) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.viewport_markers(numeric, numeric, numeric, numeric, integer) TO authenticated;
