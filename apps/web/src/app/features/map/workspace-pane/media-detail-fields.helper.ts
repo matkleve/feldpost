@@ -3,7 +3,7 @@ import { ForwardGeocodeResult } from '../../../core/geocoding.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast.service';
 import { DateSaveEvent } from './captured-date-editor.component';
-import { DetailEditingField, ImageRecord } from './image-detail-view.types';
+import { DetailEditingField, ImageRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
@@ -40,9 +40,9 @@ export class ImageDetailFieldsHelper {
     this.deps.signals.saving.set(true);
 
     const { error } = await this.deps.services.supabase.client
-      .from('images')
+      .from('media_items')
       .update({ [field]: updateValue })
-      .eq('id', img.id);
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
       this.deps.signals.image.update((prev) => (prev ? { ...prev, [field]: oldValue } : prev));
@@ -142,7 +142,7 @@ export class ImageDetailFieldsHelper {
     this.deps.signals.editingField.set(null);
 
     const { error } = await this.deps.services.supabase.client
-      .from('images')
+      .from('media_items')
       .update({
         street: suggestion.street,
         city: suggestion.city,
@@ -150,7 +150,7 @@ export class ImageDetailFieldsHelper {
         country: suggestion.country,
         address_label: suggestion.addressLabel,
       })
-      .eq('id', img.id);
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
       this.deps.signals.image.update((prev) =>

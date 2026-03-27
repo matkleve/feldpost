@@ -17,8 +17,8 @@ import {
     UiButtonDirective,
     UiButtonPrimaryDirective,
   ],
-  templateUrl: './image-detail-photo-viewer.component.html',
-  styleUrl: './image-detail-photo-viewer.component.scss',
+  templateUrl: './media-detail-photo-viewer.component.html',
+  styleUrl: './media-detail-photo-viewer.component.scss',
 })
 export class ImageDetailPhotoViewerComponent {
   private readonly i18nService = inject(I18nService);
@@ -66,4 +66,3 @@ export class ImageDetailPhotoViewerComponent {
     }
   }
 }
-

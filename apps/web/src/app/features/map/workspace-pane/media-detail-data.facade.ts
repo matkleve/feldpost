@@ -1,13 +1,13 @@
 import type { WritableSignal } from '@angular/core';
-import type { ImageDetailProjectMembershipHelper } from './image-detail-project-membership.helper';
+import type { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import type { PhotoLoadService } from '../../../core/photo-load.service';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
-import type { ImageRecord, MetadataEntry, SelectOption } from './image-detail-view.types';
+import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
 import {
   isImageLikeMedia,
   mapImageMetadataRows,
   resolvePreviewThumbnailPath,
-} from './image-detail-view.utils';
+} from './media-detail-view.utils';
 
 interface MediaDetailRow {
   id: string;
@@ -25,6 +25,11 @@ interface MediaDetailRow {
   created_at: string;
   mime_type: string | null;
   location_status: 'gps' | 'no_gps' | 'unresolved' | null;
+  address_label: string | null;
+  street: string | null;
+  city: string | null;
+  district: string | null;
+  country: string | null;
 }
 
 interface ProjectRow {
@@ -169,7 +174,7 @@ export class ImageDetailDataFacade {
     const mediaResult = await this.deps.services.supabase.client
       .from('media_items')
       .select(
-        'id,source_image_id,organization_id,primary_project_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status',
+        'id,source_image_id,organization_id,primary_project_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status,address_label,street,city,district,country',
       )
       .or(`id.eq.${id},source_image_id.eq.${id}`)
       .limit(1)
@@ -199,11 +204,11 @@ export class ImageDetailDataFacade {
       captured_at: media.captured_at,
       has_time: media.captured_at !== null,
       created_at: media.created_at,
-      address_label: null,
-      street: null,
-      city: null,
-      district: null,
-      country: null,
+      address_label: media.address_label,
+      street: media.street,
+      city: media.city,
+      district: media.district,
+      country: media.country,
       direction: null,
       location_unresolved: media.location_status === 'unresolved',
     };

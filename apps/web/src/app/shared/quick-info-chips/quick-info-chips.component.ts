@@ -16,7 +16,6 @@ export interface ChipDef {
   styleUrl: './quick-info-chips.component.scss',
 })
 export class QuickInfoChipsComponent {
-  readonly chips = input.required<ChipDef[]>();
+  readonly chips = input<ChipDef[]>([]);
   readonly chipClicked = output<number>();
 }
-

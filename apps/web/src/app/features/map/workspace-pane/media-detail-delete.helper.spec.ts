@@ -1,19 +1,19 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailDeleteHelper } from './image-detail-delete.helper';
+import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
 
 function createHelper() {
   const showDeleteConfirm = signal(false);
   const showContextMenu = signal(true);
   const onDeleted = vi.fn();
-  const deleteEq = vi.fn(async () => ({ error: null }));
+  const deleteOr = vi.fn(async () => ({ error: null }));
   const helper = new ImageDetailDeleteHelper({
     services: {
       supabase: {
         client: {
           from: vi.fn(() => ({
             delete: vi.fn(() => ({
-              eq: deleteEq,
+              or: deleteOr,
             })),
           })),
         },
@@ -29,7 +29,7 @@ function createHelper() {
     },
   });
 
-  return { helper, signals: { showDeleteConfirm, showContextMenu }, onDeleted, deleteEq };
+  return { helper, signals: { showDeleteConfirm, showContextMenu }, onDeleted, deleteOr };
 }
 
 describe('ImageDetailDeleteHelper', () => {
@@ -43,12 +43,12 @@ describe('ImageDetailDeleteHelper', () => {
   });
 
   it('deletes the image and calls the close callback', async () => {
-    const { helper, signals, onDeleted, deleteEq } = createHelper();
+    const { helper, signals, onDeleted, deleteOr } = createHelper();
     signals.showDeleteConfirm.set(true);
 
     await helper.executeDelete();
 
-    expect(deleteEq).toHaveBeenCalledWith('id', 'img-1');
+    expect(deleteOr).toHaveBeenCalledWith('id.eq.img-1,source_image_id.eq.img-1');
     expect(signals.showDeleteConfirm()).toBe(false);
     expect(onDeleted).toHaveBeenCalled();
   });

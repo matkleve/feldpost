@@ -6,7 +6,7 @@ import {
 import { PhotoLoadService } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { ImageRecord } from './image-detail-view.types';
+import { ImageRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 

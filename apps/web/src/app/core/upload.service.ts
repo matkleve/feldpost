@@ -367,40 +367,42 @@ export class UploadService {
     //    when EXIF is absent.
     const finalCoords: ExifCoords | undefined = exifCoords ?? manualCoords;
 
-    // ── 6. Insert images row ───────────────────────────────────────────────
-    const { data: imageRow, error: dbError } = await this.supabase.client
-      .from('images')
-      .insert({
-        user_id: user.id,
-        organization_id: orgId,
-        storage_path: storagePath,
-        exif_latitude: exifCoords?.lat ?? null,
-        exif_longitude: exifCoords?.lng ?? null,
-        latitude: finalCoords?.lat ?? null,
-        longitude: finalCoords?.lng ?? null,
-        captured_at: capturedAt ?? null,
-        direction: direction ?? null,
-        location_unresolved: finalCoords != null,
-        project_id: projectId ?? null,
-      })
-      .select('id')
-      .single();
+    // ── 6. Resolve media type and location status ──────────────────────────
+    const mediaType = this.resolveMediaType(file.type);
+    const mimeType = file.type || this.resolveMimeType(file);
+    const locationStatus = this.resolveLocationStatus(mediaType, finalCoords);
 
-    if (dbError) {
-      return { error: dbError };
+    // Determine primary project: use provided projectId or fetch default project
+    let primaryProjectId = projectId;
+    if (!primaryProjectId) {
+      const { data: defProj } = await this.supabase.client
+        .from('projects')
+        .select('id')
+        .eq('organization_id', orgId)
+        .order('archived_at', { ascending: true })
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single();
+
+      primaryProjectId = defProj?.id ?? null;
     }
 
-    // Shadow write into mixed-media tables when upload context has a primary project.
-    if (projectId) {
-      const mediaType = this.resolveMediaType(file.type);
-      const locationStatus = this.resolveLocationStatus(mediaType, finalCoords);
+    if (!primaryProjectId) {
+      return {
+        error:
+          'No active project found in this organization. Cannot insert media without a primary project.',
+      };
+    }
 
-      const { error: mediaError } = await this.supabase.client.from('media_items').insert({
+    // ── 7. Insert into media_items (now PRIMARY) ───────────────────────────
+    const { data: mediaRow, error: dbError } = await this.supabase.client
+      .from('media_items')
+      .insert({
         organization_id: orgId,
-        primary_project_id: projectId,
+        primary_project_id: primaryProjectId,
         created_by: user.id,
         media_type: mediaType,
-        mime_type: file.type,
+        mime_type: mimeType,
         storage_path: storagePath,
         file_name: file.name,
         file_size_bytes: file.size,
@@ -411,21 +413,43 @@ export class UploadService {
         longitude: finalCoords?.lng ?? null,
         location_status: locationStatus,
         gps_assignment_allowed: mediaType !== 'document',
-        source_image_id: imageRow.id as string,
-      });
+      })
+      .select('id')
+      .single();
 
-      if (mediaError) {
-        return { error: mediaError };
-      }
+    if (dbError) {
+      return { error: dbError };
+    }
+
+    // Legacy: also write to images table for backward compatibility
+    const { error: legacyError } = await this.supabase.client.from('images').insert({
+      id: mediaRow.id as string,
+      user_id: user.id,
+      organization_id: orgId,
+      storage_path: storagePath,
+      exif_latitude: exifCoords?.lat ?? null,
+      exif_longitude: exifCoords?.lng ?? null,
+      latitude: finalCoords?.lat ?? null,
+      longitude: finalCoords?.lng ?? null,
+      captured_at: capturedAt ?? null,
+      direction: direction ?? null,
+      location_unresolved: finalCoords == null,
+      project_id: primaryProjectId,
+    });
+
+    if (legacyError && legacyError.code !== 'PGRST116') {
+      // PGRST116 = already exists, acceptable for idempotence
+      // Log but don't fail the overall operation
+      console.warn('Warning: legacy images insert failed:', legacyError);
     }
 
     // Fire-and-forget: reverse-geocode coordinates to populate address fields.
     if (finalCoords) {
-      this.resolveAddress(imageRow.id as string, finalCoords.lat, finalCoords.lng);
+      this.resolveAddress(mediaRow.id as string, finalCoords.lat, finalCoords.lng);
     }
 
     return {
-      id: imageRow.id as string,
+      id: mediaRow.id as string,
       storagePath,
       coords: finalCoords,
       direction,
@@ -437,26 +461,40 @@ export class UploadService {
    * Reverse-geocode coordinates and update the image row with structured address fields.
    * Runs asynchronously after upload — failures are logged but do not block the upload result.
    */
-  private async resolveAddress(imageId: string, lat: number, lng: number): Promise<void> {
+  private async resolveAddress(mediaItemId: string, lat: number, lng: number): Promise<void> {
     try {
       const result = await this.geocoding.reverse(lat, lng);
       if (!result) return;
 
-      const { error } = await this.supabase.client.rpc('bulk_update_image_addresses', {
-        p_image_ids: [imageId],
-        p_address_label: result.addressLabel,
-        p_city: result.city,
-        p_district: result.district,
-        p_street: result.street,
-        p_country: result.country,
-      });
+      const { error } = await this.supabase.client
+        .from('media_items')
+        .update({
+          address_label: result.addressLabel,
+          city: result.city,
+          district: result.district,
+          street: result.street,
+          country: result.country,
+        })
+        .eq('id', mediaItemId);
 
       if (error) {
-        console.error('Failed to persist address for image', imageId, {
-          imageId,
+        console.error('Failed to persist address for media item', mediaItemId, {
+          mediaItemId,
           ...this.describePersistError(error),
         });
       }
+
+      // Legacy: also update images table if it exists
+      await this.supabase.client
+        .from('images')
+        .update({
+          address_label: result.addressLabel,
+          city: result.city,
+          district: result.district,
+          street: result.street,
+          country: result.country,
+        })
+        .eq('id', mediaItemId);
     } catch {
       // Non-critical — address will show as "Unknown district" until resolved.
     }

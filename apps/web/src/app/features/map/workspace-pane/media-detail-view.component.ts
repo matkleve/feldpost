@@ -1,4 +1,13 @@
-import { Component, OnDestroy, computed, effect, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { DateSaveEvent } from './captured-date-editor.component';
@@ -25,11 +34,9 @@ import {
   ImageRecord,
   MetadataEntry,
   SelectOption,
-} from './image-detail-view.types';
+} from './media-detail-view.types';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
-import {
-  QuickInfoChipsComponent,
-} from '../../../shared/quick-info-chips/quick-info-chips.component';
+import { QuickInfoChipsComponent } from '../../../shared/quick-info-chips/quick-info-chips.component';
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
 import { DetailActionsComponent } from './detail-actions/detail-actions.component';
 import { I18nService } from '../../../core/i18n/i18n.service';
@@ -45,19 +52,19 @@ import {
   resolveFullAddress,
   resolveMediaTypeLabel,
   resolveProjectName,
-} from './image-detail-view.utils';
-import { ImageDetailHeaderComponent } from './image-detail-header/image-detail-header.component';
-import { ImageDetailPhotoViewerComponent } from './image-detail-photo-viewer/image-detail-photo-viewer.component';
-import { ImageDetailInlineSectionComponent } from './image-detail-inline-section/image-detail-inline-section.component';
-import { ImageDetailProjectMembershipHelper } from './image-detail-project-membership.helper';
-import { ImageDetailDataFacade } from './image-detail-data.facade';
-import { ImageDetailMetadataHelper } from './image-detail-metadata.helper';
-import { ImageDetailFieldsHelper } from './image-detail-fields.helper';
-import { ImageDetailPhotoEventsHelper } from './image-detail-photo-events.helper';
-import { ImageDetailUploadHelper } from './image-detail-upload.helper';
-import { ImageDetailDeleteHelper } from './image-detail-delete.helper';
+} from './media-detail-view.utils';
+import { ImageDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
+import { ImageDetailPhotoViewerComponent } from './media-detail-photo-viewer/media-detail-photo-viewer.component';
+import { ImageDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
+import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
+import { ImageDetailDataFacade } from './media-detail-data.facade';
+import { ImageDetailMetadataHelper } from './media-detail-metadata.helper';
+import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
+import { ImageDetailPhotoEventsHelper } from './media-detail-photo-events.helper';
+import { ImageDetailUploadHelper } from './media-detail-upload.helper';
+import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
 
-export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
+export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
 @Component({
   selector: 'app-image-detail-view',
@@ -71,8 +78,8 @@ export type { ImageRecord, MetadataEntry } from './image-detail-view.types';
     ImageDetailPhotoViewerComponent,
     ImageDetailInlineSectionComponent,
   ],
-  templateUrl: './image-detail-view.component.html',
-  styleUrl: './image-detail-view.component.scss',
+  templateUrl: './media-detail-view.component.html',
+  styleUrl: './media-detail-view.component.scss',
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
     '[style.--no-photo-icon]': 'noPhotoIconUrl',

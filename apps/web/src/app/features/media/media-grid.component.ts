@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { inject } from '@angular/core';
 import { signal } from '@angular/core';
-import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types';
+import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
 import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
 import { CardGridComponent } from '../../shared/ui-primitives/card-grid.component';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';

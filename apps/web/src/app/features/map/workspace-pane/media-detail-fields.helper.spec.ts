@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailFieldsHelper } from './image-detail-fields.helper';
-import type { ImageRecord } from './image-detail-view.types';
+import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
+import type { ImageRecord } from './media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
   id: 'img-1',
@@ -32,14 +32,14 @@ function createHelper() {
   const saving = signal(false);
   const editDate = signal('');
   const editTime = signal('');
-  const updateEq = vi.fn(async () => ({ error: null }));
+  const updateOr = vi.fn(async () => ({ error: null }));
   const helper = new ImageDetailFieldsHelper({
     services: {
       supabase: {
         client: {
           from: vi.fn(() => ({
             update: vi.fn(() => ({
-              eq: updateEq,
+              or: updateOr,
             })),
           })),
         },
@@ -58,7 +58,7 @@ function createHelper() {
     },
   });
 
-  return { helper, signals: { image, editingField, editDate, editTime }, updateEq };
+  return { helper, signals: { image, editingField, editDate, editTime }, updateOr };
 }
 
 describe('ImageDetailFieldsHelper', () => {

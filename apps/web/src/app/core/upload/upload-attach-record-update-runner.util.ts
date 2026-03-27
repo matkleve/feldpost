@@ -45,25 +45,27 @@ export async function runAttachRecordUpdate(
     userId,
     fetchExistingRow: async () => {
       const { data, error } = await supabaseClient
-        .from('images')
+        .from('media_items')
         .select('latitude, longitude')
-        .eq('id', job.targetImageId!)
-        .single();
+        .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+        .limit(1)
+        .maybeSingle();
       return { data, error };
     },
     updateImageRow: async (updateData) => {
       const { error } = await supabaseClient
-        .from('images')
+        .from('media_items')
         .update(updateData)
-        .eq('id', job.targetImageId!);
+        .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`);
       return { error };
     },
     readBackStoragePath: async () => {
       const { data, error } = await supabaseClient
-        .from('images')
+        .from('media_items')
         .select('storage_path')
-        .eq('id', job.targetImageId!)
-        .single();
+        .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+        .limit(1)
+        .maybeSingle();
       return { storagePath: data?.storage_path, error };
     },
     removeStoragePath: async (path) => {

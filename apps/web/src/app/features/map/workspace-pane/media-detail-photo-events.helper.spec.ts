@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailPhotoEventsHelper } from './image-detail-photo-events.helper';
-import type { ImageRecord } from './image-detail-view.types';
+import { ImageDetailPhotoEventsHelper } from './media-detail-photo-events.helper';
+import type { ImageRecord } from './media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
   id: 'img-1',

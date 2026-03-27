@@ -176,10 +176,17 @@ export class WorkspaceViewService {
     if (cells.length === 0) return [];
 
     if (cells.length > 1) {
-      const { data, error } = await this.supabase.client.rpc('cluster_images_multi', {
+      let { data, error } = await this.supabase.client.rpc('cluster_media_multi', {
         p_cells: cells,
         p_zoom: zoom,
       });
+
+      if (error) {
+        ({ data, error } = await this.supabase.client.rpc('cluster_images_multi', {
+          p_cells: cells,
+          p_zoom: zoom,
+        }));
+      }
 
       if (!error && Array.isArray(data)) {
         const seen = new Set<string>();
@@ -195,13 +202,23 @@ export class WorkspaceViewService {
     }
 
     const results = await Promise.all(
-      cells.map((cell) =>
-        this.supabase.client.rpc('cluster_images', {
+      cells.map(async (cell) => {
+        let response = await this.supabase.client.rpc('cluster_media', {
           p_cluster_lat: cell.lat,
           p_cluster_lng: cell.lng,
           p_zoom: zoom,
-        }),
-      ),
+        });
+
+        if (response.error) {
+          response = await this.supabase.client.rpc('cluster_images', {
+            p_cluster_lat: cell.lat,
+            p_cluster_lng: cell.lng,
+            p_zoom: zoom,
+          });
+        }
+
+        return response;
+      }),
     );
 
     const seen = new Set<string>();

@@ -4,7 +4,7 @@ import type {
   UploadFailedEvent,
   UploadManagerService,
 } from '../../../core/upload/upload-manager.service';
-import type { ImageRecord } from './image-detail-view.types';
+import type { ImageRecord } from './media-detail-view.types';
 
 interface ImageDetailUploadHelperDeps {
   services: {

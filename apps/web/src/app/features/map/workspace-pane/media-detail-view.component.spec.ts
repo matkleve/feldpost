@@ -9,14 +9,14 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { ComponentRef, signal } from '@angular/core';
+import { ComponentRef, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
   ImageDetailViewComponent,
   ImageRecord,
   MetadataEntry,
-} from './image-detail-view.component';
-import { formatCoordinate } from './image-detail-view.utils';
+} from './media-detail-view.component';
+import { formatCoordinate } from './media-detail-view.utils';
 import {
   UploadManagerService,
   ImageReplacedEvent,
@@ -75,13 +75,13 @@ const MOCK_METADATA: MetadataEntry[] = [
 function buildFakeClient() {
   // Track per-table interactions
   const updateEqFn = vi.fn().mockResolvedValue({ data: null, error: null });
-  const updateFn = vi.fn().mockReturnValue({ eq: updateEqFn });
+  const updateFn = vi.fn().mockReturnValue({ eq: updateEqFn, or: updateEqFn });
 
   const upsertFn = vi.fn().mockResolvedValue({ data: null, error: null });
 
   const deleteEq2Fn = vi.fn().mockResolvedValue({ data: null, error: null });
   const deleteEq1Fn = vi.fn().mockReturnValue({ eq: deleteEq2Fn });
-  const deleteFn = vi.fn().mockReturnValue({ eq: deleteEq1Fn });
+  const deleteFn = vi.fn().mockReturnValue({ eq: deleteEq1Fn, or: deleteEq2Fn });
 
   // For metadata_keys lookup: .select('id').eq(...).eq(...).maybeSingle()
   const maybeSingleFn = vi.fn().mockResolvedValue({ data: null, error: null });
@@ -115,6 +115,43 @@ function buildFakeClient() {
 
   const client = {
     from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'media_items') {
+        const mediaRow = {
+          id: 'media-001',
+          source_image_id: MOCK_IMAGE.id,
+          organization_id: MOCK_IMAGE.organization_id,
+          primary_project_id: MOCK_IMAGE.project_id,
+          created_by: MOCK_IMAGE.user_id,
+          storage_path: MOCK_IMAGE.storage_path,
+          thumbnail_path: MOCK_IMAGE.thumbnail_path,
+          latitude: MOCK_IMAGE.latitude,
+          longitude: MOCK_IMAGE.longitude,
+          exif_latitude: MOCK_IMAGE.exif_latitude,
+          exif_longitude: MOCK_IMAGE.exif_longitude,
+          captured_at: MOCK_IMAGE.captured_at,
+          created_at: MOCK_IMAGE.created_at,
+          mime_type: 'image/jpeg',
+          location_status: 'gps',
+          address_label: MOCK_IMAGE.address_label,
+          street: MOCK_IMAGE.street,
+          city: MOCK_IMAGE.city,
+          district: MOCK_IMAGE.district,
+          country: MOCK_IMAGE.country,
+          media_type: 'image',
+          gps_assignment_allowed: true,
+        };
+        return {
+          select: vi.fn(() => ({
+            or: vi.fn(() => ({
+              limit: vi.fn(() => ({
+                maybeSingle: vi.fn().mockResolvedValue({ data: mediaRow, error: null }),
+              })),
+            })),
+          })),
+          update: updateFn,
+          delete: deleteFn,
+        };
+      }
       if (table === 'images') {
         return {
           select: vi.fn().mockReturnValue({
@@ -202,6 +239,7 @@ function setup() {
 
   TestBed.configureTestingModule({
     imports: [ImageDetailViewComponent],
+    schemas: [NO_ERRORS_SCHEMA],
     providers: [
       { provide: SupabaseService, useValue: { client: fake.client } },
       { provide: GeocodingService, useValue: fakeGeocoding },
@@ -216,6 +254,12 @@ function setup() {
   fixture.detectChanges();
 
   return { component, fixture, ref, fake, fakeGeocoding };
+}
+
+function setImageId(component: ImageDetailViewComponent, id: string | null): void {
+  (component as unknown as { imageId: ReturnType<typeof signal<string | null>> }).imageId = signal<
+    string | null
+  >(id);
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -342,7 +386,7 @@ describe('ImageDetailViewComponent', () => {
   // ── primary project selection ───────────────────────────────────────────
 
   describe('setPrimaryProject', () => {
-    it('updates primary project for no-gps media and persists legacy project_id', async () => {
+    it('updates primary project for no-gps media and persists primary project', async () => {
       const { component, fake } = setup();
       component.image.set({ ...MOCK_IMAGE });
       component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
@@ -352,7 +396,9 @@ describe('ImageDetailViewComponent', () => {
 
       expect(component.primaryProjectId()).toBe('proj-002');
       expect(component.image()!.project_id).toBe('proj-002');
-      expect(fake.updateFn).toHaveBeenCalledWith({ project_id: 'proj-002' });
+      expect(fake.updateFn).toHaveBeenCalledWith(
+        expect.objectContaining({ primary_project_id: 'proj-002' }),
+      );
     });
 
     it('does not update primary project for gps media', async () => {
@@ -399,15 +445,17 @@ describe('ImageDetailViewComponent', () => {
       expect(component.saving()).toBe(false);
     });
 
-    it('calls Supabase images.update for a changed field', async () => {
+    it('calls Supabase media_items.update for a changed field', async () => {
       const { component, fake } = setup();
       component.image.set({ ...MOCK_IMAGE });
 
       await component.saveImageField('city', 'Graz');
 
-      expect(fake.client.from).toHaveBeenCalledWith('images');
+      expect(fake.client.from).toHaveBeenCalledWith('media_items');
       expect(fake.updateFn).toHaveBeenCalledWith({ city: 'Graz' });
-      expect(fake.updateEqFn).toHaveBeenCalledWith('id', MOCK_IMAGE.id);
+      expect(fake.updateEqFn).toHaveBeenCalledWith(
+        `id.eq.${MOCK_IMAGE.id},source_image_id.eq.${MOCK_IMAGE.id}`,
+      );
     });
 
     it('skips save when value is unchanged', async () => {
@@ -457,8 +505,9 @@ describe('ImageDetailViewComponent', () => {
 
   describe('saveMetadata', () => {
     it('updates metadata value optimistically', async () => {
-      const { component, ref } = setup();
-      ref.setInput('imageId', 'img-001');
+      const { component, ref, fixture } = setup();
+      setImageId(component, 'img-001');
+      fixture.detectChanges();
       component.image.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
 
@@ -468,8 +517,9 @@ describe('ImageDetailViewComponent', () => {
     });
 
     it('calls upsert on image_metadata table', async () => {
-      const { component, ref, fake } = setup();
-      ref.setInput('imageId', 'img-001');
+      const { component, ref, fake, fixture } = setup();
+      setImageId(component, 'img-001');
+      fixture.detectChanges();
       component.image.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
 
@@ -509,7 +559,7 @@ describe('ImageDetailViewComponent', () => {
 
     it('rolls back on upsert error', async () => {
       const { component, ref, fake } = setup();
-      ref.setInput('imageId', 'img-001');
+      setImageId(component, 'img-001');
       component.image.set({ ...MOCK_IMAGE });
       component.metadata.set([...MOCK_METADATA]);
       fake.upsertFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
@@ -525,8 +575,9 @@ describe('ImageDetailViewComponent', () => {
 
   describe('removeMetadata', () => {
     it('removes entry optimistically', async () => {
-      const { component, ref } = setup();
-      ref.setInput('imageId', 'img-001');
+      const { component, ref, fixture } = setup();
+      setImageId(component, 'img-001');
+      fixture.detectChanges();
       component.metadata.set([...MOCK_METADATA]);
 
       await component.removeMetadata(MOCK_METADATA[0]);
@@ -547,7 +598,7 @@ describe('ImageDetailViewComponent', () => {
 
     it('rolls back on delete error', async () => {
       const { component, ref, fake } = setup();
-      ref.setInput('imageId', 'img-001');
+      setImageId(component, 'img-001');
       component.metadata.set([...MOCK_METADATA]);
       fake.deleteEq2Fn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
 
@@ -643,14 +694,15 @@ describe('ImageDetailViewComponent', () => {
     });
 
     it('executeDelete calls Supabase delete and emits closed', async () => {
-      const { component, ref, fake } = setup();
-      ref.setInput('imageId', 'img-001');
+      const { component, ref, fake, fixture } = setup();
+      setImageId(component, 'img-001');
+      fixture.detectChanges();
       let closedEmitted = false;
       component.closed.subscribe(() => (closedEmitted = true));
 
       await component.executeDelete();
 
-      expect(fake.client.from).toHaveBeenCalledWith('images');
+      expect(fake.client.from).toHaveBeenCalledWith('media_items');
       expect(closedEmitted).toBe(true);
     });
 
@@ -696,9 +748,9 @@ describe('ImageDetailViewComponent', () => {
       expect(formatCoordinate(48.208174)).toBe('48.208174');
     });
 
-    it('returns em-dash for null', () => {
+    it('returns dash for null', () => {
       const { component } = setup();
-      expect(component['formatCoord'](null)).toBe('—');
+      expect(component['formatCoord'](null)).toBe('-');
     });
   });
 
@@ -766,7 +818,7 @@ describe('ImageDetailViewComponent', () => {
         zip: '',
       });
 
-      expect(fake.client.from).toHaveBeenCalledWith('images');
+      expect(fake.client.from).toHaveBeenCalledWith('media_items');
       expect(fake.updateFn).toHaveBeenCalledWith(
         expect.objectContaining({
           street: 'Hauptplatz',
@@ -828,10 +880,7 @@ describe('ImageDetailViewComponent', () => {
       await component.saveCapturedAt({ date: '2025-07-20', time: '14:30' });
 
       const expectedIso = new Date('2025-07-20T14:30:00').toISOString();
-      expect(fake.updateFn).toHaveBeenCalledWith({
-        captured_at: expectedIso,
-        has_time: true,
-      });
+      expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: expectedIso });
       expect(component.image()!.has_time).toBe(true);
     });
 
@@ -842,10 +891,7 @@ describe('ImageDetailViewComponent', () => {
       await component.saveCapturedAt({ date: '2025-07-20', time: null });
 
       const expectedIso = new Date('2025-07-20T00:00:00').toISOString();
-      expect(fake.updateFn).toHaveBeenCalledWith({
-        captured_at: expectedIso,
-        has_time: false,
-      });
+      expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: expectedIso });
       expect(component.image()!.has_time).toBe(false);
     });
 
@@ -856,10 +902,7 @@ describe('ImageDetailViewComponent', () => {
       await component.saveCapturedAt({ date: '2025-07-20', time: '00:00' });
 
       const expectedIso = new Date('2025-07-20T00:00:00').toISOString();
-      expect(fake.updateFn).toHaveBeenCalledWith({
-        captured_at: expectedIso,
-        has_time: true,
-      });
+      expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: expectedIso });
       expect(component.image()!.has_time).toBe(true);
     });
 
@@ -871,10 +914,7 @@ describe('ImageDetailViewComponent', () => {
 
       expect(component.image()!.captured_at).toBeNull();
       expect(component.image()!.has_time).toBe(false);
-      expect(fake.updateFn).toHaveBeenCalledWith({
-        captured_at: null,
-        has_time: false,
-      });
+      expect(fake.updateFn).toHaveBeenCalledWith({ captured_at: null });
     });
 
     it('saveCapturedAt closes editor', async () => {
@@ -998,6 +1038,47 @@ function setupReplace() {
 
   const client = {
     from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'media_items') {
+        const mediaRow = {
+          id: 'media-001',
+          source_image_id: MOCK_IMAGE.id,
+          organization_id: MOCK_IMAGE.organization_id,
+          primary_project_id: MOCK_IMAGE.project_id,
+          created_by: MOCK_IMAGE.user_id,
+          storage_path: MOCK_IMAGE.storage_path,
+          thumbnail_path: MOCK_IMAGE.thumbnail_path,
+          latitude: MOCK_IMAGE.latitude,
+          longitude: MOCK_IMAGE.longitude,
+          exif_latitude: MOCK_IMAGE.exif_latitude,
+          exif_longitude: MOCK_IMAGE.exif_longitude,
+          captured_at: MOCK_IMAGE.captured_at,
+          created_at: MOCK_IMAGE.created_at,
+          mime_type: 'image/jpeg',
+          location_status: 'gps',
+          address_label: MOCK_IMAGE.address_label,
+          street: MOCK_IMAGE.street,
+          city: MOCK_IMAGE.city,
+          district: MOCK_IMAGE.district,
+          country: MOCK_IMAGE.country,
+          media_type: 'image',
+          gps_assignment_allowed: true,
+        };
+        return {
+          select: vi.fn(() => ({
+            or: vi.fn(() => ({
+              limit: vi.fn(() => ({
+                maybeSingle: vi.fn().mockResolvedValue({ data: mediaRow, error: null }),
+              })),
+            })),
+          })),
+          update: vi
+            .fn()
+            .mockReturnValue({ or: vi.fn().mockResolvedValue({ data: null, error: null }) }),
+          delete: vi
+            .fn()
+            .mockReturnValue({ or: vi.fn().mockResolvedValue({ data: null, error: null }) }),
+        };
+      }
       if (table === 'images') {
         return {
           select: vi.fn().mockReturnValue({
@@ -1109,6 +1190,7 @@ function setupReplace() {
 
   TestBed.configureTestingModule({
     imports: [ImageDetailViewComponent],
+    schemas: [NO_ERRORS_SCHEMA],
     providers: [
       { provide: SupabaseService, useValue: { client } },
       { provide: GeocodingService, useValue: fakeGeocoding },
@@ -1122,6 +1204,7 @@ function setupReplace() {
   const fixture = TestBed.createComponent(ImageDetailViewComponent);
   const component = fixture.componentInstance;
   const ref = fixture.componentRef as ComponentRef<ImageDetailViewComponent>;
+  setImageId(component, MOCK_IMAGE.id);
   fixture.detectChanges();
 
   return {
@@ -1219,7 +1302,7 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE });
     // Simulate the component seeing this image as "current"
-    ctx.ref.setInput('imageId', MOCK_IMAGE.id);
+    setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
     const blobUrl = 'blob:http://localhost/fake-blob';
@@ -1239,7 +1322,7 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
   it('updates workspace grid cache on imageReplaced$', () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE });
-    ctx.ref.setInput('imageId', MOCK_IMAGE.id);
+    setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
     ctx.imageReplaced$.next({
@@ -1264,7 +1347,7 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
   it('switches from no-photo to photo display on imageAttached$', async () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE, storage_path: null });
-    ctx.ref.setInput('imageId', MOCK_IMAGE.id);
+    setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
     expect(ctx.component.hasPhoto()).toBe(false);
@@ -1288,7 +1371,7 @@ describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
   it('revokes blob URL after replace event is handled', async () => {
     const ctx = setupReplace();
     ctx.component.image.set({ ...MOCK_IMAGE });
-    ctx.ref.setInput('imageId', MOCK_IMAGE.id);
+    setImageId(ctx.component, MOCK_IMAGE.id);
     ctx.fixture.detectChanges();
 
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL');

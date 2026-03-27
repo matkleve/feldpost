@@ -13,8 +13,8 @@ import { CapturedDateEditorComponent, DateSaveEvent } from '../captured-date-edi
 import { AddressSearchComponent } from '../address-search/address-search.component';
 import { ForwardGeocodeResult } from '../../../../core/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { formatCoordinate } from '../image-detail-view.utils';
-import { DetailEditingField, ImageRecord, SelectOption } from '../image-detail-view.types';
+import { formatCoordinate } from '../media-detail-view.utils';
+import { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   UiIconButtonGhostDirective,
@@ -56,8 +56,8 @@ interface AddressFieldDefinition {
     UiStatusBadgeSizeSmDirective,
     UiStatusBadgeInfoDirective,
   ],
-  templateUrl: './image-detail-inline-section.component.html',
-  styleUrl: '../image-detail-view.component.scss',
+  templateUrl: './media-detail-inline-section.component.html',
+  styleUrl: '../media-detail-view.component.scss',
 })
 export class ImageDetailInlineSectionComponent {
   private static readonly PROJECT_DROPDOWN_GAP_PX = 8;
@@ -75,9 +75,9 @@ export class ImageDetailInlineSectionComponent {
   readonly projectDropdownLeft = signal(0);
   readonly projectDropdownWidth = signal<number | null>(null);
 
-  readonly image = input.required<ImageRecord>();
-  readonly detailViewLabel = input.required<string>();
-  readonly mediaTypeLabel = input.required<string>();
+  readonly image = input<ImageRecord>({} as ImageRecord);
+  readonly detailViewLabel = input('');
+  readonly mediaTypeLabel = input('');
   readonly editingField = input<DetailEditingField>(null);
   readonly editDate = input('');
   readonly editTime = input('');
@@ -342,4 +342,3 @@ export class ImageDetailInlineSectionComponent {
     ) as HTMLButtonElement[];
   }
 }
-

@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailDataFacade } from './image-detail-data.facade';
-import type { ImageRecord } from './image-detail-view.types';
+import { ImageDetailDataFacade } from './media-detail-data.facade';
+import type { ImageRecord } from './media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
   id: 'img-1',
@@ -40,16 +40,46 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   const supabase = {
     client: {
       from: vi.fn((table: string) => {
-        if (table === 'images') {
+        if (table === 'media_items') {
+          const storagePath =
+            overrides?.image &&
+            Object.prototype.hasOwnProperty.call(overrides.image, 'storage_path')
+              ? overrides.image.storage_path
+              : MOCK_IMAGE.storage_path;
+          const thumbnailPath =
+            overrides?.image &&
+            Object.prototype.hasOwnProperty.call(overrides.image, 'thumbnail_path')
+              ? overrides.image.thumbnail_path
+              : MOCK_IMAGE.thumbnail_path;
+
+          const data = {
+            id: 'media-1',
+            source_image_id: 'img-1',
+            organization_id: 'org-1',
+            primary_project_id: 'proj-1',
+            created_by: 'user-1',
+            storage_path: storagePath,
+            thumbnail_path: thumbnailPath,
+            latitude: overrides?.image?.latitude ?? MOCK_IMAGE.latitude,
+            longitude: overrides?.image?.longitude ?? MOCK_IMAGE.longitude,
+            exif_latitude: overrides?.image?.exif_latitude ?? MOCK_IMAGE.exif_latitude,
+            exif_longitude: overrides?.image?.exif_longitude ?? MOCK_IMAGE.exif_longitude,
+            captured_at: overrides?.image?.captured_at ?? MOCK_IMAGE.captured_at,
+            created_at: overrides?.image?.created_at ?? MOCK_IMAGE.created_at,
+            mime_type: 'image/jpeg',
+            location_status: 'gps',
+            address_label: overrides?.image?.address_label ?? MOCK_IMAGE.address_label,
+            street: overrides?.image?.street ?? MOCK_IMAGE.street,
+            city: overrides?.image?.city ?? MOCK_IMAGE.city,
+            district: overrides?.image?.district ?? MOCK_IMAGE.district,
+            country: overrides?.image?.country ?? MOCK_IMAGE.country,
+          };
           return {
             select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() =>
-                  Promise.resolve({
-                    data: { ...MOCK_IMAGE, ...overrides?.image },
-                    error: null,
-                  }),
-                ),
+              or: vi.fn(() => ({
+                limit: vi.fn(() => ({
+                  maybeSingle: vi.fn(() => Promise.resolve({ data, error: null })),
+                })),
               })),
             })),
           };

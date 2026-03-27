@@ -2,7 +2,7 @@ import { WritableSignal } from '@angular/core';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast.service';
-import { ImageRecord, MediaContextRow, SelectOption } from './image-detail-view.types';
+import { ImageRecord, MediaContextRow, SelectOption } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 

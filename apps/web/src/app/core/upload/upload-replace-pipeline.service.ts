@@ -43,12 +43,12 @@ export class UploadReplacePipelineService {
       return;
     }
 
-    // ── Fetch existing row to capture old paths ────────────────────────
     const { data: existingRow, error: fetchError } = await this.supabase.client
-      .from('images')
+      .from('media_items')
       .select('storage_path, thumbnail_path')
-      .eq('id', job.targetImageId!)
-      .single();
+      .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+      .limit(1)
+      .maybeSingle();
 
     if (fetchError || !existingRow) {
       ctx.failJob(jobId, 'validating', 'Could not find the existing image row.');
@@ -133,9 +133,9 @@ export class UploadReplacePipelineService {
     const updateData = buildReplaceUpdateData(storagePath, parsedExif);
 
     const { error: updateError } = await this.supabase.client
-      .from('images')
+      .from('media_items')
       .update(updateData)
-      .eq('id', job.targetImageId!);
+      .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`);
 
     if (this.isCancelled(jobId)) {
       await this.supabase.client.storage.from('images').remove([storagePath]);

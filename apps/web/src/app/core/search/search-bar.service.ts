@@ -258,8 +258,10 @@ export class SearchBarService {
     if (!trimmedQuery) return [];
 
     let request = this.supabaseService.client
-      .from('images')
-      .select('id,address_label,street,city,latitude,longitude,project_id,created_at')
+      .from('media_items')
+      .select(
+        'id,address_label,street,city,latitude,longitude,project_id:primary_project_id,created_at',
+      )
       .ilike('address_label', `*${trimmedQuery}*`)
       .not('address_label', 'is', null)
       .not('latitude', 'is', null)

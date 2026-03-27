@@ -28,8 +28,8 @@ import {
     UiStatusBadgeDirective,
     UiStatusBadgeSizeSmDirective,
   ],
-  templateUrl: './image-detail-header.component.html',
-  styleUrl: '../image-detail-view.component.scss',
+  templateUrl: './media-detail-header.component.html',
+  styleUrl: '../media-detail-view.component.scss',
 })
 export class ImageDetailHeaderComponent {
   private static readonly MENU_GAP_PX = 8;
@@ -46,9 +46,9 @@ export class ImageDetailHeaderComponent {
   readonly contextMenuTop = signal(0);
   readonly contextMenuLeft = signal(0);
 
-  readonly displayTitle = input.required<string>();
+  readonly displayTitle = input<string>('');
   readonly titleValue = input<string>('');
-  readonly mediaTypeLabel = input.required<string>();
+  readonly mediaTypeLabel = input<string>('');
   readonly editingTitle = input(false);
   readonly showContextMenu = input(false);
 
@@ -195,4 +195,3 @@ export class ImageDetailHeaderComponent {
     focusableItems[nextIndex]?.focus();
   }
 }
-

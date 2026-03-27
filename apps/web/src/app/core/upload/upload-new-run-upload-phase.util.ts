@@ -176,6 +176,12 @@ async function handleCancelledResultBeforeFinalize(args: {
 
   if (result.error === null) {
     await supabaseClient.storage.from('images').remove([result.storagePath]);
+    // Delete from primary media_items table by media id or legacy source image id.
+    await supabaseClient
+      .from('media_items')
+      .delete()
+      .or(`id.eq.${result.id},source_image_id.eq.${result.id}`);
+    // Fallback: also delete from legacy images table (non-blocking)
     await supabaseClient.from('images').delete().eq('id', result.id);
   }
 

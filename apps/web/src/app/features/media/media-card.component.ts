@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { PhotoLoadService } from '../../core/photo-load.service';
-import type { ImageRecord } from '../map/workspace-pane/image-detail-view.types';
+import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 
 @Component({

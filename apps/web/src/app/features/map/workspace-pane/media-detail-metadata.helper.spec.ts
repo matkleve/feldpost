@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailMetadataHelper } from './image-detail-metadata.helper';
-import type { ImageRecord, MetadataEntry } from './image-detail-view.types';
+import { ImageDetailMetadataHelper } from './media-detail-metadata.helper';
+import type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
 const MOCK_IMAGE = {
   id: 'img-1',

@@ -45,24 +45,27 @@ export class UploadEnrichmentService {
 
       // Update the DB row with the resolved coordinates.
       const { error } = await this.supabase.client
-        .from('images')
+        .from('media_items')
         .update({
           latitude: result.lat,
           longitude: result.lng,
+          location_status: 'gps',
         })
-        .eq('id', imageId);
+        .or(`id.eq.${imageId},source_image_id.eq.${imageId}`);
 
       if (error) return undefined;
 
       // Update the DB row with address fields from forward geocoding.
-      await this.supabase.client.rpc('bulk_update_image_addresses', {
-        p_image_ids: [imageId],
-        p_address_label: result.addressLabel,
-        p_city: result.city,
-        p_district: result.district,
-        p_street: result.street,
-        p_country: result.country,
-      });
+      await this.supabase.client
+        .from('media_items')
+        .update({
+          address_label: result.addressLabel,
+          city: result.city,
+          district: result.district,
+          street: result.street,
+          country: result.country,
+        })
+        .or(`id.eq.${imageId},source_image_id.eq.${imageId}`);
 
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {
