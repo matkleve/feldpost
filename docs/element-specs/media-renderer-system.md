@@ -19,14 +19,14 @@ This is a mixed system spec (service plus UI contract). Visual output is a frame
 
 ## Actions
 
-| # | Trigger | System Response | Output |
-| --- | --- | --- | --- |
-| 1 | A component requests media render for `{ fileRef, tier }` | Resolve file type from registry and derive color, icon, and aspect ratio | Render config object |
-| 2 | Tier requests thumbnail asset | Orchestrator returns state chain `placeholder -> icon -> loading -> loaded` with fallback to lower tier when needed | `MediaRenderState` update |
-| 3 | Upload item is in progress | Orchestrator exposes upload progress overlay state through the same API | Overlay metadata |
-| 4 | High tier requested but missing | Service requests prerender generation and keeps lower-tier asset visible | Deferred upgrade state |
-| 5 | File is updated/replaced | Service invalidates caches and emits fresh state | Invalidation event |
-| 6 | Consumer switches context (`map`, `grid`, `upload`, `detail`) | Same component API is reused; only style variants differ | Stable markup + variant class |
+| #   | Trigger                                                       | System Response                                                                                                     | Output                        |
+| --- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 1   | A component requests media render for `{ fileRef, tier }`     | Resolve file type from registry and derive color, icon, and aspect ratio                                            | Render config object          |
+| 2   | Tier requests thumbnail asset                                 | Orchestrator returns state chain `placeholder -> icon -> loading -> loaded` with fallback to lower tier when needed | `MediaRenderState` update     |
+| 3   | Upload item is in progress                                    | Orchestrator exposes upload progress overlay state through the same API                                             | Overlay metadata              |
+| 4   | High tier requested but missing                               | Service requests prerender generation and keeps lower-tier asset visible                                            | Deferred upgrade state        |
+| 5   | File is updated/replaced                                      | Service invalidates caches and emits fresh state                                                                    | Invalidation event            |
+| 6   | Consumer switches context (`map`, `grid`, `upload`, `detail`) | Same component API is reused; only style variants differ                                                            | Stable markup + variant class |
 
 ## Component Hierarchy
 
@@ -72,34 +72,34 @@ flowchart TD
   U --> C
 ```
 
-| Field | Source | Type |
-| --- | --- | --- |
-| File type definition | FileTypeRegistry | `FileTypeDefinition` |
-| Media tier | Universal input | `MediaTier` |
-| Thumbnail URL candidate | PhotoLoadService or MediaPreviewService | `string | null` |
-| Upload progress | UploadManagerService | `number | null` |
-| Render state | MediaOrchestratorService | `MediaRenderState` |
+| Field                   | Source                                  | Type                 |
+| ----------------------- | --------------------------------------- | -------------------- | ----- |
+| File type definition    | FileTypeRegistry                        | `FileTypeDefinition` |
+| Media tier              | Universal input                         | `MediaTier`          |
+| Thumbnail URL candidate | PhotoLoadService or MediaPreviewService | `string              | null` |
+| Upload progress         | UploadManagerService                    | `number              | null` |
+| Render state            | MediaOrchestratorService                | `MediaRenderState`   |
 
 ## State
 
-| Name | Type | Default | Controls |
-| --- | --- | --- | --- |
-| `typeRegistry` | `Record<string, FileTypeDefinition>` | required | Visual and behavior mapping per file type |
-| `renderState` | `Signal<MediaRenderState>` | `placeholder` | Layer currently rendered by the universal component |
-| `requestedTier` | `MediaTier` | `small` | Target quality and slot policy |
-| `resolvedTier` | `MediaTier` | `small` | Actual tier currently available after fallback |
-| `uploadOverlay` | `Signal<UploadOverlayState | null>` | `null` | Upload badge/progress on top of media tile |
+| Name            | Type                                 | Default       | Controls                                            |
+| --------------- | ------------------------------------ | ------------- | --------------------------------------------------- | ------------------------------------------ |
+| `typeRegistry`  | `Record<string, FileTypeDefinition>` | required      | Visual and behavior mapping per file type           |
+| `renderState`   | `Signal<MediaRenderState>`           | `placeholder` | Layer currently rendered by the universal component |
+| `requestedTier` | `MediaTier`                          | `small`       | Target quality and slot policy                      |
+| `resolvedTier`  | `MediaTier`                          | `small`       | Actual tier currently available after fallback      |
+| `uploadOverlay` | `Signal<UploadOverlayState           | null>`        | `null`                                              | Upload badge/progress on top of media tile |
 
 ## File Map
 
-| File | Purpose |
-| --- | --- |
-| `apps/web/src/app/core/media/file-type-registry.ts` | Single source of truth for file type metadata (color, icon, aspect-ratio, mime mapping) |
-| `apps/web/src/app/core/media/media-orchestrator.service.ts` | Unified state orchestration for thumbnail and upload rendering |
-| `apps/web/src/app/shared/media/universal-media.component.ts` | One reusable media renderer component for all surfaces |
-| `apps/web/src/app/shared/media/universal-media.component.html` | Stable DOM structure with layered rendering |
-| `apps/web/src/app/shared/media/universal-media.component.scss` | Tier/context visual variants and slot behavior |
-| `docs/element-specs/media-renderer-system.md` | Architecture contract and acceptance criteria |
+| File                                                           | Purpose                                                                                 |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `apps/web/src/app/core/media/file-type-registry.ts`            | Single source of truth for file type metadata (color, icon, aspect-ratio, mime mapping) |
+| `apps/web/src/app/core/media/media-orchestrator.service.ts`    | Unified state orchestration for thumbnail and upload rendering                          |
+| `apps/web/src/app/shared/media/universal-media.component.ts`   | One reusable media renderer component for all surfaces                                  |
+| `apps/web/src/app/shared/media/universal-media.component.html` | Stable DOM structure with layered rendering                                             |
+| `apps/web/src/app/shared/media/universal-media.component.scss` | Tier/context visual variants and slot behavior                                          |
+| `docs/element-specs/media-renderer-system.md`                  | Architecture contract and acceptance criteria                                           |
 
 ## Wiring
 
