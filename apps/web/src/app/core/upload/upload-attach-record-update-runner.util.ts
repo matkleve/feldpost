@@ -35,10 +35,24 @@ export async function runAttachRecordUpdate(
     logError,
   } = args;
 
+  const { data: targetRow, error: targetResolveError } = await supabaseClient
+    .from('media_items')
+    .select('id')
+    .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+    .limit(1)
+    .maybeSingle();
+
+  if (targetResolveError || !targetRow?.id) {
+    failJob('replacing_record', 'Could not resolve target image row.');
+    return null;
+  }
+
+  const targetMediaItemId = targetRow.id;
+
   setPhase('replacing_record');
   return performAttachRecordUpdate({
     storagePath,
-    targetImageId: job.targetImageId!,
+    targetImageId: targetMediaItemId,
     parsedExif,
     conflictResolution: job.conflictResolution,
     contentHash,
@@ -47,7 +61,7 @@ export async function runAttachRecordUpdate(
       const { data, error } = await supabaseClient
         .from('media_items')
         .select('latitude, longitude')
-        .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+        .eq('id', targetMediaItemId)
         .limit(1)
         .maybeSingle();
       return { data, error };
@@ -56,14 +70,14 @@ export async function runAttachRecordUpdate(
       const { error } = await supabaseClient
         .from('media_items')
         .update(updateData)
-        .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`);
+        .eq('id', targetMediaItemId);
       return { error };
     },
     readBackStoragePath: async () => {
       const { data, error } = await supabaseClient
         .from('media_items')
         .select('storage_path')
-        .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+        .eq('id', targetMediaItemId)
         .limit(1)
         .maybeSingle();
       return { storagePath: data?.storage_path, error };

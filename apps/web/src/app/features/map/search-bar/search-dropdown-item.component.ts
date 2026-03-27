@@ -118,8 +118,6 @@ export class SearchDropdownItemComponent {
         return 'location_on';
       case 'db-content':
         switch (candidate.contentType) {
-          case 'group':
-            return 'folder';
           case 'project':
             return 'workspaces';
           case 'metadata':

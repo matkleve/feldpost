@@ -84,7 +84,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
             })),
           };
         }
-        if (table === 'image_metadata') {
+        if (table === 'media_metadata') {
           return {
             select: vi.fn(() => ({
               eq: vi.fn(() =>

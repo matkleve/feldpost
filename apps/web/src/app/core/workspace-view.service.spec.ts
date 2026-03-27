@@ -612,7 +612,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
           select: vi.fn().mockResolvedValue({ data: fakeMetadataKeys, error: null }),
         };
       }
-      // Default for other tables (image_metadata, images, etc.)
+      // Default for other tables (media_metadata, images, etc.)
       return {
         update: vi.fn().mockReturnValue({
           in: vi.fn().mockResolvedValue({ error: null }),

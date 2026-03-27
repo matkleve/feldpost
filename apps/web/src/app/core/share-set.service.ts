@@ -57,9 +57,8 @@ export class ShareSetService {
 
     return data.map((row) => ({
       shareSetId: row.share_set_id,
-      imageId: row.image_id,
+      imageId: row.media_item_id,
       itemOrder: row.item_order,
     }));
   }
 }
-

@@ -26,7 +26,7 @@ export class ImageDetailMetadataHelper {
       list.map((m) => (m.metadataKeyId === entry.metadataKeyId ? { ...m, value: newValue } : m)),
     );
 
-    const { error } = await this.deps.services.supabase.client.from('image_metadata').upsert(
+    const { error } = await this.deps.services.supabase.client.from('media_metadata').upsert(
       {
         image_id: id,
         metadata_key_id: entry.metadataKeyId,
@@ -74,7 +74,7 @@ export class ImageDetailMetadataHelper {
       keyId = created.id;
     }
 
-    const { error } = await this.deps.services.supabase.client.from('image_metadata').upsert(
+    const { error } = await this.deps.services.supabase.client.from('media_metadata').upsert(
       {
         image_id: img.id,
         metadata_key_id: keyId,
@@ -103,7 +103,7 @@ export class ImageDetailMetadataHelper {
     );
 
     const { error } = await this.deps.services.supabase.client
-      .from('image_metadata')
+      .from('media_metadata')
       .delete()
       .eq('image_id', id)
       .eq('metadata_key_id', entry.metadataKeyId);

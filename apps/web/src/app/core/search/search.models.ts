@@ -8,7 +8,7 @@ export type SearchState =
 
 export type SearchResultFamily = 'db-address' | 'db-content' | 'geocoder' | 'command' | 'recent';
 
-export type SearchContentType = 'photo' | 'group' | 'project' | 'metadata';
+export type SearchContentType = 'photo' | 'project' | 'metadata';
 
 export interface SearchQueryContext {
   organizationId?: string;
@@ -33,7 +33,6 @@ export interface SearchQueryContext {
   };
   activeFilterCount?: number;
   commandMode?: boolean;
-  selectedGroupId?: string;
 }
 
 export interface SearchBaseCandidate {
@@ -72,7 +71,7 @@ export interface SearchContentCandidate extends SearchBaseCandidate {
 
 export interface SearchCommandCandidate extends SearchBaseCandidate {
   family: 'command';
-  command: 'upload' | 'clear-filters' | 'go-to-location' | 'open-group' | 'create-qr-invite';
+  command: 'upload' | 'clear-filters' | 'go-to-location' | 'create-qr-invite';
   payload?: string;
 }
 

@@ -155,7 +155,7 @@ async function handleUploadResult(args: {
   if (savedJob.contentHash && savedJob.imageId) {
     insertDedupHashFireAndForget({
       contentHash: savedJob.contentHash,
-      imageId: savedJob.imageId,
+      mediaItemId: savedJob.imageId,
       userId: getUserId(),
       insert: (payload) => supabaseClient.from('dedup_hashes').insert(payload),
     });

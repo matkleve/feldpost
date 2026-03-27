@@ -18,10 +18,6 @@ interface DbContentRow {
   name: string | null;
 }
 
-interface SavedGroupImageRow {
-  group_id: string;
-}
-
 export async function fetchDbContentCandidates(
   supabase: SupabaseService,
   query: string,
@@ -41,35 +37,17 @@ export async function fetchDbContentCandidates(
     projectsQuery = projectsQuery.eq('organization_id', context.organizationId);
   }
 
-  const [projectsResponse, groupsResponse] = await Promise.all([
-    projectsQuery,
-    supabase.client
-      .from('saved_groups')
-      .select('id,name')
-      .ilike('name', `*${trimmedQuery}*`)
-      .limit(maxDbContentResults),
-  ]);
+  const projectsResponse = await projectsQuery;
 
   const projectRows =
     projectsResponse.error || !Array.isArray(projectsResponse.data)
       ? []
       : (projectsResponse.data as DbContentRow[]).filter((row) => !!row.name);
-  const groupRows =
-    groupsResponse.error || !Array.isArray(groupsResponse.data)
-      ? []
-      : (groupsResponse.data as DbContentRow[]).filter((row) => !!row.name);
-
-  const [projectSizes, groupSizes] = await Promise.all([
-    loadProjectSizeSignals(
-      supabase,
-      projectRows.map((row) => row.id),
-      context.organizationId,
-    ),
-    loadGroupSizeSignals(
-      supabase,
-      groupRows.map((row) => row.id),
-    ),
-  ]);
+  const projectSizes = await loadProjectSizeSignals(
+    supabase,
+    projectRows.map((row) => row.id),
+    context.organizationId,
+  );
 
   const projectCandidates = buildProjectContentCandidates(
     projectRows,
@@ -78,9 +56,7 @@ export async function fetchDbContentCandidates(
     projectSizes,
   );
 
-  const groupCandidates = buildGroupContentCandidates(groupRows, trimmedQuery, context, groupSizes);
-
-  return [...projectCandidates, ...groupCandidates]
+  return projectCandidates
     .sort((left, right) => {
       const scoreDelta = (right.score ?? 0) - (left.score ?? 0);
       if (scoreDelta !== 0) return scoreDelta;
@@ -109,32 +85,6 @@ function buildProjectContentCandidates(
         contentType: 'project' as const,
         contentId: row.id,
         subtitle: 'Project',
-        score: textMatch * projectBoost * sizeSignal,
-      };
-    })
-    .filter((candidate) => candidate.label.length > 0);
-}
-
-function buildGroupContentCandidates(
-  groupRows: DbContentRow[],
-  query: string,
-  context: SearchQueryContext,
-  groupSizes: Map<string, number>,
-): SearchContentCandidate[] {
-  return groupRows
-    .map((row) => {
-      const label = row.name?.trim() ?? '';
-      const textMatch = computeTextMatchScore(row.name ?? '', query);
-      const projectBoost = context.selectedGroupId === row.id ? 1.6 : 1;
-      const sizeSignal = toSizeSignal(groupSizes.get(row.id) ?? 0);
-
-      return {
-        id: `group-${row.id}`,
-        family: 'db-content' as const,
-        label,
-        contentType: 'group' as const,
-        contentId: row.id,
-        subtitle: 'Saved group',
         score: textMatch * projectBoost * sizeSignal,
       };
     })
@@ -523,27 +473,6 @@ async function loadProjectSizeSignals(
   for (const row of response.data as Array<{ primary_project_id: string | null }>) {
     if (!row.primary_project_id) continue;
     counts.set(row.primary_project_id, (counts.get(row.primary_project_id) ?? 0) + 1);
-  }
-
-  return counts;
-}
-
-async function loadGroupSizeSignals(
-  supabase: SupabaseService,
-  groupIds: string[],
-): Promise<Map<string, number>> {
-  const counts = new Map<string, number>();
-  if (groupIds.length === 0) return counts;
-
-  const response = await supabase.client
-    .from('saved_group_images')
-    .select('group_id')
-    .in('group_id', groupIds);
-
-  if (response.error || !Array.isArray(response.data)) return counts;
-
-  for (const row of response.data as SavedGroupImageRow[]) {
-    counts.set(row.group_id, (counts.get(row.group_id) ?? 0) + 1);
   }
 
   return counts;

@@ -7,35 +7,33 @@ See also: `architecture.md`, `security-boundaries.md`, `glossary.md`.
 
 Database: PostgreSQL (Supabase) with **PostGIS extension** enabled.
 
+> Migration note (2026-03-27): `public.images`, `public.image_projects`, `public.saved_groups`, and `public.saved_group_images` were removed. Canonical tables are `public.media_items`, `public.media_projects`, and `public.media_metadata`.
+
 ### Entity-Relationship Diagram
 
 ```mermaid
 erDiagram
     auth_users ||--|| profiles : "1:1"
     auth_users ||--o{ user_roles : "has roles"
-    auth_users ||--o{ images : "uploads"
-    auth_users ||--o{ saved_groups : "creates"
+    auth_users ||--o{ media_items : "creates"
     auth_users ||--o{ coordinate_corrections : "corrects"
     auth_users ||--o{ projects : "created_by (SET NULL)"
     auth_users ||--o{ metadata_keys : "created_by (SET NULL)"
 
     organizations ||--o{ profiles : "has members"
     organizations ||--o{ projects : "scopes"
-    organizations ||--o{ images : "scopes"
+    organizations ||--o{ media_items : "scopes"
     organizations ||--o{ metadata_keys : "scopes"
 
     roles ||--o{ user_roles : "assigned via"
 
-    projects ||--o{ image_projects : "groups via memberships"
+    projects ||--o{ media_projects : "groups via memberships"
 
-    images ||--o{ image_metadata : "has metadata"
-    images ||--o{ coordinate_corrections : "has corrections"
-    images ||--o{ saved_group_images : "in groups"
-    images ||--o{ image_projects : "belongs to projects"
+    media_items ||--o{ media_metadata : "has metadata"
+    media_items ||--o{ coordinate_corrections : "has corrections"
+    media_items ||--o{ media_projects : "belongs to projects"
 
-    saved_groups ||--o{ saved_group_images : "contains"
-
-    metadata_keys ||--o{ image_metadata : "defines key"
+    metadata_keys ||--o{ media_metadata : "defines key"
 
     auth_users {
         uuid id PK
@@ -72,10 +70,11 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
-    images {
+    media_items {
         uuid id PK
-        uuid user_id FK
+        uuid created_by FK
         uuid organization_id FK
+        uuid primary_project_id FK
         text storage_path
         text thumbnail_path
         numeric exif_latitude
@@ -83,18 +82,19 @@ erDiagram
         numeric latitude
         numeric longitude
         geography geog
-        numeric direction
+        text location_status
         timestamptz captured_at
         timestamptz created_at
+        uuid source_image_id
         text address_label
         text city
         text district
         text street
         text country
-        boolean location_unresolved
+        timestamptz updated_at
     }
-    image_projects {
-        uuid image_id PK_FK
+    media_projects {
+        uuid media_item_id PK_FK
         uuid project_id PK_FK
         timestamptz created_at
     }
@@ -104,21 +104,10 @@ erDiagram
         uuid organization_id FK
         uuid created_by FK
     }
-    image_metadata {
+    media_metadata {
         uuid image_id PK_FK
         uuid metadata_key_id PK_FK
         text value_text
-    }
-    saved_groups {
-        uuid id PK
-        uuid user_id FK
-        text name
-        int tab_order
-    }
-    saved_group_images {
-        uuid group_id PK_FK
-        uuid image_id PK_FK
-        timestamptz added_at
     }
     coordinate_corrections {
         uuid id PK

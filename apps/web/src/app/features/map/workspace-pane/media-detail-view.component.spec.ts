@@ -95,7 +95,7 @@ function buildFakeClient() {
   // For images.select('*').eq('id', ...).single()
   const imageSingleFn = vi.fn().mockResolvedValue({ data: MOCK_IMAGE, error: null });
 
-  // For image_metadata.select(...).eq('image_id', ...)
+  // For media_metadata.select(...).eq('image_id', ...)
   const metaSelectEqFn = vi.fn().mockResolvedValue({ data: [], error: null });
 
   // For projects.select('id, name').eq('organization_id', ...).order('name')
@@ -161,7 +161,7 @@ function buildFakeClient() {
           delete: deleteFn,
         };
       }
-      if (table === 'image_metadata') {
+      if (table === 'media_metadata') {
         return {
           select: vi.fn().mockReturnValue({ eq: metaSelectEqFn }),
           upsert: upsertFn,
@@ -516,7 +516,7 @@ describe('ImageDetailViewComponent', () => {
       expect(component.metadata()[0].value).toBe('Commercial');
     });
 
-    it('calls upsert on image_metadata table', async () => {
+    it('calls upsert on media_metadata table', async () => {
       const { component, ref, fake, fixture } = setup();
       setImageId(component, 'img-001');
       fixture.detectChanges();
@@ -525,7 +525,7 @@ describe('ImageDetailViewComponent', () => {
 
       await component.saveMetadata(MOCK_METADATA[0], 'Commercial');
 
-      expect(fake.client.from).toHaveBeenCalledWith('image_metadata');
+      expect(fake.client.from).toHaveBeenCalledWith('media_metadata');
       expect(fake.upsertFn).toHaveBeenCalledWith(
         {
           image_id: 'img-001',
@@ -1094,7 +1094,7 @@ function setupReplace() {
           }),
         };
       }
-      if (table === 'image_metadata') {
+      if (table === 'media_metadata') {
         return {
           select: vi.fn().mockReturnValue({ eq: metaSelectEqFn }),
         };

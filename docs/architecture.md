@@ -82,7 +82,7 @@ graph TD
   L1["Layer 1 — Identity<br/>(Supabase Auth → auth.users)"]
   L2["Layer 2 — Domain Profile<br/>(profiles table, 1:1 with auth.users)"]
   L3["Layer 3 — Authorization<br/>(roles + user_roles, RLS policies)"]
-  L4["Layer 4 — Domain Data<br/>(images, projects, metadata_keys,<br/>saved_groups, coordinate_corrections)"]
+  L4["Layer 4 — Domain Data<br/>(media_items, media_projects, metadata_keys,<br/>media_metadata, coordinate_corrections)"]
 
   L1 --> L2
   L2 --> L3

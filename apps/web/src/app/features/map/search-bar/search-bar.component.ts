@@ -34,7 +34,7 @@ const MAX_RECENT_SEARCHES = 8;
 const MAX_RECENT_MATCHES_WHILE_TYPING = 2;
 
 const PLACEHOLDER_EXAMPLES = [
-  'Search address, project, group…',
+  'Search address or project…',
   'Denisgasse 46, Vienna',
   '48.2082, 16.3738',
   'maps.google.com/…',
@@ -498,7 +498,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           break;
         }
 
-        void this.router.navigate([candidate.contentType === 'group' ? '/projects' : '/media'], {
+        void this.router.navigate(['/media'], {
           queryParams: {
             search: commitAction.query,
             type: candidate.contentType,

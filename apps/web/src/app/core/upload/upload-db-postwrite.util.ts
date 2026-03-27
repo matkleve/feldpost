@@ -1,23 +1,23 @@
 type DedupInsertPayload = {
-  image_id: string | undefined;
+  media_item_id: string | undefined;
   content_hash: string;
   user_id: string | undefined;
 };
 
 type InsertDedupHashArgs = {
   contentHash: string | undefined;
-  imageId: string | undefined;
+  mediaItemId: string | undefined;
   userId: string | undefined;
   insert: (payload: DedupInsertPayload) => PromiseLike<unknown>;
 };
 
 export function insertDedupHashFireAndForget(args: InsertDedupHashArgs): void {
-  const { contentHash, imageId, userId, insert } = args;
+  const { contentHash, mediaItemId, userId, insert } = args;
   if (!contentHash) {
     return;
   }
   insert({
-    image_id: imageId,
+    media_item_id: mediaItemId,
     content_hash: contentHash,
     user_id: userId,
   }).then();

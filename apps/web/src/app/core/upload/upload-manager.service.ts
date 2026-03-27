@@ -654,7 +654,7 @@ export class UploadManagerService {
         hashes: [contentHash],
       });
       if (error || !data || data.length === 0) return null;
-      return data[0].image_id;
+      return data[0].media_item_id ?? null;
     } catch {
       return null;
     }

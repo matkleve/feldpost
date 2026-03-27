@@ -78,7 +78,7 @@ export class ImageDetailDataFacade {
     const image = this.toImageRecord(media, legacyImageId);
 
     const metaResult = await this.deps.services.supabase.client
-      .from('image_metadata')
+      .from('media_metadata')
       .select('metadata_key_id, value_text, metadata_keys(key_name)')
       .eq('image_id', legacyImageId);
 

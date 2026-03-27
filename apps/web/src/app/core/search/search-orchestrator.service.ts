@@ -265,7 +265,7 @@ export class SearchOrchestratorService {
     this.annotateCandidates(rankedGeocoder, context, 'geocoder');
 
     sections.push({ family: 'db-address', title: 'Addresses', items: rankedDbAddress });
-    sections.push({ family: 'db-content', title: 'Projects & Groups', items: rankedDbContent });
+    sections.push({ family: 'db-content', title: 'Projects', items: rankedDbContent });
     sections.push({
       family: 'geocoder',
       title: 'Places',

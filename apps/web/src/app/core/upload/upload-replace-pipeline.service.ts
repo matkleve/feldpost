@@ -43,10 +43,24 @@ export class UploadReplacePipelineService {
       return;
     }
 
+    const { data: targetRow, error: targetResolveError } = await this.supabase.client
+      .from('media_items')
+      .select('id')
+      .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (targetResolveError || !targetRow?.id) {
+      ctx.failJob(jobId, 'validating', 'Could not find the existing image row.');
+      return;
+    }
+
+    const targetMediaItemId = targetRow.id;
+
     const { data: existingRow, error: fetchError } = await this.supabase.client
       .from('media_items')
       .select('storage_path, thumbnail_path')
-      .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`)
+      .eq('id', targetMediaItemId)
       .limit(1)
       .maybeSingle();
 
@@ -58,6 +72,7 @@ export class UploadReplacePipelineService {
     this.jobState.updateJob(jobId, {
       oldStoragePath: existingRow.storage_path ?? undefined,
       oldThumbnailPath: existingRow.thumbnail_path ?? undefined,
+      targetImageId: targetMediaItemId,
     });
 
     if (this.uploadService.isHeic(job.file)) {
@@ -135,7 +150,7 @@ export class UploadReplacePipelineService {
     const { error: updateError } = await this.supabase.client
       .from('media_items')
       .update(updateData)
-      .or(`id.eq.${job.targetImageId!},source_image_id.eq.${job.targetImageId!}`);
+      .eq('id', targetMediaItemId);
 
     if (this.isCancelled(jobId)) {
       await this.supabase.client.storage.from('images').remove([storagePath]);
@@ -166,13 +181,13 @@ export class UploadReplacePipelineService {
     // Insert dedup hash
     insertDedupHashFireAndForget({
       contentHash: updatedJob.contentHash,
-      imageId: updatedJob.targetImageId,
+      mediaItemId: targetMediaItemId,
       userId: this.auth.user()?.id,
       insert: (payload) => this.supabase.client.from('dedup_hashes').insert(payload),
     });
 
     this.jobState.updateJob(jobId, {
-      imageId: updatedJob.targetImageId,
+      imageId: targetMediaItemId,
       coords: parsedExif.coords,
       direction: parsedExif.direction,
     });
@@ -189,12 +204,12 @@ export class UploadReplacePipelineService {
     }
 
     if (finalJob.thumbnailUrl) {
-      this.photoLoad.setLocalUrl(finalJob.targetImageId!, finalJob.thumbnailUrl);
+      this.photoLoad.setLocalUrl(targetMediaItemId, finalJob.thumbnailUrl);
     }
 
     ctx.emitImageReplaced({
       jobId,
-      imageId: finalJob.targetImageId!,
+      imageId: targetMediaItemId,
       newStoragePath: storagePath,
       localObjectUrl: finalJob.thumbnailUrl,
       coords: parsedExif.coords,

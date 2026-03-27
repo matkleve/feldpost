@@ -48,14 +48,6 @@ describe('SearchBarComponent', () => {
       data: [{ id: 'project-1', name: 'Burg Renovation' }],
       error: null,
     });
-    const groupsBuilder = createQueryBuilder({
-      data: [{ id: 'group-1', name: 'Burg Quote Group' }],
-      error: null,
-    });
-    const savedGroupImagesBuilder = createQueryBuilder({
-      data: [{ group_id: 'group-1' }],
-      error: null,
-    });
 
     await TestBed.configureTestingModule({
       imports: [SearchBarComponent],
@@ -72,8 +64,6 @@ describe('SearchBarComponent', () => {
               from: vi.fn((table: string) => {
                 if (table === 'images') return imagesBuilder;
                 if (table === 'projects') return projectsBuilder;
-                if (table === 'saved_groups') return groupsBuilder;
-                if (table === 'saved_group_images') return savedGroupImagesBuilder;
                 return createQueryBuilder({ data: [], error: null });
               }),
             },
@@ -206,25 +196,25 @@ describe('SearchBarComponent', () => {
     });
   });
 
-  it('navigates to the projects route for group content commits', async () => {
+  it('navigates to media route for project content commits', async () => {
     const fixture = TestBed.createComponent(SearchBarComponent);
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
     component.onCandidateSelected({
-      id: 'group-1',
+      id: 'project-1',
       family: 'db-content',
-      label: 'Burg Quote Group',
-      contentType: 'group',
-      contentId: 'group-1',
-      subtitle: 'Saved group',
+      label: 'Burg Renovation',
+      contentType: 'project',
+      contentId: 'project-1',
+      subtitle: 'Project',
     });
 
-    expect(router.navigate).toHaveBeenCalledWith(['/projects'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/media'], {
       queryParams: {
-        search: 'Burg Quote Group',
-        type: 'group',
-        id: 'group-1',
+        search: 'Burg Renovation',
+        type: 'project',
+        id: 'project-1',
       },
     });
   });

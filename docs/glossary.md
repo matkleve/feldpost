@@ -141,20 +141,17 @@
   - Used to filter and organize photos across time and space.
 
 - **Group (Saved Group)**  
-  A named, user-created collection of images. Represented as a tab in the workspace.
-  - Table: `saved_groups` + `saved_group_images`.
-  - A group can contain images from any project, location, or time range.
-  - Private to the creator (future: optionally shared within the org).
+  Legacy concept for named, user-created collections.
+  - Tables `saved_groups` and `saved_group_images` were removed in the 2026-03-27 cleanup migration.
+  - Current product flow uses Active Selection and project membership (`media_projects`) instead of persisted group tabs.
 
 - **Active Selection**  
-  A transient, in-memory group that holds images currently selected on the map (via click, Ctrl+click, or radius selection).
-  - Always visible as the first tab in the workspace.
+  A transient, in-memory set that holds images currently selected on the map (via click, Ctrl+click, or radius selection).
   - Not persisted to the database; cleared on page reload.
-  - Can be saved as a named Group.
 
 - **Workspace**  
-  The tabbed panel (desktop: side pane; mobile: bottom sheet) that displays image groups.
-  - Contains the Active Selection tab plus zero or more named Group tabs.
+  The side panel (desktop) / bottom sheet (mobile) that displays selection and detail context.
+  - Group tabs are deprecated and removed from persistence.
   - See architecture.md §11.
 
 - **Metadata Key**  

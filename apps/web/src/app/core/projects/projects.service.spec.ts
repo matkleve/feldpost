@@ -72,7 +72,7 @@ function buildFakeSupabase(data: FakeSupabaseData) {
   const client = {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === 'images') return imagesChain;
-      if (table === 'image_metadata') return metadataChain;
+      if (table === 'media_metadata') return metadataChain;
       if (table === 'media_items') return mediaItemsChain;
       if (table === 'media_projects') return mediaProjectsChain;
       return {

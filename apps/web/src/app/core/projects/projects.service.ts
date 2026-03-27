@@ -669,7 +669,7 @@ export class ProjectsService {
     const escaped = this.escapeIlike(searchTerm);
 
     const response = await this.supabase.client
-      .from('image_metadata')
+      .from('media_metadata')
       .select('image_id,value_text')
       .ilike('value_text', `%${escaped}%`);
 

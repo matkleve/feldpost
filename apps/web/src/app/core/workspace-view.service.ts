@@ -544,7 +544,7 @@ export class WorkspaceViewService {
   }
 
   /**
-   * Load custom property values (image_metadata) for a batch of images.
+   * Load custom property values (media_metadata) for a batch of images.
    * Patches the metadata map onto each WorkspaceImage in the signal.
    */
   private async loadImageMetadata(images: WorkspaceImage[]): Promise<void> {
@@ -552,7 +552,7 @@ export class WorkspaceViewService {
     if (imageIds.length === 0) return;
 
     const { data, error } = await this.supabase.client
-      .from('image_metadata')
+      .from('media_metadata')
       .select('image_id, metadata_key_id, value_text')
       .in('image_id', imageIds);
 

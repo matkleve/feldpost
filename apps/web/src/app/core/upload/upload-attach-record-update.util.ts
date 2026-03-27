@@ -32,7 +32,7 @@ type AttachRecordUpdateArgs = {
   onCancelled: () => Promise<boolean>;
   insertDedupHash: (payload: {
     content_hash: string;
-    image_id: string | undefined;
+    media_item_id: string | undefined;
     user_id?: string;
   }) => PromiseLike<unknown>;
   logInfo: (...args: unknown[]) => void;
@@ -82,7 +82,7 @@ export async function performAttachRecordUpdate(
 
   insertDedupHashFireAndForget({
     contentHash: args.contentHash,
-    imageId: args.targetImageId,
+    mediaItemId: args.targetImageId,
     userId: args.userId,
     insert: args.insertDedupHash,
   });

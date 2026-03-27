@@ -62,23 +62,11 @@ describe('SearchBarService', () => {
       error: null,
     });
 
-    const groupsBuilder = createQueryBuilder({
-      data: [],
-      error: null,
-    });
-
-    const savedGroupImagesBuilder = createQueryBuilder({
-      data: [{ group_id: 'group-1' }],
-      error: null,
-    });
-
     supabaseMock = {
       client: {
         from: vi.fn((table: string) => {
           if (table === 'images') return imagesBuilder;
           if (table === 'projects') return projectsBuilder;
-          if (table === 'saved_groups') return groupsBuilder;
-          if (table === 'saved_group_images') return savedGroupImagesBuilder;
           return createQueryBuilder({ data: [], error: null });
         }),
       },
