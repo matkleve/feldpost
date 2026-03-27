@@ -56,7 +56,6 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
             id: 'media-1',
             source_image_id: 'img-1',
             organization_id: 'org-1',
-            primary_project_id: 'proj-1',
             created_by: 'user-1',
             storage_path: storagePath,
             thumbnail_path: thumbnailPath,
@@ -168,7 +167,7 @@ describe('ImageDetailDataFacade', () => {
 
     expect(signals.image()?.id).toBe('img-1');
     expect(signals.metadata()[0].key).toBe('Key');
-    expect(deps.projectMemberships.loadProjectMemberships).toHaveBeenCalledWith('img-1', 'proj-1');
+    expect(deps.projectMemberships.loadProjectMemberships).toHaveBeenCalledWith('img-1', null);
   });
 
   it('marks no-photo rows without requesting signed urls', async () => {

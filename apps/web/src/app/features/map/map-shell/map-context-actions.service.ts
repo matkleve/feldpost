@@ -102,15 +102,6 @@ export class MapContextActionsService {
       return { ok: false, reason: 'empty' };
     }
 
-    const { error: primaryError } = await client
-      .from('media_items')
-      .update({ primary_project_id: projectId })
-      .in('id', mediaItemIds);
-
-    if (primaryError) {
-      return { ok: false, reason: 'error', errorMessage: primaryError.message };
-    }
-
     const membershipPayload = mediaItemIds.map((mediaItemId) => ({
       media_item_id: mediaItemId,
       project_id: projectId,

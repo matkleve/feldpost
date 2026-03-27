@@ -459,9 +459,9 @@ async function loadProjectSizeSignals(
   if (projectIds.length === 0) return counts;
 
   let request = supabase.client
-    .from('media_items')
-    .select('primary_project_id')
-    .in('primary_project_id', projectIds);
+    .from('media_projects')
+    .select('project_id')
+    .in('project_id', projectIds);
 
   if (organizationId) {
     request = request.eq('organization_id', organizationId);
@@ -470,9 +470,9 @@ async function loadProjectSizeSignals(
   const response = await request;
   if (response.error || !Array.isArray(response.data)) return counts;
 
-  for (const row of response.data as Array<{ primary_project_id: string | null }>) {
-    if (!row.primary_project_id) continue;
-    counts.set(row.primary_project_id, (counts.get(row.primary_project_id) ?? 0) + 1);
+  for (const row of response.data as Array<{ project_id: string | null }>) {
+    if (!row.project_id) continue;
+    counts.set(row.project_id, (counts.get(row.project_id) ?? 0) + 1);
   }
 
   return counts;

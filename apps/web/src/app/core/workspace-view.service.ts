@@ -259,13 +259,13 @@ export class WorkspaceViewService {
       this.supabase.client
         .from('media_items')
         .select(
-          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, primary_project_id, exif_latitude, exif_longitude, location_status, created_by',
+          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
         )
         .in('id', uniqueIds),
       this.supabase.client
         .from('media_items')
         .select(
-          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, primary_project_id, exif_latitude, exif_longitude, location_status, created_by',
+          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, exif_latitude, exif_longitude, location_status, created_by',
         )
         .in('source_image_id', uniqueIds),
     ]);
@@ -327,24 +327,6 @@ export class WorkspaceViewService {
       }
     }
 
-    const fallbackProjectIds = Array.from(
-      new Set(rows.map((row) => row.primary_project_id).filter((id): id is string => !!id)),
-    );
-    const fallbackProjectNameById = new Map<string, string>();
-
-    if (fallbackProjectIds.length > 0) {
-      const { data: projectsData, error: projectsError } = await this.supabase.client
-        .from('projects')
-        .select('id, name')
-        .in('id', fallbackProjectIds);
-
-      if (!projectsError && Array.isArray(projectsData)) {
-        for (const project of projectsData as Array<{ id: string; name: string }>) {
-          fallbackProjectNameById.set(project.id, project.name);
-        }
-      }
-    }
-
     const mediaByLookupId = new Map<string, WorkspaceImage>();
 
     for (const row of rows) {
@@ -366,11 +348,8 @@ export class WorkspaceViewService {
 
       const projectIds = memberships.map((entry) => entry.id);
       const projectNames = memberships.map((entry) => entry.name ?? '').filter((name) => !!name);
-      const fallbackProjectName = row.primary_project_id
-        ? (fallbackProjectNameById.get(row.primary_project_id) ?? null)
-        : null;
-      const primaryProjectId = row.primary_project_id ?? projectIds[0] ?? null;
-      const primaryProjectName = projectNames[0] ?? fallbackProjectName;
+      const primaryProjectId = projectIds[0] ?? null;
+      const primaryProjectName = projectNames[0] ?? null;
       const lookupIds = [row.id, row.source_image_id].filter(
         (id): id is string => typeof id === 'string' && id.length > 0,
       );
@@ -718,7 +697,6 @@ interface RawSharedMediaItemRow {
   storage_path: string | null;
   captured_at: string | null;
   created_at: string;
-  primary_project_id: string | null;
   exif_latitude: number | null;
   exif_longitude: number | null;
   location_status: 'gps' | 'no_gps' | 'unresolved' | null;

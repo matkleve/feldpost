@@ -100,10 +100,6 @@ export class UploadService {
       return { error: 'Not authenticated.' };
     }
 
-    if (!projectId) {
-      return { error: 'No project selected for upload.' };
-    }
-
     const validation = this.validateFile(file);
     if (!validation.valid) {
       return { error: validation.error! };
@@ -169,7 +165,6 @@ export class UploadService {
       .from('media_items')
       .insert({
         organization_id: orgId,
-        primary_project_id: projectId,
         created_by: user.id,
         media_type: mediaType,
         mime_type: file.type,

@@ -46,7 +46,6 @@ export type DetailEditingField =
 
 export interface MediaContextRow {
   id: string;
-  primary_project_id: string | null;
   media_type: string | null;
   mime_type: string | null;
   location_status: string | null;

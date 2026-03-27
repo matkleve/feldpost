@@ -13,7 +13,6 @@ interface MediaDetailRow {
   id: string;
   source_image_id: string | null;
   organization_id: string | null;
-  primary_project_id: string | null;
   created_by: string | null;
   storage_path: string | null;
   thumbnail_path: string | null;
@@ -174,7 +173,7 @@ export class ImageDetailDataFacade {
     const mediaResult = await this.deps.services.supabase.client
       .from('media_items')
       .select(
-        'id,source_image_id,organization_id,primary_project_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status,address_label,street,city,district,country',
+        'id,source_image_id,organization_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status,address_label,street,city,district,country',
       )
       .or(`id.eq.${id},source_image_id.eq.${id}`)
       .limit(1)
@@ -194,7 +193,7 @@ export class ImageDetailDataFacade {
       id: legacyImageId,
       user_id: media.created_by ?? '',
       organization_id: media.organization_id,
-      project_id: media.primary_project_id,
+      project_id: null,
       storage_path: media.storage_path,
       thumbnail_path: media.thumbnail_path,
       latitude: media.latitude,

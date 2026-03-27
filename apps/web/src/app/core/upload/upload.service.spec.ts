@@ -363,24 +363,16 @@ describe('UploadService', () => {
     it('returns an error when the user is not authenticated', async () => {
       const { service } = setup({}, null);
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
-
-      expect(result.error).toBeTruthy();
-    });
-
-    it('returns an error when no project is selected', async () => {
-      const { service } = setup();
-
       const result = await service.uploadFile(makeFile());
 
-      expect(result.error).toBe('No project selected for upload.');
+      expect(result.error).toBeTruthy();
     });
 
     it('returns an error when the file fails validation', async () => {
       const { service } = setup();
       const badFile = makeFile('x.gif', 'image/gif', 100);
 
-      const result = await service.uploadFile(badFile, undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(badFile);
 
       expect(result.error).toBeTruthy();
       expect(typeof result.error === 'string' ? result.error : '').toContain('image/gif');
@@ -391,7 +383,7 @@ describe('UploadService', () => {
         profileResult: { data: null, error: new Error('profile not found') },
       });
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeTruthy();
     });
@@ -401,7 +393,7 @@ describe('UploadService', () => {
         storageUploadResult: { error: new Error('storage error') },
       });
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeTruthy();
     });
@@ -411,7 +403,7 @@ describe('UploadService', () => {
         storageUploadResult: { error: { message: 'Bucket not found' } },
       });
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBe(
         'Storage bucket "media" is missing in this Supabase project. Create it (or run the storage migration) and retry.',
@@ -423,7 +415,7 @@ describe('UploadService', () => {
         insertResult: { data: null, error: new Error('db error') },
       });
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeTruthy();
     });
@@ -431,7 +423,7 @@ describe('UploadService', () => {
     it('returns id and coords on a successful upload with EXIF GPS', async () => {
       const { service } = setup();
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeNull();
       if (result.error === null) {
@@ -443,7 +435,7 @@ describe('UploadService', () => {
     it('persists EXIF lat/lng in both exif_ columns and mutable columns', async () => {
       const { service, fakeSupabase } = setup();
 
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
 
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall.exif_latitude).toBe(51.5074);
@@ -458,7 +450,7 @@ describe('UploadService', () => {
 
       const { service, fakeSupabase } = setup();
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeNull();
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
@@ -473,7 +465,7 @@ describe('UploadService', () => {
       const { service, fakeSupabase } = setup();
       const manualCoords = { lat: 48.8566, lng: 2.3522 };
 
-      const result = await service.uploadFile(makeFile(), manualCoords, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile(), manualCoords);
 
       expect(result.error).toBeNull();
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
@@ -485,7 +477,7 @@ describe('UploadService', () => {
     it('builds the storage path using org_id / user_id segments', async () => {
       const { service, fakeSupabase } = setup();
 
-      await service.uploadFile(makeFile('shot.jpg', 'image/jpeg'), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile('shot.jpg', 'image/jpeg'));
 
       const uploadCall = fakeSupabase._storageFromChain.upload.mock.calls[0];
       const storagePath: string = uploadCall[0];
@@ -498,7 +490,7 @@ describe('UploadService', () => {
       vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: capturedAt });
 
       const { service, fakeSupabase } = setup();
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
 
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall.captured_at).toEqual(capturedAt);
@@ -508,7 +500,7 @@ describe('UploadService', () => {
       vi.mocked(exifr.parse).mockResolvedValue(null as any);
 
       const { service, fakeSupabase } = setup();
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
 
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall.captured_at).toBeNull();
@@ -521,7 +513,7 @@ describe('UploadService', () => {
       });
 
       const { service, fakeSupabase } = setup();
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
 
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       // direction is returned in UploadResult but not persisted on media_items
@@ -532,7 +524,7 @@ describe('UploadService', () => {
       vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-01-10') });
 
       const { service, fakeSupabase } = setup();
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
 
       const insertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
       expect(insertCall).toBeTruthy();
@@ -545,7 +537,7 @@ describe('UploadService', () => {
       });
 
       const { service } = setup();
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeNull();
       if (result.error === null) {
@@ -591,7 +583,7 @@ describe('UploadService', () => {
     it('calls GeocodingService.reverse() with EXIF coordinates after successful upload', async () => {
       const { service, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
       // Allow the fire-and-forget to complete.
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
@@ -601,7 +593,7 @@ describe('UploadService', () => {
     it('updates the DB row with resolved address fields via RPC', async () => {
       const { service, fakeSupabase, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
       const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
@@ -624,7 +616,7 @@ describe('UploadService', () => {
 
       const { service, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      await service.uploadFile(makeFile());
       // Give time for any async work to settle.
       await new Promise((r) => setTimeout(r, 50));
 
@@ -634,7 +626,7 @@ describe('UploadService', () => {
     it('does not fail the upload when geocoding returns null', async () => {
       const { service } = setup({}, 'user-uuid', null);
 
-      const result = await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
+      const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeNull();
     });
@@ -645,7 +637,7 @@ describe('UploadService', () => {
 
       const { service, fakeGeocoding } = setup();
 
-      await service.uploadFile(makeFile(), { lat: 48.8566, lng: 2.3522 }, undefined, 'proj-001');
+      await service.uploadFile(makeFile(), { lat: 48.8566, lng: 2.3522 });
       await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalled());
 
       expect(fakeGeocoding.reverse).toHaveBeenCalledWith(48.8566, 2.3522);
@@ -657,7 +649,6 @@ describe('UploadService', () => {
       await service.uploadFile(makeFile(), undefined, undefined, 'proj-001');
 
       const mediaInsertCall = fakeSupabase._mediaItemsInsertChain.insert.mock.calls[0][0];
-      expect(mediaInsertCall.primary_project_id).toBe('proj-001');
       expect(mediaInsertCall.media_type).toBe('photo');
       expect(mediaInsertCall.location_status).toBe('gps');
     });

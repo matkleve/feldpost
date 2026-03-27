@@ -107,11 +107,6 @@
                 "
                 [attr.title]="t('workspace.imageDetail.projects.remove', 'Remove')"
               >
-                @if (primarySelectorVisible() && isPrimaryProject(opt.id)) {
-                  <span class="detail-tags__chip-primary">{{
-                    t('workspace.imageDetail.projects.primary', 'Primary')
-                  }}</span>
-                }
                 <span class="detail-tags__chip-label">{{ opt.label }}</span>
                 <span class="material-icons" aria-hidden="true">close</span>
               </button>
@@ -153,17 +148,6 @@
               {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
             </div>
 
-            @if (!canAssignMultipleProjects()) {
-              <div class="detail-tags__note" role="status">
-                {{
-                  t(
-                    'workspace.imageDetail.projects.noGpsNote',
-                    'No GPS: this item can only belong to one project.'
-                  )
-                }}
-              </div>
-            }
-
             @if (isGpsAssignmentLocked()) {
               <div class="detail-tags__note" role="status">
                 {{
@@ -196,7 +180,6 @@
                   type="button"
                   class="detail-tags__option"
                   [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
-                  [disabled]="!selectedProjectIds().has(opt.id) && !canAssignMultipleProjects()"
                   (click)="projectMembershipToggled.emit(opt.id)"
                 >
                   <span class="detail-tags__option-color" aria-hidden="true"></span>
@@ -207,27 +190,6 @@
                   </span>
                   <span>{{ opt.label }}</span>
                 </button>
-
-                @if (primarySelectorVisible()) {
-                  <button
-                    type="button"
-                    class="detail-tags__primary"
-                    [class.detail-tags__primary--active]="isPrimaryProject(opt.id)"
-                    [disabled]="!selectedProjectIds().has(opt.id)"
-                    [attr.aria-label]="
-                      t('workspace.imageDetail.projects.setPrimaryPrefix', 'Set') +
-                      ' ' +
-                      opt.label +
-                      ' ' +
-                      t('workspace.imageDetail.projects.setPrimarySuffix', 'as primary project')
-                    "
-                    (click)="primaryProjectSelected.emit(opt.id)"
-                  >
-                    <span class="material-icons" aria-hidden="true">
-                      {{ isPrimaryProject(opt.id) ? 'star' : 'star_border' }}
-                    </span>
-                  </button>
-                }
               </div>
             }
           </div>

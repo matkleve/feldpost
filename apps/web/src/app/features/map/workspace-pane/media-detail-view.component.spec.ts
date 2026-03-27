@@ -120,7 +120,6 @@ function buildFakeClient() {
           id: 'media-001',
           source_image_id: MOCK_IMAGE.id,
           organization_id: MOCK_IMAGE.organization_id,
-          primary_project_id: MOCK_IMAGE.project_id,
           created_by: MOCK_IMAGE.user_id,
           storage_path: MOCK_IMAGE.storage_path,
           thumbnail_path: MOCK_IMAGE.thumbnail_path,
@@ -377,57 +376,8 @@ describe('ImageDetailViewComponent', () => {
         { id: 'proj-002', label: 'Project Beta' },
       ]);
       component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
-      component.primaryProjectId.set('proj-002');
 
       expect(component.projectName()).toBe('Project Beta +1');
-    });
-  });
-
-  // ── primary project selection ───────────────────────────────────────────
-
-  describe('setPrimaryProject', () => {
-    it('updates primary project for no-gps media and persists primary project', async () => {
-      const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
-      component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
-      component.mediaLocationStatus.set('no_gps');
-
-      await component.setPrimaryProject('proj-002');
-
-      expect(component.primaryProjectId()).toBe('proj-002');
-      expect(component.image()!.project_id).toBe('proj-002');
-      expect(fake.updateFn).toHaveBeenCalledWith(
-        expect.objectContaining({ primary_project_id: 'proj-002' }),
-      );
-    });
-
-    it('does not update primary project for gps media', async () => {
-      const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
-      component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
-      component.primaryProjectId.set('proj-001');
-      component.mediaLocationStatus.set('gps');
-      fake.updateFn.mockClear();
-
-      await component.setPrimaryProject('proj-002');
-
-      expect(component.primaryProjectId()).toBe('proj-001');
-      expect(component.image()!.project_id).toBe('proj-001');
-      expect(fake.updateFn).not.toHaveBeenCalled();
-    });
-
-    it('ignores primary selection for non-member projects', async () => {
-      const { component, fake } = setup();
-      component.image.set({ ...MOCK_IMAGE });
-      component.selectedProjectIds.set(new Set(['proj-001']));
-      component.primaryProjectId.set('proj-001');
-      component.mediaLocationStatus.set('no_gps');
-      fake.updateFn.mockClear();
-
-      await component.setPrimaryProject('proj-002');
-
-      expect(component.primaryProjectId()).toBe('proj-001');
-      expect(fake.updateFn).not.toHaveBeenCalled();
     });
   });
 
@@ -1043,7 +993,6 @@ function setupReplace() {
           id: 'media-001',
           source_image_id: MOCK_IMAGE.id,
           organization_id: MOCK_IMAGE.organization_id,
-          primary_project_id: MOCK_IMAGE.project_id,
           created_by: MOCK_IMAGE.user_id,
           storage_path: MOCK_IMAGE.storage_path,
           thumbnail_path: MOCK_IMAGE.thumbnail_path,

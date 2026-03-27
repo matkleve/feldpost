@@ -372,34 +372,11 @@ export class UploadService {
     const mimeType = file.type || this.resolveMimeType(file);
     const locationStatus = this.resolveLocationStatus(mediaType, finalCoords);
 
-    // Determine primary project: use provided projectId or fetch default project
-    let primaryProjectId = projectId;
-    if (!primaryProjectId) {
-      const { data: defProj } = await this.supabase.client
-        .from('projects')
-        .select('id')
-        .eq('organization_id', orgId)
-        .order('archived_at', { ascending: true })
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .single();
-
-      primaryProjectId = defProj?.id ?? null;
-    }
-
-    if (!primaryProjectId) {
-      return {
-        error:
-          'No active project found in this organization. Cannot insert media without a primary project.',
-      };
-    }
-
     // ── 7. Insert into media_items (now PRIMARY) ───────────────────────────
     const { data: mediaRow, error: dbError } = await this.supabase.client
       .from('media_items')
       .insert({
         organization_id: orgId,
-        primary_project_id: primaryProjectId,
         created_by: user.id,
         media_type: mediaType,
         mime_type: mimeType,

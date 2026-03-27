@@ -5,7 +5,6 @@ import type { ImageRecord } from '../features/map/workspace-pane/media-detail-vi
 interface MediaItemRow {
   id: string;
   organization_id: string;
-  primary_project_id: string | null;
   created_by: string | null;
   storage_path: string | null;
   thumbnail_path: string | null;
@@ -59,7 +58,7 @@ export class MediaQueryService {
     const { data, error } = await this.supabase.client
       .from('media_items')
       .select(
-        'id, organization_id, primary_project_id, created_by, storage_path, thumbnail_path, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status',
+        'id, organization_id, created_by, storage_path, thumbnail_path, latitude, longitude, exif_latitude, exif_longitude, captured_at, created_at, location_status',
       )
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false });
@@ -71,37 +70,7 @@ export class MediaQueryService {
     const items = Array.isArray(data)
       ? (data as MediaItemRow[]).map((row) => this.toImageRecord(row))
       : [];
-    const projectIds = Array.from(
-      new Set(
-        items
-          .map((item) => item.project_id)
-          .filter((projectId): projectId is string => !!projectId),
-      ),
-    );
-
-    if (projectIds.length === 0) {
-      return { items, totalCount, projectNameById: new Map<string, string>() };
-    }
-
-    const { data: projectsData, error: projectsError } = await this.supabase.client
-      .from('projects')
-      .select('id, name')
-      .in('id', projectIds);
-
-    if (projectsError) {
-      return { items, totalCount, projectNameById: new Map<string, string>() };
-    }
-
-    const projectNameById = new Map<string, string>();
-    if (Array.isArray(projectsData)) {
-      for (const row of projectsData as Array<{ id: string; name: string | null }>) {
-        if (row.name) {
-          projectNameById.set(row.id, row.name);
-        }
-      }
-    }
-
-    return { items, totalCount, projectNameById };
+    return { items, totalCount, projectNameById: new Map<string, string>() };
   }
 
   private toImageRecord(row: MediaItemRow): ImageRecord {
@@ -109,7 +78,7 @@ export class MediaQueryService {
       id: row.id,
       user_id: row.created_by ?? '',
       organization_id: row.organization_id,
-      project_id: row.primary_project_id,
+      project_id: null,
       storage_path: row.storage_path,
       thumbnail_path: row.thumbnail_path,
       latitude: row.latitude,

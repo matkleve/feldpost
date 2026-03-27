@@ -127,7 +127,6 @@ export function formatUploadDate(image: ImageRecord | null, locale: string): str
 export function resolveProjectName(
   options: SelectOption[],
   selectedIds: Set<string>,
-  primaryId: string | null,
   fallbackProjectId: string | null,
 ): string {
   if (selectedIds.size === 0) {
@@ -140,10 +139,7 @@ export function resolveProjectName(
     .map((option) => option.label);
   if (selectedLabels.length === 0) return '';
 
-  const primaryLabel =
-    primaryId && selectedIds.has(primaryId)
-      ? (options.find((option) => option.id === primaryId)?.label ?? selectedLabels[0])
-      : selectedLabels[0];
+  const primaryLabel = selectedLabels[0];
 
   return selectedLabels.length === 1
     ? primaryLabel

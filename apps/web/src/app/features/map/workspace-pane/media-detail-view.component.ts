@@ -113,7 +113,6 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly saving = signal(false);
   readonly projectOptions = signal<SelectOption[]>([]);
   readonly selectedProjectIds = signal<Set<string>>(new Set());
-  readonly primaryProjectId = signal<string | null>(null);
   readonly mediaItemId = signal<string | null>(null);
   readonly mediaType = signal<string | null>(null);
   readonly mediaMimeType = signal<string | null>(null);
@@ -181,7 +180,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     return resolveProjectName(
       this.projectOptions(),
       this.selectedProjectIds(),
-      this.primaryProjectId(),
       image?.project_id ?? null,
     );
   });
@@ -211,16 +209,7 @@ export class ImageDetailViewComponent implements OnDestroy {
     );
   });
 
-  readonly canAssignMultipleProjects = computed(() => {
-    const locationStatus = this.mediaLocationStatus();
-    if (locationStatus === 'no_gps' || locationStatus === 'unresolved') return false;
-    const img = this.image();
-    if (!img) return true;
-    if (img.location_unresolved) return false;
-    return img.latitude != null && img.longitude != null;
-  });
-
-  readonly primarySelectorVisible = computed(() => !this.canAssignMultipleProjects());
+  readonly canAssignMultipleProjects = computed(() => true);
 
   readonly fullAddress = computed(() => resolveFullAddress(this.image()));
 
@@ -263,9 +252,8 @@ export class ImageDetailViewComponent implements OnDestroy {
     projectsService: this.projectsService,
     toastService: this.toastService,
     t: this.t,
-    image: this.image,
+    media: this.image,
     selectedProjectIds: this.selectedProjectIds,
-    primaryProjectId: this.primaryProjectId,
     mediaItemId: this.mediaItemId,
     mediaType: this.mediaType,
     mediaMimeType: this.mediaMimeType,
@@ -273,7 +261,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     projectOptions: this.projectOptions,
     projectSearch: this.projectSearch,
     canAssignMultipleProjects: () => this.canAssignMultipleProjects(),
-    primarySelectorVisible: () => this.primarySelectorVisible(),
   });
 
   private readonly dataFacade = new ImageDetailDataFacade({
@@ -423,7 +410,6 @@ export class ImageDetailViewComponent implements OnDestroy {
     this.image.set(null);
     this.metadata.set([]);
     this.selectedProjectIds.set(new Set());
-    this.primaryProjectId.set(null);
     this.mediaItemId.set(null);
     this.mediaType.set(null);
     this.mediaMimeType.set(null);
@@ -461,14 +447,6 @@ export class ImageDetailViewComponent implements OnDestroy {
 
   async toggleProjectMembership(projectId: string): Promise<void> {
     await this.projectMembershipHelper.toggleProjectMembership(projectId);
-  }
-
-  isPrimaryProject(projectId: string): boolean {
-    return this.primaryProjectId() === projectId;
-  }
-
-  async setPrimaryProject(projectId: string): Promise<void> {
-    await this.projectMembershipHelper.setPrimaryProject(projectId);
   }
 
   setProjectSearch(value: string): void {

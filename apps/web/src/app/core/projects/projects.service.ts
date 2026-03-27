@@ -431,20 +431,7 @@ export class ProjectsService {
     return ok;
   }
 
-  async setMediaPrimaryProject(mediaItemId: string, projectId: string): Promise<boolean> {
-    const { error } = await this.supabase.client
-      .from('media_items')
-      .update({ primary_project_id: projectId, updated_at: new Date().toISOString() })
-      .eq('id', mediaItemId);
-
-    const ok = !error;
-    if (ok) {
-      this.invalidateProjectsReadCaches();
-      this.projectWorkspaceImagesCache.clear();
-    }
-
-    return ok;
-  }
+  // No "primary project" concept — memberships only via media_projects.
 
   private invalidateProjectsReadCaches(): void {
     this.projectsCache = null;

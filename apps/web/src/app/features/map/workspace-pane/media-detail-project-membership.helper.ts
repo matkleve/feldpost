@@ -11,9 +11,8 @@ interface ProjectMembershipHelperDeps {
   projectsService: ProjectsService;
   toastService: ToastService;
   t: DetailTranslateFn;
-  image: WritableSignal<ImageRecord | null>;
+  media: WritableSignal<ImageRecord | null>;
   selectedProjectIds: WritableSignal<Set<string>>;
-  primaryProjectId: WritableSignal<string | null>;
   mediaItemId: WritableSignal<string | null>;
   mediaType: WritableSignal<string | null>;
   mediaMimeType: WritableSignal<string | null>;
@@ -21,7 +20,6 @@ interface ProjectMembershipHelperDeps {
   projectOptions: WritableSignal<SelectOption[]>;
   projectSearch: WritableSignal<string>;
   canAssignMultipleProjects: () => boolean;
-  primarySelectorVisible: () => boolean;
 }
 
 export class ImageDetailProjectMembershipHelper {
@@ -30,7 +28,6 @@ export class ImageDetailProjectMembershipHelper {
   async loadProjectMemberships(imageId: string, fallbackProjectId: string | null): Promise<void> {
     const mediaContext = await this.loadMediaContext(imageId);
     const memberships = new Set<string>();
-    let resolvedPrimaryProjectId: string | null = mediaContext?.primary_project_id ?? null;
 
     if (mediaContext?.id) {
       const mediaMemberships = await this.deps.projectsService.loadMediaProjectMemberships(
@@ -39,25 +36,13 @@ export class ImageDetailProjectMembershipHelper {
       for (const projectId of mediaMemberships) {
         memberships.add(projectId);
       }
-      if (mediaContext.primary_project_id) {
-        memberships.add(mediaContext.primary_project_id);
-      }
     }
 
     if (memberships.size === 0 && fallbackProjectId) {
       memberships.add(fallbackProjectId);
     }
 
-    if (!resolvedPrimaryProjectId && fallbackProjectId && memberships.has(fallbackProjectId)) {
-      resolvedPrimaryProjectId = fallbackProjectId;
-    }
-
-    if (!resolvedPrimaryProjectId && memberships.size > 0) {
-      resolvedPrimaryProjectId = [...memberships][0] ?? null;
-    }
-
     this.deps.selectedProjectIds.set(memberships);
-    this.deps.primaryProjectId.set(resolvedPrimaryProjectId);
   }
 
   async toggleProjectMembership(projectId: string): Promise<void> {
@@ -65,91 +50,22 @@ export class ImageDetailProjectMembershipHelper {
     const next = new Set(previous);
     const removing = next.has(projectId);
 
-    if (removing && previous.size === 1) {
-      this.showProjectRequiredToast();
-      return;
-    }
-
-    if (!removing && !this.deps.canAssignMultipleProjects() && previous.size > 0) {
-      this.showSingleProjectToast();
-      return;
-    }
-
     if (removing) {
       next.delete(projectId);
     } else {
       next.add(projectId);
     }
 
-    const currentPrimaryProjectId = this.deps.primaryProjectId();
-    if (!currentPrimaryProjectId || !next.has(currentPrimaryProjectId)) {
-      this.deps.primaryProjectId.set([...next][0] ?? null);
-    }
-
     this.deps.selectedProjectIds.set(next);
     await this.persistProjectMemberships(previous);
-  }
-
-  async setPrimaryProject(projectId: string): Promise<void> {
-    if (!this.deps.primarySelectorVisible()) {
-      return;
-    }
-
-    if (!this.deps.selectedProjectIds().has(projectId)) {
-      return;
-    }
-
-    if (this.deps.primaryProjectId() === projectId) {
-      return;
-    }
-
-    const previousPrimary = this.deps.primaryProjectId();
-    this.deps.primaryProjectId.set(projectId);
-
-    const mediaItemId = this.deps.mediaItemId();
-    if (mediaItemId) {
-      const ok = await this.deps.projectsService.setMediaPrimaryProject(mediaItemId, projectId);
-      if (!ok) {
-        this.deps.primaryProjectId.set(previousPrimary);
-        this.showPrimaryProjectFailedToast();
-        return;
-      }
-    } else {
-      const img = this.deps.image();
-      if (!img) {
-        return;
-      }
-
-      const mediaContext = await this.loadMediaContext(img.id);
-      if (!mediaContext?.id) {
-        this.deps.primaryProjectId.set(previousPrimary);
-        this.showPrimaryProjectFailedToast();
-        return;
-      }
-
-      const ok = await this.deps.projectsService.setMediaPrimaryProject(mediaContext.id, projectId);
-
-      if (!ok) {
-        this.deps.primaryProjectId.set(previousPrimary);
-        this.showPrimaryProjectFailedToast();
-        return;
-      }
-    }
-
-    this.deps.image.update((prev) => (prev ? { ...prev, project_id: projectId } : prev));
   }
 
   async createProjectFromSearch(): Promise<void> {
     const name = this.deps.projectSearch().trim();
     if (!name) return;
 
-    const img = this.deps.image();
+    const img = this.deps.media();
     if (!img?.organization_id) return;
-
-    if (!this.deps.canAssignMultipleProjects() && this.deps.selectedProjectIds().size > 0) {
-      this.showSingleProjectToast();
-      return;
-    }
 
     const existing = this.deps
       .projectOptions()
@@ -183,7 +99,7 @@ export class ImageDetailProjectMembershipHelper {
   private async loadMediaContext(imageId: string): Promise<MediaContextRow | null> {
     const response = await this.deps.supabase.client
       .from('media_items')
-      .select('id,primary_project_id,media_type,mime_type,location_status')
+      .select('id,media_type,mime_type,location_status')
       .or(`id.eq.${imageId},source_image_id.eq.${imageId}`)
       .limit(1)
       .maybeSingle();
@@ -205,7 +121,7 @@ export class ImageDetailProjectMembershipHelper {
   }
 
   private async persistProjectMemberships(previous: Set<string>): Promise<void> {
-    const img = this.deps.image();
+    const img = this.deps.media();
     if (!img) return;
 
     const next = this.deps.selectedProjectIds();
@@ -214,24 +130,6 @@ export class ImageDetailProjectMembershipHelper {
 
     const toInsert = nextIds.filter((id) => !previous.has(id));
     const toDelete = prevIds.filter((id) => !next.has(id));
-    const requestedPrimaryProjectId = this.deps.primaryProjectId();
-    const primaryProjectId =
-      requestedPrimaryProjectId && next.has(requestedPrimaryProjectId)
-        ? requestedPrimaryProjectId
-        : (nextIds[0] ?? null);
-
-    if (nextIds.length === 0) {
-      this.deps.selectedProjectIds.set(previous);
-      this.showProjectRequiredToast();
-      return;
-    }
-
-    if (!this.deps.canAssignMultipleProjects() && nextIds.length > 1) {
-      this.deps.selectedProjectIds.set(previous);
-      this.showSingleProjectToast();
-      return;
-    }
-
     let mediaItemId = this.deps.mediaItemId();
     if (!mediaItemId) {
       const mediaContext = await this.loadMediaContext(img.id);
@@ -262,42 +160,7 @@ export class ImageDetailProjectMembershipHelper {
       }
     }
 
-    if (primaryProjectId) {
-      const ok = await this.deps.projectsService.setMediaPrimaryProject(
-        mediaItemId,
-        primaryProjectId,
-      );
-      if (!ok) {
-        this.deps.selectedProjectIds.set(previous);
-        this.showPrimaryProjectFailedToast();
-        return;
-      }
-    }
-
-    this.deps.primaryProjectId.set(primaryProjectId);
-    this.deps.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
-  }
-
-  private showProjectRequiredToast(): void {
-    this.deps.toastService.show({
-      message: this.deps.t(
-        'workspace.imageDetail.toast.projectRequired',
-        'At least one project is required.',
-      ),
-      type: 'warning',
-      dedupe: true,
-    });
-  }
-
-  private showSingleProjectToast(): void {
-    this.deps.toastService.show({
-      message: this.deps.t(
-        'workspace.imageDetail.toast.noGpsSingleProject',
-        'No-GPS media can only belong to one project.',
-      ),
-      type: 'warning',
-      dedupe: true,
-    });
+    this.deps.media.update((prev) => (prev ? { ...prev, project_id: nextIds[0] ?? null } : prev));
   }
 
   private showMembershipUpdateFailedToast(): void {
@@ -311,14 +174,5 @@ export class ImageDetailProjectMembershipHelper {
     });
   }
 
-  private showPrimaryProjectFailedToast(): void {
-    this.deps.toastService.show({
-      message: this.deps.t(
-        'workspace.imageDetail.toast.primaryProjectFailed',
-        'Could not set primary project.',
-      ),
-      type: 'error',
-      dedupe: true,
-    });
-  }
+  // No "primary project" concept.
 }

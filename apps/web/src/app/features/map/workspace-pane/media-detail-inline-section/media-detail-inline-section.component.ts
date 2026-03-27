@@ -87,12 +87,10 @@ export class ImageDetailInlineSectionComponent {
   readonly fullAddress = input('');
   readonly projectOptions = input<SelectOption[]>([]);
   readonly selectedProjectIds = input<Set<string>>(new Set());
-  readonly primaryProjectId = input<string | null>(null);
   readonly projectSearch = input('');
   readonly filteredProjectOptions = input<SelectOption[]>([]);
   readonly projectCanCreate = input(false);
   readonly canAssignMultipleProjects = input(false);
-  readonly primarySelectorVisible = input(false);
   readonly isGpsAssignmentLocked = input(false);
   readonly isCorrected = input(false);
   readonly saving = input(false);
@@ -105,7 +103,6 @@ export class ImageDetailInlineSectionComponent {
   readonly projectSearchChanged = output<string>();
   readonly projectCreateRequested = output<void>();
   readonly projectMembershipToggled = output<string>();
-  readonly primaryProjectSelected = output<string>();
   readonly addressSuggestionApplied = output<ForwardGeocodeResult>();
   readonly copyCoordinatesRequested = output<void>();
   readonly zoomToLocationRequested = output<void>();
@@ -244,10 +241,6 @@ export class ImageDetailInlineSectionComponent {
     this.positionProjectDropdown();
   }
 
-  isPrimaryProject(projectId: string): boolean {
-    return this.primaryProjectId() === projectId;
-  }
-
   formatCoord(value: number | null): string {
     return formatCoordinate(value);
   }
@@ -337,7 +330,7 @@ export class ImageDetailInlineSectionComponent {
 
     return Array.from(
       container.querySelectorAll(
-        '.detail-tags__create:not(:disabled), .detail-tags__option:not(:disabled), .detail-tags__primary:not(:disabled)',
+        '.detail-tags__create:not(:disabled), .detail-tags__option:not(:disabled)',
       ),
     ) as HTMLButtonElement[];
   }

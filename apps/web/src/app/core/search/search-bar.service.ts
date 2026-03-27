@@ -64,7 +64,6 @@ interface DbAddressRow {
   city: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
-  project_id: string | null;
   created_at: string | null;
 }
 
@@ -260,7 +259,7 @@ export class SearchBarService {
     let request = this.supabaseService.client
       .from('media_items')
       .select(
-        'id,address_label,street,city,latitude,longitude,project_id:primary_project_id,created_at',
+        'id,address_label,street,city,latitude,longitude,created_at',
       )
       .ilike('address_label', `*${trimmedQuery}*`)
       .not('address_label', 'is', null)
@@ -313,8 +312,7 @@ export class SearchBarService {
       const key = label.toLowerCase();
       const textMatch = computeTextMatchScore(label, trimmedQuery);
       const createdAtMs = row.created_at ? Date.parse(row.created_at) : 0;
-      const activeProjectHit =
-        context.activeProjectId && row.project_id === context.activeProjectId ? 1 : 0;
+      const activeProjectHit = 0;
 
       const existing = grouped.get(key);
       if (existing) {
