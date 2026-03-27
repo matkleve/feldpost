@@ -1,13 +1,40 @@
-import { WritableSignal } from '@angular/core';
-import { ImageDetailProjectMembershipHelper } from './image-detail-project-membership.helper';
-import { PhotoLoadService } from '../../../core/photo-load.service';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { ImageRecord, MetadataEntry, SelectOption } from './image-detail-view.types';
+import type { WritableSignal } from '@angular/core';
+import type { ImageDetailProjectMembershipHelper } from './image-detail-project-membership.helper';
+import type { PhotoLoadService } from '../../../core/photo-load.service';
+import type { SupabaseService } from '../../../core/supabase/supabase.service';
+import type { ImageRecord, MetadataEntry, SelectOption } from './image-detail-view.types';
 import {
   isImageLikeMedia,
   mapImageMetadataRows,
   resolvePreviewThumbnailPath,
 } from './image-detail-view.utils';
+
+interface MediaDetailRow {
+  id: string;
+  source_image_id: string | null;
+  organization_id: string | null;
+  primary_project_id: string | null;
+  created_by: string | null;
+  storage_path: string | null;
+  thumbnail_path: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  exif_latitude: number | null;
+  exif_longitude: number | null;
+  captured_at: string | null;
+  created_at: string;
+  mime_type: string | null;
+  location_status: 'gps' | 'no_gps' | 'unresolved' | null;
+}
+
+interface ProjectRow {
+  id: string;
+  name: string;
+}
+
+interface MetadataKeyRow {
+  key_name: string;
+}
 
 interface ImageDetailDataFacadeDeps {
   services: {
@@ -36,30 +63,22 @@ export class ImageDetailDataFacade {
   constructor(private readonly deps: ImageDetailDataFacadeDeps) {}
 
   async loadImage(id: string, abortSignal: AbortSignal): Promise<void> {
-    this.deps.signals.loading.set(true);
-    this.deps.signals.error.set(null);
-    this.deps.signals.fullResPreloaded.set(false);
-    this.deps.signals.fullResUrl.set(null);
-    this.deps.signals.thumbnailUrl.set(null);
+    this.resetLoadState();
 
-    const [imageResult, metaResult] = await Promise.all([
-      this.deps.services.supabase.client.from('images').select('*').eq('id', id).single(),
-      this.deps.services.supabase.client
-        .from('image_metadata')
-        .select('metadata_key_id, value_text, metadata_keys(key_name)')
-        .eq('image_id', id),
-    ]);
-
+    const media = await this.loadMediaRow(id);
     if (abortSignal.aborted) return;
+    if (!media) return;
 
-    if (imageResult.error) {
-      this.deps.signals.error.set(imageResult.error.message);
-      this.deps.signals.loading.set(false);
-      return;
-    }
+    const legacyImageId = media.source_image_id ?? media.id;
+    const image = this.toImageRecord(media, legacyImageId);
 
-    const image = imageResult.data as ImageRecord;
+    const metaResult = await this.deps.services.supabase.client
+      .from('image_metadata')
+      .select('metadata_key_id, value_text, metadata_keys(key_name)')
+      .eq('image_id', legacyImageId);
+
     this.deps.signals.image.set(image);
+    this.deps.signals.error.set(null);
     this.deps.signals.loading.set(false);
     this.deps.signals.metadata.set(mapImageMetadataRows(metaResult.data ?? []));
 
@@ -118,7 +137,9 @@ export class ImageDetailDataFacade {
       .order('name');
 
     if (data) {
-      this.deps.signals.projectOptions.set(data.map((p: any) => ({ id: p.id, label: p.name })));
+      this.deps.signals.projectOptions.set(
+        (data as ProjectRow[]).map((project) => ({ id: project.id, label: project.name })),
+      );
     }
   }
 
@@ -130,7 +151,61 @@ export class ImageDetailDataFacade {
       .order('key_name');
 
     if (data) {
-      this.deps.signals.allMetadataKeyNames.set(data.map((k: any) => k.key_name as string));
+      this.deps.signals.allMetadataKeyNames.set(
+        (data as MetadataKeyRow[]).map((metadataKey) => metadataKey.key_name),
+      );
     }
+  }
+
+  private resetLoadState(): void {
+    this.deps.signals.loading.set(true);
+    this.deps.signals.error.set(null);
+    this.deps.signals.fullResPreloaded.set(false);
+    this.deps.signals.fullResUrl.set(null);
+    this.deps.signals.thumbnailUrl.set(null);
+  }
+
+  private async loadMediaRow(id: string): Promise<MediaDetailRow | null> {
+    const mediaResult = await this.deps.services.supabase.client
+      .from('media_items')
+      .select(
+        'id,source_image_id,organization_id,primary_project_id,created_by,storage_path,thumbnail_path,latitude,longitude,exif_latitude,exif_longitude,captured_at,created_at,mime_type,location_status',
+      )
+      .or(`id.eq.${id},source_image_id.eq.${id}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (mediaResult.error || !mediaResult.data) {
+      this.deps.signals.error.set(mediaResult.error?.message ?? 'Media not found');
+      this.deps.signals.loading.set(false);
+      return null;
+    }
+
+    return mediaResult.data as MediaDetailRow;
+  }
+
+  private toImageRecord(media: MediaDetailRow, legacyImageId: string): ImageRecord {
+    return {
+      id: legacyImageId,
+      user_id: media.created_by ?? '',
+      organization_id: media.organization_id,
+      project_id: media.primary_project_id,
+      storage_path: media.storage_path,
+      thumbnail_path: media.thumbnail_path,
+      latitude: media.latitude,
+      longitude: media.longitude,
+      exif_latitude: media.exif_latitude,
+      exif_longitude: media.exif_longitude,
+      captured_at: media.captured_at,
+      has_time: media.captured_at !== null,
+      created_at: media.created_at,
+      address_label: null,
+      street: null,
+      city: null,
+      district: null,
+      country: null,
+      direction: null,
+      location_unresolved: media.location_status === 'unresolved',
+    };
   }
 }

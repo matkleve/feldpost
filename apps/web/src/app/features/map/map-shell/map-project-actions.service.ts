@@ -113,10 +113,11 @@ export class MapProjectActionsService {
     imageId: string,
   ): Promise<string | null> {
     const { data, error } = await client
-      .from('images')
+      .from('media_items')
       .select('organization_id')
-      .eq('id', imageId)
-      .single();
+      .or(`id.eq.${imageId},source_image_id.eq.${imageId}`)
+      .limit(1)
+      .maybeSingle();
 
     if (error || !data?.organization_id) {
       return null;

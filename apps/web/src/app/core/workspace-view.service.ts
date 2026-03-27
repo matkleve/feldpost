@@ -236,24 +236,40 @@ export class WorkspaceViewService {
       return [];
     }
 
-    const { data, error } = await this.supabase.client
-      .from('images')
-      .select(
-        'id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, project_id, direction, exif_latitude, exif_longitude, address_label, city, district, street, country, user_id',
-      )
-      .in('id', uniqueIds);
+    const [directRowsResponse, sourceRowsResponse] = await Promise.all([
+      this.supabase.client
+        .from('media_items')
+        .select(
+          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, primary_project_id, exif_latitude, exif_longitude, location_status, created_by',
+        )
+        .in('id', uniqueIds),
+      this.supabase.client
+        .from('media_items')
+        .select(
+          'id, source_image_id, latitude, longitude, thumbnail_path, storage_path, captured_at, created_at, primary_project_id, exif_latitude, exif_longitude, location_status, created_by',
+        )
+        .in('source_image_id', uniqueIds),
+    ]);
 
-    if (error) {
-      throw new Error(error.message);
+    if (directRowsResponse.error && sourceRowsResponse.error) {
+      throw new Error(directRowsResponse.error.message);
     }
 
-    const rows = Array.isArray(data) ? (data as RawSharedImageRow[]) : [];
+    const rows = [
+      ...(Array.isArray(directRowsResponse.data)
+        ? (directRowsResponse.data as RawSharedMediaItemRow[])
+        : []),
+      ...(Array.isArray(sourceRowsResponse.data)
+        ? (sourceRowsResponse.data as RawSharedMediaItemRow[])
+        : []),
+    ].filter((row, index, all) => index === all.findIndex((candidate) => candidate.id === row.id));
+
     if (rows.length === 0) {
       return [];
     }
 
     const userIds = Array.from(
-      new Set(rows.map((row) => row.user_id).filter((id): id is string => !!id)),
+      new Set(rows.map((row) => row.created_by).filter((id): id is string => !!id)),
     );
     const profileNameById = new Map<string, string>();
 
@@ -272,26 +288,28 @@ export class WorkspaceViewService {
       }
     }
 
-    const membershipByImageId = new Map<string, Array<{ id: string; name: string | null }>>();
+    const membershipByMediaId = new Map<string, Array<{ id: string; name: string | null }>>();
+    const mediaItemIds = rows.map((row) => row.id);
+
     const { data: membershipsData, error: membershipsError } = await this.supabase.client
-      .from('image_projects')
-      .select('image_id, project_id, projects(name)')
-      .in('image_id', uniqueIds);
+      .from('media_projects')
+      .select('media_item_id, project_id, projects(name)')
+      .in('media_item_id', mediaItemIds);
 
     if (!membershipsError && Array.isArray(membershipsData)) {
-      for (const row of membershipsData as RawImageProjectMembershipRow[]) {
-        const bucket = membershipByImageId.get(row.image_id) ?? [];
+      for (const row of membershipsData as RawMediaProjectMembershipRow[]) {
+        const bucket = membershipByMediaId.get(row.media_item_id) ?? [];
         const relatedProject = Array.isArray(row.projects) ? row.projects[0] : row.projects;
         bucket.push({
           id: row.project_id,
           name: relatedProject?.name ?? null,
         });
-        membershipByImageId.set(row.image_id, bucket);
+        membershipByMediaId.set(row.media_item_id, bucket);
       }
     }
 
     const fallbackProjectIds = Array.from(
-      new Set(rows.map((row) => row.project_id).filter((id): id is string => !!id)),
+      new Set(rows.map((row) => row.primary_project_id).filter((id): id is string => !!id)),
     );
     const fallbackProjectNameById = new Map<string, string>();
 
@@ -308,7 +326,8 @@ export class WorkspaceViewService {
       }
     }
 
-    const imageById = new Map<string, WorkspaceImage>();
+    const mediaByLookupId = new Map<string, WorkspaceImage>();
+
     for (const row of rows) {
       if (
         typeof row.latitude !== 'number' ||
@@ -319,7 +338,7 @@ export class WorkspaceViewService {
         continue;
       }
 
-      const memberships = membershipByImageId.get(row.id) ?? [];
+      const memberships = membershipByMediaId.get(row.id) ?? [];
       memberships.sort((a, b) => {
         const aName = (a.name ?? '').toLowerCase();
         const bName = (b.name ?? '').toLowerCase();
@@ -328,42 +347,46 @@ export class WorkspaceViewService {
 
       const projectIds = memberships.map((entry) => entry.id);
       const projectNames = memberships.map((entry) => entry.name ?? '').filter((name) => !!name);
-      const fallbackProjectName = row.project_id
-        ? (fallbackProjectNameById.get(row.project_id) ?? null)
+      const fallbackProjectName = row.primary_project_id
+        ? (fallbackProjectNameById.get(row.primary_project_id) ?? null)
         : null;
-      const primaryProjectId = projectIds[0] ?? row.project_id;
+      const primaryProjectId = row.primary_project_id ?? projectIds[0] ?? null;
       const primaryProjectName = projectNames[0] ?? fallbackProjectName;
-      const derivedAddress = deriveStreetNumberAndZip(row.street, row.address_label);
+      const lookupIds = [row.id, row.source_image_id].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0,
+      );
 
-      imageById.set(row.id, {
-        id: row.id,
-        latitude: row.latitude,
-        longitude: row.longitude,
-        thumbnailPath: row.thumbnail_path,
-        storagePath: row.storage_path,
-        capturedAt: row.captured_at,
-        createdAt: row.created_at,
-        projectId: primaryProjectId,
-        projectName: primaryProjectName,
-        projectIds,
-        projectNames,
-        direction: row.direction,
-        exifLatitude: row.exif_latitude,
-        exifLongitude: row.exif_longitude,
-        addressLabel: row.address_label,
-        city: row.city,
-        district: row.district,
-        street: row.street,
-        streetNumber: row.street_number ?? derivedAddress.streetNumber,
-        zip: row.zip ?? derivedAddress.zip,
-        country: row.country,
-        userName: row.user_id ? (profileNameById.get(row.user_id) ?? null) : null,
-      });
+      for (const lookupId of lookupIds) {
+        mediaByLookupId.set(lookupId, {
+          id: lookupId,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          thumbnailPath: row.thumbnail_path,
+          storagePath: row.storage_path,
+          capturedAt: row.captured_at,
+          createdAt: row.created_at,
+          projectId: primaryProjectId,
+          projectName: primaryProjectName,
+          projectIds,
+          projectNames,
+          direction: null,
+          exifLatitude: row.exif_latitude,
+          exifLongitude: row.exif_longitude,
+          addressLabel: null,
+          city: null,
+          district: null,
+          street: null,
+          streetNumber: null,
+          zip: null,
+          country: null,
+          userName: row.created_by ? (profileNameById.get(row.created_by) ?? null) : null,
+        });
+      }
     }
 
     const ordered: WorkspaceImage[] = [];
     for (const id of imageIds) {
-      const image = imageById.get(id);
+      const image = mediaByLookupId.get(id);
       if (image) {
         ordered.push(image);
       }
@@ -625,30 +648,24 @@ interface RawClusterRow {
   user_name: string | null;
 }
 
-interface RawSharedImageRow {
+interface RawSharedMediaItemRow {
   id: string;
+  source_image_id: string | null;
   latitude: number | null;
   longitude: number | null;
   thumbnail_path: string | null;
   storage_path: string | null;
   captured_at: string | null;
   created_at: string;
-  project_id: string | null;
-  direction: number | null;
+  primary_project_id: string | null;
   exif_latitude: number | null;
   exif_longitude: number | null;
-  address_label: string | null;
-  city: string | null;
-  district: string | null;
-  street: string | null;
-  street_number?: string | null;
-  zip?: string | null;
-  country: string | null;
-  user_id: string | null;
+  location_status: 'gps' | 'no_gps' | 'unresolved' | null;
+  created_by: string | null;
 }
 
-interface RawImageProjectMembershipRow {
-  image_id: string;
+interface RawMediaProjectMembershipRow {
+  media_item_id: string;
   project_id: string;
   projects: { name: string | null } | Array<{ name: string | null }> | null;
 }
@@ -696,4 +713,3 @@ function deriveStreetNumberAndZip(
     zip: zipMatch?.[1] ?? null,
   };
 }
-

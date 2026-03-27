@@ -31,7 +31,10 @@ export class ImageDetailDeleteHelper {
     const id = this.deps.signals.imageId();
     if (!id) return;
 
-    const { error } = await this.deps.services.supabase.client.from('images').delete().eq('id', id);
+    const { error } = await this.deps.services.supabase.client
+      .from('media_items')
+      .delete()
+      .or(`id.eq.${id},source_image_id.eq.${id}`);
     if (error) return;
 
     this.deps.signals.showDeleteConfirm.set(false);

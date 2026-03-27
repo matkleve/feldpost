@@ -5,8 +5,6 @@ import type {
   ProjectListItem,
   ProjectSearchCounts,
   ProjectStatusFilter,
-  ProjectsImageMetadataRow,
-  ProjectsImageRow,
   ProjectScopedWorkspaceImage,
 } from './projects.types';
 
@@ -67,6 +65,19 @@ interface MediaWorkspaceJoinRow {
         created_at: string;
         exif_latitude: number | null;
         exif_longitude: number | null;
+      }>
+    | null;
+}
+
+interface MediaSearchJoinRow {
+  project_id: string | null;
+  media_item_id: string;
+  media_items:
+    | {
+        source_image_id: string | null;
+      }
+    | Array<{
+        source_image_id: string | null;
       }>
     | null;
 }
@@ -338,7 +349,7 @@ export class ProjectsService {
       .eq('project_id', projectId)
       .order('created_at', { foreignTable: 'media_items', ascending: false });
 
-    if (!preferred.error && Array.isArray(preferred.data) && preferred.data.length > 0) {
+    if (!preferred.error && Array.isArray(preferred.data)) {
       const mappedPreferred: ProjectScopedWorkspaceImage[] = [];
       for (const row of preferred.data as MediaWorkspaceJoinRow[]) {
         const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
@@ -376,53 +387,7 @@ export class ProjectsService {
       return mappedPreferred;
     }
 
-    const fallback = await this.supabase.client
-      .from('images')
-      .select(
-        'id,project_id,latitude,longitude,thumbnail_path,storage_path,captured_at,created_at,direction,exif_latitude,exif_longitude,address_label,city,district,street,country',
-      )
-      .eq('project_id', projectId)
-      .order('captured_at', { ascending: false, nullsFirst: false });
-
-    if (fallback.error || !Array.isArray(fallback.data)) {
-      return [];
-    }
-
-    const mapped = (fallback.data as ProjectsImageRow[])
-      .filter(
-        (row) =>
-          typeof row.latitude === 'number' &&
-          Number.isFinite(row.latitude) &&
-          typeof row.longitude === 'number' &&
-          Number.isFinite(row.longitude),
-      )
-      .map((row) => ({
-        id: row.id,
-        projectId: row.project_id,
-        projectName: null,
-        latitude: row.latitude as number,
-        longitude: row.longitude as number,
-        thumbnailPath: row.thumbnail_path,
-        storagePath: row.storage_path,
-        capturedAt: row.captured_at,
-        createdAt: row.created_at,
-        direction: row.direction,
-        exifLatitude: row.exif_latitude,
-        exifLongitude: row.exif_longitude,
-        addressLabel: row.address_label,
-        city: row.city,
-        district: row.district,
-        street: row.street,
-        country: row.country,
-        userName: null,
-      }));
-
-    this.projectWorkspaceImagesCache.set(projectId, {
-      value: mapped,
-      expiresAt: now + PROJECT_WORKSPACE_CACHE_TTL_MS,
-    });
-
-    return mapped;
+    return [];
   }
 
   async loadMediaProjectMemberships(mediaItemId: string): Promise<string[]> {
@@ -670,43 +635,30 @@ export class ProjectsService {
   ): Promise<void> {
     const escaped = this.escapeIlike(searchTerm);
 
-    const preferred = await this.supabase.client
-      .from('images')
-      .select('id,project_id')
-      .not('project_id', 'is', null)
-      .or(`title.ilike.%${escaped}%,address_label.ilike.%${escaped}%`);
-
-    const response = preferred.error
-      ? await this.supabase.client
-          .from('images')
-          .select('id,project_id')
-          .not('project_id', 'is', null)
-          .ilike('address_label', `%${escaped}%`)
-      : preferred;
+    const response = await this.supabase.client
+      .from('media_projects')
+      .select('project_id,media_item_id,media_items!inner(source_image_id)')
+      .or(`file_name.ilike.%${escaped}%,storage_path.ilike.%${escaped}%`, {
+        foreignTable: 'media_items',
+      });
 
     if (response.error || !Array.isArray(response.data)) {
       return;
     }
 
-    const matchedImageIds = new Set<string>();
-
-    for (const row of response.data as Array<{ id: string; project_id: string | null }>) {
-      matchedImageIds.add(row.id);
+    for (const row of response.data as MediaSearchJoinRow[]) {
       if (!row.project_id) continue;
-      const bucket = imageIdsByProject.get(row.project_id) ?? new Set<string>();
-      bucket.add(row.id);
-      imageIdsByProject.set(row.project_id, bucket);
-    }
 
-    const membershipProjectsByImageId = await this.loadMembershipProjectsBySourceImageIds([
-      ...matchedImageIds,
-    ]);
-    for (const [imageId, projectIds] of membershipProjectsByImageId) {
-      for (const projectId of projectIds) {
-        const bucket = imageIdsByProject.get(projectId) ?? new Set<string>();
-        bucket.add(imageId);
-        imageIdsByProject.set(projectId, bucket);
+      const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
+      const stableSearchId = media?.source_image_id ?? row.media_item_id;
+
+      if (!stableSearchId) {
+        continue;
       }
+
+      const bucket = imageIdsByProject.get(row.project_id) ?? new Set<string>();
+      bucket.add(stableSearchId);
+      imageIdsByProject.set(row.project_id, bucket);
     }
   }
 
@@ -718,7 +670,7 @@ export class ProjectsService {
 
     const response = await this.supabase.client
       .from('image_metadata')
-      .select('image_id,value_text,images!inner(project_id)')
+      .select('image_id,value_text')
       .ilike('value_text', `%${escaped}%`);
 
     if (response.error || !Array.isArray(response.data)) {
@@ -727,15 +679,8 @@ export class ProjectsService {
 
     const matchedImageIds = new Set<string>();
 
-    for (const row of response.data as ProjectsImageMetadataRow[]) {
+    for (const row of response.data as Array<{ image_id: string; value_text: string }>) {
       matchedImageIds.add(row.image_id);
-      const relatedImage = Array.isArray(row.images) ? row.images[0] : row.images;
-      const projectId = relatedImage?.project_id ?? null;
-      if (!projectId) continue;
-
-      const bucket = imageIdsByProject.get(projectId) ?? new Set<string>();
-      bucket.add(row.image_id);
-      imageIdsByProject.set(projectId, bucket);
     }
 
     const membershipProjectsByImageId = await this.loadMembershipProjectsBySourceImageIds([
@@ -807,7 +752,7 @@ export class ProjectsService {
       .from('media_projects')
       .select('project_id,media_items!inner(captured_at,created_at)');
 
-    if (!preferred.error && Array.isArray(preferred.data) && preferred.data.length > 0) {
+    if (!preferred.error && Array.isArray(preferred.data)) {
       const rows: ProjectActivityRow[] = [];
       for (const row of preferred.data as MediaActivityJoinRow[]) {
         const media = Array.isArray(row.media_items) ? row.media_items[0] : row.media_items;
@@ -827,16 +772,7 @@ export class ProjectsService {
       return rows;
     }
 
-    const fallback = await this.supabase.client
-      .from('images')
-      .select('project_id,captured_at,created_at,city,district,street,country')
-      .not('project_id', 'is', null);
-
-    if (fallback.error || !Array.isArray(fallback.data)) {
-      return [];
-    }
-
-    return fallback.data as ProjectActivityRow[];
+    return [];
   }
 
   private async loadStatusByProjectId(): Promise<Map<string, boolean>> {

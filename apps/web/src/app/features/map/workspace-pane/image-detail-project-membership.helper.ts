@@ -49,17 +49,6 @@ export class ImageDetailProjectMembershipHelper {
       if (mediaContext.primary_project_id) {
         memberships.add(mediaContext.primary_project_id);
       }
-    } else {
-      const { data, error } = await this.deps.supabase.client
-        .from('image_projects')
-        .select('project_id')
-        .eq('image_id', imageId);
-
-      if (!error && Array.isArray(data)) {
-        for (const row of data as Array<{ project_id: string }>) {
-          memberships.add(row.project_id);
-        }
-      }
     }
 
     if (memberships.size === 0 && fallbackProjectId) {
@@ -138,13 +127,18 @@ export class ImageDetailProjectMembershipHelper {
         return;
       }
 
-      const { error } = await this.deps.supabase.client
-        .from('images')
-        .update({ project_id: projectId })
-        .eq('id', img.id);
-
-      if (error) {
+      const mediaContext = await this.loadMediaContext(img.id);
+      if (!mediaContext?.id) {
         this.deps.primaryProjectId.set(previousPrimary);
+        this.showPrimaryProjectFailedToast();
+        return;
+      }
+
+      const ok = await this.deps.projectsService.setMediaPrimaryProject(mediaContext.id, projectId);
+
+      if (!ok) {
+        this.deps.primaryProjectId.set(previousPrimary);
+        this.showPrimaryProjectFailedToast();
         return;
       }
     }
@@ -197,9 +191,11 @@ export class ImageDetailProjectMembershipHelper {
     const response = await this.deps.supabase.client
       .from('media_items')
       .select('id,primary_project_id,media_type,mime_type,location_status')
-      .eq('source_image_id', imageId);
+      .or(`id.eq.${imageId},source_image_id.eq.${imageId}`)
+      .limit(1)
+      .maybeSingle();
 
-    if (response.error || !Array.isArray(response.data) || response.data.length === 0) {
+    if (response.error || !response.data) {
       this.deps.mediaItemId.set(null);
       this.deps.mediaType.set(null);
       this.deps.mediaMimeType.set(null);
@@ -207,7 +203,7 @@ export class ImageDetailProjectMembershipHelper {
       return null;
     }
 
-    const row = response.data[0] as MediaContextRow;
+    const row = response.data as MediaContextRow;
     this.deps.mediaItemId.set(row.id);
     this.deps.mediaType.set(row.media_type ?? null);
     this.deps.mediaMimeType.set(row.mime_type ?? null);
@@ -243,46 +239,15 @@ export class ImageDetailProjectMembershipHelper {
       return;
     }
 
-    const mediaItemId = this.deps.mediaItemId();
+    let mediaItemId = this.deps.mediaItemId();
     if (!mediaItemId) {
-      if (toInsert.length > 0) {
-        const insertPayload = toInsert.map((projectId) => ({
-          image_id: img.id,
-          project_id: projectId,
-        }));
-        const { error } = await this.deps.supabase.client
-          .from('image_projects')
-          .upsert(insertPayload, { onConflict: 'image_id,project_id' });
-        if (error) {
-          this.deps.selectedProjectIds.set(previous);
-          return;
-        }
-      }
+      const mediaContext = await this.loadMediaContext(img.id);
+      mediaItemId = mediaContext?.id ?? null;
+    }
 
-      if (toDelete.length > 0) {
-        const { error } = await this.deps.supabase.client
-          .from('image_projects')
-          .delete()
-          .eq('image_id', img.id)
-          .in('project_id', toDelete);
-        if (error) {
-          this.deps.selectedProjectIds.set(previous);
-          return;
-        }
-      }
-
-      const { error: syncError } = await this.deps.supabase.client
-        .from('images')
-        .update({ project_id: primaryProjectId })
-        .eq('id', img.id);
-
-      if (syncError) {
-        this.deps.selectedProjectIds.set(previous);
-        return;
-      }
-
-      this.deps.primaryProjectId.set(primaryProjectId);
-      this.deps.image.update((prev) => (prev ? { ...prev, project_id: primaryProjectId } : prev));
+    if (!mediaItemId) {
+      this.deps.selectedProjectIds.set(previous);
+      this.showMembershipUpdateFailedToast();
       return;
     }
 

@@ -85,9 +85,9 @@ export class ImageDetailFieldsHelper {
       );
       this.deps.signals.saving.set(true);
       const { error } = await this.deps.services.supabase.client
-        .from('images')
-        .update({ captured_at: null, has_time: false })
-        .eq('id', img.id);
+        .from('media_items')
+        .update({ captured_at: null })
+        .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
       if (error) {
         this.deps.signals.image.update((prev) =>
           prev ? { ...prev, captured_at: oldCapturedAt, has_time: oldHasTime } : prev,
@@ -109,9 +109,9 @@ export class ImageDetailFieldsHelper {
     this.deps.signals.saving.set(true);
 
     const { error } = await this.deps.services.supabase.client
-      .from('images')
-      .update({ captured_at: combined, has_time: hasTime })
-      .eq('id', img.id);
+      .from('media_items')
+      .update({ captured_at: combined })
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
       this.deps.signals.image.update((prev) =>
@@ -187,12 +187,13 @@ export class ImageDetailFieldsHelper {
 
     this.deps.signals.saving.set(true);
     const { error } = await this.deps.services.supabase.client
-      .from('images')
+      .from('media_items')
       .update({
         latitude: img.exif_latitude,
         longitude: img.exif_longitude,
+        location_status: 'gps',
       })
-      .eq('id', img.id);
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 
     if (error) {
       this.deps.signals.image.update((prev) =>

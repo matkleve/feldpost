@@ -33,7 +33,10 @@ export class MarkerContextPhotoDeleteService {
   }
 
   async deleteImageById(client: SupabaseClient, imageId: string): Promise<DeleteImageByIdResult> {
-    const { error } = await client.from('images').delete().eq('id', imageId);
+    const { error } = await client
+      .from('media_items')
+      .delete()
+      .or(`id.eq.${imageId},source_image_id.eq.${imageId}`);
     if (error) {
       return { ok: false, errorMessage: error.message };
     }

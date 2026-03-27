@@ -85,12 +85,43 @@ export class MapContextActionsService {
       return { ok: false, reason: 'empty' };
     }
 
-    const { error } = await client
-      .from('images')
-      .update({ project_id: projectId })
-      .in('id', imageIds);
-    if (error) {
-      return { ok: false, reason: 'error', errorMessage: error.message };
+    const { data: mediaRows, error: mediaLookupError } = await client
+      .from('media_items')
+      .select('id,source_image_id')
+      .or(`id.in.(${imageIds.join(',')}),source_image_id.in.(${imageIds.join(',')})`);
+
+    if (mediaLookupError) {
+      return { ok: false, reason: 'error', errorMessage: mediaLookupError.message };
+    }
+
+    const mediaItemIds = Array.from(
+      new Set((mediaRows ?? []).map((row: { id: string }) => row.id).filter(Boolean)),
+    );
+
+    if (mediaItemIds.length === 0) {
+      return { ok: false, reason: 'empty' };
+    }
+
+    const { error: primaryError } = await client
+      .from('media_items')
+      .update({ primary_project_id: projectId })
+      .in('id', mediaItemIds);
+
+    if (primaryError) {
+      return { ok: false, reason: 'error', errorMessage: primaryError.message };
+    }
+
+    const membershipPayload = mediaItemIds.map((mediaItemId) => ({
+      media_item_id: mediaItemId,
+      project_id: projectId,
+    }));
+
+    const { error: membershipError } = await client
+      .from('media_projects')
+      .upsert(membershipPayload, { onConflict: 'media_item_id,project_id' });
+
+    if (membershipError) {
+      return { ok: false, reason: 'error', errorMessage: membershipError.message };
     }
 
     return { ok: true, reason: 'success' };
