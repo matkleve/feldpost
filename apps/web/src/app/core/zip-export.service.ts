@@ -66,15 +66,24 @@ export class ZipExportService {
   }
 
   private async createSignedUrl(storagePath: string): Promise<string> {
-    const { data, error } = await this.supabase.client.storage
-      .from('images')
-      .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
+    const buckets: Array<'media' | 'images'> = ['media', 'images'];
+    let lastErrorMessage = 'Failed to sign media URL.';
 
-    if (error || !data?.signedUrl) {
-      throw new Error(error?.message ?? 'Failed to sign media URL.');
+    for (const bucket of buckets) {
+      const { data, error } = await this.supabase.client.storage
+        .from(bucket)
+        .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
+
+      if (!error && data?.signedUrl) {
+        return data.signedUrl;
+      }
+
+      if (error?.message) {
+        lastErrorMessage = error.message;
+      }
     }
 
-    return data.signedUrl;
+    throw new Error(lastErrorMessage);
   }
 
   private formatDate(date: Date): string {
@@ -100,4 +109,3 @@ export class ZipExportService {
     return `media-${media.id}`;
   }
 }
-

@@ -267,9 +267,13 @@ Notes:
 
 ---
 
-## 7. Images Table
+## 7. Media Items Table (Primary — V2)
 
-Table: `images`
+Table: `media_items`
+
+> **Migration Status:** The `public.images` table (legacy V1) was officially deprecated and dropped on 2026-03-27 as part of Phase 3 of the media-items migration. All data has been backfilled into `media_items`. RPC functions, RLS policies, and services now query `media_items` as the canonical source. A `source_image_id` column provides backward-compatibility references for legacy archive lookups if needed.
+
+**Canonical table for all photo/media storage and metadata.**
 
 Columns:
 

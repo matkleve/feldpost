@@ -66,12 +66,22 @@ export class UploadService {
   async getSignedUrl(
     storagePath: string,
   ): Promise<{ url: string; error: null } | { error: Error | string }> {
-    const { data, error } = await this.supabase.client.storage
-      .from('images')
-      .createSignedUrl(storagePath, 3600);
+    const buckets: Array<'media' | 'images'> = ['media', 'images'];
+    let lastError: unknown = null;
 
-    if (error) return { error: mapUploadStorageError(error) };
-    return { url: data.signedUrl, error: null };
+    for (const bucket of buckets) {
+      const { data, error } = await this.supabase.client.storage
+        .from(bucket)
+        .createSignedUrl(storagePath, 3600);
+
+      if (!error && data?.signedUrl) {
+        return { url: data.signedUrl, error: null };
+      }
+
+      lastError = error;
+    }
+
+    return { error: mapUploadStorageError(lastError) };
   }
 
   /**

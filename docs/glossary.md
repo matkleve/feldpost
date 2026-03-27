@@ -38,10 +38,11 @@
 
 ## Spatial & Temporal Concepts
 
-- **Image**  
+- **Image / Media Item**  
   A single photo plus its associated metadata in the database.
-  - Table: `images`.
-  - Key fields: `id`, `user_id`, `storage_path`, `latitude`, `longitude`, `geog`, `captured_at`, (optional) direction/bearing, project reference, metadata.
+  - Primary table: `media_items` (replaces legacy `images`).
+  - Legacy archive: `source_image_id` column in `media_items` stores references to old `public.images` for backward compatibility during transition.
+  - Key fields: `id`, `user_id`, `storage_path`, `media_bucket_name`, `latitude`, `longitude`, `geog`, `captured_at`, (optional) direction/bearing, project reference, metadata.
 
 - **Viewport**  
   The rectangular area of the map currently visible to the user.
@@ -103,7 +104,7 @@
   - Depends on distance (e.g., 50m radius) and bearing tolerance (e.g., ±30°).
 - **Address Label**  
   A human-readable address string stored alongside an image's coordinates (e.g., "Burgstraße 7, 8001 Zürich").
-  - Column: `images.address_label`.
+  - Column: `media_items.address_label`.
   - Populated on upload from (a) a user-entered address, (b) a filename hint resolved via `AddressResolverService`, or (c) reverse geocoding of the EXIF coordinates.
   - Used by `AddressResolverService` to build the DB-first address index for autocomplete ranking.
   - See `address-resolver.md` §7.

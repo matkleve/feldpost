@@ -50,7 +50,7 @@ graph TB
   subgraph Supabase["Supabase BaaS (Trusted)"]
     Auth["Supabase Auth<br/>(JWT, Sessions)"]
     DB["PostgreSQL + PostGIS<br/>(RLS Enforced)"]
-    Storage["Supabase Storage<br/>(Private Bucket: images/)"]
+    Storage["Supabase Storage<br/>(Private Buckets: media/ primary +<br/>images/ read-only fallback)"]
   end
 
   subgraph External["External Services"]
@@ -61,7 +61,7 @@ graph TB
   UI --> Services
   Services --> Auth
   Services --> DB
-  Services --> Storage
+  Services -->|"photo signing:<br/>media-first + fallback"| Storage
   Services -->|"functions.invoke"| EdgeFn["Edge Function: geocode<br/>(Nominatim proxy)"]
   EdgeFn -->|"Rate-limited 1 req/1.1s"| Nominatim
   MapAdapter --> Tiles

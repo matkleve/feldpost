@@ -27,6 +27,7 @@ const TRANSFORMS: Record<PhotoSize, { width: number; height: number; resize: 'co
 
 const STALE_THRESHOLD_MS = 3_000_000; // 50 minutes
 const SIGN_EXPIRY_SECONDS = 3600;
+const SIGN_BUCKETS: ReadonlyArray<'media' | 'images'> = ['media', 'images'];
 
 @Injectable({ providedIn: 'root' })
 export class PhotoLoadService {
@@ -79,9 +80,10 @@ export class PhotoLoadService {
     this.setLoadState(id, size, 'loading');
 
     const transform = TRANSFORMS[size];
-    const { data, error } = await this.supabase.client.storage
-      .from('images')
-      .createSignedUrl(storagePath, SIGN_EXPIRY_SECONDS, transform ? { transform } : undefined);
+    const { data, error } = await this.createSignedUrlWithFallback(
+      storagePath,
+      transform ? { transform } : undefined,
+    );
 
     if (error || !data?.signedUrl) {
       this.setLoadState(id, size, 'error');
@@ -128,26 +130,20 @@ export class PhotoLoadService {
     // 1) Batch-sign pre-generated thumbnails
     if (withThumb.length > 0) {
       const paths = withThumb.map((i) => i.thumbnailPath!);
-      const { data } = await this.supabase.client.storage
-        .from('images')
-        .createSignedUrls(paths, SIGN_EXPIRY_SECONDS);
-
-      if (data) {
-        const pathToId = new Map(withThumb.map((i) => [i.thumbnailPath!, i.id]));
-        for (const item of data) {
-          if (item.signedUrl && item.path) {
-            const imageId = pathToId.get(item.path);
-            if (imageId) {
-              this.setCacheEntry(imageId, size, {
-                url: item.signedUrl,
-                signedAt: Date.now(),
-                isLocal: false,
-              });
-              this.setLoadState(imageId, size, 'loaded');
-              results.set(imageId, { url: item.signedUrl, error: null });
-            }
-          }
-        }
+      const signedMap = await this.createSignedUrlsWithFallback(paths);
+      const pathToId = new Map(withThumb.map((i) => [i.thumbnailPath!, i.id]));
+      for (const path of paths) {
+        const signedUrl = signedMap.get(path);
+        if (!signedUrl) continue;
+        const imageId = pathToId.get(path);
+        if (!imageId) continue;
+        this.setCacheEntry(imageId, size, {
+          url: signedUrl,
+          signedAt: Date.now(),
+          isLocal: false,
+        });
+        this.setLoadState(imageId, size, 'loaded');
+        results.set(imageId, { url: signedUrl, error: null });
       }
     }
 
@@ -156,13 +152,10 @@ export class PhotoLoadService {
       const transform = TRANSFORMS[size];
       const individualResults = await Promise.all(
         withoutThumb.map(async (item) => {
-          const { data, error } = await this.supabase.client.storage
-            .from('images')
-            .createSignedUrl(
-              item.storagePath!,
-              SIGN_EXPIRY_SECONDS,
-              transform ? { transform } : undefined,
-            );
+          const { data, error } = await this.createSignedUrlWithFallback(
+            item.storagePath!,
+            transform ? { transform } : undefined,
+          );
           return { id: item.id, url: data?.signedUrl ?? null, error: error?.message ?? null };
         }),
       );
@@ -289,5 +282,57 @@ export class PhotoLoadService {
     state.set(newState);
     this.stateChanged$.next({ imageId, size, state: newState });
   }
-}
 
+  private async createSignedUrlWithFallback(
+    path: string,
+    options?: { transform?: { width: number; height: number; resize: 'cover' } },
+  ): Promise<{
+    data: { signedUrl: string } | null;
+    error: { message?: string } | null;
+  }> {
+    let lastError: { message?: string } | null = null;
+
+    for (const bucket of SIGN_BUCKETS) {
+      const { data, error } = await this.supabase.client.storage
+        .from(bucket)
+        .createSignedUrl(path, SIGN_EXPIRY_SECONDS, options);
+
+      if (!error && data?.signedUrl) {
+        return { data: { signedUrl: data.signedUrl }, error: null };
+      }
+
+      lastError = error ?? { message: 'Failed to sign URL' };
+    }
+
+    return { data: null, error: lastError };
+  }
+
+  private async createSignedUrlsWithFallback(paths: string[]): Promise<Map<string, string>> {
+    const resultMap = new Map<string, string>();
+
+    const assignFromRows = (rows: Array<{ path?: string | null; signedUrl?: string | null }>) => {
+      for (const row of rows) {
+        if (!row?.path || !row.signedUrl) continue;
+        resultMap.set(row.path, row.signedUrl);
+      }
+    };
+
+    const { data: mediaRows } = await this.supabase.client.storage
+      .from('media')
+      .createSignedUrls(paths, SIGN_EXPIRY_SECONDS);
+
+    assignFromRows((mediaRows ?? []) as Array<{ path?: string | null; signedUrl?: string | null }>);
+
+    const missing = paths.filter((path) => !resultMap.has(path));
+    if (missing.length === 0) return resultMap;
+
+    const { data: legacyRows } = await this.supabase.client.storage
+      .from('images')
+      .createSignedUrls(missing, SIGN_EXPIRY_SECONDS);
+
+    assignFromRows(
+      (legacyRows ?? []) as Array<{ path?: string | null; signedUrl?: string | null }>,
+    );
+    return resultMap;
+  }
+}

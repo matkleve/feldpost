@@ -162,15 +162,27 @@ describe('PhotoLoadService', () => {
 
   describe('preload', () => {
     it('resolves true when image loads', async () => {
-      // Image constructor is available in jsdom
-      const result = await new Promise<boolean>((resolve) => {
-        // We can't easily test real image loading in jsdom, but we test the interface
+      const OriginalImage = globalThis.Image;
+
+      class FakeImage {
+        onload: null | (() => void) = null;
+        onerror: null | (() => void) = null;
+
+        set src(_value: string) {
+          queueMicrotask(() => this.onload?.());
+        }
+      }
+
+      // Force deterministic success path for preload().
+      globalThis.Image = FakeImage as unknown as typeof Image;
+
+      try {
         const service = createService().service;
-        // preload will call new Image() which in jsdom fires onerror (no real network)
-        service.preload('https://example.com/photo.jpg').then(resolve);
-      });
-      // jsdom Image doesn't load, so expect false
-      expect(typeof result).toBe('boolean');
+        const result = await service.preload('https://example.com/photo.jpg');
+        expect(result).toBe(true);
+      } finally {
+        globalThis.Image = OriginalImage;
+      }
     });
   });
 
@@ -191,16 +203,24 @@ describe('PhotoLoadService', () => {
 
   describe('invalidateStale', () => {
     it('only clears entries older than the threshold', async () => {
+      vi.useFakeTimers();
       const { service, fake } = createService();
-      await service.getSignedUrl('org/photo.jpg', 'thumb', 'img-1');
+      try {
+        await service.getSignedUrl('org/photo.jpg', 'thumb', 'img-1');
 
-      // With maxAge of 0, everything should be stale
-      const cleared = service.invalidateStale(0);
-      expect(cleared).toBe(1);
+        // Advance clock so entry age is guaranteed > 0ms.
+        vi.advanceTimersByTime(1);
 
-      // Now it should re-sign
-      await service.getSignedUrl('org/photo.jpg', 'thumb', 'img-1');
-      expect(fake._createSignedUrl).toHaveBeenCalledTimes(2);
+        // With maxAge of 0, everything older than now should be stale.
+        const cleared = service.invalidateStale(0);
+        expect(cleared).toBe(1);
+
+        // Now it should re-sign.
+        await service.getSignedUrl('org/photo.jpg', 'thumb', 'img-1');
+        expect(fake._createSignedUrl).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('does not clear local blob URLs', () => {
@@ -292,4 +312,3 @@ describe('PhotoLoadService', () => {
     });
   });
 });
-
