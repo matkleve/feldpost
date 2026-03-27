@@ -1,12 +1,11 @@
 <app-card-grid
-  tag="ul"
   minColumnWidth="128px"
   role="listbox"
   [variant]="variant()"
   [attr.aria-activedescendant]="activeDescendantId()"
 >
   @for (item of items(); track item.id) {
-    <li
+    <div
       class="media-grid__item"
       (click)="onItemClicked(item.id)"
       (keydown)="onItemKeydown($event, item.id)"
@@ -26,6 +25,6 @@
         (open)="onItemClicked(item.id)"
         (locate)="onItemClicked(item.id)"
       />
-    </li>
+    </div>
   }
 </app-card-grid>

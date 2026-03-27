@@ -1,15 +1,4 @@
-<!-- Floating sidebar nav only for authenticated app routes. -->
-@if (showNav()) {
-  <app-nav />
-
-  <ss-settings-overlay
-    [open]="settingsOverlayOpen()"
-    (openChange)="onSettingsOverlayOpenChange($event)"
-  />
+:host {
+  display: block;
+  min-height: 100%;
 }
-
-<!-- Full-screen page content — nav is floating, does not push layout. -->
-<router-outlet />
-
-<!-- Global toast notifications -->
-<ss-toast-container />
