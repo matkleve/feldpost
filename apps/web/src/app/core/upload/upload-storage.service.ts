@@ -52,7 +52,7 @@ export class UploadStorageService {
     const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
     console.log('[upload-storage] uploading to path:', storagePath);
 
-    const { error } = await this.supabase.client.storage.from('images').upload(storagePath, file, {
+    const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {
       contentType: file.type,
       upsert: false,
       ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),

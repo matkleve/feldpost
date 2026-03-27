@@ -324,7 +324,7 @@ export class UploadManagerService {
 
     // Attempt to clean up orphaned storage file if upload was already started.
     if (job.storagePath) {
-      this.supabase.client.storage.from('images').remove([job.storagePath]);
+      this.supabase.client.storage.from('media').remove([job.storagePath]);
     }
 
     this.jobState.updateJob(jobId, {
@@ -605,7 +605,7 @@ export class UploadManagerService {
       this.abortJobRequest(job.id);
       this.queue.markDone(job.id);
       if (job.storagePath) {
-        this.supabase.client.storage.from('images').remove([job.storagePath]);
+        this.supabase.client.storage.from('media').remove([job.storagePath]);
       }
       this.jobState.updateJob(job.id, {
         phase: 'error',

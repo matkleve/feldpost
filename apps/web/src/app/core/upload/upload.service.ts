@@ -100,6 +100,10 @@ export class UploadService {
       return { error: 'Not authenticated.' };
     }
 
+    if (!projectId) {
+      return { error: 'No project selected for upload.' };
+    }
+
     const validation = this.validateFile(file);
     if (!validation.valid) {
       return { error: validation.error! };
@@ -134,7 +138,7 @@ export class UploadService {
     }
 
     const { error: storageError } = await this.supabase.client.storage
-      .from('images')
+      .from('media')
       .upload(storagePath, file, {
         contentType: file.type,
         upsert: false,
@@ -146,7 +150,7 @@ export class UploadService {
     }
 
     if (abortSignal?.aborted) {
-      await this.supabase.client.storage.from('images').remove([storagePath]);
+      await this.supabase.client.storage.from('media').remove([storagePath]);
       return { error: 'Upload cancelled by user.' };
     }
 
@@ -158,46 +162,12 @@ export class UploadService {
 
     const finalCoords: ExifCoords | undefined = exifCoords ?? manualCoords;
 
-    const imageInsertQuery = this.supabase.client
-      .from('images')
+    const mediaType = resolveUploadMediaType(file.type);
+    const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords);
+
+    const mediaInsertQuery = this.supabase.client
+      .from('media_items')
       .insert({
-        user_id: user.id,
-        organization_id: orgId,
-        storage_path: storagePath,
-        exif_latitude: exifCoords?.lat ?? null,
-        exif_longitude: exifCoords?.lng ?? null,
-        latitude: finalCoords?.lat ?? null,
-        longitude: finalCoords?.lng ?? null,
-        captured_at: capturedAt ?? null,
-        direction: direction ?? null,
-        location_unresolved: finalCoords != null,
-        project_id: projectId ?? null,
-      })
-      .select('id');
-
-    const { data: imageRow, error: dbError } = await this.withAbort(
-      imageInsertQuery,
-      abortSignal,
-    ).single();
-
-    if (dbError) {
-      return { error: dbError };
-    }
-
-    if (abortSignal?.aborted) {
-      await this.supabase.client.storage.from('images').remove([storagePath]);
-      await this.supabase.client
-        .from('images')
-        .delete()
-        .eq('id', imageRow.id as string);
-      return { error: 'Upload cancelled by user.' };
-    }
-
-    if (projectId) {
-      const mediaType = resolveUploadMediaType(file.type);
-      const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords);
-
-      const mediaInsertQuery = this.supabase.client.from('media_items').insert({
         organization_id: orgId,
         primary_project_id: projectId,
         created_by: user.id,
@@ -213,19 +183,27 @@ export class UploadService {
         longitude: finalCoords?.lng ?? null,
         location_status: locationStatus,
         gps_assignment_allowed: mediaType !== 'document',
-        source_image_id: imageRow.id as string,
-      });
+      })
+      .select('id');
 
-      const { error: mediaError } = await this.withAbort(mediaInsertQuery, abortSignal);
+    const { data: mediaRow, error: dbError } = await this.withAbort(
+      mediaInsertQuery,
+      abortSignal,
+    ).single();
 
-      if (mediaError) {
-        return { error: mediaError };
-      }
+    if (dbError) {
+      return { error: dbError };
+    }
+
+    if (abortSignal?.aborted) {
+      await this.supabase.client.storage.from('media').remove([storagePath]);
+      await this.supabase.client.from('media_items').delete().eq('id', mediaRow.id as string);
+      return { error: 'Upload cancelled by user.' };
     }
 
     if (finalCoords) {
       resolveUploadAddress({
-        mediaItemId: imageRow.id as string,
+        mediaItemId: mediaRow.id as string,
         lat: finalCoords.lat,
         lng: finalCoords.lng,
         geocoding: this.geocoding,
@@ -235,7 +213,7 @@ export class UploadService {
     }
 
     return {
-      id: imageRow.id as string,
+      id: mediaRow.id as string,
       storagePath,
       coords: finalCoords,
       direction,

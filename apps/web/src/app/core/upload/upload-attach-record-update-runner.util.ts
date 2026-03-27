@@ -83,7 +83,7 @@ export async function runAttachRecordUpdate(
       return { storagePath: data?.storage_path, error };
     },
     removeStoragePath: async (path) => {
-      await supabaseClient.storage.from('images').remove([path]);
+      await supabaseClient.storage.from('media').remove([path]);
     },
     onFail: (_phase, error) => failJob('replacing_record', error),
     onCancelled,

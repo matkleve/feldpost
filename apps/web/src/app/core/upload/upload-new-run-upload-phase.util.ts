@@ -175,7 +175,7 @@ async function handleCancelledResultBeforeFinalize(args: {
   const { jobId, result, ctx, jobState, queue, supabaseClient } = args;
 
   if (result.error === null) {
-    await supabaseClient.storage.from('images').remove([result.storagePath]);
+    await supabaseClient.storage.from('media').remove([result.storagePath]);
     // Delete from primary media_items table by media id or legacy source image id.
     await supabaseClient
       .from('media_items')

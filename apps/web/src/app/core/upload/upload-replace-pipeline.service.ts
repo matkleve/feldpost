@@ -128,7 +128,7 @@ export class UploadReplacePipelineService {
       return;
     }
     if (this.isCancelled(jobId)) {
-      await this.supabase.client.storage.from('images').remove([storagePath]);
+      await this.supabase.client.storage.from('media').remove([storagePath]);
       const cancelledJob = this.jobState.findJob(jobId);
       this.queue.markDone(jobId);
       if (cancelledJob) {
@@ -153,7 +153,7 @@ export class UploadReplacePipelineService {
       .eq('id', targetMediaItemId);
 
     if (this.isCancelled(jobId)) {
-      await this.supabase.client.storage.from('images').remove([storagePath]);
+      await this.supabase.client.storage.from('media').remove([storagePath]);
       const cancelledJob = this.jobState.findJob(jobId);
       this.queue.markDone(jobId);
       if (cancelledJob) {
@@ -164,7 +164,7 @@ export class UploadReplacePipelineService {
     }
 
     if (updateError) {
-      await this.supabase.client.storage.from('images').remove([storagePath]);
+      await this.supabase.client.storage.from('media').remove([storagePath]);
       ctx.failJob(jobId, 'replacing_record', updateError.message);
       return;
     }
@@ -175,7 +175,7 @@ export class UploadReplacePipelineService {
     if (updatedJob.oldStoragePath) pathsToDelete.push(updatedJob.oldStoragePath);
     if (updatedJob.oldThumbnailPath) pathsToDelete.push(updatedJob.oldThumbnailPath);
     if (pathsToDelete.length > 0) {
-      this.supabase.client.storage.from('images').remove(pathsToDelete);
+      this.supabase.client.storage.from('media').remove(pathsToDelete);
     }
 
     // Insert dedup hash

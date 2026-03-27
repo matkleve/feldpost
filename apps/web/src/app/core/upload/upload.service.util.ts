@@ -144,7 +144,7 @@ export function mapUploadStorageError(error: unknown): Error | string {
         : '';
 
   if (/bucket\s+not\s+found/i.test(message)) {
-    return 'Storage bucket "images" is missing in this Supabase project. Create it (or run the storage migration) and retry.';
+    return 'Storage bucket "media" is missing in this Supabase project. Create it (or run the storage migration) and retry.';
   }
 
   return (error as Error | string) ?? 'Storage error.';

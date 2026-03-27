@@ -52,7 +52,7 @@ export class UploadAttachPipelineService {
         cancelled: this.isCancelled(jobId),
         storagePath,
         removeStoragePath: async (cleanupPath) => {
-          await this.supabase.client.storage.from('images').remove([cleanupPath]);
+          await this.supabase.client.storage.from('media').remove([cleanupPath]);
         },
         findJob: () => this.jobState.findJob(jobId),
         markDone: () => this.queue.markDone(jobId),
@@ -179,7 +179,7 @@ export class UploadAttachPipelineService {
         cancelled: this.isCancelled(jobId),
         storagePath: path,
         removeStoragePath: async (cleanupPath) => {
-          await this.supabase.client.storage.from('images').remove([cleanupPath]);
+          await this.supabase.client.storage.from('media').remove([cleanupPath]);
         },
         findJob: () => this.jobState.findJob(jobId),
         markDone: () => this.queue.markDone(jobId),
