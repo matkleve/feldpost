@@ -181,8 +181,6 @@ async function handleCancelledResultBeforeFinalize(args: {
       .from('media_items')
       .delete()
       .or(`id.eq.${result.id},source_image_id.eq.${result.id}`);
-    // Fallback: also delete from legacy images table (non-blocking)
-    await supabaseClient.from('images').delete().eq('id', result.id);
   }
 
   const cancelledJob = jobState.findJob(jobId);

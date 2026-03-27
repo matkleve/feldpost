@@ -421,28 +421,6 @@ export class UploadService {
       return { error: dbError };
     }
 
-    // Legacy: also write to images table for backward compatibility
-    const { error: legacyError } = await this.supabase.client.from('images').insert({
-      id: mediaRow.id as string,
-      user_id: user.id,
-      organization_id: orgId,
-      storage_path: storagePath,
-      exif_latitude: exifCoords?.lat ?? null,
-      exif_longitude: exifCoords?.lng ?? null,
-      latitude: finalCoords?.lat ?? null,
-      longitude: finalCoords?.lng ?? null,
-      captured_at: capturedAt ?? null,
-      direction: direction ?? null,
-      location_unresolved: finalCoords == null,
-      project_id: primaryProjectId,
-    });
-
-    if (legacyError && legacyError.code !== 'PGRST116') {
-      // PGRST116 = already exists, acceptable for idempotence
-      // Log but don't fail the overall operation
-      console.warn('Warning: legacy images insert failed:', legacyError);
-    }
-
     // Fire-and-forget: reverse-geocode coordinates to populate address fields.
     if (finalCoords) {
       this.resolveAddress(mediaRow.id as string, finalCoords.lat, finalCoords.lng);
@@ -483,18 +461,6 @@ export class UploadService {
           ...this.describePersistError(error),
         });
       }
-
-      // Legacy: also update images table if it exists
-      await this.supabase.client
-        .from('images')
-        .update({
-          address_label: result.addressLabel,
-          city: result.city,
-          district: result.district,
-          street: result.street,
-          country: result.country,
-        })
-        .eq('id', mediaItemId);
     } catch {
       // Non-critical — address will show as "Unknown district" until resolved.
     }
