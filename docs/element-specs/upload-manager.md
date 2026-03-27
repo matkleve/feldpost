@@ -1,5 +1,7 @@
 # Upload Manager
 
+> **Related specs:** [media-renderer-system](media-renderer-system.md), [upload-panel](upload-panel.md), [photo-load-service](photo-load-service.md)
+
 ## What It Is
 
 A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, media-only deduplication, duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.

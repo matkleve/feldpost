@@ -1,6 +1,7 @@
 # Image Detail — Photo Viewer
 
 > **Parent spec:** [image-detail-view](image-detail-view.md)
+> **Architecture parent:** [media-renderer-system](media-renderer-system.md)
 > **Photo loading service:** [photo-load-service](photo-load-service.md)
 > **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 > **Editing use cases:** [use-cases/image-editing.md](../use-cases/image-editing.md) (IE-10)

@@ -1,5 +1,7 @@
 # File-Type Chips (Upload Area Feature)
 
+> **Architecture parent:** [media-renderer-system](media-renderer-system.md)
+
 ## What It Is
 
 Visual chip-based display of the file types present in the current upload batch. Replaces the text-based "JPEG · PNG · HEIC · WebP · MP4 · MOV · WebM · PDF · DOCX · XLSX · PPTX" string with a grid or inline display of compact, color-coded chip elements. Each unique file type in the upload queue is represented by a single chip showing the file-type abbreviation + icon.

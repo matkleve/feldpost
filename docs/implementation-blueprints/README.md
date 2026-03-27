@@ -50,6 +50,7 @@ Blueprints close that gap with concrete implementation details.
 | 9   | [search-bar.md](search-bar.md)                                         | [element spec](../element-specs/search-bar.md)                 | SearchOrchestratorService             |
 | 10  | [thumbnail-grid.md](thumbnail-grid.md)                                 | [element spec](../element-specs/thumbnail-grid.md)             | GroupService, SelectionService        |
 | 11  | [photo-multi-project-membership.md](photo-multi-project-membership.md) | [multi-spec update](../element-specs/workspace-view-system.md) | SupabaseService, WorkspaceViewService |
+| 12  | [media-renderer-system.md](media-renderer-system.md)                   | [element spec](../element-specs/media-renderer-system.md)      | FileTypeRegistry, MediaOrchestrator   |
 
 ## Conventions
 

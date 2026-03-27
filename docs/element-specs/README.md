@@ -248,6 +248,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
 - ✅ `language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
 - ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
+- ✅ `media-renderer-system.md` — Universal media rendering contract (file-type registry, tier model, shared orchestrator + component API)
 
 ### Planned / Missing Specs
 

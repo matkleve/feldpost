@@ -1,0 +1,52 @@
+# Media Renderer System - Implementation Blueprint
+
+## Goal
+
+Introduce one shared media rendering architecture with:
+
+- a single `FileTypeRegistry`
+- a shared `MediaOrchestratorService`
+- a universal `UniversalMediaComponent`
+- incremental migration of all existing surfaces
+
+This blueprint follows the contract in `docs/element-specs/media-renderer-system.md`.
+
+## Non-Goals
+
+- No big-bang rewrite of all existing components in one PR.
+- No visual redesign of unrelated controls.
+- No direct schema migration unless tiered asset fields are approved.
+
+## Phase Plan
+
+| Phase | Goal | Main Deliverables | Files (target) | Exit Criteria |
+| --- | --- | --- | --- | --- |
+| 0 | Stabilize contracts | Freeze naming + tier enum + state model | `core/media/file-type-registry.ts`, `core/media/media-renderer.types.ts` | Shared types compile and are imported by at least one existing feature without behavior change |
+| 1 | Introduce registry | Single source of truth for file type color/icon/aspect-ratio/mime aliases | `core/media/file-type-registry.ts`; adapters in upload helpers | No duplicate switch maps remain in new code paths; old maps marked for migration |
+| 2 | Build orchestrator facade | Wrap `PhotoLoadService`, `MediaPreviewService`, and upload overlay bridge | `core/media/media-orchestrator.service.ts` | Consumer can request render state by `{fileRef,tier}` and get deterministic fallback behavior |
+| 3 | Build universal component | New shared renderer with stable DOM, context variants, layered states | `shared/media/universal-media.component.ts/.html/.scss` | Component works for image, document fallback, and upload-progress overlay |
+| 4 | Migrate upload and grid | Replace local render logic in upload rows and thumbnail cards | `features/upload/upload-panel-item.component.*`, `features/map/workspace-pane/thumbnail-card/*` | Existing tests pass and visual parity is maintained for upload + workspace grid |
+| 5 | Migrate media cards and detail | Replace media card and detail preview rendering path | `features/media/media-card.component.*`, `features/map/workspace-pane/media-detail-photo-viewer/*` | Progressive loading path is fully driven by orchestrator; no direct per-component signing logic |
+| 6 | Cleanup and hardening | Remove duplicate maps, dead paths, add regression tests, docs sync | related legacy helpers/specs/tests | All target surfaces use universal component; lint + tests + build green |
+
+## Test Gates per Phase
+
+- Unit tests for registry mapping and tier fallback decisions.
+- Component tests for universal renderer states (`placeholder`, `icon-only`, `loading`, `loaded`, `error`).
+- Upload regression tests for in-progress overlays and replace/attach instant update behavior.
+- Existing upload panel and workspace thumbnail tests stay green.
+
+## Rollout Strategy
+
+- Keep compatibility adapters during phases 1-5.
+- Migrate one surface at a time behind a small feature flag if needed.
+- Do not remove legacy code until replacement surface tests are passing.
+
+## Risks and Mitigations
+
+- Risk: subtle visual regressions across contexts.
+  - Mitigation: context snapshots and explicit CSS variant contracts.
+- Risk: upload and detail paths diverge in edge cases.
+  - Mitigation: shared orchestrator state model and contract tests.
+- Risk: tier request can over-fetch high-res assets.
+  - Mitigation: strict fallback chain and lazy high-tier prerender trigger.
