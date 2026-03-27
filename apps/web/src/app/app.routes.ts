@@ -69,7 +69,7 @@ export const routes: Routes = [
       {
         path: 'media',
         loadComponent: () =>
-          import('./features/photos/media.component').then((m) => m.MediaComponent),
+          import('./features/media/media.component').then((m) => m.MediaComponent),
       },
       {
         path: 'projects',

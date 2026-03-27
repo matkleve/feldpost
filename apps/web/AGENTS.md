@@ -14,7 +14,7 @@ src/app/
     nav/            → sidebar navigation
     upload/         → upload panel
     auth/           → login, register, reset-password
-    photos/         → photo gallery page
+    media/          → media gallery page
     groups/         → groups management page
     settings/       → settings page
     account/        → account management page

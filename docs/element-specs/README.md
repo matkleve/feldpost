@@ -239,7 +239,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 ### Pages
 
 - ✅ `auth-map-background.md` — Auth Map Background (fixed city backdrop for login/register)
-- ✅ `photos-page.md` — Photos Page
+- ✅ `media-page.md` — Media Page
 - ✅ `settings-page.md` — Settings Page
 - ✅ `account-page.md` — Account Page
 

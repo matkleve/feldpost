@@ -211,7 +211,7 @@ Composites:
   - reset-password
   - update-password
 - Map workspace route (`/`, `/map`)
-- Photos route (`/photos`)
+- Media route (`/media`)
 - Projects route (`/projects`)
 - Settings route (`/settings`)
 - Account route (`/account`)
@@ -219,7 +219,7 @@ Composites:
 Status:
 
 - map composite baseline: `stable`
-- projects/photos/settings/account/auth compositional parity: `draft`
+- projects/media/settings/account/auth compositional parity: `draft`
 
 ## Space and Responsive Behavior Contract
 

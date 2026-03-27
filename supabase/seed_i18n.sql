@@ -5552,7 +5552,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0230.photo_gallery_coming_in_m_ui6', 'Photo gallery � coming in M-UI6.', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+values (null, 'auto.0230.photo_gallery_coming_in_m_ui6', 'Photo gallery � coming in M-UI6.', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18572,7 +18572,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.title', 'Media', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+values (null, 'media.page.title', 'Media', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18603,7 +18603,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.empty', 'No media found', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+values (null, 'media.page.empty', 'No media found', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18634,7 +18634,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.empty.authRequired.title', 'Sign in required', 'en', 'apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node')
+values (null, 'media.page.empty.authRequired.title', 'Sign in required', 'en', 'apps/web/src/app/features/media/media-empty.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18665,7 +18665,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.empty.authRequired.body', 'You need to sign in to view media.', 'en', 'apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node')
+values (null, 'media.page.empty.authRequired.body', 'You need to sign in to view media.', 'en', 'apps/web/src/app/features/media/media-empty.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18696,7 +18696,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.empty.org.body', 'No media is available for your organization yet.', 'en', 'apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node')
+values (null, 'media.page.empty.org.body', 'No media is available for your organization yet.', 'en', 'apps/web/src/app/features/media/media-empty.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18727,7 +18727,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.error', 'Failed to load media', 'en', 'apps/web/src/app/features/photos/photos.component.ts ts-prop:loadError')
+values (null, 'media.page.error', 'Failed to load media', 'en', 'apps/web/src/app/features/media/media.component.ts ts-prop:loadError')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18758,7 +18758,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.retry', 'Retry', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+values (null, 'media.page.retry', 'Retry', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18789,7 +18789,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'common.loading', 'Loading media...', 'en', 'apps/web/src/app/features/photos/photos.component.ts inline-template text-node')
+values (null, 'common.loading', 'Loading media...', 'en', 'apps/web/src/app/features/media/media.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18882,7 +18882,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.meta.type.image', 'Image', 'en', 'apps/web/src/app/features/photos/media-card.component.ts ts:content')
+values (null, 'media.meta.type.image', 'Image', 'en', 'apps/web/src/app/features/media/media-card.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18913,7 +18913,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.meta.type.video', 'Video', 'en', 'apps/web/src/app/features/photos/media-card.component.ts ts:content')
+values (null, 'media.meta.type.video', 'Video', 'en', 'apps/web/src/app/features/media/media-card.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18944,7 +18944,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.meta.type.pdf', 'PDF', 'en', 'apps/web/src/app/features/photos/media-card.component.ts ts:content')
+values (null, 'media.meta.type.pdf', 'PDF', 'en', 'apps/web/src/app/features/media/media-card.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -18975,7 +18975,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.card.alt.missing', 'Image', 'en', 'apps/web/src/app/features/photos/media-card.component.html html:alt')
+values (null, 'media.card.alt.missing', 'Image', 'en', 'apps/web/src/app/features/media/media-card.component.html html:alt')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -19192,7 +19192,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.header.item', 'item', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts ts:content')
+values (null, 'media.page.header.item', 'item', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -19223,7 +19223,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.header.items', 'items', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts ts:content')
+values (null, 'media.page.header.items', 'items', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -19254,7 +19254,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.header.loadedOfTotal', '{loaded} of {total} items loaded', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts inline-template text-node')
+values (null, 'media.page.header.loadedOfTotal', '{loaded} of {total} items loaded', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -19285,7 +19285,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'media.page.loading.more', 'Loading more media...', 'en', 'apps/web/src/app/features/photos/media.component.html text-node')
+values (null, 'media.page.loading.more', 'Loading more media...', 'en', 'apps/web/src/app/features/media/media.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -19316,7 +19316,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'nav.home', 'Home', 'en', 'apps/web/src/app/features/photos/media-page-header.component.ts ts:content')
+values (null, 'nav.home', 'Home', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,

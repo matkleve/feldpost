@@ -25,8 +25,8 @@
 |                          | `apps/web/src/app/features/projects/projects-page.component.scss`      | SCSS: `:host`, `.projects-page`, `.projects-rail`, `.projects-*`    | ✅ Reference   | HIGH     |
 |                          | `apps/web/src/app/features/projects/projects-page-header.component.ts` | Page header with title, count, actions                              | ✅ Reference   | MEDIUM   |
 |                          | `apps/web/src/app/features/projects/projects-toolbar.component.ts`     | Toolbar: grouping, filter, sort, view-mode toggle                   | ✅ Reference   | MEDIUM   |
-|                          | `apps/web/src/app/features/photos/media.component.ts`                  | NEW: Media page (refactored from photos), same layout pattern       | ✅ Implemented | HIGH     |
-|                          | `apps/web/src/app/features/photos/media-page-header.component.ts`      | Media page header with breadcrumb + count                           | ✅ Implemented | MEDIUM   |
+|                          | `apps/web/src/app/features/media/media.component.ts`                  | NEW: Media page (refactored from photos), same layout pattern       | ✅ Implemented | HIGH     |
+|                          | `apps/web/src/app/features/media/media-page-header.component.ts`      | Media page header with breadcrumb + count                           | ✅ Implemented | MEDIUM   |
 | **Element Specs**        | `docs/element-specs/projects-page.md`                                  | Spec contract for projects page                                     | ✅ Reference   | HIGH     |
 |                          | `docs/element-specs/media-page.md`                                     | Spec contract for media page                                        | ✅ Reference   | HIGH     |
 | **UI Standards**         | `docs/design-system/`                                                  | Design system folder (structure, components, usage)                 | 🔶 Partial     | MEDIUM   |

@@ -178,7 +178,7 @@ auto.0224.password_must_include_uppercase_lowercase_number_and_symbol,"Password 
 auto.0226.passwort_ndern,Passwort �ndern,apps/web/src/app/features/account/account.component.html interpolation-literal,Passwort �ndern,Passwort �ndern,Cambiare la password
 auto.0227.passwort_vergessen,Passwort vergessen,apps/web/src/app/features/account/account.component.html interpolation-literal,Passwort vergessen,Passwort vergessen,La password � inutilizzabile
 auto.0229.photo,Photo,apps/web/src/app/features/map/map-shell/map-shell.component.html text-node,Photo,Foto,Foto
-auto.0230.photo_gallery_coming_in_m_ui6,Photo gallery � coming in M-UI6.,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Photo gallery � coming in M-UI6.,Photo gallery � coming in M-UI6.,Galleria fotografica: disponibile nella M-UI6.
+auto.0230.photo_gallery_coming_in_m_ui6,Photo gallery � coming in M-UI6.,apps/web/src/app/features/media/media.component.ts inline-template text-node,Photo gallery � coming in M-UI6.,Photo gallery � coming in M-UI6.,Galleria fotografica: disponibile nella M-UI6.
 auto.0231.photo_map,Photo map,apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label,Photo map,Fotokarte,Mappa fotografica
 auto.0232.photos,photos,apps/web/src/app/features/map/workspace-pane/group-header.component.ts inline-template interpolation-literal,Photos,Photos,Foto
 auto.0233.place_job_file_name_on_map,Place {{ job.file.name }} on map,apps/web/src/app/features/upload/upload-panel/upload-panel.component.html attr:aria-label,Place {{ job.file.name }} on map,{{ job.file.name }} auf der Karte platzieren,Posiziona {{ job.file.name }} sulla mappa
@@ -598,28 +598,28 @@ upload.dropzone.label.dragAndDrop,Drag & drop files here,apps/web/src/app/featur
 upload.dropzone.label.clickHere,or click here,apps/web/src/app/features/upload/upload-panel.component.html text-node,or click here,oder hier klicken,oppure clicca qui
 upload.item.status.missingGps,GPS missing,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,GPS missing,GPS fehlt,GPS mancante
 upload.item.action.place,Place,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Place,Verorten,Posiziona
-media.page.title,Media,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Media,Medien,Media
-media.page.empty,No media found,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,No media found,Keine Medien gefunden,Nessun file multimediale trovato
-media.page.empty.authRequired.title,Sign in required,apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node,Sign in required,Anmeldung erforderlich,Accesso richiesto
-media.page.empty.authRequired.body,You need to sign in to view media.,apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node,You need to sign in to view media.,Du musst dich anmelden, um Medien anzuzeigen.,Devi accedere per visualizzare i contenuti multimediali.
-media.page.empty.org.body,No media is available for your organization yet.,apps/web/src/app/features/photos/media-empty.component.ts inline-template text-node,No media is available for your organization yet.,Fuer deine Organisation sind noch keine Medien verfuegbar.,Non sono ancora disponibili contenuti multimediali per la tua organizzazione.
-media.page.error,Failed to load media,apps/web/src/app/features/photos/photos.component.ts ts-prop:loadError,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i file multimediali
-media.page.retry,Retry,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Retry,Erneut versuchen,Riprova
-common.loading,Loading media...,apps/web/src/app/features/photos/photos.component.ts inline-template text-node,Loading media...,Medien werden geladen...,Caricamento file multimediali...
+media.page.title,Media,apps/web/src/app/features/media/media.component.ts inline-template text-node,Media,Medien,Media
+media.page.empty,No media found,apps/web/src/app/features/media/media.component.ts inline-template text-node,No media found,Keine Medien gefunden,Nessun file multimediale trovato
+media.page.empty.authRequired.title,Sign in required,apps/web/src/app/features/media/media-empty.component.ts inline-template text-node,Sign in required,Anmeldung erforderlich,Accesso richiesto
+media.page.empty.authRequired.body,You need to sign in to view media.,apps/web/src/app/features/media/media-empty.component.ts inline-template text-node,You need to sign in to view media.,Du musst dich anmelden, um Medien anzuzeigen.,Devi accedere per visualizzare i contenuti multimediali.
+media.page.empty.org.body,No media is available for your organization yet.,apps/web/src/app/features/media/media-empty.component.ts inline-template text-node,No media is available for your organization yet.,Fuer deine Organisation sind noch keine Medien verfuegbar.,Non sono ancora disponibili contenuti multimediali per la tua organizzazione.
+media.page.error,Failed to load media,apps/web/src/app/features/media/media.component.ts ts-prop:loadError,Failed to load media,Medien konnten nicht geladen werden,Impossibile caricare i file multimediali
+media.page.retry,Retry,apps/web/src/app/features/media/media.component.ts inline-template text-node,Retry,Erneut versuchen,Riprova
+common.loading,Loading media...,apps/web/src/app/features/media/media.component.ts inline-template text-node,Loading media...,Medien werden geladen...,Caricamento file multimediali...
 projects.status.active,Active,apps/web/src/app/features/projects/project-card.component.html html:content,Active,Aktiv,Attivo
 projects.status.archived,Archived,apps/web/src/app/features/projects/project-card.component.html html:content,Archived,Archiviert,Archiviato
-media.meta.type.image,Image,apps/web/src/app/features/photos/media-card.component.ts ts:content,Image,Bild,Immagine
-media.meta.type.video,Video,apps/web/src/app/features/photos/media-card.component.ts ts:content,Video,Video,Video
-media.meta.type.pdf,PDF,apps/web/src/app/features/photos/media-card.component.ts ts:content,PDF,PDF,PDF
-media.card.alt.missing,Image,apps/web/src/app/features/photos/media-card.component.html html:alt,Image,Bild,Immagine
+media.meta.type.image,Image,apps/web/src/app/features/media/media-card.component.ts ts:content,Image,Bild,Immagine
+media.meta.type.video,Video,apps/web/src/app/features/media/media-card.component.ts ts:content,Video,Video,Video
+media.meta.type.pdf,PDF,apps/web/src/app/features/media/media-card.component.ts ts:content,PDF,PDF,PDF
+media.card.alt.missing,Image,apps/web/src/app/features/media/media-card.component.html html:alt,Image,Bild,Immagine
 projects.page.meta.noLocation,No location,apps/web/src/app/features/projects/project-card.component.html html:content,No location,Kein Standort,Nessuna posizione
 workspace.toolbar.size.aria,Thumbnail size,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Thumbnail size,Thumbnail-Gr��e,Dimensione miniatura
 workspace.toolbar.size.row,List,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,List,Liste,Elenco
 workspace.toolbar.size.small,Small,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Small,Klein,Piccolo
 workspace.toolbar.size.medium,Medium,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Medium,Mittel,Medio
 workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Large,Gro�,Grande
-media.page.header.item,item,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,item,Element,elemento
-media.page.header.items,items,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,items,Elemente,elementi
-media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/photos/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati
-media.page.loading.more,Loading more media...,apps/web/src/app/features/photos/media.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
-nav.home,Home,apps/web/src/app/features/photos/media-page-header.component.ts ts:content,Home,Startseite,Home
+media.page.header.item,item,apps/web/src/app/features/media/media-page-header.component.ts ts:content,item,Element,elemento
+media.page.header.items,items,apps/web/src/app/features/media/media-page-header.component.ts ts:content,items,Elemente,elementi
+media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/media/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati
+media.page.loading.more,Loading more media...,apps/web/src/app/features/media/media.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
+nav.home,Home,apps/web/src/app/features/media/media-page-header.component.ts ts:content,Home,Startseite,Home

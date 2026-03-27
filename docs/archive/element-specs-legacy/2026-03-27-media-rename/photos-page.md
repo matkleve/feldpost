@@ -18,14 +18,14 @@ Full-width page with a top toolbar (sort controls, filter trigger) and a respons
 
 ## Actions
 
-| #   | User Action                   | System Response                                       | Triggers            |
-| --- | ----------------------------- | ----------------------------------------------------- | ------------------- |
-| 1   | Navigates to /media           | Loads first page of images, shows grid                | Supabase query      |
-| 2   | Scrolls to bottom             | Loads next page (cursor pagination)                   | Append to grid      |
-| 3   | Changes sort (Date ↓/↑, Name) | Re-queries with new sort, resets grid                 | Grid refreshed      |
-| 4   | Clicks a thumbnail            | Opens Image Detail View                               | Navigate or overlay |
-| 5   | Opens filter panel            | Same filter controls as map (time, project, metadata) | `FilterService`     |
-| 6   | Sees empty state              | "No media yet. Upload your first file." + upload CTA  | —                   |
+| #   | User Action                   | System Response                                        | Triggers            |
+| --- | ----------------------------- | ------------------------------------------------------ | ------------------- |
+| 1   | Navigates to /media           | Loads first page of images, shows grid                 | Supabase query      |
+| 2   | Scrolls to bottom             | Loads next page (cursor pagination)                    | Append to grid      |
+| 3   | Changes sort (Date ↓/↑, Name) | Re-queries with new sort, resets grid                  | Grid refreshed      |
+| 4   | Clicks a thumbnail            | Opens Image Detail View                                | Navigate or overlay |
+| 5   | Opens filter panel            | Same filter controls as map (time, project, metadata)  | `FilterService`     |
+| 6   | Sees empty state              | "No media yet. Upload your first file." + upload CTA   | —                   |
 
 ## Component Hierarchy
 
@@ -72,12 +72,12 @@ flowchart LR
 
 ## File Map
 
-| File                                   | Purpose                             |
-| -------------------------------------- | ----------------------------------- |
-| `features/photos/media.component.ts`   | Active media page shell             |
-| `features/photos/media.component.html` | Active media page template          |
-| `features/photos/media.component.scss` | Active media page styles            |
-| `core/image.service.ts`                | Image querying, pagination, sorting |
+| File                                    | Purpose                                |
+| --------------------------------------- | -------------------------------------- |
+| `features/photos/media.component.ts`    | Active media page shell                |
+| `features/photos/media.component.html`  | Active media page template             |
+| `features/photos/media.component.scss`  | Active media page styles               |
+| `core/image.service.ts`                 | Image querying, pagination, sorting    |
 
 ## Acceptance Criteria
 

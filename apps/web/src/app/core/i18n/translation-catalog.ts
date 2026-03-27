@@ -478,7 +478,7 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
   {
     key: 'nav.item.photos',
     original: 'Photos',
-    context: 'Main navigation label for photos route.',
+    context: 'Main navigation label for media route.',
     en: 'Photos',
     de: 'Fotos',
     it: 'Foto',

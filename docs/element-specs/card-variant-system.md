@@ -126,12 +126,12 @@ flowchart LR
 | `apps/web/src/app/features/projects/project-card.component.ts`                                  | dedicated project card renderer with variant-aware info density |
 | `apps/web/src/app/features/projects/project-card.component.html`                                | project card template per info profile                          |
 | `apps/web/src/app/features/projects/project-card.component.scss`                                | project card variant styles                                     |
-| `apps/web/src/app/features/photos/media-card.component.ts`                                      | dedicated media card renderer with variant-aware info density   |
-| `apps/web/src/app/features/photos/media-card.component.html`                                    | media card template per info profile                            |
-| `apps/web/src/app/features/photos/media-card.component.scss`                                    | media card variant styles                                       |
+| `apps/web/src/app/features/media/media-card.component.ts`                                      | dedicated media card renderer with variant-aware info density   |
+| `apps/web/src/app/features/media/media-card.component.html`                                    | media card template per info profile                            |
+| `apps/web/src/app/features/media/media-card.component.scss`                                    | media card variant styles                                       |
 | `apps/web/src/app/features/projects/projects-toolbar.component.ts`                              | integrate variant switch options (`row/small/medium/large`)     |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` | align existing thumbnail size presets to canonical variant type |
-| `apps/web/src/app/features/photos/media-page.component.ts`                                      | add media variant switch and state wiring                       |
+| `apps/web/src/app/features/media/media-page.component.ts`                                      | add media variant switch and state wiring                       |
 
 ## Wiring
 

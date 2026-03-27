@@ -40,7 +40,7 @@ Global overflow/compression order:
 
 ### 1) Global App Shell
 
-Route scope: all authenticated routes (`/`, `/map`, `/photos`, `/projects`, `/settings`, `/account`)
+Route scope: all authenticated routes (`/`, `/map`, `/media`, `/projects`, `/settings`, `/account`)
 
 Composition:
 
@@ -198,19 +198,19 @@ Space behavior:
 - Mobile:
   - single-column card/list emphasis with toolbar controls preserved
 
-### 6) Photos Page Composite
+### 6) Media Page Composite
 
-Route scope: `/photos`
+Route scope: `/media`
 
 Composition:
 
 - page rail container
-- photos toolbar
+- media toolbar
   - sort control
   - filter trigger
   - photo count label
-- responsive photo grid
-  - photo grid items
+- responsive media grid
+  - media grid items
 - loading/end/empty surfaces
   - loading spinner
   - end-of-list marker or load-more action
@@ -355,6 +355,6 @@ If a feature cannot map to existing primitives/composites, add:
 ## Current High-Priority Standardization Gaps
 
 1. Projects responsive column-reduction rules need one explicit stable contract (table-to-list threshold and required always-visible columns).
-2. Photos page card/list composition needs explicit stable variant matrix entries.
+2. Media page card/list composition needs explicit stable variant matrix entries.
 3. Settings overlay rail-collapse thresholds should move from feature-specific implementation details to a stable design-system contract.
 4. Workspace pane toolbar operator density levels should be formally promoted from `draft` to `stable` once cross-route parity checks are complete.

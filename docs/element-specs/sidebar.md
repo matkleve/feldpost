@@ -2,7 +2,7 @@
 
 ## What It Is
 
-The main navigation rail. Desktop: a frosted-glass floating panel on the left that expands on hover to show labels. Mobile: a fixed bottom tab bar. Contains nav links to Map, Photos, Groups, Settings, and a user avatar at the bottom.
+The main navigation rail. Desktop: a frosted-glass floating panel on the left that expands on hover to show labels. Mobile: a fixed bottom tab bar. Contains nav links to Map, Media, Groups, Settings, and a user avatar at the bottom.
 
 ## What It Looks Like
 
@@ -151,7 +151,7 @@ NavRow
 Sidebar                                    ← nav element, fixed/absolute left, frosted glass
 ├── SidebarPanel                           ← `.ui-container`, standard panel radius
 │   ├── NavLink "Map"                      ← icon: map, route: /
-│   ├── NavLink "Photos"                   ← icon: photo_camera, route: /photos
+│   ├── NavLink "Media"                    ← icon: photo_camera, route: /media
 │   ├── NavLink "Projects"                 ← icon: folder, route: /projects
 │   ├── NavLink "Settings"                 ← icon: settings, route: /settings
 │   ├── SpacerRow                          ← flex-1 pushes account row to bottom
