@@ -2,11 +2,7 @@ import { WritableSignal } from '@angular/core';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast.service';
-import {
-  ImageRecord,
-  MediaContextRow,
-  SelectOption,
-} from './image-detail-view.types';
+import { ImageRecord, MediaContextRow, SelectOption } from './image-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
@@ -31,10 +27,7 @@ interface ProjectMembershipHelperDeps {
 export class ImageDetailProjectMembershipHelper {
   constructor(private readonly deps: ProjectMembershipHelperDeps) {}
 
-  async loadProjectMemberships(
-    imageId: string,
-    fallbackProjectId: string | null,
-  ): Promise<void> {
+  async loadProjectMemberships(imageId: string, fallbackProjectId: string | null): Promise<void> {
     const mediaContext = await this.loadMediaContext(imageId);
     const memberships = new Set<string>();
     let resolvedPrimaryProjectId: string | null = mediaContext?.primary_project_id ?? null;
@@ -158,9 +151,9 @@ export class ImageDetailProjectMembershipHelper {
       return;
     }
 
-    const existing = this.deps.projectOptions().find(
-      (option) => option.label.toLowerCase() === name.toLowerCase(),
-    );
+    const existing = this.deps
+      .projectOptions()
+      .find((option) => option.label.toLowerCase() === name.toLowerCase());
     if (existing) {
       await this.toggleProjectMembership(existing.id);
       this.deps.projectSearch.set('');
