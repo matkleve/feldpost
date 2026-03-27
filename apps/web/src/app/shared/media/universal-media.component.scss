@@ -1,9 +1,26 @@
 .universal-media {
   display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  --universal-media-slot-border: 1px solid var(--color-border);
+  --universal-media-slot-radius: var(--radius-md);
+  --universal-media-slot-background: color-mix(
+    in srgb,
+    var(--color-bg-surface) 92%,
+    var(--color-bg-base)
+  );
+  --universal-media-slot-max-height: none;
+  --universal-media-asset-width: 100%;
+  --universal-media-asset-height: 100%;
+  --universal-media-asset-max-width: 100%;
+  --universal-media-asset-max-height: none;
 }
 
 .universal-media__surface {
   width: 100%;
+  height: 100%;
+  min-height: 0;
   display: block;
 }
 
@@ -13,17 +30,21 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 6rem;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
+  border: var(--universal-media-slot-border);
+  border-radius: var(--universal-media-slot-radius);
+  background: var(--universal-media-slot-background);
+  max-height: var(--universal-media-slot-max-height);
 }
 
 .universal-media__asset {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: var(--universal-media-asset-width);
+  height: var(--universal-media-asset-height);
+  max-width: var(--universal-media-asset-max-width);
+  max-height: var(--universal-media-asset-max-height);
   object-fit: contain;
   object-position: top center;
 }
@@ -62,7 +83,43 @@
   position: absolute;
   inset: 0;
   z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: stretch;
+  overflow: hidden;
   background: color-mix(in srgb, var(--color-bg-base) 45%, transparent);
+}
+
+.universal-media__upload-overlay-fill {
+  position: absolute;
+  inset: auto 0 0 0;
+  block-size: 0.2rem;
+  background: color-mix(in srgb, var(--color-primary) 82%, white);
+}
+
+.universal-media__upload-overlay-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.25rem;
+  color: white;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+}
+
+.universal-media__upload-icon {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.universal-media__upload-label {
+  font-size: var(--font-size-label);
+  line-height: 1.1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 @keyframes universal-media-pulse {

@@ -15,7 +15,7 @@ This is a mixed system spec (service plus UI contract). Visual output is a frame
 - Scope: Shared cross-feature architecture contract
 - Spec root: `docs/element-specs/media-renderer-system.md`
 - Angular workspace: `apps/web/src/app/`
-- Parent surfaces: Upload Panel, Thumbnail Grid, Media Page cards, Image Detail viewer, map markers
+- Parent surfaces: Upload Panel, Thumbnail Grid, Media Page cards, Media Detail viewer, map markers
 
 ## Actions
 
@@ -84,14 +84,14 @@ flowchart TD
 ## State
 
 | Name            | Type                                 | Default       | Controls                                            |
-| --------------- | ------------------------------------ | ------------- | --------------------------------------------------- | ------------------------------------------ |
+| --------------- | ------------------------------------ | ------------- | --------------------------------------------------- |
 | `typeRegistry`  | `Record<string, FileTypeDefinition>` | required      | Visual and behavior mapping per file type           |
 | `renderState`   | `Signal<MediaRenderState>`           | `placeholder` | Layer currently rendered by the universal component |
 | `requestedTier` | `MediaTier`                          | `small`       | Target quality and slot policy                      |
 | `resolvedTier`  | `MediaTier`                          | `small`       | Actual tier currently available after fallback      |
 | `slotWidthRem`  | `number \| null`                     | `null`        | Measured render slot width in `rem` from component  |
 | `slotHeightRem` | `number \| null`                     | `null`        | Measured render slot height in `rem` from component |
-| `uploadOverlay` | `Signal<UploadOverlayState           | null>`        | `null`                                              | Upload badge/progress on top of media tile |
+| `uploadOverlay` | `Signal<UploadOverlayState \| null>` | `null`        | Upload badge/progress on top of media tile          |
 
 ## File Map
 
@@ -171,12 +171,12 @@ sequenceDiagram
 
 - [x] A single FileTypeRegistry exists and is the only source for file type label, color token, icon token, mime aliases, and aspect ratio policy.
 - [x] No feature component keeps duplicate file-type switch maps after migration.
-- [x] A universal media component exists and is used by upload list rows, thumbnail cards, media cards, and detail viewer preview slot. _(Done: upload-panel-item ✅, thumbnail-cards ✅, media-detail-photo-viewer ✅; pending: media-card surfaces)_
+- [x] A universal media component exists and is used by upload list rows, thumbnail cards, media cards, and detail viewer preview slot. _(Done: upload-panel-item , thumbnail-cards , media-detail-viewer ; pending: media-card surfaces)_
 - [x] The universal component supports contexts (`map`, `grid`, `upload`, `detail`) without forking behavior logic.
 - [x] A shared tier model is defined (`inline`, `small`, `mid`, `mid2`, `large`, `full`).
 - [x] Mid to large image rendering uses `object-fit: contain` and `object-position: top center` inside tier slots.
 - [x] Render-state transitions are provided by one orchestrator service instead of per-component ad-hoc logic.
-- [ ] Upload progress overlays are exposed through the same render contract as thumbnail loading states. _(Phase 5 work)_
+- [x] Upload progress overlays are exposed through the same render contract as thumbnail loading states.
 - [ ] High-tier misses fall back to lower tiers and trigger prerender requests without UI blank states.
 - [x] Adaptive tier selection contract exists: components provide measured slot dimensions, orchestrator decides effective tier.
 - [x] Tier decision logic remains UI-agnostic: no direct DOM access inside orchestrator/service layer.

@@ -13,7 +13,7 @@ import { getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
-import type { MediaRenderState } from '../../core/media/media-renderer.types';
+import type { MediaRenderState, UploadOverlayState } from '../../core/media/media-renderer.types';
 
 @Component({
   selector: 'app-upload-panel-item',
@@ -69,6 +69,19 @@ export class UploadPanelItemComponent {
     } else {
       return { status: 'placeholder' };
     }
+  };
+
+  readonly uploadOverlay = (): UploadOverlayState | null => {
+    const job = this.job();
+    if (!this.showsUploadOverlay(job.phase)) {
+      return null;
+    }
+
+    return {
+      progress: job.progress,
+      label: job.statusLabel,
+      phase: job.phase,
+    };
   };
 
   phaseToStatusClass(phase: UploadPhase): string {
@@ -134,5 +147,23 @@ export class UploadPanelItemComponent {
       mimeType: file.type,
       fileName: file.name,
     });
+  }
+
+  private showsUploadOverlay(phase: UploadPhase): boolean {
+    return (
+      phase === 'queued' ||
+      phase === 'validating' ||
+      phase === 'parsing_exif' ||
+      phase === 'converting_format' ||
+      phase === 'hashing' ||
+      phase === 'dedup_check' ||
+      phase === 'extracting_title' ||
+      phase === 'conflict_check' ||
+      phase === 'uploading' ||
+      phase === 'saving_record' ||
+      phase === 'replacing_record' ||
+      phase === 'resolving_address' ||
+      phase === 'resolving_coordinates'
+    );
   }
 }

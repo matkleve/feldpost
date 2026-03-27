@@ -15,9 +15,9 @@ Feature-specific behavior is owned by these child specs:
 | Child Spec                                                    | Covers                                                |
 | ------------------------------------------------------------- | ----------------------------------------------------- |
 | [media-detail-photo-viewer](media-detail-photo-viewer.md)     | Progressive loading, lightbox, replace/upload photo   |
-| [image-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows   |
+| [media-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows   |
 | [custom-metadata](custom-metadata.md)                         | Metadata CRUD, chip types, typeahead add flow         |
-| [image-detail-actions](media-detail-actions.md)               | Actions section, delete, marker sync, correction mode |
+| [media-detail-actions](media-detail-actions.md)               | Actions section, delete, marker sync, correction mode |
 
 The parent element coordinates shared state and section visibility only. Field-level editing, project membership management, location editing, photo interactions, metadata CRUD, and action-specific flows belong to the child specs above.
 

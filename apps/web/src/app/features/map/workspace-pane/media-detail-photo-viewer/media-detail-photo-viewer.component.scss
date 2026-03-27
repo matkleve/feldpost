@@ -39,30 +39,19 @@
   display: block;
   width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
   max-width: 100%;
-}
-
-.detail-image-wrap ::ng-deep .universal-media__surface {
-  display: block;
-}
-
-.detail-image-wrap ::ng-deep .universal-media__slot {
-  width: 100%;
-  max-height: 33vh;
-  border-radius: var(--radius-lg);
-  border: 0;
-  background: linear-gradient(
+  min-height: 0;
+  --universal-media-slot-border: 0;
+  --universal-media-slot-radius: var(--radius-lg);
+  --universal-media-slot-background: linear-gradient(
     135deg,
     var(--color-bg-subtle, var(--color-bg-surface)) 0%,
     var(--color-bg-muted, var(--color-bg-base)) 100%
   );
-}
-
-.detail-image-wrap ::ng-deep .universal-media__asset {
-  display: block;
-  max-height: 33vh;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
+  --universal-media-slot-max-height: 33vh;
+  --universal-media-asset-width: auto;
+  --universal-media-asset-height: auto;
+  --universal-media-asset-max-width: 100%;
+  --universal-media-asset-max-height: 33vh;
 }
 
 .detail-image-wrap--thumb-preview ::ng-deep .universal-media__asset {

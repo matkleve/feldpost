@@ -4,6 +4,7 @@
 
 .media-card {
   position: relative;
+  display: grid;
   border-radius: var(--container-radius-control);
   overflow: hidden;
   aspect-ratio: 1;
@@ -52,19 +53,7 @@
 .media-card__media {
   width: 100%;
   height: 100%;
-}
-
-.media-card__media ::ng-deep {
-  .universal-media__slot {
-    width: 100%;
-    height: 100%;
-  }
-
-  .universal-media__asset {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  min-height: 0;
 }
 
 .media-card__info {

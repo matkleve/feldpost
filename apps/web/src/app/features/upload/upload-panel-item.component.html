@@ -14,22 +14,23 @@
     (click)="rowMainClick.emit(job())"
     (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
   >
-    @if (job().thumbnailUrl) {
-      <div class="upload-panel__thumbnail-container">
-        <div class="upload-panel__thumbnail-helper">
-          <app-universal-media
-            class="upload-panel__universal-media"
-            [fileIdentity]="fileIdentity()"
-            [context]="'upload'"
-            [requestedTier]="'inline'"
-            [slotWidthRem]="2.75"
-            [slotHeightRem]="2.75"
-            [renderState]="mediaRenderState()"
-            [fit]="'contain'"
-            [minHeightRem]="2.75"
-            [altText]="job().file.name"
-          ></app-universal-media>
-        </div>
+    <div class="upload-panel__thumbnail-container">
+      <div class="upload-panel__thumbnail-helper">
+        <app-universal-media
+          class="upload-panel__universal-media"
+          [fileIdentity]="fileIdentity()"
+          [context]="'upload'"
+          [requestedTier]="'inline'"
+          [slotWidthRem]="2.75"
+          [slotHeightRem]="2.75"
+          [renderState]="mediaRenderState()"
+          [uploadOverlay]="uploadOverlay()"
+          [fit]="'contain'"
+          [minHeightRem]="2.75"
+          [altText]="job().file.name"
+        ></app-universal-media>
+      </div>
+      @if (job().thumbnailUrl) {
         <button
           uiButton
           uiButtonSizeSm
@@ -42,42 +43,8 @@
         >
           <span class="material-icons" aria-hidden="true">my_location</span>
         </button>
-      </div>
-    } @else if (job().phase === 'converting_format') {
-      <div class="upload-panel__thumbnail-container">
-        <div class="upload-panel__thumbnail-helper">
-          <app-universal-media
-            class="upload-panel__universal-media"
-            [fileIdentity]="fileIdentity()"
-            [context]="'upload'"
-            [requestedTier]="'inline'"
-            [slotWidthRem]="2.75"
-            [slotHeightRem]="2.75"
-            [renderState]="mediaRenderState()"
-            [fit]="'contain'"
-            [minHeightRem]="2.75"
-            [altText]="job().file.name"
-          ></app-universal-media>
-        </div>
-      </div>
-    } @else {
-      <div class="upload-panel__thumbnail-container">
-        <div class="upload-panel__thumbnail-helper">
-          <app-universal-media
-            class="upload-panel__universal-media"
-            [fileIdentity]="fileIdentity()"
-            [context]="'upload'"
-            [requestedTier]="'inline'"
-            [slotWidthRem]="2.75"
-            [slotHeightRem]="2.75"
-            [renderState]="mediaRenderState()"
-            [fit]="'contain'"
-            [minHeightRem]="2.75"
-            [altText]="job().file.name"
-          ></app-universal-media>
-        </div>
-      </div>
-    }
+      }
+    </div>
 
     <div class="upload-panel__file-meta">
       <div class="upload-panel__name-row">

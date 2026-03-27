@@ -4,11 +4,10 @@ import {
   computed,
   inject,
   input,
-  OnChanges,
   output,
-  SimpleChanges,
   signal,
 } from '@angular/core';
+import type { OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { PhotoLoadService } from '../../core/photo-load.service';
@@ -55,11 +54,12 @@ export class MediaCardComponent implements OnChanges {
     const storagePath = item.storage_path;
     const extension = storagePath?.split('.').pop()?.toLowerCase() ?? '';
     return {
-      mimeType: this.getMimeTypeFromExtension(extension),
       fileName: storagePath,
       extension,
     };
   });
+
+  readonly fileType = computed(() => this.mediaOrchestrator.resolveFileType(this.fileIdentity()));
 
   readonly mediaRenderState = computed((): MediaRenderState => {
     if (this.thumbnailUrl().length > 0 && !this.thumbnailFailed()) {
@@ -90,38 +90,23 @@ export class MediaCardComponent implements OnChanges {
   }
 
   get mediaTypeLabel(): string {
-    const extension = this.fileExtension();
-    if (!extension) {
-      return '';
+    const definition = this.fileType();
+    const badge = this.mediaOrchestrator.resolveBadge(this.fileIdentity());
+
+    switch (definition.category) {
+      case 'image':
+        return this.t('media.meta.type.image', 'Image');
+      case 'video':
+        return this.t('media.meta.type.video', 'Video');
+      case 'document':
+        return definition.id === 'pdf' ? this.t('media.meta.type.pdf', 'PDF') : definition.label;
+      case 'spreadsheet':
+      case 'presentation':
+      case 'audio':
+        return definition.label;
+      default:
+        return badge ?? definition.label;
     }
-
-    if (['jpg', 'jpeg', 'png', 'webp', 'heic', 'gif', 'bmp'].includes(extension))
-      return this.t('media.meta.type.image', 'Image');
-    if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'].includes(extension))
-      return this.t('media.meta.type.video', 'Video');
-    if (extension === 'pdf') return this.t('media.meta.type.pdf', 'PDF');
-    return extension.toUpperCase();
-  }
-
-  get fallbackIcon(): string {
-    const extension = this.fileExtension();
-    if (!extension) {
-      return 'insert_drive_file';
-    }
-
-    if (['jpg', 'jpeg', 'png', 'webp', 'heic', 'gif', 'bmp'].includes(extension)) {
-      return 'image';
-    }
-
-    if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'm4v'].includes(extension)) {
-      return 'movie';
-    }
-
-    if (extension === 'pdf') {
-      return 'picture_as_pdf';
-    }
-
-    return 'insert_drive_file';
   }
 
   get hasLocation(): boolean {
@@ -201,41 +186,6 @@ export class MediaCardComponent implements OnChanges {
 
   private isLikelyImagePath(path: string): boolean {
     const extension = path.split('.').pop()?.toLowerCase() ?? '';
-    return ['jpg', 'jpeg', 'png', 'webp', 'heic', 'gif', 'bmp'].includes(extension);
-  }
-
-  private getMimeTypeFromExtension(extension: string): string {
-    if (!extension) return 'application/octet-stream';
-    switch (extension) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'webp':
-        return 'image/webp';
-      case 'heic':
-        return 'image/heic';
-      case 'gif':
-        return 'image/gif';
-      case 'bmp':
-        return 'image/bmp';
-      case 'mp4':
-        return 'video/mp4';
-      case 'mov':
-        return 'video/quicktime';
-      case 'avi':
-        return 'video/x-msvideo';
-      case 'mkv':
-        return 'video/x-matroska';
-      case 'webm':
-        return 'video/webm';
-      case 'm4v':
-        return 'video/x-m4v';
-      case 'pdf':
-        return 'application/pdf';
-      default:
-        return 'application/octet-stream';
-    }
+    return this.mediaOrchestrator.resolveFileType({ extension }).category === 'image';
   }
 }

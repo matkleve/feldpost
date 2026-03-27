@@ -43,7 +43,18 @@
     }
 
     @if (uploadOverlay()) {
-      <span class="universal-media__upload-overlay" aria-hidden="true"></span>
+      <div class="universal-media__upload-overlay" aria-hidden="true">
+        <div
+          class="universal-media__upload-overlay-fill"
+          [style.width.%]="uploadOverlay()?.progress ?? 0"
+        ></div>
+        <div class="universal-media__upload-overlay-content">
+          <span class="material-icons universal-media__upload-icon">upload</span>
+          @if (uploadOverlay()?.label) {
+            <span class="universal-media__upload-label">{{ uploadOverlay()?.label }}</span>
+          }
+        </div>
+      </div>
     }
   </div>
 </ng-template>

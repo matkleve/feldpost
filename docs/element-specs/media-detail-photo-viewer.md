@@ -1,6 +1,6 @@
 # Media Detail — Media Viewer
 
-> **Parent spec:** [image-detail-view](media-detail-view.md)
+> **Parent spec:** [media-detail-view](media-detail-view.md)
 > **Architecture parent:** [media-renderer-system](media-renderer-system.md)
 > **Photo loading service:** [photo-load-service](photo-load-service.md)
 > **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
@@ -8,7 +8,7 @@
 
 ## What It Is
 
-The hero photo area inside the Image Detail View. Handles progressive image loading (placeholder → thumbnail → full-res), lightbox enlargement, and photo replacement/upload for photoless datapoints. Delegates all signed-URL generation and load-state tracking to `PhotoLoadService`; delegates file uploads to `UploadManagerService`.
+The hero photo area inside the Media Detail View. Handles progressive image loading (placeholder → thumbnail → full-res), lightbox enlargement, and photo replacement/upload for photoless datapoints. Delegates all signed-URL generation and load-state tracking to `PhotoLoadService`; delegates file uploads to `UploadManagerService`.
 
 ## What It Looks Like
 

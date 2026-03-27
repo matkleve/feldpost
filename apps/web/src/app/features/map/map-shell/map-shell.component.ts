@@ -54,6 +54,7 @@ import {
   type SegmentedSwitchOption,
 } from '../../../shared/segmented-switch/segmented-switch.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { fileTypeBadge } from '../../../core/media/file-type-registry';
 import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
@@ -3224,25 +3225,7 @@ export class MapShellComponent implements OnDestroy {
   private buildFallbackLabelFromPath(path: string | undefined): string | undefined {
     if (!path) return undefined;
 
-    const ext = path.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'pdf':
-        return 'PDF';
-      case 'doc':
-        return 'DOC';
-      case 'docx':
-        return 'DOCX';
-      case 'xls':
-        return 'XLS';
-      case 'xlsx':
-        return 'XLSX';
-      case 'ppt':
-        return 'PPT';
-      case 'pptx':
-        return 'PPTX';
-      default:
-        return undefined;
-    }
+    return fileTypeBadge({ fileName: path }) ?? undefined;
   }
 
   private getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
