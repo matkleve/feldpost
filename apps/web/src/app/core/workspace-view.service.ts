@@ -192,8 +192,9 @@ export class WorkspaceViewService {
         const seen = new Set<string>();
         const images: WorkspaceImage[] = [];
         for (const row of data as RawClusterRow[]) {
-          if (seen.has(row.image_id)) continue;
-          seen.add(row.image_id);
+          const resolvedId = row.media_item_id ?? row.image_id;
+          if (!resolvedId || seen.has(resolvedId)) continue;
+          seen.add(resolvedId);
           images.push(mapClusterRow(row));
         }
         return images;
@@ -228,8 +229,9 @@ export class WorkspaceViewService {
       if (error || !Array.isArray(data)) continue;
 
       for (const row of data as RawClusterRow[]) {
-        if (seen.has(row.image_id)) continue;
-        seen.add(row.image_id);
+        const resolvedId = row.media_item_id ?? row.image_id;
+        if (!resolvedId || seen.has(resolvedId)) continue;
+        seen.add(resolvedId);
         images.push(mapClusterRow(row));
       }
     }
@@ -551,26 +553,67 @@ export class WorkspaceViewService {
     const imageIds = images.map((img) => img.id);
     if (imageIds.length === 0) return;
 
+    const imageIdSet = new Set(imageIds);
+
+    const [directLinksResponse, sourceLinksResponse] = await Promise.all([
+      this.supabase.client.from('media_items').select('id,source_image_id').in('id', imageIds),
+      this.supabase.client
+        .from('media_items')
+        .select('id,source_image_id')
+        .in('source_image_id', imageIds),
+    ]);
+
+    const mediaRows = [
+      ...(Array.isArray(directLinksResponse.data)
+        ? (directLinksResponse.data as MediaSourceLinkRow[])
+        : []),
+      ...(Array.isArray(sourceLinksResponse.data)
+        ? (sourceLinksResponse.data as MediaSourceLinkRow[])
+        : []),
+    ].filter((row, index, all) => index === all.findIndex((candidate) => candidate.id === row.id));
+
+    if (mediaRows.length === 0) return;
+
+    const lookupIdsByMediaItemId = new Map<string, string[]>();
+    const mediaItemIds: string[] = [];
+
+    for (const row of mediaRows) {
+      const lookupIds = [row.id, row.source_image_id].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0 && imageIdSet.has(id),
+      );
+      if (lookupIds.length === 0) continue;
+
+      lookupIdsByMediaItemId.set(row.id, lookupIds);
+      mediaItemIds.push(row.id);
+    }
+
+    if (mediaItemIds.length === 0) return;
+
     const { data, error } = await this.supabase.client
       .from('media_metadata')
-      .select('image_id, metadata_key_id, value_text')
-      .in('image_id', imageIds);
+      .select('media_item_id, metadata_key_id, value_text')
+      .in('media_item_id', mediaItemIds);
 
     if (error || !data || data.length === 0) return;
 
     // Build map: imageId → { metadataKeyId → value }
     const metadataMap = new Map<string, WorkspaceMediaCustomMetadata>();
     for (const row of data as Array<{
-      image_id: string;
+      media_item_id: string;
       metadata_key_id: string;
       value_text: string;
     }>) {
-      let entry = metadataMap.get(row.image_id);
-      if (!entry) {
-        entry = {};
-        metadataMap.set(row.image_id, entry);
+      const lookupIds = lookupIdsByMediaItemId.get(row.media_item_id);
+      if (!lookupIds || lookupIds.length === 0) continue;
+
+      for (const lookupId of lookupIds) {
+        let entry = metadataMap.get(lookupId);
+        if (!entry) {
+          entry = {};
+          metadataMap.set(lookupId, entry);
+        }
+        entry[row.metadata_key_id] = row.value_text;
       }
-      entry[row.metadata_key_id] = row.value_text;
     }
 
     // Patch metadata onto images
@@ -641,7 +684,8 @@ export class WorkspaceViewService {
 // ── RPC row mapping ──────────────────────────────────────────────────────────
 
 interface RawClusterRow {
-  image_id: string;
+  image_id: string | null;
+  media_item_id?: string | null;
   latitude: number;
   longitude: number;
   thumbnail_path: string | null;
@@ -687,13 +731,24 @@ interface RawMediaProjectMembershipRow {
   projects: { name: string | null } | Array<{ name: string | null }> | null;
 }
 
+interface MediaSourceLinkRow {
+  id: string;
+  source_image_id: string | null;
+}
+
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {
+  const resolvedId = row.media_item_id ?? row.image_id;
+
+  if (!resolvedId) {
+    throw new Error('cluster row is missing both media_item_id and image_id');
+  }
+
   const membershipIds = Array.isArray(row.project_ids) ? row.project_ids : [];
   const membershipNames = Array.isArray(row.project_names) ? row.project_names : [];
   const derivedAddress = deriveStreetNumberAndZip(row.street, row.address_label);
 
   return {
-    id: row.image_id,
+    id: resolvedId,
     latitude: row.latitude,
     longitude: row.longitude,
     thumbnailPath: row.thumbnail_path,

@@ -9,7 +9,7 @@ type QueryResult = { data: unknown; error: unknown };
 interface FakeSupabaseData {
   titleAddressRows?: Array<{ id: string; project_id: string | null }>;
   metadataRows?: Array<{
-    image_id: string;
+    media_item_id: string;
     value_text: string;
     images: { project_id: string | null } | Array<{ project_id: string | null }> | null;
   }>;
@@ -46,13 +46,14 @@ function buildFakeSupabase(data: FakeSupabaseData) {
   const mediaItemsChain = {
     select: vi.fn().mockReturnThis(),
     in: vi.fn().mockImplementation((column: string, values: string[]): Promise<QueryResult> => {
-      if (column !== 'source_image_id') {
-        return Promise.resolve({ data: [], error: null });
-      }
-
-      const filtered = mediaItemRows.filter(
-        (row) => !!row.source_image_id && values.includes(row.source_image_id),
-      );
+      const filtered =
+        column === 'source_image_id'
+          ? mediaItemRows.filter(
+              (row) => !!row.source_image_id && values.includes(row.source_image_id),
+            )
+          : column === 'id'
+            ? mediaItemRows.filter((row) => values.includes(row.id))
+            : [];
       return Promise.resolve({ data: filtered, error: null });
     }),
   };
@@ -143,7 +144,7 @@ describe('ProjectsService', () => {
       titleAddressRows: [],
       metadataRows: [
         {
-          image_id: 'img-2',
+          media_item_id: 'media-2',
           value_text: 'phase-2',
           images: { project_id: null },
         },
@@ -167,7 +168,7 @@ describe('ProjectsService', () => {
       titleAddressRows: [{ id: 'img-3', project_id: null }],
       metadataRows: [
         {
-          image_id: 'img-3',
+          media_item_id: 'media-3',
           value_text: 'steel',
           images: { project_id: null },
         },

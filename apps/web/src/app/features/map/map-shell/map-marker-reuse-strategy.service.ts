@@ -8,14 +8,18 @@ export class MapMarkerReuseStrategyService {
     map: L.Map | undefined,
     markersByImageId: Map<string, string>,
     uploadedPhotoMarkers: Map<string, PhotoMarkerState>,
-    row: Pick<ReconcileIncomingRow, 'cluster_lat' | 'cluster_lng' | 'image_count' | 'image_id'>,
+    row: Pick<
+      ReconcileIncomingRow,
+      'cluster_lat' | 'cluster_lng' | 'image_count' | 'image_id' | 'media_item_id'
+    >,
     recyclableKeys: Set<string>,
   ): string | null {
     const count = Number(row.image_count);
     const incomingIsSingle = count === 1;
+    const incomingMediaItemId = row.media_item_id ?? row.image_id;
 
-    if (incomingIsSingle && row.image_id) {
-      const byImageId = markersByImageId.get(row.image_id);
+    if (incomingIsSingle && incomingMediaItemId) {
+      const byImageId = markersByImageId.get(incomingMediaItemId);
       if (byImageId && recyclableKeys.has(byImageId)) {
         return byImageId;
       }

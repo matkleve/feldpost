@@ -87,11 +87,6 @@ interface MediaProjectMembershipRow {
   project_id: string;
 }
 
-interface MediaSourceLinkRow {
-  id: string;
-  source_image_id: string | null;
-}
-
 interface ProfileOrgRow {
   organization_id: string | null;
 }
@@ -670,81 +665,61 @@ export class ProjectsService {
 
     const response = await this.supabase.client
       .from('media_metadata')
-      .select('image_id,value_text')
+      .select('media_item_id,value_text')
       .ilike('value_text', `%${escaped}%`);
 
     if (response.error || !Array.isArray(response.data)) {
       return;
     }
 
-    const matchedImageIds = new Set<string>();
+    const matchedMediaItemIds = new Set<string>();
 
-    for (const row of response.data as Array<{ image_id: string; value_text: string }>) {
-      matchedImageIds.add(row.image_id);
-    }
-
-    const membershipProjectsByImageId = await this.loadMembershipProjectsBySourceImageIds([
-      ...matchedImageIds,
-    ]);
-    for (const [imageId, projectIds] of membershipProjectsByImageId) {
-      for (const projectId of projectIds) {
-        const bucket = imageIdsByProject.get(projectId) ?? new Set<string>();
-        bucket.add(imageId);
-        imageIdsByProject.set(projectId, bucket);
+    for (const row of response.data as Array<{ media_item_id: string; value_text: string }>) {
+      if (row.media_item_id) {
+        matchedMediaItemIds.add(row.media_item_id);
       }
     }
-  }
 
-  private async loadMembershipProjectsBySourceImageIds(
-    imageIds: string[],
-  ): Promise<Map<string, Set<string>>> {
-    const result = new Map<string, Set<string>>();
-    if (imageIds.length === 0) {
-      return result;
+    if (matchedMediaItemIds.size === 0) {
+      return;
     }
 
     const mediaLinksResponse = await this.supabase.client
       .from('media_items')
       .select('id,source_image_id')
-      .in('source_image_id', imageIds);
+      .in('id', [...matchedMediaItemIds]);
 
     if (mediaLinksResponse.error || !Array.isArray(mediaLinksResponse.data)) {
-      return result;
+      return;
     }
 
-    const mediaItemToSourceImage = new Map<string, string>();
-    const mediaItemIds: string[] = [];
+    const lookupIdByMediaItemId = new Map<string, string>();
 
-    for (const row of mediaLinksResponse.data as MediaSourceLinkRow[]) {
-      if (!row.source_image_id) continue;
-      mediaItemToSourceImage.set(row.id, row.source_image_id);
-      mediaItemIds.push(row.id);
-    }
-
-    if (mediaItemIds.length === 0) {
-      return result;
+    for (const row of mediaLinksResponse.data as Array<{
+      id: string;
+      source_image_id: string | null;
+    }>) {
+      lookupIdByMediaItemId.set(row.id, row.source_image_id ?? row.id);
     }
 
     const membershipsResponse = await this.supabase.client
       .from('media_projects')
       .select('media_item_id,project_id')
-      .in('media_item_id', mediaItemIds);
+      .in('media_item_id', [...matchedMediaItemIds]);
 
     if (membershipsResponse.error || !Array.isArray(membershipsResponse.data)) {
-      return result;
+      return;
     }
 
     for (const row of membershipsResponse.data as MediaProjectMembershipRow[]) {
       if (!row.media_item_id) continue;
-      const sourceImageId = mediaItemToSourceImage.get(row.media_item_id);
-      if (!sourceImageId) continue;
+      const lookupId = lookupIdByMediaItemId.get(row.media_item_id);
+      if (!lookupId) continue;
 
-      const bucket = result.get(sourceImageId) ?? new Set<string>();
-      bucket.add(row.project_id);
-      result.set(sourceImageId, bucket);
+      const bucket = imageIdsByProject.get(row.project_id) ?? new Set<string>();
+      bucket.add(lookupId);
+      imageIdsByProject.set(row.project_id, bucket);
     }
-
-    return result;
   }
 
   private async loadProjectActivityRows(): Promise<ProjectActivityRow[]> {

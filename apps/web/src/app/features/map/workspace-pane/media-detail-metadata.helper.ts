@@ -17,10 +17,28 @@ interface ImageDetailMetadataHelperDeps {
 export class ImageDetailMetadataHelper {
   constructor(private readonly deps: ImageDetailMetadataHelperDeps) {}
 
+  private async resolveMediaItemId(id: string): Promise<string | null> {
+    const { data, error } = await this.deps.services.supabase.client
+      .from('media_items')
+      .select('id')
+      .or(`id.eq.${id},source_image_id.eq.${id}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data?.id) {
+      return null;
+    }
+
+    return data.id;
+  }
+
   async saveMetadata(entry: MetadataEntry, newValue: string): Promise<void> {
     if (newValue === entry.value) return;
     const id = this.deps.signals.imageId();
     if (!id) return;
+
+    const mediaItemId = await this.resolveMediaItemId(id);
+    if (!mediaItemId) return;
 
     this.deps.signals.metadata.update((list) =>
       list.map((m) => (m.metadataKeyId === entry.metadataKeyId ? { ...m, value: newValue } : m)),
@@ -28,11 +46,11 @@ export class ImageDetailMetadataHelper {
 
     const { error } = await this.deps.services.supabase.client.from('media_metadata').upsert(
       {
-        image_id: id,
+        media_item_id: mediaItemId,
         metadata_key_id: entry.metadataKeyId,
         value_text: newValue,
       },
-      { onConflict: 'image_id,metadata_key_id' },
+      { onConflict: 'media_item_id,metadata_key_id' },
     );
 
     if (error) {
@@ -47,6 +65,9 @@ export class ImageDetailMetadataHelper {
   async addMetadata(keyName: string, value: string): Promise<void> {
     const img = this.deps.signals.image();
     if (!img || !keyName.trim() || !value.trim()) return;
+
+    const mediaItemId = await this.resolveMediaItemId(img.id);
+    if (!mediaItemId) return;
 
     this.deps.signals.saving.set(true);
 
@@ -76,11 +97,11 @@ export class ImageDetailMetadataHelper {
 
     const { error } = await this.deps.services.supabase.client.from('media_metadata').upsert(
       {
-        image_id: img.id,
+        media_item_id: mediaItemId,
         metadata_key_id: keyId,
         value_text: value.trim(),
       },
-      { onConflict: 'image_id,metadata_key_id' },
+      { onConflict: 'media_item_id,metadata_key_id' },
     );
 
     if (!error) {
@@ -97,6 +118,9 @@ export class ImageDetailMetadataHelper {
     const id = this.deps.signals.imageId();
     if (!id) return;
 
+    const mediaItemId = await this.resolveMediaItemId(id);
+    if (!mediaItemId) return;
+
     const previousList = this.deps.signals.metadata();
     this.deps.signals.metadata.update((list) =>
       list.filter((m) => m.metadataKeyId !== entry.metadataKeyId),
@@ -105,7 +129,7 @@ export class ImageDetailMetadataHelper {
     const { error } = await this.deps.services.supabase.client
       .from('media_metadata')
       .delete()
-      .eq('image_id', id)
+      .eq('media_item_id', mediaItemId)
       .eq('metadata_key_id', entry.metadataKeyId);
 
     if (error) {

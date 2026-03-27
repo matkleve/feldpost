@@ -80,7 +80,7 @@ export class ImageDetailDataFacade {
     const metaResult = await this.deps.services.supabase.client
       .from('media_metadata')
       .select('metadata_key_id, value_text, metadata_keys(key_name)')
-      .eq('image_id', legacyImageId);
+      .eq('media_item_id', media.id);
 
     this.deps.signals.image.set(image);
     this.deps.signals.error.set(null);

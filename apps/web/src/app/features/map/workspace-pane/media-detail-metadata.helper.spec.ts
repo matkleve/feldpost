@@ -17,9 +17,22 @@ describe('ImageDetailMetadataHelper', () => {
       services: {
         supabase: {
           client: {
-            from: vi.fn(() => ({
-              upsert: vi.fn(async () => ({ error: null })),
-            })),
+            from: vi.fn((table: string) => {
+              if (table === 'media_items') {
+                return {
+                  select: vi.fn(() => ({
+                    or: vi.fn(() => ({
+                      limit: vi.fn(() => ({
+                        maybeSingle: vi.fn(async () => ({ data: { id: 'media-1' }, error: null })),
+                      })),
+                    })),
+                  })),
+                };
+              }
+              return {
+                upsert: vi.fn(async () => ({ error: null })),
+              };
+            }),
           },
         } as any,
       },
@@ -41,13 +54,26 @@ describe('ImageDetailMetadataHelper', () => {
       services: {
         supabase: {
           client: {
-            from: vi.fn(() => ({
-              delete: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                  eq: vi.fn(async () => ({ error: { message: 'fail' } })),
+            from: vi.fn((table: string) => {
+              if (table === 'media_items') {
+                return {
+                  select: vi.fn(() => ({
+                    or: vi.fn(() => ({
+                      limit: vi.fn(() => ({
+                        maybeSingle: vi.fn(async () => ({ data: { id: 'media-1' }, error: null })),
+                      })),
+                    })),
+                  })),
+                };
+              }
+              return {
+                delete: vi.fn(() => ({
+                  eq: vi.fn(() => ({
+                    eq: vi.fn(async () => ({ error: { message: 'fail' } })),
+                  })),
                 })),
-              })),
-            })),
+              };
+            }),
           },
         } as any,
       },

@@ -16,41 +16,41 @@ Hinweis:
 
 ## Gesamtplanung pro Tabelle
 
-| Tabelle / View                     | Ist-Status          | Ziel-Status                         | Geplante Aktion                  | PK/FK/Spalten-Änderung                                             | Reihenfolge |
-| ---------------------------------- | ------------------- | ----------------------------------- | -------------------------------- | ------------------------------------------------------------------ | ----------- |
-| app_texts                          | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| app_text_translations              | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| organizations                      | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| profiles                           | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| roles                              | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| user_roles                         | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| projects                           | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| media_items                        | Aktiv, Canonical    | Bleibt (Canonical)                  | Legacy-Fallback später entfernen | Später source_image_id drop                                        | P3          |
-| media_projects                     | Aktiv               | Bleibt (einzige Membership-Tabelle) | Konsolidieren auf diese Tabelle  | Optional unique/index review                                       | P1          |
-| project_sections                   | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| project_section_items              | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| metadata_keys                      | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| media_metadata (ex image_metadata) | Umbenannt und aktiv | Bleibt                              | Bereits umgesetzt                | Table rename erledigt; Spalten-Naming cleanup optional             | Done        |
-| coordinate_corrections             | Aktiv               | Bleibt                              | Legacy-Spalte entfernen          | Runtime-Entkopplung in Arbeit; finaler Drop in separater Migration | P2          |
-| dedup_hashes                       | Aktiv               | Bleibt                              | Legacy-Spalte entfernt           | auf media_item_id-Vertrag umgestellt (DB + Upload-Pipeline)        | Done        |
-| share_sets                         | Aktiv               | Bleibt                              | Keine Strukturänderung nötig     | Keine                                                              | P0          |
-| share_set_items                    | Aktiv               | Bleibt                              | Spaltenbereinigung umgesetzt     | image_id entfernt; PK/Vertrag auf media_item_id                    | Done        |
-| image_projects                     | Entfernt            | Entfernt                            | Bereits umgesetzt                | cluster_images auf media_projects umgestellt, dann DROP TABLE      | Done        |
-| saved_groups                       | Entfernt            | Entfernt                            | Bereits umgesetzt                | App-Queries entfernt, Tabelle gedroppt                             | Done        |
-| saved_group_images                 | Entfernt            | Entfernt                            | Bereits umgesetzt                | App-Queries entfernt, Tabelle gedroppt                             | Done        |
-| invite_share_events                | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| qr_invites                         | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| storage_cleanup_runs               | Aktiv               | Bleibt                              | Keine Änderung                   | Keine                                                              | P0          |
-| v_media_backfill_audit (View)      | Aktiv               | Optional später entfernen           | Bis Abschluss Cleanup behalten   | Keine                                                              | P3          |
+| Tabelle / View                     | Ist-Status       | Ziel-Status                         | Geplante Aktion                  | PK/FK/Spalten-Änderung                                        | Reihenfolge |
+| ---------------------------------- | ---------------- | ----------------------------------- | -------------------------------- | ------------------------------------------------------------- | ----------- |
+| app_texts                          | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| app_text_translations              | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| organizations                      | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| profiles                           | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| roles                              | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| user_roles                         | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| projects                           | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| media_items                        | Aktiv, Canonical | Bleibt (Canonical)                  | Legacy-Fallback später entfernen | Später source_image_id drop                                   | P3          |
+| media_projects                     | Aktiv            | Bleibt (einzige Membership-Tabelle) | Konsolidieren auf diese Tabelle  | Optional unique/index review                                  | P1          |
+| project_sections                   | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| project_section_items              | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| metadata_keys                      | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| media_metadata (ex image_metadata) | Aktiv            | Bleibt                              | Spaltenbereinigung umgesetzt     | image_id entfernt; Vertrag/Policies auf media_item_id         | Done        |
+| coordinate_corrections             | Aktiv            | Bleibt                              | Legacy-Spalte entfernt           | image_id entfernt; Vertrag auf media_item_id abgeschlossen    | Done        |
+| dedup_hashes                       | Aktiv            | Bleibt                              | Legacy-Spalte entfernt           | auf media_item_id-Vertrag umgestellt (DB + Upload-Pipeline)   | Done        |
+| share_sets                         | Aktiv            | Bleibt                              | Keine Strukturänderung nötig     | Keine                                                         | P0          |
+| share_set_items                    | Aktiv            | Bleibt                              | Spaltenbereinigung umgesetzt     | image_id entfernt; PK/Vertrag auf media_item_id               | Done        |
+| image_projects                     | Entfernt         | Entfernt                            | Bereits umgesetzt                | cluster_images auf media_projects umgestellt, dann DROP TABLE | Done        |
+| saved_groups                       | Entfernt         | Entfernt                            | Bereits umgesetzt                | App-Queries entfernt, Tabelle gedroppt                        | Done        |
+| saved_group_images                 | Entfernt         | Entfernt                            | Bereits umgesetzt                | App-Queries entfernt, Tabelle gedroppt                        | Done        |
+| invite_share_events                | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| qr_invites                         | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| storage_cleanup_runs               | Aktiv            | Bleibt                              | Keine Änderung                   | Keine                                                         | P0          |
+| v_media_backfill_audit (View)      | Aktiv            | Optional später entfernen           | Bis Abschluss Cleanup behalten   | Keine                                                         | P3          |
 
 ## Konkrete Arbeitsblöcke
 
-| Block                         | Inhalt                                                                                                        | Ergebnis                                                                                    |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| P1: Legacy Tabellen entfernen | image_projects, saved_groups, saved_group_images                                                              | Erledigt                                                                                    |
-| P2: Legacy Spalten entfernen  | image_id in coordinate_corrections, dedup_hashes, media_metadata, share_set_items; media_item_id auf NOT NULL | Teilweise erledigt (dedup_hashes + share_set_items done; Upload-Contract weiter entkoppelt) |
-| P2: Naming Cleanup            | image_metadata -> media_metadata                                                                              | Erledigt (Tabellenname)                                                                     |
-| P3: Letzte Übergangsreste     | source_image_id in media_items und optional v_media_backfill_audit                                            | Finaler Post-Migration Zustand                                                              |
+| Block                         | Inhalt                                                                                                        | Ergebnis                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| P1: Legacy Tabellen entfernen | image_projects, saved_groups, saved_group_images                                                              | Erledigt                                                                             |
+| P2: Legacy Spalten entfernen  | image_id in coordinate_corrections, dedup_hashes, media_metadata, share_set_items; media_item_id auf NOT NULL | Erledigt (alle vier Tabellen auf media_item_id umgestellt, Legacy image_id entfernt) |
+| P2: Naming Cleanup            | image_metadata -> media_metadata                                                                              | Erledigt (Tabellenname)                                                              |
+| P3: Letzte Übergangsreste     | source_image_id in media_items und optional v_media_backfill_audit                                            | In Arbeit (cluster/viewport RPCs emittieren jetzt auch media_item_id)                |
 
 ## Freigabekriterien vor DROP
 

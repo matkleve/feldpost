@@ -6,6 +6,7 @@ export interface ClusterMergeRow {
   cluster_lng: number;
   image_count: number;
   image_id: string | null;
+  media_item_id?: string | null;
   direction: number | null;
   storage_path: string | null;
   thumbnail_path: string | null;
@@ -102,6 +103,7 @@ export class MapMarkerClusterMergeService {
         cluster_lng: wLng / totalCount,
         image_count: totalCount,
         image_id: isSingle ? rows[i].image_id : null,
+        media_item_id: isSingle ? (rows[i].media_item_id ?? rows[i].image_id) : null,
         direction: isSingle ? rows[i].direction : null,
         storage_path: isSingle ? rows[i].storage_path : null,
         thumbnail_path: isSingle ? rows[i].thumbnail_path : null,

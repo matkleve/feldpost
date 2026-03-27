@@ -58,7 +58,7 @@ export interface ProjectsImageRow {
 }
 
 export interface ProjectsImageMetadataRow {
-  image_id: string;
+  media_item_id: string;
   value_text: string;
   images: { project_id: string | null } | Array<{ project_id: string | null }> | null;
 }

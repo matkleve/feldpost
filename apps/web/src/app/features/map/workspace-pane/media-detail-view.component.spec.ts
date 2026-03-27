@@ -95,7 +95,7 @@ function buildFakeClient() {
   // For images.select('*').eq('id', ...).single()
   const imageSingleFn = vi.fn().mockResolvedValue({ data: MOCK_IMAGE, error: null });
 
-  // For media_metadata.select(...).eq('image_id', ...)
+  // For media_metadata.select(...).eq('media_item_id', ...)
   const metaSelectEqFn = vi.fn().mockResolvedValue({ data: [], error: null });
 
   // For projects.select('id, name').eq('organization_id', ...).order('name')
@@ -528,11 +528,11 @@ describe('ImageDetailViewComponent', () => {
       expect(fake.client.from).toHaveBeenCalledWith('media_metadata');
       expect(fake.upsertFn).toHaveBeenCalledWith(
         {
-          image_id: 'img-001',
+          media_item_id: 'media-001',
           metadata_key_id: 'mk-001',
           value_text: 'Commercial',
         },
-        { onConflict: 'image_id,metadata_key_id' },
+        { onConflict: 'media_item_id,metadata_key_id' },
       );
     });
 
