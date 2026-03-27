@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  computed,
   effect,
   inject,
   input,
@@ -13,17 +14,19 @@ import {
 import type { PhotoLoadState } from '../../../../core/photo-load.model';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-lightbox.component';
+import { UniversalMediaComponent } from '../../../../shared/media/universal-media.component';
+import type { MediaRenderState } from '../../../../core/media/media-renderer.types';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
   UiIconButtonGhostDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
-
 @Component({
   selector: 'app-media-detail-photo-viewer',
   standalone: true,
   imports: [
     PhotoLightboxComponent,
+    UniversalMediaComponent,
     UiIconButtonGhostDirective,
     UiButtonDirective,
     UiButtonPrimaryDirective,
@@ -54,6 +57,58 @@ export class MediaDetailPhotoViewerComponent implements AfterViewInit {
   readonly fileSelected = output<File>();
   readonly slotMeasured = output<{ widthRem: number; heightRem: number }>();
   readonly showLightbox = signal(false);
+
+  readonly currentViewerState = computed<MediaRenderState>(() => {
+    const fullResUrl = this.fullResUrl();
+    const thumbnailUrl = this.thumbnailUrl();
+
+    if (fullResUrl && this.fullResPreloaded()) {
+      return {
+        status: 'loaded',
+        url: fullResUrl,
+        resolvedTier: 'full',
+      };
+    }
+
+    if (thumbnailUrl && this.thumbState() === 'loaded') {
+      return {
+        status: 'loaded',
+        url: thumbnailUrl,
+        resolvedTier: 'mid',
+      };
+    }
+
+    if (this.thumbState() === 'error' && this.fullState() === 'error') {
+      return {
+        status: 'error',
+        reason: 'image-unavailable',
+      };
+    }
+
+    if (
+      this.isImageLoading() ||
+      this.thumbState() === 'loading' ||
+      this.fullState() === 'loading'
+    ) {
+      return { status: 'loading' };
+    }
+
+    return { status: 'placeholder' };
+  });
+
+  readonly usesThumbnailPreview = computed(
+    () =>
+      this.currentViewerState().status === 'loaded' &&
+      !this.fullResPreloaded() &&
+      this.canOpenLightbox(),
+  );
+
+  readonly viewerAltText = computed(() => {
+    const title = this.displayTitle().trim();
+    return title.length > 0
+      ? title
+      : this.t('workspace.imageDetail.photoPreview.alt', 'Photo preview');
+  });
 
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 

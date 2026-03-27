@@ -12,6 +12,8 @@ import { ChipComponent, type ChipVariant } from '../../shared/components/chip/ch
 import { getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
+import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
+import type { MediaRenderState } from '../../core/media/media-renderer.types';
 
 @Component({
   selector: 'app-upload-panel-item',
@@ -24,6 +26,7 @@ import { MediaOrchestratorService } from '../../core/media/media-orchestrator.se
     UiButtonPrimaryDirective,
     UiButtonGhostDirective,
     ChipComponent,
+    UniversalMediaComponent,
   ],
   templateUrl: './upload-panel-item.component.html',
   styleUrl: './upload-panel-item.component.scss',
@@ -41,6 +44,32 @@ export class UploadPanelItemComponent {
   readonly dismissFile = output<string>();
   readonly rowMainClick = output<UploadJob>();
   readonly rowMainKeydown = output<{ job: UploadJob; event: KeyboardEvent }>();
+
+  // Media renderer state
+  readonly fileIdentity = () => ({
+    mimeType: this.job().file.type,
+    fileName: this.job().file.name,
+  });
+
+  readonly mediaRenderState = (): MediaRenderState => {
+    const j = this.job();
+    if (j.thumbnailUrl) {
+      return {
+        status: 'loaded',
+        url: j.thumbnailUrl,
+        resolvedTier: 'inline',
+      };
+    } else if (
+      j.phase === 'converting_format' ||
+      j.phase === 'uploading' ||
+      j.phase === 'validating' ||
+      j.phase === 'parsing_exif'
+    ) {
+      return { status: 'loading' };
+    } else {
+      return { status: 'placeholder' };
+    }
+  };
 
   phaseToStatusClass(phase: UploadPhase): string {
     return phaseToStatusClass(phase);

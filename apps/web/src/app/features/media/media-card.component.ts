@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   OnChanges,
@@ -8,14 +9,19 @@ import {
   SimpleChanges,
   signal,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { PhotoLoadService } from '../../core/photo-load.service';
+import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
 import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
+import type { MediaRenderState } from '../../core/media/media-renderer.types';
+import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
 
 @Component({
   selector: 'app-media-card',
   standalone: true,
+  imports: [CommonModule, UniversalMediaComponent],
   templateUrl: './media-card.component.html',
   styleUrl: './media-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +29,7 @@ import type { CardVariant } from '../../shared/ui-primitives/card-variant.types'
 export class MediaCardComponent implements OnChanges {
   private readonly i18nService = inject(I18nService);
   private readonly photoLoadService = inject(PhotoLoadService);
+  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
   private thumbnailRequestId = 0;
 
   readonly item = input.required<ImageRecord>();
@@ -41,6 +48,36 @@ export class MediaCardComponent implements OnChanges {
     if (fallback.trim().length > 0) return fallback;
     return key;
   };
+
+  // Media renderer state
+  readonly fileIdentity = computed(() => {
+    const item = this.item();
+    const storagePath = item.storage_path;
+    const extension = storagePath?.split('.').pop()?.toLowerCase() ?? '';
+    return {
+      mimeType: this.getMimeTypeFromExtension(extension),
+      fileName: storagePath,
+      extension,
+    };
+  });
+
+  readonly mediaRenderState = computed((): MediaRenderState => {
+    if (this.thumbnailUrl().length > 0 && !this.thumbnailFailed()) {
+      return {
+        status: 'loaded',
+        url: this.thumbnailUrl(),
+        resolvedTier: 'small',
+      };
+    } else if (this.thumbnailFailed()) {
+      return {
+        status: 'icon-only',
+      };
+    } else {
+      return {
+        status: 'placeholder',
+      };
+    }
+  });
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['item']) {
@@ -165,5 +202,40 @@ export class MediaCardComponent implements OnChanges {
   private isLikelyImagePath(path: string): boolean {
     const extension = path.split('.').pop()?.toLowerCase() ?? '';
     return ['jpg', 'jpeg', 'png', 'webp', 'heic', 'gif', 'bmp'].includes(extension);
+  }
+
+  private getMimeTypeFromExtension(extension: string): string {
+    if (!extension) return 'application/octet-stream';
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      case 'gif':
+        return 'image/gif';
+      case 'bmp':
+        return 'image/bmp';
+      case 'mp4':
+        return 'video/mp4';
+      case 'mov':
+        return 'video/quicktime';
+      case 'avi':
+        return 'video/x-msvideo';
+      case 'mkv':
+        return 'video/x-matroska';
+      case 'webm':
+        return 'video/webm';
+      case 'm4v':
+        return 'video/x-m4v';
+      case 'pdf':
+        return 'application/pdf';
+      default:
+        return 'application/octet-stream';
+    }
   }
 }

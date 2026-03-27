@@ -5,18 +5,18 @@
   [class.media-card--medium]="variant() === 'medium'"
   [class.media-card--large]="variant() === 'large'"
 >
-  @if (thumbnailUrl().length > 0 && !thumbnailFailed()) {
-    <img
-      [src]="thumbnailUrl()"
-      [alt]="item().address_label || t('media.card.alt.missing', 'Image')"
-      (error)="onThumbnailError()"
-    />
-  } @else {
-    <div class="media-card__thumb-fallback" aria-hidden="true">
-      <span class="material-icons">{{ fallbackIcon }}</span>
-      <span class="media-card__thumb-fallback-label">{{ mediaTypeLabel || 'FILE' }}</span>
-    </div>
-  }
+  <app-universal-media
+    class="media-card__media"
+    [fileIdentity]="fileIdentity()"
+    [context]="'grid'"
+    [requestedTier]="variant() === 'row' ? 'inline' : 'mid2'"
+    [slotWidthRem]="variant() === 'row' ? 6 : 10"
+    [slotHeightRem]="variant() === 'row' ? 6 : 10"
+    [renderState]="mediaRenderState()"
+    [fit]="'cover'"
+    [minHeightRem]="variant() === 'row' ? 6 : 10"
+    [altText]="item().address_label || t('media.card.alt.missing', 'Image')"
+  ></app-universal-media>
 
   <div class="media-card__info">
     <p class="media-card__title">{{ item().address_label || t('media.page.title', 'Media') }}</p>

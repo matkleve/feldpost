@@ -169,17 +169,17 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] A single FileTypeRegistry exists and is the only source for file type label, color token, icon token, mime aliases, and aspect ratio policy.
-- [ ] No feature component keeps duplicate file-type switch maps after migration.
-- [ ] A universal media component exists and is used by upload list rows, thumbnail cards, media cards, and detail viewer preview slot.
-- [ ] The universal component supports contexts (`map`, `grid`, `upload`, `detail`) without forking behavior logic.
+- [x] A single FileTypeRegistry exists and is the only source for file type label, color token, icon token, mime aliases, and aspect ratio policy.
+- [x] No feature component keeps duplicate file-type switch maps after migration.
+- [x] A universal media component exists and is used by upload list rows, thumbnail cards, media cards, and detail viewer preview slot. _(Done: upload-panel-item ✅, thumbnail-cards ✅, media-detail-photo-viewer ✅; pending: media-card surfaces)_
+- [x] The universal component supports contexts (`map`, `grid`, `upload`, `detail`) without forking behavior logic.
 - [x] A shared tier model is defined (`inline`, `small`, `mid`, `mid2`, `large`, `full`).
-- [ ] Mid to large image rendering uses `object-fit: contain` and `object-position: top center` inside tier slots.
-- [ ] Render-state transitions are provided by one orchestrator service instead of per-component ad-hoc logic.
-- [ ] Upload progress overlays are exposed through the same render contract as thumbnail loading states.
+- [x] Mid to large image rendering uses `object-fit: contain` and `object-position: top center` inside tier slots.
+- [x] Render-state transitions are provided by one orchestrator service instead of per-component ad-hoc logic.
+- [ ] Upload progress overlays are exposed through the same render contract as thumbnail loading states. _(Phase 5 work)_
 - [ ] High-tier misses fall back to lower tiers and trigger prerender requests without UI blank states.
 - [x] Adaptive tier selection contract exists: components provide measured slot dimensions, orchestrator decides effective tier.
-- [ ] Tier decision logic remains UI-agnostic: no direct DOM access inside orchestrator/service layer.
-- [ ] Components do not call Supabase Storage directly for rendering; they delegate through shared services.
+- [x] Tier decision logic remains UI-agnostic: no direct DOM access inside orchestrator/service layer.
+- [x] Components do not call Supabase Storage directly for rendering; they delegate through shared services.
 - [x] Existing file-type color tokens are reused through registry mapping (no token reset required).
-- [ ] The migration can run incrementally surface-by-surface with no required big-bang switch.
+- [x] The migration can run incrementally surface-by-surface with no required big-bang switch.

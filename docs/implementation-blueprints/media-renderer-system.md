@@ -19,15 +19,15 @@ This blueprint follows the contract in `docs/element-specs/media-renderer-system
 
 ## Current Status (2026-03-27)
 
-| Phase | Status      | Notes                                                                                                                                |
-| ----- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 0     | Done        | Shared contracts and tier model defined in `media-renderer.types.ts`.                                                                |
-| 1     | Done        | `file-type-registry.ts` is live and consumed by upload feature paths.                                                                |
-| 2     | In progress | `media-orchestrator.service.ts` exists with fallback logic and adaptive slot-based tier selection API.                               |
-| 3     | In progress | `UniversalMediaComponent` scaffold created at `shared/media/universal-media.component.ts/.html/.scss`; consumer migrations pending.  |
-| 4     | In progress | Upload paths partially migrated; thumbnail card now forwards measured slot size (`rem`) to orchestrator for adaptive tier selection. |
-| 5     | In progress | Detail viewer now emits measured slot size (`rem`) and applies orchestrator-driven adaptive tier policy for full-res preload gating. |
-| 6     | Not started | Final cleanup and hardening pending.                                                                                                 |
+| Phase | Status      | Notes                                                                                                                                     |
+| ----- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | Done        | Shared contracts and tier model defined in `media-renderer.types.ts`.                                                                     |
+| 1     | Done        | `file-type-registry.ts` is live and consumed by upload feature paths.                                                                     |
+| 2     | Done        | `media-orchestrator.service.ts` exists with fallback logic and adaptive slot-based tier selection API.                                    |
+| 3     | Done        | `UniversalMediaComponent` complete; ✅ thumbnail-card, media-detail-photo-viewer, upload-panel-item, and media-card consumers integrated. |
+| 4     | Done        | Upload-panel-item surface fully migrated; slot measurement (inline/2.75rem) working; adaptive tier gating applied.                        |
+| 5     | Done        | Media-card surface fully migrated (4 variants: row/small/medium/large); adaptive tier selection (inline→mid2) applied.                    |
+| 6     | In progress | Final cleanup and hardening pending; all primary target surfaces migrated and tested; build validated zero regressions.                   |
 
 ## Phase Plan
 

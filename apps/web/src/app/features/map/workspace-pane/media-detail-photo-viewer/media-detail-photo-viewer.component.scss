@@ -15,10 +15,6 @@
   padding: 0;
   transition: box-shadow 120ms ease-out;
 
-  > * {
-    grid-area: 1 / 1;
-  }
-
   &:hover {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
   }
@@ -37,6 +33,46 @@
     box-shadow: none;
     outline: none;
   }
+}
+
+.detail-image-media {
+  display: block;
+  width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
+  max-width: 100%;
+}
+
+.detail-image-wrap ::ng-deep .universal-media__surface {
+  display: block;
+}
+
+.detail-image-wrap ::ng-deep .universal-media__slot {
+  width: 100%;
+  max-height: 33vh;
+  border-radius: var(--radius-lg);
+  border: 0;
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-subtle, var(--color-bg-surface)) 0%,
+    var(--color-bg-muted, var(--color-bg-base)) 100%
+  );
+}
+
+.detail-image-wrap ::ng-deep .universal-media__asset {
+  display: block;
+  max-height: 33vh;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.detail-image-wrap--thumb-preview ::ng-deep .universal-media__asset {
+  filter: blur(2px);
+  transform: scale(1.02);
+}
+
+.detail-image-wrap--static ::ng-deep .universal-media__asset {
+  filter: none;
+  transform: none;
 }
 
 .detail-image-placeholder {

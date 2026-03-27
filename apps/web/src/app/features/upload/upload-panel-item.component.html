@@ -17,17 +17,18 @@
     @if (job().thumbnailUrl) {
       <div class="upload-panel__thumbnail-container">
         <div class="upload-panel__thumbnail-helper">
-          <img
-            class="upload-panel__thumbnail"
-            [class.upload-panel__thumbnail--uploading]="
-              job().phase === 'uploading' ||
-              job().phase === 'validating' ||
-              job().phase === 'parsing_exif'
-            "
-            [src]="job().thumbnailUrl"
-            [alt]="''"
-            aria-hidden="true"
-          />
+          <app-universal-media
+            class="upload-panel__universal-media"
+            [fileIdentity]="fileIdentity()"
+            [context]="'upload'"
+            [requestedTier]="'inline'"
+            [slotWidthRem]="2.75"
+            [slotHeightRem]="2.75"
+            [renderState]="mediaRenderState()"
+            [fit]="'contain'"
+            [minHeightRem]="2.75"
+            [altText]="job().file.name"
+          ></app-universal-media>
         </div>
         <button
           uiButton
@@ -44,22 +45,36 @@
       </div>
     } @else if (job().phase === 'converting_format') {
       <div class="upload-panel__thumbnail-container">
-        <div
-          class="upload-panel__thumbnail upload-panel__thumbnail--skeleton"
-          aria-hidden="true"
-        ></div>
+        <div class="upload-panel__thumbnail-helper">
+          <app-universal-media
+            class="upload-panel__universal-media"
+            [fileIdentity]="fileIdentity()"
+            [context]="'upload'"
+            [requestedTier]="'inline'"
+            [slotWidthRem]="2.75"
+            [slotHeightRem]="2.75"
+            [renderState]="mediaRenderState()"
+            [fit]="'contain'"
+            [minHeightRem]="2.75"
+            [altText]="job().file.name"
+          ></app-universal-media>
+        </div>
       </div>
     } @else {
       <div class="upload-panel__thumbnail-container">
-        <div
-          class="upload-panel__thumbnail upload-panel__thumbnail--placeholder"
-          aria-hidden="true"
-        >
-          @if (documentFallbackLabel()) {
-            <span class="upload-panel__thumbnail-fallback">{{ documentFallbackLabel() }}</span>
-          } @else {
-            <span class="material-icons">image</span>
-          }
+        <div class="upload-panel__thumbnail-helper">
+          <app-universal-media
+            class="upload-panel__universal-media"
+            [fileIdentity]="fileIdentity()"
+            [context]="'upload'"
+            [requestedTier]="'inline'"
+            [slotWidthRem]="2.75"
+            [slotHeightRem]="2.75"
+            [renderState]="mediaRenderState()"
+            [fit]="'contain'"
+            [minHeightRem]="2.75"
+            [altText]="job().file.name"
+          ></app-universal-media>
         </div>
       </div>
     }

@@ -14,52 +14,21 @@
       type="button"
       [disabled]="!canOpenLightbox()"
       [class.detail-image-wrap--static]="!canOpenLightbox()"
+      [class.detail-image-wrap--thumb-preview]="usesThumbnailPreview()"
       [attr.aria-label]="
         t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')
       "
       (click)="openLightbox()"
     >
-      @if (!imageReady()) {
-        @if (thumbState() === 'error' && fullState() === 'error') {
-          <div class="detail-image-placeholder detail-image-placeholder--no-photo">
-            <span
-              class="detail-image-placeholder__icon detail-image-placeholder__icon--no-photo"
-              aria-hidden="true"
-            ></span>
-            <span class="visually-hidden">{{
-              t('workspace.imageDetail.imageUnavailable', 'Image unavailable')
-            }}</span>
-          </div>
-        } @else {
-          <div
-            class="detail-image-placeholder"
-            [class.detail-image-placeholder--loading]="isImageLoading()"
-          >
-            <span class="detail-image-placeholder__icon" aria-hidden="true"></span>
-          </div>
-        }
-      }
-
-      @if (
-        thumbnailUrl() && thumbState() === 'loaded' && (!fullResPreloaded() || !canOpenLightbox())
-      ) {
-        <img
-          class="detail-image"
-          [class.detail-image--thumb]="canOpenLightbox()"
-          [class.detail-image--preview]="!canOpenLightbox()"
-          [src]="thumbnailUrl()!"
-          [alt]="t('workspace.imageDetail.photoPreview.alt', 'Photo preview')"
-          aria-hidden="true"
-        />
-      }
-
-      @if (fullResUrl() && fullResPreloaded()) {
-        <img
-          class="detail-image detail-image--full detail-image--loaded"
-          [src]="fullResUrl()!"
-          [alt]="displayTitle()"
-        />
-      }
+      <app-universal-media
+        class="detail-image-media"
+        [context]="'detail'"
+        [requestedTier]="'full'"
+        [renderState]="currentViewerState()"
+        [altText]="viewerAltText()"
+        [fit]="'contain'"
+        [minHeightRem]="8"
+      />
     </button>
 
     <button
