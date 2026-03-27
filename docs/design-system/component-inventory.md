@@ -184,7 +184,7 @@ Building blocks:
   - export bar
 - Image detail composites:
   - image-detail-header
-  - image-detail-photo-viewer
+  - media-detail-photo-viewer
   - metadata-section
   - image-detail-inline-section
   - detail actions

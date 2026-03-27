@@ -34,6 +34,7 @@ import {
 } from '../../shared/ui-primitives/ui-primitives.directive';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -50,47 +51,54 @@ type UploadFileTypeChip = {
   order: number;
 };
 
-const FILE_TYPE_LOOKUP: Record<string, UploadFileTypeChip> = {
-  jpg: { type: 'JPEG', icon: 'image', variant: 'filetype-image', order: 1 },
-  jpeg: { type: 'JPEG', icon: 'image', variant: 'filetype-image', order: 1 },
-  png: { type: 'PNG', icon: 'image', variant: 'filetype-image', order: 2 },
-  heic: { type: 'HEIC', icon: 'image', variant: 'filetype-image', order: 3 },
-  heif: { type: 'HEIF', icon: 'image', variant: 'filetype-image', order: 4 },
-  webp: { type: 'WebP', icon: 'image', variant: 'filetype-image', order: 5 },
-  mp4: { type: 'MP4', icon: 'videocam', variant: 'filetype-video', order: 6 },
-  mov: { type: 'MOV', icon: 'videocam', variant: 'filetype-video', order: 7 },
-  webm: { type: 'WebM', icon: 'videocam', variant: 'filetype-video', order: 8 },
-  pdf: { type: 'PDF', icon: 'description', variant: 'filetype-document', order: 9 },
-  docx: { type: 'DOCX', icon: 'description', variant: 'filetype-document', order: 10 },
-  odt: { type: 'ODT', icon: 'description', variant: 'filetype-document', order: 11 },
-  odg: { type: 'ODG', icon: 'description', variant: 'filetype-document', order: 12 },
-  txt: { type: 'TXT', icon: 'description', variant: 'filetype-document', order: 13 },
-  xlsx: { type: 'XLSX', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 14 },
-  ods: { type: 'ODS', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 15 },
-  csv: { type: 'CSV', icon: 'table_chart', variant: 'filetype-spreadsheet', order: 16 },
-  pptx: { type: 'PPTX', icon: 'bar_chart', variant: 'filetype-presentation', order: 17 },
-  odp: { type: 'ODP', icon: 'bar_chart', variant: 'filetype-presentation', order: 18 },
-};
+const DEFAULT_FILE_TYPE_EXTENSIONS: ReadonlyArray<string> = [
+  'jpg',
+  'png',
+  'heic',
+  'webp',
+  'mp4',
+  'mov',
+  'webm',
+  'pdf',
+  'docx',
+  'odt',
+  'odg',
+  'txt',
+  'xlsx',
+  'ods',
+  'csv',
+  'pptx',
+  'odp',
+];
 
-const DEFAULT_FILE_TYPE_CHIPS: UploadFileTypeChip[] = [
-  FILE_TYPE_LOOKUP['jpg'],
-  FILE_TYPE_LOOKUP['png'],
-  FILE_TYPE_LOOKUP['heic'],
-  FILE_TYPE_LOOKUP['webp'],
-  FILE_TYPE_LOOKUP['mp4'],
-  FILE_TYPE_LOOKUP['mov'],
-  FILE_TYPE_LOOKUP['webm'],
-  FILE_TYPE_LOOKUP['pdf'],
-  FILE_TYPE_LOOKUP['docx'],
-  FILE_TYPE_LOOKUP['odt'],
-  FILE_TYPE_LOOKUP['odg'],
-  FILE_TYPE_LOOKUP['txt'],
-  FILE_TYPE_LOOKUP['xlsx'],
-  FILE_TYPE_LOOKUP['ods'],
-  FILE_TYPE_LOOKUP['csv'],
-  FILE_TYPE_LOOKUP['pptx'],
-  FILE_TYPE_LOOKUP['odp'],
-].filter((chip): chip is UploadFileTypeChip => !!chip);
+const DEFAULT_FILE_TYPE_CHIPS: ReadonlyArray<UploadFileTypeChip> = DEFAULT_FILE_TYPE_EXTENSIONS.map(
+  (ext, index) => {
+    const definition = resolveFileType({ extension: ext });
+    return {
+      type: fileTypeBadge({ extension: ext }) ?? ext.toUpperCase(),
+      icon: definition.category === 'unknown' ? 'description' : definition.icon,
+      variant: toChipVariant(definition.category),
+      order: index + 1,
+    };
+  },
+);
+
+function toChipVariant(category: string): ChipVariant {
+  switch (category) {
+    case 'image':
+      return 'filetype-image';
+    case 'video':
+      return 'filetype-video';
+    case 'spreadsheet':
+      return 'filetype-spreadsheet';
+    case 'presentation':
+      return 'filetype-presentation';
+    case 'document':
+      return 'filetype-document';
+    default:
+      return 'default';
+  }
+}
 
 @Component({
   selector: 'app-upload-panel',

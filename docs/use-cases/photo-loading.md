@@ -1,6 +1,6 @@
 # Photo Loading — Use Cases & Interaction Scenarios
 
-> **Related specs:** [photo-marker](../element-specs/photo-marker.md), [thumbnail-card](../element-specs/thumbnail-card.md), [thumbnail-grid](../element-specs/thumbnail-grid.md), [image-detail-view](../element-specs/image-detail-view.md)
+> **Related specs:** [photo-marker](../element-specs/photo-marker.md), [thumbnail-card](../element-specs/thumbnail-card.md), [thumbnail-grid](../element-specs/thumbnail-grid.md), [image-detail-view](../element-specs/media-detail-view.md)
 > **Storage docs:** Supabase Storage Image Transformations (signed URLs with `transform` options)
 
 ---

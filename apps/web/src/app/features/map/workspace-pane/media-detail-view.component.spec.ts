@@ -1,5 +1,5 @@
 /**
- * ImageDetailViewComponent — inline editing tests.
+ * MediaDetailViewComponent — inline editing tests.
  *
  * Strategy:
  *  - SupabaseService is faked with a chainable client mock.
@@ -12,7 +12,7 @@ import { TestBed } from '@angular/core/testing';
 import { ComponentRef, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
-  ImageDetailViewComponent,
+  MediaDetailViewComponent,
   ImageRecord,
   MetadataEntry,
 } from './media-detail-view.component';
@@ -237,7 +237,7 @@ function setup() {
   };
 
   TestBed.configureTestingModule({
-    imports: [ImageDetailViewComponent],
+    imports: [MediaDetailViewComponent],
     schemas: [NO_ERRORS_SCHEMA],
     providers: [
       { provide: SupabaseService, useValue: { client: fake.client } },
@@ -245,9 +245,9 @@ function setup() {
     ],
   });
 
-  const fixture = TestBed.createComponent(ImageDetailViewComponent);
+  const fixture = TestBed.createComponent(MediaDetailViewComponent);
   const component = fixture.componentInstance;
-  const ref = fixture.componentRef as ComponentRef<ImageDetailViewComponent>;
+  const ref = fixture.componentRef as ComponentRef<MediaDetailViewComponent>;
 
   // Trigger initial change detection without setting imageId (stays null).
   fixture.detectChanges();
@@ -255,7 +255,7 @@ function setup() {
   return { component, fixture, ref, fake, fakeGeocoding };
 }
 
-function setImageId(component: ImageDetailViewComponent, id: string | null): void {
+function setImageId(component: MediaDetailViewComponent, id: string | null): void {
   (component as unknown as { imageId: ReturnType<typeof signal<string | null>> }).imageId = signal<
     string | null
   >(id);
@@ -263,7 +263,7 @@ function setImageId(component: ImageDetailViewComponent, id: string | null): voi
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-describe('ImageDetailViewComponent', () => {
+describe('MediaDetailViewComponent', () => {
   // ── Initial state ────────────────────────────────────────────────────────
 
   describe('initial state', () => {
@@ -1138,7 +1138,7 @@ function setupReplace() {
   };
 
   TestBed.configureTestingModule({
-    imports: [ImageDetailViewComponent],
+    imports: [MediaDetailViewComponent],
     schemas: [NO_ERRORS_SCHEMA],
     providers: [
       { provide: SupabaseService, useValue: { client } },
@@ -1150,9 +1150,9 @@ function setupReplace() {
     ],
   });
 
-  const fixture = TestBed.createComponent(ImageDetailViewComponent);
+  const fixture = TestBed.createComponent(MediaDetailViewComponent);
   const component = fixture.componentInstance;
-  const ref = fixture.componentRef as ComponentRef<ImageDetailViewComponent>;
+  const ref = fixture.componentRef as ComponentRef<MediaDetailViewComponent>;
   setImageId(component, MOCK_IMAGE.id);
   fixture.detectChanges();
 
@@ -1185,7 +1185,7 @@ function createFileEvent(file: File): Event {
   return { target: input } as unknown as Event;
 }
 
-describe('ImageDetailViewComponent — IE-10 Replace Photo', () => {
+describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
   // ── Delegation ────────────────────────────────────────────────────────────
 
   it('delegates to uploadManager.replaceFile for images with storage_path', () => {

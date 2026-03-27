@@ -1,11 +1,11 @@
 # Photo Load Service
 
-> **Related specs:** [media-renderer-system](media-renderer-system.md), [photo-marker](photo-marker.md), [thumbnail-card](thumbnail-card.md), [image-detail-photo-viewer](image-detail-photo-viewer.md), [image-detail-view](image-detail-view.md)
+> **Related specs:** [media-renderer-system](media-renderer-system.md), [photo-marker](photo-marker.md), [thumbnail-card](thumbnail-card.md), [media-detail-photo-viewer](media-detail-photo-viewer.md), [image-detail-view](media-detail-view.md)
 > **Use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
 ## What It Is
 
-A centralized Angular service that owns all photo signed-URL generation, caching, preloading, and loading-state management. Every surface that displays a photo (map markers, thumbnail cards, detail view, lightbox) uses this service instead of calling Supabase Storage directly. It replaces the scattered signing logic currently duplicated across `WorkspaceViewService`, `MapShellComponent`, and `ImageDetailViewComponent`.
+A centralized Angular service that owns all photo signed-URL generation, caching, preloading, and loading-state management. Every surface that displays a photo (map markers, thumbnail cards, detail view, lightbox) uses this service instead of calling Supabase Storage directly. It replaces the scattered signing logic currently duplicated across `WorkspaceViewService`, `MapShellComponent`, and `MediaDetailViewComponent`.
 
 ## What It Looks Like
 
@@ -47,7 +47,7 @@ stateDiagram-v2
 
 - **Scope**: `providedIn: 'root'` singleton
 - **File**: `core/photo-load.service.ts`
-- **Used by**: `MapShellComponent`, `WorkspaceViewService`, `ThumbnailCardComponent`, `ImageDetailViewComponent`, `PhotoLightboxComponent`, `marker-factory.ts`
+- **Used by**: `MapShellComponent`, `WorkspaceViewService`, `ThumbnailCardComponent`, `MediaDetailViewComponent`, `PhotoLightboxComponent`, `marker-factory.ts`
 
 ## Actions
 
@@ -104,7 +104,7 @@ flowchart LR
 
     MS[MapShellComponent] -- "getSignedUrl(path, marker)<br/>+ preload()" --> PLS
     WVS[WorkspaceViewService] -- "batchSign(images, thumb)" --> PLS
-    IDV[ImageDetailViewComponent] -- "getSignedUrl(path, thumb)<br/>getSignedUrl(path, full)" --> PLS
+    IDV[MediaDetailViewComponent] -- "getSignedUrl(path, thumb)<br/>getSignedUrl(path, full)" --> PLS
     UMS[UploadManagerService] -- "setLocalUrl()<br/>revokeLocalUrl()" --> PLS
 
     MS -- "passes URL to" --> MF[marker-factory.ts]
@@ -117,7 +117,7 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     actor User
-    participant Detail as ImageDetailViewComponent
+    participant Detail as MediaDetailViewComponent
     participant PhotoLoad as PhotoLoadService
     participant Supabase as Supabase Storage
 
@@ -179,7 +179,7 @@ All components that currently sign URLs directly will `inject(PhotoLoadService)`
 
 - **`WorkspaceViewService`** — replace `batchSignThumbnails()` internals with `photoLoad.batchSign(images, 'thumb')`
 - **`MapShellComponent`** — replace `lazyLoadThumbnail()` internals with `photoLoad.getSignedUrl(path, 'marker')` + `photoLoad.preload(url)`
-- **`ImageDetailViewComponent`** — replace `loadSignedUrls()` with `photoLoad.getSignedUrl(path, 'thumb')` + `photoLoad.getSignedUrl(path, 'full')`
+- **`MediaDetailViewComponent`** — replace `loadSignedUrls()` with `photoLoad.getSignedUrl(path, 'thumb')` + `photoLoad.getSignedUrl(path, 'full')`
 - **`PhotoLightboxComponent`** — receive URL from parent (no change), but parent uses service to sign
 - **`marker-factory.ts`** — no direct injection (pure function), but receives pre-signed URLs from `MapShellComponent`
 
@@ -205,7 +205,7 @@ export const PHOTO_PLACEHOLDER_ICON: string;
 export const PHOTO_NO_PHOTO_ICON: string;
 ```
 
-These replace the inline SVG data-URIs currently duplicated in `thumbnail-card.component.scss`, `map-shell.component.scss`, and `image-detail-view.component.scss`.
+These replace the inline SVG data-URIs currently duplicated in `thumbnail-card.component.scss`, `map-shell.component.scss`, and `media-detail-view.component.scss`.
 
 ### Before / After Architecture
 
@@ -215,7 +215,7 @@ flowchart TB
         direction TB
         MS1[MapShellComponent] -- direct --> SB1[(Supabase Storage)]
         WVS1[WorkspaceViewService] -- direct --> SB1
-        IDV1[ImageDetailViewComponent] -- direct --> SB1
+        IDV1[MediaDetailViewComponent] -- direct --> SB1
         Note1["Each manages its own cache,<br/>state signals, staleness,<br/>and placeholder icons"]
     end
 
@@ -223,7 +223,7 @@ flowchart TB
         direction TB
         MS2[MapShellComponent] --> PLS2[PhotoLoadService]
         WVS2[WorkspaceViewService] --> PLS2
-        IDV2[ImageDetailViewComponent] --> PLS2
+        IDV2[MediaDetailViewComponent] --> PLS2
         UMS2[UploadManagerService] --> PLS2
         PLS2 -- "single point of<br/>contact" --> SB2[(Supabase Storage)]
         Note2["One cache, one state model,<br/>one set of placeholder icons,<br/>one staleness strategy"]

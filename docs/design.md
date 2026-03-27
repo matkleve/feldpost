@@ -29,7 +29,7 @@ Archived design/components/ files have been superseded by their element specs:
 - marker → `docs/element-specs/photo-marker.md`
 - filter-panel → `docs/element-specs/filter-panel.md`
 - workspace-pane → `docs/element-specs/workspace-pane.md`
-- image-detail → `docs/element-specs/image-detail-view.md`
+- image-detail → `docs/element-specs/media-detail-view.md`
 - upload-flow → `docs/element-specs/upload-panel.md` + `upload-button-zone.md`
 - radius-selection → `docs/element-specs/radius-selection.md`
 

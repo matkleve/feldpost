@@ -1,4 +1,4 @@
-<!-- ImageDetailViewComponent - full detail view coordinator. -->
+<!-- MediaDetailViewComponent - full detail view coordinator. -->
 
 @if (error() && !loading()) {
   <div class="detail-error" role="alert">
@@ -54,7 +54,7 @@
     />
 
     <div class="detail-scroll">
-      <app-image-detail-photo-viewer
+      <app-media-detail-photo-viewer
         [hasPhoto]="hasPhoto()"
         [canOpenLightbox]="canOpenLightbox()"
         [imageReady]="imageReady()"
@@ -68,6 +68,7 @@
         [replacing]="replacing()"
         [replaceError]="replaceError()"
         [acceptTypes]="acceptTypes"
+        (slotMeasured)="onDetailSlotMeasured($event)"
         (fileSelected)="onFileSelected($event)"
       />
 

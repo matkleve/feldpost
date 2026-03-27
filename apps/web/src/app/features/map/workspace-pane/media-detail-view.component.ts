@@ -27,6 +27,8 @@ import {
   PHOTO_PLACEHOLDER_ICON,
   PhotoLoadService,
 } from '../../../core/photo-load.service';
+import { MediaOrchestratorService } from '../../../core/media/media-orchestrator.service';
+import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { PhotoLoadState } from '../../../core/photo-load.model';
 import { ForwardGeocodeResult } from '../../../core/geocoding.service';
 import {
@@ -54,7 +56,7 @@ import {
   resolveProjectName,
 } from './media-detail-view.utils';
 import { ImageDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
-import { ImageDetailPhotoViewerComponent } from './media-detail-photo-viewer/media-detail-photo-viewer.component';
+import { MediaDetailPhotoViewerComponent } from './media-detail-photo-viewer/media-detail-photo-viewer.component';
 import { ImageDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import { ImageDetailDataFacade } from './media-detail-data.facade';
@@ -67,7 +69,7 @@ import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
 @Component({
-  selector: 'app-image-detail-view',
+  selector: 'app-media-detail-view',
   standalone: true,
   imports: [
     ConfirmDialogComponent,
@@ -75,7 +77,7 @@ export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
     MetadataSectionComponent,
     DetailActionsComponent,
     ImageDetailHeaderComponent,
-    ImageDetailPhotoViewerComponent,
+    MediaDetailPhotoViewerComponent,
     ImageDetailInlineSectionComponent,
   ],
   templateUrl: './media-detail-view.component.html',
@@ -85,7 +87,7 @@ export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
     '[style.--no-photo-icon]': 'noPhotoIconUrl',
   },
 })
-export class ImageDetailViewComponent implements OnDestroy {
+export class MediaDetailViewComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -97,6 +99,7 @@ export class ImageDetailViewComponent implements OnDestroy {
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
   private readonly photoLoad = inject(PhotoLoadService);
+  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
 
@@ -123,6 +126,8 @@ export class ImageDetailViewComponent implements OnDestroy {
   readonly thumbnailUrl = signal<string | null>(null);
   readonly allMetadataKeyNames = signal<string[]>([]);
   readonly fullResPreloaded = signal(false);
+  readonly detailSlotWidthRem = signal<number | null>(null);
+  readonly detailSlotHeightRem = signal<number | null>(null);
   readonly replaceError = signal<string | null>(null);
   readonly editDate = signal('');
   readonly editTime = signal('');
@@ -236,6 +241,17 @@ export class ImageDetailViewComponent implements OnDestroy {
     );
   });
 
+  readonly requestedDetailTier = computed<MediaTier>(() => 'full');
+
+  readonly effectiveDetailTier = computed<MediaTier>(() =>
+    this.mediaOrchestrator.selectRequestedTierForSlot({
+      requestedTier: this.requestedDetailTier(),
+      slotWidthRem: this.detailSlotWidthRem(),
+      slotHeightRem: this.detailSlotHeightRem(),
+      context: 'detail',
+    }),
+  );
+
   readonly infoChips = computed(() =>
     buildInfoChips({
       image: this.image(),
@@ -283,6 +299,7 @@ export class ImageDetailViewComponent implements OnDestroy {
     computed: {
       mediaType: () => this.mediaType(),
       mediaMimeType: () => this.mediaMimeType(),
+      detailTier: () => this.effectiveDetailTier(),
     },
   });
 
@@ -439,6 +456,11 @@ export class ImageDetailViewComponent implements OnDestroy {
     if (!img?.storage_path) return;
     const signal = this.abortController?.signal ?? new AbortController().signal;
     await this.dataFacade.loadSignedUrls(img, signal);
+  }
+
+  onDetailSlotMeasured(slot: { widthRem: number; heightRem: number }): void {
+    this.detailSlotWidthRem.set(slot.widthRem);
+    this.detailSlotHeightRem.set(slot.heightRem);
   }
 
   close(): void {

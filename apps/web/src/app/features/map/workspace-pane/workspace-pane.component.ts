@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { WorkspacePaneHeaderComponent } from './workspace-pane-header/workspace-pane-header.component';
 import { WorkspacePaneToolbarComponent } from './workspace-pane-toolbar/workspace-pane-toolbar.component';
 import { ThumbnailGridComponent } from './thumbnail-grid.component';
-import { ImageDetailViewComponent } from './media-detail-view.component';
+import { MediaDetailViewComponent } from './media-detail-view.component';
 import { WorkspacePaneFooterComponent } from './workspace-pane-footer/workspace-pane-footer.component';
 import { UploadPanelComponent, type ImageUploadedEvent } from '../../upload/upload-panel.component';
 import { MaxWidthContainerComponent } from '../../../shared/containers';
@@ -19,7 +19,7 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane-host.port';
     WorkspacePaneHeaderComponent,
     WorkspacePaneToolbarComponent,
     ThumbnailGridComponent,
-    ImageDetailViewComponent,
+    MediaDetailViewComponent,
     WorkspacePaneFooterComponent,
     UploadPanelComponent,
   ],

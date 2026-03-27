@@ -1,7 +1,18 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import type { ThumbnailSizePreset, WorkspaceImage } from '../../../../core/workspace-view.types';
-import { PHOTO_PLACEHOLDER_ICON, PHOTO_NO_PHOTO_ICON } from '../../../../core/photo-load.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { MediaOrchestratorService } from '../../../../core/media/media-orchestrator.service';
+import type { MediaTier } from '../../../../core/media/media-renderer.types';
 import { ThumbnailCardMediaComponent } from './thumbnail-card-media/thumbnail-card-media.component';
 
 export interface ThumbnailCardInteraction {
@@ -34,6 +45,10 @@ export interface ThumbnailCardHoverEvent {
         [imgLoading]="imgLoading()"
         [isLoading]="isLoading()"
         [imageReady]="imageReady()"
+        [requestedTier]="requestedTier()"
+        [slotWidthRem]="slotWidthRem()"
+        [slotHeightRem]="slotHeightRem()"
+        [rowMode]="viewMode() === 'row'"
         [altText]="t('workspace.thumbnailCard.photoThumbnail.alt', 'Photo thumbnail')"
         (imgLoaded)="onImgLoad()"
         (imgError)="onImgError()"
@@ -88,15 +103,16 @@ export interface ThumbnailCardHoverEvent {
   `,
   styleUrl: './thumbnail-card.component.scss',
   host: {
-    '[style.--placeholder-icon]': 'placeholderIconUrl',
-    '[style.--no-photo-icon]': 'noPhotoIconUrl',
+    '[attr.data-tier-requested]': 'requestedTier()',
+    '[attr.data-tier-effective]': 'effectiveTier()',
   },
 })
-export class ThumbnailCardComponent {
+export class ThumbnailCardComponent implements AfterViewInit {
   private readonly i18nService = inject(I18nService);
+  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
+  private readonly hostElement = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
-  readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
-  readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
   readonly image = input.required<WorkspaceImage>();
   readonly viewMode = input<ThumbnailSizePreset>('medium');
   readonly selected = input(false);
@@ -148,6 +164,46 @@ export class ThumbnailCardComponent {
   readonly imageReady = computed(
     () => !!this.image().signedThumbnailUrl && !this.imgLoading() && !this.imgErrored(),
   );
+  readonly slotWidthRem = signal<number | null>(null);
+  readonly slotHeightRem = signal<number | null>(null);
+  readonly requestedTier = computed<MediaTier>(() =>
+    this.requestedTierForViewMode(this.viewMode()),
+  );
+  readonly effectiveTier = computed<MediaTier>(() =>
+    this.mediaOrchestrator.selectRequestedTierForSlot({
+      requestedTier: this.requestedTier(),
+      slotWidthRem: this.slotWidthRem(),
+      slotHeightRem: this.slotHeightRem(),
+      context: 'grid',
+    }),
+  );
+
+  private resizeObserver: ResizeObserver | null = null;
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.resizeObserver?.disconnect();
+      this.resizeObserver = null;
+    });
+  }
+
+  ngAfterViewInit(): void {
+    const element = this.hostElement.nativeElement;
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) {
+          return;
+        }
+        this.updateSlotRem(entry.contentRect.width, entry.contentRect.height);
+      });
+      this.resizeObserver.observe(element);
+    }
+
+    const rect = element.getBoundingClientRect();
+    this.updateSlotRem(rect.width, rect.height);
+  }
 
   onCardClick(event: MouseEvent): void {
     if (event.ctrlKey || event.metaKey) {
@@ -193,5 +249,40 @@ export class ThumbnailCardComponent {
 
   onHoverEnd(): void {
     this.hoverEnded.emit(this.image().id);
+  }
+
+  private requestedTierForViewMode(viewMode: ThumbnailSizePreset): MediaTier {
+    switch (viewMode) {
+      case 'row':
+        return 'inline';
+      case 'small':
+        return 'small';
+      case 'medium':
+        return 'mid';
+      case 'large':
+        return 'mid2';
+      default:
+        return 'small';
+    }
+  }
+
+  private updateSlotRem(widthPx: number, heightPx: number): void {
+    if (widthPx <= 0 || heightPx <= 0) {
+      return;
+    }
+
+    const rootSizePx = this.rootFontSizePx();
+    this.slotWidthRem.set(widthPx / rootSizePx);
+    this.slotHeightRem.set(heightPx / rootSizePx);
+  }
+
+  private rootFontSizePx(): number {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return 16;
+    }
+
+    const rootSize = getComputedStyle(document.documentElement).fontSize;
+    const parsed = Number.parseFloat(rootSize);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 16;
   }
 }

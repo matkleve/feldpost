@@ -30,7 +30,7 @@ From [layout-width-breakpoint-scale.md](./layout-width-breakpoint-scale.md):
 - `max-width: 767px` -> `max-width: 47.9375rem`
 - `min-width: 768px` -> `min-width: 48rem`
 
-2. `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.scss`
+2. `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.scss`
 
 - all `max-width: 767px` breakpoints -> `max-width: 47.9375rem`
 

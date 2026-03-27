@@ -1,6 +1,6 @@
 # Media Renderer System
 
-> **Related specs:** [photo-load-service](photo-load-service.md), [upload-manager](upload-manager.md), [upload-panel](upload-panel.md), [thumbnail-card](thumbnail-card.md), [image-detail-photo-viewer](image-detail-photo-viewer.md), [file-type-chips](file-type-chips.md)
+> **Related specs:** [photo-load-service](photo-load-service.md), [upload-manager](upload-manager.md), [upload-panel](upload-panel.md), [thumbnail-card](thumbnail-card.md), [media-detail-photo-viewer](media-detail-photo-viewer.md), [file-type-chips](file-type-chips.md)
 
 ## What It Is
 
@@ -19,14 +19,15 @@ This is a mixed system spec (service plus UI contract). Visual output is a frame
 
 ## Actions
 
-| #   | Trigger                                                       | System Response                                                                                                     | Output                        |
-| --- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| 1   | A component requests media render for `{ fileRef, tier }`     | Resolve file type from registry and derive color, icon, and aspect ratio                                            | Render config object          |
-| 2   | Tier requests thumbnail asset                                 | Orchestrator returns state chain `placeholder -> icon -> loading -> loaded` with fallback to lower tier when needed | `MediaRenderState` update     |
-| 3   | Upload item is in progress                                    | Orchestrator exposes upload progress overlay state through the same API                                             | Overlay metadata              |
-| 4   | High tier requested but missing                               | Service requests prerender generation and keeps lower-tier asset visible                                            | Deferred upgrade state        |
-| 5   | File is updated/replaced                                      | Service invalidates caches and emits fresh state                                                                    | Invalidation event            |
-| 6   | Consumer switches context (`map`, `grid`, `upload`, `detail`) | Same component API is reused; only style variants differ                                                            | Stable markup + variant class |
+| #   | Trigger                                                       | System Response                                                                                                                | Output                        |
+| --- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| 1   | A component requests media render for `{ fileRef, tier }`     | Resolve file type from registry and derive color, icon, and aspect ratio                                                       | Render config object          |
+| 2   | Tier requests thumbnail asset                                 | Orchestrator returns state chain `placeholder -> icon -> loading -> loaded` with fallback to lower tier when needed            | `MediaRenderState` update     |
+| 3   | Upload item is in progress                                    | Orchestrator exposes upload progress overlay state through the same API                                                        | Overlay metadata              |
+| 4   | High tier requested but missing                               | Service requests prerender generation and keeps lower-tier asset visible                                                       | Deferred upgrade state        |
+| 5   | File is updated/replaced                                      | Service invalidates caches and emits fresh state                                                                               | Invalidation event            |
+| 6   | Consumer switches context (`map`, `grid`, `upload`, `detail`) | Same component API is reused; only style variants differ                                                                       | Stable markup + variant class |
+| 7   | Component slot size changes                                   | Component forwards slot width/height in `rem` to orchestrator; orchestrator selects effective tier and clamps to requested cap | Adaptive tier selection       |
 
 ## Component Hierarchy
 
@@ -88,6 +89,8 @@ flowchart TD
 | `renderState`   | `Signal<MediaRenderState>`           | `placeholder` | Layer currently rendered by the universal component |
 | `requestedTier` | `MediaTier`                          | `small`       | Target quality and slot policy                      |
 | `resolvedTier`  | `MediaTier`                          | `small`       | Actual tier currently available after fallback      |
+| `slotWidthRem`  | `number \| null`                     | `null`        | Measured render slot width in `rem` from component  |
+| `slotHeightRem` | `number \| null`                     | `null`        | Measured render slot height in `rem` from component |
 | `uploadOverlay` | `Signal<UploadOverlayState           | null>`        | `null`                                              | Upload badge/progress on top of media tile |
 
 ## File Map
@@ -116,6 +119,8 @@ flowchart TD
   - `fileRef: FeldpostFile | UploadJob`
   - `tier: MediaTier`
   - `context: 'map' | 'grid' | 'upload' | 'detail'`
+  - `slotWidthRem?: number | null`
+  - `slotHeightRem?: number | null`
 - Universal component outputs:
   - `assetReady`
   - `assetFailed`
@@ -125,6 +130,7 @@ flowchart TD
 
 - Subscribe to orchestrator render state stream per `fileRef + tier`
 - Subscribe to upload state stream when `fileRef` is an in-progress upload job
+- Re-run tier selection when component slot size changes (for example via `ResizeObserver`)
 - Unsubscribe through Angular signal lifecycle / destroy hooks (no manual leak paths)
 
 ### Supabase Calls
@@ -143,8 +149,10 @@ sequenceDiagram
   participant PhotoLoad as PhotoLoadService
   participant Upload as UploadManagerService
 
-  Consumer->>Universal: bind(fileRef, tier, context)
-  Universal->>Orchestrator: requestRenderState(fileRef, tier)
+  Consumer->>Universal: bind(fileRef, tier, context, slotWidthRem, slotHeightRem)
+  Universal->>Orchestrator: selectRequestedTierForSlot({tier, slotWidthRem, slotHeightRem, context})
+  Orchestrator-->>Universal: effectiveTier
+  Universal->>Orchestrator: requestRenderState(fileRef, effectiveTier)
   Orchestrator->>Registry: resolve(fileRef.mime, fileRef.ext)
   Registry-->>Orchestrator: type definition
 
@@ -165,11 +173,13 @@ sequenceDiagram
 - [ ] No feature component keeps duplicate file-type switch maps after migration.
 - [ ] A universal media component exists and is used by upload list rows, thumbnail cards, media cards, and detail viewer preview slot.
 - [ ] The universal component supports contexts (`map`, `grid`, `upload`, `detail`) without forking behavior logic.
-- [ ] A shared tier model is defined (`inline`, `small`, `mid`, `mid2`, `large`, `full`).
+- [x] A shared tier model is defined (`inline`, `small`, `mid`, `mid2`, `large`, `full`).
 - [ ] Mid to large image rendering uses `object-fit: contain` and `object-position: top center` inside tier slots.
 - [ ] Render-state transitions are provided by one orchestrator service instead of per-component ad-hoc logic.
 - [ ] Upload progress overlays are exposed through the same render contract as thumbnail loading states.
 - [ ] High-tier misses fall back to lower tiers and trigger prerender requests without UI blank states.
+- [x] Adaptive tier selection contract exists: components provide measured slot dimensions, orchestrator decides effective tier.
+- [ ] Tier decision logic remains UI-agnostic: no direct DOM access inside orchestrator/service layer.
 - [ ] Components do not call Supabase Storage directly for rendering; they delegate through shared services.
-- [ ] Existing file-type color tokens are reused through registry mapping (no token reset required).
+- [x] Existing file-type color tokens are reused through registry mapping (no token reset required).
 - [ ] The migration can run incrementally surface-by-surface with no required big-bang switch.

@@ -1,6 +1,6 @@
 # Image Detail — Inline Editing
 
-> **Parent spec:** [image-detail-view](image-detail-view.md)
+> **Parent spec:** [image-detail-view](media-detail-view.md)
 > **Editing use cases:** [use-cases/image-editing.md](../use-cases/image-editing.md)
 
 ## What It Is
@@ -15,7 +15,7 @@ Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-t
 
 ## Where It Lives
 
-- **Parent**: `ImageDetailViewComponent` — DetailsSection and LocationSection
+- **Parent**: `MediaDetailViewComponent` — DetailsSection and LocationSection
 - **Appears when**: Image detail view is open and image data is loaded
 
 ## Actions

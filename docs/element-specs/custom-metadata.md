@@ -1,6 +1,6 @@
 # Custom Metadata System
 
-> **Parent spec:** [image-detail-view](image-detail-view.md)
+> **Parent spec:** [image-detail-view](media-detail-view.md)
 > **Use cases:** [image-editing](../use-cases/image-editing.md) (IE-4, IE-5, IE-6)
 > **Database:** [database-schema](../database-schema.md) — `metadata_keys`, `image_metadata`
 
@@ -15,7 +15,7 @@ A section labeled **"Metadata"** (dd-section-label style) inside the Image Detai
 ## Where It Lives
 
 - **Route**: Any route with Image Detail View open
-- **Parent**: `ImageDetailViewComponent` in `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.ts`
+- **Parent**: `MediaDetailViewComponent` in `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`
 - **Appears when**: Image detail view is open and image data is loaded
 
 ## Actions

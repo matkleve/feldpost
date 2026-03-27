@@ -1,0 +1,49 @@
+@if (interactive()) {
+  <button class="universal-media__surface" type="button" (click)="onClick()">
+    <ng-container *ngTemplateOutlet="slotTemplate" />
+  </button>
+} @else {
+  <div class="universal-media__surface">
+    <ng-container *ngTemplateOutlet="slotTemplate" />
+  </div>
+}
+
+<ng-template #slotTemplate>
+  <div
+    class="universal-media__slot"
+    [attr.data-tier]="effectiveTier()"
+    [attr.data-context]="context()"
+    [style.min-height.rem]="minHeightRem()"
+  >
+    @if (renderState().status === 'loaded' && loadedUrl()) {
+      <img
+        class="universal-media__asset universal-media__asset--loaded"
+        [src]="loadedUrl()!"
+        [alt]="altText()"
+        [style.object-fit]="fit()"
+        (load)="onAssetLoaded()"
+        (error)="onAssetError()"
+      />
+    } @else if (renderState().status === 'loading') {
+      <div class="universal-media__layer universal-media__layer--loading" aria-hidden="true">
+        <span class="material-icons">hourglass_top</span>
+      </div>
+    } @else if (renderState().status === 'error') {
+      <div class="universal-media__layer universal-media__layer--error" aria-hidden="true">
+        <span class="material-icons">broken_image</span>
+      </div>
+    } @else {
+      <div class="universal-media__layer universal-media__layer--placeholder" aria-hidden="true">
+        <span class="material-icons">{{ icon() }}</span>
+      </div>
+    }
+
+    @if (badge()) {
+      <span class="universal-media__badge">{{ badge() }}</span>
+    }
+
+    @if (uploadOverlay()) {
+      <span class="universal-media__upload-overlay" aria-hidden="true"></span>
+    }
+  </div>
+</ng-template>

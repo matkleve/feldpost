@@ -91,7 +91,7 @@ sequenceDiagram
 graph TB
     subgraph Consumers["Toast Consumers"]
         GPS["GpsButtonComponent<br/>GPS fix failed"]
-        IDV["ImageDetailViewComponent<br/>Replace/attach success/error<br/>Copy coordinates"]
+        IDV["MediaDetailViewComponent<br/>Replace/attach success/error<br/>Copy coordinates"]
         MS["MapShellComponent<br/>Upload failed (uploadFailed$)"]
         AP["AccountPageComponent<br/>Email/password update result"]
         UMS["UploadManagerService<br/>Batch complete summary"]
@@ -254,9 +254,9 @@ Each consumer injects `ToastService` and calls `show()` with appropriate options
 | ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------- |
 | `features/map/map-shell/map-shell.component.ts`              | `uploadFailed$` subscription                 | `toast.show({ message: event.error, type: 'error' })`         |
 | `features/map/map-shell/map-shell.component.ts`              | `imageUploaded$` (already handled via panel) | `toast.show({ message: 'Photo uploaded', type: 'success' })`  |
-| `features/map/workspace-pane/image-detail-view.component.ts` | Replace/attach success                       | `toast.show({ message: 'Photo replaced', type: 'success' })`  |
-| `features/map/workspace-pane/image-detail-view.component.ts` | Replace/attach failure via `uploadFailed$`   | `toast.show({ message: event.error, type: 'error' })`         |
-| `features/map/workspace-pane/image-detail-view.component.ts` | Copy coordinates                             | `toast.show({ message: 'Coordinates copied', type: 'info' })` |
+| `features/map/workspace-pane/media-detail-view.component.ts` | Replace/attach success                       | `toast.show({ message: 'Photo replaced', type: 'success' })`  |
+| `features/map/workspace-pane/media-detail-view.component.ts` | Replace/attach failure via `uploadFailed$`   | `toast.show({ message: event.error, type: 'error' })`         |
+| `features/map/workspace-pane/media-detail-view.component.ts` | Copy coordinates                             | `toast.show({ message: 'Coordinates copied', type: 'info' })` |
 | `features/map/gps-button/gps-button.component.ts`            | GPS failure                                  | Already uses `ToastService` — update call signature           |
 
 ### Backward compatibility
@@ -287,9 +287,9 @@ The existing `ToastService.show(msg, duration)` signature must be replaced with 
 - [ ] Info toasts use `--color-text-secondary` left border
 - [ ] `z-index: var(--z-toast)` (450) — above dropdowns, below modals
 - [ ] `MapShellComponent` subscribes to `uploadFailed$` and shows error toast
-- [ ] `ImageDetailViewComponent` subscribes to `uploadFailed$` and shows error toast
-- [ ] `ImageDetailViewComponent` shows success toast on replace/attach complete
-- [ ] `ImageDetailViewComponent` shows info toast on coordinate copy
+- [ ] `MediaDetailViewComponent` subscribes to `uploadFailed$` and shows error toast
+- [ ] `MediaDetailViewComponent` shows success toast on replace/attach complete
+- [ ] `MediaDetailViewComponent` shows info toast on coordinate copy
 - [ ] `GpsButtonComponent` updated to use new `show(ToastOptions)` API
 - [ ] Old `toast.component.ts` / `toast.component.html` / `toast.component.scss` removed
 - [ ] Dark mode: warm `--color-bg-elevated` background, proper token usage throughout

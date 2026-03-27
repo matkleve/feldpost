@@ -1,5 +1,6 @@
 import type { WritableSignal } from '@angular/core';
 import type { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
+import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { PhotoLoadService } from '../../../core/photo-load.service';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
@@ -60,6 +61,7 @@ interface ImageDetailDataFacadeDeps {
   computed: {
     mediaType: () => string | null;
     mediaMimeType: () => string | null;
+    detailTier: () => MediaTier;
   };
 }
 
@@ -125,12 +127,19 @@ export class ImageDetailDataFacade {
     this.deps.signals.thumbnailUrl.set(thumbResult.url);
     this.deps.signals.fullResUrl.set(fullResult.url);
 
-    if (isImageAsset && fullResult.url) {
+    const shouldPreloadFull = this.shouldPreloadFull(this.deps.computed.detailTier());
+    if (isImageAsset && fullResult.url && shouldPreloadFull) {
       const preloaded = await this.deps.services.photoLoad.preload(fullResult.url);
       if (!abortSignal.aborted) {
         this.deps.signals.fullResPreloaded.set(preloaded);
       }
+    } else {
+      this.deps.signals.fullResPreloaded.set(false);
     }
+  }
+
+  private shouldPreloadFull(tier: MediaTier): boolean {
+    return tier === 'large' || tier === 'full';
   }
 
   async loadProjects(organizationId: string): Promise<void> {

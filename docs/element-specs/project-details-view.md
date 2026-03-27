@@ -1,4 +1,4 @@
-﻿# Project Details View
+# Project Details View
 
 > **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
 
@@ -65,15 +65,15 @@ stateDiagram-v2
 
 ```
 ProjectsPage (host route)
-├── ProjectsList / ProjectsCardGrid
-└── WorkspacePaneComponent (reused)
-    ├── PaneHeader
-    │   ├── Project context title
-    │   ├── FullViewToggle
-    │   └── CloseButton
-    ├── MediaGrid / CollectionThumbnails (reused)
-    └── ImageDetailView (reused)
-        └── MapButton → navigate `/map` and focus selected image
++-- ProjectsList / ProjectsCardGrid
++-- WorkspacePaneComponent (reused)
+    +-- PaneHeader
+    |   +-- Project context title
+    |   +-- FullViewToggle
+    |   +-- CloseButton
+    +-- MediaGrid / CollectionThumbnails (reused)
+    +-- ImageDetailView (reused)
+        +-- MapButton → navigate `/map` and focus selected image
 ```
 
 ## Data Requirements
@@ -136,7 +136,7 @@ sequenceDiagram
 | ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `apps/web/src/app/features/projects/projects-page.component.ts`               | Host page state for project selection + workspace visibility |
 | `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Reused pane for project-scoped media browsing                |
-| `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.ts` | Reused details view with map action                          |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts` | Reused details view with map action                          |
 | `apps/web/src/app/features/projects/projects-page.component.spec.ts`          | Integration tests for in-page project details behavior       |
 
 ## Wiring

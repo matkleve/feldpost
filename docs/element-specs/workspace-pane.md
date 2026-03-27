@@ -10,7 +10,7 @@ Current detail/grid behavior remains map-compatible while the same contract is r
 
 **Desktop:** right-side pane rendered by the App Shell layout (not map-specific). It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between thumbnail-grid mode and image-detail mode.
 
-The currently implemented pane shows `PaneHeaderComponent`, then either `ImageDetailViewComponent` or `WorkspaceToolbarComponent` plus `ThumbnailGridComponent`. When one or more media items are selected, `WorkspaceExportBarComponent` appears at the bottom of grid mode.
+The currently implemented pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or `WorkspaceToolbarComponent` plus `ThumbnailGridComponent`. When one or more media items are selected, `WorkspaceExportBarComponent` appears at the bottom of grid mode.
 
 **Planned but not primary implemented structure:** mobile bottom-sheet snapping and fullscreen workspace mode remain product intent, but are not the main implemented behavior today.
 
@@ -96,7 +96,7 @@ WorkspacePane                              ← `.ui-container` right panel rende
             └── Upload Job List
 
 [In both tabs]
-├── [detailImageId set] ImageDetailViewComponent (overlay on top, full-pane modal)
+├── [detailImageId set] MediaDetailViewComponent (overlay on top, full-pane modal)
 └── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (slot-based footer)
 ```
 

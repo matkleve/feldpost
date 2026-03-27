@@ -11,7 +11,7 @@ The control renders as a compact `.ui-item` row with a date value label and an e
 ## Where It Lives
 
 - Route: `/`
-- Parent: `ImageDetailViewComponent` metadata area
+- Parent: `MediaDetailViewComponent` metadata area
 - Appears when: Image Detail View is open and metadata rows are rendered
 
 ## Actions
@@ -64,8 +64,8 @@ flowchart LR
 | File                                                                            | Purpose                       |
 | ------------------------------------------------------------------------------- | ----------------------------- |
 | `docs/element-specs/captured-date-editor.md`                                    | Captured Date Editor contract |
-| `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.ts`   | Inline edit logic host        |
-| `apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html` | Captured date row markup      |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`   | Inline edit logic host        |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html` | Captured date row markup      |
 
 ## Wiring
 
@@ -84,7 +84,7 @@ sequenceDiagram
 	C-->>U: Exit edit mode
 ```
 
-- `ImageDetailViewComponent` owns the row-level state and delegates persistence to `WorkspaceViewService`.
+- `MediaDetailViewComponent` owns the row-level state and delegates persistence to `WorkspaceViewService`.
 - Persistence updates only `captured_at`; no other metadata fields are mutated.
 
 ## Acceptance Criteria

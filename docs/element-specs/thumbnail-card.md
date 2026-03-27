@@ -79,6 +79,13 @@ The `UploadingOverlay` is shown when a file targeting this image's coordinates i
 
 Thumbnail cards use **Tier 2** of the progressive loading pipeline (256×256px). The `WorkspaceViewService` calls `photoLoad.batchSign(images, 'thumb')` for images with a pre-generated `thumbnailPath`, and the service falls back to individual `photoLoad.getSignedUrl(storagePath, 'thumb')` with server-side transforms for images without a thumbnail. The card reads `photoLoad.getLoadState(imageId, 'thumb')` to drive all visual states.
 
+### Adaptive Tier Selection Contract
+
+- The card measures its effective media slot (target ~`8rem` x `8rem`) in the component layer.
+- Measured slot dimensions are converted to `rem` and passed to `MediaOrchestratorService.selectRequestedTierForSlot(...)`.
+- The orchestrator returns an effective tier that is capped by the requested tier and then resolved through fallback.
+- No DOM access for tier decisions is allowed inside orchestrator/service code.
+
 ### Loading State Machine
 
 ```mermaid
@@ -134,7 +141,7 @@ stateDiagram-v2
 
 - **Loading state:** `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` (camera icon SVG data-URI) centered on gradient background (`--color-bg-subtle` → `--color-bg-muted`). Pulses at 1400ms ease-in-out to match map marker loading animation.
 - **No-photo / error state:** `PHOTO_NO_PHOTO_ICON` from `PhotoLoadService` (crossed-out image SVG data-URI, Material "image_not_supported") at 0.55 opacity. No pulse.
-- These icons are shared with `PhotoMarkerComponent` and `ImageDetailPhotoViewerComponent` for consistent visuals across all surfaces.
+- These icons are shared with `PhotoMarkerComponent` and `MediaDetailPhotoViewerComponent` for consistent visuals across all surfaces.
 
 ## File Map
 
@@ -187,5 +194,6 @@ sequenceDiagram
 - [ ] Upload overlay shown when a file for this image's coords is in `uploading` phase
 - [ ] Upload overlay has animated upload icon + semi-transparent background
 - [ ] Upload overlay disappears when upload completes or errors
+- [x] Thumbnail card forwards measured slot size in `rem` to orchestrator for adaptive tier selection (component measures, service decides)
 - [ ] Mobile: checkboxes visible in bulk-select mode, hidden otherwise
 - [ ] Click opens detail view

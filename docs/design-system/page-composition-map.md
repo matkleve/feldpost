@@ -92,11 +92,11 @@ Composition:
       - `app-group-tab-bar`
       - `app-thumbnail-grid`
         - `thumbnail-card` primitives
-      - `app-image-detail-view` (conditional)
+      - `app-media-detail-view` (conditional)
         - `app-image-detail-header`
           - back button
           - overflow actions
-        - `app-image-detail-photo-viewer`
+        - `app-media-detail-photo-viewer`
         - `app-metadata-section`
           - metadata property rows
         - `app-image-detail-inline-section`

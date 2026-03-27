@@ -914,7 +914,7 @@ Files
 
 TODOs
 
-- [ ] Create `ImageDetailPanelComponent`: thumbnail, metadata rows (property-style from `docs/element-specs/image-detail-view.md`), action buttons.
+- [ ] Create `ImageDetailPanelComponent`: thumbnail, metadata rows (property-style from `docs/element-specs/media-detail-view.md`), action buttons.
 - [ ] Pass selected marker data from `MapShellComponent` into the panel via `@Input` or signal.
 - [ ] Clicking a map marker: set selected marker signal → open panel.
 - [ ] Clicking the map background (not a marker): clear selected → close panel.

@@ -122,7 +122,7 @@ Alle Features in `app.routes.ts` verwenden `loadComponent` mit dynamischen Impor
 | -------------------------------- | -------- | -------- | ----------- |
 | upload-panel.component.scss      | 12.00 kB | 12.11 kB | ⚠️ +108 B   |
 | map-shell.component.scss         | 12.00 kB | 17.55 kB | ⚠️ +5.55 kB |
-| image-detail-view.component.scss | 12.00 kB | 18.53 kB | ⚠️ +6.53 kB |
+| media-detail-view.component.scss | 12.00 kB | 18.53 kB | ⚠️ +6.53 kB |
 
 **Status:** Pre-existing. Not caused by reorganisation. Recommendation: refactor these SCSS files (extract utilities, reduce specificity) in follow-up work.
 

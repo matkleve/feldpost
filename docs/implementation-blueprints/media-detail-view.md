@@ -1,20 +1,20 @@
 # Media Detail View - Implementation Blueprint
 
-> **Spec**: [element-specs/image-detail-view.md](../element-specs/image-detail-view.md)
+> **Spec**: [element-specs/media-detail-view.md](../element-specs/media-detail-view.md)
 > **Status**: Refactored into a parent coordinator plus extracted section components. Remaining work should focus on behavioral gaps against child specs, not on further monolith reduction inside `MediaDetailViewComponent`.
 
 ## Existing Infrastructure
 
-| File                                                                    | What it provides                                                     |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `features/map/workspace-pane/media-detail-view.component.ts`            | Parent coordinator: load record, own shared state, wire child events |
-| `features/map/workspace-pane/image-detail-header/*`                     | Header UI and context-menu intent emission                           |
-| `features/map/workspace-pane/media-detail-photo-viewer/*`               | Photo area UI, file-selection handoff, lightbox                      |
-| `features/map/workspace-pane/media-detail-inline-section/*`             | Details/location editing UI and project picker                       |
-| `features/map/workspace-pane/media-detail-project-membership.helper.ts` | Project membership loading and persistence rules                     |
-| `core/supabase.service.ts`                                              | `SupabaseService.client` for queries                                 |
-| `core/upload.service.ts`                                                | File validation for replace/attach flow                              |
-| `core/photo-load.service.ts`                                            | Signed URL lookup, load-state tracking, preload                      |
+| File                                                                      | What it provides |
+| ------------------------------------------------------------------------- | ---------------- |
+| `features/map/workspace-pane/media-detail-view.component.ts`              | Parent coordinator: load record, own shared state, wire child events |
+| `features/map/workspace-pane/image-detail-header/*`                       | Header UI and context-menu intent emission |
+| `features/map/workspace-pane/media-detail-photo-viewer/*`                 | Photo area UI, file-selection handoff, lightbox |
+| `features/map/workspace-pane/media-detail-inline-section/*`               | Details/location editing UI and project picker |
+| `features/map/workspace-pane/media-detail-project-membership.helper.ts`   | Project membership loading and persistence rules |
+| `core/supabase.service.ts`                                                | `SupabaseService.client` for queries |
+| `core/upload.service.ts`                                                  | File validation for replace/attach flow |
+| `core/photo-load.service.ts`                                              | Signed URL lookup, load-state tracking, preload |
 
 ## Service Contract
 
@@ -37,11 +37,7 @@ displayTitle: Signal<string>;
 captureDate: Signal<string | null>;
 
 closed: OutputEmitterRef<void>;
-zoomToLocationRequested: OutputEmitterRef<{
-  imageId: string;
-  lat: number;
-  lng: number;
-}>;
+zoomToLocationRequested: OutputEmitterRef<{ imageId: string; lat: number; lng: number }>;
 ```
 
 ### Child Boundaries

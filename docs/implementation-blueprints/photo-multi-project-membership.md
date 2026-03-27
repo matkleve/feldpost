@@ -2,8 +2,8 @@
 
 > **Related specs:**
 >
-> - [element-specs/image-detail-view.md](../element-specs/image-detail-view.md)
-> - [element-specs/image-detail-inline-editing.md](../element-specs/image-detail-inline-editing.md)
+> - [element-specs/media-detail-view.md](../element-specs/media-detail-view.md)
+> - [element-specs/media-detail-inline-editing.md](../element-specs/media-detail-inline-editing.md)
 > - [element-specs/projects-dropdown.md](../element-specs/projects-dropdown.md)
 > - [element-specs/workspace-view-system.md](../element-specs/workspace-view-system.md)
 

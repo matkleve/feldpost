@@ -1,6 +1,6 @@
 # Image Detail — Actions & Marker Sync
 
-> **Parent spec:** [image-detail-view](image-detail-view.md)
+> **Parent spec:** [image-detail-view](media-detail-view.md)
 > **Upload manager use cases:** [use-cases/upload-manager.md](../use-cases/upload-manager.md)
 > **Map shell use cases:** [use-cases/map-shell.md](../use-cases/map-shell.md)
 
@@ -13,7 +13,7 @@ The actions section at the bottom of the Image Detail View and the marker synchr
 Actions use **`dd-item`** button styling — not bordered outline buttons. Each action is a full-width row with a leading Material icon (`1rem`, `--color-text-secondary`), label text (`0.8125rem`), `dd-item` hover (warm clay tint), and `--radius-sm` border radius. A `dd-divider` separates destructive actions from normal ones. The delete action uses `dd-item--danger` style (red icon + label).
 
 ```pseudo
-┌─ �  Zoom to location        ─┐   ← dd-item style, clay hover
+┌─ [icon] Zoom to location    ─┐   ← dd-item style, clay hover
 ├─ 📁  Manage projects         ─┤   ← dd-item style, clay hover
 ├─ 📋  Copy coordinates        ─┤   ← dd-item style, clay hover
 ├──────────────────────────────-─┤   ← dd-divider
@@ -22,7 +22,7 @@ Actions use **`dd-item`** button styling — not bordered outline buttons. Each 
 
 ## Where It Lives
 
-- **Parent**: `ImageDetailViewComponent` — ActionsSection at bottom of metadata column
+- **Parent**: `MediaDetailViewComponent` — ActionsSection at bottom of metadata column
 - **Appears when**: Image detail view is open and image data is loaded
 
 ## Actions

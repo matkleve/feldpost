@@ -309,5 +309,5 @@ MapShellComponent template:
   ├── <ss-search-bar>                        ← search (outputs: mapCenterRequested, clearRequested, dropPinRequested)
   ├── <ss-gps-button>                        ← GPS (calls goToUserPosition via parent)
   ├── <app-drag-divider>                     ← resize handle (when photoPanelOpen)
-  └── <app-image-detail-view>                ← detail view (when detailImageId is set)
+  └── <app-media-detail-view>                ← detail view (when detailImageId is set)
 ```

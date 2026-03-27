@@ -69,7 +69,7 @@ A compact floating dropdown (12rem / 192px wide) showing available properties. S
 ## Where It Lives
 
 - Route: `/settings` for full property management
-- Parent: `SettingsPage` and `ImageDetailViewComponent` metadata area
+- Parent: `SettingsPage` and `MediaDetailViewComponent` metadata area
 - Appears when: User opens Settings -> Properties or uses `+ Add a property` in image detail
 
 ## Actions
@@ -200,7 +200,7 @@ Where `PropertyType` = `'text' | 'chip' | 'number' | 'date' | 'checkbox'`.
 ## Wiring
 
 - `PropertyManager` is a section inside the Settings page (`/settings`)
-- `PropertyPicker` is used inside `ImageDetailViewComponent` at the bottom of the metadata section
+- `PropertyPicker` is used inside `MediaDetailViewComponent` at the bottom of the metadata section
 - `MetadataService` provides CRUD for properties and values, shared across all consumers
 - Grouping, Sort, and Filter dropdowns all query `MetadataService.getOrgProperties()` for the custom properties list
 

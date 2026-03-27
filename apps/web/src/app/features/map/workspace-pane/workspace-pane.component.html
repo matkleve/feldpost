@@ -48,7 +48,7 @@
     </div>
 
     @if (detailImageId()) {
-      <app-image-detail-view
+      <app-media-detail-view
         [imageId]="detailImageId()"
         (closed)="onDetailClose()"
         (zoomToLocationRequested)="onZoomToLocation($event)"

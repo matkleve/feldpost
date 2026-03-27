@@ -277,7 +277,7 @@ export interface WorkspacePaneHostPort {
 **Reused Components:**
 
 - `ThumbnailCardComponent` (from workspace)
-- `ImageDetailViewComponent` (overlay variant)
+- `MediaDetailViewComponent` (overlay variant)
 - `UploadPanelComponent` (full embed in Upload tab)
 
 ---
@@ -432,4 +432,4 @@ sequenceDiagram
 
 - [workspace-pane.md](workspace-pane.md) — extended with Upload tab
 - [upload-panel.md](upload-panel.md) — embedded in workspace pane Upload tab (no changes)
-- [image-detail-inline-editing.md](image-detail-inline-editing.md) — detail modal reused on media page
+- [media-detail-inline-editing.md](media-detail-inline-editing.md) — detail modal reused on media page

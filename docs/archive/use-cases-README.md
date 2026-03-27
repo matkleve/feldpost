@@ -815,7 +815,7 @@ Each interaction scenario file must link to:
 Interaction scenario files should be created for these specs as they are implemented. Ordered by delivery wave from `element-spec-priority-ranking.md`.
 
 - [ ] photo-marker.md — Wave 1
-- [ ] image-detail-view.md — Wave 1
+- [ ] media-detail-view.md — Wave 1
 - [ ] filter-panel.md — Wave 1
 - [ ] workspace-pane.md — Wave 2
 - [ ] radius-selection.md — Wave 2

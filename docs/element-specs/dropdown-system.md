@@ -67,7 +67,7 @@ This warm clay tint is used on **all** hover states — items, action rows, sear
 - **Grouping**: `workspace-toolbar/grouping-dropdown.component.ts` + `.scss`
 - **Projects**: `workspace-toolbar/projects-dropdown.component.ts` + `.scss`
 - **Filter**: `workspace-toolbar/filter-dropdown.component.ts` + `.scss`
-- **Context menu**: `workspace-pane/image-detail-view.component.html` + `.scss`
+- **Context menu**: `workspace-pane/media-detail-view.component.html` + `.scss`
 
 ## Actions
 
@@ -112,7 +112,7 @@ Component-specific: Checkbox column, count badge, "All projects" separator row.
 Uses: `dd-empty`, `dd-action-row`.
 Component-specific: Notion-style compound filter rules (form rows with selects/inputs — justified exception).
 
-**Image Detail Context Menu** — `image-detail-view.component.html`
+**Image Detail Context Menu** — `media-detail-view.component.html`
 Uses: `dd-items`, `dd-item`, `dd-item--danger`, `dd-item__icon`, `dd-item__label`.
 Component-specific: Absolute positioning, click-outside overlay.
 

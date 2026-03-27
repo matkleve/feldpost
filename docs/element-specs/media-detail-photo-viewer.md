@@ -1,6 +1,6 @@
 # Media Detail — Media Viewer
 
-> **Parent spec:** [image-detail-view](image-detail-view.md)
+> **Parent spec:** [image-detail-view](media-detail-view.md)
 > **Architecture parent:** [media-renderer-system](media-renderer-system.md)
 > **Photo loading service:** [photo-load-service](photo-load-service.md)
 > **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)

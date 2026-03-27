@@ -17,7 +17,7 @@ This ranking is for implementation order, not spec quality. It is based on:
 | ---- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | [map-shell.md](./element-specs/map-shell.md)                     | Highest-leverage spec. The main authenticated experience depends on viewport loading, marker rendering, panel orchestration, and map-first layout all working here.                                            |
 | 2    | [photo-marker.md](./element-specs/photo-marker.md)               | The map has limited value without reliable markers, clustering behavior, selection behavior, and correction affordances. This is coupled directly to the biggest map retrieval gaps.                           |
-| 3    | [image-detail-view.md](./element-specs/image-detail-view.md)     | Users currently cannot inspect image metadata, correction history, or full image detail. This blocks core retrieval and review workflows.                                                                      |
+| 3    | [media-detail-view.md](./element-specs/media-detail-view.md)     | Users currently cannot inspect image metadata, correction history, or full image detail. This blocks core retrieval and review workflows.                                                                      |
 | 4    | [filter-panel.md](./element-specs/filter-panel.md)               | Filtering is a core MVP capability and currently one of the largest functional gaps. It also anchors project, metadata, time, and distance workflows.                                                          |
 | 5    | [active-filter-chips.md](./element-specs/active-filter-chips.md) | Once filters exist, users need visible state and quick removal controls. This closes the loop on filter semantics instead of leaving them opaque.                                                              |
 | 6    | [workspace-pane.md](./element-specs/workspace-pane.md)           | The workspace pattern is central to selection review, group creation, and image browsing. Several use cases stay blocked until this is real.                                                                   |
@@ -32,7 +32,7 @@ This ranking is for implementation order, not spec quality. It is based on:
 | ---- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1    | [map-shell.md](./element-specs/map-shell.md)                         | Now      | Root container for the authenticated product. Unblocks viewport-bounded loading, marker orchestration, floating controls, and panel composition. |
 | 2    | [photo-marker.md](./element-specs/photo-marker.md)                   | Now      | Essential for map retrieval, clustering, hover/selection behavior, and later correction flows.                                                   |
-| 3    | [image-detail-view.md](./element-specs/image-detail-view.md)         | Now      | Required for image inspection, metadata review, correction history, and the main retrieval use cases.                                            |
+| 3    | [media-detail-view.md](./element-specs/media-detail-view.md)         | Now      | Required for image inspection, metadata review, correction history, and the main retrieval use cases.                                            |
 | 4    | [filter-panel.md](./element-specs/filter-panel.md)                   | Now      | Needed for time, project, metadata, and distance filtering. A major gap across retrieval workflows.                                              |
 | 5    | [active-filter-chips.md](./element-specs/active-filter-chips.md)     | Now      | Necessary companion to the filter panel so filter state is visible, removable, and understandable.                                               |
 | 6    | [workspace-pane.md](./element-specs/workspace-pane.md)               | Now      | Core workspace container for Active Selection, saved groups, and gallery review.                                                                 |
@@ -70,7 +70,7 @@ Build the core retrieval loop:
 
 - [map-shell.md](./element-specs/map-shell.md)
 - [photo-marker.md](./element-specs/photo-marker.md)
-- [image-detail-view.md](./element-specs/image-detail-view.md)
+- [media-detail-view.md](./element-specs/media-detail-view.md)
 - [filter-panel.md](./element-specs/filter-panel.md)
 - [active-filter-chips.md](./element-specs/active-filter-chips.md)
 

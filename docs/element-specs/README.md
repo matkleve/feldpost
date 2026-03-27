@@ -219,10 +219,10 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `filter-dropdown.md` — Filter Dropdown (shared dropdown primitive)
 - ✅ `projects-dropdown.md` — Projects Dropdown (project selection filter)
 - ✅ `active-filter-chips.md` — Active Filter Chips Strip
-- ✅ `image-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
-  - ✅ `image-detail-photo-viewer.md` — Photo Viewer (progressive loading, lightbox, replace/upload)
-  - ✅ `image-detail-inline-editing.md` — Inline Editing (property rows, address search)
-  - ✅ `image-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
+- ✅ `media-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
+  - ✅ `media-detail-photo-viewer.md` — Photo Viewer (progressive loading, lightbox, replace/upload)
+  - ✅ `media-detail-inline-editing.md` — Inline Editing (property rows, address search)
+  - ✅ `media-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
 - ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)
 - ✅ `grouping-dropdown.md` — Grouping Dropdown (thumbnail group-by)
 - ✅ `card-variant-system.md` — Cross-feature card variant contract (`row`, `small`, `medium`, `large`) for media/project cards
@@ -248,7 +248,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
 - ✅ `language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
 - ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
-- ✅ `media-renderer-system.md` — Universal media rendering contract (file-type registry, tier model, shared orchestrator + component API)
+- ✅ `media-renderer-system.md` — Universal media rendering contract (file-type registry, adaptive slot-based tier model, shared orchestrator + component API)
 
 ### Planned / Missing Specs
 
