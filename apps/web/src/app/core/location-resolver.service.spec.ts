@@ -87,4 +87,3 @@ describe('LocationResolverService', () => {
     expect((service as unknown as { pending: Set<string> }).pending.size).toBe(0);
   });
 });
-

@@ -276,7 +276,10 @@ export class LocationResolverService {
   }
 
   /** Persist address fields for multiple images sharing the same address. */
-  private async persistAddress(mediaItemIds: string[], result: ReverseGeocodeResult): Promise<void> {
+  private async persistAddress(
+    mediaItemIds: string[],
+    result: ReverseGeocodeResult,
+  ): Promise<void> {
     const { error } = await this.supabase.client.rpc('bulk_update_media_addresses', {
       p_media_item_ids: mediaItemIds,
       p_address_label: result.addressLabel,
@@ -411,4 +414,3 @@ interface UnresolvedRow {
   zip?: string | null;
   country: string | null;
 }
-
