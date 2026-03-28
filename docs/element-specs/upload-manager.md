@@ -44,8 +44,8 @@ Canonical document/office upload catalog for this manager contract is: `DOC`, `D
 | 8   | User retries failed job                            | Requeues from start with new phase transitions                 | Job id retained                    |
 | 9   | User cancels job or batch                          | Stops work and performs cleanup as needed                      | Emits cancellation events          |
 | 10  | Persisted upload is shown in Uploaded lane actions | Exposes add-to-project, prioritize, download, media navigation | Only after saved media exists      |
-| 10a | User selects `Standort ändern > Karte anklicken`   | Enters map-pick flow and persists clicked coordinates           | Existing media row is updated       |
-| 10b | User selects `Standort ändern > Adresse eingeben`  | Opens address-finder overlay and persists selected suggestion   | Hover previews are map-only, no DB  |
+| 10a | User selects `Standort ändern > Karte anklicken`   | Enters map-pick flow and persists clicked coordinates          | Existing media row is updated      |
+| 10b | User selects `Standort ändern > Adresse eingeben`  | Opens address-finder overlay and persists selected suggestion  | Hover previews are map-only, no DB |
 
 ## Component Hierarchy
 

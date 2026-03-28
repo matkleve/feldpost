@@ -414,7 +414,10 @@ export class UploadPanelComponent {
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t('upload.location.update.failed', 'Standort konnte nicht aktualisiert werden.'),
+        message: this.t(
+          'upload.location.update.failed',
+          'Standort konnte nicht aktualisiert werden.',
+        ),
         type: 'error',
         dedupe: true,
       });
@@ -423,10 +426,7 @@ export class UploadPanelComponent {
 
     this.imageUploaded.emit({ id: job.imageId, lat: result.lat, lng: result.lng });
     this.toastService.show({
-      message: this.t(
-        'upload.location.update.success',
-        'Standort wurde aktualisiert.',
-      ),
+      message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),
       type: 'success',
       dedupe: true,
     });
@@ -607,12 +607,7 @@ export class UploadPanelComponent {
           lat: result.lat,
           lng: result.lng,
           addressLabel: result.displayName,
-          city:
-            address?.city ??
-            address?.town ??
-            address?.village ??
-            address?.municipality ??
-            null,
+          city: address?.city ?? address?.town ?? address?.village ?? address?.municipality ?? null,
           district: null,
           street: address?.road ?? null,
           streetNumber: address?.house_number ?? null,

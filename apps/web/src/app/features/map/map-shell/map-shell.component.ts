@@ -1918,10 +1918,16 @@ export class MapShellComponent implements OnDestroy {
     request: UploadLocationMapPickRequest,
     coords: { lat: number; lng: number },
   ): Promise<void> {
-    const result = await this.mediaLocationUpdateService.updateFromCoordinates(request.imageId, coords);
+    const result = await this.mediaLocationUpdateService.updateFromCoordinates(
+      request.imageId,
+      coords,
+    );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t('upload.location.update.failed', 'Standort konnte nicht aktualisiert werden.'),
+        message: this.t(
+          'upload.location.update.failed',
+          'Standort konnte nicht aktualisiert werden.',
+        ),
         type: 'error',
         dedupe: true,
       });
