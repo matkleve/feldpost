@@ -31,10 +31,16 @@
 
       <div class="media-card__meta-chips">
         @if (projectName().length > 0) {
-          <span class="media-card__chip">{{ projectName() }}</span>
+          <app-chip class="media-card__chip" [text]="projectName()" [size]="'sm'"></app-chip>
         }
         @if (mediaTypeLabel.length > 0) {
-          <span class="media-card__chip">{{ mediaTypeLabel }}</span>
+          <app-chip
+            class="media-card__chip"
+            [icon]="mediaTypeIcon"
+            [text]="mediaTypeLabel"
+            [size]="'sm'"
+            [variant]="mediaTypeChipVariant"
+          ></app-chip>
         }
       </div>
 

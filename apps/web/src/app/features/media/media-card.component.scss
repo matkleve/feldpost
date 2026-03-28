@@ -90,15 +90,7 @@
 }
 
 .media-card__chip {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 1.75rem;
-  padding-inline: var(--spacing-2);
-  border-radius: var(--container-radius-chip);
-  background: color-mix(in srgb, var(--color-bg-surface) 82%, var(--color-bg-base));
-  color: var(--color-text-primary);
-  font-size: var(--font-size-xs);
-  line-height: 1;
+  max-width: 100%;
 }
 
 .media-card__actions {

@@ -16,11 +16,12 @@ import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types'
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { MediaRenderState } from '../../core/media/media-renderer.types';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
+import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 
 @Component({
   selector: 'app-media-card',
   standalone: true,
-  imports: [CommonModule, UniversalMediaComponent],
+  imports: [CommonModule, UniversalMediaComponent, ChipComponent],
   templateUrl: './media-card.component.html',
   styleUrl: './media-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -107,6 +108,27 @@ export class MediaCardComponent implements OnChanges {
       default:
         return badge ?? definition.label;
     }
+  }
+
+  get mediaTypeChipVariant(): ChipVariant {
+    switch (this.fileType().category) {
+      case 'image':
+        return 'filetype-image';
+      case 'video':
+        return 'filetype-video';
+      case 'spreadsheet':
+        return 'filetype-spreadsheet';
+      case 'presentation':
+        return 'filetype-presentation';
+      case 'document':
+        return 'filetype-document';
+      default:
+        return 'default';
+    }
+  }
+
+  get mediaTypeIcon(): string {
+    return this.mediaOrchestrator.resolveIcon(this.fileIdentity());
   }
 
   get hasLocation(): boolean {

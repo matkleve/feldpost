@@ -50,7 +50,7 @@ export class ThumbnailCardMediaComponent {
   readonly renderState = computed(() => {
     const signedThumbnailUrl = this.image().signedThumbnailUrl;
 
-    if (this.imageReady() && signedThumbnailUrl) {
+    if (signedThumbnailUrl) {
       return {
         status: 'loaded' as const,
         url: signedThumbnailUrl,

@@ -59,7 +59,16 @@
 }
 
 .universal-media__layer--loading {
-  animation: universal-media-pulse 1.2s ease-in-out infinite;
+  color: var(--color-clay);
+}
+
+.universal-media__spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: var(--radius-full);
+  border: 2px solid color-mix(in srgb, currentcolor 24%, transparent);
+  border-top-color: currentcolor;
+  animation: universal-media-spin 700ms linear infinite;
 }
 
 .universal-media__layer--error {
@@ -122,12 +131,8 @@
   text-overflow: ellipsis;
 }
 
-@keyframes universal-media-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
+@keyframes universal-media-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

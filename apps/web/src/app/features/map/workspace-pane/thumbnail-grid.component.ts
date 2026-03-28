@@ -5,6 +5,7 @@ import {
   OnDestroy,
   afterNextRender,
   computed,
+  effect,
   input,
   inject,
   output,
@@ -215,6 +216,16 @@ export class ThumbnailGridComponent implements OnDestroy {
     afterNextRender(() => {
       this.scheduleThumbnailSigning();
       this.updateMaxColumns();
+    });
+
+    effect(() => {
+      const flat = this.flatImages();
+      const grouped = this.sections();
+      const preset = this.viewService.thumbnailSizePreset();
+      void flat;
+      void grouped;
+      void preset;
+      this.scheduleThumbnailSigning();
     });
   }
 
