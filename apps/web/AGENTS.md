@@ -61,6 +61,7 @@ Related references:
 When implementing components or changing UI copy:
 
 - Use deterministic key-based lookups (`t(key, fallback)`) for product UI text.
+- Keep every `fallback` in `t(key, fallback)` in English as the canonical source text.
 - Do not add new hardcoded user-facing literals in templates/component strings unless explicitly temporary migration fallback.
 - Keep language switch labels in native form and never locale-translate them: `English`, `Deutsch`, `Italiano`.
 - Register every user-visible string in `docs/i18n/translation-workbench.csv` with useful `context` for translators.

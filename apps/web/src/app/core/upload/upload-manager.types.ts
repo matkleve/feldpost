@@ -56,6 +56,8 @@ export interface UploadJob {
   contentHash?: string;
   /** If phase === 'skipped', the existing image ID that matched. */
   existingImageId?: string;
+  /** Allows one explicit user-approved bypass of duplicate skip handling. */
+  forceDuplicateUpload?: boolean;
 
   // ── Replace / Attach mode fields ──
 

@@ -149,6 +149,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
     computed: {
       mediaType: () => 'image',
       mediaMimeType: () => 'image/jpeg',
+      detailTier: () => 'full',
     },
   });
 

@@ -108,7 +108,10 @@ export class UploadReplacePipelineService {
 
     // ── Phase: dedup_check ─────────────────────────────────────────────
     this.jobState.setPhase(jobId, 'dedup_check');
-    const dedupResult = await ctx.checkDedupHash(contentHash);
+    const dedupResult = job.forceDuplicateUpload ? null : await ctx.checkDedupHash(contentHash);
+    if (job.forceDuplicateUpload) {
+      this.jobState.updateJob(jobId, { forceDuplicateUpload: false });
+    }
     if (dedupResult) {
       handleDedupSkip({
         jobId,

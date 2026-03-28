@@ -75,7 +75,9 @@
             {{ job().error }}
           } @else if (job().phase === 'missing_data') {
             <span class="material-icons" aria-hidden="true">location_off</span>
-            <span>{{ job().statusLabel || t('upload.item.status.missingGps', 'GPS fehlt') }}</span>
+            <span>{{
+              job().statusLabel || t('upload.item.status.missingGps', 'GPS missing')
+            }}</span>
           } @else {
             {{ job().statusLabel }}
           }
@@ -135,7 +137,7 @@
         @for (action of availableMenuActions(); track action) {
           @if (action === 'change_location_map') {
             <div class="upload-item-context-menu__section-label" role="presentation">
-              {{ t('upload.item.menu.section.location', 'Standort aendern') }}
+              {{ t('upload.item.menu.section.location', 'Change location') }}
             </div>
           }
           <button class="dd-item" type="button" role="menuitem" (click)="onMenuAction(action)">
@@ -143,26 +145,44 @@
               {{
                 action === 'open_in_media'
                   ? 'open_in_new'
-                  : action === 'add_to_project'
-                    ? 'folder_open'
-                    : action === 'change_location_map'
-                      ? 'pin_drop'
-                      : action === 'change_location_address'
-                        ? 'search'
-                        : 'download'
+                  : action === 'open_existing_media'
+                    ? 'open_in_new'
+                    : action === 'upload_anyway'
+                      ? 'publish'
+                      : action === 'open_project'
+                        ? 'folder'
+                        : action === 'toggle_priority'
+                          ? 'priority_high'
+                          : action === 'add_to_project'
+                            ? 'folder_open'
+                            : action === 'change_location_map'
+                              ? 'pin_drop'
+                              : action === 'change_location_address'
+                                ? 'search'
+                                : 'download'
               }}
             </span>
             <span class="dd-item__label">
               {{
                 action === 'open_in_media'
                   ? t('auto.0089.details_oeffnen', 'Details oeffnen')
-                  : action === 'add_to_project'
-                    ? t('auto.0013.add_to_project', 'Add to project')
-                    : action === 'change_location_map'
-                      ? t('upload.item.menu.location.clickMap', 'Karte anklicken')
-                      : action === 'change_location_address'
-                        ? t('upload.item.menu.location.enterAddress', 'Adresse eingeben')
-                        : t('auto.0099.download', 'Download')
+                  : action === 'open_existing_media'
+                    ? t('upload.item.menu.issue.openExisting', 'Open existing media')
+                    : action === 'upload_anyway'
+                      ? t('upload.item.menu.issue.uploadAnyway', 'Upload anyway')
+                      : action === 'open_project'
+                        ? t('upload.item.menu.project.open', 'Open project')
+                        : action === 'toggle_priority'
+                          ? prioritized()
+                            ? t('upload.item.menu.priority.remove', 'Remove priority')
+                            : t('upload.item.menu.priority.add', 'Prioritize')
+                          : action === 'add_to_project'
+                            ? t('auto.0013.add_to_project', 'Add to project')
+                            : action === 'change_location_map'
+                              ? t('upload.item.menu.location.clickMap', 'Click on map')
+                              : action === 'change_location_address'
+                                ? t('upload.item.menu.location.enterAddress', 'Enter address')
+                                : t('auto.0099.download', 'Download')
               }}
             </span>
           </button>

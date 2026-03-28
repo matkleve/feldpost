@@ -2452,6 +2452,254 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.project.open', 'Open project', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Open project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt oeffnen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Apri progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.project.unavailable', 'No project assigned.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No project assigned.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Kein Projekt zugewiesen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun progetto assegnato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.priority.add', 'Prioritize', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Prioritize', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Priorisieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Dai priorita', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.priority.remove', 'Remove priority', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove priority', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Priorisierung entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi priorita', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.remove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.priority.addedToast', 'Upload prioritized.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload prioritized.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.addedToast'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Upload priorisiert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.addedToast'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento prioritario impostato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.addedToast'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.priority.removedToast', 'Priority removed.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Priority removed.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.removedToast'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Priorisierung entfernt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.removedToast'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Priorita rimossa.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.priority.removedToast'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.issue.openExisting', 'Open existing media', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Open existing media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.issue.openExisting'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bestehendes Medium oeffnen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.issue.openExisting'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Apri media esistente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.issue.openExisting'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.issue.uploadAnyway', 'Upload anyway', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload anyway', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.issue.uploadAnyway'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Trotzdem hochladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.issue.uploadAnyway'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Carica comunque', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.issue.uploadAnyway'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0098.done', 'Done', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

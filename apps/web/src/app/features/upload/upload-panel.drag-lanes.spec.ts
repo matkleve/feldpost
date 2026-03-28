@@ -115,6 +115,30 @@ describe('UploadPanelComponent lanes', () => {
 
     expect(component.effectiveLane()).toBe('issues');
   });
+
+  it('counts missing_data jobs in issues lane', async () => {
+    const { fixture, component, fakeManager } = await setupUploadPanel();
+    fakeManager._jobsSignal.set([
+      makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
+      makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
+    ]);
+    fixture.detectChanges();
+
+    expect(component.laneCounts().issues).toBe(1);
+    expect(component.laneCounts().uploading).toBe(1);
+  });
+
+  it('routes jobs with missing-location status text to issues lane', async () => {
+    const { fixture, component, fakeManager } = await setupUploadPanel();
+    fakeManager._jobsSignal.set([
+      makeUploadJob({ phase: 'uploading', statusLabel: 'Missing location' }),
+    ]);
+    component.setSelectedLane('issues');
+    fixture.detectChanges();
+
+    expect(component.visibleLaneJobs().length).toBe(1);
+    expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Missing location');
+  });
 });
 
 describe('UploadPanelComponent actions', () => {

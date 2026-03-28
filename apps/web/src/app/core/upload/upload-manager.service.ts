@@ -500,6 +500,26 @@ export class UploadManagerService {
     this.drainQueue();
   }
 
+  /**
+   * Re-queue a duplicate-skipped job and bypass one dedup decision.
+   * Used by the explicit user action "upload anyway".
+   */
+  forceDuplicateUpload(jobId: string): void {
+    const job = this.jobState.findJob(jobId);
+    if (!job || job.phase !== 'skipped' || !job.existingImageId) return;
+
+    this.jobState.updateJob(jobId, {
+      forceDuplicateUpload: true,
+      phase: 'queued',
+      statusLabel: phaseLabel('queued'),
+      error: undefined,
+      failedAt: undefined,
+      existingImageId: undefined,
+    });
+
+    this.drainQueue();
+  }
+
   // ── Pipeline orchestration ─────────────────────────────────────────────────
 
   /**

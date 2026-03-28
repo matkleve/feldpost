@@ -194,13 +194,15 @@
   }
 
   <!-- Per-file progress list -->
-  @if (laneJobs().length > 0) {
+  @if (visibleLaneJobs().length > 0) {
     <ul class="upload-panel__file-list" aria-label="Upload queue">
-      @for (job of laneJobs(); track trackByJobId($index, job)) {
+      @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
         <app-upload-panel-item
           [job]="job"
           [interactive]="isRowInteractive(job)"
           [documentFallbackLabel]="documentFallbackLabel(job)"
+          [showOpenProject]="!!job.projectId"
+          [prioritized]="isJobPrioritized(job)"
           (requestPlacement)="requestPlacement(job.id, job.phase, $event.event)"
           (dismissFile)="dismissFile(job.id)"
           (rowMainClick)="onRowMainClick(job)"
@@ -214,11 +216,11 @@
   @if (locationAddressDialogOpen()) {
     <section
       class="upload-panel__location-editor option-menu-surface"
-      [attr.aria-label]="t('upload.location.editor.aria', 'Standort per Adresse aendern')"
+      [attr.aria-label]="t('upload.location.editor.aria', 'Change location by address')"
     >
       <header class="upload-panel__location-editor-header">
         <h4 class="upload-panel__location-editor-title">
-          {{ t('upload.item.menu.section.location', 'Standort aendern') }}
+          {{ t('upload.item.menu.section.location', 'Change location') }}
         </h4>
         <button
           uiButton
@@ -233,7 +235,7 @@
       </header>
 
       <label class="upload-panel__location-editor-label" for="upload-location-search-input">
-        {{ t('upload.item.menu.location.enterAddress', 'Adresse eingeben') }}
+        {{ t('upload.item.menu.location.enterAddress', 'Enter address') }}
       </label>
 
       <input

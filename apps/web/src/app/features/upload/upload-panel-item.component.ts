@@ -9,7 +9,7 @@ import {
   UiButtonSizeSmDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
-import { getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
+import { getIssueKind, getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
@@ -23,6 +23,10 @@ export type UploadItemMenuAction =
   | 'add_to_project'
   | 'download'
   | 'open_in_media'
+  | 'open_project'
+  | 'toggle_priority'
+  | 'open_existing_media'
+  | 'upload_anyway'
   | 'change_location_map'
   | 'change_location_address';
 
@@ -50,6 +54,8 @@ export class UploadPanelItemComponent {
   readonly job = input.required<UploadJob>();
   readonly interactive = input<boolean>(false);
   readonly documentFallbackLabel = input<string | null>(null);
+  readonly showOpenProject = input<boolean>(false);
+  readonly prioritized = input<boolean>(false);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly requestPlacement = output<{ jobId: string; phase: UploadPhase; event: MouseEvent }>();
@@ -117,16 +123,32 @@ export class UploadPanelItemComponent {
 
   availableMenuActions(): UploadItemMenuAction[] {
     const job = this.job();
-    if (getLaneForJob(job) !== 'uploaded' || !job.imageId) {
+    const lane = getLaneForJob(job);
+
+    if (lane === 'issues') {
+      const issueKind = getIssueKind(job);
+      if (issueKind !== 'duplicate_photo') {
+        return [];
+      }
+
+      return [
+        ...(job.existingImageId ? (['open_existing_media'] as UploadItemMenuAction[]) : []),
+        'upload_anyway',
+      ];
+    }
+
+    if (lane !== 'uploaded' || !job.imageId) {
       return [];
     }
 
     return [
-      'open_in_media',
-      'add_to_project',
-      'download',
       'change_location_map',
       'change_location_address',
+      ...(this.showOpenProject() ? (['open_project'] as UploadItemMenuAction[]) : []),
+      'add_to_project',
+      'open_in_media',
+      'download',
+      'toggle_priority',
     ];
   }
 

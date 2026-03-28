@@ -8,7 +8,7 @@
  *  - Component only bridges template events to services.
  */
 
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UploadPanelItemComponent, type UploadItemMenuAction } from './upload-panel-item.component';
@@ -193,6 +193,24 @@ export class UploadPanelComponent {
   readonly selectedLane = this.signals.selectedLane;
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
+  readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
+  readonly visibleLaneJobs = computed(() => {
+    const jobs = this.laneJobs();
+    if (this.effectiveLane() !== 'uploaded') {
+      return jobs;
+    }
+
+    const prioritizedIds = this.prioritizedUploadedJobIds();
+    if (prioritizedIds.size === 0) {
+      return jobs;
+    }
+
+    return [...jobs].sort((a, b) => {
+      const aPrio = prioritizedIds.has(a.id) ? 1 : 0;
+      const bPrio = prioritizedIds.has(b.id) ? 1 : 0;
+      return bPrio - aPrio;
+    });
+  });
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
   readonly fileTypeChips = DEFAULT_FILE_TYPE_CHIPS;
   readonly projectSelectionDialogOpen = signal(false);
@@ -341,6 +359,22 @@ export class UploadPanelComponent {
     job: UploadJob;
     action: UploadItemMenuAction;
   }): Promise<void> {
+    if (event.action === 'open_existing_media') {
+      await this.openExistingDuplicateInMedia(event.job);
+      return;
+    }
+
+    if (event.action === 'upload_anyway') {
+      this.uploadManager.forceDuplicateUpload(event.job.id);
+      this.selectedLane.set('uploading');
+      return;
+    }
+
+    if (event.action === 'open_project') {
+      await this.openUploadedJobProject(event.job);
+      return;
+    }
+
     if (event.action === 'open_in_media') {
       await this.openUploadedJobInMedia(event.job);
       return;
@@ -363,7 +397,16 @@ export class UploadPanelComponent {
 
     if (event.action === 'change_location_address') {
       this.openLocationAddressDialog(event.job);
+      return;
     }
+
+    if (event.action === 'toggle_priority') {
+      this.toggleJobPriority(event.job);
+    }
+  }
+
+  isJobPrioritized(job: UploadJob): boolean {
+    return this.prioritizedUploadedJobIds().has(job.id);
   }
 
   onLocationAddressDialogQueryInput(query: string): void {
@@ -414,10 +457,7 @@ export class UploadPanelComponent {
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
       this.toastService.show({
-        message: this.t(
-          'upload.location.update.failed',
-          'Standort konnte nicht aktualisiert werden.',
-        ),
+        message: this.t('upload.location.update.failed', 'Location could not be updated.'),
         type: 'error',
         dedupe: true,
       });
@@ -426,7 +466,7 @@ export class UploadPanelComponent {
 
     this.imageUploaded.emit({ id: job.imageId, lat: result.lat, lng: result.lng });
     this.toastService.show({
-      message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),
+      message: this.t('upload.location.update.success', 'Location updated.'),
       type: 'success',
       dedupe: true,
     });
@@ -551,6 +591,54 @@ export class UploadPanelComponent {
     await this.router.navigate(['/media']);
   }
 
+  private async openExistingDuplicateInMedia(job: UploadJob): Promise<void> {
+    if (!job.existingImageId) {
+      return;
+    }
+
+    this.workspaceSelectionService.setSingle(job.existingImageId);
+    this.workspacePaneObserver.setDetailImageId(job.existingImageId);
+    this.workspacePaneObserver.setOpen(true);
+
+    await this.router.navigate(['/media']);
+  }
+
+  private async openUploadedJobProject(job: UploadJob): Promise<void> {
+    if (!job.projectId) {
+      this.toastService.show({
+        message: this.t('upload.item.menu.project.unavailable', 'No project assigned.'),
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    await this.router.navigate(['/projects', job.projectId]);
+  }
+
+  private toggleJobPriority(job: UploadJob): void {
+    if (!job.imageId) {
+      return;
+    }
+
+    const next = new Set(this.prioritizedUploadedJobIds());
+    const had = next.has(job.id);
+    if (had) {
+      next.delete(job.id);
+    } else {
+      next.add(job.id);
+    }
+    this.prioritizedUploadedJobIds.set(next);
+
+    this.toastService.show({
+      message: had
+        ? this.t('upload.item.menu.priority.removedToast', 'Priority removed.')
+        : this.t('upload.item.menu.priority.addedToast', 'Upload prioritized.'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
   private requestLocationPickOnMap(job: UploadJob): void {
     if (!job.imageId) {
       return;
@@ -558,10 +646,7 @@ export class UploadPanelComponent {
 
     this.locationMapPickRequested.emit({ imageId: job.imageId, fileName: job.file.name });
     this.toastService.show({
-      message: this.t(
-        'upload.location.mapPick.hint',
-        'Karte anklicken, um den Standort zu setzen.',
-      ),
+      message: this.t('upload.location.mapPick.hint', 'Click on the map to set the location.'),
       type: 'info',
       dedupe: true,
     });

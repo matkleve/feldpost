@@ -108,6 +108,7 @@ When creating or changing UI components, all user-facing text must be added to t
 Non-negotiable behavior:
 
 - Use deterministic key-based i18n lookups (`t(key, fallback)`) for all product UI copy.
+- Keep every `fallback` in `t(key, fallback)` in English as the canonical source text.
 - Avoid introducing new hardcoded user-visible literals in templates/component strings (except explicit temporary migration fallback).
 - Language switch option labels must remain in native form and never be translated by active locale: `English`, `Deutsch`, `Italiano`.
 

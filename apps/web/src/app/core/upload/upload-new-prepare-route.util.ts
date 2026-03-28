@@ -160,6 +160,11 @@ async function hashAndCheckDedup(
     return false;
   }
 
+  if (job.forceDuplicateUpload) {
+    deps.jobState.updateJob(jobId, { forceDuplicateUpload: false });
+    return false;
+  }
+
   deps.jobState.setPhase(jobId, 'hashing');
   const fileHead = await readFileHead(job.file);
   const contentHash = await computeContentHash({

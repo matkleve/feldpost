@@ -157,7 +157,12 @@ export class UploadAttachPipelineService {
     const contentHash = await computeAttachContentHash(currentJob.file, parsedExif);
     this.jobState.updateJob(jobId, { contentHash });
     this.jobState.setPhase(jobId, 'dedup_check');
-    const dedupResult = await ctx.checkDedupHash(contentHash);
+    const dedupResult = currentJob.forceDuplicateUpload
+      ? null
+      : await ctx.checkDedupHash(contentHash);
+    if (currentJob.forceDuplicateUpload) {
+      this.jobState.updateJob(jobId, { forceDuplicateUpload: false });
+    }
     if (dedupResult) {
       handleDedupSkip({
         jobId,
