@@ -3,6 +3,8 @@
     class="upload-panel__file-main"
     [class.upload-panel__file-main--interactive]="interactive()"
     [class.upload-panel__file-main--has-menu]="hasMenuActions()"
+    [class.upload-panel__file-main--selectable]="selectable()"
+    [class.upload-panel__file-main--selected]="selected()"
     [attr.role]="interactive() ? 'button' : null"
     [attr.tabindex]="interactive() ? '0' : null"
     [attr.aria-label]="
@@ -16,6 +18,18 @@
     (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
     (contextmenu)="onRowContextMenu($event)"
   >
+    @if (selectable()) {
+      <label class="upload-panel__selection" (click)="$event.stopPropagation()">
+        <input
+          class="upload-panel__selection-input"
+          type="checkbox"
+          [checked]="selected()"
+          [attr.aria-checked]="selected()"
+          (change)="onSelectionChanged($event)"
+        />
+      </label>
+    }
+
     <div class="upload-panel__thumbnail-container">
       <div class="upload-panel__thumbnail-helper">
         <app-universal-media

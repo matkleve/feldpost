@@ -23,28 +23,54 @@
 
   <!-- Upload button — top-right of map zone, visually over map -->
   <div class="upload-btn-zone" [class.upload-btn-zone--open]="uploadPanelOpen()">
+    @if (collapsedPreviewItems().length > 0) {
+      <div
+        class="upload-btn-zone__preview-list"
+        [attr.aria-label]="t('upload.trigger.preview.aria', 'Uploading previews')"
+        role="list"
+      >
+        @for (job of collapsedPreviewItems(); track job.id) {
+          <div class="upload-btn-zone__preview-item" role="listitem">
+            <span class="upload-btn-zone__preview-dot" aria-hidden="true"></span>
+            <span class="upload-btn-zone__preview-name" [title]="job.file.name">{{
+              job.file.name
+            }}</span>
+          </div>
+        }
+      </div>
+    }
+
     <!-- Icon button (always visible) -->
     <button
       uiButton
       uiButtonIconOnly
       class="map-upload-btn"
       type="button"
-      aria-label="Upload images"
-      title="Upload images"
+      [attr.aria-label]="t('auto.0369.upload_images', 'Upload images')"
+      [attr.title]="t('auto.0369.upload_images', 'Upload images')"
       [class.map-upload-btn--active]="uploadPanelOpen()"
+      [class.map-upload-btn--busy]="showExpandedUploadButton()"
+      [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
       (click)="toggleUploadPanel()"
     >
+      <span class="map-upload-btn__icon-shell" aria-hidden="true">
+        @if (uploadBatchActive()) {
+          <span
+            class="map-upload-btn__progress"
+            [style.--upload-progress]="uploadBatchProgress() + '%'"
+            aria-hidden="true"
+          ></span>
+        }
+        <span class="material-icons" aria-hidden="true">upload</span>
+      </span>
       @if (uploadBatchActive()) {
-        <span
-          class="map-upload-btn__progress"
-          [style.--upload-progress]="uploadBatchProgress() + '%'"
-          aria-hidden="true"
-        ></span>
-      }
-      <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
-      @if (uploadBatchActive()) {
-        <span class="map-upload-btn__percent" aria-hidden="true">
-          {{ uploadBatchProgress() }}%
+        <span class="map-upload-btn__summary" aria-hidden="true">
+          <span class="map-upload-btn__summary-label">{{
+            t('upload.trigger.status.uploading', 'Uploading...')
+          }}</span>
+          <span class="map-upload-btn__summary-count"
+            >{{ uploadSummaryCurrent() }}/{{ uploadSummaryTotal() }}</span
+          >
         </span>
       }
     </button>

@@ -59,25 +59,67 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--spacing-2);
+
+  &__preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    width: min(14rem, calc(100vw - var(--spacing-8)));
+  }
+
+  &__preview-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-height: 1.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.1rem var(--spacing-2);
+  }
+
+  &__preview-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 50%, transparent);
+    animation: upload-panel-dot-pulse 1.2s ease-out infinite;
+    flex-shrink: 0;
+  }
+
+  &__preview-name {
+    min-width: 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .map-upload-btn {
   --upload-progress: 0%;
 
-  width: 44px;
-  height: 44px;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   background: var(--color-clay);
   color: var(--color-bg-surface);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--spacing-2);
   box-shadow: var(--elevation-overlay);
   transition:
     background 120ms ease-out,
-    transform 120ms ease-out;
+    transform 120ms ease-out,
+    width 180ms var(--motion-standard);
   flex-shrink: 0;
   position: relative;
   isolation: isolate;
@@ -95,6 +137,34 @@
 
   &--active {
     background: color-mix(in srgb, var(--color-clay) 80%, var(--color-text-primary));
+  }
+
+  &--busy {
+    width: min(13.5rem, calc(100vw - var(--spacing-8)));
+    justify-content: flex-start;
+    padding: 0 var(--spacing-2);
+  }
+
+  &--issues {
+    border: 2px solid color-mix(in srgb, var(--color-warning) 88%, var(--color-bg-surface));
+  }
+
+  &__icon-shell {
+    position: relative;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 2;
+
+    .material-icons {
+      font-size: var(--font-size-xl);
+      position: relative;
+      z-index: 2;
+    }
   }
 
   &__progress {
@@ -116,20 +186,41 @@
     }
   }
 
-  &__percent {
-    position: absolute;
-    bottom: -0.8rem;
-    right: 50%;
-    transform: translateX(50%);
-    font-size: var(--font-size-caption);
+  &__summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-2);
+    min-width: 0;
+    flex: 1;
+    font-size: var(--font-size-xs);
     line-height: var(--line-height-solid);
-    color: var(--color-text-primary);
-    background: var(--color-bg-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-    padding: 0.125rem 0.35rem;
+  }
+
+  &__summary-label {
+    color: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-border));
+    white-space: nowrap;
+  }
+
+  &__summary-count {
+    color: var(--color-bg-surface);
+    font-weight: var(--font-weight-semibold);
     z-index: 3;
-    pointer-events: none;
+    white-space: nowrap;
+  }
+}
+
+@keyframes upload-panel-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 50%, transparent);
+  }
+
+  70% {
+    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--color-primary) 0%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
   }
 }
 
@@ -139,12 +230,12 @@
   flex-direction: column;
   width: min(420px, calc(100vw - var(--spacing-6)));
   max-height: min(82vh, 48rem);
-  overflow: hidden;
+  overflow: visible;
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--color-bg-surface) 95%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--elevation-overlay);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 
   &--visible {
     display: flex;

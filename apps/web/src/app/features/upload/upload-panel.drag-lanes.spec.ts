@@ -48,7 +48,7 @@ describe('UploadPanelComponent drag-and-drop interactions', () => {
 });
 
 describe('UploadPanelComponent progress board', () => {
-  it('renders progress board and matrix when jobs exist', async () => {
+  it('renders segmented lane switch and no dot matrix when jobs exist', async () => {
     const { fixture, fakeManager } = await setupUploadPanel();
     fakeManager._jobsSignal.set([
       makeUploadJob({ phase: 'queued', statusLabel: 'Queued' }),
@@ -56,14 +56,14 @@ describe('UploadPanelComponent progress board', () => {
     ]);
     fixture.detectChanges();
 
-    const board = fixture.debugElement.query(By.css('.upload-panel__progress-board'));
+    const board = fixture.debugElement.query(By.css('.ui-tab-list[role="tablist"]'));
     const dots = fixture.debugElement.queryAll(By.css('.upload-panel__dot'));
 
     expect(board).not.toBeNull();
-    expect(dots.length).toBe(2);
+    expect(dots.length).toBe(0);
   });
 
-  it('shows last upload summary when queue is empty and completed batch exists', async () => {
+  it('does not show legacy last upload summary when queue is empty and completed batch exists', async () => {
     const { fixture, fakeManager } = await setupUploadPanel();
     fakeManager._jobsSignal.set([]);
     fakeManager._batchesSignal.set([
@@ -83,9 +83,7 @@ describe('UploadPanelComponent progress board', () => {
     fixture.detectChanges();
 
     const lastUpload = fixture.debugElement.query(By.css('.upload-panel__last-upload'));
-    expect(lastUpload).not.toBeNull();
-    expect(lastUpload.nativeElement.textContent).toContain('Last upload');
-    expect(lastUpload.nativeElement.textContent).toContain('Batch · 4 files');
+    expect(lastUpload).toBeNull();
   });
 
   it('shows idle empty state when no jobs and no completed batch exist', async () => {

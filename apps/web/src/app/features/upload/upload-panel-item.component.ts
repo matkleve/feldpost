@@ -53,6 +53,8 @@ export class UploadPanelItemComponent {
 
   readonly job = input.required<UploadJob>();
   readonly interactive = input<boolean>(false);
+  readonly selectable = input<boolean>(false);
+  readonly selected = input<boolean>(false);
   readonly documentFallbackLabel = input<string | null>(null);
   readonly showOpenProject = input<boolean>(false);
   readonly prioritized = input<boolean>(false);
@@ -63,6 +65,7 @@ export class UploadPanelItemComponent {
   readonly rowMainClick = output<UploadJob>();
   readonly rowMainKeydown = output<{ job: UploadJob; event: KeyboardEvent }>();
   readonly menuActionSelected = output<{ job: UploadJob; action: UploadItemMenuAction }>();
+  readonly selectionChanged = output<{ jobId: string; selected: boolean }>();
 
   readonly menuOpen = signal(false);
   readonly menuPosition = signal<{ x: number; y: number } | null>(null);
@@ -209,6 +212,15 @@ export class UploadPanelItemComponent {
     event.stopPropagation();
     this.menuOpen.set(false);
     this.dismissFile.emit(this.job().id);
+  }
+
+  onSelectionChanged(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    this.selectionChanged.emit({ jobId: this.job().id, selected: target.checked });
   }
 
   fileTypeBadge(): string | null {

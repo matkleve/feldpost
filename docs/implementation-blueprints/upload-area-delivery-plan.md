@@ -1,6 +1,6 @@
 # Upload Area Delivery Plan (To Done)
 
-This plan covers end-to-end delivery of the upload area, including file uploads, batch progress board, lane triage, and photo capture support.
+This plan covers end-to-end delivery of the upload area, including file uploads, segmented lane triage, and photo capture support.
 
 ## Why This Plan Exists
 
@@ -13,7 +13,7 @@ Ship an upload area that:
 - Opens from the map upload button as compact container
 - Accepts image files from picker, drag/drop, folder import
 - Supports direct photo capture on mobile and camera-enabled devices
-- Shows per-photo state with dot matrix and lane filtering (Uploading, Uploaded, Issues)
+- Shows per-file state via lane filtering (Uploading, Uploaded, Issues)
 - Lets users fix issue items (address/location retry path)
 - Continues uploads in background after panel close
 - Enforces role permissions via RLS (admin, clerk, worker same for now; viewer read-only)
@@ -79,18 +79,22 @@ Tasks:
 1. Finalize upload button morph and container open/close states.
 2. Keep aggregate progress ring visible when panel collapsed.
 3. Ensure responsive behavior desktop/mobile.
+4. While panel is collapsed and uploads are active, show top-right live preview of up to 3 currently uploading items.
+5. In collapsed busy state, expand the upload trigger itself horizontally (same height as trigger) and show `Uploading...` plus `current/total` summary.
 
 Done criteria:
 
 - Open/close animation and states match specs.
 - Upload can continue when panel closed.
+- Collapsed-state busy UX shows both progress ring and 3-item live preview contract.
+- Collapsed busy state uses expanded trigger behavior (no separate status-rail surface).
 
 ### 3.2 Drop Area and File Intake
 
 Tasks:
 
 1. Drag/drop and file picker multi-select.
-2. Folder upload where supported.
+2. Keep Folder Upload button visible and clickable; use directory-picker fallback when `showDirectoryPicker` is unavailable.
 3. Validation feedback for type/size errors.
 
 Done criteria:
@@ -130,27 +134,44 @@ Current status:
 - In progress: `Take photo` action and capture-file input path are implemented.
 - Pending: optional in-app camera stream (`getUserMedia`) decision and implementation.
 
-### 3.4 Progress Board and Lanes
+### 3.4 Segmented Switch and Lanes
 
 Tasks:
 
-1. Dot matrix color/state mapping.
-2. Uploading pulse state.
-3. Lane switch and filtered gallery list.
-4. Stable ordering of jobs (no visual jumping).
-5. Separate issue semantics for duplicate review vs. GPS/manual placement.
-6. Ensure uploaded-lane actions are derived from persisted media state and project binding.
+1. Lane switch and filtered gallery list.
+   - Queue and Uploaded use compact square button treatment.
+   - Issues uses stretched icon+text treatment.
+   - Segmented switch spans full container width (same horizontal edges as upload area and folder button).
+2. Stable ordering of jobs (no visual jumping).
+3. Separate issue semantics for duplicate review vs. GPS/manual placement.
+   - Duplicate-photo review and GPS/location issues are distinct issue subtypes with distinct action sets.
+   - `Upload anyway` is allowed only in duplicate-photo review.
+   - `Upload anyway` must never appear for GPS/location issue rows.
+4. Ensure uploaded-lane actions are derived from persisted media state and project binding.
+5. Render lane rows with a dedicated transparent, padding-free overflow wrapper capped at 5 visible rows with internal scrolling.
+6. Enforce strict vertical block stacking with layout gaps between: Upload area -> Folder button -> Segmented switch -> File list.
+7. Keep file list entries as full-width stacked items separated by gap spacing (no row-border separators).
 
 Done criteria:
 
-- Matrix and lanes reflect real-time job state transitions correctly.
 - Lane counts and lane lists are derived from the same semantic bucket mapping.
 - GPS issues never expose force-upload actions.
+- Duplicate-photo issue rows expose duplicate-resolution actions and may expose `Upload anyway`.
+- GPS/location issue rows expose placement/correction actions only; no force-upload affordances.
 - Uploaded rows expose follow-up actions only when persisted media data exists.
+- Queue/Uploaded/Issues lane list containers share the 5-visible-row + internal-scroll behavior via a transparent overflow wrapper.
+- Segmented switch and file list blocks are full width and aligned edge-to-edge with upload area and folder button.
+- Segmented switch block does not render an extra card/tile shell; the tab list itself is the only container for switch options.
+- Upload panel root section is unstyled (no padding, border, background, shadow); visual surfaces belong to inner blocks only.
+- Section separation uses vertical layout gaps between blocks, not decorative separators.
+- File item separation uses item gaps, not table-row borders.
+- Lane item surfaces have no white tile background.
+- Item gaps are visually transparent/see-through.
+- Upload panel shell stays mostly transparent so inter-block gaps are visually see-through to the map/background behind.
 
 Current status:
 
-- In progress: dot matrix + lane switch + lane-filtered list implemented in Upload Panel.
+- In progress: lane switch + lane-filtered list implemented in Upload Panel.
 - Pending: broader integration pass against real mixed batches and issue-correction flow.
 - Pending: lane semantics still need final alignment for duplicate review, GPS issues, and uploaded follow-up actions.
 
@@ -162,13 +183,29 @@ Tasks:
 2. Edit address/location metadata.
 3. Retry resolution and state transition.
 4. Keep duplicate-hash review separate from GPS/location correction.
-5. Support `Trotzdem hochladen` only for duplicate-photo review.
+5. Support `Upload anyway` only for duplicate-photo review.
 
 Done criteria:
 
 - Issues can be fixed from panel and transition to uploaded on success.
 - Duplicate-photo issues support explicit override or use-existing decisions.
 - GPS issues support placement/correction flows and do not expose force-upload.
+
+### 3.6 Workspace Upload Tab Multi-Select (NEW)
+
+Tasks:
+
+1. Keep compact map-overlay upload panel menu-first (no checkboxes in compact mode).
+2. Enable checkbox reveal on upload rows only when UploadPanel is embedded in Workspace Upload tab.
+3. Add selection footer toolbar in embedded mode with `retry`, `download`, `remove`, `clear`.
+4. Route bulk remove by job phase: cancel active, dismiss terminal.
+5. Keep row/menu geometry aligned with `.ui-item` + dropdown primitives.
+
+Done criteria:
+
+- Multi-select exists only in Workspace Upload tab.
+- Compact panel remains unchanged interaction-wise for row selection.
+- Bulk actions map to existing upload manager operations without introducing parallel code paths.
 
 ## 4) Pipeline and Data Integration
 
@@ -211,16 +248,16 @@ Current status:
 
 ### Manual Scenario Pass
 
-1. Idle open and last-upload summary.
+1. Idle open without legacy last-upload summary.
 2. Batch upload matrix progression.
 3. Lane switching.
 4. Issue correction loop.
 5. Collapse while uploads continue.
 6. Take photo on mobile/camera-enabled browser and complete upload.
-7. Duplicate-photo issue enters `Issues` and offers `Trotzdem hochladen`.
+7. Duplicate-photo issue enters `Issues` and offers `Upload anyway`.
 8. Missing-GPS issue enters `Issues` and offers placement-only actions.
-9. Uploaded item exposes `Zu Projekt hinzufügen`, `Priorisieren`, `In /media anzeigen`, and `Herunterladen`.
-10. `Projekt öffnen` appears only for uploads already bound to a project.
+9. Uploaded item exposes `Add to project`, `Prioritize`, `Open in /media`, and `Download`.
+10. `Open project` appears only for uploads already bound to a project.
 
 Done criteria:
 
@@ -250,7 +287,7 @@ Current status:
 - [ ] M1: Permission baseline validated (admin/clerk/worker/viewer)
 - [ ] M2: Upload container + intake complete
 - [ ] M3: Photo capture support complete
-- [ ] M4: Dot matrix + lane triage complete
+- [ ] M4: Segmented switch + lane triage complete
 - [ ] M5: Issue correction loop complete
 - [ ] M6: Full QA + staged rollout complete
 
@@ -259,4 +296,4 @@ Status notes:
 - M1: Mostly done, but requires repeatable SQL validation script output attached to release docs.
 - M2: Done for current scope (container, intake, progress trigger, tests green).
 - M3: In progress (capture-input path complete; stream-preview path optional/pending).
-- M4: In progress (dot matrix + lane triage implemented; integration verification pending).
+- M4: In progress (segmented switch + lane triage implemented; integration verification pending).

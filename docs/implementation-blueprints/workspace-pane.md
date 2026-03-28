@@ -37,6 +37,10 @@ The pane already emits hover start/end events. Remaining work should focus on co
 
 Cluster-open behavior, header count presentation, and large-cluster progressive behavior should be treated as follow-up UX work on top of the current workspace dataset pipeline.
 
+### 5. Upload-tab selection ergonomics
+
+Upload tab now carries workspace-only multi-select intent (hover/focus checkbox reveal + bottom selection footer actions). Keep this behavior scoped to embedded UploadPanel usage in `WorkspacePaneComponent`; do not mirror it into compact map-overlay panel mode.
+
 ## Guardrails For Future Changes
 
 - Do not redesign the pane around a second future-only component abstraction.

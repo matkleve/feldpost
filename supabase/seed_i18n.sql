@@ -19812,6 +19812,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.trigger.preview.aria', 'Uploading previews', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploading previews', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.trigger.preview.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hochlade-Vorschauen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.trigger.preview.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Anteprime caricamento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.trigger.preview.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.trigger.status.uploading', 'Uploading...', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploading...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.trigger.status.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird hochgeladen...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.trigger.status.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento in corso...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.trigger.status.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.placement.banner.placeImage', 'Click the map to place the image', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:return')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

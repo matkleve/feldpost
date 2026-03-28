@@ -7,19 +7,49 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  width: 100%;
 }
 
 .upload-panel__file-main {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
+  width: 100%;
   padding: var(--spacing-2);
   background: transparent;
   border: none;
   transition: background 120ms ease-out;
   position: relative;
   border-radius: var(--radius-lg);
+}
+
+.upload-panel__selection {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-1);
+}
+
+.upload-panel__selection-input {
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  accent-color: var(--color-clay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+
+.upload-panel__file-main--selectable:hover .upload-panel__selection-input,
+.upload-panel__file-main--selectable.upload-panel__file-main--selected
+  .upload-panel__selection-input,
+.upload-panel__file-main--selectable:focus-within .upload-panel__selection-input {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.upload-panel__file-main--selectable.upload-panel__file-main--selected {
+  background: color-mix(in srgb, var(--color-clay) 10%, var(--color-bg-surface));
 }
 
 .upload-panel__file-main--interactive {

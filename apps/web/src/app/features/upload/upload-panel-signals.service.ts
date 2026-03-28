@@ -23,13 +23,10 @@ export class UploadPanelSignalsService {
   // ── Delegated state ────────────────────────────────────────────────────────
 
   readonly laneCounts = this.state.laneCounts;
-  readonly dotItems = this.state.dotItems;
   readonly scanning = this.state.scanning;
   readonly scanningLabel = this.state.scanningLabel;
   readonly hasAwaitingPlacement = this.state.hasAwaitingPlacement;
   readonly showProgressBoard = this.state.showProgressBoard;
-  readonly showLastUpload = this.state.showLastUpload;
-  readonly lastUploadLabel = this.state.lastUploadLabel;
 
   // ── UI State (lane selection) ──────────────────────────────────────────────
 

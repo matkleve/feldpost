@@ -330,6 +330,15 @@ export class LocationResolverService {
       country: string | null;
     },
   ): Promise<void> {
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      console.warn('[LocationResolver] Skipping GPS persistence due to invalid coordinates', {
+        imageId,
+        lat,
+        lng,
+      });
+      return;
+    }
+
     const { error } = await this.supabase.client.rpc('resolve_media_location', {
       p_media_item_id: imageId,
       p_latitude: lat,

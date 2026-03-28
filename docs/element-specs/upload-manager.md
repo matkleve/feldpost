@@ -44,8 +44,35 @@ Canonical document/office upload catalog for this manager contract is: `DOC`, `D
 | 8   | User retries failed job                            | Requeues from start with new phase transitions                 | Job id retained                    |
 | 9   | User cancels job or batch                          | Stops work and performs cleanup as needed                      | Emits cancellation events          |
 | 10  | Persisted upload is shown in Uploaded lane actions | Exposes add-to-project, prioritize, download, media navigation | Only after saved media exists      |
-| 10a | User selects `Standort ändern > Karte anklicken`   | Enters map-pick flow and persists clicked coordinates          | Existing media row is updated      |
-| 10b | User selects `Standort ändern > Adresse eingeben`  | Opens address-finder overlay and persists selected suggestion  | Hover previews are map-only, no DB |
+| 10a | User selects `Change location > Click on map`      | Enters map-pick flow and persists clicked coordinates          | Existing media row is updated      |
+| 10b | User selects `Change location > Enter address`     | Opens address-finder overlay and persists selected suggestion  | Hover previews are map-only, no DB |
+
+### Uploaded-Lane Follow-up Action Gating
+
+Uploaded-lane 3-dot actions are conditional and MUST NOT render before required persisted media data is confirmed.
+
+```mermaid
+flowchart TD
+  A[Uploaded row candidate] --> B{imageId present?}
+  B -->|no| Z[Hide all persisted follow-up actions]
+  B -->|yes| C[Show Open in /media]
+  C --> D[Show Prioritize]
+  D --> E{storagePath present?}
+  E -->|yes| F[Show Download]
+  E -->|no| G[Hide Download]
+  D --> H{projectId present?}
+  H -->|yes| I[Show Open project]
+  H -->|no| J[Hide Open project]
+```
+
+| Action           | Required data to render   |
+| ---------------- | ------------------------- |
+| `Open in /media` | `imageId`                 |
+| `Prioritize`     | `imageId`                 |
+| `Download`       | `imageId` + `storagePath` |
+| `Open project`   | `imageId` + `projectId`   |
+
+If required data is missing or unresolved, the action is hidden until the persistence layer confirms readiness.
 
 ## Component Hierarchy
 
@@ -91,7 +118,7 @@ flowchart TD
 ```mermaid
 flowchart LR
   A[Upload job] --> B{Issue kind}
-  B -->|duplicate_photo| C[Trotzdem hochladen<br/>Use existing<br/>Reject]
+  B -->|duplicate_photo| C[Upload anyway<br/>Use existing<br/>Reject]
   B -->|missing_gps| D[Place on map<br/>Defer<br/>Dismiss]
   B -->|conflict_review| E[Resolve conflict<br/>Retry<br/>Dismiss]
   B -->|none and complete| F[Open in media<br/>Add to project<br/>Prioritize<br/>Download]
@@ -219,10 +246,10 @@ sequenceDiagram
 - [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
 - [ ] Duplicate resolution supports a batch apply option for matching items.
 - [ ] Duplicate issue rows expose navigation to the existing placed media.
-- [ ] Duplicate issue rows expose `Trotzdem hochladen` only for duplicate-photo review, never for GPS issues.
-- [ ] Persisted successful uploads expose follow-up actions including `Zu Projekt hinzufügen`, `Priorisieren`, `In /media anzeigen`, and `Herunterladen`.
-- [ ] `Projekt öffnen` appears only when the saved media item is already bound to a project.
-- [ ] `Standort ändern` in uploaded rows exposes `Karte anklicken` and `Adresse eingeben` as separate flows.
+- [ ] Duplicate issue rows expose `Upload anyway` only for duplicate-photo review, never for GPS issues.
+- [ ] Persisted successful uploads expose follow-up actions including `Add to project`, `Prioritize`, `Open in /media`, and `Download`.
+- [ ] `Open project` appears only when the saved media item is already bound to a project.
+- [ ] `Change location` in uploaded rows exposes `Click on map` and `Enter address` as separate flows.
 - [ ] Address-suggestion hover previews map position without persisting until suggestion selection.
 - [ ] Ambiguous street+house matches are auto-assigned only when disambiguation probability is at or above threshold (default `0.95`).
 - [ ] Parser residual fragments are preserved as address notes and remain visible in media details.

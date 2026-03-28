@@ -52,6 +52,7 @@ import { ProjectsService } from '../../core/projects/projects.service';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
 import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
 import { MediaLocationUpdateService } from '../../core/media-location-update.service';
+import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -139,6 +140,7 @@ function toChipVariant(category: string): ChipVariant {
     UiButtonDirective,
     UiInputControlDirective,
     ProjectSelectDialogComponent,
+    PaneFooterComponent,
   ],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
@@ -182,13 +184,10 @@ export class UploadPanelComponent {
   readonly folderImportSupported = this.signals.folderImportSupported;
   readonly isUploading = this.signals.isUploading;
   readonly laneCounts = this.signals.laneCounts;
-  readonly dotItems = this.signals.dotItems;
   readonly scanning = this.signals.scanning;
   readonly scanningLabel = this.signals.scanningLabel;
   readonly hasAwaitingPlacement = this.signals.hasAwaitingPlacement;
   readonly showProgressBoard = this.signals.showProgressBoard;
-  readonly showLastUpload = this.signals.showLastUpload;
-  readonly lastUploadLabel = this.signals.lastUploadLabel;
   readonly isDragging = this.inputs.isDragging;
   readonly selectedLane = this.signals.selectedLane;
   readonly effectiveLane = this.signals.effectiveLane;
@@ -213,6 +212,27 @@ export class UploadPanelComponent {
   });
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
   readonly fileTypeChips = DEFAULT_FILE_TYPE_CHIPS;
+  readonly selectedUploadJobIds = signal<Set<string>>(new Set());
+  readonly selectedUploadJobs = computed(() => {
+    const selected = this.selectedUploadJobIds();
+    if (selected.size === 0) {
+      return [] as UploadJob[];
+    }
+
+    return this.jobs().filter((job) => selected.has(job.id));
+  });
+  readonly hasSelectedUploadJobs = computed(() => this.selectedUploadJobs().length > 0);
+  readonly hasRetryableSelection = computed(() =>
+    this.selectedUploadJobs().some((job) => this.isRetryableJob(job)),
+  );
+  readonly canDownloadSelectedUploads = computed(() => {
+    const jobs = this.selectedUploadJobs();
+    if (jobs.length === 0) {
+      return false;
+    }
+
+    return jobs.every((job) => !!job.imageId && !!job.storagePath && this.canZoomToJob(job));
+  });
   readonly projectSelectionDialogOpen = signal(false);
   readonly projectSelectionDialogTitle = signal(
     this.t('auto.0013.add_to_project', 'Add to project'),
@@ -244,6 +264,25 @@ export class UploadPanelComponent {
     effect(() => {
       const jobs = this.uploadManager.jobs();
       void jobs; // Track reactivity
+    });
+
+    effect(() => {
+      const existingIds = new Set(this.jobs().map((job) => job.id));
+      const selected = this.selectedUploadJobIds();
+      if (selected.size === 0) {
+        return;
+      }
+
+      const next = new Set<string>();
+      for (const id of selected) {
+        if (existingIds.has(id)) {
+          next.add(id);
+        }
+      }
+
+      if (next.size !== selected.size) {
+        this.selectedUploadJobIds.set(next);
+      }
     });
 
     // Bridge component outputs to lifecycle service
@@ -295,9 +334,6 @@ export class UploadPanelComponent {
   setSelectedLane(lane: UploadLane): void {
     this.lanes.setSelectedLane(lane);
   }
-  onDotClick(jobId: string): void {
-    this.lanes.onDotClick(jobId);
-  }
 
   // ── Row handlers (delegated to rows service) ────────────────────────────
 
@@ -342,6 +378,15 @@ export class UploadPanelComponent {
   }
   dismissFile(jobId: string): void {
     this.rows.dismissFile(jobId);
+    this.selectedUploadJobIds.update((selected) => {
+      if (!selected.has(jobId)) {
+        return selected;
+      }
+
+      const next = new Set(selected);
+      next.delete(jobId);
+      return next;
+    });
   }
   retryFile(jobId: string): void {
     this.rows.retryFile(jobId);
@@ -353,6 +398,52 @@ export class UploadPanelComponent {
 
   trackByJobId(idx: number, job: UploadJob): string {
     return trackByJobId(idx, job);
+  }
+
+  onRowSelectionChanged(event: { jobId: string; selected: boolean }): void {
+    this.selectedUploadJobIds.update((selected) => {
+      const next = new Set(selected);
+      if (event.selected) {
+        next.add(event.jobId);
+      } else {
+        next.delete(event.jobId);
+      }
+      return next;
+    });
+  }
+
+  clearSelectedUploads(): void {
+    this.selectedUploadJobIds.set(new Set());
+  }
+
+  async retrySelectedUploads(): Promise<void> {
+    for (const job of this.selectedUploadJobs()) {
+      if (this.isRetryableJob(job)) {
+        this.retryFile(job.id);
+      }
+    }
+    this.clearSelectedUploads();
+    this.selectedLane.set('uploading');
+  }
+
+  async downloadSelectedUploads(): Promise<void> {
+    for (const job of this.selectedUploadJobs()) {
+      if (job.imageId && job.storagePath && this.canZoomToJob(job)) {
+        await this.downloadUploadedJob(job);
+      }
+    }
+  }
+
+  removeSelectedUploads(): void {
+    for (const job of this.selectedUploadJobs()) {
+      if (this.isTerminalJob(job.phase)) {
+        this.dismissFile(job.id);
+      } else {
+        this.uploadManager.cancelJob(job.id);
+      }
+    }
+
+    this.clearSelectedUploads();
   }
 
   async onMenuActionSelected(event: {
@@ -637,6 +728,16 @@ export class UploadPanelComponent {
       type: 'success',
       dedupe: true,
     });
+  }
+
+  private isRetryableJob(job: UploadJob): boolean {
+    return job.phase === 'error' || job.phase === 'missing_data' || job.phase === 'skipped';
+  }
+
+  private isTerminalJob(phase: UploadPhase): boolean {
+    return (
+      phase === 'complete' || phase === 'error' || phase === 'missing_data' || phase === 'skipped'
+    );
   }
 
   private requestLocationPickOnMap(job: UploadJob): void {

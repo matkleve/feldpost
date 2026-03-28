@@ -41,6 +41,7 @@ import {
   ImageReplacedEvent,
   ImageAttachedEvent,
   UploadFailedEvent,
+  type UploadJob,
 } from '../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
@@ -101,6 +102,7 @@ import { MarkerStateMutationsService } from './marker-state-mutations.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
 import { MediaLocationUpdateService } from '../../../core/media-location-update.service';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
+import { getLaneForJob } from '../../upload/upload-phase.helpers';
 import {
   UiButtonDirective,
   UiButtonGhostDirective,
@@ -267,6 +269,35 @@ export class MapShellComponent implements OnDestroy {
     const batch = this.uploadBatch();
     return !!batch && (batch.status === 'uploading' || batch.status === 'scanning');
   });
+  readonly collapsedPreviewItems = computed(() => {
+    if (this.uploadPanelOpen()) {
+      return [] as UploadJob[];
+    }
+
+    const jobs = this.uploadManagerService
+      .jobs()
+      .filter((job) => getLaneForJob(job) === 'uploading')
+      .sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime());
+
+    return jobs.slice(0, 3);
+  });
+  readonly showExpandedUploadButton = computed(
+    () => !this.uploadPanelOpen() && this.uploadBatchActive(),
+  );
+  readonly uploadHasIssues = computed(() =>
+    this.uploadManagerService.jobs().some((job) => getLaneForJob(job) === 'issues'),
+  );
+  readonly uploadSummaryCurrent = computed(() => {
+    const batch = this.uploadBatch();
+    if (!batch || batch.totalFiles <= 0) {
+      return 0;
+    }
+
+    const doneCount = batch.completedFiles + batch.failedFiles + batch.skippedFiles;
+    const inFlight = this.uploadBatchActive() ? 1 : 0;
+    return Math.min(batch.totalFiles, Math.max(0, doneCount + inFlight));
+  });
+  readonly uploadSummaryTotal = computed(() => this.uploadBatch()?.totalFiles ?? 0);
 
   /**
    * When non-null the map is in "placement mode": the next click places an

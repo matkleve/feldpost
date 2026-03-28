@@ -24,27 +24,34 @@ The currently implemented pane shows `PaneHeaderComponent`, then either `MediaDe
 
 ## Actions
 
-| #       | User Action                                 | System Response                                                                                                                                                         | Triggers                                                 |
-| ------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| 1       | Clicks a single photo marker on map         | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                                                          | `workspacePaneOpen` → true, `detailImageId` set          |
-| 1b      | Clicks a cluster marker on map              | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null)                                  | `workspacePaneOpen` → true, `detailImageId` → null       |
-| **NEW** | **Clicks "Upload" tab button**              | **Tab switches to Upload; UploadPanelComponent fully visible; all upload jobs/lanes visible**                                                                           | **`activeTab` → `'upload'`**                             |
-| **NEW** | **Clicks "Selected Items" tab button**      | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
-| **NEW** | **Navigates from /map → /media**            | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
-| **NEW** | **Navigates from /media → /map**            | **Pane stays open on globally persisted tab; selected-items content rebinds to map context only if selected-items tab is active; upload queue continues in background** | **Route change, no pane close, context rebind hook**     |
-| 2       | Drags the Drag Divider                      | Resizes workspace pane width                                                                                                                                            | Parent shell layout change                               |
-| 3       | Clicks close button                         | Workspace pane slides out (can be reopened from any page)                                                                                                               | `workspacePaneOpen` → false                              |
-| 4       | Swipes down on bottom sheet handle (mobile) | Snaps to lower position or closes                                                                                                                                       | Snap point logic                                         |
-| 5       | Swipes up on bottom sheet handle (mobile)   | Snaps to higher position                                                                                                                                                | Snap point logic                                         |
-| 6       | Clicks a thumbnail in the grid              | Image Detail View replaces grid, back arrow to return                                                                                                                   | Detail view state                                        |
-| 7       | Updates workspace toolbar controls          | Workspace view re-groups, re-sorts, or re-filters current raw images                                                                                                    | `WorkspaceViewService` reactive recompute                |
-| 8       | Clicks pane-header close button             | Workspace pane emits `closed` to parent shell                                                                                                                           | `closed` output                                          |
-| 10      | Selects one or more media items             | Workspace Export Bar animates in at pane bottom                                                                                                                         | `selectedMediaIds.size > 0`                              |
-| 11      | Clears last selected item                   | Workspace Export Bar animates out                                                                                                                                       | `selectedMediaIds.size === 0`                            |
-| 12      | Uses export bar actions                     | Opens curation/share/download flows for selected media                                                                                                                  | Workspace export wiring                                  |
-| 15      | Hovers media item in workspace list/grid    | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer                                     | `hoveredWorkspaceImageId`                                |
-| 16      | Hovers marker on map                        | Matching workspace media item receives linked-hover highlight state                                                                                                     | `hoveredMarkerImageId` / cluster hover payload           |
-| 17      | Leaves hover (either side)                  | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                                                           | hover clear events                                       |
+| #       | User Action                                          | System Response                                                                                                                                                         | Triggers                                                 |
+| ------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| 1       | Clicks a single photo marker on map                  | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                                                          | `workspacePaneOpen` → true, `detailImageId` set          |
+| 1b      | Clicks a cluster marker on map                       | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null)                                  | `workspacePaneOpen` → true, `detailImageId` → null       |
+| **NEW** | **Clicks "Upload" tab button**                       | **Tab switches to Upload; UploadPanelComponent fully visible; all upload jobs/lanes visible**                                                                           | **`activeTab` → `'upload'`**                             |
+| **NEW** | **Clicks "Selected Items" tab button**               | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
+| **NEW** | **Navigates from /map → /media**                     | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
+| **NEW** | **Navigates from /media → /map**                     | **Pane stays open on globally persisted tab; selected-items content rebinds to map context only if selected-items tab is active; upload queue continues in background** | **Route change, no pane close, context rebind hook**     |
+| **NEW** | **Hovers an upload row in Upload tab**               | **Selection checkbox appears on that row without changing compact row geometry**                                                                                        | **`activeTab === 'upload'` + hover/focus state**         |
+| **NEW** | **Checks one or more upload rows**                   | **Upload footer toolbar appears with count and bulk actions (`retry`, `download`, `remove`, `clear`)**                                                                  | **`selectedUploadJobIds.size > 0`**                      |
+| **NEW** | **Clicks bulk `retry` in Upload tab**                | **Retries only selected retryable jobs and keeps non-retryable rows unchanged**                                                                                         | **`UploadManagerService.retryJob()` per selected row**   |
+| **NEW** | **Clicks bulk `download` in Upload tab**             | **Downloads selected uploaded items when every selected row is downloadable**                                                                                           | **signed URL path from upload item context**             |
+| **NEW** | **Clicks bulk `remove` in Upload tab**               | **Cancels selected active uploads and dismisses selected terminal uploads**                                                                                             | **`cancelJob` or `dismissJob` per selected row**         |
+| **NEW** | **Clicks bulk `clear` in Upload tab**                | **Clears upload-row selection while preserving queue state**                                                                                                            | **`selectedUploadJobIds.clear()`**                       |
+| **NEW** | **Uses Upload-tab selection in compact map overlay** | **Not available; compact overlay remains menu-first without row checkboxes**                                                                                            | **`embeddedInPane === false`**                           |
+| 2       | Drags the Drag Divider                               | Resizes workspace pane width                                                                                                                                            | Parent shell layout change                               |
+| 3       | Clicks close button                                  | Workspace pane slides out (can be reopened from any page)                                                                                                               | `workspacePaneOpen` → false                              |
+| 4       | Swipes down on bottom sheet handle (mobile)          | Snaps to lower position or closes                                                                                                                                       | Snap point logic                                         |
+| 5       | Swipes up on bottom sheet handle (mobile)            | Snaps to higher position                                                                                                                                                | Snap point logic                                         |
+| 6       | Clicks a thumbnail in the grid                       | Image Detail View replaces grid, back arrow to return                                                                                                                   | Detail view state                                        |
+| 7       | Updates workspace toolbar controls                   | Workspace view re-groups, re-sorts, or re-filters current raw images                                                                                                    | `WorkspaceViewService` reactive recompute                |
+| 8       | Clicks pane-header close button                      | Workspace pane emits `closed` to parent shell                                                                                                                           | `closed` output                                          |
+| 10      | Selects one or more media items                      | Workspace Export Bar animates in at pane bottom                                                                                                                         | `selectedMediaIds.size > 0`                              |
+| 11      | Clears last selected item                            | Workspace Export Bar animates out                                                                                                                                       | `selectedMediaIds.size === 0`                            |
+| 12      | Uses export bar actions                              | Opens curation/share/download flows for selected media                                                                                                                  | Workspace export wiring                                  |
+| 15      | Hovers media item in workspace list/grid             | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer                                     | `hoveredWorkspaceImageId`                                |
+| 16      | Hovers marker on map                                 | Matching workspace media item receives linked-hover highlight state                                                                                                     | `hoveredMarkerImageId` / cluster hover payload           |
+| 17      | Leaves hover (either side)                           | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                                                           | hover clear events                                       |
 
 ### Interaction Flowchart
 
@@ -93,7 +100,14 @@ WorkspacePane                              ← `.ui-container` right panel rende
         └── UploadPanelComponent (1:1 embed, uses its own .ui-container primitive)
             ├── Drop Zone
             ├── Lane Tab Selector
-            └── Upload Job List
+        ├── Upload Job List
+        ├── [row hover/focus] RowSelectionCheckbox
+        └── [selection > 0] UploadSelectionFooter (`app-pane-footer`)
+          ├── SelectedCount
+          ├── RetrySelectionAction
+          ├── DownloadSelectionAction
+          ├── RemoveSelectionAction (cancel active, dismiss terminal)
+          └── ClearSelectionAction
 
 [In both tabs]
 ├── [detailImageId set] MediaDetailViewComponent (overlay on top, full-pane modal)
@@ -141,6 +155,7 @@ flowchart LR
 | `restoreWidth`            | `number \| null`                          | `null`             | Planned restore width after fullscreen                                                                           |
 | `restoreSnapPoint`        | `'minimized' \| 'half' \| 'full' \| null` | `null`             | Planned restore snap point after fullscreen                                                                      |
 | `selectedMediaIds`        | `Set<string>`                             | empty set          | Current media selection that drives Workspace Export Bar visibility and actions                                  |
+| `selectedUploadJobIds`    | `Set<string>`                             | empty set          | Upload-tab multi-selection state for workspace-only bulk actions                                                 |
 | `hoveredWorkspaceImageId` | `string \| null`                          | `null`             | Current workspace item under pointer for map-linked hover highlight                                              |
 | `hoveredMarkerImageId`    | `string \| null`                          | `null`             | Current map marker image reference mirrored into workspace linked-hover                                          |
 | `hoveredMarkerClusterKey` | `string \| null`                          | `null`             | Current hovered cluster marker key used to highlight all matching workspace items                                |
@@ -272,6 +287,11 @@ sequenceDiagram
 - [ ] **NEW:** Navigating to different page rebinds selected-items context while preserving global tab state
 - [ ] **NEW:** Uploads continue in background when "Selected Items" tab is active
 - [ ] **NEW:** Uploads not cancelled when navigating away from current page
+- [ ] **NEW:** Upload tab supports row-hover checkbox reveal for workspace-only multi-select
+- [ ] **NEW:** Upload selection footer appears only when at least one upload row is selected
+- [ ] **NEW:** Upload footer exposes bulk actions for retry, download, remove, and clear selection
+- [ ] **NEW:** Upload bulk remove action uses split routing: `cancelJob` for active rows, `dismissJob` for terminal rows
+- [ ] **NEW:** Compact map-overlay upload panel keeps row menu-first behavior and does not render multi-select checkboxes
 - [x] Desktop: resizable via Drag Divider (280–640px range)
 - [x] Desktop shell uses `.ui-container` for shared panel geometry
 - [ ] Mobile: bottom sheet with 3 snap points (64px, 50vh, 100vh)
