@@ -143,6 +143,16 @@ export class UploadAttachPipelineService {
       });
       currentJob = this.jobState.findJob(jobId)!;
     }
+
+    if (!this.uploadService.isPhotoFile(currentJob.file)) {
+      ctx.failJob(
+        jobId,
+        'validating',
+        'Only photo files can be attached to an existing photo-less item.',
+      );
+      return null;
+    }
+
     this.jobState.setPhase(jobId, 'hashing');
     const contentHash = await computeAttachContentHash(currentJob.file, parsedExif);
     this.jobState.updateJob(jobId, { contentHash });

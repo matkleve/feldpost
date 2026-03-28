@@ -205,8 +205,87 @@
           (dismissFile)="dismissFile(job.id)"
           (rowMainClick)="onRowMainClick(job)"
           (rowMainKeydown)="onRowMainKeydown(job, $event.event)"
+          (menuActionSelected)="onMenuActionSelected($event)"
         ></app-upload-panel-item>
       }
     </ul>
+  }
+
+  @if (locationAddressDialogOpen()) {
+    <section
+      class="upload-panel__location-editor option-menu-surface"
+      [attr.aria-label]="t('upload.location.editor.aria', 'Standort per Adresse aendern')"
+    >
+      <header class="upload-panel__location-editor-header">
+        <h4 class="upload-panel__location-editor-title">
+          {{ t('upload.item.menu.section.location', 'Standort aendern') }}
+        </h4>
+        <button
+          uiButton
+          uiButtonGhost
+          type="button"
+          class="upload-panel__location-editor-close"
+          [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
+          (click)="onLocationAddressDialogClose()"
+        >
+          <span class="material-icons" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <label class="upload-panel__location-editor-label" for="upload-location-search-input">
+        {{ t('upload.item.menu.location.enterAddress', 'Adresse eingeben') }}
+      </label>
+
+      <input
+        id="upload-location-search-input"
+        uiInputControl
+        class="upload-panel__location-editor-input"
+        type="text"
+        [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
+        [value]="locationAddressDialogQuery()"
+        (input)="onLocationAddressDialogQueryInput(uploadLocationSearchInput.value)"
+        #uploadLocationSearchInput
+      />
+
+      @if (locationAddressDialogLoading()) {
+        <div class="upload-panel__location-editor-loading" role="status" aria-live="polite">
+          {{ t('workspace.addressSearch.loading', 'Searching...') }}
+        </div>
+      }
+
+      @if (locationAddressDialogSuggestions().length > 0) {
+        <div class="upload-panel__location-editor-results dd-items" role="listbox">
+          @for (suggestion of locationAddressDialogSuggestions(); track suggestion.addressLabel) {
+            <button
+              class="dd-item"
+              type="button"
+              role="option"
+              (mouseenter)="onLocationAddressSuggestionHover(suggestion)"
+              (mouseleave)="onLocationAddressSuggestionHoverEnd()"
+              (focus)="onLocationAddressSuggestionHover(suggestion)"
+              (blur)="onLocationAddressSuggestionHoverEnd()"
+              (click)="onLocationAddressSuggestionApply(suggestion)"
+            >
+              <span class="material-icons dd-item__icon" aria-hidden="true">place</span>
+              <span class="dd-item__label">{{ suggestion.addressLabel }}</span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (projectSelectionDialogOpen()) {
+    <app-project-select-dialog
+      [title]="projectSelectionDialogTitle()"
+      [message]="projectSelectionDialogMessage()"
+      [options]="projectSelectionDialogOptions()"
+      [selectedId]="projectSelectionDialogSelectedId()"
+      confirmLabel="Auswaehlen"
+      cancelLabel="Abbrechen"
+      (selectedIdChange)="onProjectSelectionDialogSelected($event)"
+      (confirmed)="onProjectSelectionDialogConfirmed($event)"
+      (cancelled)="onProjectSelectionDialogCancelled()"
+    />
   }
 </section>

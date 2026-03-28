@@ -56,6 +56,9 @@
         (imageUploaded)="onImageUploaded($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
         (placementRequested)="enterPlacementMode($event)"
+        (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
+        (locationPreviewCleared)="onUploadLocationPreviewCleared()"
+        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
     </div>
   </div>
@@ -315,7 +318,7 @@
   @if (placementActive() || searchPlacementActive()) {
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
-      {{ placementActive() ? 'Click the map to place the image' : 'Click the map to drop a pin' }}
+        {{ placementBannerText() }}
       <button
         uiButton
         uiButtonGhost
@@ -376,6 +379,9 @@
       (imageUploaded)="onImageUploaded($event)"
       (zoomToLocationRequested)="onZoomToLocation($event)"
       (placementRequested)="enterPlacementMode($event)"
+      (uploadLocationPreviewRequested)="onUploadLocationPreviewRequested($event)"
+      (uploadLocationPreviewCleared)="onUploadLocationPreviewCleared()"
+      (uploadLocationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       (workspaceItemHoverStarted)="onWorkspaceItemHoverStarted($event)"
       (workspaceItemHoverEnded)="onWorkspaceItemHoverEnded($event)"
     />

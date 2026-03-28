@@ -4,7 +4,12 @@ import { WorkspacePaneToolbarComponent } from './workspace-pane-toolbar/workspac
 import { ThumbnailGridComponent } from './thumbnail-grid.component';
 import { MediaDetailViewComponent } from './media-detail-view.component';
 import { WorkspacePaneFooterComponent } from './workspace-pane-footer/workspace-pane-footer.component';
-import { UploadPanelComponent, type ImageUploadedEvent } from '../../upload/upload-panel.component';
+import {
+  UploadPanelComponent,
+  type ImageUploadedEvent,
+  type UploadLocationMapPickRequest,
+  type UploadLocationPreviewEvent,
+} from '../../upload/upload-panel.component';
 import { MaxWidthContainerComponent } from '../../../shared/containers';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
@@ -52,6 +57,9 @@ export class WorkspacePaneComponent {
   readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
   readonly imageUploaded = output<ImageUploadedEvent>();
   readonly placementRequested = output<string>();
+  readonly uploadLocationPreviewRequested = output<UploadLocationPreviewEvent>();
+  readonly uploadLocationPreviewCleared = output<void>();
+  readonly uploadLocationMapPickRequested = output<UploadLocationMapPickRequest>();
   readonly titleEditValueChange = output<string>();
   readonly titleSubmitRequested = output<string>();
   readonly titleEditRequested = output<void>();
@@ -119,5 +127,17 @@ export class WorkspacePaneComponent {
 
   onPlacementRequested(jobId: string): void {
     this.placementRequested.emit(jobId);
+  }
+
+  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
+    this.uploadLocationPreviewRequested.emit(event);
+  }
+
+  onUploadLocationPreviewCleared(): void {
+    this.uploadLocationPreviewCleared.emit();
+  }
+
+  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
+    this.uploadLocationMapPickRequested.emit(event);
   }
 }

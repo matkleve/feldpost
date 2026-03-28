@@ -92,6 +92,11 @@ export class UploadReplacePipelineService {
       job = this.jobState.findJob(jobId)!;
     }
 
+    if (!this.uploadService.isPhotoFile(job.file)) {
+      ctx.failJob(jobId, 'validating', 'Only photo files can replace an existing photo.');
+      return;
+    }
+
     // ── Phase: hashing (skip EXIF for replace — existing row has metadata) ──
     this.jobState.setPhase(jobId, 'hashing');
     const fileHead = await readFileHead(job.file);

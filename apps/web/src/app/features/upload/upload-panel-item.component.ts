@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import {
@@ -14,6 +14,17 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
 import type { MediaRenderState, UploadOverlayState } from '../../core/media/media-renderer.types';
+import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
+
+const UPLOAD_ITEM_MENU_WIDTH = 224;
+const UPLOAD_ITEM_MENU_OFFSET_Y = 4;
+
+export type UploadItemMenuAction =
+  | 'add_to_project'
+  | 'download'
+  | 'open_in_media'
+  | 'change_location_map'
+  | 'change_location_address';
 
 @Component({
   selector: 'app-upload-panel-item',
@@ -27,6 +38,7 @@ import type { MediaRenderState, UploadOverlayState } from '../../core/media/medi
     UiButtonGhostDirective,
     ChipComponent,
     UniversalMediaComponent,
+    DropdownShellComponent,
   ],
   templateUrl: './upload-panel-item.component.html',
   styleUrl: './upload-panel-item.component.scss',
@@ -44,9 +56,14 @@ export class UploadPanelItemComponent {
   readonly dismissFile = output<string>();
   readonly rowMainClick = output<UploadJob>();
   readonly rowMainKeydown = output<{ job: UploadJob; event: KeyboardEvent }>();
+  readonly menuActionSelected = output<{ job: UploadJob; action: UploadItemMenuAction }>();
+
+  readonly menuOpen = signal(false);
+  readonly menuPosition = signal<{ x: number; y: number } | null>(null);
+  readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
 
   // Media renderer state
-  readonly fileIdentity = () => ({
+  readonly fileIdentity = (): { mimeType: string; fileName: string } => ({
     mimeType: this.job().file.type,
     fileName: this.job().file.name,
   });
@@ -98,6 +115,67 @@ export class UploadPanelItemComponent {
     );
   }
 
+  availableMenuActions(): UploadItemMenuAction[] {
+    const job = this.job();
+    if (getLaneForJob(job) !== 'uploaded' || !job.imageId) {
+      return [];
+    }
+
+    return [
+      'open_in_media',
+      'add_to_project',
+      'download',
+      'change_location_map',
+      'change_location_address',
+    ];
+  }
+
+  menuPanelClass(): string {
+    return 'map-context-menu option-menu-surface upload-item-context-menu';
+  }
+
+  onRowContextMenu(event: MouseEvent): void {
+    if (!this.hasMenuActions()) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY));
+    this.menuOpen.set(true);
+  }
+
+  onMenuTriggerClick(event: MouseEvent): void {
+    if (!this.hasMenuActions()) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    const target = event.currentTarget;
+    if (target instanceof HTMLElement) {
+      const rect = target.getBoundingClientRect();
+      this.menuPosition.set(
+        this.clampMenuPosition(
+          rect.right - UPLOAD_ITEM_MENU_WIDTH,
+          rect.bottom + UPLOAD_ITEM_MENU_OFFSET_Y,
+        ),
+      );
+    } else {
+      this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY));
+    }
+    this.menuOpen.set(true);
+  }
+
+  onMenuCloseRequested(): void {
+    this.menuOpen.set(false);
+  }
+
+  onMenuAction(action: UploadItemMenuAction): void {
+    this.menuOpen.set(false);
+    this.menuActionSelected.emit({ job: this.job(), action });
+  }
+
   onRequestPlacement(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -107,6 +185,7 @@ export class UploadPanelItemComponent {
   onDismissClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    this.menuOpen.set(false);
     this.dismissFile.emit(this.job().id);
   }
 
@@ -165,5 +244,19 @@ export class UploadPanelItemComponent {
       phase === 'resolving_address' ||
       phase === 'resolving_coordinates'
     );
+  }
+
+  private clampMenuPosition(x: number, y: number): { x: number; y: number } {
+    if (typeof window === 'undefined') {
+      return { x, y };
+    }
+
+    const menuWidth = 240;
+    const menuHeight = 160;
+    const margin = 8;
+    return {
+      x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),
+      y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
+    };
   }
 }

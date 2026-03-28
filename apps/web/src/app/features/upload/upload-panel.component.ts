@@ -8,9 +8,12 @@
  *  - Component only bridges template events to services.
  */
 
-import { Component, effect, inject, input, output } from '@angular/core';
+import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UploadPanelItemComponent } from './upload-panel-item.component';
+import { Router } from '@angular/router';
+import { UploadPanelItemComponent, type UploadItemMenuAction } from './upload-panel-item.component';
+import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding.service';
+import { GeocodingService } from '../../core/geocoding.service';
 import type { ExifCoords } from '../../core/upload/upload.service';
 import {
   UploadManagerService,
@@ -26,15 +29,29 @@ import {
   UploadPanelRowHandlersService,
   type ZoomToLocationEvent,
 } from './upload-panel-row-handlers';
+import { UploadService } from '../../core/upload/upload.service';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
 import {
   UiButtonDirective,
   UiTabDirective,
   UiTabListDirective,
+  UiInputControlDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
+import { ToastService } from '../../core/toast.service';
+import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';
+import { MapProjectDialogService } from '../map/map-shell/map-project-dialog.service';
+import {
+  ProjectSelectDialogComponent,
+  type ProjectSelectOption,
+} from '../../shared/project-select-dialog/project-select-dialog.component';
+import { SupabaseService } from '../../core/supabase/supabase.service';
+import { ProjectsService } from '../../core/projects/projects.service';
+import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
+import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
+import { MediaLocationUpdateService } from '../../core/media-location-update.service';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -42,6 +59,16 @@ export interface ImageUploadedEvent {
   lng: number;
   direction?: number;
   thumbnailUrl?: string;
+}
+
+export interface UploadLocationPreviewEvent {
+  lat: number;
+  lng: number;
+}
+
+export interface UploadLocationMapPickRequest {
+  imageId: string;
+  fileName: string;
 }
 
 type UploadFileTypeChip = {
@@ -110,6 +137,8 @@ function toChipVariant(category: string): ChipVariant {
     UiTabListDirective,
     UiTabDirective,
     UiButtonDirective,
+    UiInputControlDirective,
+    ProjectSelectDialogComponent,
   ],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
@@ -123,6 +152,17 @@ export class UploadPanelComponent {
   private readonly inputs = inject(UploadPanelInputHandlersService);
   private readonly lanes = inject(UploadPanelLaneHandlersService);
   private readonly rows = inject(UploadPanelRowHandlersService);
+  private readonly uploadService = inject(UploadService);
+  private readonly geocodingService = inject(GeocodingService);
+  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly toastService = inject(ToastService);
+  private readonly supabaseService = inject(SupabaseService);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly mapProjectActionsService = inject(MapProjectActionsService);
+  private readonly mapProjectDialogService = inject(MapProjectDialogService);
+  private readonly router = inject(Router);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   // Component I/O
@@ -131,6 +171,9 @@ export class UploadPanelComponent {
   readonly imageUploaded = output<ImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly zoomToLocationRequested = output<ZoomToLocationEvent>();
+  readonly locationPreviewRequested = output<UploadLocationPreviewEvent>();
+  readonly locationPreviewCleared = output<void>();
+  readonly locationMapPickRequested = output<UploadLocationMapPickRequest>();
 
   // Delegate all signals to signals service
   readonly jobs = this.signals.jobs;
@@ -152,6 +195,32 @@ export class UploadPanelComponent {
   readonly laneJobs = this.signals.laneJobs;
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
   readonly fileTypeChips = DEFAULT_FILE_TYPE_CHIPS;
+  readonly projectSelectionDialogOpen = signal(false);
+  readonly projectSelectionDialogTitle = signal(
+    this.t('auto.0013.add_to_project', 'Add to project'),
+  );
+  readonly projectSelectionDialogMessage = signal('');
+  readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
+  readonly projectSelectionDialogSelectedId = signal<string | null>(null);
+  readonly locationAddressDialogOpen = signal(false);
+  readonly locationAddressDialogQuery = signal('');
+  readonly locationAddressDialogLoading = signal(false);
+  readonly locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
+
+  private pendingProjectAssignmentJob = signal<UploadJob | null>(null);
+  private pendingLocationAddressJob = signal<UploadJob | null>(null);
+  private locationAddressSearchTimeout: ReturnType<typeof setTimeout> | null = null;
+  private readonly projectDialogSignals = {
+    projectSelectionDialogOpen: this.projectSelectionDialogOpen,
+    projectSelectionDialogTitle: this.projectSelectionDialogTitle,
+    projectSelectionDialogMessage: this.projectSelectionDialogMessage,
+    projectSelectionDialogOptions: this.projectSelectionDialogOptions,
+    projectSelectionDialogSelectedId: this.projectSelectionDialogSelectedId,
+    projectNameDialogOpen: signal(false),
+    projectNameDialogTitle: signal(''),
+    projectNameDialogMessage: signal(''),
+    projectNameDialogInitialValue: signal(''),
+  };
 
   constructor() {
     effect(() => {
@@ -260,12 +329,297 @@ export class UploadPanelComponent {
     this.rows.retryFile(jobId);
   }
 
-  // ── Template helpers ───────────────────────────────────────────────────
-
   documentFallbackLabel(job: UploadJob): string | null {
     return documentFallbackLabel(job);
   }
+
   trackByJobId(idx: number, job: UploadJob): string {
     return trackByJobId(idx, job);
+  }
+
+  async onMenuActionSelected(event: {
+    job: UploadJob;
+    action: UploadItemMenuAction;
+  }): Promise<void> {
+    if (event.action === 'open_in_media') {
+      await this.openUploadedJobInMedia(event.job);
+      return;
+    }
+
+    if (event.action === 'add_to_project') {
+      await this.openProjectAssignmentForJob(event.job);
+      return;
+    }
+
+    if (event.action === 'download') {
+      await this.downloadUploadedJob(event.job);
+      return;
+    }
+
+    if (event.action === 'change_location_map') {
+      this.requestLocationPickOnMap(event.job);
+      return;
+    }
+
+    if (event.action === 'change_location_address') {
+      this.openLocationAddressDialog(event.job);
+    }
+  }
+
+  onLocationAddressDialogQueryInput(query: string): void {
+    this.locationAddressDialogQuery.set(query);
+    if (this.locationAddressSearchTimeout) {
+      clearTimeout(this.locationAddressSearchTimeout);
+      this.locationAddressSearchTimeout = null;
+    }
+
+    if (!query.trim()) {
+      this.locationAddressDialogLoading.set(false);
+      this.locationAddressDialogSuggestions.set([]);
+      this.locationPreviewCleared.emit();
+      return;
+    }
+
+    this.locationAddressSearchTimeout = setTimeout(() => {
+      void this.searchLocationAddress(query);
+    }, 280);
+  }
+
+  onLocationAddressDialogClose(): void {
+    this.locationAddressDialogOpen.set(false);
+    this.locationAddressDialogQuery.set('');
+    this.locationAddressDialogSuggestions.set([]);
+    this.pendingLocationAddressJob.set(null);
+    this.locationPreviewCleared.emit();
+  }
+
+  onLocationAddressSuggestionHover(suggestion: ForwardGeocodeResult): void {
+    this.locationPreviewRequested.emit({ lat: suggestion.lat, lng: suggestion.lng });
+  }
+
+  onLocationAddressSuggestionHoverEnd(): void {
+    this.locationPreviewCleared.emit();
+  }
+
+  async onLocationAddressSuggestionApply(suggestion: ForwardGeocodeResult): Promise<void> {
+    const job = this.pendingLocationAddressJob();
+    if (!job?.imageId) {
+      this.onLocationAddressDialogClose();
+      return;
+    }
+
+    const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
+      job.imageId,
+      suggestion,
+    );
+    if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
+      this.toastService.show({
+        message: this.t('upload.location.update.failed', 'Standort konnte nicht aktualisiert werden.'),
+        type: 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.imageUploaded.emit({ id: job.imageId, lat: result.lat, lng: result.lng });
+    this.toastService.show({
+      message: this.t(
+        'upload.location.update.success',
+        'Standort wurde aktualisiert.',
+      ),
+      type: 'success',
+      dedupe: true,
+    });
+    this.onLocationAddressDialogClose();
+  }
+
+  onProjectSelectionDialogSelected(projectId: string): void {
+    this.mapProjectDialogService.setProjectSelectionSelectedId(
+      this.projectDialogSignals,
+      projectId,
+    );
+  }
+
+  async onProjectSelectionDialogConfirmed(projectId: string): Promise<void> {
+    const job = this.pendingProjectAssignmentJob();
+    const selected =
+      this.projectSelectionDialogOptions().find((option) => option.id === projectId) ?? null;
+    this.mapProjectDialogService.confirmProjectSelection(this.projectDialogSignals, projectId);
+
+    if (!job?.imageId || !selected) {
+      this.pendingProjectAssignmentJob.set(null);
+      return;
+    }
+
+    const ok = await this.projectsService.addMediaToProject(job.imageId, projectId);
+    if (ok) {
+      this.toastService.show({
+        message: this.mapProjectActionsService.formatProjectAssignmentSuccess(selected.name, 1),
+        type: 'success',
+        dedupe: true,
+      });
+    } else {
+      this.toastService.show({
+        message: this.t(
+          'workspace.imageDetail.toast.membershipUpdateFailed',
+          'Could not update project memberships.',
+        ),
+        type: 'error',
+        dedupe: true,
+      });
+    }
+
+    this.pendingProjectAssignmentJob.set(null);
+  }
+
+  onProjectSelectionDialogCancelled(): void {
+    this.mapProjectDialogService.cancelProjectSelection(this.projectDialogSignals);
+    this.pendingProjectAssignmentJob.set(null);
+  }
+
+  private async openProjectAssignmentForJob(job: UploadJob): Promise<void> {
+    if (!job.imageId) {
+      return;
+    }
+
+    const optionsResult = await this.mapProjectActionsService.loadProjectOptions(
+      this.supabaseService.client,
+    );
+    if (!optionsResult.ok) {
+      this.toastService.show({
+        message: this.t('map.shell.toast.projectAssignmentFailed', 'Project assignment failed.'),
+        type: optionsResult.reason === 'empty' ? 'warning' : 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.pendingProjectAssignmentJob.set(job);
+    void this.mapProjectDialogService.openProjectSelectionDialog(
+      this.projectDialogSignals,
+      optionsResult.options,
+      this.t('auto.0013.add_to_project', 'Add to project'),
+      job.file.name,
+    );
+  }
+
+  private async downloadUploadedJob(job: UploadJob): Promise<void> {
+    if (!job.storagePath) {
+      this.toastService.show({
+        message: 'Download nicht verfuegbar.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    const result = await this.uploadService.getSignedUrl(job.storagePath);
+    if (!('url' in result)) {
+      this.toastService.show({
+        message:
+          typeof result.error === 'string'
+            ? result.error
+            : result.error instanceof Error
+              ? result.error.message
+              : 'Download fehlgeschlagen.',
+        type: 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = result.url;
+    link.download = job.file.name;
+    link.rel = 'noopener';
+    link.click();
+  }
+
+  private async openUploadedJobInMedia(job: UploadJob): Promise<void> {
+    if (!job.imageId) {
+      return;
+    }
+
+    this.workspaceSelectionService.setSingle(job.imageId);
+    this.workspacePaneObserver.setDetailImageId(job.imageId);
+    this.workspacePaneObserver.setOpen(true);
+
+    await this.router.navigate(['/media']);
+  }
+
+  private requestLocationPickOnMap(job: UploadJob): void {
+    if (!job.imageId) {
+      return;
+    }
+
+    this.locationMapPickRequested.emit({ imageId: job.imageId, fileName: job.file.name });
+    this.toastService.show({
+      message: this.t(
+        'upload.location.mapPick.hint',
+        'Karte anklicken, um den Standort zu setzen.',
+      ),
+      type: 'info',
+      dedupe: true,
+    });
+  }
+
+  private openLocationAddressDialog(job: UploadJob): void {
+    if (!job.imageId) {
+      return;
+    }
+
+    this.pendingLocationAddressJob.set(job);
+    this.locationAddressDialogQuery.set('');
+    this.locationAddressDialogSuggestions.set([]);
+    this.locationAddressDialogLoading.set(false);
+    this.locationAddressDialogOpen.set(true);
+  }
+
+  private async searchLocationAddress(query: string): Promise<void> {
+    const normalized = query.trim();
+    if (!normalized) {
+      this.locationAddressDialogSuggestions.set([]);
+      this.locationAddressDialogLoading.set(false);
+      return;
+    }
+
+    this.locationAddressDialogLoading.set(true);
+    const results = await this.geocodingService.search(normalized, { limit: 6 });
+    this.locationAddressDialogLoading.set(false);
+    this.locationAddressDialogSuggestions.set(this.mapSearchResultsToForwardSuggestions(results));
+  }
+
+  private mapSearchResultsToForwardSuggestions(
+    results: readonly GeocoderSearchResult[],
+  ): ForwardGeocodeResult[] {
+    return results
+      .map((result) => {
+        if (!Number.isFinite(result.lat) || !Number.isFinite(result.lng)) {
+          return null;
+        }
+
+        const address = result.address;
+        return {
+          lat: result.lat,
+          lng: result.lng,
+          addressLabel: result.displayName,
+          city:
+            address?.city ??
+            address?.town ??
+            address?.village ??
+            address?.municipality ??
+            null,
+          district: null,
+          street: address?.road ?? null,
+          streetNumber: address?.house_number ?? null,
+          zip: address?.postcode ?? null,
+          country: address?.country ?? null,
+        } as ForwardGeocodeResult;
+      })
+      .filter((entry): entry is ForwardGeocodeResult => entry !== null);
   }
 }

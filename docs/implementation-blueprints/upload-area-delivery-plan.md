@@ -138,15 +138,21 @@ Tasks:
 2. Uploading pulse state.
 3. Lane switch and filtered gallery list.
 4. Stable ordering of jobs (no visual jumping).
+5. Separate issue semantics for duplicate review vs. GPS/manual placement.
+6. Ensure uploaded-lane actions are derived from persisted media state and project binding.
 
 Done criteria:
 
 - Matrix and lanes reflect real-time job state transitions correctly.
+- Lane counts and lane lists are derived from the same semantic bucket mapping.
+- GPS issues never expose force-upload actions.
+- Uploaded rows expose follow-up actions only when persisted media data exists.
 
 Current status:
 
 - In progress: dot matrix + lane switch + lane-filtered list implemented in Upload Panel.
 - Pending: broader integration pass against real mixed batches and issue-correction flow.
+- Pending: lane semantics still need final alignment for duplicate review, GPS issues, and uploaded follow-up actions.
 
 ### 3.5 Issue Editing
 
@@ -155,10 +161,14 @@ Tasks:
 1. Open issue item drawer.
 2. Edit address/location metadata.
 3. Retry resolution and state transition.
+4. Keep duplicate-hash review separate from GPS/location correction.
+5. Support `Trotzdem hochladen` only for duplicate-photo review.
 
 Done criteria:
 
 - Issues can be fixed from panel and transition to uploaded on success.
+- Duplicate-photo issues support explicit override or use-existing decisions.
+- GPS issues support placement/correction flows and do not expose force-upload.
 
 ## 4) Pipeline and Data Integration
 
@@ -168,10 +178,14 @@ Tasks:
 2. Keep max concurrency and queue behavior consistent.
 3. Ensure dedup hash path treats captured photos identically.
 4. Ensure image detail and map marker refresh events fire on completion.
+5. Ensure dedup hash path is gated by media category and never blocks document uploads.
+6. Emit enough persisted item context for uploaded-lane actions (`imageId`, coords, project binding, download source).
 
 Done criteria:
 
 - One canonical job lifecycle regardless of upload source.
+- Duplicate review and GPS correction are represented as separate issue semantics.
+- Uploaded follow-up actions can be resolved without re-querying ambiguous lane state.
 
 Current status:
 
@@ -203,6 +217,10 @@ Current status:
 4. Issue correction loop.
 5. Collapse while uploads continue.
 6. Take photo on mobile/camera-enabled browser and complete upload.
+7. Duplicate-photo issue enters `Issues` and offers `Trotzdem hochladen`.
+8. Missing-GPS issue enters `Issues` and offers placement-only actions.
+9. Uploaded item exposes `Zu Projekt hinzufügen`, `Priorisieren`, `In /media anzeigen`, and `Herunterladen`.
+10. `Projekt öffnen` appears only for uploads already bound to a project.
 
 Done criteria:
 

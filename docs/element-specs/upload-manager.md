@@ -4,7 +4,7 @@
 
 ## What It Is
 
-A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, media-only deduplication, duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
+A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, photo-only deduplication, duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
 
 Queue management and concurrency are implemented inside `UploadManagerService` through `UploadQueueService` and pipeline services under `core/upload/`.
 
@@ -30,17 +30,22 @@ Canonical document/office upload catalog for this manager contract is: `DOC`, `D
 
 ## Actions
 
-| #   | Trigger                                 | System Response                                          | Notes                              |
-| --- | --------------------------------------- | -------------------------------------------------------- | ---------------------------------- |
-| 1   | Any entry point submits files           | Creates jobs and batch, starts queued execution          | Service-owned lifecycle            |
-| 2   | A job starts processing                 | Runs validation, EXIF parse, dedup, upload, DB write     | Max 3 concurrent active jobs       |
-| 3   | Folder/file title provides address text | Resolves textual location source with precedence rules   | File title overrides folder title  |
-| 4   | EXIF and textual location both exist    | Performs tolerance-based reconciliation (15m)            | Keeps both coordinate sources      |
-| 5   | Duplicate hash match for image/video    | Opens duplicate-resolution flow and moves item to issues | Supports batch-wide decision apply |
-| 6   | Geocoding enrichment needed             | Runs reverse or forward enrichment as non-blocking phase | Failure remains non-fatal          |
-| 7   | Conflict detected                       | Job pauses in awaiting conflict resolution               | Resumes on user decision           |
-| 8   | User retries failed job                 | Requeues from start with new phase transitions           | Job id retained                    |
-| 9   | User cancels job or batch               | Stops work and performs cleanup as needed                | Emits cancellation events          |
+| #   | Trigger                                            | System Response                                                | Notes                              |
+| --- | -------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------- |
+| 1   | Any entry point submits files                      | Creates jobs and batch, starts queued execution                | Service-owned lifecycle            |
+| 2   | A job starts processing                            | Runs validation, EXIF parse, dedup, upload, DB write           | Max 3 concurrent active jobs       |
+| 3   | Folder/file title provides address text            | Resolves textual location source with precedence rules         | File title overrides folder title  |
+| 4   | EXIF and textual location both exist               | Performs tolerance-based reconciliation (15m)                  | Keeps both coordinate sources      |
+| 5   | Duplicate hash match for photo/image               | Opens duplicate-resolution flow and moves item to issues       | Supports batch-wide decision apply |
+| 5a  | User chooses `upload anyway` on duplicate issue    | Resumes pipeline with force-upload semantics                   | Only valid for duplicate review    |
+| 5b  | User chooses `use existing` on duplicate issue     | Completes without creating duplicate persisted media           | Existing media reference retained  |
+| 6   | Geocoding enrichment needed                        | Runs reverse or forward enrichment as non-blocking phase       | Failure remains non-fatal          |
+| 7   | Conflict detected                                  | Job pauses in awaiting conflict resolution                     | Resumes on user decision           |
+| 8   | User retries failed job                            | Requeues from start with new phase transitions                 | Job id retained                    |
+| 9   | User cancels job or batch                          | Stops work and performs cleanup as needed                      | Emits cancellation events          |
+| 10  | Persisted upload is shown in Uploaded lane actions | Exposes add-to-project, prioritize, download, media navigation | Only after saved media exists      |
+| 10a | User selects `Standort ändern > Karte anklicken`   | Enters map-pick flow and persists clicked coordinates           | Existing media row is updated       |
+| 10b | User selects `Standort ändern > Adresse eingeben`  | Opens address-finder overlay and persists selected suggestion   | Hover previews are map-only, no DB  |
 
 ## Component Hierarchy
 
@@ -77,29 +82,46 @@ flowchart TD
   R --> E
   A --> E
   E --> UI
+  E --> UAI[Uploaded item action presenter]
+  UAI --> NAV[In media, add to project, prioritize, download, project open when bound]
 ```
 
-| Field          | Source                                  | Type                          |
-| -------------- | --------------------------------------- | ----------------------------- |
-| Jobs           | `UploadManagerService.jobs()`           | `Signal<UploadJob[]>`         |
-| Active count   | `UploadManagerService.activeCount()`    | `Signal<number>`              |
-| Is busy        | `UploadManagerService.isBusy()`         | `Signal<boolean>`             |
-| Batches        | `UploadManagerService.batches()`        | `Signal<UploadBatch[]>`       |
-| Active batch   | `UploadManagerService.activeBatch()`    | `Signal<UploadBatch \| null>` |
-| Per-job events | `UploadManagerService.jobPhaseChanged$` | `Observable<...>`             |
-| Batch events   | `UploadManagerService.batchProgress$`   | `Observable<...>`             |
-| Skip events    | `UploadManagerService.uploadSkipped$`   | `Observable<...>`             |
+### Issue and Action Semantics (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Upload job] --> B{Issue kind}
+  B -->|duplicate_photo| C[Trotzdem hochladen<br/>Use existing<br/>Reject]
+  B -->|missing_gps| D[Place on map<br/>Defer<br/>Dismiss]
+  B -->|conflict_review| E[Resolve conflict<br/>Retry<br/>Dismiss]
+  B -->|none and complete| F[Open in media<br/>Add to project<br/>Prioritize<br/>Download]
+```
+
+| Field            | Source                                  | Type                                                                                |
+| ---------------- | --------------------------------------- | ----------------------------------------------------------------------------------- |
+| Jobs             | `UploadManagerService.jobs()`           | `Signal<UploadJob[]>`                                                               |
+| Active count     | `UploadManagerService.activeCount()`    | `Signal<number>`                                                                    |
+| Is busy          | `UploadManagerService.isBusy()`         | `Signal<boolean>`                                                                   |
+| Batches          | `UploadManagerService.batches()`        | `Signal<UploadBatch[]>`                                                             |
+| Active batch     | `UploadManagerService.activeBatch()`    | `Signal<UploadBatch \| null>`                                                       |
+| Per-job events   | `UploadManagerService.jobPhaseChanged$` | `Observable<...>`                                                                   |
+| Batch events     | `UploadManagerService.batchProgress$`   | `Observable<...>`                                                                   |
+| Skip events      | `UploadManagerService.uploadSkipped$`   | `Observable<...>`                                                                   |
+| Issue kind       | upload lane presenter                   | `'duplicate_photo' \| 'missing_gps' \| 'conflict_review' \| 'upload_error' \| null` |
+| Uploaded actions | upload row presenter                    | `UploadItemAction[]`                                                                |
 
 ## State
 
-| Name          | Type                            | Default | Controls                                     |
-| ------------- | ------------------------------- | ------- | -------------------------------------------- |
-| `jobs`        | `WritableSignal<UploadJob[]>`   | `[]`    | Full upload queue + history                  |
-| `activeJobs`  | `Signal<UploadJob[]>`           | `[]`    | Computed: non-terminal jobs                  |
-| `isBusy`      | `Signal<boolean>`               | `false` | Computed: any non-terminal job exists        |
-| `activeCount` | `Signal<number>`                | `0`     | Computed: jobs in uploading/saving/resolving |
-| `batches`     | `WritableSignal<UploadBatch[]>` | `[]`    | All batches (active + completed)             |
-| `activeBatch` | `Signal<UploadBatch \| null>`   | `null`  | Active upload/scanning batch                 |
+| Name                   | Type                            | Default | Controls                                                             |
+| ---------------------- | ------------------------------- | ------- | -------------------------------------------------------------------- |
+| `jobs`                 | `WritableSignal<UploadJob[]>`   | `[]`    | Full upload queue + history                                          |
+| `activeJobs`           | `Signal<UploadJob[]>`           | `[]`    | Computed: non-terminal jobs                                          |
+| `isBusy`               | `Signal<boolean>`               | `false` | Computed: any non-terminal job exists                                |
+| `activeCount`          | `Signal<number>`                | `0`     | Computed: jobs in uploading/saving/resolving                         |
+| `batches`              | `WritableSignal<UploadBatch[]>` | `[]`    | All batches (active + completed)                                     |
+| `activeBatch`          | `Signal<UploadBatch \| null>`   | `null`  | Active upload/scanning batch                                         |
+| `job.issueKind`        | `UploadIssueKind \| null`       | `null`  | Distinguishes duplicate review from GPS or hard error                |
+| `job.availableActions` | `UploadItemAction[]`            | `[]`    | Contextual row actions derived from saved media state and issue kind |
 
 ## File Map
 
@@ -193,10 +215,15 @@ sequenceDiagram
 - [ ] File-level title addresses override folder-level defaults.
 - [ ] EXIF GPS is preserved even when textual location is present.
 - [ ] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
-- [ ] Hash dedupe runs only for images and videos (never for `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`).
+- [ ] Hash dedupe runs only for photos/images (never for videos, `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`).
 - [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
 - [ ] Duplicate resolution supports a batch apply option for matching items.
 - [ ] Duplicate issue rows expose navigation to the existing placed media.
+- [ ] Duplicate issue rows expose `Trotzdem hochladen` only for duplicate-photo review, never for GPS issues.
+- [ ] Persisted successful uploads expose follow-up actions including `Zu Projekt hinzufügen`, `Priorisieren`, `In /media anzeigen`, and `Herunterladen`.
+- [ ] `Projekt öffnen` appears only when the saved media item is already bound to a project.
+- [ ] `Standort ändern` in uploaded rows exposes `Karte anklicken` and `Adresse eingeben` as separate flows.
+- [ ] Address-suggestion hover previews map position without persisting until suggestion selection.
 - [ ] Ambiguous street+house matches are auto-assigned only when disambiguation probability is at or above threshold (default `0.95`).
 - [ ] Parser residual fragments are preserved as address notes and remain visible in media details.
 - [x] Address resolution and coordinate resolution are enrichment — failure is silent

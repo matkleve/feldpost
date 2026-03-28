@@ -46,13 +46,32 @@ The matrix defaults to a square board using up to 10 columns by 10 rows per visi
 | 17  | Clicks map-marker icon in Issues row (`missing_data`) | Emits placement request to map shell                                            | `placementRequested.emit(jobId)`                        |
 | 18  | Clicks row in Issues lane (`missing_data`)            | Enters placement mode from map shell                                            | `placementRequested.emit(jobId)`                        |
 | 19  | Clicks row in Uploaded lane with coords               | Requests map zoom to uploaded media location                                    | `zoomToLocationRequested.emit({ imageId, lat, lng })`   |
+| 19a | Opens uploaded row action menu                        | Shows follow-up actions based on saved media state                              | derived from `imageId`, `projectId`, coords             |
 | 19b | Job has EXIF and textual address mismatch (>15m)      | Row remains uploaded but carries mismatch indicator for detail follow-up        | location reconciliation state                           |
 | 19c | Duplicate hash issue row shows secondary GPS button   | Clicking button opens/focuses the already placed existing media                 | duplicate target image reference                        |
 | 19d | Duplicate hash issue detected                         | Opens duplicate-resolution modal with `use existing`, `upload anyway`, `reject` | Optional apply-to-batch checkbox                        |
 | 19e | Address parser found unresolved address fragments     | Row shows subtle address-note indicator and links to detail evidence section    | No parsing info is dropped                              |
+| 19f | Chooses `Zu Projekt hinzufügen` on uploaded item      | Opens add-to-project flow for the saved media item                              | requires persisted `imageId`                            |
+| 19g | Chooses `Priorisieren` on uploaded item               | Marks or queues the saved media item for prioritized follow-up                  | project/workflow integration                            |
+| 19h | Chooses `In /media anzeigen` on uploaded item         | Navigates to `/media` and focuses or filters the persisted media item           | router navigation with media context                    |
+| 19i | Chooses `Projekt öffnen` on uploaded item             | Navigates to the bound project when the upload already belongs to one           | only when `projectId` exists on job/media               |
+| 19j | Chooses `Standort ändern` on uploaded item            | Opens suboptions for location correction                                        | grouped action section in row context menu              |
+| 19j1 | Chooses `Karte anklicken`                            | Enters map-pick mode and persists clicked coordinates for the saved media item  | map banner + next map click commits coordinates         |
+| 19j2 | Chooses `Adresse eingeben`                           | Opens taller address-finder overlay with search input and suggestions list      | suggestions render in vertical list under input         |
+| 19j3 | Hovers an address suggestion                         | Shows preview pin on map at suggestion coordinates                              | preview clears when hover ends or dialog closes         |
+| 19j4 | Selects an address suggestion                        | Persists address + coordinates and refreshes marker position                    | same `resolve_media_location` contract                  |
+| 19k | Chooses `Herunterladen` on uploaded item              | Downloads the saved file via signed URL or download service                     | persisted storage path required                         |
 | 20  | Clicks dismiss icon on terminal row                   | Removes row from queue/history                                                  | `UploadManagerService.dismissJob()`                     |
 | 21  | Switches into empty lane                              | Lane stays selected even with zero items                                        | `selectedLane` signal                                   |
 | 22  | Closes panel                                          | Panel collapses; uploads continue in background                                 | Root service lifecycle                                  |
+
+## Lane Item Features
+
+| Lane        | Availability                                                               | Item Actions                                                                                                                            | Notes                                                                                                                          |
+| ----------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `uploading` | queued, parsing, validating, uploading, saving, enrichment                 | `Fortschritt ansehen`, `Dateiinfo ansehen`, `Abbrechen`                                                                                 | No navigation to saved media targets before persistence is complete                                                            |
+| `uploaded`  | persisted uploads and attachments with successful completion               | `Auf Karte zeigen`, `Standort ändern > Karte anklicken`, `Standort ändern > Adresse eingeben`, `In /media anzeigen`, `Zu Projekt hinzufügen`, `Priorisieren`, `Herunterladen`, `Projekt öffnen` | `Projekt öffnen` only appears when a project is already bound by folder/project context; otherwise use `Zu Projekt hinzufügen` |
+| `issues`    | duplicate-photo review, GPS/manual placement, conflict review, hard errors | `Auf Karte platzieren`, `Erneut versuchen`, `Trotzdem hochladen`, `Verwerfen`, `Bestehendes Medium öffnen`                              | `Trotzdem hochladen` is only valid for duplicate-photo review, never for GPS issues                                            |
 
 ## Component Hierarchy
 
@@ -96,35 +115,79 @@ flowchart TD
   P --> M[UploadManagerService submit/submitFolder]
   M --> J[(jobs signal)]
   M --> DD[duplicateDetected stream]
-  J --> B[Lane buckets by phase]
+  J --> B[Lane buckets by lane semantics plus issue kind]
   B --> C[Lane counts]
   B --> L[Lane list rows]
   J --> D[Dot matrix]
   L --> I[UploadPanelItemComponent]
   I -->|missing_data| R[placementRequested output]
   I -->|uploaded row| Z[zoomToLocationRequested output]
+  I -->|uploaded actions| ZA[navigate, prioritize, add-to-project, download]
   I -->|duplicate issue GPS action| Z2[openExistingPlacedMedia output]
   DD --> DM[DuplicateResolutionModal]
   DM -->|use_existing/upload_anyway/reject| M
   I -->|dismiss| M
 ```
 
-| Field                   | Source                                      | Type                                                             |
-| ----------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
-| Upload jobs             | `UploadManagerService.jobs()`               | `Signal<UploadJob[]>`                                            |
-| Active batch            | `UploadManagerService.activeBatch()`        | `Signal<UploadBatch \| null>`                                    |
-| Folder address hint     | Upload pipeline folder-title parsing        | `string \| null`                                                 |
-| Last completed batch    | `UploadPanelComponent.lastCompletedBatch()` | `Computed<UploadBatch \| null>`                                  |
-| Lane buckets            | `UploadPanelComponent.laneBuckets()`        | `Computed<Record<UploadLane, UploadJob[]>>`                      |
-| Lane counts             | `UploadPanelComponent.laneCounts()`         | `Computed<{ uploading:number; uploaded:number; issues:number }>` |
-| Selected lane items     | `UploadPanelComponent.laneJobs()`           | `Computed<UploadJob[]>`                                          |
-| Accepted MIME set       | `UploadService.validateFile()`              | Runtime validation                                               |
-| Document fallback badge | `documentFallbackLabel(job)`                | `string \| null`                                                 |
-| Location mismatch flag  | Upload pipeline EXIF/text reconciliation    | `boolean`                                                        |
-| Duplicate issue flag    | Upload pipeline dedupe decision flow        | `boolean`                                                        |
-| Duplicate target image  | Duplicate detection payload                 | `string \| null`                                                 |
-| Address parsing notes   | Upload parser residual fragments            | `string[]`                                                       |
-| Placement handoff       | `placementRequested` output                 | `jobId`                                                          |
+### Lane Actions (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Upload job] --> B{Lane}
+  B -->|uploading| C[Fortschritt ansehen<br/>Dateiinfo ansehen<br/>Abbrechen]
+  B -->|uploaded| D[Auf Karte zeigen<br/>Standort ändern > Karte anklicken<br/>Standort ändern > Adresse eingeben<br/>In /media anzeigen<br/>Zu Projekt hinzufügen<br/>Priorisieren<br/>Herunterladen]
+  B -->|issues duplicate_photo| E[Trotzdem hochladen<br/>Bestehendes Medium öffnen<br/>Verwerfen]
+  B -->|issues missing_gps| F[Auf Karte platzieren<br/>Später lösen<br/>Verwerfen]
+  B -->|issues conflict_review| G[Konflikt auflösen<br/>Erneut versuchen<br/>Verwerfen]
+```
+
+### Change Location Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Row as UploadPanelItem
+  participant Panel as UploadPanelComponent
+  participant Map as MapShellComponent
+  participant DB as resolve_media_location RPC
+
+  User->>Row: Kontextmenü > Standort ändern
+  alt Karte anklicken
+    Row->>Panel: change_location_map(imageId)
+    Panel->>Map: locationMapPickRequested(imageId)
+    User->>Map: Klick auf Karte
+    Map->>DB: persist(latitude, longitude, address)
+    Map-->>Panel: imageUploaded(id, lat, lng)
+  else Adresse eingeben
+    Row->>Panel: change_location_address(imageId)
+    User->>Panel: tippt Suchtext
+    Panel-->>User: Suggestionen unter Eingabe
+    User->>Panel: Hover Suggestion
+    Panel->>Map: locationPreviewRequested(lat, lng)
+    User->>Panel: Klick Suggestion
+    Panel->>DB: persist(latitude, longitude, address)
+    Panel->>Map: imageUploaded(id, lat, lng)
+  end
+```
+
+| Field                   | Source                                      | Type                                                                                |
+| ----------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Upload jobs             | `UploadManagerService.jobs()`               | `Signal<UploadJob[]>`                                                               |
+| Active batch            | `UploadManagerService.activeBatch()`        | `Signal<UploadBatch \| null>`                                                       |
+| Folder address hint     | Upload pipeline folder-title parsing        | `string \| null`                                                                    |
+| Last completed batch    | `UploadPanelComponent.lastCompletedBatch()` | `Computed<UploadBatch \| null>`                                                     |
+| Lane buckets            | `UploadPanelComponent.laneBuckets()`        | `Computed<Record<UploadLane, UploadJob[]>>`                                         |
+| Lane counts             | `UploadPanelComponent.laneCounts()`         | `Computed<{ uploading:number; uploaded:number; issues:number }>`                    |
+| Selected lane items     | `UploadPanelComponent.laneJobs()`           | `Computed<UploadJob[]>`                                                             |
+| Accepted MIME set       | `UploadService.validateFile()`              | Runtime validation                                                                  |
+| Document fallback badge | `documentFallbackLabel(job)`                | `string \| null`                                                                    |
+| Location mismatch flag  | Upload pipeline EXIF/text reconciliation    | `boolean`                                                                           |
+| Duplicate issue flag    | Upload pipeline dedupe decision flow        | `boolean`                                                                           |
+| Duplicate target image  | Duplicate detection payload                 | `string \| null`                                                                    |
+| Address parsing notes   | Upload parser residual fragments            | `string[]`                                                                          |
+| Placement handoff       | `placementRequested` output                 | `jobId`                                                                             |
+| Item action set         | upload row presenter                        | `UploadItemAction[]`                                                                |
+| Issue kind              | upload lane mapping                         | `'duplicate_photo' \| 'missing_gps' \| 'conflict_review' \| 'upload_error' \| null` |
 
 ### Status Mapping (Mermaid)
 
@@ -134,7 +197,8 @@ stateDiagram-v2
   queued --> validating
   validating --> parsing_exif
   parsing_exif --> converting_format: HEIC/HEIF
-  parsing_exif --> hashing: non-HEIC
+  parsing_exif --> hashing: photo/image path
+  parsing_exif --> conflict_check: video/document path
   converting_format --> hashing
   hashing --> dedup_check
   dedup_check --> duplicate_issue: duplicate match
@@ -163,6 +227,21 @@ stateDiagram-v2
   skipped --> [*]
 ```
 
+### Lane Semantics (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Job phase] --> B{Issue kind?}
+  B -->|duplicate_photo| C[Issues lane]
+  B -->|missing_gps| C
+  B -->|conflict_review| C
+  B -->|upload_error| C
+  B -->|none| D{Phase family}
+  D -->|queued parsing uploading enrichment| E[Uploading lane]
+  D -->|complete attached replaced| F[Uploaded lane]
+  D -->|skipped reject| C
+```
+
 ## State
 
 | Name                  | Type                                                             | Default       | Controls                                        |
@@ -173,6 +252,8 @@ stateDiagram-v2
 | `scanningLabel`       | `Computed<string \| null>`                                       | `null`        | Folder-scan feedback text                       |
 | `laneBuckets`         | `Computed<Record<UploadLane, UploadJob[]>>`                      | empty buckets | Single source for list + tab counts             |
 | `laneCounts`          | `Computed<{ uploading:number; uploaded:number; issues:number }>` | zeros         | Counts rendered in segmented tabs               |
+| `issueKind`           | `Computed<UploadIssueKind \| null>`                              | `null`        | Determines row actions inside the Issues lane   |
+| `availableActions`    | `Computed<UploadItemAction[]>`                                   | `[]`          | Per-row action menu in any lane                 |
 
 ## File Map
 
@@ -243,10 +324,21 @@ sequenceDiagram
 - [ ] Clicking a lane filters visible image list to that lane only
 - [ ] Clicking the map-marker action on a `missing_data` row emits a placement request
 - [ ] Clicking an uploaded row with coordinates emits a zoom-to-location request
+- [ ] Uploaded rows expose `Zu Projekt hinzufügen` when the item is not yet bound to a project
+- [ ] Uploaded rows expose `Priorisieren` for saved media follow-up workflows
+- [ ] Uploaded rows expose `Projekt öffnen` only when the upload already belongs to a project context
+- [ ] Uploaded rows expose `In /media anzeigen`, `Standort ändern`, and `Herunterladen` when persisted media data is available
+- [ ] `Standort ändern` exposes exactly two suboptions: `Karte anklicken` and `Adresse eingeben`
+- [ ] `Adresse eingeben` opens a vertically extended address-finder overlay with suggestions under the input
+- [ ] Hovering a location suggestion previews that location on the map without committing the update
+- [ ] Selecting a location suggestion persists both address and coordinates for the media item
+- [ ] `Karte anklicken` enters map-pick mode and commits the clicked location for the selected media item
 - [ ] Uploaded rows with EXIF/text mismatch (>15m) expose a clear mismatch indicator for follow-up in media details.
-- [ ] Duplicate hash rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
-- [ ] Duplicate-resolution modal appears for duplicate hash issues with `use existing`, `upload anyway`, and `reject` options.
+- [ ] Duplicate-photo rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
+- [ ] Duplicate-resolution modal appears for duplicate-photo issues with `use existing`, `upload anyway`, and `reject` options.
 - [ ] Duplicate-resolution modal provides "apply to all matching items in this batch" behavior.
+- [ ] `Trotzdem hochladen` is available only for duplicate-photo issue rows, never for GPS issue rows
+- [ ] GPS issue rows expose placement-oriented actions instead of force-upload actions
 - [ ] Jobs with unresolved address fragments expose an address-note indicator that leads to detail evidence rows.
 - [ ] Lane tabs display live counts derived from the same lane bucket data as the list
 - [ ] Users can switch to an empty lane and keep that lane selected

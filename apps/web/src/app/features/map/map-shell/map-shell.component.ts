@@ -27,7 +27,12 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
-import { UploadPanelComponent, ImageUploadedEvent } from '../../upload/upload-panel.component';
+import {
+  UploadPanelComponent,
+  ImageUploadedEvent,
+  type UploadLocationMapPickRequest,
+  type UploadLocationPreviewEvent,
+} from '../../upload/upload-panel.component';
 import { ExifCoords } from '../../../core/upload/upload.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding.service';
@@ -41,6 +46,7 @@ import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
 import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
 import { ToastService } from '../../../core/toast.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
@@ -93,6 +99,7 @@ import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
+import { MediaLocationUpdateService } from '../../../core/media-location-update.service';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
 import {
   UiButtonDirective,
@@ -198,6 +205,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly photoLoadService = inject(PhotoLoadService);
   private readonly toastService = inject(ToastService);
+  private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly settingsPaneService = inject(SettingsPaneService);
@@ -227,6 +235,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
@@ -263,6 +273,7 @@ export class MapShellComponent implements OnDestroy {
    * image that had no GPS EXIF data. Holds the upload-panel row key.
    */
   private pendingPlacementKey: string | null = null;
+  private pendingUploadedLocationMapPick: UploadLocationMapPickRequest | null = null;
 
   /** Whether the map is in placement mode (drives the banner + cursor class). */
   readonly placementActive = signal(false);
@@ -1441,6 +1452,7 @@ export class MapShellComponent implements OnDestroy {
   /** Cancels placement mode without placing the image. */
   cancelPlacement(): void {
     this.pendingPlacementKey = null;
+    this.pendingUploadedLocationMapPick = null;
     this.placementActive.set(false);
     this.searchPlacementActive.set(false);
     this.map?.getContainer().classList.remove('map-container--placing');
@@ -1530,9 +1542,42 @@ export class MapShellComponent implements OnDestroy {
 
   onSearchDropPinRequested(): void {
     this.pendingPlacementKey = null;
+    this.pendingUploadedLocationMapPick = null;
     this.placementActive.set(false);
     this.searchPlacementActive.set(true);
     this.map?.getContainer().classList.add('map-container--placing');
+  }
+
+  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
+    this.renderOrUpdateSearchLocationMarker([event.lat, event.lng]);
+  }
+
+  onUploadLocationPreviewCleared(): void {
+    if (this.searchPlacementActive()) {
+      return;
+    }
+    this.clearSearchLocationMarker();
+  }
+
+  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
+    this.pendingPlacementKey = null;
+    this.pendingUploadedLocationMapPick = event;
+    this.placementActive.set(false);
+    this.searchPlacementActive.set(true);
+    this.map?.getContainer().classList.add('map-container--placing');
+  }
+
+  placementBannerText(): string {
+    if (this.placementActive()) {
+      return this.t('upload.placement.banner.placeImage', 'Click the map to place the image');
+    }
+    if (this.pendingUploadedLocationMapPick) {
+      return this.t(
+        'upload.placement.banner.setNewLocation',
+        'Click the map to set the new location',
+      );
+    }
+    return this.t('upload.placement.banner.dropPin', 'Click the map to drop a pin');
   }
 
   // ── Map init ──────────────────────────────────────────────────────────────
@@ -1854,8 +1899,41 @@ export class MapShellComponent implements OnDestroy {
 
   private completeSearchPlacement(latlng: L.LatLng): void {
     this.renderOrUpdateSearchLocationMarker([latlng.lat, latlng.lng]);
+    const pendingUploadLocation = this.pendingUploadedLocationMapPick;
+    this.pendingUploadedLocationMapPick = null;
     this.searchPlacementActive.set(false);
     this.map?.getContainer().classList.remove('map-container--placing');
+
+    if (!pendingUploadLocation) {
+      return;
+    }
+
+    void this.applyUploadedLocationMapPick(pendingUploadLocation, {
+      lat: latlng.lat,
+      lng: latlng.lng,
+    });
+  }
+
+  private async applyUploadedLocationMapPick(
+    request: UploadLocationMapPickRequest,
+    coords: { lat: number; lng: number },
+  ): Promise<void> {
+    const result = await this.mediaLocationUpdateService.updateFromCoordinates(request.imageId, coords);
+    if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
+      this.toastService.show({
+        message: this.t('upload.location.update.failed', 'Standort konnte nicht aktualisiert werden.'),
+        type: 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.onImageUploaded({ id: request.imageId, lat: result.lat, lng: result.lng });
+    this.toastService.show({
+      message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),
+      type: 'success',
+      dedupe: true,
+    });
   }
 
   private handleMapMouseDown(event: L.LeafletMouseEvent): void {

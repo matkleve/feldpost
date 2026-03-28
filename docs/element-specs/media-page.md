@@ -95,17 +95,21 @@ AppShell (top-level, persistent across routes)
 
 **Upload Tab (Global, Seitenübergreifend):**
 
-| #   | User Action                                     | System Response                                                                                | Notes                                                |
-| --- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| 9a  | Clicks "Upload" tab in workspace                | Tab switches, shows full UploadPanelComponent                                                  | Same as upload on map                                |
-| 9b  | Drags files onto Drop Zone                      | Creates upload jobs via UploadManagerService                                                   | Queue + progress visible                             |
-| 10  | Clicks "Select Folder" button                   | Opens folder picker, scans + enqueues                                                          | Folder address hint applied                          |
-| 11  | Folder name contains address                    | Address becomes default for all files in folder                                                | Folder precedence rule                               |
-| 12  | Clicks "Uploading" / "Uploaded" / "Issues" lane | Lane list filters to show matching jobs                                                        | 1:1 copy of upload panel                             |
-| 13  | Duplicate detected                              | Modal appears, user selects use/upload/reject                                                  | Job state resolved                                   |
-| 14  | Switches back to "Selected Items"               | Tab switches, media grid stays in last filter state                                            | Uploads continue in background                       |
-| 15  | Navigates away to `/map`                        | MediaPage unmounts, Map loads; **Workspace pane stays open with Upload tab content preserved** | Uploads never interrupted                            |
-| 16  | Navigates back from `/map` to `/media`          | MediaPage mounts; pane stays on previously active tab (global restore policy)                  | If tab is `selected-items`, media context is rebound |
+| #   | User Action                                     | System Response                                                                                | Notes                                                       |
+| --- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 9a  | Clicks "Upload" tab in workspace                | Tab switches, shows full UploadPanelComponent                                                  | Same as upload on map                                       |
+| 9b  | Drags files onto Drop Zone                      | Creates upload jobs via UploadManagerService                                                   | Queue + progress visible                                    |
+| 10  | Clicks "Select Folder" button                   | Opens folder picker, scans + enqueues                                                          | Folder address hint applied                                 |
+| 11  | Folder name contains address                    | Address becomes default for all files in folder                                                | Folder precedence rule                                      |
+| 12  | Clicks "Uploading" / "Uploaded" / "Issues" lane | Lane list filters to show matching jobs                                                        | 1:1 copy of upload panel                                    |
+| 13  | Duplicate detected                              | Modal appears, user selects use/upload/reject                                                  | Job state resolved                                          |
+| 13a | User opens action menu on uploaded row          | Embedded upload tab exposes saved-media follow-up actions                                      | `Zu Projekt hinzufügen`, `Priorisieren`, `/media`, download |
+| 13b | Uploaded row belongs to a bound project         | `Projekt öffnen` action is available                                                           | Only when project context already exists                    |
+| 13c | Issue row represents missing GPS                | Upload tab exposes placement-oriented actions only                                             | No `Trotzdem hochladen` for GPS issues                      |
+| 13d | Issue row represents duplicate-photo review     | Upload tab exposes `Trotzdem hochladen` and existing-media actions                             | Only for duplicate review                                   |
+| 14  | Switches back to "Selected Items"               | Tab switches, media grid stays in last filter state                                            | Uploads continue in background                              |
+| 15  | Navigates away to `/map`                        | MediaPage unmounts, Map loads; **Workspace pane stays open with Upload tab content preserved** | Uploads never interrupted                                   |
+| 16  | Navigates back from `/map` to `/media`          | MediaPage mounts; pane stays on previously active tab (global restore policy)                  | If tab is `selected-items`, media context is rebound        |
 
 ---
 
@@ -166,6 +170,8 @@ flowchart LR
     G --> H{"Which tab?"}
     H -->|Selected Items| I["Show media grid"]
     H -->|Upload| J["Show UploadPanelComponent"]
+    J --> K["Lane buckets by issue kind + lane semantics"]
+    K --> L["Uploaded actions: add to project, prioritize, open media, download"]
 ```
 
 ---

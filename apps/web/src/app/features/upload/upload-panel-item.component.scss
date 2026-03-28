@@ -234,3 +234,12 @@
   font-size: var(--font-size-base-strong);
   line-height: var(--line-height-solid);
 }
+
+.upload-item-context-menu__section-label {
+  padding: 0.4rem 0.75rem 0.2rem;
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-tight);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}

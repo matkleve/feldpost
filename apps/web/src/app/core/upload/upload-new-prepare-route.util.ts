@@ -156,6 +156,10 @@ async function hashAndCheckDedup(
   parsedExif: ParsedExif,
   ctx: PipelineContext,
 ): Promise<boolean> {
+  if (!deps.uploadService.isPhotoFile(job.file)) {
+    return false;
+  }
+
   deps.jobState.setPhase(jobId, 'hashing');
   const fileHead = await readFileHead(job.file);
   const contentHash = await computeContentHash({

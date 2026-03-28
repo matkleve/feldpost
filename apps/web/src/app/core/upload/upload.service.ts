@@ -19,6 +19,7 @@ import {
   resolveUploadMimeType,
   validateUploadFile,
 } from './upload.service.util';
+import type { MediaType } from './upload-file-types';
 import type { ExifCoords, FileValidation, ParsedExif, UploadResult } from './upload.types';
 
 export { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './upload-file-types';
@@ -42,6 +43,14 @@ export class UploadService {
   /** Normalize file MIME with extension fallback for platform inconsistencies. */
   resolveMimeType(file: File): string {
     return resolveUploadMimeType(file);
+  }
+
+  resolveMediaType(file: File): MediaType {
+    return resolveUploadMediaType(this.resolveMimeType(file));
+  }
+
+  isPhotoFile(file: File): boolean {
+    return this.resolveMediaType(file) === 'photo';
   }
 
   /** Client-side guard mirrored by server/bucket constraints. */
@@ -158,7 +167,7 @@ export class UploadService {
 
     const finalCoords: ExifCoords | undefined = exifCoords ?? manualCoords;
 
-    const mediaType = resolveUploadMediaType(file.type);
+    const mediaType = this.resolveMediaType(file);
     const locationStatus = resolveUploadLocationStatus(mediaType, finalCoords);
     const gpsAssignmentAllowed = mediaType !== 'document' || finalCoords != null;
 

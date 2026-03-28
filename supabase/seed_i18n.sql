@@ -19346,4 +19346,314 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.section.location', 'Change location', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.section.location'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.section.location'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.section.location'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.location.clickMap', 'Click on map', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click on map', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.clickMap'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Karte anklicken', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.clickMap'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca sulla mappa', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.clickMap'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.location.enterAddress', 'Enter address', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.enterAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse eingeben', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.enterAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.enterAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.update.failed', 'Location could not be updated.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location could not be updated.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.update.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort konnte nicht aktualisiert werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.update.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile aggiornare la posizione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.update.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.update.success', 'Location updated.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location updated.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.update.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort wurde aktualisiert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.update.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione aggiornata.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.update.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mapPick.hint', 'Click the map to set the location.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click the map to set the location.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mapPick.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Karte anklicken, um den Standort zu setzen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mapPick.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca sulla mappa per impostare la posizione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mapPick.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.editor.aria', 'Change location by address', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change location by address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.editor.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort per Adresse aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.editor.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia posizione tramite indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.editor.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.placement.banner.placeImage', 'Click the map to place the image', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click the map to place the image', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.placeImage'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Klicke auf die Karte um das Medium zu platzieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.placeImage'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca sulla mappa per posizionare il media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.placeImage'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.placement.banner.setNewLocation', 'Click the map to set the new location', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click the map to set the new location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.setNewLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Klicke auf die Karte um den neuen Standort zu setzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.setNewLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca sulla mappa per impostare la nuova posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.setNewLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.placement.banner.dropPin', 'Click the map to drop a pin', 'en', 'apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:return')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click the map to drop a pin', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.dropPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Klicke auf die Karte um einen Pin zu setzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.dropPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca sulla mappa per inserire un pin', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.placement.banner.dropPin'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

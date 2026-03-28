@@ -2,6 +2,7 @@
   <div
     class="upload-panel__file-main"
     [class.upload-panel__file-main--interactive]="interactive()"
+    [class.upload-panel__file-main--has-menu]="hasMenuActions()"
     [attr.role]="interactive() ? 'button' : null"
     [attr.tabindex]="interactive() ? '0' : null"
     [attr.aria-label]="
@@ -13,6 +14,7 @@
     "
     (click)="rowMainClick.emit(job())"
     (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
+    (contextmenu)="onRowContextMenu($event)"
   >
     <div class="upload-panel__thumbnail-container">
       <div class="upload-panel__thumbnail-helper">
@@ -81,6 +83,22 @@
       </div>
     </div>
 
+    @if (hasMenuActions()) {
+      <button
+        uiButton
+        uiButtonSizeSm
+        uiButtonGhost
+        uiButtonIconOnly
+        class="upload-panel__row-action upload-panel__row-action--menu"
+        type="button"
+        [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+        [attr.title]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+        (click)="onMenuTriggerClick($event)"
+      >
+        <span class="material-icons" aria-hidden="true">more_vert</span>
+      </button>
+    }
+
     <button
       uiButton
       uiButtonSizeSm
@@ -95,4 +113,61 @@
       <span class="material-icons" aria-hidden="true">close</span>
     </button>
   </div>
+
+  @if (menuOpen() && menuPosition(); as menuPos) {
+    <app-dropdown-shell
+      class="map-context-menu"
+      [top]="menuPos.y"
+      [left]="menuPos.x"
+      [minWidth]="224"
+      [panelClass]="menuPanelClass()"
+      (closeRequested)="onMenuCloseRequested()"
+    >
+      <div class="map-context-menu__header option-menu-header">
+        {{ job().file.name }}
+      </div>
+
+      <div
+        class="dd-items"
+        role="menu"
+        [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+      >
+        @for (action of availableMenuActions(); track action) {
+          @if (action === 'change_location_map') {
+            <div class="upload-item-context-menu__section-label" role="presentation">
+              {{ t('upload.item.menu.section.location', 'Standort aendern') }}
+            </div>
+          }
+          <button class="dd-item" type="button" role="menuitem" (click)="onMenuAction(action)">
+            <span class="material-icons dd-item__icon" aria-hidden="true">
+              {{
+                action === 'open_in_media'
+                  ? 'open_in_new'
+                  : action === 'add_to_project'
+                    ? 'folder_open'
+                    : action === 'change_location_map'
+                      ? 'pin_drop'
+                      : action === 'change_location_address'
+                        ? 'search'
+                        : 'download'
+              }}
+            </span>
+            <span class="dd-item__label">
+              {{
+                action === 'open_in_media'
+                  ? t('auto.0089.details_oeffnen', 'Details oeffnen')
+                  : action === 'add_to_project'
+                    ? t('auto.0013.add_to_project', 'Add to project')
+                    : action === 'change_location_map'
+                      ? t('upload.item.menu.location.clickMap', 'Karte anklicken')
+                      : action === 'change_location_address'
+                        ? t('upload.item.menu.location.enterAddress', 'Adresse eingeben')
+                        : t('auto.0099.download', 'Download')
+              }}
+            </span>
+          </button>
+        }
+      </div>
+    </app-dropdown-shell>
+  }
 </li>
