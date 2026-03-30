@@ -3,6 +3,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { isUploadLane } from './upload-panel-helpers';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 
@@ -12,5 +13,12 @@ export class UploadPanelLaneHandlersService {
 
   setSelectedLane(lane: UploadLane): void {
     this.signals.selectedLane.set(lane);
+  }
+
+  onLaneSwitchValueChange(value: string | null): void {
+    if (!value || !isUploadLane(value)) {
+      return;
+    }
+    this.setSelectedLane(value);
   }
 }

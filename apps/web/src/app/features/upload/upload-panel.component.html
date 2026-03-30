@@ -21,14 +21,14 @@
     <div
       class="upload-panel__dropzone"
       [class.upload-panel__dropzone--dragging]="isDragging()"
-      (dragover)="onDragOver($event)"
-      (dragleave)="onDragLeave($event)"
-      (drop)="onDrop($event)"
+      (dragover)="inputHandlers.onDragOver($event)"
+      (dragleave)="inputHandlers.onDragLeave($event)"
+      (drop)="inputHandlers.onDrop($event); selectedLane.set('uploading')"
       role="button"
       tabindex="0"
       aria-label="Drag files here or click to select"
-      (click)="openFilePicker(fileInput)"
-      (keydown)="onDropZoneKeydown($event, fileInput)"
+      (click)="inputHandlers.openFilePicker(fileInput)"
+      (keydown)="inputHandlers.onDropZoneKeydown($event, fileInput)"
     >
       <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
       <p class="upload-panel__dropzone-label">
@@ -54,7 +54,7 @@
         multiple
         aria-hidden="true"
         tabindex="-1"
-        (change)="onFileInputChange($event)"
+        (change)="inputHandlers.onFileInputChange($event); selectedLane.set('uploading')"
       />
     </div>
 
@@ -69,7 +69,7 @@
             ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
             : null
         "
-        (click)="onSelectFolder($event, folderInput)"
+        (click)="inputHandlers.onSelectFolder($event, folderInput)"
       >
         <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
         Upload folder
@@ -88,7 +88,7 @@
         class="upload-panel__intake-btn upload-panel__intake-btn--capture"
         type="button"
         [disabled]="scanning()"
-        (click)="openCapturePicker($event, captureInput)"
+        (click)="inputHandlers.openCapturePicker($event, captureInput)"
       >
         <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
           >photo_camera</span
@@ -105,7 +105,7 @@
       capture="environment"
       aria-hidden="true"
       tabindex="-1"
-      (change)="onCaptureInputChange($event)"
+      (change)="inputHandlers.onCaptureInputChange($event); selectedLane.set('uploading')"
     />
 
     <input
@@ -117,7 +117,7 @@
       directory
       aria-hidden="true"
       tabindex="-1"
-      (change)="onFolderInputChange($event)"
+      (change)="inputHandlers.onFolderInputChange($event); selectedLane.set('uploading')"
     />
   </div>
 
@@ -127,7 +127,7 @@
       [options]="laneSwitchOptions()"
       [value]="effectiveLane()"
       sizing="fill"
-      (valueChange)="onLaneSwitchValueChange($event)"
+      (valueChange)="laneHandlers.onLaneSwitchValueChange($event)"
       [ariaLabel]="t('auto.0370.upload_lanes', 'Upload lanes')"
     ></app-segmented-switch>
   }
@@ -139,19 +139,21 @@
         @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
           <app-upload-panel-item
             [job]="job"
-            [interactive]="isRowInteractive(job)"
+            [interactive]="rowHandlers.isRowInteractive(job)"
             [selectable]="embeddedInPane()"
             [selected]="selectedUploadJobIds().has(job.id)"
             [documentFallbackLabel]="documentFallbackLabel(job)"
             [showOpenProject]="!!job.projectId"
             [priorityEnabled]="priorityWorkflowEnabled()"
-            [prioritized]="isJobPrioritized(job)"
-            (requestPlacement)="requestPlacement(job.id, job.phase, $event.event)"
+            [prioritized]="prioritizedUploadedJobIds().has(job.id)"
+            (requestPlacement)="
+              rowInteractionHandlers.requestPlacement(job.id, job.phase, $event.event)
+            "
             (dismissFile)="dismissFile(job.id)"
-            (rowMainClick)="onRowMainClick(job)"
-            (rowMainKeydown)="onRowMainKeydown(job, $event.event)"
-            (menuActionSelected)="onMenuActionSelected($event)"
-            (selectionChanged)="onRowSelectionChanged($event)"
+            (rowMainClick)="rowInteractionHandlers.onRowMainClick(job)"
+            (rowMainKeydown)="rowInteractionHandlers.onRowMainKeydown(job, $event.event)"
+            (menuActionSelected)="actionHandlers.handleMenuAction($event.job, $event.action)"
+            (selectionChanged)="bulkHandlers.onRowSelectionChanged($event)"
           ></app-upload-panel-item>
         }
       </ul>
@@ -170,7 +172,7 @@
           <button
             uiButton
             type="button"
-            (click)="retrySelectedUploads()"
+            (click)="bulkHandlers.retrySelectedUploads()"
             [attr.aria-label]="t('projects.page.error.retry', 'Retry')"
             [title]="t('projects.page.error.retry', 'Retry')"
           >
@@ -182,7 +184,7 @@
           <button
             uiButton
             type="button"
-            (click)="downloadSelectedUploads()"
+            (click)="bulkHandlers.downloadSelectedUploads()"
             [attr.aria-label]="t('auto.0099.download', 'Download')"
             [title]="t('auto.0099.download', 'Download')"
           >
@@ -194,7 +196,7 @@
           uiButton
           type="button"
           class="upload-panel__bulk-remove"
-          (click)="removeSelectedUploads()"
+          (click)="bulkHandlers.removeSelectedUploads()"
           [attr.aria-label]="t('workspace.imageDetail.projects.remove', 'Remove')"
           [title]="t('workspace.imageDetail.projects.remove', 'Remove')"
         >
@@ -204,7 +206,7 @@
         <button
           uiButton
           type="button"
-          (click)="clearSelectedUploads()"
+          (click)="bulkHandlers.clearSelectedUploads()"
           [attr.aria-label]="t('workspace.export.action.selectNone', 'Select none')"
           [title]="t('workspace.export.action.selectNone', 'Select none')"
         >
@@ -229,7 +231,7 @@
           type="button"
           class="upload-panel__location-editor-close"
           [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
-          (click)="onLocationAddressDialogClose()"
+          (click)="actionHandlers.onLocationAddressDialogClose()"
         >
           <span class="material-icons" aria-hidden="true">close</span>
         </button>
@@ -246,7 +248,7 @@
         type="text"
         [placeholder]="t('workspace.addressSearch.placeholder', 'Search address...')"
         [value]="locationAddressDialogQuery()"
-        (input)="onLocationAddressDialogQueryInput(uploadLocationSearchInput.value)"
+        (input)="actionHandlers.onLocationAddressDialogQueryInput(uploadLocationSearchInput.value)"
         #uploadLocationSearchInput
       />
 
@@ -263,11 +265,11 @@
               class="dd-item"
               type="button"
               role="option"
-              (mouseenter)="onLocationAddressSuggestionHover(suggestion)"
-              (mouseleave)="onLocationAddressSuggestionHoverEnd()"
-              (focus)="onLocationAddressSuggestionHover(suggestion)"
-              (blur)="onLocationAddressSuggestionHoverEnd()"
-              (click)="onLocationAddressSuggestionApply(suggestion)"
+              (mouseenter)="actionHandlers.onLocationAddressSuggestionHover(suggestion)"
+              (mouseleave)="actionHandlers.onLocationAddressSuggestionHoverEnd()"
+              (focus)="actionHandlers.onLocationAddressSuggestionHover(suggestion)"
+              (blur)="actionHandlers.onLocationAddressSuggestionHoverEnd()"
+              (click)="actionHandlers.onLocationAddressSuggestionApply(suggestion)"
             >
               <span class="material-icons dd-item__icon" aria-hidden="true">place</span>
               <span class="dd-item__label">{{ suggestion.addressLabel }}</span>
@@ -299,7 +301,7 @@
           <input
             type="checkbox"
             [checked]="duplicateResolutionApplyToBatch()"
-            (change)="onDuplicateResolutionApplyToBatchChange($event)"
+            (change)="actionHandlers.onDuplicateResolutionApplyToBatchChange($event)"
           />
           <span>{{
             t('upload.duplicate.dialog.applyToBatch', 'Apply to all matching items in this batch')
@@ -307,17 +309,25 @@
         </label>
 
         <div class="upload-panel__duplicate-dialog-actions">
-          <button uiButton type="button" (click)="onDuplicateResolutionChoice('use_existing')">
+          <button
+            uiButton
+            type="button"
+            (click)="actionHandlers.onDuplicateResolutionChoice('use_existing')"
+          >
             {{ t('upload.duplicate.dialog.action.useExisting', 'Use existing') }}
           </button>
-          <button uiButton type="button" (click)="onDuplicateResolutionChoice('upload_anyway')">
+          <button
+            uiButton
+            type="button"
+            (click)="actionHandlers.onDuplicateResolutionChoice('upload_anyway')"
+          >
             {{ t('upload.duplicate.dialog.action.uploadAnyway', 'Upload anyway') }}
           </button>
           <button
             uiButton
             uiButtonGhost
             type="button"
-            (click)="onDuplicateResolutionChoice('reject')"
+            (click)="actionHandlers.onDuplicateResolutionChoice('reject')"
           >
             {{ t('upload.duplicate.dialog.action.reject', 'Reject') }}
           </button>
@@ -334,9 +344,9 @@
       [selectedId]="projectSelectionDialogSelectedId()"
       confirmLabel="Auswaehlen"
       cancelLabel="Abbrechen"
-      (selectedIdChange)="onProjectSelectionDialogSelected($event)"
-      (confirmed)="onProjectSelectionDialogConfirmed($event)"
-      (cancelled)="onProjectSelectionDialogCancelled()"
+      (selectedIdChange)="actionHandlers.onProjectSelectionDialogSelected($event)"
+      (confirmed)="actionHandlers.onProjectSelectionDialogConfirmed($event)"
+      (cancelled)="actionHandlers.onProjectSelectionDialogCancelled()"
     />
   }
 </section>
