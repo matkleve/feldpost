@@ -10,10 +10,8 @@
 
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { UploadPanelItemComponent, type UploadItemMenuAction } from './upload-panel-item.component';
-import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding.service';
-import { GeocodingService } from '../../core/geocoding.service';
+import type { ForwardGeocodeResult } from '../../core/geocoding.service';
 import type { ExifCoords } from '../../core/upload/upload.service';
 import {
   UploadManagerService,
@@ -29,7 +27,6 @@ import {
   UploadPanelRowHandlersService,
   type ZoomToLocationEvent,
 } from './upload-panel-row-handlers';
-import { UploadService } from '../../core/upload/upload.service';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
 import {
   isRetryableJob,
@@ -43,25 +40,18 @@ import {
 } from '../../shared/ui-primitives/ui-primitives.directive';
 import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { ToastService } from '../../core/toast.service';
-import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';
-import { MapProjectDialogService } from '../map/map-shell/map-project-dialog.service';
-import {
-  ProjectSelectDialogComponent,
-  type ProjectSelectOption,
-} from '../../shared/project-select-dialog/project-select-dialog.component';
-import { SupabaseService } from '../../core/supabase/supabase.service';
-import { ProjectsService } from '../../core/projects/projects.service';
-import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
-import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
-import { MediaLocationUpdateService } from '../../core/media-location-update.service';
+import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
 import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import { getIssueKind, type UploadLane } from './upload-phase.helpers';
+import type { UploadLane } from './upload-phase.helpers';
 import { DEFAULT_FILE_TYPE_CHIPS, UPLOAD_LANES } from './upload-panel.constants';
+import {
+  UploadPanelJobActionsService,
+  type DuplicateResolutionChoice,
+} from './upload-panel-job-actions.service';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -81,8 +71,6 @@ export interface UploadLocationMapPickRequest {
   fileName: string;
 }
 
-type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
-
 @Component({
   selector: 'app-upload-panel',
   standalone: true,
@@ -96,6 +84,7 @@ type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
     ProjectSelectDialogComponent,
     PaneFooterComponent,
   ],
+  providers: [UploadPanelDialogSignals, UploadPanelJobActionsService],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
 })
@@ -108,17 +97,7 @@ export class UploadPanelComponent {
   private readonly inputs = inject(UploadPanelInputHandlersService);
   private readonly lanes = inject(UploadPanelLaneHandlersService);
   private readonly rows = inject(UploadPanelRowHandlersService);
-  private readonly uploadService = inject(UploadService);
-  private readonly geocodingService = inject(GeocodingService);
-  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
-  private readonly toastService = inject(ToastService);
-  private readonly supabaseService = inject(SupabaseService);
-  private readonly projectsService = inject(ProjectsService);
-  private readonly mapProjectActionsService = inject(MapProjectActionsService);
-  private readonly mapProjectDialogService = inject(MapProjectDialogService);
-  private readonly router = inject(Router);
-  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
-  private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
+  private readonly jobActions = inject(UploadPanelJobActionsService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   // Component I/O
@@ -243,23 +222,6 @@ export class UploadPanelComponent {
   readonly duplicateResolutionDialogOpen = this.dialogSignals.duplicateResolutionDialogOpen;
   readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
 
-  // Pending job signals
-  private readonly pendingProjectAssignmentJob = this.dialogSignals.pendingProjectAssignmentJob;
-  private readonly pendingLocationAddressJob = this.dialogSignals.pendingLocationAddressJob;
-  private readonly pendingDuplicateResolutionJob = this.dialogSignals.pendingDuplicateResolutionJob;
-
-  private readonly projectDialogSignals = {
-    projectSelectionDialogOpen: this.dialogSignals.projectSelectionDialogOpen,
-    projectSelectionDialogTitle: this.dialogSignals.projectSelectionDialogTitle,
-    projectSelectionDialogMessage: this.dialogSignals.projectSelectionDialogMessage,
-    projectSelectionDialogOptions: this.dialogSignals.projectSelectionDialogOptions,
-    projectSelectionDialogSelectedId: this.dialogSignals.projectSelectionDialogSelectedId,
-    projectNameDialogOpen: signal(false),
-    projectNameDialogTitle: signal(''),
-    projectNameDialogMessage: signal(''),
-    projectNameDialogInitialValue: signal(''),
-  };
-
   constructor() {
     effect(() => {
       const jobs = this.uploadManager.jobs();
@@ -290,6 +252,17 @@ export class UploadPanelComponent {
     this.lifecycle.setPlacementRequestedCallback((jobId) => this.placementRequested.emit(jobId));
     this.lifecycle.setAutoSwitchCallback(() => this.lanes.setSelectedLane('issues'));
     this.lifecycle.initializeSubscriptions();
+
+    this.jobActions.register({
+      imageUploaded: (event) => this.imageUploaded.emit(event),
+      placementRequested: (jobId) => this.placementRequested.emit(jobId),
+      locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
+      locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),
+      locationPreviewCleared: () => this.locationPreviewCleared.emit(),
+      setLane: (lane) => this.selectedLane.set(lane),
+      selectedUploadJobIds: this.selectedUploadJobIds,
+      prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
+    });
   }
 
   // ── Input handlers (delegated to inputs service) ────────────────────────
@@ -435,7 +408,7 @@ export class UploadPanelComponent {
   async downloadSelectedUploads(): Promise<void> {
     for (const job of this.selectedUploadJobs()) {
       if (job.imageId && job.storagePath && this.canZoomToJob(job)) {
-        await this.downloadUploadedJob(job);
+        await this.jobActions.downloadUploadedJob(job);
       }
     }
   }
@@ -456,89 +429,7 @@ export class UploadPanelComponent {
     job: UploadJob;
     action: UploadItemMenuAction;
   }): Promise<void> {
-    if (event.action === 'view_progress' || event.action === 'view_file_details') {
-      this.toastService.show({
-        message: event.job.statusLabel,
-        type: 'info',
-        dedupe: true,
-      });
-      return;
-    }
-
-    if (event.action === 'open_existing_media') {
-      await this.openExistingDuplicateInMedia(event.job);
-      return;
-    }
-
-    if (event.action === 'upload_anyway') {
-      this.openDuplicateResolutionDialog(event.job);
-      return;
-    }
-
-    if (event.action === 'change_location_map') {
-      this.requestLocationPickOnMap(event.job);
-      return;
-    }
-
-    if (event.action === 'place_on_map') {
-      const issueKind = getIssueKind(event.job);
-      if (issueKind === 'missing_gps' || issueKind === 'document_unresolved') {
-        this.placementRequested.emit(event.job.id);
-        return;
-      }
-      this.requestLocationPickOnMap(event.job);
-      return;
-    }
-
-    if (event.action === 'change_location_address') {
-      this.openLocationAddressDialog(event.job);
-      return;
-    }
-
-    if (event.action === 'retry') {
-      this.retryFile(event.job.id);
-      this.selectedLane.set('uploading');
-      return;
-    }
-
-    if (event.action === 'open_project') {
-      await this.openUploadedJobProject(event.job);
-      return;
-    }
-
-    if (event.action === 'open_in_media') {
-      await this.openUploadedJobInMedia(event.job);
-      return;
-    }
-
-    if (event.action === 'add_to_project') {
-      await this.openProjectAssignmentForJob(event.job);
-      return;
-    }
-
-    if (event.action === 'download') {
-      await this.downloadUploadedJob(event.job);
-      return;
-    }
-
-    if (event.action === 'cancel_upload') {
-      this.uploadManager.cancelJob(event.job.id);
-      return;
-    }
-
-    if (event.action === 'remove_from_project') {
-      await this.removeUploadedJobFromProject(event.job);
-      return;
-    }
-
-    if (event.action === 'dismiss') {
-      this.dismissFile(event.job.id);
-      return;
-    }
-
-    if (event.action === 'toggle_priority') {
-      this.toggleJobPriority(event.job);
-    }
+    await this.jobActions.handleMenuAction(event.job, event.action);
   }
 
   isJobPrioritized(job: UploadJob): boolean {
@@ -546,402 +437,42 @@ export class UploadPanelComponent {
   }
 
   onLocationAddressDialogQueryInput(query: string): void {
-    this.locationAddressDialogQuery.set(query);
-    const timeout = this.dialogSignals.getLocationAddressSearchTimeout();
-    if (timeout) {
-      clearTimeout(timeout);
-      this.dialogSignals.setLocationAddressSearchTimeout(null);
-    }
-
-    if (!query.trim()) {
-      this.locationAddressDialogLoading.set(false);
-      this.locationAddressDialogSuggestions.set([]);
-      this.locationPreviewCleared.emit();
-      return;
-    }
-
-    const newTimeout = setTimeout(() => {
-      void this.searchLocationAddress(query);
-    }, 280);
-    this.dialogSignals.setLocationAddressSearchTimeout(newTimeout);
+    this.jobActions.onLocationAddressDialogQueryInput(query);
   }
 
   onLocationAddressDialogClose(): void {
-    this.locationAddressDialogOpen.set(false);
-    this.locationAddressDialogQuery.set('');
-    this.locationAddressDialogSuggestions.set([]);
-    this.pendingLocationAddressJob.set(null);
-    this.locationPreviewCleared.emit();
+    this.jobActions.onLocationAddressDialogClose();
   }
 
   onLocationAddressSuggestionHover(suggestion: ForwardGeocodeResult): void {
-    this.locationPreviewRequested.emit({ lat: suggestion.lat, lng: suggestion.lng });
+    this.jobActions.onLocationAddressSuggestionHover(suggestion);
   }
 
   onLocationAddressSuggestionHoverEnd(): void {
-    this.locationPreviewCleared.emit();
+    this.jobActions.onLocationAddressSuggestionHoverEnd();
   }
 
   async onLocationAddressSuggestionApply(suggestion: ForwardGeocodeResult): Promise<void> {
-    const job = this.pendingLocationAddressJob();
-    if (!job) {
-      this.onLocationAddressDialogClose();
-      return;
-    }
-
-    if (!job.imageId && job.phase === 'missing_data') {
-      this.placeFile(job.id, { lat: suggestion.lat, lng: suggestion.lng });
-      this.toastService.show({
-        message: this.t('upload.location.update.success', 'Location updated.'),
-        type: 'success',
-        dedupe: true,
-      });
-      this.onLocationAddressDialogClose();
-      return;
-    }
-
-    if (!job.imageId) {
-      this.onLocationAddressDialogClose();
-      return;
-    }
-
-    const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
-      job.imageId,
-      suggestion,
-    );
-    if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
-      this.toastService.show({
-        message: this.t('upload.location.update.failed', 'Location could not be updated.'),
-        type: 'error',
-        dedupe: true,
-      });
-      return;
-    }
-
-    this.imageUploaded.emit({ id: job.imageId, lat: result.lat, lng: result.lng });
-    this.toastService.show({
-      message: this.t('upload.location.update.success', 'Location updated.'),
-      type: 'success',
-      dedupe: true,
-    });
-    this.onLocationAddressDialogClose();
+    await this.jobActions.onLocationAddressSuggestionApply(suggestion);
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {
-    this.mapProjectDialogService.setProjectSelectionSelectedId(
-      this.projectDialogSignals,
-      projectId,
-    );
+    this.jobActions.onProjectSelectionDialogSelected(projectId);
   }
 
   async onProjectSelectionDialogConfirmed(projectId: string): Promise<void> {
-    const job = this.pendingProjectAssignmentJob();
-    const selected =
-      this.projectSelectionDialogOptions().find((option) => option.id === projectId) ?? null;
-    this.mapProjectDialogService.confirmProjectSelection(this.projectDialogSignals, projectId);
-
-    if (!job || !selected) {
-      this.pendingProjectAssignmentJob.set(null);
-      return;
-    }
-
-    if (!job.imageId && job.phase === 'missing_data') {
-      this.uploadManager.assignJobToProject(job.id, projectId);
-      this.toastService.show({
-        message: this.mapProjectActionsService.formatProjectAssignmentSuccess(selected.name, 1),
-        type: 'success',
-        dedupe: true,
-      });
-      this.pendingProjectAssignmentJob.set(null);
-      this.selectedLane.set('uploading');
-      return;
-    }
-
-    if (!job.imageId) {
-      this.pendingProjectAssignmentJob.set(null);
-      return;
-    }
-
-    const ok = await this.projectsService.addMediaToProject(job.imageId, projectId);
-    if (ok) {
-      this.toastService.show({
-        message: this.mapProjectActionsService.formatProjectAssignmentSuccess(selected.name, 1),
-        type: 'success',
-        dedupe: true,
-      });
-    } else {
-      this.toastService.show({
-        message: this.t(
-          'workspace.imageDetail.toast.membershipUpdateFailed',
-          'Could not update project memberships.',
-        ),
-        type: 'error',
-        dedupe: true,
-      });
-    }
-
-    this.pendingProjectAssignmentJob.set(null);
+    await this.jobActions.onProjectSelectionDialogConfirmed(projectId);
   }
 
   onProjectSelectionDialogCancelled(): void {
-    this.mapProjectDialogService.cancelProjectSelection(this.projectDialogSignals);
-    this.pendingProjectAssignmentJob.set(null);
+    this.jobActions.onProjectSelectionDialogCancelled();
   }
 
   onDuplicateResolutionApplyToBatchChange(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement)) {
-      return;
-    }
-    this.duplicateResolutionApplyToBatch.set(target.checked);
+    this.jobActions.onDuplicateResolutionApplyToBatchChange(event);
   }
 
   async onDuplicateResolutionChoice(choice: DuplicateResolutionChoice): Promise<void> {
-    const job = this.pendingDuplicateResolutionJob();
-    if (!job) {
-      this.closeDuplicateResolutionDialog();
-      return;
-    }
-
-    const jobs = this.resolveDuplicateResolutionTargets(
-      job,
-      this.duplicateResolutionApplyToBatch(),
-    );
-
-    if (choice === 'upload_anyway') {
-      for (const entry of jobs) {
-        this.uploadManager.forceDuplicateUpload(entry.id);
-      }
-      this.selectedLane.set('uploading');
-      this.closeDuplicateResolutionDialog();
-      return;
-    }
-
-    if (choice === 'use_existing') {
-      await this.openExistingDuplicateInMedia(job);
-      for (const entry of jobs) {
-        this.dismissFile(entry.id);
-      }
-      this.closeDuplicateResolutionDialog();
-      return;
-    }
-
-    for (const entry of jobs) {
-      this.dismissFile(entry.id);
-    }
-    this.closeDuplicateResolutionDialog();
-  }
-
-  private async openProjectAssignmentForJob(job: UploadJob): Promise<void> {
-    if (!job.imageId && job.phase !== 'missing_data') {
-      return;
-    }
-
-    const optionsResult = await this.mapProjectActionsService.loadProjectOptions(
-      this.supabaseService.client,
-    );
-    if (!optionsResult.ok) {
-      this.toastService.show({
-        message: this.t('map.shell.toast.projectAssignmentFailed', 'Project assignment failed.'),
-        type: optionsResult.reason === 'empty' ? 'warning' : 'error',
-        dedupe: true,
-      });
-      return;
-    }
-
-    this.pendingProjectAssignmentJob.set(job);
-    void this.mapProjectDialogService.openProjectSelectionDialog(
-      this.projectDialogSignals,
-      optionsResult.options,
-      this.t('auto.0013.add_to_project', 'Add to project'),
-      job.file.name,
-    );
-  }
-
-  private openDuplicateResolutionDialog(job: UploadJob): void {
-    this.pendingDuplicateResolutionJob.set(job);
-    this.duplicateResolutionApplyToBatch.set(false);
-    this.duplicateResolutionDialogOpen.set(true);
-  }
-
-  private closeDuplicateResolutionDialog(): void {
-    this.pendingDuplicateResolutionJob.set(null);
-    this.duplicateResolutionApplyToBatch.set(false);
-    this.duplicateResolutionDialogOpen.set(false);
-  }
-
-  private resolveDuplicateResolutionTargets(
-    seed: UploadJob,
-    applyToBatch: boolean,
-  ): ReadonlyArray<UploadJob> {
-    if (!applyToBatch || !seed.existingImageId) {
-      return [seed];
-    }
-
-    return this.jobs().filter(
-      (job) => job.phase === 'skipped' && job.existingImageId === seed.existingImageId,
-    );
-  }
-
-  private async downloadUploadedJob(job: UploadJob): Promise<void> {
-    if (!job.storagePath) {
-      this.toastService.show({
-        message: 'Download nicht verfuegbar.',
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    const result = await this.uploadService.downloadFile(job.storagePath);
-    if (!result.ok) {
-      this.toastService.show({
-        message: typeof result.error === 'string' ? result.error : 'Download fehlgeschlagen.',
-        type: 'error',
-        dedupe: true,
-      });
-      return;
-    }
-
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    const blobUrl = URL.createObjectURL(result.blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = job.file.name;
-    link.rel = 'noopener';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
-  }
-
-  private async openUploadedJobInMedia(job: UploadJob): Promise<void> {
-    if (!job.imageId) {
-      return;
-    }
-
-    this.workspaceSelectionService.setSingle(job.imageId);
-    this.workspacePaneObserver.setDetailImageId(job.imageId);
-    this.workspacePaneObserver.setOpen(true);
-
-    await this.router.navigate(['/media']);
-  }
-
-  private async openExistingDuplicateInMedia(job: UploadJob): Promise<void> {
-    if (!job.existingImageId) {
-      return;
-    }
-
-    this.workspaceSelectionService.setSingle(job.existingImageId);
-    this.workspacePaneObserver.setDetailImageId(job.existingImageId);
-    this.workspacePaneObserver.setOpen(true);
-
-    await this.router.navigate(['/media']);
-  }
-
-  private async openUploadedJobProject(job: UploadJob): Promise<void> {
-    if (!job.projectId) {
-      this.toastService.show({
-        message: this.t('upload.item.menu.project.unavailable', 'No project assigned.'),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    await this.router.navigate(['/projects', job.projectId]);
-  }
-
-  private async removeUploadedJobFromProject(job: UploadJob): Promise<void> {
-    if (!job.imageId || !job.projectId) {
-      this.toastService.show({
-        message: this.t('upload.item.menu.project.unavailable', 'No project assigned.'),
-        type: 'warning',
-        dedupe: true,
-      });
-      return;
-    }
-
-    const ok = await this.projectsService.removeMediaFromProject(job.imageId, job.projectId);
-    if (!ok) {
-      this.toastService.show({
-        message: this.t('upload.item.menu.project.remove.failed', 'Could not remove from project.'),
-        type: 'error',
-        dedupe: true,
-      });
-      return;
-    }
-
-    this.toastService.show({
-      message: this.t('upload.item.menu.project.remove.success', 'Removed from project.'),
-      type: 'success',
-      dedupe: true,
-    });
-    this.dismissFile(job.id);
-  }
-
-  private toggleJobPriority(job: UploadJob): void {
-    if (!job.imageId) {
-      return;
-    }
-
-    const next = new Set(this.prioritizedUploadedJobIds());
-    const had = next.has(job.id);
-    if (had) {
-      next.delete(job.id);
-    } else {
-      next.add(job.id);
-    }
-    this.prioritizedUploadedJobIds.set(next);
-
-    this.toastService.show({
-      message: had
-        ? this.t('upload.item.menu.priority.removedToast', 'Priority removed.')
-        : this.t('upload.item.menu.priority.addedToast', 'Upload prioritized.'),
-      type: 'success',
-      dedupe: true,
-    });
-  }
-
-  private requestLocationPickOnMap(job: UploadJob): void {
-    if (!job.imageId) {
-      return;
-    }
-
-    this.locationMapPickRequested.emit({ imageId: job.imageId, fileName: job.file.name });
-    this.toastService.show({
-      message: this.t('upload.location.mapPick.hint', 'Click on the map to set the location.'),
-      type: 'info',
-      dedupe: true,
-    });
-  }
-
-  private openLocationAddressDialog(job: UploadJob): void {
-    if (!job.imageId && job.phase !== 'missing_data') {
-      return;
-    }
-
-    this.pendingLocationAddressJob.set(job);
-    this.locationAddressDialogQuery.set('');
-    this.locationAddressDialogSuggestions.set([]);
-    this.locationAddressDialogLoading.set(false);
-    this.locationAddressDialogOpen.set(true);
-  }
-
-  private async searchLocationAddress(query: string): Promise<void> {
-    const normalized = query.trim();
-    if (!normalized) {
-      this.locationAddressDialogSuggestions.set([]);
-      this.locationAddressDialogLoading.set(false);
-      return;
-    }
-
-    this.locationAddressDialogLoading.set(true);
-    const results = await this.geocodingService.search(normalized, { limit: 6 });
-    this.locationAddressDialogLoading.set(false);
-    this.locationAddressDialogSuggestions.set(mapSearchResultsToForwardSuggestions(results));
+    await this.jobActions.onDuplicateResolutionChoice(choice);
   }
 }
