@@ -1,19 +1,20 @@
 # Upload Panel - 3-Dot Menu Audit
 
 ## 1. State Table
-Here is an overview of what currently renders versus what *should* render based on the new rules.
 
-| Lane / State | Currently renders | Should render |
-| - | - | - |
-| **Uploading** (Any phase, no issue) | (none or empty) | `Stop uploading` |
-| **Uploaded** (No project) | `Click on map`, `Enter address`, `Add to project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list` | `Change GPT`*, `Change Address`*, `Add to project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list`|
-| **Uploaded** (In project) | `Click on map`, `Enter address`, `Open project`, `Add to project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list` | `Change GPT`*, `Change Address`*, `Open project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list` |
-| **Issue — duplicate** | `Open existing media`, `Upload anyway`, `Remove from list` | `Open existing media`, `Upload anyway`, `Remove from list` |
-| **Issue — missing GPS** | (empty except Remove from list) | `Change GPT`*, `Change Address`*, `Remove from list` |
-| **Failed** (Error) | (empty) | `Retry` (if we have it, otherwise just `Remove from list`) |
+Here is an overview of what currently renders versus what _should_ render based on the new rules.
 
-*Note: Per requirements, "Click on map" and "Enter address" are changing to "Change GPT" / "Change Address". "Add to project" is removed if already project-bound, otherwise available.*
-*"Remove from list" is the destructive bottom item in all states. If State is Uploading, it says "Stop uploading" instead.*
+| Lane / State                        | Currently renders                                                                                                                  | Should render                                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Uploading** (Any phase, no issue) | (none or empty)                                                                                                                    | `Stop uploading`                                                                                                    |
+| **Uploaded** (No project)           | `Click on map`, `Enter address`, `Add to project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list`                 | `Change GPT`_, `Change Address`_, `Add to project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list` |
+| **Uploaded** (In project)           | `Click on map`, `Enter address`, `Open project`, `Add to project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list` | `Change GPT`_, `Change Address`_, `Open project`, `Details oeffnen`, `Download`, `Prioritize`, `Remove from list`   |
+| **Issue — duplicate**               | `Open existing media`, `Upload anyway`, `Remove from list`                                                                         | `Open existing media`, `Upload anyway`, `Remove from list`                                                          |
+| **Issue — missing GPS**             | (empty except Remove from list)                                                                                                    | `Change GPT`_, `Change Address`_, `Remove from list`                                                                |
+| **Failed** (Error)                  | (empty)                                                                                                                            | `Retry` (if we have it, otherwise just `Remove from list`)                                                          |
+
+_Note: Per requirements, "Click on map" and "Enter address" are changing to "Change GPT" / "Change Address". "Add to project" is removed if already project-bound, otherwise available._
+_"Remove from list" is the destructive bottom item in all states. If State is Uploading, it says "Stop uploading" instead._
 
 ## 2. All Possible Options & Rules
 
@@ -28,10 +29,11 @@ Here is an overview of what currently renders versus what *should* render based 
 9. `toggle_priority` - Only on `Uploaded`.
 10. **(Divider)**
 11. `dismiss` - ALWAYS PRESENT at the bottom.
-     - Label: "Stop uploading" (State == Uploading)
-     - Label: "Remove from list" (State == Uploaded or Issues)
+    - Label: "Stop uploading" (State == Uploading)
+    - Label: "Remove from list" (State == Uploaded or Issues)
 
 ## 3. Dropdown Header removal
+
 - `<div class="upload-item-context-menu__section-label" role="presentation">` is being removed.
 - `map-context-menu__header option-menu-header` is already removed.
 
