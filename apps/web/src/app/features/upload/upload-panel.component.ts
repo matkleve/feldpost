@@ -20,7 +20,6 @@ import {
   type UploadJob,
   type UploadPhase,
 } from '../../core/upload/upload-manager.service';
-import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 import { UploadPanelLifecycleService } from './upload-panel-lifecycle.service';
 import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
@@ -35,9 +34,8 @@ import {
   UiButtonDirective,
   UiInputControlDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
-import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
+import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { fileTypeBadge, resolveFileType } from '../../core/media/file-type-registry';
 import { ToastService } from '../../core/toast.service';
 import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';
 import { MapProjectDialogService } from '../map/map-shell/map-project-dialog.service';
@@ -55,7 +53,8 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
-import { getIssueKind } from './upload-phase.helpers';
+import { getIssueKind, type UploadLane } from './upload-phase.helpers';
+import { DEFAULT_FILE_TYPE_CHIPS, UPLOAD_LANES } from './upload-panel.constants';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -75,65 +74,7 @@ export interface UploadLocationMapPickRequest {
   fileName: string;
 }
 
-type UploadFileTypeChip = {
-  type: string;
-  icon: string;
-  variant: ChipVariant;
-  order: number;
-};
-
 type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
-
-const UPLOAD_LANES = ['uploading', 'uploaded', 'issues'] as const;
-
-const DEFAULT_FILE_TYPE_EXTENSIONS: ReadonlyArray<string> = [
-  'jpg',
-  'png',
-  'heic',
-  'webp',
-  'mp4',
-  'mov',
-  'webm',
-  'pdf',
-  'docx',
-  'odt',
-  'odg',
-  'txt',
-  'xlsx',
-  'ods',
-  'csv',
-  'pptx',
-  'odp',
-];
-
-const DEFAULT_FILE_TYPE_CHIPS: ReadonlyArray<UploadFileTypeChip> = DEFAULT_FILE_TYPE_EXTENSIONS.map(
-  (ext, index) => {
-    const definition = resolveFileType({ extension: ext });
-    return {
-      type: fileTypeBadge({ extension: ext }) ?? ext.toUpperCase(),
-      icon: definition.category === 'unknown' ? 'description' : definition.icon,
-      variant: toChipVariant(definition.category),
-      order: index + 1,
-    };
-  },
-);
-
-function toChipVariant(category: string): ChipVariant {
-  switch (category) {
-    case 'image':
-      return 'filetype-image';
-    case 'video':
-      return 'filetype-video';
-    case 'spreadsheet':
-      return 'filetype-spreadsheet';
-    case 'presentation':
-      return 'filetype-presentation';
-    case 'document':
-      return 'filetype-document';
-    default:
-      return 'default';
-  }
-}
 
 @Component({
   selector: 'app-upload-panel',
