@@ -2343,7 +2343,16 @@ export class MapShellComponent implements OnDestroy {
         interactive: false,
         keyboard: false,
         zIndexOffset: 2000,
-      }).addTo(this.map);
+      });
+
+      try {
+        this.userLocationMarker.addTo(this.map);
+      } catch {
+        // Leaflet map not yet fully initialized (panes not ready).
+        // Reset marker to null and silently fail; will retry on next call.
+        this.userLocationMarker = null;
+        return;
+      }
       return;
     }
 
@@ -2385,7 +2394,16 @@ export class MapShellComponent implements OnDestroy {
         icon,
         interactive: false,
         keyboard: false,
-      }).addTo(this.map);
+      });
+
+      try {
+        this.searchLocationMarker.addTo(this.map);
+      } catch {
+        // Leaflet map not yet fully initialized (panes not ready).
+        // Reset marker to null and silently fail; will retry on next call.
+        this.searchLocationMarker = null;
+        return;
+      }
       return;
     }
 
@@ -2403,10 +2421,17 @@ export class MapShellComponent implements OnDestroy {
         keyboard: false,
       });
 
-      if (this.photoMarkerLayer) {
-        this.photoMarkerLayer.addLayer(this.draftMediaMarkerLeaflet);
-      } else {
-        this.draftMediaMarkerLeaflet.addTo(this.map);
+      try {
+        if (this.photoMarkerLayer) {
+          this.photoMarkerLayer.addLayer(this.draftMediaMarkerLeaflet);
+        } else {
+          this.draftMediaMarkerLeaflet.addTo(this.map);
+        }
+      } catch {
+        // Leaflet map not yet fully initialized (panes not ready).
+        // Reset marker to null and silently fail; will retry on next call.
+        this.draftMediaMarkerLeaflet = null;
+        return;
       }
       return;
     }

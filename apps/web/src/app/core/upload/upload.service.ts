@@ -93,6 +93,29 @@ export class UploadService {
     return { error: mapUploadStorageError(lastError) };
   }
 
+  async downloadFile(
+    storagePath: string,
+  ): Promise<{ ok: true; blob: Blob } | { ok: false; error: string }> {
+    const buckets: Array<'media' | 'images'> = ['media', 'images'];
+    let lastError: unknown = null;
+
+    for (const bucket of buckets) {
+      const { data, error } = await this.supabase.client.storage.from(bucket).download(storagePath);
+
+      if (!error && data instanceof Blob) {
+        return { ok: true, blob: data };
+      }
+
+      lastError = error;
+    }
+
+    const mapped = mapUploadStorageError(lastError);
+    return {
+      ok: false,
+      error: typeof mapped === 'string' && mapped.trim().length > 0 ? mapped : 'Download failed.',
+    };
+  }
+
   /**
    * Upload pipeline: auth -> validate -> org lookup -> storage upload -> DB write
    * -> optional mixed-media shadow write -> async address resolve.

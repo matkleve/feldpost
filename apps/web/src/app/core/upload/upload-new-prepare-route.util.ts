@@ -96,18 +96,12 @@ export async function routePreparedNewJob(
   }
 
   deps.jobState.setPhase(jobId, 'extracting_title');
-  const titleAddress = deps.filenameParser.extractAddress(job.file.name);
-  if (titleAddress) {
-    deps.jobState.updateJob(jobId, { titleAddress, issueKind: undefined });
+  const parsed = deps.filenameParser.extractAddress(job.file.name);
+  // Only accept high-confidence addresses; low-confidence → Issues
+  if (parsed && parsed.confidence === 'high') {
+    deps.jobState.updateJob(jobId, { titleAddress: parsed.address, issueKind: undefined });
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
-    await runUploadPhase(jobId, undefined, parsedExif, ctx);
-    return;
-  }
-
-  // Documents can proceed without location when they are explicitly project-bound.
-  if (isDocument && !!job.projectId) {
-    deps.jobState.updateJob(jobId, { issueKind: undefined });
     await runUploadPhase(jobId, undefined, parsedExif, ctx);
     return;
   }

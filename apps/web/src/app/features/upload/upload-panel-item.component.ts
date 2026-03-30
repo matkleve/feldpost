@@ -231,6 +231,8 @@ export class UploadPanelItemComponent {
   }
 
   actionLabel(action: UploadItemMenuAction): string {
+    const job = this.job();
+
     switch (action) {
       case 'view_progress':
         return this.t('upload.item.menu.uploading.viewProgress', 'View progress');
@@ -251,11 +253,20 @@ export class UploadPanelItemComponent {
       case 'add_to_project':
         return this.t('auto.0013.add_to_project', 'Add to project');
       case 'change_location_map':
-        return this.t('upload.item.menu.location.clickMap', 'Click on map');
+        // Contextual: "Add GPS" vs "Change GPS" based on whether coordinates already exist
+        return job.coords
+          ? this.t('upload.item.menu.location.changeGps', 'Change GPS location')
+          : this.t('upload.item.menu.location.addGps', 'Add GPS location');
       case 'change_location_address':
-        return this.t('upload.item.menu.location.enterAddress', 'Enter address');
+        // Contextual: "Add address" vs "Change address" based on whether address already exists
+        return job.titleAddress
+          ? this.t('upload.item.menu.location.changeAddress', 'Change address')
+          : this.t('upload.item.menu.location.addAddress', 'Add address');
       case 'place_on_map':
-        return this.t('upload.item.menu.issue.placeOnMap', 'Place on map');
+        // For issues lane: "Add location" vs "Change location" based on whether coordinates exist
+        return job.coords
+          ? this.t('upload.item.menu.location.changeLocation', 'Change location')
+          : this.t('upload.item.menu.location.addLocation', 'Choose location');
       case 'retry':
         return this.t('projects.page.error.retry', 'Retry');
       case 'cancel_upload':
@@ -387,12 +398,15 @@ export class UploadPanelItemComponent {
     if (target instanceof HTMLElement) {
       const rect = target.getBoundingClientRect();
       const menuHeight = this.availableMenuActions().length * 44 + 48; // rough estimate
+
+      // Try to position downward first; fall back to upward if insufficient space
+      const downwardY = rect.bottom + UPLOAD_ITEM_MENU_OFFSET_Y;
+      const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8; // 8px margin
+
+      const menuY = hasSpaceBelow ? downwardY : rect.top - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y;
+
       this.menuPosition.set(
-        this.clampMenuPosition(
-          rect.right - UPLOAD_ITEM_MENU_WIDTH,
-          rect.top - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y,
-          menuHeight,
-        ),
+        this.clampMenuPosition(rect.right - UPLOAD_ITEM_MENU_WIDTH, menuY, menuHeight),
       );
     } else {
       this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY, 200));

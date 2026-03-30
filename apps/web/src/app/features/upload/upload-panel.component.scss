@@ -107,16 +107,30 @@
   }
 
   &__dropzone-icon {
+    display: block;
+    opacity: 1;
     font-size: var(--font-size-5xl);
     line-height: var(--line-height-solid);
     color: var(--color-text-secondary);
   }
 
   &__dropzone-label {
+    display: block;
     margin: 0;
+    min-height: 1.5rem;
+    opacity: 1;
+    visibility: visible;
     font-size: var(--font-size-md-emphasis);
     color: var(--color-text-primary);
     line-height: var(--line-height-open);
+  }
+
+  &__dropzone--dragging {
+    .upload-panel__dropzone-label,
+    .upload-panel__dropzone-icon {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   &__dropzone-sub {

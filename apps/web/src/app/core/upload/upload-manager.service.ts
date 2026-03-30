@@ -25,6 +25,7 @@ import type { Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { FolderScanService } from '../folder-scan.service';
 import { MediaPreviewService } from '../media-preview.service';
+import { ProjectsService } from '../projects/projects.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
@@ -96,6 +97,7 @@ export class UploadManagerService {
   private readonly queue = inject(UploadQueueService);
   private readonly folderScan = inject(FolderScanService);
   private readonly mediaPreview = inject(MediaPreviewService);
+  private readonly projects = inject(ProjectsService);
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
@@ -225,6 +227,9 @@ export class UploadManagerService {
    * Submit an entire folder for upload via the File System Access API.
    * Recursively scans the directory for supported image types,
    * creates a batch, and feeds files into the pipeline.
+   *
+   * Folder names in form "Project: [projectname]" are parsed case-insensitively
+   * and the corresponding project is auto-assigned to all jobs in the batch.
    */
   async submitFolder(
     dirHandle: FileSystemDirectoryHandle,
@@ -232,6 +237,13 @@ export class UploadManagerService {
   ): Promise<string> {
     const batchId = crypto.randomUUID();
     const label = options?.batchLabel ?? dirHandle.name;
+
+    // Attempt to parse project context from folder name (e.g., "Project: My Project")
+    let projectIdFromFolder: string | undefined;
+    if (!options?.projectId) {
+      projectIdFromFolder = await this.resolveProjectIdFromFolderName(dirHandle.name);
+    }
+    const resolvedProjectId = options?.projectId ?? projectIdFromFolder;
 
     this.batchService.addBatch({
       id: batchId,
@@ -273,7 +285,7 @@ export class UploadManagerService {
       thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
       submittedAt: new Date(),
       mode: 'new' as UploadJobMode,
-      projectId: options?.projectId,
+      projectId: resolvedProjectId,
     }));
 
     this.jobState.addJobs(newJobs);
@@ -695,6 +707,38 @@ export class UploadManagerService {
       return data[0].media_item_id ?? null;
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Parse folder name for project context token (e.g., "Project: My Project Name").
+   * Case-insensitive matching. Returns project ID if found, undefined otherwise.
+   *
+   * Format: "Project: [projectname]" (colon + space required)
+   * Examples: "Project: Site A", "project: Building Z", "PROJECT: Renovation 2024"
+   */
+  private async resolveProjectIdFromFolderName(folderName: string): Promise<string | undefined> {
+    const projectTokenMatch = folderName.match(/^\s*project\s*:\s*(.+)$/i);
+    if (!projectTokenMatch || !projectTokenMatch[1]) {
+      return undefined;
+    }
+
+    const projectNameHint = projectTokenMatch[1].trim();
+    if (!projectNameHint) {
+      return undefined;
+    }
+
+    try {
+      const projects = await this.projects.loadProjects();
+      const matches = projects.filter(
+        (p) => p.name.toLowerCase() === projectNameHint.toLowerCase() && p.status === 'active',
+      );
+
+      // Return first matching active project, or undefined if not found.
+      return matches.length > 0 ? matches[0].id : undefined;
+    } catch {
+      // Silently fail if project lookup fails (e.g., network error).
+      return undefined;
     }
   }
 }

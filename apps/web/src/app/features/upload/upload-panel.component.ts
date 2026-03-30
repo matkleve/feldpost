@@ -201,6 +201,12 @@ export class UploadPanelComponent {
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
 
+  dropzoneLabelText(): string {
+    const localized = this.t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here');
+    const trimmed = typeof localized === 'string' ? localized.trim() : '';
+    return trimmed.length > 0 ? trimmed : 'Drag & drop files here';
+  }
+
   readonly laneSwitchOptions = computed<SegmentedSwitchOption[]>(() => {
     const counts = this.laneCounts();
     return [
@@ -423,7 +429,6 @@ export class UploadPanelComponent {
 
   placeFile(key: string, coords: ExifCoords): void {
     this.rows.placeFile(key, coords);
-    this.selectedLane.set('uploading');
   }
   dismissFile(jobId: string): void {
     this.rows.dismissFile(jobId);
@@ -834,15 +839,10 @@ export class UploadPanelComponent {
       return;
     }
 
-    const result = await this.uploadService.getSignedUrl(job.storagePath);
-    if (!('url' in result)) {
+    const result = await this.uploadService.downloadFile(job.storagePath);
+    if (!result.ok) {
       this.toastService.show({
-        message:
-          typeof result.error === 'string'
-            ? result.error
-            : result.error instanceof Error
-              ? result.error.message
-              : 'Download fehlgeschlagen.',
+        message: typeof result.error === 'string' ? result.error : 'Download fehlgeschlagen.',
         type: 'error',
         dedupe: true,
       });
@@ -853,11 +853,15 @@ export class UploadPanelComponent {
       return;
     }
 
+    const blobUrl = URL.createObjectURL(result.blob);
     const link = document.createElement('a');
-    link.href = result.url;
+    link.href = blobUrl;
     link.download = job.file.name;
     link.rel = 'noopener';
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
   }
 
   private async openUploadedJobInMedia(job: UploadJob): Promise<void> {

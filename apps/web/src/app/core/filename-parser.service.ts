@@ -40,13 +40,20 @@ const NON_ADDRESS_WORDS = new Set([
   'file',
 ]);
 
+export interface ParsedAddress {
+  address: string;
+  confidence: 'high' | 'low';
+}
+
 @Injectable({ providedIn: 'root' })
 export class FilenameParserService {
   /**
-   * Attempts to extract an address hint from a filename.
+   * Attempts to extract an address hint from a filename with confidence level.
+   * High: explicit street-type suffix detected.
+   * Low: conservative fallback "StreetName 12[, City]" pattern.
    * Returns undefined for camera-generated filenames and timestamps.
    */
-  extractAddress(filename: string): string | undefined {
+  extractAddress(filename: string): ParsedAddress | undefined {
     // Strip extension
     const base = filename.replace(/\.[^.]+$/, '');
 
@@ -69,11 +76,12 @@ export class FilenameParserService {
 
     // Primary path: explicit street-type suffix (high confidence).
     if (STREET_SUFFIXES.test(cleaned)) {
-      return cleaned;
+      return { address: cleaned, confidence: 'high' };
     }
 
-    // Fallback path: conservative "StreetName 12[, City]" detection.
-    return this.extractFallbackAddress(cleaned);
+    // Fallback path: conservative "StreetName 12[, City]" detection (low confidence).
+    const fallback = this.extractFallbackAddress(cleaned);
+    return fallback ? { address: fallback, confidence: 'low' } : undefined;
   }
 
   private extractFallbackAddress(cleaned: string): string | undefined {
