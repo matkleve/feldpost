@@ -19,36 +19,36 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 
 ## Actions
 
-| #   | Trigger                                                    | System Response                                                                   | Notes                                                                                                     |
-| --- | ---------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 1   | User selects many files                                    | Creates one batch and one job per file                                            | Standard multi-file flow                                                                                  |
-| 2   | User selects a folder                                      | Scans recursively, creates scanning batch, then queues jobs                       | Chromium/File System Access only                                                                          |
-| 3   | Folder name contains parseable address                     | Stores batch-level folder address hint and applies it to jobs without own address | Default only, never forced override                                                                       |
-| 4   | Individual file name contains parseable address            | File-level address overrides inherited folder hint                                | Most-specific textual source wins                                                                         |
-| 4a  | Parsed file/folder address is low-confidence               | Keeps parsed fragment as note only; does not qualify as resolved address          | Prevents nonsense title strings from bypassing issues routing                                             |
-| 4b  | Street+house resolves to multiple cities                   | Runs disambiguation algorithm and computes ranked candidate probabilities         | Auto-assign only above threshold                                                                          |
-| 5   | EXIF GPS and text-derived address both available           | Geocodes text address and compares distance to EXIF GPS using 15m tolerance       | Keeps both coordinate sources                                                                             |
-| 6   | Distance between text-derived and EXIF coordinates > 15m   | Marks location source mismatch for detail UI and audit fields                     | Upload still continues                                                                                    |
-| 7   | Job media type is photo/image                              | Computes content hash and checks server for duplicate content                     | Hash dedupe does not run for videos or documents                                                          |
-| 8   | Job media type is video                                    | Skips dedupe check and continues normal upload path                               | Video uploads are never hash-blocked                                                                      |
-| 8a  | Job media type is document with GPS or parseable address   | Skips dedupe check and continues normal upload path                               | Applies to `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`   |
+| #   | Trigger                                                          | System Response                                                                   | Notes                                                                                                     |
+| --- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 1   | User selects many files                                          | Creates one batch and one job per file                                            | Standard multi-file flow                                                                                  |
+| 2   | User selects a folder                                            | Scans recursively, creates scanning batch, then queues jobs                       | Chromium/File System Access only                                                                          |
+| 3   | Folder name contains parseable address                           | Stores batch-level folder address hint and applies it to jobs without own address | Default only, never forced override                                                                       |
+| 4   | Individual file name contains parseable address                  | File-level address overrides inherited folder hint                                | Most-specific textual source wins                                                                         |
+| 4a  | Parsed file/folder address is low-confidence                     | Keeps parsed fragment as note only; does not qualify as resolved address          | Prevents nonsense title strings from bypassing issues routing                                             |
+| 4b  | Street+house resolves to multiple cities                         | Runs disambiguation algorithm and computes ranked candidate probabilities         | Auto-assign only above threshold                                                                          |
+| 5   | EXIF GPS and text-derived address both available                 | Geocodes text address and compares distance to EXIF GPS using 15m tolerance       | Keeps both coordinate sources                                                                             |
+| 6   | Distance between text-derived and EXIF coordinates > 15m         | Marks location source mismatch for detail UI and audit fields                     | Upload still continues                                                                                    |
+| 7   | Job media type is photo/image                                    | Computes content hash and checks server for duplicate content                     | Hash dedupe does not run for videos or documents                                                          |
+| 8   | Job media type is video                                          | Skips dedupe check and continues normal upload path                               | Video uploads are never hash-blocked                                                                      |
+| 8a  | Job media type is document with GPS or parseable address         | Skips dedupe check and continues normal upload path                               | Applies to `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`   |
 | 8a1 | Job media type is document with low-confidence text address only | Treats job as unresolved location and routes to Issues                            | Low-confidence text address is not equivalent to parseable address                                        |
-| 8b  | Job media type is document without GPS and without address | Moves to issues as `document_unresolved`                                          | Status text: `Choose location or project`                                                                 |
-| 8c  | User resolves `document_unresolved` via project binding    | Continues upload as project-bound document and moves to Uploaded lane             | Project context can satisfy non-geospatial document uploads                                               |
-| 8d  | User resolves `document_unresolved` via map/address        | Persists location and continues upload to Uploaded lane                           | Uses same `resolve_media_location` contract                                                               |
-| 8e  | Issue row action menu is opened                            | Exposes only issue-kind-specific options plus one destructive final item          | no cross-kind action leakage                                                                              |
-| 8f  | User changes GPS/address on persisted uploaded media       | Updates location fields for existing media only                                   | MUST NOT create a new upload job or re-enter upload queue                                                 |
-| 9   | Duplicate hash found (photo/image)                         | Moves job to issues lane and opens duplicate-resolution modal                     | Not auto-skipped                                                                                          |
-| 10  | User clicks secondary GPS button in duplicate issue row    | Opens/focuses already placed existing media item                                  | Uses existing media reference                                                                             |
-| 11  | User resolves duplicate modal                              | Chooses `use_existing`, `upload_anyway`, or `reject`                              | Optional "apply to all in batch"                                                                          |
-| 11a | Duplicate issue is resolved as `upload_anyway`             | Resumes upload path with force-upload semantics                                   | Only duplicate review supports force-upload                                                               |
-| 11b | GPS issue remains unresolved                               | Stays in issues lane for placement or later correction                            | Never exposes `upload anyway`                                                                             |
-| 11c | Parser leaves residual address fragments                   | Persists `addressNotes[]` on job/media metadata                                   | Nothing parsed is lost                                                                                    |
-| 12  | Upload targets photoless row conflict                      | Pauses in `awaiting_conflict_resolution` and emits popup event                    | Releases concurrency slot                                                                                 |
-| 13  | User resolves conflict                                     | Resumes with `attach_replace`, `attach_keep`, or `create_new`                     | Re-queues at front                                                                                        |
-| 14  | User replaces existing photo                               | Emits replace-specific events so map/detail/grid refresh instantly                | Existing image row retained                                                                               |
-| 15  | User attaches photo to photoless row                       | Emits attach-specific events so no-photo surfaces update                          | Existing row gains media                                                                                  |
-| 16  | Job reaches uploaded lane with persisted media             | Exposes follow-up item actions                                                    | `Zu Projekt hinzufügen`, `Priorisieren`, `In /media anzeigen`, `Herunterladen`, optional `Projekt öffnen` |
+| 8b  | Job media type is document without GPS and without address       | Moves to issues as `document_unresolved`                                          | Status text: `Choose location or project`                                                                 |
+| 8c  | User resolves `document_unresolved` via project binding          | Continues upload as project-bound document and moves to Uploaded lane             | Project context can satisfy non-geospatial document uploads                                               |
+| 8d  | User resolves `document_unresolved` via map/address              | Persists location and continues upload to Uploaded lane                           | Uses same `resolve_media_location` contract                                                               |
+| 8e  | Issue row action menu is opened                                  | Exposes only issue-kind-specific options plus one destructive final item          | no cross-kind action leakage                                                                              |
+| 8f  | User changes GPS/address on persisted uploaded media             | Updates location fields for existing media only                                   | MUST NOT create a new upload job or re-enter upload queue                                                 |
+| 9   | Duplicate hash found (photo/image)                               | Moves job to issues lane and opens duplicate-resolution modal                     | Not auto-skipped                                                                                          |
+| 10  | User clicks secondary GPS button in duplicate issue row          | Opens/focuses already placed existing media item                                  | Uses existing media reference                                                                             |
+| 11  | User resolves duplicate modal                                    | Chooses `use_existing`, `upload_anyway`, or `reject`                              | Optional "apply to all in batch"                                                                          |
+| 11a | Duplicate issue is resolved as `upload_anyway`                   | Resumes upload path with force-upload semantics                                   | Only duplicate review supports force-upload                                                               |
+| 11b | GPS issue remains unresolved                                     | Stays in issues lane for placement or later correction                            | Never exposes `upload anyway`                                                                             |
+| 11c | Parser leaves residual address fragments                         | Persists `addressNotes[]` on job/media metadata                                   | Nothing parsed is lost                                                                                    |
+| 12  | Upload targets photoless row conflict                            | Pauses in `awaiting_conflict_resolution` and emits popup event                    | Releases concurrency slot                                                                                 |
+| 13  | User resolves conflict                                           | Resumes with `attach_replace`, `attach_keep`, or `create_new`                     | Re-queues at front                                                                                        |
+| 14  | User replaces existing photo                                     | Emits replace-specific events so map/detail/grid refresh instantly                | Existing image row retained                                                                               |
+| 15  | User attaches photo to photoless row                             | Emits attach-specific events so no-photo surfaces update                          | Existing row gains media                                                                                  |
+| 16  | Job reaches uploaded lane with persisted media                   | Exposes follow-up item actions                                                    | `Zu Projekt hinzufügen`, `Priorisieren`, `In /media anzeigen`, `Herunterladen`, optional `Projekt öffnen` |
 
 ## Component Hierarchy
 
@@ -164,19 +164,19 @@ flowchart TD
 
 ### Filename Address Confidence Contract
 
-| Input | Confidence result | Pipeline behavior |
-| ----- | ----------------- | ----------------- |
-| Filename/folder address parse | `high` | Treated as parseable title/folder address and can continue normal route |
-| Filename/folder address parse | `low` / `nonsense` | Stored in `addressNotes[]` only; does not satisfy location requirement |
-| Document with only low-confidence text address | unresolved | Routed to `missing_data` with `issueKind=document_unresolved` |
+| Input                                          | Confidence result  | Pipeline behavior                                                       |
+| ---------------------------------------------- | ------------------ | ----------------------------------------------------------------------- |
+| Filename/folder address parse                  | `high`             | Treated as parseable title/folder address and can continue normal route |
+| Filename/folder address parse                  | `low` / `nonsense` | Stored in `addressNotes[]` only; does not satisfy location requirement  |
+| Document with only low-confidence text address | unresolved         | Routed to `missing_data` with `issueKind=document_unresolved`           |
 
 ### Persisted Media Location Edit Contract
 
-| Trigger | Required behavior | Forbidden behavior |
-| ------- | ----------------- | ------------------ |
-| User chooses `Add/Change GPS` on uploaded row | Update persisted media coordinates/address fields | Creating a new upload job |
-| User chooses `Add/Change address` on uploaded row | Resolve and persist updated address/coords on same media record | Requeueing file into upload phases |
-| Address/GPS correction completes | Keep row identity in uploaded lane and refresh map/card position | Re-running `uploading -> saving_record` for same file |
+| Trigger                                           | Required behavior                                                | Forbidden behavior                                    |
+| ------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
+| User chooses `Add/Change GPS` on uploaded row     | Update persisted media coordinates/address fields                | Creating a new upload job                             |
+| User chooses `Add/Change address` on uploaded row | Resolve and persist updated address/coords on same media record  | Requeueing file into upload phases                    |
+| Address/GPS correction completes                  | Keep row identity in uploaded lane and refresh map/card position | Re-running `uploading -> saving_record` for same file |
 
 ### Status Label Contract
 
