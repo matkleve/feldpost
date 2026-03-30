@@ -33,8 +33,6 @@ import { UploadService } from '../../core/upload/upload.service';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
 import {
   UiButtonDirective,
-  UiTabDirective,
-  UiTabListDirective,
   UiInputControlDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
@@ -53,6 +51,10 @@ import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer
 import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
 import { MediaLocationUpdateService } from '../../core/media-location-update.service';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
+import {
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../shared/segmented-switch/segmented-switch.component';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -78,6 +80,8 @@ type UploadFileTypeChip = {
   variant: ChipVariant;
   order: number;
 };
+
+const UPLOAD_LANES = ['uploading', 'uploaded', 'issues'] as const;
 
 const DEFAULT_FILE_TYPE_EXTENSIONS: ReadonlyArray<string> = [
   'jpg',
@@ -135,8 +139,7 @@ function toChipVariant(category: string): ChipVariant {
     CommonModule,
     UploadPanelItemComponent,
     ChipComponent,
-    UiTabListDirective,
-    UiTabDirective,
+    SegmentedSwitchComponent,
     UiButtonDirective,
     UiInputControlDirective,
     ProjectSelectDialogComponent,
@@ -193,6 +196,38 @@ export class UploadPanelComponent {
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
+
+  readonly laneSwitchOptions = computed<SegmentedSwitchOption[]>(() => {
+    const counts = this.laneCounts();
+    return [
+      {
+        id: 'uploading',
+        label: this.t('upload.panel.lane.uploading', 'Uploading'),
+        icon: 'cloud_upload',
+        type: 'icon-only',
+        ariaLabel: `${this.t('upload.panel.lane.uploading', 'Uploading')} (${counts.uploading})`,
+        title: this.t('upload.panel.lane.uploading', 'Uploading'),
+      },
+      {
+        id: 'uploaded',
+        label: this.t('upload.panel.lane.uploaded', 'Uploaded'),
+        icon: 'check_circle',
+        type: 'icon-only',
+        ariaLabel: `${this.t('upload.panel.lane.uploaded', 'Uploaded')} (${counts.uploaded})`,
+        title: this.t('upload.panel.lane.uploaded', 'Uploaded'),
+      },
+      {
+        id: 'issues',
+        label: this.t('upload.panel.lane.issues', 'Issues'),
+        icon: 'warning_amber',
+        type: 'icon-with-text',
+        ariaLabel: `${this.t('upload.panel.lane.issues', 'Issues')} (${counts.issues})`,
+        attention:
+          this.issueAttentionPulse() && counts.issues > 0 && this.effectiveLane() !== 'issues',
+      },
+    ];
+  });
+
   readonly visibleLaneJobs = computed(() => {
     const jobs = this.laneJobs();
     if (this.effectiveLane() !== 'uploaded') {
@@ -333,6 +368,13 @@ export class UploadPanelComponent {
 
   setSelectedLane(lane: UploadLane): void {
     this.lanes.setSelectedLane(lane);
+  }
+
+  onLaneSwitchValueChange(value: string | null): void {
+    if (!value || !this.isUploadLane(value)) {
+      return;
+    }
+    this.setSelectedLane(value);
   }
 
   // ── Row handlers (delegated to rows service) ────────────────────────────
@@ -802,5 +844,9 @@ export class UploadPanelComponent {
         } as ForwardGeocodeResult;
       })
       .filter((entry): entry is ForwardGeocodeResult => entry !== null);
+  }
+
+  private isUploadLane(value: string): value is UploadLane {
+    return (UPLOAD_LANES as readonly string[]).includes(value);
   }
 }

@@ -8,7 +8,6 @@
   --upload-row-height: 3.25rem;
   --upload-visible-rows: 5;
 
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--upload-area-gap);
@@ -48,17 +47,6 @@
 
     &--intake {
       gap: var(--spacing-2);
-    }
-
-    &--switch {
-      padding: var(--spacing-1);
-      gap: 0;
-    }
-
-    &--lanes {
-      padding: 0;
-      border: 0;
-      background: transparent;
     }
   }
 
@@ -167,25 +155,8 @@
   }
 
   &__intake-btn {
-    width: 100%;
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg-surface));
-      border-color: var(--color-primary);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
-
-    &:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
     &-icon {
       font-size: var(--font-size-base);
-      line-height: var(--line-height-solid);
     }
 
     &--capture {
@@ -255,13 +226,6 @@
     line-height: var(--line-height-reading);
   }
 
-  &__lane-switch {
-    display: inline-flex;
-    width: 100%;
-    align-items: center;
-    gap: var(--spacing-1);
-  }
-
   &__lane-overflow {
     display: block;
     width: 100%;
@@ -276,31 +240,6 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
-  }
-
-  :where(.ui-tab-list) {
-    width: 100%;
-    align-self: stretch;
-  }
-
-  :where(.ui-tab--uploading, .ui-tab--uploaded) {
-    flex: 0 0 auto;
-    min-width: 2.25rem;
-  }
-
-  .ui-tab--issues {
-    flex: 1 1 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-1);
-    border-radius: var(--radius-pill);
-    padding-inline: var(--spacing-3);
-  }
-
-  .ui-tab__icon {
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-solid);
   }
 
   // ── File list ──────────────────────────────────────────────────────────────

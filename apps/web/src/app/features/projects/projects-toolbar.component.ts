@@ -19,7 +19,6 @@ import {
 } from '../../shared/segmented-switch/segmented-switch.component';
 import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
 import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
-import { ProjectsViewToggleComponent } from '../../shared/view-toggle/projects-view-toggle.component';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
 import type { SortConfig } from '../../core/workspace-view.types';
@@ -38,7 +37,6 @@ type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;
     SegmentedSwitchComponent,
     CardVariantSwitchComponent,
     UiDropdownTriggerDirective,
-    ProjectsViewToggleComponent,
     PaneToolbarComponent,
   ],
   templateUrl: './projects-toolbar.component.html',
@@ -87,11 +85,13 @@ export class ProjectsToolbarComponent {
   readonly statusOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
     {
       id: 'all',
+      type: 'icon-with-text',
       label: this.t('projects.toolbar.status.all', 'All'),
       icon: 'apps',
     },
     {
       id: 'archived',
+      type: 'icon-with-text',
       label: this.t('projects.toolbar.status.archived', 'Archived'),
       icon: 'inventory_2',
       inactive: !this.hasArchivedProjects(),

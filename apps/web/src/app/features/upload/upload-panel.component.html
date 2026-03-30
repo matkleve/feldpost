@@ -109,59 +109,14 @@
   </div>
 
   @if (showProgressBoard()) {
-    <div
-      uiTabList
-      class="ui-tab-list ui-tab-list--sm ui-tab-list--fill upload-panel__area--switch"
-      role="tablist"
-      aria-label="Upload lanes"
-    >
-      <button
-        uiTab
-        uiTabSizeSm
-        uiTabIconOnly
-        type="button"
-        role="tab"
-        class="ui-tab ui-tab--sm ui-tab--uploading"
-        [class.ui-tab--active]="effectiveLane() === 'uploading'"
-        [attr.aria-selected]="effectiveLane() === 'uploading'"
-        [attr.aria-label]="'Uploading (' + laneCounts().uploading + ')'"
-        [attr.title]="'Uploading'"
-        (click)="setSelectedLane('uploading')"
-      >
-        <span class="material-icons ui-tab__icon" aria-hidden="true">cloud_upload</span>
-      </button>
-      <button
-        uiTab
-        uiTabSizeSm
-        uiTabIconOnly
-        type="button"
-        role="tab"
-        class="ui-tab ui-tab--sm ui-tab--uploaded"
-        [class.ui-tab--active]="effectiveLane() === 'uploaded'"
-        [attr.aria-selected]="effectiveLane() === 'uploaded'"
-        [attr.aria-label]="'Uploaded (' + laneCounts().uploaded + ')'"
-        [attr.title]="'Uploaded'"
-        (click)="setSelectedLane('uploaded')"
-      >
-        <span class="material-icons ui-tab__icon" aria-hidden="true">check_circle</span>
-      </button>
-      <button
-        uiTab
-        uiTabSizeSm
-        type="button"
-        role="tab"
-        class="ui-tab ui-tab--sm ui-tab--issues"
-        [class.ui-tab--active]="effectiveLane() === 'issues'"
-        [class.ui-tab--attention]="
-          issueAttentionPulse() && laneCounts().issues > 0 && effectiveLane() !== 'issues'
-        "
-        [attr.aria-selected]="effectiveLane() === 'issues'"
-        (click)="setSelectedLane('issues')"
-      >
-        <span class="material-icons ui-tab__icon" aria-hidden="true">warning_amber</span>
-        <span class="ui-tab__label">Issues</span>
-      </button>
-    </div>
+    <app-segmented-switch
+      class="upload-panel__area--switch"
+      [options]="laneSwitchOptions()"
+      [value]="effectiveLane()"
+      sizing="fill"
+      (valueChange)="onLaneSwitchValueChange($event)"
+      [ariaLabel]="t('auto.0370.upload_lanes', 'Upload lanes')"
+    ></app-segmented-switch>
   }
 
   <!-- Per-file progress list -->

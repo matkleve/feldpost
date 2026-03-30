@@ -33,13 +33,6 @@
     }
   </div>
 
-  <app-projects-view-toggle
-    slot="right"
-    class="projects-toolbar__view-toggle"
-    [viewMode]="viewMode()"
-    (viewModeChange)="viewModeChange.emit($event)"
-  />
-
   <app-card-variant-switch
     slot="right"
     class="projects-toolbar__card-variant"

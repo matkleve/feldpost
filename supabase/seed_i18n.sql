@@ -19966,4 +19966,97 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.uploading', 'Uploading', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploading', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird hochgeladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.uploaded', 'Uploaded', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploaded', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hochgeladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.issues', 'Issues', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Issues', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Probleme', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Problemi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

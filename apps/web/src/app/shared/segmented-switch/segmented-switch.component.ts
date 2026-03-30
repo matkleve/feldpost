@@ -4,10 +4,12 @@ export interface SegmentedSwitchOption {
   id: string;
   label: string;
   icon?: string;
+  type?: 'text-only' | 'icon-only' | 'icon-with-text';
   title?: string;
   ariaLabel?: string;
   disabled?: boolean;
   inactive?: boolean;
+  attention?: boolean;
 }
 
 export type SegmentedSwitchSize = 'sm' | 'md' | 'lg';
@@ -24,7 +26,7 @@ export class SegmentedSwitchComponent {
   readonly value = input<string | null>(null);
   readonly disabled = input(false);
   readonly allowDeselect = input(false);
-  readonly iconOnly = input(false);
+  readonly sizing = input<'fit' | 'fill'>('fit');
   readonly size = input<SegmentedSwitchSize>('md');
 
   readonly valueChange = output<string | null>();
@@ -44,6 +46,13 @@ export class SegmentedSwitchComponent {
   readonly inactiveOptions = computed(() =>
     this.safeOptions().filter((option) => !!option.inactive),
   );
+
+  resolveType(option: SegmentedSwitchOption): 'text-only' | 'icon-only' | 'icon-with-text' {
+    if (option.type) return option.type;
+    if (option.icon && option.label) return 'icon-with-text';
+    if (option.icon) return 'icon-only';
+    return 'text-only';
+  }
 
   isSelected(option: SegmentedSwitchOption): boolean {
     return this.value() === option.id;

@@ -33,6 +33,7 @@ export class CardVariantSwitchComponent {
 
     return this.allowed().map((variant) => ({
       id: variant,
+      type: this.iconOnly() ? 'icon-only' : 'icon-with-text',
       label: t(`workspace.toolbar.size.${variant}`, variant),
       icon: this.iconFor(variant),
       title: t(`workspace.toolbar.size.${variant}`, variant),

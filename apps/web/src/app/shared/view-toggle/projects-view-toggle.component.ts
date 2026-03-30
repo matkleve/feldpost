@@ -10,7 +10,7 @@ import {
   selector: 'app-projects-view-toggle',
   standalone: true,
   imports: [SegmentedSwitchComponent],
-    templateUrl: './projects-view-toggle.component.html',
+  templateUrl: './projects-view-toggle.component.html',
   styleUrl: './projects-view-toggle.component.scss',
 })
 export class ProjectsViewToggleComponent {
@@ -22,6 +22,7 @@ export class ProjectsViewToggleComponent {
   readonly viewOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
     {
       id: 'list',
+      type: 'icon-only',
       label: this.t('projects.viewToggle.list.aria', 'List view'),
       icon: 'view_headline',
       title: this.t('projects.viewToggle.list.title', 'List view'),
@@ -29,6 +30,7 @@ export class ProjectsViewToggleComponent {
     },
     {
       id: 'cards',
+      type: 'icon-only',
       label: this.t('projects.viewToggle.cards.aria', 'Card view'),
       icon: 'grid_view',
       title: this.t('projects.viewToggle.cards.title', 'Card view'),

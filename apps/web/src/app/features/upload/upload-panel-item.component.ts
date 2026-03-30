@@ -144,6 +144,18 @@ export class UploadPanelItemComponent {
       } else if (issueKind === 'missing_gps') {
         actions.push('change_location_map');
         actions.push('change_location_address');
+      }
+    } else if (lane === 'uploaded' && job.imageId) {
+      actions.push('change_location_map');
+      actions.push('change_location_address');
+      if (this.showOpenProject()) {
+        actions.push('open_project');
+      }
+      actions.push('add_to_project');
+      actions.push('open_in_media');
+      actions.push('download');
+      actions.push('toggle_priority');
+    }
 
     actions.push('dismiss');
 

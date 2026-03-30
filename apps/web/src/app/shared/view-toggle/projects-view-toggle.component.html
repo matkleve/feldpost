@@ -1,10 +1,7 @@
-
-    <app-segmented-switch
-      [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
-      [options]="viewOptions()"
-      [value]="viewMode()"
-      [size]="'sm'"
-      [iconOnly]="true"
-      (valueChange)="onViewModeSelected($event)"
-    />
-  
+<app-segmented-switch
+  [ariaLabel]="t('projects.viewToggle.aria.group', 'View mode')"
+  [options]="viewOptions()"
+  [value]="viewMode()"
+  [size]="'sm'"
+  (valueChange)="onViewModeSelected($event)"
+/>
