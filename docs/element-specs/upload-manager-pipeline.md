@@ -25,16 +25,19 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 | 2   | User selects a folder                                      | Scans recursively, creates scanning batch, then queues jobs                       | Chromium/File System Access only                                                                          |
 | 3   | Folder name contains parseable address                     | Stores batch-level folder address hint and applies it to jobs without own address | Default only, never forced override                                                                       |
 | 4   | Individual file name contains parseable address            | File-level address overrides inherited folder hint                                | Most-specific textual source wins                                                                         |
+| 4a  | Parsed file/folder address is low-confidence               | Keeps parsed fragment as note only; does not qualify as resolved address          | Prevents nonsense title strings from bypassing issues routing                                             |
 | 4b  | Street+house resolves to multiple cities                   | Runs disambiguation algorithm and computes ranked candidate probabilities         | Auto-assign only above threshold                                                                          |
 | 5   | EXIF GPS and text-derived address both available           | Geocodes text address and compares distance to EXIF GPS using 15m tolerance       | Keeps both coordinate sources                                                                             |
 | 6   | Distance between text-derived and EXIF coordinates > 15m   | Marks location source mismatch for detail UI and audit fields                     | Upload still continues                                                                                    |
 | 7   | Job media type is photo/image                              | Computes content hash and checks server for duplicate content                     | Hash dedupe does not run for videos or documents                                                          |
 | 8   | Job media type is video                                    | Skips dedupe check and continues normal upload path                               | Video uploads are never hash-blocked                                                                      |
 | 8a  | Job media type is document with GPS or parseable address   | Skips dedupe check and continues normal upload path                               | Applies to `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`   |
+| 8a1 | Job media type is document with low-confidence text address only | Treats job as unresolved location and routes to Issues                            | Low-confidence text address is not equivalent to parseable address                                        |
 | 8b  | Job media type is document without GPS and without address | Moves to issues as `document_unresolved`                                          | Status text: `Choose location or project`                                                                 |
 | 8c  | User resolves `document_unresolved` via project binding    | Continues upload as project-bound document and moves to Uploaded lane             | Project context can satisfy non-geospatial document uploads                                               |
 | 8d  | User resolves `document_unresolved` via map/address        | Persists location and continues upload to Uploaded lane                           | Uses same `resolve_media_location` contract                                                               |
 | 8e  | Issue row action menu is opened                            | Exposes only issue-kind-specific options plus one destructive final item          | no cross-kind action leakage                                                                              |
+| 8f  | User changes GPS/address on persisted uploaded media       | Updates location fields for existing media only                                   | MUST NOT create a new upload job or re-enter upload queue                                                 |
 | 9   | Duplicate hash found (photo/image)                         | Moves job to issues lane and opens duplicate-resolution modal                     | Not auto-skipped                                                                                          |
 | 10  | User clicks secondary GPS button in duplicate issue row    | Opens/focuses already placed existing media item                                  | Uses existing media reference                                                                             |
 | 11  | User resolves duplicate modal                              | Chooses `use_existing`, `upload_anyway`, or `reject`                              | Optional "apply to all in batch"                                                                          |
@@ -98,7 +101,7 @@ flowchart TD
   N --> O{Media type photo/image?}
   O -->|Yes| P[hashing and dedup_check]
   O -->|video| U[uploading then saving_record]
-  O -->|document| O2{Has GPS or parseable address?}
+  O -->|document| O2{Has GPS or high-confidence parseable address?}
   O2 -->|Yes| U
   O2 -->|No| ZA[missing_data + issueKind=document_unresolved]
   P --> Q{Dedup match?}
@@ -158,6 +161,22 @@ flowchart TD
 | `missing_gps`                      | `place_on_map`, `retry`                                     | `dismiss`                   |
 | `document_unresolved`              | `place_on_map`, `change_location_address`, `add_to_project` | `dismiss`                   |
 | `conflict_review` / `upload_error` | `retry`                                                     | `dismiss`                   |
+
+### Filename Address Confidence Contract
+
+| Input | Confidence result | Pipeline behavior |
+| ----- | ----------------- | ----------------- |
+| Filename/folder address parse | `high` | Treated as parseable title/folder address and can continue normal route |
+| Filename/folder address parse | `low` / `nonsense` | Stored in `addressNotes[]` only; does not satisfy location requirement |
+| Document with only low-confidence text address | unresolved | Routed to `missing_data` with `issueKind=document_unresolved` |
+
+### Persisted Media Location Edit Contract
+
+| Trigger | Required behavior | Forbidden behavior |
+| ------- | ----------------- | ------------------ |
+| User chooses `Add/Change GPS` on uploaded row | Update persisted media coordinates/address fields | Creating a new upload job |
+| User chooses `Add/Change address` on uploaded row | Resolve and persist updated address/coords on same media record | Requeueing file into upload phases |
+| Address/GPS correction completes | Keep row identity in uploaded lane and refresh map/card position | Re-running `uploading -> saving_record` for same file |
 
 ### Status Label Contract
 
@@ -330,14 +349,14 @@ sequenceDiagram
 - [ ] EXIF GPS is never discarded when title/folder addresses exist.
 - [ ] Text-derived coordinates and EXIF coordinates are compared with a 15m tolerance.
 - [ ] Mismatches beyond 15m are persisted as structured location mismatch state and surfaced to detail UI.
-- [ ] Hash deduplication runs only for photo/image media types.
-- [ ] Videos bypass hash dedupe and stay on normal upload path.
-- [ ] Documents with GPS or parseable textual address bypass hash dedupe and stay on normal upload path.
-- [ ] Documents without GPS and without parseable textual address enter issues as `document_unresolved` with status `Choose location or project`.
-- [ ] `document_unresolved` items can be resolved either by assigning a project or by setting GPS/address, then continue to Uploaded lane.
-- [ ] Issue actions are gated strictly by issue kind according to the issue-kind option contract.
-- [ ] `missing_data` for `document_unresolved` can be resolved by `assignJobToProject` in addition to location placement.
-- [ ] `statusLabel` fallback text matches the status-label contract for every pipeline state transition.
+- [x] Hash deduplication runs only for photo/image media types.
+- [x] Videos bypass hash dedupe and stay on normal upload path.
+- [x] Documents with GPS or parseable textual address bypass hash dedupe and stay on normal upload path.
+- [x] Documents without GPS and without parseable textual address enter issues as `document_unresolved` with status `Choose location or project`.
+- [x] `document_unresolved` items can be resolved either by assigning a project or by setting GPS/address, then continue to Uploaded lane.
+- [x] Issue actions are gated strictly by issue kind according to the issue-kind option contract.
+- [x] `missing_data` for `document_unresolved` can be resolved by `assignJobToProject` in addition to location placement.
+- [x] `statusLabel` fallback text matches the status-label contract for every pipeline state transition.
 - [ ] Duplicate-photo matches are surfaced as issues instead of being auto-skipped.
 - [ ] Duplicate issue row exposes a secondary GPS action that opens the existing placed media.
 - [ ] Duplicate-resolution modal supports `use_existing`, `upload_anyway`, and `reject` decisions.

@@ -22,12 +22,14 @@ These blocks are separated by a **vertical gap between distinct sections**. Sepa
 
 The top section contains title/subtitle, the dashed Drop Zone, and the `Folder upload` button together in one shared full-width container card.
 
+The Upload Zone instructional copy (title/subtitle/helper text) is persistent while the panel is open. It MUST NOT disappear due to drag state transitions, lane switches, or batch updates.
+
 The segmented switch block comes directly after the gap.
 That block has NO extra card/tile wrapper. The tab list itself (`ui-tab-list`) is the container.
 
-- `Queue` (Uploading): Compact, icon-only button (`cloud_upload`).
-- `Uploaded`: Compact, icon-only button (`check_circle`).
-- `Issues`: Takes up the rest of the available width (flex-grow), containing both an icon and text label to increase attention and actionability.
+- `Queue` (Uploading): Compact icon-only control (`cloud_upload`) with square footprint (control width equals control height).
+- `Uploaded`: Compact icon-only control (`check_circle`) with square footprint (control width equals control height).
+- `Issues`: Takes up the remaining available width (flex-grow) and contains both icon and text label; the key difference is content and width, not a separate base fill style.
 
 The file list is a separate full-width block under the switch. File entries are stacked as individual full-width items with a gap between items.
 
@@ -123,6 +125,21 @@ stateDiagram-v2
 - **Component**: `UploadPanelComponent` at `features/upload/upload-panel/`
 - **Appears when**: user toggles Upload Button open
 
+## Feedback Triage (2026-03-30)
+
+| Issue | Files involved | Possible solution (spec contract) | Priority |
+| ----- | -------------- | --------------------------------- | -------- |
+| Document `5._Minitest.pdf` reaches Uploaded despite meaningless title parsing | `apps/web/src/app/core/upload/upload-new-prepare-route.util.ts`, `apps/web/src/app/core/filename-parser.service.ts`, `apps/web/src/app/features/upload/upload-phase.helpers.ts` | Add filename-address confidence gate. Low-confidence title matches MUST NOT unlock upload completion; route to `issues: document_unresolved` with actionable resolution. | P0 |
+| `Download` opens in browser tab instead of downloading | `apps/web/src/app/features/upload/upload-panel.component.ts`, `apps/web/src/app/core/upload/upload-manager.service.ts`, `apps/web/src/app/core/supabase.service.ts` | `Download` action MUST force attachment semantics (`Content-Disposition: attachment`) and trigger file download, never open inline preview tab. | P0 |
+| `Choose project` UI quality is below toolbar dropdown quality | `apps/web/src/app/features/upload/upload-panel.component.html`, `apps/web/src/app/features/upload/upload-panel.component.ts`, `apps/web/src/app/shared/` | Reuse the same shared project-selection dropdown primitive/pattern used by toolbar project selection. Avoid feature-local degraded variant. | P1 |
+| `Click on map` label is unclear for GPS correction | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `apps/web/src/app/features/upload/upload-panel-item.component.html`, `docs/i18n/translation-workbench.csv` | Replace label contract with contextual GPS wording: `Add GPS` when missing, `Change GPS` when existing coordinates are present. | P1 |
+| `Add to project` is missing in some already-bound contexts | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `apps/web/src/app/features/upload/upload-panel.component.ts` | Keep project assignment action always available as `Assign project` (opens selector with current project preselected when already bound). | P1 |
+| `Enter address` label is wrong when address already exists | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `docs/i18n/translation-workbench.csv` | Use contextual label contract: `Add address` when absent, `Change address` when present. | P1 |
+| Changing address on uploaded photos can restart upload path | `apps/web/src/app/features/upload/upload-panel.component.ts`, `apps/web/src/app/features/map/map-shell/map-shell.component.ts`, `apps/web/src/app/core/upload/upload-manager.service.ts` | Persist location updates on existing media only; MUST call location update flow and MUST NOT requeue/reupload files. | P0 |
+| Hover thumbnail preview is missing on media rows | `apps/web/src/app/features/upload/upload-panel-item.component.html`, `apps/web/src/app/features/upload/upload-panel-item.component.scss` | Enforce deterministic thumbnail rendering for rows with preview-capable media; hover must reveal media thumbnail reliably. | P1 |
+| Segmented switch style mismatch (Queue/Uploaded should be icon-only square controls, Issues wider with icon+label) | `apps/web/src/app/features/upload/upload-panel.component.html`, `apps/web/src/app/features/upload/upload-panel.component.scss` | Lock segmented style contract: Queue/Uploaded remain icon-only with square footprint; Issues remains wider with icon+label. | P1 |
+| Upload Zone text disappears intermittently | `apps/web/src/app/features/upload/upload-panel.component.html`, `apps/web/src/app/features/upload/upload-panel.component.ts` | Keep Upload Zone title/subtitle/helper text mounted and stable during all panel states. | P0 |
+
 ## Actions
 
 | #    | User Action                                                     | System Response                                                                           | Triggers                                                   |
@@ -135,6 +152,7 @@ stateDiagram-v2
 | 5    | Folder scan is running                                          | Shows scanning status line and disables folder action                                     | `activeBatch.status = 'scanning'`                          |
 | 5b   | Folder name contains parseable address                          | Uses folder address as default location hint for queued files                             | folder-title parser in upload pipeline                     |
 | 5c   | A file inside folder has its own parseable address              | File-level address overrides inherited folder address                                     | filename parser precedence                                 |
+| 5d   | File/folder title contains low-confidence or nonsense address   | Address hint is recorded as note only; file stays unresolved and lands in Issues         | confidence gate before routing                             |
 | 6    | Clicks Take Photo                                               | Opens camera-capable file capture path and submits captured file                          | Native capture input                                       |
 | 6b   | Uploads DOCX/XLSX/PPTX/ODT/ODS/ODP/ODG/TXT/CSV/PDF              | File is accepted and classified as `document`; if no GPS/address exists it enters Issues  | `UploadService.validateFile()` + location-context gate     |
 | 6c   | Document has no GPS and no parseable address                    | Item stays in Issues with status `Choose location or project`                             | issue kind `document_unresolved`                           |
@@ -151,18 +169,18 @@ stateDiagram-v2
 | 15c  | Duplicate hash issue row shows secondary GPS button             | Clicking button opens/focuses the already placed existing media                           | duplicate target image reference                           |
 | 15d  | Duplicate hash issue detected                                   | Opens duplicate-resolution modal with `use existing`, `upload anyway`, `reject`           | Optional apply-to-batch checkbox                           |
 | 15e  | Address parser found unresolved address fragments               | Row shows subtle address-note indicator and links to detail evidence section              | No parsing info is dropped                                 |
-| 15f  | Chooses `Add to project` on uploaded item                       | Opens add-to-project flow for the saved media item                                        | requires persisted `imageId`                               |
+| 15f  | Chooses `Assign project` on uploaded item                       | Opens project selector (shared toolbar dropdown pattern), supports assign and reassign     | persisted media; current project preselected when present  |
 | 15g  | Chooses `Prioritize` on uploaded item                           | Marks or queues the saved media item for prioritized follow-up                            | project/workflow integration                               |
 | 15h  | Chooses `Open in /media` on uploaded item                       | Navigates to `/media` and focuses or filters the persisted media item                     | router navigation with media context                       |
 | 15i  | Chooses `Open project` on uploaded item                         | Navigates to the bound project when the upload already belongs to one                     | only when `projectId` exists on job/media                  |
 | 15j  | Chooses `Change location` on uploaded item                      | Opens suboptions for location correction                                                  | grouped action section in row context menu                 |
-| 15j1 | Chooses `Click on map`                                          | Enters map-pick mode and persists clicked coordinates for the saved media item            | map banner + next map click commits coordinates            |
-| 15j2 | Chooses `Enter address`                                         | Opens taller address-finder overlay with search input and suggestions list                | suggestions render in vertical list under input            |
+| 15j1 | Chooses `Add GPS` or `Change GPS`                               | Enters map-pick mode and persists clicked coordinates for the saved media item            | label depends on whether coordinates exist                 |
+| 15j2 | Chooses `Add address` or `Change address`                       | Opens taller address-finder overlay with search input and suggestions list                | label depends on whether address exists                    |
 | 15j3 | Hovers an address suggestion                                    | Shows preview pin on map at suggestion coordinates                                        | preview clears when hover ends or dialog closes            |
 | 15j4 | Selects an address suggestion                                   | Persists address + coordinates and refreshes marker position                              | same `resolve_media_location` contract                     |
-| 15k  | Chooses `Download` on uploaded item                             | Downloads the saved file via signed URL or download service                               | persisted storage path required                            |
-| 15l  | Chooses `Add to project` on document issue row                  | Binds the document to a project and moves it to Uploaded lane                             | project-bound document resolution path                     |
-| 15m  | Chooses `Place on map` or `Enter address` on document issue row | Persists location context and moves item to Uploaded lane                                 | same resolver contract as uploaded location edits          |
+| 15k  | Chooses `Download` on uploaded item                             | Forces file download with attachment semantics; never opens inline browser tab            | persisted storage path required                            |
+| 15l  | Chooses `Assign project` on document issue row                  | Binds or rebinds the document to a project and moves it to Uploaded lane                  | project-bound document resolution path                     |
+| 15m  | Chooses `Add GPS/Change GPS` or `Add address/Change address` on document issue row | Persists location context and moves item to Uploaded lane                                 | same resolver contract as uploaded location edits          |
 | 15n  | Opens 3-dot menu on issue row                                   | Shows only issue-kind-specific options plus one destructive final action                  | contract matrix by `issueKind`                             |
 | 16   | Clicks dismiss icon on terminal row                             | Removes row from queue/history                                                            | `UploadManagerService.dismissJob()`                        |
 | 17   | Switches into empty lane                                        | Lane stays selected even with zero items                                                  | `selectedLane` signal                                      |
@@ -182,16 +200,17 @@ stateDiagram-v2
 | Lane                                       | Availability                                                 | Item Actions                                                                                                                                                 | Notes                                                                                                                                                      |
 | ------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `uploading`                                | queued, parsing, validating, uploading, saving, enrichment   | `View progress`, `View file details`, `Cancel upload`                                                                                                        | No navigation to saved media targets before persistence is complete                                                                                        |
-| `uploaded`                                 | persisted uploads and attachments with successful completion | `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Add to project` or `Open project`, `Download`, optional `Prioritize` | Row click performs map focus only when coordinates exist; `Prioritize` appears only when prioritized-workflow capability is enabled in the current context |
+| `uploaded`                                 | persisted uploads and attachments with successful completion | `Change location > Add/Change GPS`, `Change location > Add/Change address`, `Open in /media`, `Assign project`, `Download`, optional `Prioritize` | Row click performs map focus only when coordinates exist; `Assign project` supports assign/reassign in one flow; `Prioritize` appears only when capability is enabled |
 | `issues: duplicate_photo`                  | dedupe review                                                | `Open existing media`, `Upload anyway`, `Dismiss`                                                                                                            | `Upload anyway` only for duplicate-photo rows                                                                                                              |
-| `issues: missing_gps`                      | GPS/manual placement needed                                  | `Place on map`, `Retry`, `Dismiss`                                                                                                                           | `Retry` re-queues only when retry preconditions are met                                                                                                    |
-| `issues: document_unresolved`              | document without GPS/address                                 | `Place on map`, `Enter address`, `Add to project`, `Dismiss`                                                                                                 | `Add to project` resolves geospatially missing documents as project-bound artifacts                                                                        |
+| `issues: missing_gps`                      | GPS/manual placement needed                                  | `Add GPS`, `Add/Change address`, `Retry`, `Dismiss`                                                                                                          | `Retry` re-queues only when retry preconditions are met                                                                                                    |
+| `issues: document_unresolved`              | document without GPS/address                                 | `Add GPS`, `Add/Change address`, `Assign project`, `Dismiss`                                                                                                 | `Assign project` resolves geospatially missing documents as project-bound artifacts                                                                        |
 | `issues: conflict_review` / `upload_error` | conflict or hard error                                       | `Retry`, `Dismiss`                                                                                                                                           | No force-upload actions in these issue kinds                                                                                                               |
 
 Row state rendering requirements:
 
 - Each lane item uses a white/surface background (`var(--color-bg-surface)`), with status tints for error/warning states.
 - During active upload and retry transitions, the thumbnail area shows an overlaid spinning loading indicator.
+- Rows with preview-capable media always render deterministic thumbnail previews; hover MUST NOT collapse to empty placeholders.
 - Row status text must update live as phase/statusLabel changes (including retry re-queue and upload progression).
 - `document_unresolved` issue rows show status text `Choose location or project` (or localized equivalent) until resolved.
 
@@ -217,12 +236,19 @@ Row state rendering requirements:
 | Lane / Issue Kind                           | Non-destructive actions                                                                                                                    | Destructive action (last item) | Destructive styling       |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | ------------------------- |
 | `uploading`                                 | `View progress`, `View file details`                                                                                                       | `Cancel upload`                | danger text + danger icon |
-| `uploaded` (with project binding)           | `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Open project`, optional `Prioritize`, `Download`   | `Remove from project`          | danger text + danger icon |
-| `uploaded` (without project binding)        | `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Add to project`, optional `Prioritize`, `Download` | `Dismiss`                      | danger text + danger icon |
+| `uploaded` (with or without project binding) | `Change location > Add/Change GPS`, `Change location > Add/Change address`, `Open in /media`, `Assign project`, optional `Prioritize`, `Download` | `Remove from project` when project-bound; otherwise `Dismiss` | danger text + danger icon |
 | `issues: duplicate_photo`                   | `Open existing media`, `Upload anyway`                                                                                                     | `Dismiss`                      | danger text + danger icon |
-| `issues: missing_gps`                       | `Place on map`, `Retry`                                                                                                                    | `Dismiss`                      | danger text + danger icon |
-| `issues: document_unresolved`               | `Place on map`, `Enter address`, `Add to project`                                                                                          | `Dismiss`                      | danger text + danger icon |
+| `issues: missing_gps`                       | `Add GPS`, `Add/Change address`, `Retry`                                                                                                   | `Dismiss`                      | danger text + danger icon |
+| `issues: document_unresolved`               | `Add GPS`, `Add/Change address`, `Assign project`                                                                                           | `Dismiss`                      | danger text + danger icon |
 | `issues: conflict_review` or `upload_error` | `Retry`                                                                                                                                    | `Dismiss`                      | danger text + danger icon |
+
+### Action Label Contract
+
+| Action family | Label when value missing | Label when value already exists |
+| ------------- | ------------------------ | ------------------------------- |
+| GPS action | `Add GPS` | `Change GPS` |
+| Address action | `Add address` | `Change address` |
+| Project action | `Assign project` | `Assign project` (opens preselected current project) |
 
 ### Media Item Action Wiring (Mermaid)
 
@@ -328,10 +354,10 @@ flowchart TD
 flowchart LR
   A[Upload job] --> B{Lane}
   B -->|uploading| C[View progress<br/>View file details<br/>Cancel]
-  B -->|uploaded| D[Row click: map focus when coords exist<br/>Change location > Click on map<br/>Change location > Enter address<br/>Open in /media<br/>Add/Open project<br/>Optional Prioritize<br/>Download]
+  B -->|uploaded| D[Row click: map focus when coords exist<br/>Change location > Add/Change GPS<br/>Change location > Add/Change address<br/>Open in /media<br/>Assign project<br/>Optional Prioritize<br/>Download]
   B -->|issues duplicate_photo| E[Upload anyway<br/>Open existing media<br/>Dismiss]
-  B -->|issues missing_gps| F[Place on map<br/>Retry<br/>Dismiss]
-  B -->|issues document_unresolved| H[Place on map<br/>Enter address<br/>Add to project<br/>Dismiss]
+  B -->|issues missing_gps| F[Add GPS<br/>Add/Change address<br/>Retry<br/>Dismiss]
+  B -->|issues document_unresolved| H[Add GPS<br/>Add/Change address<br/>Assign project<br/>Dismiss]
   B -->|issues conflict_review| G[Resolve conflict<br/>Retry<br/>Dismiss]
 ```
 
@@ -346,13 +372,13 @@ sequenceDiagram
   participant DB as resolve_media_location RPC
 
   User->>Row: Context menu > Change location
-  alt Click on map
+  alt Add/Change GPS
     Row->>Panel: change_location_map(imageId)
     Panel->>Map: locationMapPickRequested(imageId)
     User->>Map: Click map
     Map->>DB: persist(latitude, longitude, address)
     Map-->>Panel: imageUploaded(id, lat, lng)
-  else Enter address
+  else Add/Change address
     Row->>Panel: change_location_address(imageId)
     User->>Panel: Types search text
     Panel-->>User: Suggestions under input
@@ -362,6 +388,7 @@ sequenceDiagram
     Panel->>DB: persist(latitude, longitude, address)
     Panel->>Map: imageUploaded(id, lat, lng)
   end
+  Note over Panel,DB: Persisted media location update only; do not requeue upload pipeline
 ```
 
 | Field                   | Source                                      | Type                                                                                                         |
@@ -508,71 +535,75 @@ sequenceDiagram
 ## Acceptance Criteria
 
 - [ ] Panel appears as compact container expansion from Upload Button
-- [ ] Top section is a Drop Zone with drag-and-drop and click upload
-- [ ] `Upload folder` action is always visible in intake area
-- [ ] When folder import is unsupported, `Upload folder` is disabled and shows fallback guidance
-- [ ] Folder scan shows progress text and disables repeat folder action while scanning
-- [ ] Take Photo action opens capture-capable intake and submits into the same upload pipeline
+- [x] Top section is a Drop Zone with drag-and-drop and click upload
+- [x] `Upload folder` action is always visible in intake area
+- [x] When folder import is unsupported, `Upload folder` is disabled and shows fallback guidance
+- [x] Folder scan shows progress text and disables repeat folder action while scanning
+- [x] Take Photo action opens capture-capable intake and submits into the same upload pipeline
 - [ ] Folder uploads inherit folder-name address as default location hint when files do not provide their own title address.
 - [ ] File-level title address overrides inherited folder-level address.
 - [ ] If queue has jobs, segmented lane switch appears under Drop Zone
-- [ ] Lane switch contains exactly 3 options: Queue (`uploading`), Uploaded, Issues
-- [ ] Clicking a lane filters visible image list to that lane only
-- [ ] Queue and Uploaded lane buttons use compact square treatment
-- [ ] Issues lane button uses stretched icon+text treatment
-- [ ] Segmented switch block is full width and shares the same left/right edges as upload area and folder button
-- [ ] Segmented switch block has no additional tile/card shell around it; the tab list itself is the only visual container
-- [ ] Lane list uses a fully transparent, padding-free overflow wrapper for scrolling only
-- [ ] Queue/Uploaded/Issues lane lists show max 5 rows and scroll internally when more rows exist
+- [x] Lane switch contains exactly 3 options: Queue (`uploading`), Uploaded, Issues
+- [x] Clicking a lane filters visible image list to that lane only
+- [x] Queue and Uploaded lane buttons are icon-only controls with square footprint (width equals height)
+- [x] Issues lane button uses icon+label content and a wider footprint (flex-grow) than Queue/Uploaded
+- [x] Segmented switch block is full width and shares the same left/right edges as upload area and folder button
+- [x] Segmented switch block has no additional tile/card shell around it; the tab list itself is the only visual container
+- [x] Lane list uses a fully transparent, padding-free overflow wrapper for scrolling only
+- [x] Queue/Uploaded/Issues lane lists show max 5 rows and scroll internally when more rows exist
 - [ ] File list block is full width and shares the same left/right edges as upload area and folder button
 - [ ] Lane list item surfaces use white/surface background (`var(--color-bg-surface)`) with state-aware warning/error tinting
 - [ ] Gap between lane items is visually see-through
 - [ ] File items are separated by vertical gap (not by table-like borders)
 - [ ] Distinct panel blocks are separated by layout gap between sections (not by decorative separators)
 - [ ] Upload panel shell remains mostly transparent; block gaps are literal see-through spaces to the map/background behind
-- [ ] Compact intake layout does not render a `No uploads yet` placeholder block
+- [x] Compact intake layout does not render a `No uploads yet` placeholder block
 - [ ] Compact map-overlay panel keeps row actions menu-first and does not render selection checkboxes
 - [ ] Embedded workspace panel reveals row-selection checkbox on hover/focus for eligible rows
-- [ ] Embedded workspace panel shows bottom selection toolbar only when one or more rows are selected
+- [x] Embedded workspace panel shows bottom selection toolbar only when one or more rows are selected
 - [ ] Embedded selection toolbar provides retry/download/remove/clear actions with lane-safe behavior
-- [ ] 3-dot row menu always contains a divider followed by exactly one destructive bottom action
-- [ ] Destructive bottom action label is state-dependent: `Cancel upload` (active), `Remove from project` (uploaded), `Dismiss` (issues/failed)
+- [x] 3-dot row menu always contains a divider followed by exactly one destructive bottom action
+- [x] Destructive bottom action label is state-dependent: `Cancel upload` (active), `Remove from project` (uploaded), `Dismiss` (issues/failed)
 - [ ] Destructive bottom action uses danger styling for both label and icon
-- [ ] Clicking the map-marker action on a `missing_data` row emits a placement request
-- [ ] Clicking an uploaded row with coordinates emits a zoom-to-location request
-- [ ] Uploaded rows expose `Add to project` when the item is not yet bound to a project
-- [ ] Uploaded rows expose `Prioritize` for saved media follow-up workflows
-- [ ] Uploaded rows expose `Open project` only when the upload already belongs to a project context
-- [ ] Uploaded rows expose `Open in /media`, `Change location`, and `Download` when persisted media data is available
-- [ ] `Change location` exposes exactly two suboptions: `Click on map` and `Enter address`
-- [ ] `Enter address` opens a vertically extended address-finder overlay with suggestions under the input
-- [ ] Hovering a location suggestion previews that location on the map without committing the update
-- [ ] Selecting a location suggestion persists both address and coordinates for the media item
-- [ ] `Click on map` enters map-pick mode and commits the clicked location for the selected media item
+- [x] Clicking the map-marker action on a `missing_data` row emits a placement request
+- [x] Clicking an uploaded row with coordinates emits a zoom-to-location request
+- [ ] Uploaded rows expose `Assign project` in all states (assign and reassign through one selector flow)
+- [ ] Project assignment UI in upload panel reuses the same shared dropdown primitive/pattern as toolbar project selection
+- [x] Uploaded rows expose `Prioritize` for saved media follow-up workflows
+- [x] Uploaded rows expose `Open in /media`, `Change location`, and `Download` when persisted media data is available
+- [ ] `Change location` exposes exactly two suboptions with contextual labels: `Add/Change GPS` and `Add/Change address`
+- [x] `Add/Change address` opens a vertically extended address-finder overlay with suggestions under the input
+- [x] Hovering a location suggestion previews that location on the map without committing the update
+- [x] Selecting a location suggestion persists both address and coordinates for the media item
+- [ ] `Add/Change GPS` enters map-pick mode and commits the clicked location for the selected media item
+- [ ] Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only
+- [ ] `Download` always triggers file download behavior and never opens inline browser preview tabs
 - [ ] Uploaded rows with EXIF/text mismatch (>15m) expose a clear mismatch indicator for follow-up in media details.
 - [ ] Duplicate-photo rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
 - [ ] Duplicate-resolution modal appears for duplicate-photo issues with `use existing`, `upload anyway`, and `reject` options.
 - [ ] Duplicate-resolution modal provides "apply to all matching items in this batch" behavior.
-- [ ] Non-photo/video documents without GPS and without parseable address land in Issues as `document_unresolved`.
-- [ ] `document_unresolved` rows show status text `Choose location or project` (localized fallback allowed).
-- [ ] `document_unresolved` row menu exposes exactly `Place on map`, `Enter address`, and `Add to project` before the destructive action.
-- [ ] Choosing `Place on map`, `Enter address`, or `Add to project` from `document_unresolved` resolves the item and moves it to Uploaded lane.
-- [ ] Issue-row menu visibility is strict by `issueKind` (no cross-kind leakage of actions).
-- [ ] Uploaded-row menu exposes `Prioritize` only when priority workflow capability is enabled.
-- [ ] Phase and issue status texts follow the status-text contract for every lane transition.
-- [ ] `Upload anyway` is available only for duplicate-photo issue rows, never for GPS issue rows
-- [ ] GPS issue rows expose placement-oriented actions instead of force-upload actions
-- [ ] `Retry` action in row menu is operational and re-queues eligible issue rows into uploading flow
-- [ ] `Place on map` action in row menu is operational for placement-related issue rows
-- [ ] Uploading/retrying rows show a spinning loading indicator overlay over the thumbnail
+- [x] Non-photo/video documents without GPS and without parseable address land in Issues as `document_unresolved`.
+- [x] `document_unresolved` rows show status text `Choose location or project` (localized fallback allowed).
+- [ ] `document_unresolved` row menu exposes exactly `Add GPS`, `Add/Change address`, and `Assign project` before the destructive action.
+- [ ] Choosing `Add GPS`, `Add/Change address`, or `Assign project` from `document_unresolved` resolves the item and moves it to Uploaded lane.
+- [x] Issue-row menu visibility is strict by `issueKind` (no cross-kind leakage of actions).
+- [x] Uploaded-row menu exposes `Prioritize` only when priority workflow capability is enabled.
+- [x] Phase and issue status texts follow the status-text contract for every lane transition.
+- [x] `Upload anyway` is available only for duplicate-photo issue rows, never for GPS issue rows
+- [x] GPS issue rows expose placement-oriented actions instead of force-upload actions
+- [x] `Retry` action in row menu is operational and re-queues eligible issue rows into uploading flow
+- [x] `Place on map` action in row menu is operational for placement-related issue rows
+- [x] Uploading/retrying rows show a spinning loading indicator overlay over the thumbnail
+- [ ] Hovering media rows with available previews always shows a stable thumbnail/media preview (no blank hover state)
 - [ ] Row status text updates live while retrying and uploading phases progress
 - [ ] Jobs with unresolved address fragments expose an address-note indicator that leads to detail evidence rows.
-- [ ] Lane tabs display live counts derived from the same lane bucket data as the list
+- [x] Lane tabs display live counts derived from the same lane bucket data as the list
 - [ ] Users can switch to an empty lane and keep that lane selected
 - [ ] Closing panel does not cancel active uploads
 - [ ] Viewer upload attempts are blocked by RLS and shown as a clear error state
-- [ ] Upload intake accepts office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`) plus `.txt` and `.csv` in addition to photo/video/PDF types
+- [x] Upload intake accepts office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`) plus `.txt` and `.csv` in addition to photo/video/PDF types
 - [ ] Document uploads without preview show deterministic type fallback badge (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`)
-- [ ] Panel root section is layout-only (no padding, border, background, or shadow); inner blocks carry container styling.
+- [ ] Upload Zone instructional text remains visible and stable across drag states, lane switches, and queue updates while panel is open
+- [x] Panel root section is layout-only (no padding, border, background, or shadow); inner blocks carry container styling.
 - [ ] Panel rigidly adheres to `.ui-item` class primitives for list rendering geometry.
 - [ ] Visual state changes (hover, active, selected) do NOT impact layout geometry or spacing.
