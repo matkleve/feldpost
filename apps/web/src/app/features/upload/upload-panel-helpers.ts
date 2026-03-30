@@ -7,8 +7,15 @@
 
 import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding.service';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
+import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
 import { UPLOAD_LANES } from './upload-panel.constants';
 import type { UploadLane } from './upload-phase.helpers';
+
+export interface UploadLaneCounts {
+  uploading: number;
+  uploaded: number;
+  issues: number;
+}
 
 /**
  * Checks if a job can be retried (failed, missing data, or skipped).
@@ -31,6 +38,60 @@ export function isTerminalJob(phase: UploadPhase): boolean {
  */
 export function isUploadLane(value: string): value is UploadLane {
   return (UPLOAD_LANES as readonly string[]).includes(value);
+}
+
+export function dropzoneLabelText(t: (key: string, fallback?: string) => string): string {
+  const localized = t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here');
+  const trimmed = typeof localized === 'string' ? localized.trim() : '';
+  return trimmed.length > 0 ? trimmed : 'Drag & drop files here';
+}
+
+export function buildLaneSwitchOptions(
+  t: (key: string, fallback?: string) => string,
+  counts: UploadLaneCounts,
+  issueAttentionPulse: boolean,
+  effectiveLane: UploadLane,
+): SegmentedSwitchOption[] {
+  return [
+    {
+      id: 'uploading',
+      label: t('upload.panel.lane.uploading', 'Uploading'),
+      icon: 'cloud_upload',
+      type: 'icon-only',
+      ariaLabel: `${t('upload.panel.lane.uploading', 'Uploading')} (${counts.uploading})`,
+      title: t('upload.panel.lane.uploading', 'Uploading'),
+    },
+    {
+      id: 'uploaded',
+      label: t('upload.panel.lane.uploaded', 'Uploaded'),
+      icon: 'check_circle',
+      type: 'icon-only',
+      ariaLabel: `${t('upload.panel.lane.uploaded', 'Uploaded')} (${counts.uploaded})`,
+      title: t('upload.panel.lane.uploaded', 'Uploaded'),
+    },
+    {
+      id: 'issues',
+      label: t('upload.panel.lane.issues', 'Issues'),
+      icon: 'warning_amber',
+      type: 'icon-with-text',
+      ariaLabel: `${t('upload.panel.lane.issues', 'Issues')} (${counts.issues})`,
+      attention: issueAttentionPulse && counts.issues > 0 && effectiveLane !== 'issues',
+    },
+  ];
+}
+
+export function sortUploadedByPriority(
+  jobs: readonly UploadJob[],
+  prioritizedIds: ReadonlySet<string>,
+): UploadJob[] {
+  if (prioritizedIds.size === 0) {
+    return [...jobs];
+  }
+  return [...jobs].sort((a, b) => {
+    const aPrio = prioritizedIds.has(a.id) ? 1 : 0;
+    const bPrio = prioritizedIds.has(b.id) ? 1 : 0;
+    return bPrio - aPrio;
+  });
 }
 
 /**

@@ -22,6 +22,8 @@ Use this workflow for high-risk file splitting where behavior must remain identi
 4. Preserve execution order exactly in orchestrators and pipelines.
 5. Keep cancellation/abort/event semantics identical where applicable.
 6. Do not delete documentation comments just to satisfy line-count lint rules.
+7. **Mandatory split order (no exceptions):** comment old block first, then copy to new file, then wire delegation and validate, then delete old block.
+8. If the mandatory order is not followed, stop immediately and restart that extraction step from baseline.
 
 ## Split Method (Mechanical)
 
@@ -39,11 +41,12 @@ Use this workflow for high-risk file splitting where behavior must remain identi
 - Internal private helpers
 - Only then service/module extraction for orchestration/phase handlers
 
-3. 1:1 move strategy
+3. 1:1 move strategy (MANDATORY ORDER)
 
-- Copy block to new file first.
-- Keep old callsite and delegate to extracted function.
-- Do not alter conditions, return paths, or side-effect order.
+- First comment out the old block in the original file as a safety marker.
+- Then copy the exact block to the new file.
+- Then wire delegation from original file to new file.
+- Do not alter conditions, return paths, side-effect order, or async sequencing.
 
 4. Verify immediately after each extraction
 
@@ -51,6 +54,11 @@ Use this workflow for high-risk file splitting where behavior must remain identi
 - Re-run nearest regression tests.
 - If any deviation appears, stop and rollback that extraction only.
 - For panel/component splits: if baseline is not exactly reproducible (same suite, same pass/fail profile), rollback immediately and continue splitting in a different area.
+
+5. Delete old code only after green validation
+
+- Remove the commented old block only after lint/build/tests are green.
+- Re-run validation after deletion.
 
 ## Validation Gate per Step
 
@@ -112,48 +120,51 @@ When splitting files under a UI panel/component area:
 
 ## Annotated Security Playbook (Anti-Regression Workflow)
 
-### Phase 1: Prepare New File (Exact Copy)
+### Phase 1: Freeze Old Block In Place (Comment-First)
 
-**Goal:** Create the new file with **identical code** before removing anything from the old file.
+**Goal:** Mark and preserve old behavior in the source file before any extraction.
 
 **Steps:**
 
 1. Identify the extraction block (function, helper, or tightly scoped method).
-2. Create new file with copy of the block + required imports.
-3. Format and validate new file syntax (build/lint should pass for new file in isolation).
-4. **Do NOT yet delete** or modify the old file.
+2. Comment out the old block in the original file with a migration marker.
+3. Keep the old block text unchanged inside the comment (no edits).
+4. Do not delete old code in this phase.
 
 **Example:**
 
 ```bash
 # Before this phase: old file has 900+ lines
-# After this phase: old file unchanged (900+ lines), new file created with 200 lines (copy)
-#                    Build: ✅, Lint: ✅ (both files)
+# After this phase: old block is commented in-place as safety net
+#                    Build: ✅, Lint: ✅
 ```
 
-### Phase 2: Add Delegation + Integration (Comment Out, Don't Delete)
+### Phase 2: Copy To New File + Wire Delegation
 
-**Goal:** Point the old file to the new file without removing old code yet.
+**Goal:** Move execution path to the new file while keeping old commented fallback.
 
 **Steps:**
 
-1. In the old file, add the import for the new extracted function/service.
-2. Replace the old implementation **with a call** to the extracted version (one-line delegation).
-3. **Comment out the old implementation** (do NOT delete it yet).
-4. Build and test — this is your **validation checkpoint**.
+1. Create the new file and copy exact old block logic.
+2. In the old file, add import for new extracted function/service.
+3. Replace the old implementation with one-line delegation.
+4. Keep commented old implementation as rollback safety.
+5. Build and test as validation checkpoint.
 
 **Example (before Phase 2):**
 
 ```typescript
 // Old file, 900 lines
 export class OldComponent {
+  /* PHASE 1 SAFETY NET
   private longHelperFunction() {
-    // 50 lines of helper logic
+    // 50 lines of helper logic (ORIGINAL)
   }
+  */
 }
 ```
 
-**After Phase 2:**
+**After Phase 2 (wired):**
 
 ```typescript
 import { longHelperFunction } from "./new-helper.ts";
@@ -163,7 +174,7 @@ export class OldComponent {
     return longHelperFunction();
   }
 
-  /* COMMENTED OUT - Phase 2 safety net (can be deleted in Phase 3)
+  /* COMMENTED OUT - Safety net (delete only in Phase 3)
 	private longHelperFunction() {
 		// 50 lines of helper logic (ORIGINAL - DO NOT EDIT)
 	}
@@ -178,7 +189,7 @@ export class OldComponent {
 - `npx vitest run <affected-tests>` → **Same pass/fail as baseline**
 - **Manual UI test:** Trigger the delegated function in dev/staging → expected behavior exhibited ✅
 
-### Phase 3: Remove Commented Code (After All Validations Pass)
+### Phase 3: Remove Commented Old Code (After Green Gates)
 
 **Goal:** Clean up after all tests pass and behavior is confirmed.
 
@@ -203,12 +214,12 @@ export class OldComponent {
 
 ### Rollback Strategy (If Anything Fails)
 
-**If Phase 2 validation fails:**
+**If Phase 1 or 2 validation fails:**
 
-1. Uncomment the old code (it's still there).
-2. Remove the delegation line.
-3. Delete the import and the new file.
-4. Rebuild — should be back to pre-Phase-2 state.
+1. Restore the original active old block immediately.
+2. Remove delegation line.
+3. Remove new import and delete the new file.
+4. Rebuild — must match pre-extraction baseline.
 5. Choose a different extraction unit or replan the split.
 
 **This workflow ensures:**
