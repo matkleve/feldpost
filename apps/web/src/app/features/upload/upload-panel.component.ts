@@ -21,6 +21,7 @@ import {
   type UploadPhase,
 } from '../../core/upload/upload-manager.service';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
+import { UploadPanelDialogSignals } from './upload-panel-dialog-signals.service';
 import { UploadPanelLifecycleService } from './upload-panel-lifecycle.service';
 import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
 import { UploadPanelLaneHandlersService } from './upload-panel-lane-handlers';
@@ -30,6 +31,12 @@ import {
 } from './upload-panel-row-handlers';
 import { UploadService } from '../../core/upload/upload.service';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
+import {
+  isRetryableJob,
+  isTerminalJob,
+  isUploadLane,
+  mapSearchResultsToForwardSuggestions,
+} from './upload-panel-helpers';
 import {
   UiButtonDirective,
   UiInputControlDirective,
@@ -209,7 +216,7 @@ export class UploadPanelComponent {
   });
   readonly hasSelectedUploadJobs = computed(() => this.selectedUploadJobs().length > 0);
   readonly hasRetryableSelection = computed(() =>
-    this.selectedUploadJobs().some((job) => this.isRetryableJob(job)),
+    this.selectedUploadJobs().some((job) => isRetryableJob(job)),
   );
   readonly canDownloadSelectedUploads = computed(() => {
     const jobs = this.selectedUploadJobs();
@@ -219,30 +226,34 @@ export class UploadPanelComponent {
 
     return jobs.every((job) => !!job.imageId && !!job.storagePath && this.canZoomToJob(job));
   });
-  readonly projectSelectionDialogOpen = signal(false);
-  readonly projectSelectionDialogTitle = signal(
-    this.t('auto.0013.add_to_project', 'Add to project'),
-  );
-  readonly projectSelectionDialogMessage = signal('');
-  readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
-  readonly projectSelectionDialogSelectedId = signal<string | null>(null);
-  readonly locationAddressDialogOpen = signal(false);
-  readonly locationAddressDialogQuery = signal('');
-  readonly locationAddressDialogLoading = signal(false);
-  readonly locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
-  readonly duplicateResolutionDialogOpen = signal(false);
-  readonly duplicateResolutionApplyToBatch = signal(false);
 
-  private pendingProjectAssignmentJob = signal<UploadJob | null>(null);
-  private pendingLocationAddressJob = signal<UploadJob | null>(null);
-  private pendingDuplicateResolutionJob = signal<UploadJob | null>(null);
-  private locationAddressSearchTimeout: ReturnType<typeof setTimeout> | null = null;
+  // Dialog state delegated to UploadPanelDialogSignals service
+  private readonly dialogSignals = inject(UploadPanelDialogSignals);
+
+  // Expose dialog signals to template
+  readonly projectSelectionDialogOpen = this.dialogSignals.projectSelectionDialogOpen;
+  readonly projectSelectionDialogTitle = this.dialogSignals.projectSelectionDialogTitle;
+  readonly projectSelectionDialogMessage = this.dialogSignals.projectSelectionDialogMessage;
+  readonly projectSelectionDialogOptions = this.dialogSignals.projectSelectionDialogOptions;
+  readonly projectSelectionDialogSelectedId = this.dialogSignals.projectSelectionDialogSelectedId;
+  readonly locationAddressDialogOpen = this.dialogSignals.locationAddressDialogOpen;
+  readonly locationAddressDialogQuery = this.dialogSignals.locationAddressDialogQuery;
+  readonly locationAddressDialogLoading = this.dialogSignals.locationAddressDialogLoading;
+  readonly locationAddressDialogSuggestions = this.dialogSignals.locationAddressDialogSuggestions;
+  readonly duplicateResolutionDialogOpen = this.dialogSignals.duplicateResolutionDialogOpen;
+  readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
+
+  // Pending job signals
+  private readonly pendingProjectAssignmentJob = this.dialogSignals.pendingProjectAssignmentJob;
+  private readonly pendingLocationAddressJob = this.dialogSignals.pendingLocationAddressJob;
+  private readonly pendingDuplicateResolutionJob = this.dialogSignals.pendingDuplicateResolutionJob;
+
   private readonly projectDialogSignals = {
-    projectSelectionDialogOpen: this.projectSelectionDialogOpen,
-    projectSelectionDialogTitle: this.projectSelectionDialogTitle,
-    projectSelectionDialogMessage: this.projectSelectionDialogMessage,
-    projectSelectionDialogOptions: this.projectSelectionDialogOptions,
-    projectSelectionDialogSelectedId: this.projectSelectionDialogSelectedId,
+    projectSelectionDialogOpen: this.dialogSignals.projectSelectionDialogOpen,
+    projectSelectionDialogTitle: this.dialogSignals.projectSelectionDialogTitle,
+    projectSelectionDialogMessage: this.dialogSignals.projectSelectionDialogMessage,
+    projectSelectionDialogOptions: this.dialogSignals.projectSelectionDialogOptions,
+    projectSelectionDialogSelectedId: this.dialogSignals.projectSelectionDialogSelectedId,
     projectNameDialogOpen: signal(false),
     projectNameDialogTitle: signal(''),
     projectNameDialogMessage: signal(''),
@@ -325,7 +336,7 @@ export class UploadPanelComponent {
   }
 
   onLaneSwitchValueChange(value: string | null): void {
-    if (!value || !this.isUploadLane(value)) {
+    if (!value || !isUploadLane(value)) {
       return;
     }
     this.setSelectedLane(value);
@@ -413,7 +424,7 @@ export class UploadPanelComponent {
 
   async retrySelectedUploads(): Promise<void> {
     for (const job of this.selectedUploadJobs()) {
-      if (this.isRetryableJob(job)) {
+      if (isRetryableJob(job)) {
         this.retryFile(job.id);
       }
     }
@@ -431,7 +442,7 @@ export class UploadPanelComponent {
 
   removeSelectedUploads(): void {
     for (const job of this.selectedUploadJobs()) {
-      if (this.isTerminalJob(job.phase)) {
+      if (isTerminalJob(job.phase)) {
         this.dismissFile(job.id);
       } else {
         this.uploadManager.cancelJob(job.id);
@@ -536,9 +547,10 @@ export class UploadPanelComponent {
 
   onLocationAddressDialogQueryInput(query: string): void {
     this.locationAddressDialogQuery.set(query);
-    if (this.locationAddressSearchTimeout) {
-      clearTimeout(this.locationAddressSearchTimeout);
-      this.locationAddressSearchTimeout = null;
+    const timeout = this.dialogSignals.getLocationAddressSearchTimeout();
+    if (timeout) {
+      clearTimeout(timeout);
+      this.dialogSignals.setLocationAddressSearchTimeout(null);
     }
 
     if (!query.trim()) {
@@ -548,9 +560,10 @@ export class UploadPanelComponent {
       return;
     }
 
-    this.locationAddressSearchTimeout = setTimeout(() => {
+    const newTimeout = setTimeout(() => {
       void this.searchLocationAddress(query);
     }, 280);
+    this.dialogSignals.setLocationAddressSearchTimeout(newTimeout);
   }
 
   onLocationAddressDialogClose(): void {
@@ -893,16 +906,6 @@ export class UploadPanelComponent {
     });
   }
 
-  private isRetryableJob(job: UploadJob): boolean {
-    return job.phase === 'error' || job.phase === 'missing_data' || job.phase === 'skipped';
-  }
-
-  private isTerminalJob(phase: UploadPhase): boolean {
-    return (
-      phase === 'complete' || phase === 'error' || phase === 'missing_data' || phase === 'skipped'
-    );
-  }
-
   private requestLocationPickOnMap(job: UploadJob): void {
     if (!job.imageId) {
       return;
@@ -939,35 +942,6 @@ export class UploadPanelComponent {
     this.locationAddressDialogLoading.set(true);
     const results = await this.geocodingService.search(normalized, { limit: 6 });
     this.locationAddressDialogLoading.set(false);
-    this.locationAddressDialogSuggestions.set(this.mapSearchResultsToForwardSuggestions(results));
-  }
-
-  private mapSearchResultsToForwardSuggestions(
-    results: readonly GeocoderSearchResult[],
-  ): ForwardGeocodeResult[] {
-    return results
-      .map((result) => {
-        if (!Number.isFinite(result.lat) || !Number.isFinite(result.lng)) {
-          return null;
-        }
-
-        const address = result.address;
-        return {
-          lat: result.lat,
-          lng: result.lng,
-          addressLabel: result.displayName,
-          city: address?.city ?? address?.town ?? address?.village ?? address?.municipality ?? null,
-          district: null,
-          street: address?.road ?? null,
-          streetNumber: address?.house_number ?? null,
-          zip: address?.postcode ?? null,
-          country: address?.country ?? null,
-        } as ForwardGeocodeResult;
-      })
-      .filter((entry): entry is ForwardGeocodeResult => entry !== null);
-  }
-
-  private isUploadLane(value: string): value is UploadLane {
-    return (UPLOAD_LANES as readonly string[]).includes(value);
+    this.locationAddressDialogSuggestions.set(mapSearchResultsToForwardSuggestions(results));
   }
 }

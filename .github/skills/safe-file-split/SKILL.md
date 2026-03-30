@@ -107,3 +107,114 @@ When splitting files under a UI panel/component area:
 4. Prefer fallback scope if panel gate is noisy
 
 - If panel suite cannot be made stable quickly, defer panel splitting and continue with core/service files.
+
+---
+
+## Annotated Security Playbook (Anti-Regression Workflow)
+
+### Phase 1: Prepare New File (Exact Copy)
+
+**Goal:** Create the new file with **identical code** before removing anything from the old file.
+
+**Steps:**
+
+1. Identify the extraction block (function, helper, or tightly scoped method).
+2. Create new file with copy of the block + required imports.
+3. Format and validate new file syntax (build/lint should pass for new file in isolation).
+4. **Do NOT yet delete** or modify the old file.
+
+**Example:**
+
+```bash
+# Before this phase: old file has 900+ lines
+# After this phase: old file unchanged (900+ lines), new file created with 200 lines (copy)
+#                    Build: ✅, Lint: ✅ (both files)
+```
+
+### Phase 2: Add Delegation + Integration (Comment Out, Don't Delete)
+
+**Goal:** Point the old file to the new file without removing old code yet.
+
+**Steps:**
+
+1. In the old file, add the import for the new extracted function/service.
+2. Replace the old implementation **with a call** to the extracted version (one-line delegation).
+3. **Comment out the old implementation** (do NOT delete it yet).
+4. Build and test — this is your **validation checkpoint**.
+
+**Example (before Phase 2):**
+
+```typescript
+// Old file, 900 lines
+export class OldComponent {
+  private longHelperFunction() {
+    // 50 lines of helper logic
+  }
+}
+```
+
+**After Phase 2:**
+
+```typescript
+import { longHelperFunction } from "./new-helper.ts";
+
+export class OldComponent {
+  private delegateHelper() {
+    return longHelperFunction();
+  }
+
+  /* COMMENTED OUT - Phase 2 safety net (can be deleted in Phase 3)
+	private longHelperFunction() {
+		// 50 lines of helper logic (ORIGINAL - DO NOT EDIT)
+	}
+	*/
+}
+```
+
+**Validation Checkpoints at end of Phase 2:**
+
+- `npx eslint <old-file> <new-file>` → **No new errors**
+- `npm run build` → **Success (new code path used)**
+- `npx vitest run <affected-tests>` → **Same pass/fail as baseline**
+- **Manual UI test:** Trigger the delegated function in dev/staging → expected behavior exhibited ✅
+
+### Phase 3: Remove Commented Code (After All Validations Pass)
+
+**Goal:** Clean up after all tests pass and behavior is confirmed.
+
+**Steps:**
+
+1. Only if Phase 2 validation is green, remove the commented-out old implementation.
+2. Run lint + build again.
+3. Re-run tests one final time.
+
+**Result:**
+
+```typescript
+import { longHelperFunction } from "./new-helper.ts";
+
+export class OldComponent {
+  private delegateHelper() {
+    return longHelperFunction();
+  }
+  // Old code fully removed; new delegation is permanent.
+}
+```
+
+### Rollback Strategy (If Anything Fails)
+
+**If Phase 2 validation fails:**
+
+1. Uncomment the old code (it's still there).
+2. Remove the delegation line.
+3. Delete the import and the new file.
+4. Rebuild — should be back to pre-Phase-2 state.
+5. Choose a different extraction unit or replan the split.
+
+**This workflow ensures:**
+
+- ✅ Zero line-by-line behavior changes during the split.
+- ✅ Commented code serves as a safety net until validation passes.
+- ✅ Easy rollback if tests fail.
+- ✅ Clear audit trail (comments show what moved and when).
+- ✅ One logical unit per phase (no co-mingled changes).
