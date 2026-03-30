@@ -12,6 +12,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--upload-area-gap);
+  background: transparent;
+  padding: 0;
 
   &--embedded {
     display: flex;
@@ -39,30 +41,23 @@
     gap: var(--spacing-3);
     width: 100%;
     align-self: stretch;
+    border-radius: var(--radius-lg);
     padding: var(--spacing-3);
-    border-radius: var(--radius-md);
-    border: 1px solid color-mix(in srgb, var(--color-border) 58%, transparent);
-    background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
 
     &--intake {
       gap: var(--spacing-2);
-      background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);
     }
 
     &--switch {
-      gap: var(--spacing-2);
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
+      padding: var(--spacing-1);
+      gap: 0;
     }
 
     &--lanes {
-      min-height: 0;
-      gap: 0;
       padding: 0;
       border: 0;
-      border-radius: 0;
       background: transparent;
     }
   }
@@ -290,7 +285,7 @@
 
   :where(.ui-tab--uploading, .ui-tab--uploaded) {
     flex: 0 0 auto;
-    min-width: 6rem;
+    min-width: 2.25rem;
   }
 
   .ui-tab--issues {

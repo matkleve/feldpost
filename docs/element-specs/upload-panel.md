@@ -8,68 +8,111 @@ The Upload Panel is the compact upload workspace that appears from the Upload Bu
 
 ## What It Looks Like
 
-The panel root is a single fixed-width section shell built from **4 vertically stacked full-width blocks**. All four blocks use the same left and right edges.
+The panel root is a single fixed-width section shell built from **3 vertically stacked blocks**. All blocks use the same left and right edges.
 
 The root section is layout-only and intentionally unstyled: no padding, no border, no background, and no shadow. Visual container treatment belongs only to the inner blocks.
 
 The shell itself is intentionally mostly transparent and acts as structure, not as a decorative card. The gaps between blocks are literal see-through spaces where the map/background behind the panel remains visible.
 
-1. Upload area (title + subtitle + drop zone + file type chips).
-2. Folder upload button.
-3. Segmented switch / tab bar (`Uploading`, `Uploaded`, `Issues`).
-4. File list stack.
+1. Intake Area (Upload zone + Folder upload button within the same container block).
+2. Segmented switch / tab bar (`Uploading`, `Uploaded`, `Issues`).
+3. File list stack.
 
 These blocks are separated by a **vertical gap between distinct sections**. Separation is defined by real layout gap, not by decorative borders, separators, or fake divider surfaces.
 
-The top section contains title/subtitle and the dashed Drop Zone. The `Folder upload` button is its own full-width block directly below the upload area.
+The top section contains title/subtitle, the dashed Drop Zone, and the `Folder upload` button together in one shared full-width container card.
 
-The segmented switch is a separate full-width block under the folder button.
-That block must not render an extra card/tile surface. The tab list itself is the container, and only the tab options live inside it.
+The segmented switch block comes directly after the gap.
+That block has NO extra card/tile wrapper. The tab list itself (`ui-tab-list`) is the container.
+
+- `Queue` (Uploading): Compact, icon-only button (`cloud_upload`).
+- `Uploaded`: Compact, icon-only button (`check_circle`).
+- `Issues`: Takes up the rest of the available width (flex-grow), containing both an icon and text label to increase attention and actionability.
 
 The file list is a separate full-width block under the switch. File entries are stacked as individual full-width items with a gap between items.
 
-The idle `No uploads yet` placeholder is not part of the compact intake layout contract.
-
-The compact map-overlay panel is menu-first for row interactions: no row-level checkboxes and no multi-select in compact mode. Multi-select is allowed only when this panel is embedded in the Workspace Upload tab.
-
-Primary upload intake supports photos, videos, PDFs, office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`), plain text (`.txt`), and CSV (`.csv`). Document-like files render thumbnail previews as generated cover snapshots when available; otherwise they fall back to deterministic type icons (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`) in lane rows. For folder uploads, a parseable address in the folder name acts as the default location hint for all files unless a file provides its own parseable address in its name.
-
-Lane switch visuals are asymmetric by contract: `Queue` and `Uploaded` are compact square button forms, while `Issues` uses a stretched icon+text treatment to increase attention and actionability. The switch container itself is full width.
-
 The lane item area uses a fully transparent overflow wrapper (no padding, no decorative surface) only for scrolling behavior. It shows up to 5 full rows at once; additional rows are reachable by internal scrolling. This applies equally to Queue, Uploaded, and Issues lanes.
 
-Each file item in the list is full width, has no white card background, and is separated from the next item via gap spacing. The separator is the gap itself, not a table-row border, and the gap must stay visually transparent.
+When the 3-dot context menu is opened from a file item, the menu options must open **upwards** to avoid being clipped by the bottom of the map or panel overflow.
 
 ### Reference Structure (Contract)
 
 ```text
-<UploadPanel>                          <!-- fixed width container -->
+<UploadPanel>                          <!-- transparent wrapper, flex column, gap -->
 
-  <UploadZone />                       <!-- full width -->
+  <IntakeArea>                         <!-- full width card, bg-surface, padding -->
+    <UploadZone />
+    <FolderUploadButton />
+  </IntakeArea>
 
-  <FolderUploadButton />               <!-- full width -->
+  <!-- gap (transparent to map) -->
+
+  <SegmentedSwitch />                  <!-- ui-tab-list ONLY, no wrapping div -->
+    <!-- Uploading (Icon only) -->
+    <!-- Uploaded (Icon only) -->
+    <!-- Issues (Icon + Text, flex grow) -->
 
   <!-- gap -->
 
-  <SegmentedSwitch>                    <!-- full width, same as container -->
-    <Segment id="uploading" />
-    <Segment id="uploaded" />
-    <Segment id="issues" />
-  </SegmentedSwitch>
+  <FileItemStack>                      <!-- transparent overflow wrapper (max 5 items height) -->
 
-  <!-- gap -->
-
-  <FileItemStack>                      <!-- full width -->
-
-    <FileItem />                       <!-- full width -->
+    <FileItem />                       <!-- full width card, bg-surface, padding -->
     <!-- gap -->
-    <FileItem />                       <!-- full width -->
+    <FileItem state="error" />         <!-- error tint bg-surface, padding -->
     <!-- gap -->
-    <FileItem />                       <!-- full width -->
+    <FileItem />                       <!-- full width card, bg-surface, padding -->
 
   </FileItemStack>
 
 </UploadPanel>
+```
+
+### Visual States (Mermaid)
+
+```mermaid
+stateDiagram-v2
+    direction TB
+
+    state FileItem {
+        direction LR
+        [*] --> default_item
+        default_item --> uploading : phase='uploading'
+        uploading --> complete : phase='complete'
+        uploading --> missing_data : phase='missing_data'
+        uploading --> error : phase='error'
+
+        state default_item {
+            bg: var(--color-bg-surface)
+        }
+
+        state complete {
+            statusText: var(--color-success)
+        }
+
+        state missing_data {
+            bg: var(--color-bg-surface) + warning tint
+            statusText: var(--color-warning)
+        }
+
+        state error {
+            bg: var(--color-bg-surface) + danger tint
+            statusText: var(--color-danger)
+        }
+    }
+
+    state SegmentedSwitch {
+        [*] --> activeTab
+        activeTab --> QueueTab
+        activeTab --> UploadedTab
+        activeTab --> IssuesTab
+
+        state IssuesTab {
+            [*] --> empty
+            [*] --> attention
+            empty : no items (default styles)
+            attention : has items (tinted/distinguished style via .ui-tab--attention)
+        }
+    }
 ```
 
 ## Where It Lives

@@ -85,48 +85,28 @@
         >
           @if (job().phase === 'complete' || job().phase === 'skipped') {
             <span class="material-icons upload-panel__success-indicator">check_circle</span>
-          } @else if (job().phase === 'error' && job().error) {
-            {{ job().error }}
           } @else if (job().phase === 'missing_data') {
             <span class="material-icons" aria-hidden="true">location_off</span>
-            <span>{{
-              job().statusLabel || t('upload.item.status.missingGps', 'GPS missing')
-            }}</span>
+            <span>{{ job().statusLabel }}</span>
           } @else {
-            {{ job().statusLabel }}
+            {{ job().error || job().statusLabel }}
           }
         </p>
       </div>
     </div>
-
-    @if (hasMenuActions()) {
-      <button
-        uiButton
-        uiButtonSizeSm
-        uiButtonGhost
-        uiButtonIconOnly
-        class="upload-panel__row-action upload-panel__row-action--menu"
-        type="button"
-        [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
-        [attr.title]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
-        (click)="onMenuTriggerClick($event)"
-      >
-        <span class="material-icons" aria-hidden="true">more_vert</span>
-      </button>
-    }
 
     <button
       uiButton
       uiButtonSizeSm
       uiButtonGhost
       uiButtonIconOnly
-      class="upload-panel__row-action upload-panel__row-action--right"
+      class="upload-panel__row-action upload-panel__row-action--menu"
       type="button"
-      aria-label="Dismiss {{ job().file.name }}"
-      title="Dismiss"
-      (click)="onDismissClick($event)"
+      [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+      [attr.title]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
+      (click)="onMenuTriggerClick($event)"
     >
-      <span class="material-icons" aria-hidden="true">close</span>
+      <span class="material-icons" aria-hidden="true">more_vert</span>
     </button>
   </div>
 
@@ -139,20 +119,14 @@
       [panelClass]="menuPanelClass()"
       (closeRequested)="onMenuCloseRequested()"
     >
-      <div class="map-context-menu__header option-menu-header">
-        {{ job().file.name }}
-      </div>
-
       <div
         class="dd-items"
         role="menu"
         [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
       >
         @for (action of availableMenuActions(); track action) {
-          @if (action === 'change_location_map') {
-            <div class="upload-item-context-menu__section-label" role="presentation">
-              {{ t('upload.item.menu.section.location', 'Change location') }}
-            </div>
+          @if (action === 'dismiss') {
+            <div class="dd-divider" aria-hidden="true"></div>
           }
           <button class="dd-item" type="button" role="menuitem" (click)="onMenuAction(action)">
             <span class="material-icons dd-item__icon" aria-hidden="true">
@@ -173,7 +147,9 @@
                               ? 'pin_drop'
                               : action === 'change_location_address'
                                 ? 'search'
-                                : 'download'
+                                : action === 'dismiss'
+                                  ? 'close'
+                                  : 'download'
               }}
             </span>
             <span class="dd-item__label">
@@ -193,10 +169,14 @@
                           : action === 'add_to_project'
                             ? t('auto.0013.add_to_project', 'Add to project')
                             : action === 'change_location_map'
-                              ? t('upload.item.menu.location.clickMap', 'Click on map')
+                              ? t('upload.item.menu.location.clickMap', 'Change GPS')
                               : action === 'change_location_address'
-                                ? t('upload.item.menu.location.enterAddress', 'Enter address')
-                                : t('auto.0099.download', 'Download')
+                                ? t('upload.item.menu.location.enterAddress', 'Change Address')
+                                : action === 'dismiss'
+                                  ? isUploading()
+                                    ? t('upload.item.menu.stop', 'Stop uploading')
+                                    : t('upload.item.menu.dismiss', 'Remove from list')
+                                  : t('auto.0099.download', 'Download')
               }}
             </span>
           </button>

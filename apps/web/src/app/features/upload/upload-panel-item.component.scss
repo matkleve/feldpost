@@ -16,11 +16,21 @@
   gap: var(--spacing-3);
   width: 100%;
   padding: var(--spacing-2);
-  background: transparent;
-  border: none;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   transition: background 120ms ease-out;
   position: relative;
   border-radius: var(--radius-lg);
+}
+
+.upload-panel__file-item--error .upload-panel__file-main {
+  background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--color-danger) 24%, var(--color-border));
+}
+
+.upload-panel__file-item--missing_data .upload-panel__file-main {
+  background: color-mix(in srgb, var(--color-warning) 4%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--color-warning) 24%, var(--color-border));
 }
 
 .upload-panel__selection {

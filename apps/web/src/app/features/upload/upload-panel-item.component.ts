@@ -28,7 +28,8 @@ export type UploadItemMenuAction =
   | 'open_existing_media'
   | 'upload_anyway'
   | 'change_location_map'
-  | 'change_location_address';
+  | 'change_location_address'
+  | 'dismiss';
 
 @Component({
   selector: 'app-upload-panel-item',
@@ -124,35 +125,29 @@ export class UploadPanelItemComponent {
     );
   }
 
+  isUploading(): boolean {
+    return getLaneForJob(this.job()) === 'uploading';
+  }
+
   availableMenuActions(): UploadItemMenuAction[] {
     const job = this.job();
     const lane = getLaneForJob(job);
+    let actions: UploadItemMenuAction[] = [];
 
     if (lane === 'issues') {
       const issueKind = getIssueKind(job);
-      if (issueKind !== 'duplicate_photo') {
-        return [];
-      }
+      if (issueKind === 'duplicate_photo') {
+        if (job.existingImageId) {
+          actions.push('open_existing_media');
+        }
+        actions.push('upload_anyway');
+      } else if (issueKind === 'missing_gps') {
+        actions.push('change_location_map');
+        actions.push('change_location_address');
 
-      return [
-        ...(job.existingImageId ? (['open_existing_media'] as UploadItemMenuAction[]) : []),
-        'upload_anyway',
-      ];
-    }
+    actions.push('dismiss');
 
-    if (lane !== 'uploaded' || !job.imageId) {
-      return [];
-    }
-
-    return [
-      'change_location_map',
-      'change_location_address',
-      ...(this.showOpenProject() ? (['open_project'] as UploadItemMenuAction[]) : []),
-      'add_to_project',
-      'open_in_media',
-      'download',
-      'toggle_priority',
-    ];
+    return actions;
   }
 
   menuPanelClass(): string {
@@ -166,7 +161,10 @@ export class UploadPanelItemComponent {
 
     event.preventDefault();
     event.stopPropagation();
-    this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY));
+    const menuHeight = this.availableMenuActions().length * 44 + 48;
+    this.menuPosition.set(
+      this.clampMenuPosition(event.clientX, event.clientY - menuHeight, menuHeight),
+    );
     this.menuOpen.set(true);
   }
 
@@ -180,14 +178,16 @@ export class UploadPanelItemComponent {
     const target = event.currentTarget;
     if (target instanceof HTMLElement) {
       const rect = target.getBoundingClientRect();
+      const menuHeight = this.availableMenuActions().length * 44 + 48; // rough estimate
       this.menuPosition.set(
         this.clampMenuPosition(
-          rect.right - UPLOAD_ITEM_MENU_WIDTH,
-          rect.bottom + UPLOAD_ITEM_MENU_OFFSET_Y,
+          rect.right - 240, // width 240
+          rect.top - menuHeight - 4, // open upwards
+          menuHeight,
         ),
       );
     } else {
-      this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY));
+      this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY, 200));
     }
     this.menuOpen.set(true);
   }
@@ -198,7 +198,11 @@ export class UploadPanelItemComponent {
 
   onMenuAction(action: UploadItemMenuAction): void {
     this.menuOpen.set(false);
-    this.menuActionSelected.emit({ job: this.job(), action });
+    if (action === 'dismiss') {
+      this.dismissFile.emit(this.job().id);
+    } else {
+      this.menuActionSelected.emit({ job: this.job(), action });
+    }
   }
 
   onRequestPlacement(event: MouseEvent): void {
@@ -280,13 +284,12 @@ export class UploadPanelItemComponent {
     );
   }
 
-  private clampMenuPosition(x: number, y: number): { x: number; y: number } {
+  private clampMenuPosition(x: number, y: number, menuHeight: number): { x: number; y: number } {
     if (typeof window === 'undefined') {
       return { x, y };
     }
 
     const menuWidth = 240;
-    const menuHeight = 160;
     const margin = 8;
     return {
       x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),

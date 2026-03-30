@@ -109,91 +109,84 @@
   </div>
 
   @if (showProgressBoard()) {
-    <section class="upload-panel__area upload-panel__area--switch" aria-label="Upload lanes">
-      <div
-        uiTabList
-        class="ui-tab-list ui-tab-list--sm ui-tab-list--fill"
-        role="tablist"
-        aria-label="Upload lanes"
+    <div
+      uiTabList
+      class="ui-tab-list ui-tab-list--sm ui-tab-list--fill upload-panel__area--switch"
+      role="tablist"
+      aria-label="Upload lanes"
+    >
+      <button
+        uiTab
+        uiTabSizeSm
+        uiTabIconOnly
+        type="button"
+        role="tab"
+        class="ui-tab ui-tab--sm ui-tab--uploading"
+        [class.ui-tab--active]="effectiveLane() === 'uploading'"
+        [attr.aria-selected]="effectiveLane() === 'uploading'"
+        [attr.aria-label]="'Uploading (' + laneCounts().uploading + ')'"
+        [attr.title]="'Uploading'"
+        (click)="setSelectedLane('uploading')"
       >
-        <button
-          uiTab
-          uiTabSizeSm
-          type="button"
-          role="tab"
-          class="ui-tab ui-tab--sm ui-tab--uploading"
-          [class.ui-tab--active]="effectiveLane() === 'uploading'"
-          [attr.aria-selected]="effectiveLane() === 'uploading'"
-          (click)="setSelectedLane('uploading')"
-        >
-          <span class="ui-tab__label">Uploading</span>
-          <span class="ui-chip ui-chip--count ui-chip--sm" aria-hidden="true">{{
-            laneCounts().uploading
-          }}</span>
-        </button>
-        <button
-          uiTab
-          uiTabSizeSm
-          type="button"
-          role="tab"
-          class="ui-tab ui-tab--sm ui-tab--uploaded"
-          [class.ui-tab--active]="effectiveLane() === 'uploaded'"
-          [attr.aria-selected]="effectiveLane() === 'uploaded'"
-          (click)="setSelectedLane('uploaded')"
-        >
-          <span class="ui-tab__label">Uploaded</span>
-          <span class="ui-chip ui-chip--count ui-chip--sm" aria-hidden="true">{{
-            laneCounts().uploaded
-          }}</span>
-        </button>
-        <button
-          uiTab
-          uiTabSizeSm
-          type="button"
-          role="tab"
-          class="ui-tab ui-tab--sm ui-tab--issues"
-          [class.ui-tab--active]="effectiveLane() === 'issues'"
-          [class.ui-tab--attention]="
-            issueAttentionPulse() && laneCounts().issues > 0 && effectiveLane() !== 'issues'
-          "
-          [attr.aria-selected]="effectiveLane() === 'issues'"
-          (click)="setSelectedLane('issues')"
-        >
-          <span class="material-icons ui-tab__icon" aria-hidden="true">warning_amber</span>
-          <span class="ui-tab__label">Issues</span>
-          <span class="ui-chip ui-chip--count ui-chip--sm" aria-hidden="true">{{
-            laneCounts().issues
-          }}</span>
-        </button>
-      </div>
-    </section>
+        <span class="material-icons ui-tab__icon" aria-hidden="true">cloud_upload</span>
+      </button>
+      <button
+        uiTab
+        uiTabSizeSm
+        uiTabIconOnly
+        type="button"
+        role="tab"
+        class="ui-tab ui-tab--sm ui-tab--uploaded"
+        [class.ui-tab--active]="effectiveLane() === 'uploaded'"
+        [attr.aria-selected]="effectiveLane() === 'uploaded'"
+        [attr.aria-label]="'Uploaded (' + laneCounts().uploaded + ')'"
+        [attr.title]="'Uploaded'"
+        (click)="setSelectedLane('uploaded')"
+      >
+        <span class="material-icons ui-tab__icon" aria-hidden="true">check_circle</span>
+      </button>
+      <button
+        uiTab
+        uiTabSizeSm
+        type="button"
+        role="tab"
+        class="ui-tab ui-tab--sm ui-tab--issues"
+        [class.ui-tab--active]="effectiveLane() === 'issues'"
+        [class.ui-tab--attention]="
+          issueAttentionPulse() && laneCounts().issues > 0 && effectiveLane() !== 'issues'
+        "
+        [attr.aria-selected]="effectiveLane() === 'issues'"
+        (click)="setSelectedLane('issues')"
+      >
+        <span class="material-icons ui-tab__icon" aria-hidden="true">warning_amber</span>
+        <span class="ui-tab__label">Issues</span>
+      </button>
+    </div>
   }
 
   <!-- Per-file progress list -->
   @if (visibleLaneJobs().length > 0) {
-    <section class="upload-panel__area upload-panel__area--lanes">
-      <div class="upload-panel__lane-overflow">
-        <ul class="upload-panel__file-list" aria-label="Upload queue">
-          @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
-            <app-upload-panel-item
-              [job]="job"
-              [interactive]="isRowInteractive(job)"
-              [selectable]="embeddedInPane()"
-              [selected]="selectedUploadJobIds().has(job.id)"
-              [documentFallbackLabel]="documentFallbackLabel(job)"
-              [showOpenProject]="!!job.projectId"
-              [prioritized]="isJobPrioritized(job)"
-              (requestPlacement)="requestPlacement(job.id, job.phase, $event.event)"
-              (dismissFile)="dismissFile(job.id)"
-              (rowMainClick)="onRowMainClick(job)"
-              (rowMainKeydown)="onRowMainKeydown(job, $event.event)"
-              (menuActionSelected)="onMenuActionSelected($event)"
-              (selectionChanged)="onRowSelectionChanged($event)"
-            ></app-upload-panel-item>
-          }
-        </ul>
-      </div>
-    </section>
+    <div class="upload-panel__lane-overflow">
+      <ul class="upload-panel__file-list" aria-label="Upload queue">
+        @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
+          <app-upload-panel-item
+            [job]="job"
+            [interactive]="isRowInteractive(job)"
+            [selectable]="embeddedInPane()"
+            [selected]="selectedUploadJobIds().has(job.id)"
+            [documentFallbackLabel]="documentFallbackLabel(job)"
+            [showOpenProject]="!!job.projectId"
+            [prioritized]="isJobPrioritized(job)"
+            (requestPlacement)="requestPlacement(job.id, job.phase, $event.event)"
+            (dismissFile)="dismissFile(job.id)"
+            (rowMainClick)="onRowMainClick(job)"
+            (rowMainKeydown)="onRowMainKeydown(job, $event.event)"
+            (menuActionSelected)="onMenuActionSelected($event)"
+            (selectionChanged)="onRowSelectionChanged($event)"
+          ></app-upload-panel-item>
+        }
+      </ul>
+    </div>
   }
 
   @if (embeddedInPane() && hasSelectedUploadJobs()) {
