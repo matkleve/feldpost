@@ -125,64 +125,68 @@ stateDiagram-v2
 
 ## Actions
 
-| #    | User Action                                                     | System Response                                                                           | Triggers                                               |
-| ---- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 1    | Clicks Upload Button                                            | Opens compact Upload Panel container                                                      | `uploadPanelOpen` signal                               |
-| 2    | Drags files onto Drop Zone                                      | Creates upload jobs and starts pipeline (max 3 parallel)                                  | `UploadManagerService.submit()`                        |
-| 3    | Clicks Drop Zone                                                | Opens file picker with multi-select                                                       | Native file picker                                     |
-| 4    | Clicks Upload folder                                            | Starts folder scan then enqueues discovered files                                         | `UploadManagerService.submitFolder`                    |
-| 4a   | Browser does not support folder import                          | `Upload folder` control remains visible but disabled with explanatory tooltip/text        | capability guard + UX fallback                         |
-| 5    | Folder scan is running                                          | Shows scanning status line and disables folder action                                     | `activeBatch.status = 'scanning'`                      |
-| 5b   | Folder name contains parseable address                          | Uses folder address as default location hint for queued files                             | folder-title parser in upload pipeline                 |
-| 5c   | A file inside folder has its own parseable address              | File-level address overrides inherited folder address                                     | filename parser precedence                             |
-| 6    | Clicks Take Photo                                               | Opens camera-capable file capture path and submits captured file                          | Native capture input                                   |
-| 6b   | Uploads DOCX/XLSX/PPTX/ODT/ODS/ODP/ODG/TXT/CSV/PDF              | File is accepted and classified as `document`; if no GPS/address exists it enters Issues  | `UploadService.validateFile()` + location-context gate |
-| 6c   | Document has no GPS and no parseable address                    | Item stays in Issues with status `Choose location or project`                             | issue kind `document_unresolved`                       |
-| 7    | Viewer attempts upload action                                   | Upload is denied by RLS; UI shows permission error feedback                               | Supabase policy deny                                   |
-| 9    | Active or queued jobs exist                                     | Shows segmented lane switch under Drop Zone                                               | `jobs().length > 0`                                    |
-| 10   | Switches segmented control to Queue (`uploading`)               | Lane list filters to upload pipeline jobs only                                            | `selectedLane = 'uploading'`                           |
-| 11   | Switches segmented control to Uploaded                          | Lane list filters to completed jobs                                                       | `selectedLane = 'uploaded'`                            |
-| 12   | Switches segmented control to Issues                            | Lane list filters to problematic jobs                                                     | `selectedLane = 'issues'`                              |
-| 13   | Clicks map-marker icon in Issues row (`missing_data`)           | Emits placement request to map shell                                                      | `placementRequested.emit(jobId)`                       |
-| 14   | Clicks row in Issues lane (`missing_data`)                      | Enters placement mode from map shell                                                      | `placementRequested.emit(jobId)`                       |
-| 15   | Clicks row in Uploaded lane with coords                         | Requests map zoom to uploaded media location                                              | `zoomToLocationRequested.emit({ imageId, lat, lng })`  |
-| 15a  | Opens uploaded row action menu                                  | Shows follow-up actions based on saved media state                                        | derived from `imageId`, `projectId`, coords            |
-| 15b  | Job has EXIF and textual address mismatch (>15m)                | Row remains uploaded but carries mismatch indicator for detail follow-up                  | location reconciliation state                          |
-| 15c  | Duplicate hash issue row shows secondary GPS button             | Clicking button opens/focuses the already placed existing media                           | duplicate target image reference                       |
-| 15d  | Duplicate hash issue detected                                   | Opens duplicate-resolution modal with `use existing`, `upload anyway`, `reject`           | Optional apply-to-batch checkbox                       |
-| 15e  | Address parser found unresolved address fragments               | Row shows subtle address-note indicator and links to detail evidence section              | No parsing info is dropped                             |
-| 15f  | Chooses `Add to project` on uploaded item                       | Opens add-to-project flow for the saved media item                                        | requires persisted `imageId`                           |
-| 15g  | Chooses `Prioritize` on uploaded item                           | Marks or queues the saved media item for prioritized follow-up                            | project/workflow integration                           |
-| 15h  | Chooses `Open in /media` on uploaded item                       | Navigates to `/media` and focuses or filters the persisted media item                     | router navigation with media context                   |
-| 15i  | Chooses `Open project` on uploaded item                         | Navigates to the bound project when the upload already belongs to one                     | only when `projectId` exists on job/media              |
-| 15j  | Chooses `Change location` on uploaded item                      | Opens suboptions for location correction                                                  | grouped action section in row context menu             |
-| 15j1 | Chooses `Click on map`                                          | Enters map-pick mode and persists clicked coordinates for the saved media item            | map banner + next map click commits coordinates        |
-| 15j2 | Chooses `Enter address`                                         | Opens taller address-finder overlay with search input and suggestions list                | suggestions render in vertical list under input        |
-| 15j3 | Hovers an address suggestion                                    | Shows preview pin on map at suggestion coordinates                                        | preview clears when hover ends or dialog closes        |
-| 15j4 | Selects an address suggestion                                   | Persists address + coordinates and refreshes marker position                              | same `resolve_media_location` contract                 |
-| 15k  | Chooses `Download` on uploaded item                             | Downloads the saved file via signed URL or download service                               | persisted storage path required                        |
-| 15l  | Chooses `Add to project` on document issue row                  | Binds the document to a project and moves it to Uploaded lane                             | project-bound document resolution path                 |
-| 15m  | Chooses `Place on map` or `Enter address` on document issue row | Persists location context and moves item to Uploaded lane                                 | same resolver contract as uploaded location edits      |
-| 16   | Clicks dismiss icon on terminal row                             | Removes row from queue/history                                                            | `UploadManagerService.dismissJob()`                    |
-| 17   | Switches into empty lane                                        | Lane stays selected even with zero items                                                  | `selectedLane` signal                                  |
-| 18   | Closes panel                                                    | Panel collapses; uploads continue in background                                           | Root service lifecycle                                 |
-| 19   | Uses compact map-overlay panel                                  | Per-row interactions are menu-first; no row-selection checkboxes are shown                | compact mode (`embeddedInPane = false`)                |
-| 20   | Uses embedded panel in Workspace Upload tab                     | Row-selection checkboxes appear on hover/focus for multi-select workflows                 | embedded mode (`embeddedInPane = true`)                |
-| 21   | Selects upload rows in embedded mode                            | Bottom toolbar appears with retry/download/remove/clear selection actions                 | `selectedUploadJobIds.size > 0`                        |
-| 22   | Uses bulk remove in embedded mode                               | Active jobs are cancelled; terminal jobs are dismissed from the list                      | `cancelJob` + `dismissJob` dispatch                    |
-| 23   | Opens 3-dot menu in any lane row                                | Bottom menu item is always destructive, separated by a divider                            | row action menu contract                               |
-| 24   | Uses destructive 3-dot action on active upload row              | Label is `Cancel upload`; operation cancels active/pending job                            | `UploadManagerService.cancelJob()`                     |
-| 25   | Uses destructive 3-dot action on uploaded row                   | Label is `Remove from project`; operation removes item from project context               | project-bound persisted media contract                 |
-| 26   | Uses destructive 3-dot action on issue/failed row               | Label is `Dismiss`; operation dismisses terminal issue row                                | `UploadManagerService.dismissJob()`                    |
-| 27   | Lane contains more than 5 rows                                  | List remains constrained to 5 visible rows and scrolls internally via transparent wrapper | lane overflow wrapper contract                         |
+| #    | User Action                                                     | System Response                                                                           | Triggers                                                   |
+| ---- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 1    | Clicks Upload Button                                            | Opens compact Upload Panel container                                                      | `uploadPanelOpen` signal                                   |
+| 2    | Drags files onto Drop Zone                                      | Creates upload jobs and starts pipeline (max 3 parallel)                                  | `UploadManagerService.submit()`                            |
+| 3    | Clicks Drop Zone                                                | Opens file picker with multi-select                                                       | Native file picker                                         |
+| 4    | Clicks Upload folder                                            | Starts folder scan then enqueues discovered files                                         | `UploadManagerService.submitFolder`                        |
+| 4a   | Browser does not support folder import                          | `Upload folder` control remains visible but disabled with explanatory tooltip/text        | capability guard + UX fallback                             |
+| 5    | Folder scan is running                                          | Shows scanning status line and disables folder action                                     | `activeBatch.status = 'scanning'`                          |
+| 5b   | Folder name contains parseable address                          | Uses folder address as default location hint for queued files                             | folder-title parser in upload pipeline                     |
+| 5c   | A file inside folder has its own parseable address              | File-level address overrides inherited folder address                                     | filename parser precedence                                 |
+| 6    | Clicks Take Photo                                               | Opens camera-capable file capture path and submits captured file                          | Native capture input                                       |
+| 6b   | Uploads DOCX/XLSX/PPTX/ODT/ODS/ODP/ODG/TXT/CSV/PDF              | File is accepted and classified as `document`; if no GPS/address exists it enters Issues  | `UploadService.validateFile()` + location-context gate     |
+| 6c   | Document has no GPS and no parseable address                    | Item stays in Issues with status `Choose location or project`                             | issue kind `document_unresolved`                           |
+| 7    | Viewer attempts upload action                                   | Upload is denied by RLS; UI shows permission error feedback                               | Supabase policy deny                                       |
+| 9    | Active or queued jobs exist                                     | Shows segmented lane switch under Drop Zone                                               | `jobs().length > 0`                                        |
+| 10   | Switches segmented control to Queue (`uploading`)               | Lane list filters to upload pipeline jobs only                                            | `selectedLane = 'uploading'`                               |
+| 11   | Switches segmented control to Uploaded                          | Lane list filters to completed jobs                                                       | `selectedLane = 'uploaded'`                                |
+| 12   | Switches segmented control to Issues                            | Lane list filters to problematic jobs                                                     | `selectedLane = 'issues'`                                  |
+| 13   | Clicks map-marker icon in Issues row (`missing_data`)           | Emits placement request to map shell                                                      | `placementRequested.emit(jobId)`                           |
+| 14   | Clicks row in Issues lane (`missing_data`)                      | Enters placement mode from map shell                                                      | `placementRequested.emit(jobId)`                           |
+| 15   | Clicks row in Uploaded lane with coords                         | Requests map zoom to uploaded media location                                              | `zoomToLocationRequested.emit({ imageId, lat, lng })`      |
+| 15a  | Opens uploaded row action menu                                  | Shows follow-up actions based on saved media state and workflow capability                | derived from `imageId`, `projectId`, coords, feature flags |
+| 15b  | Job has EXIF and textual address mismatch (>15m)                | Row remains uploaded but carries mismatch indicator for detail follow-up                  | location reconciliation state                              |
+| 15c  | Duplicate hash issue row shows secondary GPS button             | Clicking button opens/focuses the already placed existing media                           | duplicate target image reference                           |
+| 15d  | Duplicate hash issue detected                                   | Opens duplicate-resolution modal with `use existing`, `upload anyway`, `reject`           | Optional apply-to-batch checkbox                           |
+| 15e  | Address parser found unresolved address fragments               | Row shows subtle address-note indicator and links to detail evidence section              | No parsing info is dropped                                 |
+| 15f  | Chooses `Add to project` on uploaded item                       | Opens add-to-project flow for the saved media item                                        | requires persisted `imageId`                               |
+| 15g  | Chooses `Prioritize` on uploaded item                           | Marks or queues the saved media item for prioritized follow-up                            | project/workflow integration                               |
+| 15h  | Chooses `Open in /media` on uploaded item                       | Navigates to `/media` and focuses or filters the persisted media item                     | router navigation with media context                       |
+| 15i  | Chooses `Open project` on uploaded item                         | Navigates to the bound project when the upload already belongs to one                     | only when `projectId` exists on job/media                  |
+| 15j  | Chooses `Change location` on uploaded item                      | Opens suboptions for location correction                                                  | grouped action section in row context menu                 |
+| 15j1 | Chooses `Click on map`                                          | Enters map-pick mode and persists clicked coordinates for the saved media item            | map banner + next map click commits coordinates            |
+| 15j2 | Chooses `Enter address`                                         | Opens taller address-finder overlay with search input and suggestions list                | suggestions render in vertical list under input            |
+| 15j3 | Hovers an address suggestion                                    | Shows preview pin on map at suggestion coordinates                                        | preview clears when hover ends or dialog closes            |
+| 15j4 | Selects an address suggestion                                   | Persists address + coordinates and refreshes marker position                              | same `resolve_media_location` contract                     |
+| 15k  | Chooses `Download` on uploaded item                             | Downloads the saved file via signed URL or download service                               | persisted storage path required                            |
+| 15l  | Chooses `Add to project` on document issue row                  | Binds the document to a project and moves it to Uploaded lane                             | project-bound document resolution path                     |
+| 15m  | Chooses `Place on map` or `Enter address` on document issue row | Persists location context and moves item to Uploaded lane                                 | same resolver contract as uploaded location edits          |
+| 15n  | Opens 3-dot menu on issue row                                   | Shows only issue-kind-specific options plus one destructive final action                  | contract matrix by `issueKind`                             |
+| 16   | Clicks dismiss icon on terminal row                             | Removes row from queue/history                                                            | `UploadManagerService.dismissJob()`                        |
+| 17   | Switches into empty lane                                        | Lane stays selected even with zero items                                                  | `selectedLane` signal                                      |
+| 18   | Closes panel                                                    | Panel collapses; uploads continue in background                                           | Root service lifecycle                                     |
+| 19   | Uses compact map-overlay panel                                  | Per-row interactions are menu-first; no row-selection checkboxes are shown                | compact mode (`embeddedInPane = false`)                    |
+| 20   | Uses embedded panel in Workspace Upload tab                     | Row-selection checkboxes appear on hover/focus for multi-select workflows                 | embedded mode (`embeddedInPane = true`)                    |
+| 21   | Selects upload rows in embedded mode                            | Bottom toolbar appears with retry/download/remove/clear selection actions                 | `selectedUploadJobIds.size > 0`                            |
+| 22   | Uses bulk remove in embedded mode                               | Active jobs are cancelled; terminal jobs are dismissed from the list                      | `cancelJob` + `dismissJob` dispatch                        |
+| 23   | Opens 3-dot menu in any lane row                                | Bottom menu item is always destructive, separated by a divider                            | row action menu contract                                   |
+| 24   | Uses destructive 3-dot action on active upload row              | Label is `Cancel upload`; operation cancels active/pending job                            | `UploadManagerService.cancelJob()`                         |
+| 25   | Uses destructive 3-dot action on uploaded row                   | Label is `Remove from project`; operation removes item from project context               | project-bound persisted media contract                     |
+| 26   | Uses destructive 3-dot action on issue/failed row               | Label is `Dismiss`; operation dismisses terminal issue row                                | `UploadManagerService.dismissJob()`                        |
+| 27   | Lane contains more than 5 rows                                  | List remains constrained to 5 visible rows and scrolls internally via transparent wrapper | lane overflow wrapper contract                             |
 
 ## Lane Item Features
 
-| Lane        | Availability                                                                                     | Item Actions                                                                                                                                                     | Notes                                                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `uploading` | queued, parsing, validating, uploading, saving, enrichment                                       | `View progress`, `View file details`, `Cancel`                                                                                                                   | No navigation to saved media targets before persistence is complete                                                                                  |
-| `uploaded`  | persisted uploads and attachments with successful completion                                     | `Show on map`, `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Add to project`, `Prioritize`, `Download`, `Open project` | `Open project` only appears when a project is already bound by folder/project context; otherwise use `Add to project`                                |
-| `issues`    | duplicate-photo review, GPS/manual placement, unresolved documents, conflict review, hard errors | `Place on map`, `Enter address`, `Add to project`, `Retry`, `Upload anyway`, `Dismiss`, `Open existing media`                                                    | `document_unresolved` rows must offer `Place on map`, `Enter address`, or `Add to project`; `Upload anyway` is only valid for duplicate-photo review |
+| Lane                                       | Availability                                                 | Item Actions                                                                                                                                                 | Notes                                                                                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `uploading`                                | queued, parsing, validating, uploading, saving, enrichment   | `View progress`, `View file details`, `Cancel upload`                                                                                                        | No navigation to saved media targets before persistence is complete                                                                                        |
+| `uploaded`                                 | persisted uploads and attachments with successful completion | `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Add to project` or `Open project`, `Download`, optional `Prioritize` | Row click performs map focus only when coordinates exist; `Prioritize` appears only when prioritized-workflow capability is enabled in the current context |
+| `issues: duplicate_photo`                  | dedupe review                                                | `Open existing media`, `Upload anyway`, `Dismiss`                                                                                                            | `Upload anyway` only for duplicate-photo rows                                                                                                              |
+| `issues: missing_gps`                      | GPS/manual placement needed                                  | `Place on map`, `Retry`, `Dismiss`                                                                                                                           | `Retry` re-queues only when retry preconditions are met                                                                                                    |
+| `issues: document_unresolved`              | document without GPS/address                                 | `Place on map`, `Enter address`, `Add to project`, `Dismiss`                                                                                                 | `Add to project` resolves geospatially missing documents as project-bound artifacts                                                                        |
+| `issues: conflict_review` / `upload_error` | conflict or hard error                                       | `Retry`, `Dismiss`                                                                                                                                           | No force-upload actions in these issue kinds                                                                                                               |
 
 Row state rendering requirements:
 
@@ -191,17 +195,34 @@ Row state rendering requirements:
 - Row status text must update live as phase/statusLabel changes (including retry re-queue and upload progression).
 - `document_unresolved` issue rows show status text `Choose location or project` (or localized equivalent) until resolved.
 
+### Status Text Contract
+
+| Phase / Issue Kind                            | Required status text (English fallback)      | Lane        | Notes                                      |
+| --------------------------------------------- | -------------------------------------------- | ----------- | ------------------------------------------ |
+| `queued`                                      | `Queued`                                     | `uploading` | Initial queued and post-resolution requeue |
+| `validating`                                  | `Validating…`                                | `uploading` | File checks                                |
+| `parsing_exif` / `extracting_title`           | `Reading metadata…` / `Checking filename…`   | `uploading` | Metadata context build                     |
+| `hashing` / `dedup_check`                     | `Computing hash…` / `Checking duplicates…`   | `uploading` | Photo-only dedupe path                     |
+| `uploading` / `saving_record`                 | `Uploading…` / `Saving…`                     | `uploading` | Persist path                               |
+| `resolving_address` / `resolving_coordinates` | `Resolving address…` / `Resolving location…` | `uploading` | Enrichment path                            |
+| `awaiting_conflict_resolution`                | `Waiting for decision…`                      | `issues`    | Conflict review hold                       |
+| `missing_data` + `missing_gps`                | `Choose location`                            | `issues`    | Requires GPS/address placement             |
+| `missing_data` + `document_unresolved`        | `Choose location or project`                 | `issues`    | Resolvable by location or project binding  |
+| `skipped` + `duplicate_photo`                 | `Already uploaded`                           | `issues`    | Duplicate review entry                     |
+| `error`                                       | `Upload failed`                              | `issues`    | Retry path allowed when supported          |
+| `complete`                                    | `Uploaded`                                   | `uploaded`  | Terminal success                           |
+
 ### Media Item Menu Contract
 
-| Lane / Issue Kind                           | Non-destructive actions                                                                                                                          | Destructive action (last item) | Destructive styling       |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | ------------------------- |
-| `uploading`                                 | `View progress`, `View file details`                                                                                                             | `Cancel upload`                | danger text + danger icon |
-| `uploaded` (with project binding)           | `Show on map`, `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Open project`, `Prioritize`, `Download`   | `Remove from project`          | danger text + danger icon |
-| `uploaded` (without project binding)        | `Show on map`, `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Add to project`, `Prioritize`, `Download` | `Dismiss`                      | danger text + danger icon |
-| `issues: duplicate_photo`                   | `Open existing media`, `Upload anyway`                                                                                                           | `Dismiss`                      | danger text + danger icon |
-| `issues: missing_gps`                       | `Place on map`, `Retry`                                                                                                                          | `Dismiss`                      | danger text + danger icon |
-| `issues: document_unresolved`               | `Place on map`, `Enter address`, `Add to project`                                                                                                | `Dismiss`                      | danger text + danger icon |
-| `issues: conflict_review` or `upload_error` | `Retry`                                                                                                                                          | `Dismiss`                      | danger text + danger icon |
+| Lane / Issue Kind                           | Non-destructive actions                                                                                                                    | Destructive action (last item) | Destructive styling       |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | ------------------------- |
+| `uploading`                                 | `View progress`, `View file details`                                                                                                       | `Cancel upload`                | danger text + danger icon |
+| `uploaded` (with project binding)           | `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Open project`, optional `Prioritize`, `Download`   | `Remove from project`          | danger text + danger icon |
+| `uploaded` (without project binding)        | `Change location > Click on map`, `Change location > Enter address`, `Open in /media`, `Add to project`, optional `Prioritize`, `Download` | `Dismiss`                      | danger text + danger icon |
+| `issues: duplicate_photo`                   | `Open existing media`, `Upload anyway`                                                                                                     | `Dismiss`                      | danger text + danger icon |
+| `issues: missing_gps`                       | `Place on map`, `Retry`                                                                                                                    | `Dismiss`                      | danger text + danger icon |
+| `issues: document_unresolved`               | `Place on map`, `Enter address`, `Add to project`                                                                                          | `Dismiss`                      | danger text + danger icon |
+| `issues: conflict_review` or `upload_error` | `Retry`                                                                                                                                    | `Dismiss`                      | danger text + danger icon |
 
 ### Media Item Action Wiring (Mermaid)
 
@@ -307,7 +328,7 @@ flowchart TD
 flowchart LR
   A[Upload job] --> B{Lane}
   B -->|uploading| C[View progress<br/>View file details<br/>Cancel]
-  B -->|uploaded| D[Show on map<br/>Change location > Click on map<br/>Change location > Enter address<br/>Open in /media<br/>Add to project<br/>Prioritize<br/>Download]
+  B -->|uploaded| D[Row click: map focus when coords exist<br/>Change location > Click on map<br/>Change location > Enter address<br/>Open in /media<br/>Add/Open project<br/>Optional Prioritize<br/>Download]
   B -->|issues duplicate_photo| E[Upload anyway<br/>Open existing media<br/>Dismiss]
   B -->|issues missing_gps| F[Place on map<br/>Retry<br/>Dismiss]
   B -->|issues document_unresolved| H[Place on map<br/>Enter address<br/>Add to project<br/>Dismiss]
@@ -343,26 +364,26 @@ sequenceDiagram
   end
 ```
 
-| Field                   | Source                                      | Type                                                                                |
-| ----------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Upload jobs             | `UploadManagerService.jobs()`               | `Signal<UploadJob[]>`                                                               |
-| Active batch            | `UploadManagerService.activeBatch()`        | `Signal<UploadBatch \| null>`                                                       |
-| Folder address hint     | Upload pipeline folder-title parsing        | `string \| null`                                                                    |
-| Last completed batch    | `UploadPanelComponent.lastCompletedBatch()` | `Computed<UploadBatch \| null>`                                                     |
-| Lane buckets            | `UploadPanelComponent.laneBuckets()`        | `Computed<Record<UploadLane, UploadJob[]>>`                                         |
-| Lane counts             | `UploadPanelComponent.laneCounts()`         | `Computed<{ uploading:number; uploaded:number; issues:number }>`                    |
-| Selected lane items     | `UploadPanelComponent.laneJobs()`           | `Computed<UploadJob[]>`                                                             |
-| Selected upload rows    | `UploadPanelComponent.selectedUploadJobIds` | `WritableSignal<Set<string>>`                                                       |
-| Accepted MIME set       | `UploadService.validateFile()`              | Runtime validation                                                                  |
-| Document fallback badge | `documentFallbackLabel(job)`                | `string \| null`                                                                    |
-| Location mismatch flag  | Upload pipeline EXIF/text reconciliation    | `boolean`                                                                           |
-| Duplicate issue flag    | Upload pipeline dedupe decision flow        | `boolean`                                                                           |
-| Duplicate target image  | Duplicate detection payload                 | `string \| null`                                                                    |
-| Address parsing notes   | Upload parser residual fragments            | `string[]`                                                                          |
-| Thumbnail overlay state | Upload row presenter                        | `Computed<'none' \| 'spinner'>`                                                     |
-| Placement handoff       | `placementRequested` output                 | `jobId`                                                                             |
-| Item action set         | upload row presenter                        | `UploadItemAction[]`                                                                |
-| Issue kind              | upload lane mapping                         | `'duplicate_photo' \| 'missing_gps' \| 'conflict_review' \| 'upload_error' \| null` |
+| Field                   | Source                                      | Type                                                                                                         |
+| ----------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Upload jobs             | `UploadManagerService.jobs()`               | `Signal<UploadJob[]>`                                                                                        |
+| Active batch            | `UploadManagerService.activeBatch()`        | `Signal<UploadBatch \| null>`                                                                                |
+| Folder address hint     | Upload pipeline folder-title parsing        | `string \| null`                                                                                             |
+| Last completed batch    | `UploadPanelComponent.lastCompletedBatch()` | `Computed<UploadBatch \| null>`                                                                              |
+| Lane buckets            | `UploadPanelComponent.laneBuckets()`        | `Computed<Record<UploadLane, UploadJob[]>>`                                                                  |
+| Lane counts             | `UploadPanelComponent.laneCounts()`         | `Computed<{ uploading:number; uploaded:number; issues:number }>`                                             |
+| Selected lane items     | `UploadPanelComponent.laneJobs()`           | `Computed<UploadJob[]>`                                                                                      |
+| Selected upload rows    | `UploadPanelComponent.selectedUploadJobIds` | `WritableSignal<Set<string>>`                                                                                |
+| Accepted MIME set       | `UploadService.validateFile()`              | Runtime validation                                                                                           |
+| Document fallback badge | `documentFallbackLabel(job)`                | `string \| null`                                                                                             |
+| Location mismatch flag  | Upload pipeline EXIF/text reconciliation    | `boolean`                                                                                                    |
+| Duplicate issue flag    | Upload pipeline dedupe decision flow        | `boolean`                                                                                                    |
+| Duplicate target image  | Duplicate detection payload                 | `string \| null`                                                                                             |
+| Address parsing notes   | Upload parser residual fragments            | `string[]`                                                                                                   |
+| Thumbnail overlay state | Upload row presenter                        | `Computed<'none' \| 'spinner'>`                                                                              |
+| Placement handoff       | `placementRequested` output                 | `jobId`                                                                                                      |
+| Item action set         | upload row presenter                        | `UploadItemAction[]`                                                                                         |
+| Issue kind              | upload lane mapping                         | `'duplicate_photo' \| 'missing_gps' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` |
 
 ### Status Mapping (Mermaid)
 
@@ -393,7 +414,8 @@ stateDiagram-v2
   saving_record --> error
   resolving_address --> complete
   resolving_coordinates --> complete
-  missing_data --> queued: map placement provided
+  missing_data --> queued: map/address placement provided
+  missing_data --> queued: project binding provided (document_unresolved)
   queued --> error: timeout/failure
   error --> queued: retry
   complete --> [*]
@@ -409,6 +431,7 @@ flowchart LR
   A[Job phase] --> B{Issue kind?}
   B -->|duplicate_photo| C[Issues lane]
   B -->|missing_gps| C
+  B -->|document_unresolved| C
   B -->|conflict_review| C
   B -->|upload_error| C
   B -->|none| D{Phase family}
@@ -419,20 +442,20 @@ flowchart LR
 
 ## State
 
-| Name                            | Type                                                             | Default       | Controls                                                                    |
-| ------------------------------- | ---------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------- |
-| `isDragging`                    | `WritableSignal<boolean>`                                        | `false`       | Drop Zone hover treatment                                                   |
-| `selectedLane`                  | `WritableSignal<'uploading' \| 'uploaded' \| 'issues'>`          | `'uploading'` | Which lane list is visible                                                  |
-| `issueAttentionPulse`           | `WritableSignal<boolean>`                                        | `false`       | Temporary attention pulse on Issues lane button                             |
-| `scanningLabel`                 | `Computed<string \| null>`                                       | `null`        | Folder-scan feedback text                                                   |
-| `laneBuckets`                   | `Computed<Record<UploadLane, UploadJob[]>>`                      | empty buckets | Single source for list + tab counts                                         |
-| `laneCounts`                    | `Computed<{ uploading:number; uploaded:number; issues:number }>` | zeros         | Counts rendered in segmented tabs                                           |
-| `issueKind`                     | `Computed<UploadIssueKind \| null>`                              | `null`        | Determines row actions inside the Issues lane                               |
-| `availableActions`              | `Computed<UploadItemAction[]>`                                   | `[]`          | Per-row action menu in any lane                                             |
-| `thumbnailOverlayState`         | `Computed<'none' \| 'spinner'>`                                  | `'none'`      | Spinner overlay visibility for uploading/retrying rows                      |
-| `selectedUploadJobIds`          | `WritableSignal<Set<string>>`                                    | empty set     | Embedded-mode row selection for workspace bulk actions                      |
-| `laneViewportMaxRows`           | `number`                                                         | `5`           | Maximum simultaneously visible lane rows before internal scrolling          |
-| `useTransparentOverflowWrapper` | `boolean`                                                        | `true`        | Enables dedicated transparent, padding-free wrapper for lane scrolling only |
+| Name                            | Type                                                             | Default       | Controls                                                                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `isDragging`                    | `WritableSignal<boolean>`                                        | `false`       | Drop Zone hover treatment                                                                                                                  |
+| `selectedLane`                  | `WritableSignal<'uploading' \| 'uploaded' \| 'issues'>`          | `'uploading'` | Which lane list is visible                                                                                                                 |
+| `issueAttentionPulse`           | `WritableSignal<boolean>`                                        | `false`       | Temporary attention pulse on Issues lane button                                                                                            |
+| `scanningLabel`                 | `Computed<string \| null>`                                       | `null`        | Folder-scan feedback text                                                                                                                  |
+| `laneBuckets`                   | `Computed<Record<UploadLane, UploadJob[]>>`                      | empty buckets | Single source for list + tab counts                                                                                                        |
+| `laneCounts`                    | `Computed<{ uploading:number; uploaded:number; issues:number }>` | zeros         | Counts rendered in segmented tabs                                                                                                          |
+| `issueKind`                     | `Computed<UploadIssueKind \| null>`                              | `null`        | Determines row actions inside the Issues lane (`duplicate_photo`, `missing_gps`, `document_unresolved`, `conflict_review`, `upload_error`) |
+| `availableActions`              | `Computed<UploadItemAction[]>`                                   | `[]`          | Per-row action menu in any lane                                                                                                            |
+| `thumbnailOverlayState`         | `Computed<'none' \| 'spinner'>`                                  | `'none'`      | Spinner overlay visibility for uploading/retrying rows                                                                                     |
+| `selectedUploadJobIds`          | `WritableSignal<Set<string>>`                                    | empty set     | Embedded-mode row selection for workspace bulk actions                                                                                     |
+| `laneViewportMaxRows`           | `number`                                                         | `5`           | Maximum simultaneously visible lane rows before internal scrolling                                                                         |
+| `useTransparentOverflowWrapper` | `boolean`                                                        | `true`        | Enables dedicated transparent, padding-free wrapper for lane scrolling only                                                                |
 
 ## File Map
 
@@ -534,6 +557,9 @@ sequenceDiagram
 - [ ] `document_unresolved` rows show status text `Choose location or project` (localized fallback allowed).
 - [ ] `document_unresolved` row menu exposes exactly `Place on map`, `Enter address`, and `Add to project` before the destructive action.
 - [ ] Choosing `Place on map`, `Enter address`, or `Add to project` from `document_unresolved` resolves the item and moves it to Uploaded lane.
+- [ ] Issue-row menu visibility is strict by `issueKind` (no cross-kind leakage of actions).
+- [ ] Uploaded-row menu exposes `Prioritize` only when priority workflow capability is enabled.
+- [ ] Phase and issue status texts follow the status-text contract for every lane transition.
 - [ ] `Upload anyway` is available only for duplicate-photo issue rows, never for GPS issue rows
 - [ ] GPS issue rows expose placement-oriented actions instead of force-upload actions
 - [ ] `Retry` action in row menu is operational and re-queues eligible issue rows into uploading flow

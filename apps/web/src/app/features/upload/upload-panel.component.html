@@ -147,6 +147,7 @@
             [selected]="selectedUploadJobIds().has(job.id)"
             [documentFallbackLabel]="documentFallbackLabel(job)"
             [showOpenProject]="!!job.projectId"
+            [priorityEnabled]="priorityWorkflowEnabled()"
             [prioritized]="isJobPrioritized(job)"
             (requestPlacement)="requestPlacement(job.id, job.phase, $event.event)"
             (dismissFile)="dismissFile(job.id)"

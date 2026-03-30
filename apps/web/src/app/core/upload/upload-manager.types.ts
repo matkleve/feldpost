@@ -32,6 +32,13 @@ export type UploadPhase =
 
 export type UploadJobMode = 'new' | 'replace' | 'attach';
 
+export type UploadJobIssueKind =
+  | 'duplicate_photo'
+  | 'missing_gps'
+  | 'document_unresolved'
+  | 'conflict_review'
+  | 'upload_error';
+
 // ── Job ────────────────────────────────────────────────────────────────────────
 
 export interface UploadJob {
@@ -56,6 +63,8 @@ export interface UploadJob {
   contentHash?: string;
   /** If phase === 'skipped', the existing image ID that matched. */
   existingImageId?: string;
+  /** Optional UI issue classification derived by pipeline decisions. */
+  issueKind?: UploadJobIssueKind;
   /** Allows one explicit user-approved bypass of duplicate skip handling. */
   forceDuplicateUpload?: boolean;
 

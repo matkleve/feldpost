@@ -64,6 +64,7 @@ export class UploadPanelItemComponent {
   readonly selected = input<boolean>(false);
   readonly documentFallbackLabel = input<string | null>(null);
   readonly showOpenProject = input<boolean>(false);
+  readonly priorityEnabled = input<boolean>(false);
   readonly prioritized = input<boolean>(false);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
@@ -159,6 +160,10 @@ export class UploadPanelItemComponent {
           actions.push('open_existing_media');
         }
         actions.push('upload_anyway');
+      } else if (issueKind === 'document_unresolved') {
+        actions.push('place_on_map');
+        actions.push('change_location_address');
+        actions.push('add_to_project');
       } else if (issueKind === 'conflict_review' || issueKind === 'upload_error') {
         actions.push('retry');
       } else if (issueKind === 'missing_gps') {
@@ -177,7 +182,9 @@ export class UploadPanelItemComponent {
       }
       actions.push('open_in_media');
       actions.push('download');
-      actions.push('toggle_priority');
+      if (this.priorityEnabled()) {
+        actions.push('toggle_priority');
+      }
       actions.push('remove_from_project');
       return actions;
     }
@@ -261,6 +268,94 @@ export class UploadPanelItemComponent {
       default:
         return this.t('auto.0099.download', 'Download');
     }
+  }
+
+  statusLabelText(): string {
+    const job = this.job();
+    if (job.error) {
+      return job.error;
+    }
+
+    const issueKind = getIssueKind(job);
+    if (job.phase === 'missing_data') {
+      if (issueKind === 'document_unresolved') {
+        return this.t('upload.status.missingData.document', 'Choose location or project');
+      }
+      return this.t('upload.status.missingData.gps', 'Choose location');
+    }
+
+    if (job.phase === 'error') {
+      return this.t('upload.status.error', 'Upload failed');
+    }
+
+    if (job.phase === 'complete') {
+      return this.t('upload.status.complete', 'Uploaded');
+    }
+
+    if (job.phase === 'skipped') {
+      if (issueKind === 'duplicate_photo') {
+        return this.t('upload.status.skipped.duplicate', 'Already uploaded');
+      }
+      return this.t('upload.status.skipped', 'Skipped');
+    }
+
+    if (job.phase === 'queued') {
+      return this.t('upload.status.queued', 'Queued');
+    }
+
+    if (job.phase === 'validating') {
+      return this.t('upload.status.validating', 'Validating...');
+    }
+
+    if (job.phase === 'parsing_exif') {
+      return this.t('upload.status.parsingExif', 'Reading metadata...');
+    }
+
+    if (job.phase === 'converting_format') {
+      return this.t('upload.status.convertingFormat', 'Converting format...');
+    }
+
+    if (job.phase === 'extracting_title') {
+      return this.t('upload.status.extractingTitle', 'Checking filename...');
+    }
+
+    if (job.phase === 'hashing') {
+      return this.t('upload.status.hashing', 'Computing hash...');
+    }
+
+    if (job.phase === 'dedup_check') {
+      return this.t('upload.status.dedupCheck', 'Checking duplicates...');
+    }
+
+    if (job.phase === 'conflict_check') {
+      return this.t('upload.status.conflictCheck', 'Checking conflicts...');
+    }
+
+    if (job.phase === 'awaiting_conflict_resolution') {
+      return this.t('upload.status.awaitingConflictResolution', 'Waiting for decision...');
+    }
+
+    if (job.phase === 'uploading') {
+      return this.t('upload.status.uploading', 'Uploading...');
+    }
+
+    if (job.phase === 'saving_record') {
+      return this.t('upload.status.savingRecord', 'Saving...');
+    }
+
+    if (job.phase === 'replacing_record') {
+      return this.t('upload.status.replacingRecord', 'Updating record...');
+    }
+
+    if (job.phase === 'resolving_address') {
+      return this.t('upload.status.resolvingAddress', 'Resolving address...');
+    }
+
+    if (job.phase === 'resolving_coordinates') {
+      return this.t('upload.status.resolvingCoordinates', 'Resolving location...');
+    }
+
+    return job.statusLabel;
   }
 
   menuPanelClass(): string {

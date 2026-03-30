@@ -4,6 +4,7 @@ export type UploadLane = 'uploading' | 'uploaded' | 'issues';
 export type UploadIssueKind =
   | 'duplicate_photo'
   | 'missing_gps'
+  | 'document_unresolved'
   | 'conflict_review'
   | 'upload_error'
   | null;
@@ -44,11 +45,24 @@ export function getLaneForJob(job: UploadJob): UploadLane {
 }
 
 export function getIssueKind(job: UploadJob): UploadIssueKind {
+  if (job.issueKind) {
+    return job.issueKind;
+  }
+
   const statusText = (job.statusLabel ?? '').toLowerCase();
+  const looksLikeDocumentUnresolved =
+    statusText.includes('choose location or project') ||
+    statusText.includes('standort oder projekt') ||
+    statusText.includes('waehle standort oder projekt');
   const looksLikeLocationIssue =
+    statusText.includes('choose location') ||
     statusText.includes('missing location') ||
     statusText.includes('standort fehlt') ||
     statusText.includes('gps fehlt');
+
+  if (looksLikeDocumentUnresolved) {
+    return 'document_unresolved';
+  }
 
   if (job.phase === 'missing_data' || looksLikeLocationIssue) {
     return 'missing_gps';

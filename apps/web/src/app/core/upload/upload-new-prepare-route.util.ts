@@ -85,7 +85,10 @@ export async function routePreparedNewJob(
     ctx: PipelineContext,
   ) => Promise<void>,
 ): Promise<void> {
+  const isDocument = deps.uploadService.resolveMediaType(job.file) === 'document';
+
   if (job.coords) {
+    deps.jobState.updateJob(jobId, { issueKind: undefined });
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
     await runUploadPhase(jobId, job.coords, parsedExif, ctx);
@@ -95,14 +98,25 @@ export async function routePreparedNewJob(
   deps.jobState.setPhase(jobId, 'extracting_title');
   const titleAddress = deps.filenameParser.extractAddress(job.file.name);
   if (titleAddress) {
-    deps.jobState.updateJob(jobId, { titleAddress });
+    deps.jobState.updateJob(jobId, { titleAddress, issueKind: undefined });
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
     await runUploadPhase(jobId, undefined, parsedExif, ctx);
     return;
   }
 
+  // Documents can proceed without location when they are explicitly project-bound.
+  if (isDocument && !!job.projectId) {
+    deps.jobState.updateJob(jobId, { issueKind: undefined });
+    await runUploadPhase(jobId, undefined, parsedExif, ctx);
+    return;
+  }
+
   deps.jobState.setPhase(jobId, 'missing_data');
+  deps.jobState.updateJob(jobId, {
+    issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
+    statusLabel: isDocument ? 'Choose location or project' : 'Missing location',
+  });
   deps.queue.markDone(jobId);
   ctx.emitMissingData({
     jobId,

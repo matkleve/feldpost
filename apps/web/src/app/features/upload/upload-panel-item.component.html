@@ -94,11 +94,12 @@
         >
           @if (job().phase === 'complete' || job().phase === 'skipped') {
             <span class="material-icons upload-panel__success-indicator">check_circle</span>
+            <span>{{ statusLabelText() }}</span>
           } @else if (job().phase === 'missing_data') {
             <span class="material-icons" aria-hidden="true">location_off</span>
-            <span>{{ job().statusLabel }}</span>
+            <span>{{ statusLabelText() }}</span>
           } @else {
-            {{ job().error || job().statusLabel }}
+            {{ statusLabelText() }}
           }
         </p>
       </div>

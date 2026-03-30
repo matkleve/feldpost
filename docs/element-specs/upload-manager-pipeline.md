@@ -34,6 +34,7 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 | 8b  | Job media type is document without GPS and without address | Moves to issues as `document_unresolved`                                          | Status text: `Choose location or project`                                                                 |
 | 8c  | User resolves `document_unresolved` via project binding    | Continues upload as project-bound document and moves to Uploaded lane             | Project context can satisfy non-geospatial document uploads                                               |
 | 8d  | User resolves `document_unresolved` via map/address        | Persists location and continues upload to Uploaded lane                           | Uses same `resolve_media_location` contract                                                               |
+| 8e  | Issue row action menu is opened                            | Exposes only issue-kind-specific options plus one destructive final item          | no cross-kind action leakage                                                                              |
 | 9   | Duplicate hash found (photo/image)                         | Moves job to issues lane and opens duplicate-resolution modal                     | Not auto-skipped                                                                                          |
 | 10  | User clicks secondary GPS button in duplicate issue row    | Opens/focuses already placed existing media item                                  | Uses existing media reference                                                                             |
 | 11  | User resolves duplicate modal                              | Chooses `use_existing`, `upload_anyway`, or `reject`                              | Optional "apply to all in batch"                                                                          |
@@ -99,10 +100,7 @@ flowchart TD
   O -->|video| U[uploading then saving_record]
   O -->|document| O2{Has GPS or parseable address?}
   O2 -->|Yes| U
-  O2 -->|No| DOCI[set issueKind=document_unresolved]
-  DOCI --> DOCR{User resolves via location or project?}
-  DOCR -->|GPS/address| U
-  DOCR -->|Project binding| U
+  O2 -->|No| ZA[missing_data + issueKind=document_unresolved]
   P --> Q{Dedup match?}
   Q -->|Yes| R[set duplicate_issue and emit duplicateDetected$]
   R --> S[Open duplicate-resolution modal]
@@ -119,9 +117,12 @@ flowchart TD
   U --> V2{Needs enrichment?}
   V2 -->|coords| Y[resolving_address]
   V2 -->|title/folder address| Z[resolving_coordinates]
-  V2 -->|manual placement required| ZA[missing_data]
-  ZA --> ZB[placeJob sets queued]
+  V2 -->|manual placement required| ZA2[missing_data + issueKind=missing_gps]
+  ZA2 --> ZB[placeJob sets queued]
+  ZA --> ZB
+  ZA --> ZC[assignJobToProject sets queued]
   ZB --> J
+  ZC --> J
   Y --> AA[complete]
   Z --> AA
   U --> AA
@@ -148,6 +149,36 @@ flowchart TD
 | Conflict candidate     | `images` table lookup                 | `ConflictCandidate`                                                                                          | Photoless row near upload coords/address                                                                                                          |
 | Replace event          | `UploadManagerService.imageReplaced$` | `ImageReplacedEvent`                                                                                         | Drives map/detail/card refresh                                                                                                                    |
 | Attach event           | `UploadManagerService.imageAttached$` | `ImageAttachedEvent`                                                                                         | Upgrades photoless surfaces to media surfaces                                                                                                     |
+
+### Issue Kind Option Contract
+
+| Issue kind                         | Allowed non-destructive actions                             | Required destructive action |
+| ---------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| `duplicate_photo`                  | `open_existing_media`, `upload_anyway`                      | `dismiss`                   |
+| `missing_gps`                      | `place_on_map`, `retry`                                     | `dismiss`                   |
+| `document_unresolved`              | `place_on_map`, `change_location_address`, `add_to_project` | `dismiss`                   |
+| `conflict_review` / `upload_error` | `retry`                                                     | `dismiss`                   |
+
+### Status Label Contract
+
+| Pipeline state                         | Required statusLabel fallback |
+| -------------------------------------- | ----------------------------- |
+| `queued`                               | `Queued`                      |
+| `validating`                           | `Validating…`                 |
+| `parsing_exif`                         | `Reading EXIF…`               |
+| `extracting_title`                     | `Checking filename…`          |
+| `hashing`                              | `Computing hash…`             |
+| `dedup_check`                          | `Checking duplicates…`        |
+| `awaiting_conflict_resolution`         | `Waiting for decision…`       |
+| `uploading`                            | `Uploading…`                  |
+| `saving_record`                        | `Saving…`                     |
+| `resolving_address`                    | `Resolving address…`          |
+| `resolving_coordinates`                | `Resolving location…`         |
+| `missing_data` + `missing_gps`         | `Choose location`             |
+| `missing_data` + `document_unresolved` | `Choose location or project`  |
+| `skipped` + `duplicate_photo`          | `Already uploaded`            |
+| `error`                                | `Upload failed`               |
+| `complete`                             | `Uploaded`                    |
 
 ## State
 
@@ -304,6 +335,9 @@ sequenceDiagram
 - [ ] Documents with GPS or parseable textual address bypass hash dedupe and stay on normal upload path.
 - [ ] Documents without GPS and without parseable textual address enter issues as `document_unresolved` with status `Choose location or project`.
 - [ ] `document_unresolved` items can be resolved either by assigning a project or by setting GPS/address, then continue to Uploaded lane.
+- [ ] Issue actions are gated strictly by issue kind according to the issue-kind option contract.
+- [ ] `missing_data` for `document_unresolved` can be resolved by `assignJobToProject` in addition to location placement.
+- [ ] `statusLabel` fallback text matches the status-label contract for every pipeline state transition.
 - [ ] Duplicate-photo matches are surfaced as issues instead of being auto-skipped.
 - [ ] Duplicate issue row exposes a secondary GPS action that opens the existing placed media.
 - [ ] Duplicate-resolution modal supports `use_existing`, `upload_anyway`, and `reject` decisions.

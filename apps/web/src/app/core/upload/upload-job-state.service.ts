@@ -71,11 +71,11 @@ function phaseLabel(phase: UploadPhase): string {
     case 'resolving_coordinates':
       return 'Resolving location…';
     case 'missing_data':
-      return 'Missing location';
+      return 'Choose location';
     case 'complete':
       return 'Uploaded';
     case 'error':
-      return 'Failed';
+      return 'Upload failed';
   }
 }
 

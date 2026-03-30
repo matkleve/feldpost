@@ -20339,6 +20339,626 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.queued', 'Queued', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Queued', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.queued'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In Warteschlange', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.queued'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In coda', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.queued'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.validating', 'Validating...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Validating...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.validating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Validiere Datei...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.validating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Verifica file...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.validating'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.parsingExif', 'Reading metadata...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reading metadata...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.parsingExif'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Lese Metadaten...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.parsingExif'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Lettura metadati...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.parsingExif'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.convertingFormat', 'Converting format...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Converting format...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.convertingFormat'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Konvertiere Dateiformat...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.convertingFormat'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conversione formato...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.convertingFormat'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.extractingTitle', 'Checking filename...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Checking filename...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.extractingTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pruefe Dateiname...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.extractingTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Controllo nome file...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.extractingTitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.hashing', 'Computing hash...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Computing hash...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.hashing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Berechne Hash...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.hashing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Calcolo hash...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.hashing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.dedupCheck', 'Checking duplicates...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Checking duplicates...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.dedupCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pruefe Duplikate...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.dedupCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Controllo duplicati...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.dedupCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.conflictCheck', 'Checking conflicts...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Checking conflicts...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.conflictCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Pruefe Konflikte...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.conflictCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Controllo conflitti...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.conflictCheck'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.awaitingConflictResolution', 'Waiting for decision...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Waiting for decision...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.awaitingConflictResolution'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Warte auf Entscheidung...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.awaitingConflictResolution'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In attesa di decisione...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.awaitingConflictResolution'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.uploading', 'Uploading...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploading...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hochladen...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento in corso...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.uploading'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.savingRecord', 'Saving...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Saving...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.savingRecord'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Speichere Datensatz...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.savingRecord'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Salvataggio record...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.savingRecord'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.replacingRecord', 'Updating record...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Updating record...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.replacingRecord'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktualisiere Eintrag...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.replacingRecord'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiornamento record...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.replacingRecord'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.resolvingAddress', 'Resolving address...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolving address...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.resolvingAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ermittle Adresse...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.resolvingAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risoluzione indirizzo...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.resolvingAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.resolvingCoordinates', 'Resolving location...', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolving location...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.resolvingCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ermittle Standort...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.resolvingCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Risoluzione posizione...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.resolvingCoordinates'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.missingData.gps', 'Choose location', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.gps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort waehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.gps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.gps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.missingData.document', 'Choose location or project', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose location or project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.document'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort oder Projekt waehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.document'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli posizione o progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.missingData.document'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.skipped.duplicate', 'Already uploaded', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Already uploaded', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.skipped.duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bereits hochgeladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.skipped.duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Gia caricato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.skipped.duplicate'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.skipped', 'Skipped', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Skipped', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.skipped'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Uebersprungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.skipped'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Saltato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.skipped'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.error', 'Upload failed', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload failed', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Upload fehlgeschlagen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricamento non riuscito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.error'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.complete', 'Uploaded', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts method:statusLabelText')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Uploaded', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.complete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hochgeladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.complete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Caricato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.complete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.duplicate.dialog.title', 'Resolve duplicate upload', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

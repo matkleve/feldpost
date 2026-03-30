@@ -195,6 +195,7 @@ export class UploadPanelComponent {
   readonly hasAwaitingPlacement = this.signals.hasAwaitingPlacement;
   readonly showProgressBoard = this.signals.showProgressBoard;
   readonly isDragging = this.inputs.isDragging;
+  readonly priorityWorkflowEnabled = computed(() => this.embeddedInPane());
   readonly selectedLane = this.signals.selectedLane;
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
@@ -523,7 +524,8 @@ export class UploadPanelComponent {
     }
 
     if (event.action === 'place_on_map') {
-      if (getIssueKind(event.job) === 'missing_gps') {
+      const issueKind = getIssueKind(event.job);
+      if (issueKind === 'missing_gps' || issueKind === 'document_unresolved') {
         this.placementRequested.emit(event.job.id);
         return;
       }
@@ -623,7 +625,23 @@ export class UploadPanelComponent {
 
   async onLocationAddressSuggestionApply(suggestion: ForwardGeocodeResult): Promise<void> {
     const job = this.pendingLocationAddressJob();
-    if (!job?.imageId) {
+    if (!job) {
+      this.onLocationAddressDialogClose();
+      return;
+    }
+
+    if (!job.imageId && job.phase === 'missing_data') {
+      this.placeFile(job.id, { lat: suggestion.lat, lng: suggestion.lng });
+      this.toastService.show({
+        message: this.t('upload.location.update.success', 'Location updated.'),
+        type: 'success',
+        dedupe: true,
+      });
+      this.onLocationAddressDialogClose();
+      return;
+    }
+
+    if (!job.imageId) {
       this.onLocationAddressDialogClose();
       return;
     }
@@ -663,7 +681,24 @@ export class UploadPanelComponent {
       this.projectSelectionDialogOptions().find((option) => option.id === projectId) ?? null;
     this.mapProjectDialogService.confirmProjectSelection(this.projectDialogSignals, projectId);
 
-    if (!job?.imageId || !selected) {
+    if (!job || !selected) {
+      this.pendingProjectAssignmentJob.set(null);
+      return;
+    }
+
+    if (!job.imageId && job.phase === 'missing_data') {
+      this.uploadManager.assignJobToProject(job.id, projectId);
+      this.toastService.show({
+        message: this.mapProjectActionsService.formatProjectAssignmentSuccess(selected.name, 1),
+        type: 'success',
+        dedupe: true,
+      });
+      this.pendingProjectAssignmentJob.set(null);
+      this.selectedLane.set('uploading');
+      return;
+    }
+
+    if (!job.imageId) {
       this.pendingProjectAssignmentJob.set(null);
       return;
     }
@@ -739,7 +774,7 @@ export class UploadPanelComponent {
   }
 
   private async openProjectAssignmentForJob(job: UploadJob): Promise<void> {
-    if (!job.imageId) {
+    if (!job.imageId && job.phase !== 'missing_data') {
       return;
     }
 
@@ -937,7 +972,7 @@ export class UploadPanelComponent {
   }
 
   private openLocationAddressDialog(job: UploadJob): void {
-    if (!job.imageId) {
+    if (!job.imageId && job.phase !== 'missing_data') {
       return;
     }
 

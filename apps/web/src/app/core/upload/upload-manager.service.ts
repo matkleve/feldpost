@@ -360,6 +360,24 @@ export class UploadManagerService {
       phase: 'queued',
       statusLabel: phaseLabel('queued'),
       coords,
+      issueKind: undefined,
+    });
+    this.drainQueue();
+  }
+
+  /**
+   * Resolve a `missing_data` job by assigning it to a project context.
+   * Used by document uploads that can proceed as project-bound items.
+   */
+  assignJobToProject(jobId: string, projectId: string): void {
+    const job = this.jobState.findJob(jobId);
+    if (!job || job.phase !== 'missing_data') return;
+
+    this.jobState.updateJob(jobId, {
+      phase: 'queued',
+      statusLabel: phaseLabel('queued'),
+      projectId,
+      issueKind: undefined,
     });
     this.drainQueue();
   }
