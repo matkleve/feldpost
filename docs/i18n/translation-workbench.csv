@@ -80,10 +80,10 @@ auto.0095.dismiss_notification,Dismiss notification,apps/web/src/app/core/toast-
 auto.0096.district,District,apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal,District,Bezirk,Quartiere
 upload.item.menu.project.open,Open project,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Open project,Projekt oeffnen,Apri progetto
 upload.item.menu.project.unavailable,No project assigned.,apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message,No project assigned.,Kein Projekt zugewiesen.,Nessun progetto assegnato.
-upload.item.menu.priority.add,Prioritize,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Prioritize,Priorisieren,Dai priorita
-upload.item.menu.priority.remove,Remove priority,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Remove priority,Priorisierung entfernen,Rimuovi priorita
+upload.item.menu.priority.add,Prioritize,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Prioritize,Priorisieren,Assegna priorita
+upload.item.menu.priority.remove,Remove priority,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Remove priority,Prioritaet entfernen,Rimuovi priorita
 upload.item.menu.priority.addedToast,Upload prioritized.,apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message,Upload prioritized.,Upload priorisiert.,Caricamento prioritario impostato.
-upload.item.menu.priority.removedToast,Priority removed.,apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message,Priority removed.,Priorisierung entfernt.,Priorita rimossa.
+upload.item.menu.priority.removedToast,Priority removed.,apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts ts-prop:message,Priority removed.,Prioritaet entfernt.,Priorita rimossa.
 upload.item.menu.issue.openExisting,Open existing media,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Open existing media,Bestehendes Medium oeffnen,Apri media esistente
 upload.item.menu.issue.uploadAnyway,Upload anyway,apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.html interpolation-literal,Upload anyway,Trotzdem hochladen,Carica comunque
 auto.0098.done,Done,apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal,Done,Erledigt,Fatto
@@ -632,7 +632,7 @@ media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/ap
 media.page.loading.more,Loading more media...,apps/web/src/app/features/media/media.component.html text-node,Loading more media...,Weitere Medien werden geladen...,Caricamento di altri contenuti multimediali...
 nav.home,Home,apps/web/src/app/features/media/media-page-header.component.ts ts:content,Home,Startseite,Home
 upload.item.menu.section.location,Change location,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Change location,Standort aendern,Cambia posizione
-upload.item.menu.location.clickMap,Click on map,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Click on map,Karte anklicken,Clicca sulla mappa
+upload.item.menu.location.clickMap,Click on map,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Click on map,Auf Karte klicken,Clicca sulla mappa
 upload.item.menu.location.enterAddress,Enter address,apps/web/src/app/features/upload/upload-panel-item.component.html text-node,Enter address,Adresse eingeben,Inserisci indirizzo
 upload.location.update.failed,Location could not be updated.,apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message,Location could not be updated.,Standort konnte nicht aktualisiert werden.,Impossibile aggiornare la posizione.
 upload.location.update.success,Location updated.,apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message,Location updated.,Standort wurde aktualisiert.,Posizione aggiornata.
@@ -649,7 +649,7 @@ upload.panel.lane.issues,Issues,apps/web/src/app/features/upload/upload-panel.co
 upload.item.menu.uploading.viewProgress,View progress,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,View progress,Fortschritt anzeigen,Visualizza avanzamento
 upload.item.menu.uploading.viewFileDetails,View file details,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,View file details,Dateidetails anzeigen,Visualizza dettagli file
 upload.item.menu.openInMedia,Open in /media,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,Open in /media,In /media oeffnen,Apri in /media
-upload.item.menu.issue.placeOnMap,Place on map,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,Place on map,Auf Karte platzieren,Posiziona sulla mappa
+upload.item.menu.issue.placeOnMap,Place on map,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,Place on map,Auf der Karte platzieren,Posiziona sulla mappa
 upload.item.menu.destructive.cancelUpload,Cancel upload,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel destructive item,Cancel upload,Upload abbrechen,Annulla caricamento
 upload.item.menu.destructive.removeFromProject,Remove from project,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel destructive item,Remove from project,Aus Projekt entfernen,Rimuovi dal progetto
 upload.item.menu.destructive.dismiss,Dismiss,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel destructive item,Dismiss,Ausblenden,Ignora
@@ -681,4 +681,4 @@ upload.duplicate.dialog.applyToBatch,Apply to all matching items in this batch,a
 upload.duplicate.dialog.action.useExisting,Use existing,apps/web/src/app/features/upload/upload-panel.component.html text-node,Use existing,Bestehendes verwenden,Usa esistente
 upload.duplicate.dialog.action.uploadAnyway,Upload anyway,apps/web/src/app/features/upload/upload-panel.component.html text-node,Upload anyway,Trotzdem hochladen,Carica comunque
 upload.duplicate.dialog.action.reject,Reject,apps/web/src/app/features/upload/upload-panel.component.html text-node,Reject,Ablehnen,Rifiuta
-upload.folder.unsupported.hint,Folder upload is not supported in this browser.,apps/web/src/app/features/upload/upload-panel.component.html text-node and title attr,Folder upload is not supported in this browser.,Ordner-Upload wird in diesem Browser nicht unterstuetzt.,Il caricamento cartelle non e supportato in questo browser.
+upload.folder.unsupported.hint,Folder upload is not supported in this browser.,apps/web/src/app/features/upload/upload-panel.component.html text-node and title attr,Folder upload is not supported in this browser.,Ordner-Upload wird in diesem Browser nicht unterstuetzt.,Il caricamento di cartelle non e supportato in questo browser.

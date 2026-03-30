@@ -2537,7 +2537,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Dai priorita', 'published'
+select t.id, 'it', 'Assegna priorita', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.add'
 on conflict (app_text_id, lang) do update set
@@ -2560,7 +2560,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Priorisierung entfernen', 'published'
+select t.id, 'de', 'Prioritaet entfernen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.remove'
 on conflict (app_text_id, lang) do update set
@@ -2622,7 +2622,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Priorisierung entfernt.', 'published'
+select t.id, 'de', 'Prioritaet entfernt.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.priority.removedToast'
 on conflict (app_text_id, lang) do update set
@@ -19641,7 +19641,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Karte anklicken', 'published'
+select t.id, 'de', 'Auf Karte klicken', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.location.clickMap'
 on conflict (app_text_id, lang) do update set
@@ -20168,7 +20168,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auf Karte platzieren', 'published'
+select t.id, 'de', 'Auf der Karte platzieren', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.issue.placeOnMap'
 on conflict (app_text_id, lang) do update set
@@ -21168,7 +21168,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Il caricamento cartelle non e supportato in questo browser.', 'published'
+select t.id, 'it', 'Il caricamento di cartelle non e supportato in questo browser.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.folder.unsupported.hint'
 on conflict (app_text_id, lang) do update set
