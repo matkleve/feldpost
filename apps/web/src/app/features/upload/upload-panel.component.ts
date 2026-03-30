@@ -8,7 +8,7 @@
  *  - Component only bridges template events to services.
  */
 
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent, type UploadItemMenuAction } from './upload-panel-item.component';
 import type { ForwardGeocodeResult } from '../../core/geocoding.service';
@@ -28,10 +28,7 @@ import {
   type ZoomToLocationEvent,
 } from './upload-panel-row-handlers';
 import { documentFallbackLabel, trackByJobId } from './upload-panel-utils';
-import {
-  dropzoneLabelText,
-  isUploadLane,
-} from './upload-panel-helpers';
+import { dropzoneLabelText, isUploadLane } from './upload-panel-helpers';
 import {
   UiButtonDirective,
   UiInputControlDirective,
@@ -40,9 +37,7 @@ import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
-import {
-  SegmentedSwitchComponent,
-} from '../../shared/segmented-switch/segmented-switch.component';
+import { SegmentedSwitchComponent } from '../../shared/segmented-switch/segmented-switch.component';
 import type { UploadLane } from './upload-phase.helpers';
 import { DEFAULT_FILE_TYPE_CHIPS } from './upload-panel.constants';
 import {
@@ -51,6 +46,10 @@ import {
 } from './upload-panel-job-actions.service';
 import { UploadPanelBulkActionsService } from './upload-panel-bulk-actions.service';
 import { UploadPanelViewModelService } from './upload-panel-view-model.service';
+import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
+import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
+import { UploadPanelMenuActionRouterService } from './upload-panel-menu-action-router.service';
+import { UploadPanelRegistrationService } from './upload-panel-registration.service';
 import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
@@ -78,8 +77,12 @@ export type {
   providers: [
     UploadPanelDialogSignals,
     UploadPanelJobActionsService,
+    UploadPanelJobFileActionsService,
+    UploadPanelDialogActionsService,
+    UploadPanelMenuActionRouterService,
     UploadPanelBulkActionsService,
     UploadPanelViewModelService,
+    UploadPanelRegistrationService,
   ],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
@@ -96,6 +99,7 @@ export class UploadPanelComponent {
   private readonly jobActions = inject(UploadPanelJobActionsService);
   private readonly bulkActions = inject(UploadPanelBulkActionsService);
   private readonly viewModel = inject(UploadPanelViewModelService);
+  private readonly registration = inject(UploadPanelRegistrationService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   // Component I/O
@@ -157,92 +161,92 @@ export class UploadPanelComponent {
   readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
 
   constructor() {
-    effect(() => {
-      const jobs = this.uploadManager.jobs();
-      void jobs; // Track reactivity
-    });
-
-    effect(() => {
-      const existingIds = new Set(this.jobs().map((job) => job.id));
-      const selected = this.selectedUploadJobIds();
-      if (selected.size === 0) {
-        return;
-      }
-
-      const next = new Set<string>();
-      for (const id of selected) {
-        if (existingIds.has(id)) {
-          next.add(id);
-        }
-      }
-
-      if (next.size !== selected.size) {
-        this.selectedUploadJobIds.set(next);
-      }
-    });
-
     // Bridge component outputs to lifecycle service
     this.lifecycle.setImageUploadedCallback((event) => this.imageUploaded.emit(event));
     this.lifecycle.setPlacementRequestedCallback((jobId) => this.placementRequested.emit(jobId));
     this.lifecycle.setAutoSwitchCallback(() => this.lanes.setSelectedLane('issues'));
     this.lifecycle.initializeSubscriptions();
 
-    this.jobActions.register({
-      imageUploaded: (event) => this.imageUploaded.emit(event),
-      placementRequested: (jobId) => this.placementRequested.emit(jobId),
-      locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
-      locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),
-      locationPreviewCleared: () => this.locationPreviewCleared.emit(),
-      setLane: (lane) => this.selectedLane.set(lane),
-      selectedUploadJobIds: this.selectedUploadJobIds,
-      prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
-    });
-
-    this.viewModel.register({
-      t: this.t,
-      laneCounts: this.laneCounts,
-      effectiveLane: this.effectiveLane,
-      laneJobs: this.laneJobs,
-      issueAttentionPulse: this.issueAttentionPulse,
-      prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
+    this.registration.register({
+      uploadManagerJobs: this.uploadManager.jobs,
       jobs: this.jobs,
       selectedUploadJobIds: this.selectedUploadJobIds,
-      canZoomToJob: (job) => this.canZoomToJob(job),
-    });
-
-    this.bulkActions.register({
-      selectedUploadJobIds: this.selectedUploadJobIds,
-      selectedUploadJobs: () => this.selectedUploadJobs(),
-      setLane: (lane) => this.selectedLane.set(lane),
-      retryFile: (jobId) => this.retryFile(jobId),
-      dismissFile: (jobId) => this.dismissFile(jobId),
-      cancelJob: (jobId) => this.uploadManager.cancelJob(jobId),
-      canZoomToJob: (job) => this.canZoomToJob(job),
-      downloadUploadedJob: (job) => this.jobActions.downloadUploadedJob(job),
+      jobActions: {
+        imageUploaded: (event) => this.imageUploaded.emit(event),
+        placementRequested: (jobId) => this.placementRequested.emit(jobId),
+        locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
+        locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),
+        locationPreviewCleared: () => this.locationPreviewCleared.emit(),
+        setLane: (lane) => this.selectedLane.set(lane),
+        selectedUploadJobIds: this.selectedUploadJobIds,
+        prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
+      },
+      viewModel: {
+        t: this.t,
+        laneCounts: this.laneCounts,
+        effectiveLane: this.effectiveLane,
+        laneJobs: this.laneJobs,
+        issueAttentionPulse: this.issueAttentionPulse,
+        prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
+        jobs: this.jobs,
+        selectedUploadJobIds: this.selectedUploadJobIds,
+        canZoomToJob: (job) => this.canZoomToJob(job),
+      },
+      bulkActions: {
+        selectedUploadJobIds: this.selectedUploadJobIds,
+        selectedUploadJobs: () => this.selectedUploadJobs(),
+        setLane: (lane) => this.selectedLane.set(lane),
+        retryFile: (jobId) => this.retryFile(jobId),
+        dismissFile: (jobId) => this.dismissFile(jobId),
+        cancelJob: (jobId) => this.uploadManager.cancelJob(jobId),
+        canZoomToJob: (job) => this.canZoomToJob(job),
+        downloadUploadedJob: (job) => this.jobActions.downloadUploadedJob(job),
+      },
     });
   }
 
   // ── Input handlers (delegated to inputs service) ────────────────────────
 
-  onDragOver(event: DragEvent): void { this.inputs.onDragOver(event); }
-  onDragLeave(event: DragEvent): void { this.inputs.onDragLeave(event); }
+  onDragOver(event: DragEvent): void {
+    this.inputs.onDragOver(event);
+  }
+  onDragLeave(event: DragEvent): void {
+    this.inputs.onDragLeave(event);
+  }
   onDrop(event: DragEvent): void {
     this.inputs.onDrop(event);
     this.selectedLane.set('uploading');
   }
-  onFileInputChange(event: Event): void { this.inputs.onFileInputChange(event); this.selectedLane.set('uploading'); }
-  onCaptureInputChange(event: Event): void { this.inputs.onCaptureInputChange(event); this.selectedLane.set('uploading'); }
-  openFilePicker(input: HTMLInputElement): void { this.inputs.openFilePicker(input); }
-  openCapturePicker(event: MouseEvent, input: HTMLInputElement): void { this.inputs.openCapturePicker(event, input); }
-  onDropZoneKeydown(event: KeyboardEvent, input: HTMLInputElement): void { this.inputs.onDropZoneKeydown(event, input); }
+  onFileInputChange(event: Event): void {
+    this.inputs.onFileInputChange(event);
+    this.selectedLane.set('uploading');
+  }
+  onCaptureInputChange(event: Event): void {
+    this.inputs.onCaptureInputChange(event);
+    this.selectedLane.set('uploading');
+  }
+  openFilePicker(input: HTMLInputElement): void {
+    this.inputs.openFilePicker(input);
+  }
+  openCapturePicker(event: MouseEvent, input: HTMLInputElement): void {
+    this.inputs.openCapturePicker(event, input);
+  }
+  onDropZoneKeydown(event: KeyboardEvent, input: HTMLInputElement): void {
+    this.inputs.onDropZoneKeydown(event, input);
+  }
   async onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): Promise<void> {
     await this.inputs.onSelectFolder(event, folderInput);
   }
-  onFolderInputChange(event: Event): void { this.inputs.onFolderInputChange(event); this.selectedLane.set('uploading'); }
+  onFolderInputChange(event: Event): void {
+    this.inputs.onFolderInputChange(event);
+    this.selectedLane.set('uploading');
+  }
 
   // ── Lane handlers (delegated to lanes service) ──────────────────────────
 
-  setSelectedLane(lane: UploadLane): void { this.lanes.setSelectedLane(lane); }
+  setSelectedLane(lane: UploadLane): void {
+    this.lanes.setSelectedLane(lane);
+  }
 
   onLaneSwitchValueChange(value: string | null): void {
     if (!value || !isUploadLane(value)) {
@@ -261,8 +265,12 @@ export class UploadPanelComponent {
     this.placementRequested.emit(jobId);
   }
 
-  canZoomToJob(job: UploadJob): boolean { return this.rows.canZoomToJob(job); }
-  isRowInteractive(job: UploadJob): boolean { return this.rows.isRowInteractive(job); }
+  canZoomToJob(job: UploadJob): boolean {
+    return this.rows.canZoomToJob(job);
+  }
+  isRowInteractive(job: UploadJob): boolean {
+    return this.rows.isRowInteractive(job);
+  }
 
   onRowMainClick(job: UploadJob): void {
     if (job.phase === 'missing_data') {
@@ -284,7 +292,9 @@ export class UploadPanelComponent {
     this.onRowMainClick(job);
   }
 
-  placeFile(key: string, coords: ExifCoords): void { this.rows.placeFile(key, coords); }
+  placeFile(key: string, coords: ExifCoords): void {
+    this.rows.placeFile(key, coords);
+  }
   dismissFile(jobId: string): void {
     this.rows.dismissFile(jobId);
     this.selectedUploadJobIds.update((selected) => {
@@ -297,15 +307,25 @@ export class UploadPanelComponent {
       return next;
     });
   }
-  retryFile(jobId: string): void { this.rows.retryFile(jobId); }
+  retryFile(jobId: string): void {
+    this.rows.retryFile(jobId);
+  }
 
-  documentFallbackLabel(job: UploadJob): string | null { return documentFallbackLabel(job); }
+  documentFallbackLabel(job: UploadJob): string | null {
+    return documentFallbackLabel(job);
+  }
 
-  trackByJobId(idx: number, job: UploadJob): string { return trackByJobId(idx, job); }
+  trackByJobId(idx: number, job: UploadJob): string {
+    return trackByJobId(idx, job);
+  }
 
-  onRowSelectionChanged(event: { jobId: string; selected: boolean }): void { this.bulkActions.onRowSelectionChanged(event); }
+  onRowSelectionChanged(event: { jobId: string; selected: boolean }): void {
+    this.bulkActions.onRowSelectionChanged(event);
+  }
 
-  clearSelectedUploads(): void { this.bulkActions.clearSelectedUploads(); }
+  clearSelectedUploads(): void {
+    this.bulkActions.clearSelectedUploads();
+  }
 
   async retrySelectedUploads(): Promise<void> {
     await this.bulkActions.retrySelectedUploads();
@@ -319,31 +339,52 @@ export class UploadPanelComponent {
     this.bulkActions.removeSelectedUploads();
   }
 
-  async onMenuActionSelected(event: { job: UploadJob; action: UploadItemMenuAction }): Promise<void> { await this.jobActions.handleMenuAction(event.job, event.action); }
+  async onMenuActionSelected(event: {
+    job: UploadJob;
+    action: UploadItemMenuAction;
+  }): Promise<void> {
+    await this.jobActions.handleMenuAction(event.job, event.action);
+  }
 
-  isJobPrioritized(job: UploadJob): boolean { return this.prioritizedUploadedJobIds().has(job.id); }
+  isJobPrioritized(job: UploadJob): boolean {
+    return this.prioritizedUploadedJobIds().has(job.id);
+  }
 
-  onLocationAddressDialogQueryInput(query: string): void { this.jobActions.onLocationAddressDialogQueryInput(query); }
+  onLocationAddressDialogQueryInput(query: string): void {
+    this.jobActions.onLocationAddressDialogQueryInput(query);
+  }
 
-  onLocationAddressDialogClose(): void { this.jobActions.onLocationAddressDialogClose(); }
+  onLocationAddressDialogClose(): void {
+    this.jobActions.onLocationAddressDialogClose();
+  }
 
-  onLocationAddressSuggestionHover(suggestion: ForwardGeocodeResult): void { this.jobActions.onLocationAddressSuggestionHover(suggestion); }
+  onLocationAddressSuggestionHover(suggestion: ForwardGeocodeResult): void {
+    this.jobActions.onLocationAddressSuggestionHover(suggestion);
+  }
 
-  onLocationAddressSuggestionHoverEnd(): void { this.jobActions.onLocationAddressSuggestionHoverEnd(); }
+  onLocationAddressSuggestionHoverEnd(): void {
+    this.jobActions.onLocationAddressSuggestionHoverEnd();
+  }
 
   async onLocationAddressSuggestionApply(suggestion: ForwardGeocodeResult): Promise<void> {
     await this.jobActions.onLocationAddressSuggestionApply(suggestion);
   }
 
-  onProjectSelectionDialogSelected(projectId: string): void { this.jobActions.onProjectSelectionDialogSelected(projectId); }
+  onProjectSelectionDialogSelected(projectId: string): void {
+    this.jobActions.onProjectSelectionDialogSelected(projectId);
+  }
 
   async onProjectSelectionDialogConfirmed(projectId: string): Promise<void> {
     await this.jobActions.onProjectSelectionDialogConfirmed(projectId);
   }
 
-  onProjectSelectionDialogCancelled(): void { this.jobActions.onProjectSelectionDialogCancelled(); }
+  onProjectSelectionDialogCancelled(): void {
+    this.jobActions.onProjectSelectionDialogCancelled();
+  }
 
-  onDuplicateResolutionApplyToBatchChange(event: Event): void { this.jobActions.onDuplicateResolutionApplyToBatchChange(event); }
+  onDuplicateResolutionApplyToBatchChange(event: Event): void {
+    this.jobActions.onDuplicateResolutionApplyToBatchChange(event);
+  }
 
   async onDuplicateResolutionChoice(choice: DuplicateResolutionChoice): Promise<void> {
     await this.jobActions.onDuplicateResolutionChoice(choice);
