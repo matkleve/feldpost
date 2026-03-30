@@ -62,8 +62,14 @@ export class FolderScanService {
     '.csv',
   ]);
 
-  /** Whether the File System Access API is available (Chromium only). */
-  readonly isSupported = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+  /**
+   * Whether folder upload is available through either picker API:
+   * - File System Access API (`showDirectoryPicker`)
+   * - File input directory selection (`webkitdirectory`)
+   */
+  readonly isSupported =
+    typeof window !== 'undefined' &&
+    ('showDirectoryPicker' in window || 'webkitdirectory' in HTMLInputElement.prototype);
 
   /**
    * Recursively scan a directory for image files.

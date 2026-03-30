@@ -32,7 +32,10 @@
     >
       <span class="upload-panel__dropzone-icon material-icons" aria-hidden="true">upload_file</span>
       <p class="upload-panel__dropzone-label">
-        {{ t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here') }}
+        {{
+          t('upload.dropzone.label.dragAndDrop', 'Drag & drop files here') ||
+            'Drag & drop files here'
+        }}
       </p>
       <div class="upload-panel__file-type-chips" aria-hidden="true">
         @for (chip of fileTypeChips; track chip.type) {
@@ -63,12 +66,25 @@
         uiButton
         class="upload-panel__intake-btn upload-panel__intake-btn--folder"
         type="button"
-        [disabled]="scanning()"
+        [disabled]="scanning() || !folderImportSupported"
+        [attr.title]="
+          !folderImportSupported
+            ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
+            : null
+        "
         (click)="onSelectFolder($event, folderInput)"
       >
         <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
         Upload folder
       </button>
+
+      @if (!folderImportSupported) {
+        <p class="upload-panel__folder-unsupported-hint" role="note">
+          {{
+            t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
+          }}
+        </p>
+      }
 
       <button
         uiButton
@@ -261,6 +277,54 @@
           }
         </div>
       }
+    </section>
+  }
+
+  @if (duplicateResolutionDialogOpen()) {
+    <section
+      class="upload-panel__duplicate-dialog-overlay"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="t('upload.duplicate.dialog.title', 'Resolve duplicate upload')"
+    >
+      <div class="upload-panel__duplicate-dialog option-menu-surface">
+        <h4 class="upload-panel__duplicate-dialog-title">
+          {{ t('upload.duplicate.dialog.title', 'Resolve duplicate upload') }}
+        </h4>
+        <p class="upload-panel__duplicate-dialog-message">
+          {{
+            t('upload.duplicate.dialog.message', 'This file already exists. Choose how to proceed.')
+          }}
+        </p>
+
+        <label class="upload-panel__duplicate-dialog-batch">
+          <input
+            type="checkbox"
+            [checked]="duplicateResolutionApplyToBatch()"
+            (change)="onDuplicateResolutionApplyToBatchChange($event)"
+          />
+          <span>{{
+            t('upload.duplicate.dialog.applyToBatch', 'Apply to all matching items in this batch')
+          }}</span>
+        </label>
+
+        <div class="upload-panel__duplicate-dialog-actions">
+          <button uiButton type="button" (click)="onDuplicateResolutionChoice('use_existing')">
+            {{ t('upload.duplicate.dialog.action.useExisting', 'Use existing') }}
+          </button>
+          <button uiButton type="button" (click)="onDuplicateResolutionChoice('upload_anyway')">
+            {{ t('upload.duplicate.dialog.action.uploadAnyway', 'Upload anyway') }}
+          </button>
+          <button
+            uiButton
+            uiButtonGhost
+            type="button"
+            (click)="onDuplicateResolutionChoice('reject')"
+          >
+            {{ t('upload.duplicate.dialog.action.reject', 'Reject') }}
+          </button>
+        </div>
+      </div>
     </section>
   }
 

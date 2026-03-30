@@ -1,6 +1,6 @@
 ﻿<li class="upload-panel__file-item upload-panel__file-item--{{ phaseToStatusClass(job().phase) }}">
   <div
-    class="upload-panel__file-main"
+    class="upload-panel__file-main ui-item"
     [class.upload-panel__file-main--interactive]="interactive()"
     [class.upload-panel__file-main--has-menu]="hasMenuActions()"
     [class.upload-panel__file-main--selectable]="selectable()"
@@ -30,7 +30,7 @@
       </label>
     }
 
-    <div class="upload-panel__thumbnail-container">
+    <div class="upload-panel__thumbnail-container ui-item-media">
       <div class="upload-panel__thumbnail-helper">
         <app-universal-media
           class="upload-panel__universal-media"
@@ -46,22 +46,31 @@
           [altText]="job().file.name"
         ></app-universal-media>
       </div>
-      @if (job().thumbnailUrl) {
+      @if (showThumbnailSpinner()) {
+        <div
+          class="upload-panel__thumbnail-spinner"
+          role="status"
+          [attr.aria-label]="t('upload.trigger.status.uploading', 'Uploading...')"
+        ></div>
+      }
+      @if (showDuplicateExistingMediaShortcut()) {
         <button
           uiButton
           uiButtonPrimary
           uiButtonIconOnly
+          uiButtonSizeSm
           type="button"
-          tabindex="-1"
-          aria-hidden="true"
-          class="upload-panel__thumbnail-action-btn"
+          class="upload-panel__thumbnail-action-btn upload-panel__thumbnail-action-btn--interactive"
+          [attr.aria-label]="t('upload.item.menu.issue.openExisting', 'Open existing media')"
+          [attr.title]="t('upload.item.menu.issue.openExisting', 'Open existing media')"
+          (click)="onOpenExistingMediaShortcut($event)"
         >
           <span class="material-icons" aria-hidden="true">my_location</span>
         </button>
       }
     </div>
 
-    <div class="upload-panel__file-meta">
+    <div class="upload-panel__file-meta ui-item-label">
       <div class="upload-panel__name-row">
         <span class="upload-panel__file-name" [title]="job().file.name" aria-label="File name">{{
           job().file.name
@@ -81,6 +90,7 @@
           class="upload-panel__file-status upload-panel__file-status--{{
             phaseToStatusClass(job().phase)
           }}"
+          [attr.aria-live]="showThumbnailSpinner() ? 'polite' : null"
         >
           @if (job().phase === 'complete' || job().phase === 'skipped') {
             <span class="material-icons upload-panel__success-indicator">check_circle</span>
@@ -98,6 +108,7 @@
       uiButton
       uiButtonGhost
       uiButtonIconOnly
+      uiButtonSizeSm
       class="upload-panel__row-action upload-panel__row-action--menu"
       type="button"
       [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
@@ -123,60 +134,23 @@
         [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
       >
         @for (action of availableMenuActions(); track action) {
-          @if (action === 'dismiss') {
+          @if (isDestructiveAction(action)) {
             <div class="dd-divider" aria-hidden="true"></div>
           }
-          <button class="dd-item" type="button" role="menuitem" (click)="onMenuAction(action)">
-            <span class="material-icons dd-item__icon" aria-hidden="true">
-              {{
-                action === 'open_in_media'
-                  ? 'open_in_new'
-                  : action === 'open_existing_media'
-                    ? 'open_in_new'
-                    : action === 'upload_anyway'
-                      ? 'publish'
-                      : action === 'open_project'
-                        ? 'folder'
-                        : action === 'toggle_priority'
-                          ? 'priority_high'
-                          : action === 'add_to_project'
-                            ? 'folder_open'
-                            : action === 'change_location_map'
-                              ? 'pin_drop'
-                              : action === 'change_location_address'
-                                ? 'search'
-                                : action === 'dismiss'
-                                  ? 'close'
-                                  : 'download'
-              }}
-            </span>
-            <span class="dd-item__label">
-              {{
-                action === 'open_in_media'
-                  ? t('auto.0089.details_oeffnen', 'Details oeffnen')
-                  : action === 'open_existing_media'
-                    ? t('upload.item.menu.issue.openExisting', 'Open existing media')
-                    : action === 'upload_anyway'
-                      ? t('upload.item.menu.issue.uploadAnyway', 'Upload anyway')
-                      : action === 'open_project'
-                        ? t('upload.item.menu.project.open', 'Open project')
-                        : action === 'toggle_priority'
-                          ? prioritized()
-                            ? t('upload.item.menu.priority.remove', 'Remove priority')
-                            : t('upload.item.menu.priority.add', 'Prioritize')
-                          : action === 'add_to_project'
-                            ? t('auto.0013.add_to_project', 'Add to project')
-                            : action === 'change_location_map'
-                              ? t('upload.item.menu.location.clickMap', 'Change GPS')
-                              : action === 'change_location_address'
-                                ? t('upload.item.menu.location.enterAddress', 'Change Address')
-                                : action === 'dismiss'
-                                  ? isUploading()
-                                    ? t('upload.item.menu.stop', 'Stop uploading')
-                                    : t('upload.item.menu.dismiss', 'Remove from list')
-                                  : t('auto.0099.download', 'Download')
-              }}
-            </span>
+          <button
+            class="dd-item"
+            [class.dd-item--danger]="isDestructiveAction(action)"
+            type="button"
+            role="menuitem"
+            (click)="onMenuAction(action)"
+          >
+            <span
+              class="material-icons dd-item__icon"
+              [class.dd-item__icon--danger]="isDestructiveAction(action)"
+              aria-hidden="true"
+              >{{ actionIcon(action) }}</span
+            >
+            <span class="dd-item__label">{{ actionLabel(action) }}</span>
           </button>
         }
       </div>

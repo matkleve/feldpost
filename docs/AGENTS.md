@@ -5,6 +5,7 @@
 - Every UI element has a spec in `element-specs/` — this is the **implementation contract**
 - Specs are the source of truth: code must match spec, not the other way around
 - Update specs **before** modifying features
+- When user feedback changes behavior expectations, update the relevant spec sections immediately in the same session (Actions, Mermaids, Wiring/Data, Acceptance Criteria)
 - Follow the template in `agent-workflows/element-spec-format.md`
 
 ## Glossary

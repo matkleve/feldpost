@@ -48,3 +48,11 @@ For every UI text introduced or changed in components/templates:
 - Ensure translation extraction includes inline templates as well as `.html` templates.
 - Regenerate SQL via `node scripts/import-i18n-csv-to-sql.mjs` and include `supabase/seed_i18n.sql` in the same change.
 - Treat `app_texts` / `app_text_translations` data as required feature output, not optional cleanup.
+
+## Feedback-to-Spec Sync Requirement
+
+When user feedback changes feature behavior or UX expectations:
+
+- Update the relevant `docs/element-specs/*.md` spec entries first in the same session.
+- Reflect the change in Actions, Wiring/Data sections, and Acceptance Criteria as needed.
+- Keep implementation and spec synchronized; do not ship behavior changes without matching spec updates.

@@ -20,6 +20,8 @@ const UPLOAD_ITEM_MENU_WIDTH = 224;
 const UPLOAD_ITEM_MENU_OFFSET_Y = 4;
 
 export type UploadItemMenuAction =
+  | 'view_progress'
+  | 'view_file_details'
   | 'add_to_project'
   | 'download'
   | 'open_in_media'
@@ -27,8 +29,12 @@ export type UploadItemMenuAction =
   | 'toggle_priority'
   | 'open_existing_media'
   | 'upload_anyway'
+  | 'place_on_map'
+  | 'retry'
   | 'change_location_map'
   | 'change_location_address'
+  | 'cancel_upload'
+  | 'remove_from_project'
   | 'dismiss';
 
 @Component({
@@ -71,6 +77,11 @@ export class UploadPanelItemComponent {
   readonly menuOpen = signal(false);
   readonly menuPosition = signal<{ x: number; y: number } | null>(null);
   readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
+  readonly showDuplicateExistingMediaShortcut = computed(() => {
+    const job = this.job();
+    return getIssueKind(job) === 'duplicate_photo' && !!job.existingImageId;
+  });
+  readonly showThumbnailSpinner = computed(() => this.showsUploadOverlay(this.job().phase));
 
   // Media renderer state
   readonly fileIdentity = (): { mimeType: string; fileName: string } => ({
@@ -134,6 +145,13 @@ export class UploadPanelItemComponent {
     const lane = getLaneForJob(job);
     let actions: UploadItemMenuAction[] = [];
 
+    if (lane === 'uploading') {
+      actions.push('view_progress');
+      actions.push('view_file_details');
+      actions.push('cancel_upload');
+      return actions;
+    }
+
     if (lane === 'issues') {
       const issueKind = getIssueKind(job);
       if (issueKind === 'duplicate_photo') {
@@ -141,25 +159,108 @@ export class UploadPanelItemComponent {
           actions.push('open_existing_media');
         }
         actions.push('upload_anyway');
+      } else if (issueKind === 'conflict_review' || issueKind === 'upload_error') {
+        actions.push('retry');
       } else if (issueKind === 'missing_gps') {
-        actions.push('change_location_map');
-        actions.push('change_location_address');
+        actions.push('place_on_map');
+        actions.push('retry');
       }
+      actions.push('dismiss');
+      return actions;
     } else if (lane === 'uploaded' && job.imageId) {
       actions.push('change_location_map');
       actions.push('change_location_address');
       if (this.showOpenProject()) {
         actions.push('open_project');
+      } else {
+        actions.push('add_to_project');
       }
-      actions.push('add_to_project');
       actions.push('open_in_media');
       actions.push('download');
       actions.push('toggle_priority');
+      actions.push('remove_from_project');
+      return actions;
     }
 
     actions.push('dismiss');
 
     return actions;
+  }
+
+  isDestructiveAction(action: UploadItemMenuAction): boolean {
+    return action === 'cancel_upload' || action === 'remove_from_project' || action === 'dismiss';
+  }
+
+  actionIcon(action: UploadItemMenuAction): string {
+    switch (action) {
+      case 'open_in_media':
+      case 'open_existing_media':
+      case 'view_file_details':
+        return 'open_in_new';
+      case 'upload_anyway':
+        return 'publish';
+      case 'open_project':
+      case 'add_to_project':
+        return 'folder_open';
+      case 'toggle_priority':
+        return 'priority_high';
+      case 'change_location_map':
+      case 'place_on_map':
+        return 'pin_drop';
+      case 'change_location_address':
+        return 'search';
+      case 'retry':
+        return 'refresh';
+      case 'view_progress':
+        return 'query_stats';
+      case 'cancel_upload':
+      case 'remove_from_project':
+      case 'dismiss':
+        return 'delete';
+      case 'download':
+      default:
+        return 'download';
+    }
+  }
+
+  actionLabel(action: UploadItemMenuAction): string {
+    switch (action) {
+      case 'view_progress':
+        return this.t('upload.item.menu.uploading.viewProgress', 'View progress');
+      case 'view_file_details':
+        return this.t('upload.item.menu.uploading.viewFileDetails', 'View file details');
+      case 'open_in_media':
+        return this.t('upload.item.menu.openInMedia', 'Open in /media');
+      case 'open_existing_media':
+        return this.t('upload.item.menu.issue.openExisting', 'Open existing media');
+      case 'upload_anyway':
+        return this.t('upload.item.menu.issue.uploadAnyway', 'Upload anyway');
+      case 'open_project':
+        return this.t('upload.item.menu.project.open', 'Open project');
+      case 'toggle_priority':
+        return this.prioritized()
+          ? this.t('upload.item.menu.priority.remove', 'Remove priority')
+          : this.t('upload.item.menu.priority.add', 'Prioritize');
+      case 'add_to_project':
+        return this.t('auto.0013.add_to_project', 'Add to project');
+      case 'change_location_map':
+        return this.t('upload.item.menu.location.clickMap', 'Click on map');
+      case 'change_location_address':
+        return this.t('upload.item.menu.location.enterAddress', 'Enter address');
+      case 'place_on_map':
+        return this.t('upload.item.menu.issue.placeOnMap', 'Place on map');
+      case 'retry':
+        return this.t('projects.page.error.retry', 'Retry');
+      case 'cancel_upload':
+        return this.t('upload.item.menu.destructive.cancelUpload', 'Cancel upload');
+      case 'remove_from_project':
+        return this.t('upload.item.menu.destructive.removeFromProject', 'Remove from project');
+      case 'dismiss':
+        return this.t('upload.item.menu.destructive.dismiss', 'Dismiss');
+      case 'download':
+      default:
+        return this.t('auto.0099.download', 'Download');
+    }
   }
 
   menuPanelClass(): string {
@@ -193,8 +294,8 @@ export class UploadPanelItemComponent {
       const menuHeight = this.availableMenuActions().length * 44 + 48; // rough estimate
       this.menuPosition.set(
         this.clampMenuPosition(
-          rect.right - 240, // width 240
-          rect.top - menuHeight - 4, // open upwards
+          rect.right - UPLOAD_ITEM_MENU_WIDTH,
+          rect.top - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y,
           menuHeight,
         ),
       );
@@ -210,11 +311,13 @@ export class UploadPanelItemComponent {
 
   onMenuAction(action: UploadItemMenuAction): void {
     this.menuOpen.set(false);
-    if (action === 'dismiss') {
-      this.dismissFile.emit(this.job().id);
-    } else {
-      this.menuActionSelected.emit({ job: this.job(), action });
-    }
+    this.menuActionSelected.emit({ job: this.job(), action });
+  }
+
+  onOpenExistingMediaShortcut(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.menuActionSelected.emit({ job: this.job(), action: 'open_existing_media' });
   }
 
   onRequestPlacement(event: MouseEvent): void {
@@ -301,7 +404,7 @@ export class UploadPanelItemComponent {
       return { x, y };
     }
 
-    const menuWidth = 240;
+    const menuWidth = UPLOAD_ITEM_MENU_WIDTH;
     const margin = 8;
     return {
       x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),

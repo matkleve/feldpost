@@ -55,6 +55,7 @@ import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,
 } from '../../shared/segmented-switch/segmented-switch.component';
+import { getIssueKind } from './upload-phase.helpers';
 
 export interface ImageUploadedEvent {
   id: string;
@@ -80,6 +81,8 @@ type UploadFileTypeChip = {
   variant: ChipVariant;
   order: number;
 };
+
+type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
 
 const UPLOAD_LANES = ['uploading', 'uploaded', 'issues'] as const;
 
@@ -279,9 +282,12 @@ export class UploadPanelComponent {
   readonly locationAddressDialogQuery = signal('');
   readonly locationAddressDialogLoading = signal(false);
   readonly locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
+  readonly duplicateResolutionDialogOpen = signal(false);
+  readonly duplicateResolutionApplyToBatch = signal(false);
 
   private pendingProjectAssignmentJob = signal<UploadJob | null>(null);
   private pendingLocationAddressJob = signal<UploadJob | null>(null);
+  private pendingDuplicateResolutionJob = signal<UploadJob | null>(null);
   private locationAddressSearchTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly projectDialogSignals = {
     projectSelectionDialogOpen: this.projectSelectionDialogOpen,
@@ -492,13 +498,46 @@ export class UploadPanelComponent {
     job: UploadJob;
     action: UploadItemMenuAction;
   }): Promise<void> {
+    if (event.action === 'view_progress' || event.action === 'view_file_details') {
+      this.toastService.show({
+        message: event.job.statusLabel,
+        type: 'info',
+        dedupe: true,
+      });
+      return;
+    }
+
     if (event.action === 'open_existing_media') {
       await this.openExistingDuplicateInMedia(event.job);
       return;
     }
 
     if (event.action === 'upload_anyway') {
-      this.uploadManager.forceDuplicateUpload(event.job.id);
+      this.openDuplicateResolutionDialog(event.job);
+      return;
+    }
+
+    if (event.action === 'change_location_map') {
+      this.requestLocationPickOnMap(event.job);
+      return;
+    }
+
+    if (event.action === 'place_on_map') {
+      if (getIssueKind(event.job) === 'missing_gps') {
+        this.placementRequested.emit(event.job.id);
+        return;
+      }
+      this.requestLocationPickOnMap(event.job);
+      return;
+    }
+
+    if (event.action === 'change_location_address') {
+      this.openLocationAddressDialog(event.job);
+      return;
+    }
+
+    if (event.action === 'retry') {
+      this.retryFile(event.job.id);
       this.selectedLane.set('uploading');
       return;
     }
@@ -523,13 +562,18 @@ export class UploadPanelComponent {
       return;
     }
 
-    if (event.action === 'change_location_map') {
-      this.requestLocationPickOnMap(event.job);
+    if (event.action === 'cancel_upload') {
+      this.uploadManager.cancelJob(event.job.id);
       return;
     }
 
-    if (event.action === 'change_location_address') {
-      this.openLocationAddressDialog(event.job);
+    if (event.action === 'remove_from_project') {
+      await this.removeUploadedJobFromProject(event.job);
+      return;
+    }
+
+    if (event.action === 'dismiss') {
+      this.dismissFile(event.job.id);
       return;
     }
 
@@ -650,6 +694,50 @@ export class UploadPanelComponent {
     this.pendingProjectAssignmentJob.set(null);
   }
 
+  onDuplicateResolutionApplyToBatchChange(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+    this.duplicateResolutionApplyToBatch.set(target.checked);
+  }
+
+  async onDuplicateResolutionChoice(choice: DuplicateResolutionChoice): Promise<void> {
+    const job = this.pendingDuplicateResolutionJob();
+    if (!job) {
+      this.closeDuplicateResolutionDialog();
+      return;
+    }
+
+    const jobs = this.resolveDuplicateResolutionTargets(
+      job,
+      this.duplicateResolutionApplyToBatch(),
+    );
+
+    if (choice === 'upload_anyway') {
+      for (const entry of jobs) {
+        this.uploadManager.forceDuplicateUpload(entry.id);
+      }
+      this.selectedLane.set('uploading');
+      this.closeDuplicateResolutionDialog();
+      return;
+    }
+
+    if (choice === 'use_existing') {
+      await this.openExistingDuplicateInMedia(job);
+      for (const entry of jobs) {
+        this.dismissFile(entry.id);
+      }
+      this.closeDuplicateResolutionDialog();
+      return;
+    }
+
+    for (const entry of jobs) {
+      this.dismissFile(entry.id);
+    }
+    this.closeDuplicateResolutionDialog();
+  }
+
   private async openProjectAssignmentForJob(job: UploadJob): Promise<void> {
     if (!job.imageId) {
       return;
@@ -673,6 +761,31 @@ export class UploadPanelComponent {
       optionsResult.options,
       this.t('auto.0013.add_to_project', 'Add to project'),
       job.file.name,
+    );
+  }
+
+  private openDuplicateResolutionDialog(job: UploadJob): void {
+    this.pendingDuplicateResolutionJob.set(job);
+    this.duplicateResolutionApplyToBatch.set(false);
+    this.duplicateResolutionDialogOpen.set(true);
+  }
+
+  private closeDuplicateResolutionDialog(): void {
+    this.pendingDuplicateResolutionJob.set(null);
+    this.duplicateResolutionApplyToBatch.set(false);
+    this.duplicateResolutionDialogOpen.set(false);
+  }
+
+  private resolveDuplicateResolutionTargets(
+    seed: UploadJob,
+    applyToBatch: boolean,
+  ): ReadonlyArray<UploadJob> {
+    if (!applyToBatch || !seed.existingImageId) {
+      return [seed];
+    }
+
+    return this.jobs().filter(
+      (job) => job.phase === 'skipped' && job.existingImageId === seed.existingImageId,
     );
   }
 
@@ -747,6 +860,34 @@ export class UploadPanelComponent {
     }
 
     await this.router.navigate(['/projects', job.projectId]);
+  }
+
+  private async removeUploadedJobFromProject(job: UploadJob): Promise<void> {
+    if (!job.imageId || !job.projectId) {
+      this.toastService.show({
+        message: this.t('upload.item.menu.project.unavailable', 'No project assigned.'),
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    const ok = await this.projectsService.removeMediaFromProject(job.imageId, job.projectId);
+    if (!ok) {
+      this.toastService.show({
+        message: this.t('upload.item.menu.project.remove.failed', 'Could not remove from project.'),
+        type: 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.toastService.show({
+      message: this.t('upload.item.menu.project.remove.success', 'Removed from project.'),
+      type: 'success',
+      dedupe: true,
+    });
+    this.dismissFile(job.id);
   }
 
   private toggleJobPriority(job: UploadJob): void {

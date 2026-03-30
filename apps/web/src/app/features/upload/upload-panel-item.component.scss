@@ -9,24 +9,25 @@
 }
 
 .upload-panel__file-main {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-2);
+  --ui-item-media-size: 2.75rem;
+
   background: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  transition: background 120ms ease-out;
+  border: 1px solid color-mix(in srgb, var(--color-border) 62%, transparent);
+  padding-inline-end: calc(var(--container-padding-inline-compact) + 2rem + var(--spacing-2));
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
   position: relative;
   border-radius: var(--radius-lg);
 }
 
 .upload-panel__file-item--error .upload-panel__file-main {
-  background: color-mix(in srgb, var(--color-danger) 4%, var(--color-bg-surface));
+  background: color-mix(in srgb, var(--color-danger) 5%, var(--color-bg-surface));
   border-color: color-mix(in srgb, var(--color-danger) 24%, var(--color-border));
 }
 
 .upload-panel__file-item--missing_data .upload-panel__file-main {
-  background: color-mix(in srgb, var(--color-warning) 4%, var(--color-bg-surface));
+  background: color-mix(in srgb, var(--color-warning) 5%, var(--color-bg-surface));
   border-color: color-mix(in srgb, var(--color-warning) 24%, var(--color-border));
 }
 
@@ -65,6 +66,7 @@
 
 .upload-panel__file-main--interactive:hover {
   background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
 
   .upload-panel__thumbnail-helper {
     opacity: 0;
@@ -85,9 +87,6 @@
 }
 
 .upload-panel__thumbnail-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
   width: 2.75rem;
   height: 2.75rem;
@@ -133,8 +132,32 @@
   transition: opacity 120ms ease-out;
 }
 
+.upload-panel__thumbnail-action-btn--interactive {
+  pointer-events: auto;
+}
+
+.upload-panel__thumbnail-spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--color-bg-surface) 35%, transparent);
+  border-top-color: var(--color-clay);
+  animation: upload-item-spin 700ms linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.upload-panel__row-action {
+  position: absolute;
+  top: 50%;
+  right: var(--container-padding-inline-compact);
+  transform: translateY(-50%);
+}
+
 .upload-panel__file-meta {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -211,4 +234,18 @@
 .upload-panel__success-indicator {
   font-size: 1rem;
   vertical-align: middle;
+}
+
+:host ::ng-deep .upload-item-context-menu .dd-item--danger {
+  color: var(--color-danger);
+}
+
+:host ::ng-deep .upload-item-context-menu .dd-item__icon--danger {
+  color: var(--color-danger);
+}
+
+@keyframes upload-item-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

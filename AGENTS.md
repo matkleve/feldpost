@@ -92,6 +92,12 @@ Reference workflow and checklist:
 4. Reuse shared UI and adapter abstractions before introducing new structure
 5. Verify the result against `docs/agent-workflows/implementation-checklist.md`
 
+## Feedback-to-Spec Sync (Mandatory)
+
+- When user feedback changes expected behavior, update the relevant spec(s) first in the same work session.
+- Do not defer spec synchronization when behavior requirements change.
+- Keep Acceptance Criteria aligned with the latest user-confirmed behavior before finalizing implementation.
+
 ## Design Principles (summary)
 
 Field-first, map-primary, progressive disclosure, warmth, calm confidence.
