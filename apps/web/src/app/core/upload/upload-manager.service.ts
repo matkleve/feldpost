@@ -29,10 +29,42 @@ import { ProjectsService } from '../projects/projects.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { UploadBatchService } from './upload-batch.service';
-import { isCancelledUploadJob } from './upload-cancelled.util';
+import {
+  assignUploadManagerJobToProject,
+  attachUploadManagerFile,
+  cancelUploadManagerBatch,
+  cancelUploadManagerJob,
+  dismissAllUploadManagerCompleted,
+  dismissUploadManagerJob,
+  forceUploadManagerDuplicateUpload,
+  hydrateUploadManagerDeferredPreviews,
+  placeUploadManagerJob,
+  replaceUploadManagerFile,
+  resolveUploadManagerConflict,
+  retryUploadManagerJob,
+  type UploadManagerActionsDeps,
+} from './upload-manager-actions.util';
+import { cancelAllActiveUploads } from './upload-manager-cancel-active.util';
+import { checkUploadDedupHash } from './upload-manager-dedup.util';
+import { registerUploadManagerEffects } from './upload-manager-effects.util';
+import { drainUploadManagerQueue } from './upload-manager-drain.util';
+import { handleUploadPipelineError } from './upload-manager-error.util';
+import { failUploadManagerJob } from './upload-manager-fail.util';
+import {
+  abortUploadManagerJobRequest,
+  clearUploadAbortController,
+  emitUploadManagerBatchProgress,
+  ensureUploadAbortController,
+} from './upload-manager-lifecycle.util';
+import { runUploadPipelineByMode } from './upload-manager-run-route.util';
+import { createUploadManagerPipelineContext } from './upload-manager-runtime.util';
+import {
+  submitUploadManagerFiles,
+  submitUploadManagerFolder,
+  type UploadManagerSubmitDeps,
+} from './upload-manager-submit.util';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
-import { selectQueuedJobsForStart } from './upload-manager-queue.util';
 import { UploadNewPipelineService } from './upload-new-pipeline.service';
 import { UploadQueueService } from './upload-queue.service';
 import { UploadReplacePipelineService } from './upload-replace-pipeline.service';
@@ -63,7 +95,6 @@ export type {
 
 import type {
   UploadPhase,
-  UploadJobMode,
   UploadJob,
   SubmitOptions,
   ImageUploadedEvent,
@@ -103,6 +134,40 @@ export class UploadManagerService {
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly abortControllers = new Map<string, AbortController>();
 
+  private readonly actionDeps: UploadManagerActionsDeps = {
+    findJob: (jobId) => this.jobState.findJob(jobId) ?? undefined,
+    snapshotJobs: () => this.jobState.snapshot(),
+    updateJob: (jobId, patch) => this.jobState.updateJob(jobId, patch),
+    addJobs: (jobs) => this.jobState.addJobs(jobs),
+    removeJob: (jobId) => this.jobState.removeJob(jobId),
+    removeTerminalJobs: () => this.jobState.removeTerminalJobs(),
+    addBatch: (batch) => this.batchService.addBatch(batch),
+    updateBatch: (batchId, patch) => this.batchService.updateBatch(batchId, patch),
+    createImmediatePreviewUrl: (file) => this.mediaPreview.createImmediatePreviewUrl(file),
+    createDeferredPreviewUrl: (file) => this.mediaPreview.createDeferredPreviewUrl(file),
+    revokeObjectUrl: (url) => URL.revokeObjectURL(url),
+    isTerminalPhase: (phase) => TERMINAL_PHASES.has(phase),
+    queuedLabel: phaseLabel('queued'),
+    abortJobRequest: (jobId) => this.abortJobRequest(jobId),
+    markDone: (jobId) => this.queue.markDone(jobId),
+    removeStoragePath: (storagePath) => {
+      this.supabase.client.storage.from('media').remove([storagePath]);
+    },
+    drainQueue: () => this.drainQueue(),
+  };
+
+  private readonly submitDeps: UploadManagerSubmitDeps = {
+    addBatch: (batch) => this.batchService.addBatch(batch),
+    updateBatch: (batchId, patch) => this.batchService.updateBatch(batchId, patch),
+    addJobs: (jobs) => this.jobState.addJobs(jobs),
+    createImmediatePreviewUrl: (file) => this.mediaPreview.createImmediatePreviewUrl(file),
+    hydrateDeferredPreviews: (jobs) => this.hydrateDeferredPreviews(jobs),
+    drainQueue: () => this.drainQueue(),
+    scanDirectory: (dirHandle, onProgress) => this.folderScan.scanDirectory(dirHandle, onProgress),
+    loadProjects: () => this.projects.loadProjects(),
+    queuedLabel: phaseLabel('queued'),
+  };
+
   // ── Delegated state ────────────────────────────────────────────────────────
 
   readonly jobs: Signal<ReadonlyArray<UploadJob>> = this.jobState.jobs;
@@ -139,19 +204,19 @@ export class UploadManagerService {
   // ── Pipeline context ───────────────────────────────────────────────────────
 
   /** Shared context passed to pipeline services for manager-owned operations. */
-  private readonly pipelineCtx: PipelineContext = {
+  private readonly pipelineCtx: PipelineContext = createUploadManagerPipelineContext({
     failJob: (jobId, failedAt, error) => this.failJob(jobId, failedAt, error),
     emitBatchProgress: (batchId) => this.emitBatchProgress(batchId),
     drainQueue: () => this.drainQueue(),
     getAbortSignal: (jobId) => this.abortControllers.get(jobId)?.signal,
     checkDedupHash: (hash) => this.checkDedupHash(hash),
-    emitUploadSkipped: (e) => this._uploadSkipped$.next(e),
-    emitImageUploaded: (e) => this._imageUploaded$.next(e),
-    emitImageReplaced: (e) => this._imageReplaced$.next(e),
-    emitImageAttached: (e) => this._imageAttached$.next(e),
-    emitMissingData: (e) => this._missingData$.next(e),
-    emitLocationConflict: (e) => this._locationConflict$.next(e),
-  };
+    emitUploadSkipped: (event) => this._uploadSkipped$.next(event),
+    emitImageUploaded: (event) => this._imageUploaded$.next(event),
+    emitImageReplaced: (event) => this._imageReplaced$.next(event),
+    emitImageAttached: (event) => this._imageAttached$.next(event),
+    emitMissingData: (event) => this._missingData$.next(event),
+    emitLocationConflict: (event) => this._locationConflict$.next(event),
+  });
 
   // ── beforeunload ───────────────────────────────────────────────────────────
 
@@ -160,21 +225,21 @@ export class UploadManagerService {
   };
 
   constructor() {
-    // Cancel all active jobs when the user logs out.
-    effect(() => {
-      const user = this.auth.user();
-      if (!user && this.queue.hasRunning()) {
-        this.cancelAllActive();
-      }
-    });
-
-    // Manage beforeunload listener based on busy state.
-    effect(() => {
-      if (this.isBusy()) {
-        window.addEventListener('beforeunload', this.beforeUnloadHandler);
-      } else {
-        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
-      }
+    registerUploadManagerEffects({
+      createEffect: (runner) => {
+        effect(runner);
+      },
+      getUser: () => this.auth.user(),
+      hasRunning: () => this.queue.hasRunning(),
+      cancelAllActive: () => this.cancelAllActive(),
+      isBusy: () => this.isBusy(),
+      addBeforeUnloadListener: (handler) => {
+        window.addEventListener('beforeunload', handler);
+      },
+      removeBeforeUnloadListener: (handler) => {
+        window.removeEventListener('beforeunload', handler);
+      },
+      beforeUnloadHandler: this.beforeUnloadHandler,
     });
   }
 
@@ -188,39 +253,7 @@ export class UploadManagerService {
    * @returns The batch ID for tracking aggregate progress.
    */
   submit(files: File[], options?: SubmitOptions): string {
-    const batchId = crypto.randomUUID();
-    const label = options?.batchLabel ?? `${files.length} file${files.length === 1 ? '' : 's'}`;
-
-    this.batchService.addBatch({
-      id: batchId,
-      label,
-      totalFiles: files.length,
-      completedFiles: 0,
-      skippedFiles: 0,
-      failedFiles: 0,
-      overallProgress: 0,
-      status: 'uploading',
-      startedAt: new Date(),
-    });
-
-    const newJobs: UploadJob[] = files.map((file) => ({
-      id: crypto.randomUUID(),
-      batchId,
-      file,
-      phase: 'queued' as UploadPhase,
-      progress: 0,
-      statusLabel: phaseLabel('queued'),
-      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
-      submittedAt: new Date(),
-      mode: 'new' as UploadJobMode,
-      projectId: options?.projectId,
-    }));
-
-    this.jobState.addJobs(newJobs);
-    this.hydrateDeferredPreviews(newJobs);
-    this.drainQueue();
-
-    return batchId;
+    return submitUploadManagerFiles(files, options, this.submitDeps);
   }
 
   /**
@@ -235,129 +268,32 @@ export class UploadManagerService {
     dirHandle: FileSystemDirectoryHandle,
     options?: SubmitOptions,
   ): Promise<string> {
-    const batchId = crypto.randomUUID();
-    const label = options?.batchLabel ?? dirHandle.name;
-
-    // Attempt to parse project context from folder name (e.g., "Project: My Project")
-    let projectIdFromFolder: string | undefined;
-    if (!options?.projectId) {
-      projectIdFromFolder = await this.resolveProjectIdFromFolderName(dirHandle.name);
-    }
-    const resolvedProjectId = options?.projectId ?? projectIdFromFolder;
-
-    this.batchService.addBatch({
-      id: batchId,
-      label,
-      totalFiles: 0,
-      completedFiles: 0,
-      skippedFiles: 0,
-      failedFiles: 0,
-      overallProgress: 0,
-      status: 'scanning',
-      startedAt: new Date(),
-    });
-
-    // Recursively scan folder for image files.
-    const files = await this.folderScan.scanDirectory(dirHandle, (_file, count) => {
-      this.batchService.updateBatch(batchId, { totalFiles: count });
-    });
-
-    // Update batch with final count and switch to uploading.
-    this.batchService.updateBatch(batchId, {
-      totalFiles: files.length,
-      label: `${label} \u2014 ${files.length} file${files.length === 1 ? '' : 's'}`,
-      status: files.length > 0 ? 'uploading' : 'complete',
-    });
-
-    if (files.length === 0) {
-      this.batchService.updateBatch(batchId, { finishedAt: new Date() });
-      return batchId;
-    }
-
-    // Create jobs for all discovered files.
-    const newJobs: UploadJob[] = files.map((file) => ({
-      id: crypto.randomUUID(),
-      batchId,
-      file,
-      phase: 'queued' as UploadPhase,
-      progress: 0,
-      statusLabel: phaseLabel('queued'),
-      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
-      submittedAt: new Date(),
-      mode: 'new' as UploadJobMode,
-      projectId: resolvedProjectId,
-    }));
-
-    this.jobState.addJobs(newJobs);
-    this.hydrateDeferredPreviews(newJobs);
-    this.drainQueue();
-
-    return batchId;
+    return submitUploadManagerFolder(dirHandle, options, this.submitDeps);
   }
 
   /** Retry a failed job from the beginning. */
   retryJob(jobId: string): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || job.phase !== 'error') return;
-
-    this.jobState.updateJob(jobId, {
-      phase: 'queued',
-      statusLabel: phaseLabel('queued'),
-      progress: 0,
-      error: undefined,
-      failedAt: undefined,
-    });
-    this.drainQueue();
+    retryUploadManagerJob(jobId, this.actionDeps);
   }
 
   /** Remove a terminal job (complete / error / missing_data) from the list. */
   dismissJob(jobId: string): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || !TERMINAL_PHASES.has(job.phase)) return;
-
-    if (job.thumbnailUrl && job.phase !== 'complete') {
-      URL.revokeObjectURL(job.thumbnailUrl);
-    }
-    this.jobState.removeJob(jobId);
+    dismissUploadManagerJob(jobId, this.actionDeps);
   }
 
   /** Remove all terminal jobs from the list. */
   dismissAllCompleted(): void {
-    this.jobState.removeTerminalJobs();
+    dismissAllUploadManagerCompleted(this.actionDeps);
   }
 
   /** Cancel a pending or active job. Cleans up partial storage if needed. */
   cancelJob(jobId: string): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || TERMINAL_PHASES.has(job.phase)) return;
-
-    this.abortJobRequest(jobId);
-    this.queue.markDone(jobId);
-
-    // Attempt to clean up orphaned storage file if upload was already started.
-    if (job.storagePath) {
-      this.supabase.client.storage.from('media').remove([job.storagePath]);
-    }
-
-    this.jobState.updateJob(jobId, {
-      phase: 'error',
-      statusLabel: 'Cancelled',
-      error: 'Upload cancelled by user.',
-      failedAt: job.phase,
-    });
-
-    this.drainQueue();
+    cancelUploadManagerJob(jobId, this.actionDeps);
   }
 
   /** Cancel all non-terminal jobs in a batch. */
   cancelBatch(batchId: string): void {
-    const batchJobs = this.jobState
-      .snapshot()
-      .filter((j) => j.batchId === batchId && !TERMINAL_PHASES.has(j.phase));
-    for (const job of batchJobs) {
-      this.cancelJob(job.id);
-    }
-    this.batchService.updateBatch(batchId, { status: 'cancelled', finishedAt: new Date() });
+    cancelUploadManagerBatch(batchId, this.actionDeps, (jobId) => this.cancelJob(jobId));
   }
 
   /**
@@ -365,16 +301,7 @@ export class UploadManagerService {
    * Moves the job back into the upload pipeline (Path A with manual coords).
    */
   placeJob(jobId: string, coords: ExifCoords): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || job.phase !== 'missing_data') return;
-
-    this.jobState.updateJob(jobId, {
-      phase: 'queued',
-      statusLabel: phaseLabel('queued'),
-      coords,
-      issueKind: undefined,
-    });
-    this.drainQueue();
+    placeUploadManagerJob(jobId, coords, this.actionDeps);
   }
 
   /**
@@ -382,16 +309,7 @@ export class UploadManagerService {
    * Used by document uploads that can proceed as project-bound items.
    */
   assignJobToProject(jobId: string, projectId: string): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || job.phase !== 'missing_data') return;
-
-    this.jobState.updateJob(jobId, {
-      phase: 'queued',
-      statusLabel: phaseLabel('queued'),
-      projectId,
-      issueKind: undefined,
-    });
-    this.drainQueue();
+    assignUploadManagerJobToProject(jobId, projectId, this.actionDeps);
   }
 
   /**
@@ -403,38 +321,7 @@ export class UploadManagerService {
    * @returns        The job ID for tracking progress.
    */
   replaceFile(imageId: string, file: File): string {
-    const batchId = crypto.randomUUID();
-    const jobId = crypto.randomUUID();
-
-    this.batchService.addBatch({
-      id: batchId,
-      label: `Replace photo`,
-      totalFiles: 1,
-      completedFiles: 0,
-      skippedFiles: 0,
-      failedFiles: 0,
-      overallProgress: 0,
-      status: 'uploading',
-      startedAt: new Date(),
-    });
-
-    const job: UploadJob = {
-      id: jobId,
-      batchId,
-      file,
-      phase: 'queued',
-      progress: 0,
-      statusLabel: phaseLabel('queued'),
-      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
-      submittedAt: new Date(),
-      mode: 'replace',
-      targetImageId: imageId,
-    };
-
-    this.jobState.addJobs([job]);
-    this.hydrateDeferredPreviews([job]);
-    this.drainQueue();
-    return jobId;
+    return replaceUploadManagerFile(imageId, file, this.actionDeps);
   }
 
   /**
@@ -446,62 +333,11 @@ export class UploadManagerService {
    * @returns        The job ID for tracking progress.
    */
   attachFile(imageId: string, file: File): string {
-    console.log('[upload-manager] attachFile called:', {
-      imageId,
-      fileName: file.name,
-      fileSize: file.size,
-    });
-    const batchId = crypto.randomUUID();
-    const jobId = crypto.randomUUID();
-
-    this.batchService.addBatch({
-      id: batchId,
-      label: `Attach photo`,
-      totalFiles: 1,
-      completedFiles: 0,
-      skippedFiles: 0,
-      failedFiles: 0,
-      overallProgress: 0,
-      status: 'uploading',
-      startedAt: new Date(),
-    });
-
-    const job: UploadJob = {
-      id: jobId,
-      batchId,
-      file,
-      phase: 'queued',
-      progress: 0,
-      statusLabel: phaseLabel('queued'),
-      thumbnailUrl: this.mediaPreview.createImmediatePreviewUrl(file),
-      submittedAt: new Date(),
-      mode: 'attach',
-      targetImageId: imageId,
-    };
-
-    this.jobState.addJobs([job]);
-    this.hydrateDeferredPreviews([job]);
-    console.log('[upload-manager] attach job added to state, calling drainQueue. jobId:', jobId);
-    this.drainQueue();
-    return jobId;
+    return attachUploadManagerFile(imageId, file, this.actionDeps);
   }
 
   private hydrateDeferredPreviews(jobs: ReadonlyArray<UploadJob>): void {
-    for (const job of jobs) {
-      if (job.thumbnailUrl) continue;
-
-      void this.mediaPreview.createDeferredPreviewUrl(job.file).then((previewUrl) => {
-        if (!previewUrl) return;
-
-        const current = this.jobState.findJob(job.id);
-        if (!current || current.thumbnailUrl) {
-          URL.revokeObjectURL(previewUrl);
-          return;
-        }
-
-        this.jobState.updateJob(job.id, { thumbnailUrl: previewUrl });
-      });
-    }
+    hydrateUploadManagerDeferredPreviews(jobs, this.actionDeps);
   }
 
   /**
@@ -510,24 +346,7 @@ export class UploadManagerService {
    * Re-queues the job at the front of the concurrency queue.
    */
   resolveConflict(jobId: string, resolution: ConflictResolution): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || job.phase !== 'awaiting_conflict_resolution') return;
-
-    this.jobState.updateJob(jobId, {
-      conflictResolution: resolution,
-      phase: 'queued',
-      statusLabel: phaseLabel('queued'),
-    });
-
-    // If attaching to existing row, switch mode accordingly.
-    if (resolution === 'attach_replace' || resolution === 'attach_keep') {
-      this.jobState.updateJob(jobId, {
-        mode: 'attach',
-        targetImageId: job.conflictCandidate!.imageId,
-      });
-    }
-
-    this.drainQueue();
+    resolveUploadManagerConflict(jobId, resolution, this.actionDeps);
   }
 
   /**
@@ -535,19 +354,7 @@ export class UploadManagerService {
    * Used by the explicit user action "upload anyway".
    */
   forceDuplicateUpload(jobId: string): void {
-    const job = this.jobState.findJob(jobId);
-    if (!job || job.phase !== 'skipped' || !job.existingImageId) return;
-
-    this.jobState.updateJob(jobId, {
-      forceDuplicateUpload: true,
-      phase: 'queued',
-      statusLabel: phaseLabel('queued'),
-      error: undefined,
-      failedAt: undefined,
-      existingImageId: undefined,
-    });
-
-    this.drainQueue();
+    forceUploadManagerDuplicateUpload(jobId, this.actionDeps);
   }
 
   // ── Pipeline orchestration ─────────────────────────────────────────────────
@@ -557,33 +364,20 @@ export class UploadManagerService {
    * Called after enqueuing and after each pipeline completion.
    */
   private drainQueue(): void {
-    const jobs = this.jobState.snapshot();
-    const slotsAvailable = this.queue.availableSlots;
-    console.log('[upload-manager] drainQueue:', {
-      totalJobs: jobs.length,
-      slotsAvailable,
-      phases: jobs.map(
-        (j) => `${j.id.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)}:${j.phase}:${j.mode}`,
-      ),
+    drainUploadManagerQueue({
+      snapshotJobs: () => this.jobState.snapshot(),
+      availableSlots: () => this.queue.availableSlots,
+      ensureAbortController: (jobId) => {
+        this.ensureAbortController(jobId);
+      },
+      markRunning: (jobId) => {
+        this.queue.markRunning(jobId);
+      },
+      runPipeline: (jobId) => {
+        void this.runPipeline(jobId);
+      },
+      logJobIdPrefixLen: UploadManagerService.LOG_JOB_ID_PREFIX_LEN,
     });
-    if (slotsAvailable <= 0) {
-      console.log('[upload-manager] drainQueue: no slots available, exiting');
-      return;
-    }
-
-    const toStart = selectQueuedJobsForStart(jobs, slotsAvailable);
-    console.log(
-      '[upload-manager] drainQueue: starting',
-      toStart.length,
-      'jobs:',
-      toStart.map((j) => `${j.id.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)}:${j.mode}`),
-    );
-
-    for (const job of toStart) {
-      this.ensureAbortController(job.id);
-      this.queue.markRunning(job.id);
-      this.runPipeline(job.id);
-    }
   }
 
   /** Runs the full pipeline for one job. Routes by mode. */
@@ -595,103 +389,100 @@ export class UploadManagerService {
         return;
       }
 
-      console.log(
-        `[upload-manager] runPipeline: routing job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} via mode=${job.mode}, targetImageId=${job.targetImageId}`,
-      );
+      await runUploadPipelineByMode(job, {
+        runReplace: (id) => this.replacePipeline.run(id, this.pipelineCtx),
+        runAttach: (id) => this.attachPipeline.run(id, this.pipelineCtx),
+        runNew: (id) => this.newPipeline.run(id, this.pipelineCtx),
+        logJobIdPrefixLen: UploadManagerService.LOG_JOB_ID_PREFIX_LEN,
+      });
 
-      if (job.mode === 'replace') {
-        console.log('[upload-manager] → replacePipeline.run()');
-        await this.replacePipeline.run(jobId, this.pipelineCtx);
-      } else if (job.mode === 'attach') {
-        console.log('[upload-manager] → attachPipeline.run()');
-        await this.attachPipeline.run(jobId, this.pipelineCtx);
-      } else {
-        console.log('[upload-manager] → newPipeline.run()');
-        await this.newPipeline.run(jobId, this.pipelineCtx);
-      }
       console.log(
         `[upload-manager] runPipeline: job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} pipeline finished`,
       );
     } catch (err) {
-      console.error(
-        `[upload-manager] runPipeline: job ${jobId.slice(0, UploadManagerService.LOG_JOB_ID_PREFIX_LEN)} threw:`,
-        err,
-      );
-      const current = this.jobState.findJob(jobId);
-      if (isCancelledUploadJob(current)) {
-        this.queue.markDone(jobId);
-        if (current) {
-          this.emitBatchProgress(current.batchId);
-        }
-        this.drainQueue();
-        return;
-      }
-      this.failJob(
-        jobId,
-        current?.phase ?? 'queued',
-        err instanceof Error ? err.message : String(err),
-      );
+      handleUploadPipelineError(jobId, err, {
+        findJob: (id) => this.jobState.findJob(id) ?? undefined,
+        markDone: (id) => {
+          this.queue.markDone(id);
+        },
+        emitBatchProgress: (batchId) => {
+          this.emitBatchProgress(batchId);
+        },
+        drainQueue: () => {
+          this.drainQueue();
+        },
+        failJob: (id, failedAt, error) => {
+          this.failJob(id, failedAt, error);
+        },
+        logJobIdPrefixLen: UploadManagerService.LOG_JOB_ID_PREFIX_LEN,
+      });
     } finally {
-      this.abortControllers.delete(jobId);
+      clearUploadAbortController(this.abortControllers, jobId);
     }
   }
 
   // ── Internal helpers ───────────────────────────────────────────────────────
 
   private failJob(jobId: string, failedAt: UploadPhase, error: string): void {
-    this.abortJobRequest(jobId);
-    this.queue.markDone(jobId);
-    this.jobState.failJob(jobId, failedAt, error);
-    const job = this.jobState.findJob(jobId);
-    if (job) {
-      this.emitBatchProgress(job.batchId);
-    }
-    this.drainQueue();
+    failUploadManagerJob(jobId, failedAt, error, {
+      abortJobRequest: (id) => {
+        this.abortJobRequest(id);
+      },
+      markDone: (id) => {
+        this.queue.markDone(id);
+      },
+      failJobState: (id, phase, message) => {
+        this.jobState.failJob(id, phase, message);
+      },
+      findJob: (id) => this.jobState.findJob(id) ?? undefined,
+      emitBatchProgress: (batchId) => {
+        this.emitBatchProgress(batchId);
+      },
+      drainQueue: () => {
+        this.drainQueue();
+      },
+    });
   }
 
   private cancelAllActive(): void {
-    const active = this.jobState.snapshot().filter((j) => !TERMINAL_PHASES.has(j.phase));
-    for (const job of active) {
-      this.abortJobRequest(job.id);
-      this.queue.markDone(job.id);
-      if (job.storagePath) {
-        this.supabase.client.storage.from('media').remove([job.storagePath]);
-      }
-      this.jobState.updateJob(job.id, {
-        phase: 'error',
-        statusLabel: 'Cancelled',
-        error: 'Upload cancelled \u2014 user signed out.',
-        failedAt: job.phase,
-      });
-    }
+    cancelAllActiveUploads({
+      snapshotJobs: () => this.jobState.snapshot(),
+      isTerminalPhase: (phase) => TERMINAL_PHASES.has(phase),
+      abortJobRequest: (jobId) => {
+        this.abortJobRequest(jobId);
+      },
+      markDone: (jobId) => {
+        this.queue.markDone(jobId);
+      },
+      removeStoragePath: (storagePath) => {
+        this.supabase.client.storage.from('media').remove([storagePath]);
+      },
+      markCancelledSignedOut: (jobId, failedAt) => {
+        this.jobState.updateJob(jobId, {
+          phase: 'error',
+          statusLabel: 'Cancelled',
+          error: 'Upload cancelled \u2014 user signed out.',
+          failedAt,
+        });
+      },
+    });
   }
 
   private ensureAbortController(jobId: string): AbortController {
-    const existing = this.abortControllers.get(jobId);
-    if (existing) {
-      return existing;
-    }
-    const controller = new AbortController();
-    this.abortControllers.set(jobId, controller);
-    return controller;
+    return ensureUploadAbortController(this.abortControllers, jobId);
   }
 
   private abortJobRequest(jobId: string): void {
-    const controller = this.abortControllers.get(jobId);
-    if (!controller) {
-      return;
-    }
-    if (!controller.signal.aborted) {
-      controller.abort();
-    }
-    this.abortControllers.delete(jobId);
+    abortUploadManagerJobRequest(this.abortControllers, jobId);
   }
 
   /** Emit batch progress and check for batch completion. */
   private emitBatchProgress(batchId: string): void {
-    const jobs = this.jobState.snapshot();
-    this.batchService.emitBatchProgress(batchId, jobs);
-    this.batchService.checkBatchComplete(batchId, jobs);
+    emitUploadManagerBatchProgress(batchId, {
+      snapshotJobs: () => this.jobState.snapshot(),
+      emitBatchProgress: (id, jobs) => this.batchService.emitBatchProgress(id, jobs),
+      checkBatchComplete: (id, jobs) => this.batchService.checkBatchComplete(id, jobs),
+    });
   }
 
   /**
@@ -699,46 +490,7 @@ export class UploadManagerService {
    * Returns the existing image ID if found, or null.
    */
   private async checkDedupHash(contentHash: string): Promise<string | null> {
-    try {
-      const { data, error } = await this.supabase.client.rpc('check_dedup_hashes', {
-        hashes: [contentHash],
-      });
-      if (error || !data || data.length === 0) return null;
-      return data[0].media_item_id ?? null;
-    } catch {
-      return null;
-    }
+    return checkUploadDedupHash(this.supabase.client, contentHash);
   }
 
-  /**
-   * Parse folder name for project context token (e.g., "Project: My Project Name").
-   * Case-insensitive matching. Returns project ID if found, undefined otherwise.
-   *
-   * Format: "Project: [projectname]" (colon + space required)
-   * Examples: "Project: Site A", "project: Building Z", "PROJECT: Renovation 2024"
-   */
-  private async resolveProjectIdFromFolderName(folderName: string): Promise<string | undefined> {
-    const projectTokenMatch = folderName.match(/^\s*project\s*:\s*(.+)$/i);
-    if (!projectTokenMatch || !projectTokenMatch[1]) {
-      return undefined;
-    }
-
-    const projectNameHint = projectTokenMatch[1].trim();
-    if (!projectNameHint) {
-      return undefined;
-    }
-
-    try {
-      const projects = await this.projects.loadProjects();
-      const matches = projects.filter(
-        (p) => p.name.toLowerCase() === projectNameHint.toLowerCase() && p.status === 'active',
-      );
-
-      // Return first matching active project, or undefined if not found.
-      return matches.length > 0 ? matches[0].id : undefined;
-    } catch {
-      // Silently fail if project lookup fails (e.g., network error).
-      return undefined;
-    }
-  }
 }

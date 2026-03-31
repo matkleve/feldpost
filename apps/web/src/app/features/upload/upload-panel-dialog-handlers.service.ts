@@ -25,8 +25,6 @@ import type { ForwardGeocodeResult } from '../../core/geocoding.service';
 import type { ProjectSelectOption } from '../../shared/project-select-dialog/project-select-dialog.component';
 import type { GeocoderSearchResult } from '../../core/geocoding.service';
 
-type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
-
 export interface DialogSignals {
   projectSelectionDialogOpen: ReturnType<typeof signal<boolean>>;
   projectSelectionDialogTitle: ReturnType<typeof signal<string>>;

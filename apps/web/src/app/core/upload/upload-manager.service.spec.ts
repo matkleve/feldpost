@@ -19,6 +19,9 @@ import { SupabaseService } from '../supabase/supabase.service';
 
 function buildFakeUploadService() {
   return {
+    resolveMimeType: vi.fn().mockReturnValue('image/jpeg'),
+    resolveMediaType: vi.fn().mockReturnValue('photo'),
+    isPhotoFile: vi.fn().mockReturnValue(true),
     validateFile: vi.fn().mockReturnValue({ valid: true }),
     parseExif: vi.fn().mockResolvedValue({ coords: { lat: 48.2, lng: 16.37 }, direction: 90 }),
     isHeic: vi.fn().mockReturnValue(false),
