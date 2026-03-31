@@ -56,14 +56,6 @@ export class UploadPanelSetupService {
   initialize(options: UploadPanelSetupOptions): void {
     this.lifecycle.setImageUploadedCallback((event) => options.imageUploaded(event));
     this.lifecycle.setPlacementRequestedCallback((jobId) => options.placementRequested(jobId));
-
-    // ⚠️ SPEC VIOLATION (Action 8g): Register auto-switch callback that switches lane='issues'
-    // when jobPhaseChanged$ reports error/missing_data phase.
-    // Spec requires: "Keep currently selected lane stable after resolution actions;
-    // never auto-switch lane/tab unless user explicitly changes it."
-    // Current implementation: Violates spec by auto-switching. See upload-panel-lifecycle.service.ts.
-    // TODO: Remove this callback registration entirely; require explicit user lane selection.
-    this.lifecycle.setAutoSwitchCallback(() => this.lanes.setSelectedLane('issues'));
     this.lifecycle.initializeSubscriptions();
 
     this.rowInteractions.register({

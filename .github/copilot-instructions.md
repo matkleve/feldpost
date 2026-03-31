@@ -56,3 +56,15 @@ When user feedback changes feature behavior or UX expectations:
 - Update the relevant `docs/element-specs/*.md` spec entries first in the same session.
 - Reflect the change in Actions, Wiring/Data sections, and Acceptance Criteria as needed.
 - Keep implementation and spec synchronized; do not ship behavior changes without matching spec updates.
+
+## Bulk Operation Quality Gates
+
+**MANDATORY: Do not prioritize speed over correctness.**
+
+1. **All multi-file changes require audit + isolation + verification phases** — no exceptions
+2. **After every bulk replace**: Run `get_errors()` and `ng build` immediately
+3. **Max 3-5 replacements per batch** — if more needed, split into sequential batches
+4. **Comments must never be inserted above import statements** — this causes copy/paste errors
+5. **Include 3-5 context lines** before and after every oldString in multi_replace
+6. **Never combine unrelated changes** (e.g., rename + comment in one replace)
+7. **Time cost of mistakes >> time saved by speed** — when in doubt, slow down

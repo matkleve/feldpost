@@ -78,14 +78,6 @@ export class UploadPanelLifecycleService {
         event.previousPhase !== 'missing_data';
       if (becameIssue) {
         this.triggerIssueAttentionPulse();
-        // ⚠️ SPEC VIOLATION (Action 8g): Auto-switch to issues lane when error occurs.
-        // Spec requires lane stability: "Keep currently selected lane stable after resolution
-        // actions; never auto-switch lane/tab unless user explicitly changes it."
-        // Current implementation: Switches to 'issues' lane unconditionally on error/missing_data.
-        // TODO: Remove this callback execution to match spec contract.
-        if (this.autoSwitchCallback) {
-          this.autoSwitchCallback();
-        }
       }
     });
   }
