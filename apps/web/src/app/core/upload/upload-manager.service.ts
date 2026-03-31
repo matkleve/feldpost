@@ -492,5 +492,4 @@ export class UploadManagerService {
   private async checkDedupHash(contentHash: string): Promise<string | null> {
     return checkUploadDedupHash(this.supabase.client, contentHash);
   }
-
 }
