@@ -3,6 +3,19 @@
  *
  * Handles Path A (reverse-geocode GPS → address) and
  * Path B (forward-geocode filename address → GPS coordinates).
+ *
+ * Ground rules (Spec: upload-manager-pipeline.md § Enrichment):
+ * - Path A: EXIF coords exist → reverse-geocode to resolved_address via GeocodingService
+ * - Path B: Address from filename/folder; forward-geocode to coords via GeocodingService
+ * - RLS boundary: Address resolution respects org_id + user location context
+ * - Fallback: If geocoding fails, proceed with available data (partial enrichment ok)
+ *
+ * Public API:
+ *  - reverseGeocodeCoords(coords): Promise<string> → address
+ *  - forwardGeocodeAddress(address): Promise<ExifCoords | null> → coords
+ *
+ * Note: UploadService.uploadFile() calls resolveAddress() internally during storage upload,
+ * so UploadEnrichmentService is currently used for validation and re-geocoding on demand.
  */
 
 import { Injectable, inject } from '@angular/core';

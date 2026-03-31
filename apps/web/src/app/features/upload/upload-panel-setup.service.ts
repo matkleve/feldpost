@@ -32,6 +32,9 @@ export interface UploadPanelSetupOptions {
 
 @Injectable()
 export class UploadPanelSetupService {
+  // ── Core dependencies ──────────────────────────────────────────────────────
+  // I18n for translated labels; Upload manager (root orchestrator);
+  // Panels signals, lifecycle, registration for wiring event callbacks.
   private readonly i18nService = inject(I18nService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly signals = inject(UploadPanelSignalsService);
@@ -45,9 +48,21 @@ export class UploadPanelSetupService {
 
   private readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
+  /**
+   * initialize() — Wire all event callbacks and register panel state graph.
+   * Connects UploadManager observable events to UploadPanel component callbacks,
+   * sets up row/lane interaction handlers, and registers the view model signal graph.
+   */
   initialize(options: UploadPanelSetupOptions): void {
     this.lifecycle.setImageUploadedCallback((event) => options.imageUploaded(event));
     this.lifecycle.setPlacementRequestedCallback((jobId) => options.placementRequested(jobId));
+
+    // ⚠️ SPEC VIOLATION (Action 8g): Register auto-switch callback that switches lane='issues'
+    // when jobPhaseChanged$ reports error/missing_data phase.
+    // Spec requires: "Keep currently selected lane stable after resolution actions;
+    // never auto-switch lane/tab unless user explicitly changes it."
+    // Current implementation: Violates spec by auto-switching. See upload-panel-lifecycle.service.ts.
+    // TODO: Remove this callback registration entirely; require explicit user lane selection.
     this.lifecycle.setAutoSwitchCallback(() => this.lanes.setSelectedLane('issues'));
     this.lifecycle.initializeSubscriptions();
 

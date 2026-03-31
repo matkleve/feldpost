@@ -3,6 +3,20 @@
  *
  * Owns batch state (signals), computes progress from job states,
  * and emits batch-level events (progress, complete).
+ *
+ * Ground rules (Spec: upload-manager-pipeline.md § Batch Lifecycle):
+ * - Batch status flow: scanning → uploading → complete|cancelled
+ * - Progress computation: (completedFiles + skippedFiles) / totalFiles * 100
+ * - Active batch: The batch currently being processed (excluding completed/cancelled)
+ * - Batch completion: All jobs transitioned to terminal phase + finishedAt timestamp set
+ * - Event emission: batchProgress$ (on job completion), batchComplete$ (on batch finish)
+ *
+ * Public API:
+ *  - addBatch(batch): Create new batch, return batchId
+ *  - updateBatch(batchId, patch): Merge partial state (progress, status, timestamps)
+ *  - computeProgress(batchId): (completed + skipped) / total * 100
+ *  - markBatchComplete(batchId): Set status=complete, emit batchComplete$
+ *  - activeBatch: Signal<UploadBatch | null> — current batch or null if none
  */
 
 import { Injectable, computed, signal } from '@angular/core';

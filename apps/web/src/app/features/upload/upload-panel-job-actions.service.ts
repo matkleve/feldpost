@@ -1,3 +1,19 @@
+/**
+ * UploadPanelJobActionsService — Per-file action handlers (menu item clicks).
+ *
+ * Routes menu action selections to appropriate handlers:
+ *  - view_progress, view_file_details → UploadPanelJobFileActionsService
+ *  - place_on_map, change_location_* → UploadPanelDialogActionsService
+ *  - upload_anyway, use_existing, reject → Delegate to UploadManager
+ *  - retry, cancel, dismiss → UploadManager action methods
+ *  - download, open_*, add_to_project → UploadPanelJobFileActionsService
+ *
+ * Ground rules (Spec: upload-panel.md § Actions):
+ *  - Action visibility gated by lane + issueKind (see upload-panel-item.component.ts)
+ *  - Modal dialogs flow back to setLane + UploadManager actions
+ *  - Emitted events: imageUploaded, placementRequested, locationPreview*
+ */
+
 import { Injectable, inject, type WritableSignal } from '@angular/core';
 import type { ForwardGeocodeResult } from '../../core/geocoding.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';

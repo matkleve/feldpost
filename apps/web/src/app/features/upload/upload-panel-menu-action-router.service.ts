@@ -1,3 +1,18 @@
+/**
+ * UploadPanelMenuActionRouterService — Route menu actions to appropriate handlers.
+ *
+ * Central dispatcher for item context menu click → handler delegation:
+ *  - File-level actions (view_progress, download, open_project) → UploadPanelJobFileActionsService
+ *  - Resolution actions (place_on_map, change_location_*) → UploadPanelDialogActionsService
+ *  - UploadManager actions (retry, cancel, dismiss) → UploadManagerService methods
+ *  - Dialog show/hide toggles and lane navigation
+ *
+ * Responsibilities:
+ *  - Route based on action type and job state
+ *  - Emit lane changes (e.g., retry sets lane='issues' if job is error)
+ *  - Show toast feedback for disabled actions
+ */
+
 import { Injectable, inject } from '@angular/core';
 import { ToastService } from '../../core/toast.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';

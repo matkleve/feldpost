@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+/**\n * UploadPanelRowInteractionsService — Keyboard + pointer interactions on file rows.\n *\n * Handles:\n *  - Row click/keyboard: Trigger placement request (open location picker)\n *  - Zoom button click: Emit zoom to location on map\n *  - Selection via checkbox: Toggle in selectedUploadJobIds\n *\n * Ground rules:\n *  - Placement only available for jobs with/without coords (location change mode)\n *  - Zoom filtered by canZoomToJob() (coords + media exists)\n *  - Keyboard accessibility: Enter/Space for placement, F key for zoom (custom shortcut)\n */\n\nimport { Injectable, inject } from '@angular/core';
 import {
   UploadManagerService,
   type UploadJob,

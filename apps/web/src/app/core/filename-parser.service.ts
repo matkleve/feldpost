@@ -4,6 +4,16 @@
  * Simplified version of the planned FilenameLocationParser
  * (see folder-import.md §4.1). Rejects camera-generated filenames
  * and timestamps, then looks for European street-type suffixes.
+ *
+ * ⚠️ SPEC GAP: Should delegate to LocationPathParserService for:
+ *  - Address component parsing (city/zip/street separation)
+ *  - City registry lookup & validation
+ *  - Disambiguation when multiple matches found
+ * See: docs/element-specs/location-path-parser.md § Entry points.
+ * Current: Returns raw address string without component parsing.
+ * TODO: Inject LocationPathParserService; use parseAddressComponent() to
+ *       extract city, zip, street hierarchically. Refactor confidence model
+ *       to account for registry match vs. pattern-only fallback.
  */
 
 import { Injectable } from '@angular/core';
@@ -52,6 +62,14 @@ export class FilenameParserService {
    * High: explicit street-type suffix detected.
    * Low: conservative fallback "StreetName 12[, City]" pattern.
    * Returns undefined for camera-generated filenames and timestamps.
+   *
+   * ⚠️ SPEC GAP: Missing delegation to LocationPathParserService for:
+   *  - Address component validation (street + house number presence)
+   *  - City registry lookup (validate city names against known cities)
+   *  - Disambiguation if pattern matches multiple registered locations
+   * Current: Pattern-based extraction only; no registry validation.
+   * TODO: After parsing address string, call LocationPathParserService.parseAddressComponent()
+   *       to validate components and increase confidence only if registry match found.
    */
   extractAddress(filename: string): ParsedAddress | undefined {
     // Strip extension

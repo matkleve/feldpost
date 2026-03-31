@@ -1,11 +1,22 @@
-import { Injectable, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UploadManagerService } from './upload-manager.service';
-import type { UploadFailedEvent } from './upload-manager.service';
-import { ToastService } from '../toast.service';
-
-@Injectable({ providedIn: 'root' })
-export class UploadNotificationService {
+/**
+ * UploadNotificationService — toast notifications for upload failures.
+ *
+ * Subscribes to UploadManagerService.uploadFailed$ and displays user-facing
+ * error messages via ToastService.
+ * 
+ * Ground rules:
+ *  - Deduped toasts: Multiple identical failures show as single toast (dedupe=true)
+ *  - Phase-specific messages: Different failure reasons → different toast text
+ *  - User actions: Failures typically require user intervention (retry, place, adjust)
+ * 
+ * Message mapping:
+ *  - 'validating' failure: File type not supported
+ *  - 'hashing' failure: Could not read file
+ *  - 'dedup_check' failure: Already uploaded (duplicate)
+ *  - 'uploading' failure: Network or storage error
+ *  - 'saving_record' failure: Database insert failed
+ *  - 'resolving_address' failure: Geocoding service unavailable
+ */
   private readonly uploadManager = inject(UploadManagerService);
   private readonly toast = inject(ToastService);
 

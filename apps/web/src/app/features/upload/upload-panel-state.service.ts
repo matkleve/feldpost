@@ -1,5 +1,16 @@
 /**
- * UploadPanelStateService — state signals and computed properties.
+ * UploadPanelStateService — Panel-specific state signals and computed properties.
+ *
+ * Transforms UploadManagerService.jobs into panel view model:
+ *  - Buckets jobs by lane (uploading | uploaded | issues)
+ *  - Computes lane counts and effective lane (current switch selection)
+ *  - Filters jobs for display (max 5 running, scrollable; all uploaded)
+ *
+ * Signals:
+ *  - laneBuckets: Record<UploadLane, UploadJob[]> — bucketized jobs
+ *  - laneCounts: {uploading, uploaded, issues} — badge counts
+ *  - laneJobs: UploadJob[] — filtered for current lane (scrollable, limited)
+ *  - effectiveLane: UploadLane — currently selected lane from switch
  */
 
 import { Injectable, computed, inject } from '@angular/core';

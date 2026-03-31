@@ -3,6 +3,20 @@
  *
  * Owns the jobs signal and provides atomic operations for job state management.
  * Emits domain events when jobs change phase, fail, skip, or complete.
+ *
+ * Ground rules (Spec: upload-manager-pipeline.md):
+ * - Phase transitions: queued → validating → parsing_exif → ... → complete|error|missing_data|skipped
+ * - TERMINAL_PHASES: complete, error, missing_data, skipped (job leaves queue)
+ * - ACTIVE_PHASES: All phases with ongoing work (shown in 'uploading' lane)
+ * - Event emission: jobPhaseChanged$, uploadFailed$, uploadSkipped$ for subscribers
+ * - Atomic updates: setPhase(), updateJob() guarantee consistency
+ *
+ * Public API:
+ *  - findJob(jobId): UploadJob | undefined
+ *  - setPhase(jobId, phase): Update phase + emit jobPhaseChanged$
+ *  - updateJob(jobId, patch): Merge partial state without changing phase
+ *  - markJobFailed(jobId, reason, error): Set phase=error + emit uploadFailed$
+ *  - markJobSkipped(jobId, reason): Set phase=skipped + emit uploadSkipped$
  */
 
 import { Injectable, computed, signal } from '@angular/core';

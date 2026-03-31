@@ -4,8 +4,18 @@ import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelStateService } from './upload-panel-state.service';
 
 /**
- * UploadPanelSignalsService — Expose all signal/computed properties in one place.
- * Reduces component boilerplate and centralizes reactive state mapping.
+ * UploadPanelSignalsService — Expose all signals and computed properties in one place.
+ *
+ * Purpose: Centralize reactive state mapping and reduce component boilerplate.
+ * Aggregates signals from:
+ *  - UploadManagerService: jobs, batches, activeBatch, isUploading
+ *  - UploadPanelStateService: laneCounts, laneJobs, effectiveLane
+ *  - UploadPanelLifecycleService: issueAttentionPulse
+ *
+ * Ground rules:
+ *  - All signals are public readonly; no manual updates here
+ *  - Delegated signals propagate changes from source services
+ *  - Computed signals cache results until dependencies change
  */
 @Injectable({ providedIn: 'root' })
 export class UploadPanelSignalsService {

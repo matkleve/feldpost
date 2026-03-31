@@ -1,4 +1,4 @@
-import type {
+/**\n * createUploadManagerPipelineContext() — Factory for PipelineContext object.\n * Bundles global state (failJob, emit events, abort signals, dedup check, queue drain)\n * into single context passed to all pipeline stages.\n */\n\nimport type {
   ImageAttachedEvent,
   ImageReplacedEvent,
   ImageUploadedEvent,

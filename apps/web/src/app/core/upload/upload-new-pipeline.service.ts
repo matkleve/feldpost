@@ -1,10 +1,20 @@
 /**
  * UploadNewPipelineService — handles the 'new' upload pipeline.
  *
- * Pipeline paths:
+ * Pipeline paths (Spec: upload-manager-pipeline.md § New Upload Pipeline):
  *  - Path A: GPS found → conflict check → upload → save → reverse-geocode
- *  - Path B: address in filename → conflict check → upload → save → forward-geocode
- *  - Path C: no GPS + no address → missing_data
+ *  - Path B: address in filename (high confidence) → conflict check → upload → save → forward-geocode
+ *  - Path C: no GPS + no address → phase=missing_data, issueKind=missing_gps (photos) | document_unresolved (docs)
+ *
+ * Entry points:
+ *  - run(jobId, ctx): Main orchestrator; calls resumeIfAlreadyRoutedNewJob, prepareNewJobForUpload, routePreparedNewJob
+ *
+ * Delegates to:
+ *  - FilenameParserService: Address extraction from filename (confidence scoring)
+ *  - UploadConflictService: Photoless row matching
+ *  - UploadAttachPipelineService: Conflict resolution (attach mode)
+ *  - UploadEnrichmentService: Reverse/forward geocoding, address enrichment
+ *  - UploadService: EXIF parsing, file validation, media type detection
  */
 
 import { Injectable, inject } from '@angular/core';

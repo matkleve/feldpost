@@ -1,3 +1,19 @@
+/**
+ * UploadPanelJobFileActionsService — File-level actions and navigation.
+ *
+ * Provides:
+ *  - Download uploaded files via Supabase Storage
+ *  - Open file details modal (read-only inspection)
+ *  - Navigation to media gallery / existing duplicate rows
+ *  - Workspace pane selection and zoom actions
+ *  - Priority toggling for uploaded items
+ *
+ * Ground rules:
+ *  - Downloads use attachment semantics (force file save, never inline browser tab)
+ *  - Zoom actions are filtered by canZoomToJob() (only items with coordinates)
+ *  - Priority state persisted in prioritizedUploadedJobIds set
+ */
+
 import { Injectable, inject, type WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProjectsService } from '../../core/projects/projects.service';

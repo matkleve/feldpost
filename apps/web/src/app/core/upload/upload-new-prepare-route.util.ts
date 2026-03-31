@@ -72,6 +72,22 @@ export async function prepareNewJobForUpload(
   return { job: deps.jobState.findJob(jobId)!, parsedExif: prepared.parsedExif };
 }
 
+/**
+ * routePreparedNewJob() — Route a job through conflict check → upload phase or → issues lane.
+ *
+ * Ground rules:
+ *  - If job has coordinates: run conflict check → upload phase
+ *  - If no coordinates + high-confidence address: run conflict check → upload phase
+ *  - If no coordinates + low/no confidence:
+ *    - For photos: set phase=missing_data, issueKind=missing_gps
+ *    - For documents: set phase=missing_data, issueKind=document_unresolved
+ *    - Mark job done (dequeue); emit MissingDataEvent
+ *
+ * Spec compliance (upload-manager-pipeline.md):
+ *  ✅ Document routing: issueKind=document_unresolved when no address
+ *  ✅ Confidence gating: Only high-confidence addresses proceed to upload
+ *  ✅ Conflict check: Run after address resolution
+ */
 export async function routePreparedNewJob(
   deps: NewPrepareRouteDeps,
   jobId: string,

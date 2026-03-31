@@ -1,3 +1,18 @@
+/**
+ * UploadPanelBulkActionsService — Bulk selection and multi-item actions.
+ *
+ * Provides:
+ *  - Selection state: selectedUploadJobIds (Set<jobId>)
+ *  - Selection filters: allInLaneSelected(), someInLaneSelected(), canSelectMore()
+ *  - Bulk actions: retryAll(), dismissAll(), cancelAll(), downloadSelected()
+ *  - Zoom to all selected jobs
+ *
+ * Ground rules:
+ *  - Selection persists across lane switches
+ *  - Bulk actions applied only to selected jobs in current lane
+ *  - canZoomToJob() filters which files can show on map
+ */
+
 import { Injectable, type WritableSignal } from '@angular/core';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import { isRetryableJob, isTerminalJob } from './upload-panel-helpers';

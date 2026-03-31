@@ -1,3 +1,26 @@
+/**
+ * UploadPanelDialogActionsService — Modal dialog handlers (duplicate, project, location).
+ *
+ * Handles user responses from three main dialog flows:
+ *  1. **Duplicate Resolution** (issueKind=duplicate_photo)
+ *     - Modal: Choose use_existing, upload_anyway, reject
+ *     - Actions: Attach to row | Force new upload | Skip entirely
+ *
+ *  2. **Project Assignment** (issueKind=document_unresolved)
+ *     - Modal: Select from active projects or skip
+ *     - Action: assignUploadManagerJobToProject(jobId, projectId)
+ *
+ *  3. **Location Resolution** (issueKind=missing_gps | document_unresolved)
+ *     - Map picker or address search (forward-geocode)
+ *     - Actions: placeFile(jobId, lat, lng) | dismiss
+ *
+ * Delegates to:
+ *  - UploadManagerService: resolveUploadManagerConflict, assignUploadManagerJobToProject
+ *  - GeocodingService: Forward-geocode address → coords
+ *  - MediaLocationUpdateService: Update existing row coordinates
+ *  - MapProjectDialogService: Project selection UI
+ */
+
 import { Injectable, inject, signal } from '@angular/core';
 import { GeocodingService, type ForwardGeocodeResult } from '../../core/geocoding.service';
 import { MediaLocationUpdateService } from '../../core/media-location-update.service';

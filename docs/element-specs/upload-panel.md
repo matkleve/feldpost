@@ -37,7 +37,7 @@ Each media item row uses the same white/surface container treatment as other pan
 
 The lane item area uses a fully transparent overflow wrapper (no padding, no decorative surface) only for scrolling behavior. It shows up to 5 full rows at once; additional rows are reachable by internal scrolling. This applies equally to Queue, Uploaded, and Issues lanes.
 
-When the 3-dot context menu is opened from a file item, the menu options must open **upwards** to avoid being clipped by the bottom of the map or panel overflow.
+When the 3-dot context menu is opened from a file item, the menu options open **downwards first** with viewport-aware fallback to upward opening only when bottom space is insufficient.
 
 ### Reference Structure (Contract)
 

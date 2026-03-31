@@ -1,8 +1,24 @@
 /**
  * UploadReplacePipelineService — handles the 'replace' upload pipeline.
  *
- * Pipeline: validating → hashing → dedup_check → uploading → replacing_record → complete.
- * Swaps the file on an existing image row, updates EXIF metadata, and cleans up old files.
+ * Pipeline phases (Spec: upload-manager-pipeline.md § Replace Upload Pipeline):
+ * validating → converting_format → hashing → dedup_check → uploading → replacing_record → complete
+ *
+ * Purpose: Swap the file on an existing image row, update EXIF metadata, preserve location/project.
+ * Triggered by: resolveUploadManagerConflict(jobId, 'use_existing')
+ *
+ * Entry points:
+ *  - run(jobId, ctx): Main orchestrator; validates file, hashes, checks dedup, uploads, updates DB
+ *
+ * Side effects:
+ *  - Old storage file deleted (cleanup via UploadStorageService)
+ *  - EXIF metadata updated from new file
+ *  - RLS: Only user's org + row owner can replace
+ *
+ * Delegates to:
+ *  - UploadStorageService: Upload new file; delete old storage path
+ *  - UploadService: EXIF parsing, file validation
+ *  - buildReplaceUpdateData: Construct DB update payload (exif, storage_path, file_size)
  */
 
 import { Injectable, inject } from '@angular/core';

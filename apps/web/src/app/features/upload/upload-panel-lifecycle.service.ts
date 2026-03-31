@@ -6,8 +6,16 @@ import {
 import type { ImageUploadedEvent } from './upload-panel.component';
 
 /**
- * UploadPanelLifecycleService — Manage constructor subscriptions & issue attention pulse.
- * Encapsulates event bridging and state transitions triggered by UploadManagerService.
+ * UploadPanelLifecycleService — Manage panel lifecycle subscriptions & issue attention pulse.
+ * Encapsulates:
+ * - Event bridging from UploadManagerService (imageUploaded$, jobPhaseChanged$)
+ * - Issue attention pulse animation trigger (UI feedback on new issues)
+ * - **AUTO-SWITCH CALLBACK** (SPEC VIOLATION — see Action 8g in upload-manager-pipeline.md)
+ *
+ * ⚠️ VIOLATION: setAutoSwitchCallback() is registered by upload-panel-setup.service.ts (line 51)
+ * and executed when jobPhaseChanged$ reports error/missing_data phase. Spec requires lane
+ * stability; never auto-switch after resolution actions. TODO: Remove auto-switch callback
+ * and rely on explicit user lane selection.
  */
 @Injectable({ providedIn: 'root' })
 export class UploadPanelLifecycleService {
@@ -36,6 +44,10 @@ export class UploadPanelLifecycleService {
   }
 
   setAutoSwitchCallback(cb: () => void): void {
+    // ⚠️ SPEC VIOLATION: This callback is used to implement auto-switch on error.
+    // Registered in upload-panel-setup.service.ts (line 51) to trigger lane='issues' on phase error.
+    // Violates spec Action 8g: "Keep currently selected lane stable after resolution actions."
+    // TODO: Remove this method and callback execution; rely on manual user lane selection only.
     this.autoSwitchCallback = cb;
   }
 
@@ -66,7 +78,11 @@ export class UploadPanelLifecycleService {
         event.previousPhase !== 'missing_data';
       if (becameIssue) {
         this.triggerIssueAttentionPulse();
-        // Auto-switch to issues lane when error occurs (no alert/modal)
+        // ⚠️ SPEC VIOLATION (Action 8g): Auto-switch to issues lane when error occurs.
+        // Spec requires lane stability: "Keep currently selected lane stable after resolution
+        // actions; never auto-switch lane/tab unless user explicitly changes it."
+        // Current implementation: Switches to 'issues' lane unconditionally on error/missing_data.
+        // TODO: Remove this callback execution to match spec contract.
         if (this.autoSwitchCallback) {
           this.autoSwitchCallback();
         }

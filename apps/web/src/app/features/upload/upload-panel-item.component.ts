@@ -38,6 +38,26 @@ export type UploadItemMenuAction =
   | 'remove_from_project'
   | 'dismiss';
 
+/**
+ * UploadPanelItemComponent — per-file row in upload panel.
+ *
+ * Renders job state (thumbnail, progress, actions, menu) based on:
+ *  - Current lane (uploading|uploaded|issues)
+ *  - Job phase (queued → complete|error|missing_data)
+ *  - Issue kind (duplicate_photo|missing_gps|document_unresolved|upload_error)
+ *
+ * Action Gating (Spec: upload-panel.md § Wiring/Data):
+ * ✅ Uploading lane: view_progress, cancel_upload, remove_from_project
+ * ✅ Uploaded lane: download, view_file_details, open_project, open_in_media, remove_from_project
+ * ✅ Issues lane: Actions depend on issue kind:
+ *    - duplicate_photo: upload_anyway, open_existing_media
+ *    - missing_gps: place_on_map, change_location_map, change_location_address
+ *    - document_unresolved: place_on_map, change_location_map, change_location_address, add_to_project
+ *    - upload_error: retry, cancel_upload
+ *
+ * Menu Placement (Spec: down-first with fallback upward when clipped):
+ * ✅ Implemented via DropdownShellComponent (UPLOAD_ITEM_MENU_WIDTH=224px, offset-y=4px)
+ */
 @Component({
   selector: 'app-upload-panel-item',
   standalone: true,

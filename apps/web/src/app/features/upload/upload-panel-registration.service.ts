@@ -1,4 +1,7 @@
-import { Injectable, effect, inject, type Signal, type WritableSignal } from '@angular/core';
+/**
+ * UploadPanelRegistrationService — Static dependency wiring factory.
+ *
+ * Registers all panel services together in one call (from upload-panel-setup.service.ts):\n *  - UploadPanelJobActionsService (per-item menu routing)\n *  - UploadPanelBulkActionsService (selection + bulk actions)\n *  - UploadPanelViewModelService (UI helpers)\n *\n * Factory methods:\n *  - register(options): Wire all services with callbacks and signals\n *\n * Use when: Panel initialization; ensures all downstream services have correct context.\n */\n\nimport { Injectable, effect, inject, type Signal, type WritableSignal } from '@angular/core';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import {
   UploadPanelBulkActionsService,

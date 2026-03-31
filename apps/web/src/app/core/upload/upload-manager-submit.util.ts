@@ -99,6 +99,10 @@ async function resolveUploadProjectIdFromFolderName(
   folderName: string,
   deps: UploadManagerSubmitDeps,
 ): Promise<string | undefined> {
+  // ── Parse "Project: [projectname]" token from folder name ──────────────────
+  // Pattern: case-insensitive match for "project : [name]" at start of folder name.
+  // Spec (upload-manager-pipeline.md, Action 2a): Extract project context from
+  // folder naming convention and auto-assign/auto-create project.
   const projectTokenMatch = folderName.match(/^\s*project\s*:\s*(.+)$/i);
   if (!projectTokenMatch || !projectTokenMatch[1]) {
     return undefined;
@@ -116,6 +120,13 @@ async function resolveUploadProjectIdFromFolderName(
         project.name.toLowerCase() === projectNameHint.toLowerCase() && project.status === 'active',
     );
 
+    // ⚠️ SPEC GAP (Action 2a): Auto-create missing project.
+    // Current: Returns undefined if project not found; fails silently.
+    // Spec requires: "creates project if missing, otherwise assign to existing project automatically"
+    // TODO: Implement project auto-creation when no match found. Example:
+    //   if (matches.length === 0) {
+    //     return await deps.createProject(projectNameHint);
+    //   }
     return matches.length > 0 ? matches[0].id : undefined;
   } catch {
     return undefined;

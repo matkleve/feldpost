@@ -1,3 +1,28 @@
+/**
+ * UploadAttachPipelineService — handles the 'attach' upload pipeline.
+ *
+ * Pipeline phases (Spec: upload-manager-pipeline.md § Attach Upload Pipeline):
+ * validating → converting_format → hashing → dedup_check → uploading → saving_record → enrichment → complete
+ *
+ * Purpose: Add a new photo to an existing photoless image row after conflict resolution.
+ * Triggered by: conflict resolution response = 'use_existing' (user chooses to attach to found row)
+ *
+ * Entry points:
+ *  - run(jobId, ctx): Main orchestrator; prepares file, uploads, attaches to existing row
+ *
+ * Side effects:
+ *  - New storage file created and linked to existing row
+ *  - Row status updated from 'empty' to 'with_media'
+ *  - EXIF metadata captured from new photo
+ *  - RLS: Only user's org + row owner can attach
+ *
+ * Delegates to:
+ *  - UploadStorageService: Upload file, get storage_path
+ *  - UploadEnrichmentService: Reverse-geocode if new coords provided
+ *  - runAttachRecordUpdate: Atomically attach file + update row status
+ *  - Conflict resolution: Part of the conversation about duplicate handling (see upload-conflict.service.ts)
+ */
+
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { PhotoLoadService } from '../photo-load.service';

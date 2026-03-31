@@ -1,3 +1,20 @@
+<!-- 
+  UPLOAD PANEL TEMPLATE (upload-panel.component.html)
+  
+  Structure & Zones (Spec: upload-panel.md § Actions):
+  ✅ Block 1: Intake Zone — drag-drop, file picker, scan progress label
+  ✅ Block 2: Segmented Switch — lane selector (uploading|uploaded|issues)
+  ✅ Block 3: File List Stack — per-file items rendered by lane, scrollable
+  
+  Dialogs & Modals (Spec: upload-panel.md § Wiring/Data):
+  ✅ Duplicate Resolution Modal — use_existing | upload_anyway | reject
+  ✅ Project Selection Modal — assign file to active or pick project
+  ✅ Location Address Search Modal — resolve missing GPS by address lookup
+  
+  Spacing: Transparent gaps between blocks (no styling per design system).
+  Scale: Line count ~328; DOM complexity intentionally split across item/dialog/action services.
+-->
+
 <section
   class="upload-panel"
   [class.upload-panel--visible]="visible()"
@@ -5,6 +22,10 @@
   role="region"
   aria-label="Upload files"
 >
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+    BLOCK 1: INTAKE ZONE
+    Purpose: Drag-and-drop file selection + folder scanning progress feedback.
+    ═══════════════════════════════════════════════════════════════════════════ -->
   <div class="upload-panel__area upload-panel__area--intake">
     <header class="upload-panel__header">
       <h3 class="upload-panel__title">Upload files</h3>

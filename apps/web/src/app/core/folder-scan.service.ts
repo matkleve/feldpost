@@ -3,6 +3,16 @@
  *
  * Scans a FileSystemDirectoryHandle for supported image files and
  * reports progress as files are discovered.
+ *
+ * ⚠️ SPEC GAP: Uses callback pattern instead of progress Observable.
+ * Spec (folder-scan.md § Entry points): "Stream: scanProgress$ — emits
+ * discovered file counts during scan."
+ * Current: onFileFound callback parameter (not typed as Observable).
+ * TODO: (1) Create readonly scanProgress$: Observable<FileScanProgress>
+ *       (2) Emit events as files discovered during walkDirectory
+ *       (3) Update callers to subscribe to Observable instead of callback
+ *       (4) Maintain consistency with UploadManagerService event model
+ *           (imageUploaded$, jobPhaseChanged$, etc.)
  */
 
 import { Injectable } from '@angular/core';
@@ -74,6 +84,15 @@ export class FolderScanService {
   /**
    * Recursively scan a directory for image files.
    * Calls `onFileFound` for each discovered file so the caller can track progress.
+   *
+   * ⚠️ CALLBACK PATTERN (should be Observable per spec).
+   * Current: onFileFound?: (file: File, count: number) => void
+   * Spec requirement: Use Observable<FileScanProgress> instead.
+   * This maintains consistency with UploadManager's event-driven architecture:
+   * - imageUploaded$: Observable<ImageUploadedEvent>
+   * - jobPhaseChanged$: Observable<JobPhaseChangedEvent>
+   * - scanProgress$: Observable<FileScanProgress>  [MISSING]
+   * TODO: Convert to Observable-based progress reporting.
    */
   async scanDirectory(
     dirHandle: FileSystemDirectoryHandle,
