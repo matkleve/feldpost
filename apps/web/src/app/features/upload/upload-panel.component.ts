@@ -102,7 +102,7 @@ export class UploadPanelComponent {
   readonly rowHandlers = this.rows;
   readonly rowInteractionHandlers = this.rowInteractions;
   readonly bulkHandlers = this.bulkActions;
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   // Component I/O
   readonly visible = input<boolean>(false);
@@ -131,10 +131,7 @@ export class UploadPanelComponent {
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
-
-  dropzoneLabelText(): string {
-    return dropzoneLabelText(this.t);
-  }
+  readonly dropzoneLabelText = (): string => dropzoneLabelText(this.t);
 
   readonly laneSwitchOptions = this.viewModel.laneSwitchOptions;
   readonly visibleLaneJobs = this.viewModel.visibleLaneJobs;
@@ -147,11 +144,7 @@ export class UploadPanelComponent {
   readonly hasSelectedUploadJobs = this.viewModel.hasSelectedUploadJobs;
   readonly hasRetryableSelection = this.viewModel.hasRetryableSelection;
   readonly canDownloadSelectedUploads = this.viewModel.canDownloadSelectedUploads;
-
-  // Dialog state delegated to UploadPanelDialogSignals service
   private readonly dialogSignals = inject(UploadPanelDialogSignals);
-
-  // Expose dialog signals to template
   readonly projectSelectionDialogOpen = this.dialogSignals.projectSelectionDialogOpen;
   readonly projectSelectionDialogTitle = this.dialogSignals.projectSelectionDialogTitle;
   readonly projectSelectionDialogMessage = this.dialogSignals.projectSelectionDialogMessage;
@@ -165,56 +158,6 @@ export class UploadPanelComponent {
   readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
 
   constructor() {
-    /* PHASE 1 SAFETY NET - old constructor wiring
-    // Bridge component outputs to lifecycle service
-    this.lifecycle.setImageUploadedCallback((event) => this.imageUploaded.emit(event));
-    this.lifecycle.setPlacementRequestedCallback((jobId) => this.placementRequested.emit(jobId));
-    this.lifecycle.setAutoSwitchCallback(() => this.lanes.setSelectedLane('issues'));
-    this.lifecycle.initializeSubscriptions();
-
-    this.rowInteractions.register({
-      placementRequested: (jobId) => this.placementRequested.emit(jobId),
-      zoomToLocationRequested: (event) => this.zoomToLocationRequested.emit(event),
-    });
-
-    this.registration.register({
-      uploadManagerJobs: this.uploadManager.jobs,
-      jobs: this.jobs,
-      selectedUploadJobIds: this.selectedUploadJobIds,
-      jobActions: {
-        imageUploaded: (event) => this.imageUploaded.emit(event),
-        placementRequested: (jobId) => this.placementRequested.emit(jobId),
-        locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
-        locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),
-        locationPreviewCleared: () => this.locationPreviewCleared.emit(),
-        setLane: (lane) => this.lanes.setSelectedLane(lane),
-        selectedUploadJobIds: this.selectedUploadJobIds,
-        prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
-      },
-      viewModel: {
-        t: this.t,
-        laneCounts: this.laneCounts,
-        effectiveLane: this.effectiveLane,
-        laneJobs: this.laneJobs,
-        issueAttentionPulse: this.issueAttentionPulse,
-        prioritizedUploadedJobIds: this.prioritizedUploadedJobIds,
-        jobs: this.jobs,
-        selectedUploadJobIds: this.selectedUploadJobIds,
-        canZoomToJob: (job) => this.rows.canZoomToJob(job),
-      },
-      bulkActions: {
-        selectedUploadJobIds: this.selectedUploadJobIds,
-        selectedUploadJobs: () => this.selectedUploadJobs(),
-        setLane: (lane) => this.lanes.setSelectedLane(lane),
-        retryFile: (jobId) => this.rows.retryFile(jobId),
-        dismissFile: (jobId) => this.dismissFile(jobId),
-        cancelJob: (jobId) => this.uploadManager.cancelJob(jobId),
-        canZoomToJob: (job) => this.rows.canZoomToJob(job),
-        downloadUploadedJob: (job) => this.jobActions.downloadUploadedJob(job),
-      },
-    });
-    */
-
     this.setup.initialize({
       imageUploaded: (event) => this.imageUploaded.emit(event),
       placementRequested: (jobId) => this.placementRequested.emit(jobId),
@@ -227,12 +170,6 @@ export class UploadPanelComponent {
       dismissFile: (jobId) => this.dismissFile(jobId),
     });
   }
-
-  // ── Input handlers (delegated to inputs service) ────────────────────────
-
-  // ── Lane handlers (delegated to lanes service) ──────────────────────────
-
-  // ── Row handlers (delegated to rows service) ────────────────────────────
 
   // Public API used by map-shell pending-placement flow.
   placeFile(key: string, coords: ExifCoords): void {
