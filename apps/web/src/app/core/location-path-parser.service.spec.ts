@@ -43,4 +43,8 @@ describe('LocationPathParserService', () => {
     expect(service.validateAddressComponent('10700', 'zip', 'AT')).toBe(false);
     expect(service.validateAddressComponent('10115', 'zip', 'DE')).toBe(true);
   });
+
+  it('validates umlaut unit token format (Tür)', () => {
+    expect(service.validateAddressComponent('Tür 12', 'unit')).toBe(true);
+  });
 });

@@ -6,6 +6,14 @@
  *  - Path B: address in filename (high confidence) → conflict check → upload → save → forward-geocode
  *  - Path C: no GPS + no address → phase=missing_data, issueKind=missing_gps (photos) | document_unresolved (docs)
  *
+ * Deterministic precedence used by route logic:
+ *  1) EXIF GPS (strongest source)
+ *  2) High-confidence title address
+ *  3) Issues lane (`missing_data`) when no strong source exists
+ *
+ * Important: low-confidence title parsing is preserved as metadata but is not
+ * considered a reliable location anchor for auto-routing.
+ *
  * Entry points:
  *  - run(jobId, ctx): Main orchestrator; calls resumeIfAlreadyRoutedNewJob, prepareNewJobForUpload, routePreparedNewJob
  *

@@ -103,8 +103,24 @@ export async function routePreparedNewJob(
 ): Promise<void> {
   const isDocument = deps.uploadService.resolveMediaType(job.file) === 'document';
 
+  // Location resolution decision tree (deterministic, first match wins):
+  // Spec context:
+  // - docs/element-specs/upload-manager-pipeline.md (Actions 4, 4a, 5)
+  // - docs/element-specs/location-path-parser.md (filename priority behavior)
+  // 1) If EXIF GPS exists, GPS is the authoritative source for routing.
+  //    - Clear issue flag
+  //    - Run conflict check with coords
+  //    - Continue upload path with coords
+  // 2) If GPS is missing, try filename title extraction.
+  //    - Accept only `high` confidence title addresses for automatic routing
+  //    - Save titleAddress on job, run conflict check, continue upload path
+  // 3) Otherwise route to `missing_data` (no trustworthy location anchor).
+  //    - photos: issueKind=missing_gps
+  //    - documents: issueKind=document_unresolved
+  // This split ensures ambiguous/weak text does not silently bypass the issues lane.
+
   if (job.coords) {
-    deps.jobState.updateJob(jobId, { issueKind: undefined });
+    deps.jobState.updateJob(jobId, { issueKind: undefined, locationSourceUsed: 'exif' });
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
     await runUploadPhase(jobId, job.coords, parsedExif, ctx);
@@ -113,9 +129,31 @@ export async function routePreparedNewJob(
 
   deps.jobState.setPhase(jobId, 'extracting_title');
   const parsed = deps.filenameParser.extractAddress(job.file.name);
+  const inheritedTitleAddress = job.titleAddress?.trim();
   // Only accept high-confidence addresses; low-confidence → Issues
   if (parsed && parsed.confidence === 'high') {
-    deps.jobState.updateJob(jobId, { titleAddress: parsed.address, issueKind: undefined });
+    deps.jobState.updateJob(jobId, {
+      titleAddress: parsed.address,
+      titleAddressSource: 'file',
+      locationSourceUsed: 'file',
+      issueKind: undefined,
+    });
+    const conflicted = await runConflictCheck(deps, jobId, ctx);
+    if (conflicted) return;
+    await runUploadPhase(jobId, undefined, parsedExif, ctx);
+    return;
+  }
+
+  // Folder-level hints are defaults only and are used only when no high-confidence
+  // file-level title override was found for this file.
+  // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3 + Action 4).
+  if (inheritedTitleAddress) {
+    deps.jobState.updateJob(jobId, {
+      titleAddress: inheritedTitleAddress,
+      titleAddressSource: job.titleAddressSource ?? 'folder',
+      locationSourceUsed: 'folder',
+      issueKind: undefined,
+    });
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) return;
     await runUploadPhase(jobId, undefined, parsedExif, ctx);
@@ -124,6 +162,7 @@ export async function routePreparedNewJob(
 
   deps.jobState.setPhase(jobId, 'missing_data');
   deps.jobState.updateJob(jobId, {
+    locationSourceUsed: 'none',
     issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
     statusLabel: isDocument ? 'Choose location or project' : 'Missing location',
   });

@@ -52,6 +52,14 @@ export interface UploadJob {
   failedAt?: UploadPhase;
   coords?: ExifCoords;
   titleAddress?: string;
+  /** Effective source selected by routing for location resolution decisions. */
+  locationSourceUsed?: 'exif' | 'file' | 'folder' | 'none';
+  /** Source of titleAddress used for routing and audit visibility. */
+  titleAddressSource?: 'file' | 'folder';
+  /** Optional geocoded coordinates derived from titleAddress for reconciliation. */
+  titleAddressCoords?: ExifCoords;
+  /** Distance between EXIF coords and title-derived coords when both are available. */
+  locationMismatchMeters?: number;
   direction?: number;
   imageId?: string;
   storagePath?: string;

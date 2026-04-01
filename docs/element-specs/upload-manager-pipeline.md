@@ -79,6 +79,43 @@ Upload Manager Pipeline
 
 ## Data
 
+### Standortaufloesung: Algorithmus GPS vs. Titel
+
+Deterministische Reihenfolge (first-match-wins):
+
+1. Quelle EXIF-GPS pruefen.
+2. Wenn GPS vorhanden: Konfliktpruefung auf Koordinatenbasis ausfuehren und Upload fortsetzen.
+3. Wenn GPS fehlt: Titel/Filename-Adresse extrahieren.
+4. Nur bei `high` Confidence die Titeladresse als aufloesbaren Standort akzeptieren.
+5. Bei `low`/fehlender Titeladresse in `missing_data` routen:
+   - Foto: `issueKind=missing_gps`
+   - Dokument: `issueKind=document_unresolved`
+6. Nach erfolgreichem Save:
+   - Nur Koordinaten vorhanden -> reverse geocode (coords -> address)
+   - Nur Titeladresse vorhanden -> forward geocode (address -> coords)
+   - Beide vorhanden -> keine automatische Reconciliation in diesem Schritt.
+
+Pseudo-Ablauf:
+
+```ts
+if (job.coords) {
+  // Path A: GPS-priorisiert
+  runConflictCheck(coords);
+  upload(coords);
+} else if (titleAddress.confidence === "high") {
+  // Path B: Titeladresse-priorisiert
+  runConflictCheck(titleAddress);
+  upload(undefined);
+} else {
+  // Path C: nicht ausreichend aufloesbar
+  routeToMissingDataIssue();
+}
+
+// post-save enrichment
+if (coords && !titleAddress) reverseGeocode();
+else if (titleAddress && !coords) forwardGeocode();
+```
+
 ### Data Flow (Mermaid)
 
 ```mermaid

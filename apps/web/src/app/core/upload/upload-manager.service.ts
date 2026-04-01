@@ -23,6 +23,7 @@ import { Subject } from 'rxjs';
 import type { Signal } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { FilenameParserService } from '../filename-parser.service';
 import { FolderScanService } from '../folder-scan.service';
 import { MediaPreviewService } from '../media-preview.service';
 import { ProjectsService } from '../projects/projects.service';
@@ -127,6 +128,7 @@ export class UploadManagerService {
   private readonly batchService = inject(UploadBatchService);
   private readonly queue = inject(UploadQueueService);
   private readonly folderScan = inject(FolderScanService);
+  private readonly filenameParser = inject(FilenameParserService);
   private readonly mediaPreview = inject(MediaPreviewService);
   private readonly projects = inject(ProjectsService);
   private readonly newPipeline = inject(UploadNewPipelineService);
@@ -165,6 +167,24 @@ export class UploadManagerService {
     drainQueue: () => this.drainQueue(),
     scanDirectory: (dirHandle) => this.folderScan.scanDirectory(dirHandle),
     scanProgress$: this.folderScan.scanProgress$,
+    extractAddressFromFolderName: (folderName) => {
+      const parsed = this.filenameParser.extractAddress(folderName);
+      if (!parsed || parsed.confidence !== 'high') {
+        return undefined;
+      }
+      return parsed.address;
+    },
+    extractAddressFromFolderPathSegments: (segments) => {
+      // Walk from leaf to root so the most specific folder wins.
+      // Spec context: docs/element-specs/upload-manager-pipeline.md (file > folder specificity).
+      for (let index = segments.length - 1; index >= 0; index -= 1) {
+        const parsed = this.filenameParser.extractAddress(segments[index]);
+        if (parsed && parsed.confidence === 'high') {
+          return parsed.address;
+        }
+      }
+      return undefined;
+    },
     loadProjects: () => this.projects.loadProjects(),
     createProject: async (name: string) => {
       const draftProject = await this.projects.createDraftProject();

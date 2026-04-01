@@ -318,8 +318,8 @@ Decision policy:
 - [x] Addresses below threshold are marked `needs_review` instead of silently forced.
 - [x] Output always follows the `AddressExtractionResult` JSON format with all required fields.
 - [x] Service is country-agnostic; lookup tables can be swapped for different regions.
-- [ ] FolderScanService receives folder-level address hint and applies it to jobs without file-level override.
+- [x] FolderScanService receives folder-level address hint and applies it to jobs without file-level override.
 - [x] FilenameParserService calls `extractAddressFromFilename()` for individual files and receives filename-prioritized results.
 - [x] Ignored segments are tracked and returned so upstream consumers can audit noise filtering.
 - [x] Non-assignable address fragments are preserved in `address_notes[]` so no parsed signal is lost.
-- [ ] Hard conflicts (geographic mismatches) are logged but do not prevent upload; soft mismatches (distance) are handled separately by geocoding service.
+- [x] Hard conflicts (geographic mismatches) are logged but do not prevent upload; soft mismatches (distance) are handled separately by geocoding service.

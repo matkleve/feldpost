@@ -114,6 +114,14 @@ export class LocationPathParserService {
     const disambiguation = this.resolveDisambiguation(context, confidence);
     const issue = this.resolveIssue(context, conflict, disambiguation);
 
+    if (conflict) {
+      console.warn('[location-path-parser] geographic mismatch detected', {
+        fullPath,
+        conflict,
+        context,
+      });
+    }
+
     return this.formatResult({
       address_context: context,
       disambiguation,
@@ -178,7 +186,7 @@ export class LocationPathParserService {
     if (type === 'street')
       return hasStreetKeyword(segment) || parseStreetAndHouse(segment).street !== null;
     if (type === 'house_number') return /^\d{1,4}[A-Za-z]?$/.test(segment.trim());
-    return /^(Top\s*\d+|Stiege\s*[A-Za-z0-9]+|T�r\s*\d+|Unit\s*[A-Za-z0-9]+)$/i.test(
+    return /^(Top\s*\d+|Stiege\s*[A-Za-z0-9]+|Tür\s*\d+|Unit\s*[A-Za-z0-9]+)$/i.test(
       segment.trim(),
     );
   }

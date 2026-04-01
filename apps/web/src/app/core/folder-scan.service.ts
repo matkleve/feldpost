@@ -4,15 +4,10 @@
  * Scans a FileSystemDirectoryHandle for supported image files and
  * reports progress as files are discovered.
  *
- * ⚠️ SPEC GAP: Uses callback pattern instead of progress Observable.
- * Spec (folder-scan.md § Entry points): "Stream: scanProgress$ — emits
- * discovered file counts during scan."
- * Current: onFileFound callback parameter (not typed as Observable).
- * TODO: (1) Create readonly scanProgress$: Observable<FileScanProgress>
- *       (2) Emit events as files discovered during walkDirectory
- *       (3) Update callers to subscribe to Observable instead of callback
- *       (4) Maintain consistency with UploadManagerService event model
- *           (imageUploaded$, jobPhaseChanged$, etc.)
+ * Progress contract:
+ * - Emits `scanProgress$` for every accepted file.
+ * - `fileCount` is cumulative within one scan run.
+ * - `currentFile` is the file name that triggered the latest increment.
  */
 
 import { Injectable } from '@angular/core';
@@ -21,6 +16,17 @@ import { Observable, Subject } from 'rxjs';
 export interface FileScanProgress {
   fileCount: number;
   currentFile?: string;
+}
+
+export interface ScannedFileEntry {
+  file: File;
+  // Workspace-relative path within the selected folder root.
+  // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3/4).
+  // Used to derive per-file folder hints for mixed directory structures.
+  relativePath: string;
+  // Folder segments from root to the file's parent directory.
+  // Spec context: docs/element-specs/location-path-parser.md (hierarchical parsing).
+  directorySegments: readonly string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -94,13 +100,17 @@ export class FolderScanService {
    * Recursively scan a directory for image files.
    * Emits progress as files are discovered via scanProgress$ Observable.
    */
-  async scanDirectory(dirHandle: FileSystemDirectoryHandle): Promise<File[]> {
-    const files: File[] = [];
-    await this.walkDirectory(dirHandle, files);
-    return files;
+  async scanDirectory(dirHandle: FileSystemDirectoryHandle): Promise<ScannedFileEntry[]> {
+    const entries: ScannedFileEntry[] = [];
+    await this.walkDirectory(dirHandle, entries, []);
+    return entries;
   }
 
-  private async walkDirectory(dirHandle: FileSystemDirectoryHandle, files: File[]): Promise<void> {
+  private async walkDirectory(
+    dirHandle: FileSystemDirectoryHandle,
+    entries: ScannedFileEntry[],
+    pathSegments: readonly string[],
+  ): Promise<void> {
     for await (const entry of (dirHandle as any).values()) {
       if (entry.kind === 'file') {
         const fileHandle = entry as FileSystemFileHandle;
@@ -110,11 +120,18 @@ export class FolderScanService {
           FolderScanService.SUPPORTED_IMAGE_TYPES.has(file.type) ||
           FolderScanService.SUPPORTED_EXTENSIONS.has(ext)
         ) {
-          files.push(file);
-          this.scanProgressSubject$.next({ fileCount: files.length, currentFile: file.name });
+          entries.push({
+            file,
+            relativePath: [...pathSegments, file.name].join('/'),
+            directorySegments: pathSegments,
+          });
+          this.scanProgressSubject$.next({ fileCount: entries.length, currentFile: file.name });
         }
       } else if (entry.kind === 'directory') {
-        await this.walkDirectory(entry as FileSystemDirectoryHandle, files);
+        await this.walkDirectory(entry as FileSystemDirectoryHandle, entries, [
+          ...pathSegments,
+          entry.name,
+        ]);
       }
     }
   }

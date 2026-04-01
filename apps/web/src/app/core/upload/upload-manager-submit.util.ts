@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import type { ProjectListItem } from '../projects/projects.types';
-import type { FileScanProgress } from '../folder-scan.service';
+import type { FileScanProgress, ScannedFileEntry } from '../folder-scan.service';
 import type { UploadBatch, UploadJob, UploadPhase, SubmitOptions } from './upload-manager.types';
 
 export interface UploadManagerSubmitDeps {
@@ -10,8 +10,10 @@ export interface UploadManagerSubmitDeps {
   createImmediatePreviewUrl: (file: File) => string | undefined;
   hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => void;
   drainQueue: () => void;
-  scanDirectory: (dirHandle: FileSystemDirectoryHandle) => Promise<File[]>;
+  scanDirectory: (dirHandle: FileSystemDirectoryHandle) => Promise<ReadonlyArray<ScannedFileEntry>>;
   scanProgress$: Observable<FileScanProgress>;
+  extractAddressFromFolderName: (folderName: string) => string | undefined;
+  extractAddressFromFolderPathSegments: (segments: readonly string[]) => string | undefined;
   loadProjects: () => Promise<ReadonlyArray<ProjectListItem>>;
   createProject: (name: string) => Promise<string | undefined>;
   queuedLabel: string;
@@ -37,7 +39,13 @@ export function submitUploadManagerFiles(
     startedAt: new Date(),
   });
 
-  const newJobs = createNewUploadJobs(files, batchId, options?.projectId, deps);
+  const scannedEntries: ScannedFileEntry[] = files.map((file) => ({
+    file,
+    relativePath: file.name,
+    directorySegments: [],
+  }));
+
+  const newJobs = createNewUploadJobs(scannedEntries, batchId, options?.projectId, deps);
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
@@ -54,11 +62,10 @@ export async function submitUploadManagerFolder(
   const batchId = crypto.randomUUID();
   const label = options?.batchLabel ?? dirHandle.name;
 
-  let projectIdFromFolder: string | undefined;
-  if (!options?.projectId) {
-    projectIdFromFolder = await resolveUploadProjectIdFromFolderName(dirHandle.name, deps);
-  }
-  const resolvedProjectId = options?.projectId ?? projectIdFromFolder;
+  // Root-level fallback hint extracted from the selected folder label.
+  // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3, Action 4).
+  // File-level and per-segment hints can override this default later.
+  const folderAddressHint = deps.extractAddressFromFolderName(label);
 
   deps.addBatch({
     id: batchId,
@@ -76,21 +83,42 @@ export async function submitUploadManagerFolder(
   const scanSub = deps.scanProgress$.subscribe((progress) => {
     deps.updateBatch(batchId, { totalFiles: progress.fileCount });
   });
-  const files = await filesPromise;
-  scanSub.unsubscribe();
+
+  let scannedEntries: ReadonlyArray<ScannedFileEntry>;
+  try {
+    scannedEntries = await filesPromise;
+  } finally {
+    scanSub.unsubscribe();
+  }
 
   deps.updateBatch(batchId, {
-    totalFiles: files.length,
-    label: `${label} - ${files.length} file${files.length === 1 ? '' : 's'}`,
-    status: files.length > 0 ? 'uploading' : 'complete',
+    totalFiles: scannedEntries.length,
+    label: `${label} - ${scannedEntries.length} file${scannedEntries.length === 1 ? '' : 's'}`,
+    status: scannedEntries.length > 0 ? 'uploading' : 'complete',
   });
 
-  if (files.length === 0) {
+  if (scannedEntries.length === 0) {
+    // No jobs means no side effects such as project auto-create.
+    // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 2a scoped to uploads).
     deps.updateBatch(batchId, { finishedAt: new Date() });
     return batchId;
   }
 
-  const newJobs = createNewUploadJobs(files, batchId, resolvedProjectId, deps);
+  let projectIdFromFolder: string | undefined;
+  if (!options?.projectId) {
+    // Project token resolution runs only when there is at least one file to enqueue.
+    // Prevents accidental project creation for empty folder selections.
+    projectIdFromFolder = await resolveUploadProjectIdFromFolderName(dirHandle.name, deps);
+  }
+  const resolvedProjectId = options?.projectId ?? projectIdFromFolder;
+
+  const newJobs = createNewUploadJobs(
+    scannedEntries,
+    batchId,
+    resolvedProjectId,
+    deps,
+    folderAddressHint,
+  );
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
@@ -136,21 +164,34 @@ async function resolveUploadProjectIdFromFolderName(
 }
 
 function createNewUploadJobs(
-  files: ReadonlyArray<File>,
+  scannedEntries: ReadonlyArray<ScannedFileEntry>,
   batchId: string,
   projectId: string | undefined,
   deps: UploadManagerSubmitDeps,
+  folderAddressHint?: string,
 ): UploadJob[] {
-  return files.map((file) => ({
-    id: crypto.randomUUID(),
-    batchId,
-    file,
-    phase: 'queued' as UploadPhase,
-    progress: 0,
-    statusLabel: deps.queuedLabel,
-    thumbnailUrl: deps.createImmediatePreviewUrl(file),
-    submittedAt: new Date(),
-    mode: 'new',
-    projectId,
-  }));
+  return scannedEntries.map((entry) => {
+    // Folder hint precedence for mixed trees:
+    // 1) nearest matching directory segment hint
+    // 2) root folder hint fallback
+    // File-level title extraction remains authoritative in routing.
+    // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3/4).
+    const perFileFolderHint =
+      deps.extractAddressFromFolderPathSegments(entry.directorySegments) ?? folderAddressHint;
+
+    return {
+      id: crypto.randomUUID(),
+      batchId,
+      file: entry.file,
+      phase: 'queued' as UploadPhase,
+      progress: 0,
+      statusLabel: deps.queuedLabel,
+      thumbnailUrl: deps.createImmediatePreviewUrl(entry.file),
+      submittedAt: new Date(),
+      mode: 'new',
+      projectId,
+      titleAddress: perFileFolderHint,
+      titleAddressSource: perFileFolderHint ? 'folder' : undefined,
+    };
+  });
 }

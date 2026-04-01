@@ -75,4 +75,17 @@ export class UploadEnrichmentService {
       return undefined;
     }
   }
+
+  /**
+   * Forward-geocode only (no persistence). Used for EXIF-vs-title reconciliation.
+   */
+  async forwardGeocodeAddress(titleAddress: string): Promise<ExifCoords | undefined> {
+    try {
+      const result = await this.geocoding.forward(titleAddress);
+      if (!result) return undefined;
+      return { lat: result.lat, lng: result.lng };
+    } catch {
+      return undefined;
+    }
+  }
 }

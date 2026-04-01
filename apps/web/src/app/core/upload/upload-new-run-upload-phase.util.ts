@@ -81,6 +81,8 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     enrichWithReverseGeocode: (imageId) => enrich.enrichWithReverseGeocode(imageId),
     enrichWithForwardGeocode: (imageId, titleAddress) =>
       enrich.enrichWithForwardGeocode(imageId, titleAddress),
+    geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
+    mismatchToleranceMeters: 15,
     setLocalUrl: (imageId, localUrl) => photoLoad.setLocalUrl(imageId, localUrl),
     emitImageUploaded: (event) => ctx.emitImageUploaded(event),
   });
