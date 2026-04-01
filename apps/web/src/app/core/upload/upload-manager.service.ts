@@ -163,8 +163,17 @@ export class UploadManagerService {
     createImmediatePreviewUrl: (file) => this.mediaPreview.createImmediatePreviewUrl(file),
     hydrateDeferredPreviews: (jobs) => this.hydrateDeferredPreviews(jobs),
     drainQueue: () => this.drainQueue(),
-    scanDirectory: (dirHandle, onProgress) => this.folderScan.scanDirectory(dirHandle, onProgress),
+    scanDirectory: (dirHandle) => this.folderScan.scanDirectory(dirHandle),
+    scanProgress$: this.folderScan.scanProgress$,
     loadProjects: () => this.projects.loadProjects(),
+    createProject: async (name: string) => {
+      const draftProject = await this.projects.createDraftProject();
+      if (!draftProject) {
+        return undefined;
+      }
+      const renamed = await this.projects.renameProject(draftProject.id, name);
+      return renamed ? draftProject.id : undefined;
+    },
     queuedLabel: phaseLabel('queued'),
   };
 

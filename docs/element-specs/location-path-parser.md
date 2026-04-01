@@ -304,22 +304,22 @@ Decision policy:
 
 ## Acceptance Criteria
 
-- [ ] Service parses a multi-segment path and extracts city, zip, street, house number, and unit separately.
-- [ ] City validation uses a whitelist lookup (hardcoded or imported); non-matches skip without error.
-- [ ] Postal code validation uses country-specific regex patterns (AT: 4 digits, DE: 5 digits, etc.).
-- [ ] Street keyword detection supports plurals and abbreviations (Gasse/Gassen, Str./Straße, Platz/Plätze).
-- [ ] Noise segments (e.g., "Fotos von Montag", "Urlaub", "Neu") are skipped and added to ignored list without errors.
-- [ ] Confidence score starts at 0.5 and increments: +0.2 per city/street match, +0.25 per postal code match.
-- [ ] Filename addresses are extracted as highest-priority overrides to folder-level context.
-- [ ] Filename-to-folder conflicts are detected only if geographic mismatch is found (e.g., Wien vs. Berlin).
-- [ ] Missing city or postal code generates an issue flag (address cannot be anchored).
-- [ ] Ambiguous street+house matches run one of three ranking strategies (`cluster-majority`, `distance-weighted`, `bayesian-context`).
-- [ ] Auto-assignment only happens when top probability meets configurable threshold (default `0.95`).
-- [ ] Addresses below threshold are marked `needs_review` instead of silently forced.
-- [ ] Output always follows the `AddressExtractionResult` JSON format with all required fields.
-- [ ] Service is country-agnostic; lookup tables can be swapped for different regions.
+- [x] Service parses a multi-segment path and extracts city, zip, street, house number, and unit separately.
+- [x] City validation uses a whitelist lookup (hardcoded or imported); non-matches skip without error.
+- [x] Postal code validation uses country-specific regex patterns (AT: 4 digits, DE: 5 digits, etc.).
+- [x] Street keyword detection supports plurals and abbreviations (Gasse/Gassen, Str./Straße, Platz/Plätze).
+- [x] Noise segments (e.g., "Fotos von Montag", "Urlaub", "Neu") are skipped and added to ignored list without errors.
+- [x] Confidence score starts at 0.5 and increments: +0.2 per city/street match, +0.25 per postal code match.
+- [x] Filename addresses are extracted as highest-priority overrides to folder-level context.
+- [x] Filename-to-folder conflicts are detected only if geographic mismatch is found (e.g., Wien vs. Berlin).
+- [x] Missing city or postal code generates an issue flag (address cannot be anchored).
+- [x] Ambiguous street+house matches run one of three ranking strategies (`cluster-majority`, `distance-weighted`, `bayesian-context`).
+- [x] Auto-assignment only happens when top probability meets configurable threshold (default `0.95`).
+- [x] Addresses below threshold are marked `needs_review` instead of silently forced.
+- [x] Output always follows the `AddressExtractionResult` JSON format with all required fields.
+- [x] Service is country-agnostic; lookup tables can be swapped for different regions.
 - [ ] FolderScanService receives folder-level address hint and applies it to jobs without file-level override.
-- [ ] FilenameParserService calls `extractAddressFromFilename()` for individual files and receives filename-prioritized results.
-- [ ] Ignored segments are tracked and returned so upstream consumers can audit noise filtering.
-- [ ] Non-assignable address fragments are preserved in `address_notes[]` so no parsed signal is lost.
+- [x] FilenameParserService calls `extractAddressFromFilename()` for individual files and receives filename-prioritized results.
+- [x] Ignored segments are tracked and returned so upstream consumers can audit noise filtering.
+- [x] Non-assignable address fragments are preserved in `address_notes[]` so no parsed signal is lost.
 - [ ] Hard conflicts (geographic mismatches) are logged but do not prevent upload; soft mismatches (distance) are handled separately by geocoding service.

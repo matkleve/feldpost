@@ -1,4 +1,22 @@
-/**\n * drainUploadManagerQueue() — Pull queued jobs and start pipeline for available slots.\n *\n * Logic (Spec: upload-manager-pipeline.md § Queue Draining):\n *  1. Snapshot current jobs\n *  2. Count available slots (MAX_CONCURRENT=3)\n *  3. If slots avail: select N queued jobs via selectQueuedJobsForStart()\n *  4. For each job: ensureAbortController → markRunning → runPipeline()\n *  5. Exit if no slots (queue waits for running jobs to complete)\n *\n * Called by:\n *  - submitUploadManagerFiles() / submitUploadManagerFolder() (initial queue kick)\n *  - retryUploadManagerJob() (after retry)\n *  - Job completion (markDone → notifies queue there's now space)\n *\n * Logging: Debug console output for diagnostics (job phases, selected queue items)\n */\n\nimport type { UploadJob } from './upload-manager.types';
+/**
+ * drainUploadManagerQueue() — Pull queued jobs and start pipeline for available slots.
+ *
+ * Logic (Spec: upload-manager-pipeline.md § Queue Draining):
+ *  1. Snapshot current jobs
+ *  2. Count available slots (MAX_CONCURRENT=3)
+ *  3. If slots avail: select N queued jobs via selectQueuedJobsForStart()
+ *  4. For each job: ensureAbortController → markRunning → runPipeline()
+ *  5. Exit if no slots (queue waits for running jobs to complete)
+ *
+ * Called by:
+ *  - submitUploadManagerFiles() / submitUploadManagerFolder() (initial queue kick)
+ *  - retryUploadManagerJob() (after retry)
+ *  - Job completion (markDone → notifies queue there's now space)
+ *
+ * Logging: Debug console output for diagnostics (job phases, selected queue items)
+ */
+
+import type { UploadJob } from './upload-manager.types';
 import { selectQueuedJobsForStart } from './upload-manager-queue.util';
 
 export interface DrainUploadManagerQueueDeps {

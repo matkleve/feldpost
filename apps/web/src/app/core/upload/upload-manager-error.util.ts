@@ -1,4 +1,9 @@
-/**\n * handleUploadPipelineError() — Catch-all error handler for pipeline exceptions.\n * Checks if job was cancelled; if not, fails job with error message + emits batchProgress + drains queue.\n */\n\nimport { isCancelledUploadJob } from './upload-cancelled.util';
+/**
+ * handleUploadPipelineError() — Catch-all error handler for pipeline exceptions.
+ * Checks if job was cancelled; if not, fails job with error message + emits batchProgress + drains queue.
+ */
+
+import { isCancelledUploadJob } from './upload-cancelled.util';
 import type { UploadJob, UploadPhase } from './upload-manager.types';
 
 export interface HandleUploadPipelineErrorDeps {

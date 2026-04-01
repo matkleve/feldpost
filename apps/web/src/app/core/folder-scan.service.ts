@@ -16,9 +16,18 @@
  */
 
 import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+
+export interface FileScanProgress {
+  fileCount: number;
+  currentFile?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class FolderScanService {
+  private readonly scanProgressSubject$ = new Subject<FileScanProgress>();
+  readonly scanProgress$: Observable<FileScanProgress> = this.scanProgressSubject$.asObservable();
+
   private static readonly SUPPORTED_IMAGE_TYPES = new Set([
     'image/jpeg',
     'image/png',
@@ -83,31 +92,15 @@ export class FolderScanService {
 
   /**
    * Recursively scan a directory for image files.
-   * Calls `onFileFound` for each discovered file so the caller can track progress.
-   *
-   * ⚠️ CALLBACK PATTERN (should be Observable per spec).
-   * Current: onFileFound?: (file: File, count: number) => void
-   * Spec requirement: Use Observable<FileScanProgress> instead.
-   * This maintains consistency with UploadManager's event-driven architecture:
-   * - imageUploaded$: Observable<ImageUploadedEvent>
-   * - jobPhaseChanged$: Observable<JobPhaseChangedEvent>
-   * - scanProgress$: Observable<FileScanProgress>  [MISSING]
-   * TODO: Convert to Observable-based progress reporting.
+   * Emits progress as files are discovered via scanProgress$ Observable.
    */
-  async scanDirectory(
-    dirHandle: FileSystemDirectoryHandle,
-    onFileFound?: (file: File, count: number) => void,
-  ): Promise<File[]> {
+  async scanDirectory(dirHandle: FileSystemDirectoryHandle): Promise<File[]> {
     const files: File[] = [];
-    await this.walkDirectory(dirHandle, files, onFileFound);
+    await this.walkDirectory(dirHandle, files);
     return files;
   }
 
-  private async walkDirectory(
-    dirHandle: FileSystemDirectoryHandle,
-    files: File[],
-    onFileFound?: (file: File, count: number) => void,
-  ): Promise<void> {
+  private async walkDirectory(dirHandle: FileSystemDirectoryHandle, files: File[]): Promise<void> {
     for await (const entry of (dirHandle as any).values()) {
       if (entry.kind === 'file') {
         const fileHandle = entry as FileSystemFileHandle;
@@ -118,10 +111,10 @@ export class FolderScanService {
           FolderScanService.SUPPORTED_EXTENSIONS.has(ext)
         ) {
           files.push(file);
-          onFileFound?.(file, files.length);
+          this.scanProgressSubject$.next({ fileCount: files.length, currentFile: file.name });
         }
       } else if (entry.kind === 'directory') {
-        await this.walkDirectory(entry as FileSystemDirectoryHandle, files, onFileFound);
+        await this.walkDirectory(entry as FileSystemDirectoryHandle, files);
       }
     }
   }

@@ -1,4 +1,6 @@
+import { Observable } from 'rxjs';
 import type { ProjectListItem } from '../projects/projects.types';
+import type { FileScanProgress } from '../folder-scan.service';
 import type { UploadBatch, UploadJob, UploadPhase, SubmitOptions } from './upload-manager.types';
 
 export interface UploadManagerSubmitDeps {
@@ -8,11 +10,10 @@ export interface UploadManagerSubmitDeps {
   createImmediatePreviewUrl: (file: File) => string | undefined;
   hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => void;
   drainQueue: () => void;
-  scanDirectory: (
-    dirHandle: FileSystemDirectoryHandle,
-    onProgress: (file: File, count: number) => void,
-  ) => Promise<File[]>;
+  scanDirectory: (dirHandle: FileSystemDirectoryHandle) => Promise<File[]>;
+  scanProgress$: Observable<FileScanProgress>;
   loadProjects: () => Promise<ReadonlyArray<ProjectListItem>>;
+  createProject: (name: string) => Promise<string | undefined>;
   queuedLabel: string;
 }
 
@@ -71,9 +72,12 @@ export async function submitUploadManagerFolder(
     startedAt: new Date(),
   });
 
-  const files = await deps.scanDirectory(dirHandle, (_file, count) => {
-    deps.updateBatch(batchId, { totalFiles: count });
+  const filesPromise = deps.scanDirectory(dirHandle);
+  const scanSub = deps.scanProgress$.subscribe((progress) => {
+    deps.updateBatch(batchId, { totalFiles: progress.fileCount });
   });
+  const files = await filesPromise;
+  scanSub.unsubscribe();
 
   deps.updateBatch(batchId, {
     totalFiles: files.length,
@@ -120,14 +124,12 @@ async function resolveUploadProjectIdFromFolderName(
         project.name.toLowerCase() === projectNameHint.toLowerCase() && project.status === 'active',
     );
 
-    // ⚠️ SPEC GAP (Action 2a): Auto-create missing project.
-    // Current: Returns undefined if project not found; fails silently.
-    // Spec requires: "creates project if missing, otherwise assign to existing project automatically"
-    // TODO: Implement project auto-creation when no match found. Example:
-    //   if (matches.length === 0) {
-    //     return await deps.createProject(projectNameHint);
-    //   }
-    return matches.length > 0 ? matches[0].id : undefined;
+    if (matches.length > 0) {
+      return matches[0].id;
+    }
+
+    const newProjectId = await deps.createProject(projectNameHint);
+    return newProjectId;
   } catch {
     return undefined;
   }

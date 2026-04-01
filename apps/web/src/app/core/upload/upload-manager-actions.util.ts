@@ -1,4 +1,21 @@
-/**\n * UploadManagerActionFunctions — Public action implementations:\n * retryUploadManagerJob, cancelUploadManagerJob, dismissUploadManagerJob,\n * placeUploadManagerJob, assignUploadManagerJobToProject, resolveUploadManagerConflict,\n * attachUploadManagerFile, replaceUploadManagerFile, forceUploadManagerDuplicateUpload,\n * hydrateUploadManagerDeferredPreviews, cancelUploadManagerBatch, dismissAllUploadManagerCompleted.\n *\n * All functions follow the same pattern:\n *  (1) Find job by jobId\n *  (2) Guard: Check phase/state preconditions\n *  (3) Update: Mutate job state via deps.updateJob()\n *  (4) Emit: Queue drain (deps.drainQueue()) if phase changed from terminal\n *  (5) Abort/Cleanup: Call deps.abortJobRequest(jobId) if cancelling active job\n *\n * RLS boundary: All mutations respect user org + role permissions (enforced in service layer).\n */\n\nimport type { ConflictResolution, UploadJob, UploadPhase } from './upload-manager.types';
+/**
+ * UploadManagerActionFunctions — Public action implementations:
+ * retryUploadManagerJob, cancelUploadManagerJob, dismissUploadManagerJob,
+ * placeUploadManagerJob, assignUploadManagerJobToProject, resolveUploadManagerConflict,
+ * attachUploadManagerFile, replaceUploadManagerFile, forceUploadManagerDuplicateUpload,
+ * hydrateUploadManagerDeferredPreviews, cancelUploadManagerBatch, dismissAllUploadManagerCompleted.
+ *
+ * All functions follow the same pattern:
+ *  (1) Find job by jobId
+ *  (2) Guard: Check phase/state preconditions
+ *  (3) Update: Mutate job state via deps.updateJob()
+ *  (4) Emit: Queue drain (deps.drainQueue()) if phase changed from terminal
+ *  (5) Abort/Cleanup: Call deps.abortJobRequest(jobId) if cancelling active job
+ *
+ * RLS boundary: All mutations respect user org + role permissions (enforced in service layer).
+ */
+
+import type { ConflictResolution, UploadJob, UploadPhase } from './upload-manager.types';
 
 export interface UploadManagerActionsDeps {
   findJob: (jobId: string) => UploadJob | undefined;

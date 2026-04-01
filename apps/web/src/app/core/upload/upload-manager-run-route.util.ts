@@ -1,4 +1,10 @@
-/**\n * runUploadPipelineByMode() — Route job to correct pipeline by mode.\n * Delegates to UploadNewPipelineService, UploadReplacePipelineService, or UploadAttachPipelineService\n * based on job.mode. Entry point for pipeline execution.\n */\n\nimport type { UploadJob } from './upload-manager.types';
+/**
+ * runUploadPipelineByMode() — Route job to correct pipeline by mode.
+ * Delegates to UploadNewPipelineService, UploadReplacePipelineService, or UploadAttachPipelineService
+ * based on job.mode. Entry point for pipeline execution.
+ */
+
+import type { UploadJob } from './upload-manager.types';
 
 export interface RunUploadPipelineByModeDeps {
   runReplace: (jobId: string) => Promise<void>;

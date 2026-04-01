@@ -1,3 +1,26 @@
+import { computed, Injectable, signal } from '@angular/core';
+import type { UploadJob } from '../../core/upload/upload-manager.service';
+import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
+import {
+  buildLaneSwitchOptions,
+  sortUploadedByPriority,
+  isRetryableJob,
+} from './upload-panel-helpers';
+import type { UploadLaneCounts } from './upload-panel-helpers';
+import type { UploadLane } from './upload-phase.helpers';
+
+export interface UploadPanelViewModelRegisterOptions {
+  t: (key: string, fallback?: string) => string;
+  laneCounts: () => UploadLaneCounts;
+  issueAttentionPulse: () => boolean;
+  effectiveLane: () => UploadLane;
+  laneJobs: () => ReadonlyArray<UploadJob>;
+  prioritizedUploadedJobIds: () => ReadonlySet<string>;
+  selectedUploadJobIds: () => ReadonlySet<string>;
+  jobs: () => ReadonlyArray<UploadJob>;
+  canZoomToJob: (job: UploadJob) => boolean;
+}
+
 /**
  * UploadPanelViewModelService — Presentation logic and UI helper functions.
  *
@@ -7,13 +30,15 @@
  *  - Retry eligibility (which jobs can be retried)
  *  - Selection state and bulk action filtering
  *  - Zoom capability checking (can zoom to job on map)
- * 
+ *
  * Delegates to:
  *  - upload-panel-helpers: buildLaneSwitchOptions, sortUploadedByPriority, isRetryableJob
  *  - UploadPanelRegistration: Static factory for view model registration
- * 
+ *
  * Lifecycle: Created once at panel initialization; survives component rebuild.
  */
+@Injectable({ providedIn: 'root' })
+export class UploadPanelViewModelService {
   private readonly options = signal<UploadPanelViewModelRegisterOptions | null>(null);
 
   register(options: UploadPanelViewModelRegisterOptions): void {

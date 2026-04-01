@@ -17,6 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
+import { LocationPathParserService } from './location-path-parser.service';
 
 /** Camera-generated filename prefixes that carry no address information. */
 const CAMERA_PREFIXES = /^(IMG|DSC|DCIM|P|PXL|MVIMG|PANO|VID|MOV|Screenshot)[\s_-]/i;
@@ -57,6 +58,10 @@ export interface ParsedAddress {
 
 @Injectable({ providedIn: 'root' })
 export class FilenameParserService {
+  constructor(
+    private readonly locationPathParser: LocationPathParserService = new LocationPathParserService(),
+  ) {}
+
   /**
    * Attempts to extract an address hint from a filename with confidence level.
    * High: explicit street-type suffix detected.
@@ -94,12 +99,39 @@ export class FilenameParserService {
 
     // Primary path: explicit street-type suffix (high confidence).
     if (STREET_SUFFIXES.test(cleaned)) {
-      return { address: cleaned, confidence: 'high' };
+      const parsed = this.locationPathParser.extractAddressFromFilename(cleaned);
+      if (!parsed.address_context.street) {
+        return undefined;
+      }
+      const address = this.locationPathParser.formatAddressLine(
+        parsed.address_context.street,
+        parsed.address_context.house_number,
+        parsed.address_context.city,
+      );
+      return { address: address || cleaned, confidence: 'high' };
     }
 
     // Fallback path: conservative "StreetName 12[, City]" detection (low confidence).
     const fallback = this.extractFallbackAddress(cleaned);
-    return fallback ? { address: fallback, confidence: 'low' } : undefined;
+    if (!fallback) {
+      return undefined;
+    }
+
+    const parsedFallback = this.locationPathParser.extractAddressFromFilename(fallback);
+    if (!parsedFallback.address_context.street) {
+      return undefined;
+    }
+
+    const normalizedFallback = this.locationPathParser.formatAddressLine(
+      parsedFallback.address_context.street,
+      parsedFallback.address_context.house_number,
+      parsedFallback.address_context.city,
+    );
+
+    return {
+      address: normalizedFallback || fallback,
+      confidence: 'low',
+    };
   }
 
   private extractFallbackAddress(cleaned: string): string | undefined {
