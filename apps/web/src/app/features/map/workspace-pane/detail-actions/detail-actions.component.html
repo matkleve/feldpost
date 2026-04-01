@@ -1,36 +1,33 @@
 <div class="dd-section-label">{{ t('workspace.detailActions.section.title', 'Actions') }}</div>
 
-<button
-  class="dd-item"
-  type="button"
-  [disabled]="!hasCoordinates()"
-  (click)="zoomToLocation.emit()"
->
-  <span class="material-icons dd-item__icon" aria-hidden="true">gps_fixed</span>
-  <span class="dd-item__label">{{
-    t('workspace.detailActions.action.zoomToLocation', 'Zoom to location')
-  }}</span>
-</button>
+@for (action of actions(); track action.id) {
+  @if (action.section === 'primary' || action.section === 'secondary') {
+    <button
+      class="dd-item"
+      type="button"
+      [disabled]="action.disabled"
+      (click)="actionSelected.emit(action.id)"
+    >
+      <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+      <span class="dd-item__label">{{ action.label }}</span>
+    </button>
+  }
+}
 
-<button class="dd-item" type="button" (click)="addToProject.emit()">
-  <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
-  <span class="dd-item__label">{{
-    t('workspace.detailActions.action.addToProject', 'Add to project')
-  }}</span>
-</button>
+@if (hasDestructiveActions()) {
+  <div class="dd-divider"></div>
+}
 
-<button class="dd-item" type="button" (click)="copyCoordinates.emit()">
-  <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-  <span class="dd-item__label">{{
-    t('workspace.detailActions.action.copyCoordinates', 'Copy coordinates')
-  }}</span>
-</button>
-
-<div class="dd-divider"></div>
-
-<button class="dd-item dd-item--danger" type="button" (click)="deleteImage.emit()">
-  <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-  <span class="dd-item__label">{{
-    t('workspace.detailActions.action.deleteImage', 'Delete image')
-  }}</span>
-</button>
+@for (action of actions(); track action.id + '-danger') {
+  @if (action.section === 'destructive') {
+    <button
+      class="dd-item dd-item--danger"
+      type="button"
+      [disabled]="action.disabled"
+      (click)="actionSelected.emit(action.id)"
+    >
+      <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+      <span class="dd-item__label">{{ action.label }}</span>
+    </button>
+  }
+}

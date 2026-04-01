@@ -97,6 +97,7 @@ export type {
 
 import type {
   UploadPhase,
+  UploadAddressCandidate,
   UploadJob,
   SubmitOptions,
   ImageUploadedEvent,
@@ -336,6 +337,26 @@ export class UploadManagerService {
    */
   placeJob(jobId: string, coords: ExifCoords): void {
     placeUploadManagerJob(jobId, coords, this.actionDeps);
+  }
+
+  /**
+   * Resolve an address-ambiguous issue using a concrete candidate.
+   * Persists the selected textual label and re-queues the job with chosen coordinates.
+   */
+  selectAddressCandidate(jobId: string, candidate: UploadAddressCandidate): void {
+    const job = this.jobState.findJob(jobId);
+    if (!job || job.phase !== 'missing_data') {
+      return;
+    }
+
+    this.jobState.updateJob(jobId, {
+      titleAddress: candidate.addressLabel,
+      titleAddressSource: 'file',
+      locationSourceUsed: 'file',
+      issueKind: undefined,
+      addressCandidates: undefined,
+    });
+    placeUploadManagerJob(jobId, { lat: candidate.lat, lng: candidate.lng }, this.actionDeps);
   }
 
   /**

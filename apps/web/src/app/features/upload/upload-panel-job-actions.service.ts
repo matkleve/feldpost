@@ -6,7 +6,7 @@
  *  - place_on_map, change_location_* → UploadPanelDialogActionsService
  *  - upload_anyway, use_existing, reject → Delegate to UploadManager
  *  - retry, cancel, dismiss → UploadManager action methods
- *  - download, open_*, add_to_project → UploadPanelJobFileActionsService
+ *  - download, open_*, assign_to_project → UploadPanelJobFileActionsService
  *
  * Ground rules (Spec: upload-panel.md § Actions):
  *  - Action visibility gated by lane + issueKind (see upload-panel-item.component.ts)

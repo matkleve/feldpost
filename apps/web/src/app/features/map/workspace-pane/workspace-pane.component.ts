@@ -39,6 +39,8 @@ export class WorkspacePaneComponent {
 
   // ── Inputs from MapShell ──────────────────────────────────────────────────
   readonly detailImageId = input<string | null>(null);
+  readonly detailAddressSearchRequestImageId = input<string | null>(null);
+  readonly detailAddressSearchRequestId = input(0);
   readonly activeTab = input<WorkspacePaneTab>('selected-items');
   readonly title = input('');
   readonly titleEditable = input(false);
@@ -52,6 +54,7 @@ export class WorkspacePaneComponent {
   // ── Outputs to MapShell ──────────────────────────────────────────────────
   readonly closed = output<void>();
   readonly detailClosed = output<void>();
+  readonly detailAddressSearchRequestConsumed = output<number>();
   readonly detailRequested = output<string>();
   readonly activeTabChange = output<WorkspacePaneTab>();
   readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
@@ -87,6 +90,10 @@ export class WorkspacePaneComponent {
 
   onDetailClose(): void {
     this.detailClosed.emit();
+  }
+
+  onDetailAddressSearchRequestConsumed(requestId: number): void {
+    this.detailAddressSearchRequestConsumed.emit(requestId);
   }
 
   onZoomToLocation(event: { imageId: string; lat: number; lng: number }): void {

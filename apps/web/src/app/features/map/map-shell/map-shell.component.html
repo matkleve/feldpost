@@ -111,49 +111,39 @@
       <div
         class="dd-items"
         role="menu"
+        tabindex="-1"
         aria-label="Map context menu"
         (keydown)="onMapMenuKeydown($event)"
       >
-        <button
-          class="dd-item"
-          type="button"
-          role="menuitem"
-          (click)="onMapContextCreateMarkerHere()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">add_location</span>
-          <span class="dd-item__label">Media Marker hier erstellen</span>
-        </button>
-        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextZoomHouseHere()">
-          <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
-          <span class="dd-item__label">Hierhin zoomen (Hausnaehe)</span>
-        </button>
-        <button
-          class="dd-item"
-          type="button"
-          role="menuitem"
-          (click)="onMapContextZoomStreetHere()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">zoom_in</span>
-          <span class="dd-item__label">Hierhin zoomen (Strassennaehe)</span>
-        </button>
-        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCopyAddress()">
-          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">Adresse kopieren</span>
-        </button>
-        <button class="dd-item" type="button" role="menuitem" (click)="onMapContextCopyGps()">
-          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">GPS kopieren</span>
-        </button>
-        <div class="dd-divider" aria-hidden="true"></div>
-        <button
-          class="dd-item"
-          type="button"
-          role="menuitem"
-          (click)="onMapContextOpenGoogleMaps()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">open_in_new</span>
-          <span class="dd-item__label">In Google Maps oeffnen</span>
-        </button>
+        @for (action of mapPrimaryActions(); track action.id) {
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (click)="onMapMenuActionSelected(action.id)"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="dd-item__label">{{ action.label }}</span>
+          </button>
+        }
+
+        @if (mapSecondaryActions().length > 0) {
+          <div class="dd-divider" aria-hidden="true"></div>
+
+          @for (action of mapSecondaryActions(); track action.id) {
+            <button
+              class="dd-item"
+              type="button"
+              role="menuitem"
+              [disabled]="action.disabled"
+              (click)="onMapMenuActionSelected(action.id)"
+            >
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+              <span class="dd-item__label">{{ action.label }}</span>
+            </button>
+          }
+        }
       </div>
     </app-dropdown-shell>
   }
@@ -172,27 +162,22 @@
       <div
         class="dd-items"
         role="menu"
+        tabindex="-1"
         aria-label="Radius context menu"
         (keydown)="onMapMenuKeydown($event)"
       >
-        <button
-          class="dd-item"
-          type="button"
-          role="menuitem"
-          (click)="onRadiusContextCreateProjectFromSelection()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">folder</span>
-          <span class="dd-item__label">Neues Projekt aus Radius</span>
-        </button>
-        <button
-          class="dd-item"
-          type="button"
-          role="menuitem"
-          (click)="onRadiusContextAssignToProject()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
-          <span class="dd-item__label">Zu Projekt zuweisen...</span>
-        </button>
+        @for (action of radiusMenuActions(); track action.id) {
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (click)="onRadiusMenuActionSelected(action.id)"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="dd-item__label">{{ action.label }}</span>
+          </button>
+        }
       </div>
     </app-dropdown-shell>
   }
@@ -218,82 +203,53 @@
         <div
           class="dd-items"
           role="menu"
+          tabindex="-1"
           aria-label="Marker context menu"
           (keydown)="onMapMenuKeydown($event)"
         >
-          <button
-            class="dd-item"
-            type="button"
-            role="menuitem"
-            (click)="onMarkerContextOpenDetailsOrSelection()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">
-              {{ markerContextIsSingle ? 'open_in_new' : 'grid_view' }}
-            </span>
-            <span class="dd-item__label">
-              {{ markerContextIsSingle ? 'Details oeffnen' : 'Auswahl oeffnen' }}
-            </span>
-          </button>
-          <button
-            class="dd-item"
-            type="button"
-            role="menuitem"
-            (click)="onMarkerContextZoomHouse()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">center_focus_strong</span>
-            <span class="dd-item__label">Hierhin zoomen (Hausnaehe)</span>
-          </button>
-          <button
-            class="dd-item"
-            type="button"
-            role="menuitem"
-            (click)="onMarkerContextZoomStreet()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">zoom_in</span>
-            <span class="dd-item__label">Hierhin zoomen (Strassennaehe)</span>
-          </button>
-          <button
-            class="dd-item"
-            type="button"
-            role="menuitem"
-            (click)="onMarkerContextAssignToProject()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">folder_open</span>
-            <span class="dd-item__label">Projekt hinzufuegen...</span>
-          </button>
-          <button
-            class="dd-item"
-            type="button"
-            role="menuitem"
-            (click)="onMarkerContextCopyAddress()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">Adresse kopieren</span>
-          </button>
-          <button class="dd-item" type="button" role="menuitem" (click)="onMarkerContextCopyGps()">
-            <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-            <span class="dd-item__label">GPS kopieren</span>
-          </button>
-          <button
-            class="dd-item"
-            type="button"
-            role="menuitem"
-            (click)="onMarkerContextOpenGoogleMaps()"
-          >
-            <span class="material-icons dd-item__icon" aria-hidden="true">open_in_new</span>
-            <span class="dd-item__label">In Google Maps oeffnen</span>
-          </button>
-          @if (markerContextIsSingle) {
-            <div class="dd-divider" aria-hidden="true"></div>
+          @for (action of markerPrimaryActions(); track action.id + '-' + action.label) {
             <button
-              class="dd-item dd-item--danger"
+              class="dd-item"
               type="button"
               role="menuitem"
-              (click)="onMarkerContextDeletePhoto()"
+              [disabled]="action.disabled"
+              (click)="onMarkerMenuActionSelected(action.id)"
             >
-              <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-              <span class="dd-item__label">Foto loeschen</span>
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+              <span class="dd-item__label">{{ action.label }}</span>
             </button>
+          }
+
+          @for (action of markerSecondaryActions(); track action.id) {
+            <button
+              class="dd-item"
+              type="button"
+              role="menuitem"
+              [disabled]="action.disabled"
+              (click)="onMarkerMenuActionSelected(action.id)"
+            >
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+              <span class="dd-item__label">{{ action.label }}</span>
+            </button>
+          }
+
+          @if (markerDestructiveActions().length > 0) {
+            <div class="dd-divider" aria-hidden="true"></div>
+
+            @for (action of markerDestructiveActions(); track action.id) {
+              <button
+                class="dd-item dd-item--danger"
+                type="button"
+                role="menuitem"
+                [disabled]="action.disabled"
+                (click)="onMarkerMenuActionSelected(action.id)"
+              >
+                <span class="material-icons dd-item__icon" aria-hidden="true">{{
+                  action.icon
+                }}</span>
+                <span class="dd-item__label">{{ action.label }}</span>
+              </button>
+            }
           }
         </div>
       </app-dropdown-shell>
@@ -397,10 +353,13 @@
     <app-workspace-pane
       [activeTab]="workspacePaneActiveTab()"
       [detailImageId]="detailImageId()"
+      [detailAddressSearchRequestImageId]="detailAddressSearchRequest()?.imageId ?? null"
+      [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
       [linkedHoveredImageIds]="linkedHoveredWorkspaceImageIds()"
       (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
       (closed)="closeWorkspacePane()"
       (detailClosed)="closeDetailView()"
+      (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
       (detailRequested)="openDetailView($event)"
       (imageUploaded)="onImageUploaded($event)"
       (zoomToLocationRequested)="onZoomToLocation($event)"

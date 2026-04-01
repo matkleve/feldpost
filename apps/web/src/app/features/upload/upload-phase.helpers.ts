@@ -4,6 +4,7 @@ export type UploadLane = 'uploading' | 'uploaded' | 'issues';
 export type UploadIssueKind =
   | 'duplicate_photo'
   | 'missing_gps'
+  | 'address_ambiguous'
   | 'document_unresolved'
   | 'conflict_review'
   | 'upload_error'
@@ -62,6 +63,10 @@ export function getIssueKind(job: UploadJob): UploadIssueKind {
 
   if (looksLikeDocumentUnresolved) {
     return 'document_unresolved';
+  }
+
+  if (job.phase === 'missing_data' && (job.addressCandidates?.length ?? 0) > 0) {
+    return 'address_ambiguous';
   }
 
   if (job.phase === 'missing_data' || looksLikeLocationIssue) {

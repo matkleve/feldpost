@@ -2,12 +2,15 @@
 
 > **Use cases:** [use-cases/map-secondary-click-system.md](../use-cases/map-secondary-click-system.md)
 > **Child specs:** [map-context-menu](map-context-menu.md), [photo-marker-context-menu](photo-marker-context-menu.md), [radius-selection](radius-selection.md)
+> **Action contract:** [action-context-matrix](action-context-matrix.md)
 
 ## What It Is
 
 A unified interaction system for secondary-click (right-click / long-press) behavior on the map. It defines which menu opens for map, marker, and active-radius targets and prevents conflicting behavior.
 
 This system is the source of truth for precedence, gesture arbitration, and option sets across all three context menus.
+
+It also follows the shared action-section contract from the upload panel: `primary` actions come first, `secondary` actions follow, and any destructive action is always last.
 
 ## What It Looks Like
 

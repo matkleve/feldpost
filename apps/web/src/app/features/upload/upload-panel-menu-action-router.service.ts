@@ -60,17 +60,21 @@ export class UploadPanelMenuActionRouterService {
       this.uploadManager.forceDuplicateUpload(job.id);
       this.ctx.setLane('uploading');
     },
-    change_location_map: async (job) => {
-      await this.fileActions.requestLocationPickOnMap(job);
-    },
-    add_gps_issue: async (job) => {
-      this.handlePlaceOnMap(job);
-    },
-    change_address_issue: async (job) => {
-      this.dialogActions.openLocationAddressDialog(job);
-    },
     change_location_address: async (job) => {
       this.dialogActions.openLocationAddressDialog(job);
+    },
+    candidate_select: async (job) => {
+      await this.dialogActions.onAddressAmbiguousCandidateSelect(job);
+      this.ctx.setLane('uploading');
+    },
+    manual_location_entry: async (job) => {
+      this.dialogActions.openLocationAddressDialog(job);
+    },
+    cancel_location_prompt: async (job) => {
+      this.ctx.dismissFile(job.id);
+    },
+    change_location_map: async (job) => {
+      this.handlePlaceOnMap(job);
     },
     retry: async (job) => {
       this.ctx.retryFile(job.id);
@@ -82,7 +86,7 @@ export class UploadPanelMenuActionRouterService {
     open_in_media: async (job) => {
       await this.fileActions.openUploadedJobInMedia(job);
     },
-    add_to_project: async (job) => {
+    assign_to_project: async (job) => {
       await this.dialogActions.openProjectAssignmentForJob(job);
     },
     download: async (job) => {

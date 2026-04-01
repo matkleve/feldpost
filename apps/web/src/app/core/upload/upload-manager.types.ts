@@ -35,9 +35,16 @@ export type UploadJobMode = 'new' | 'replace' | 'attach';
 export type UploadJobIssueKind =
   | 'duplicate_photo'
   | 'missing_gps'
+  | 'address_ambiguous'
   | 'document_unresolved'
   | 'conflict_review'
   | 'upload_error';
+
+export interface UploadAddressCandidate {
+  addressLabel: string;
+  lat: number;
+  lng: number;
+}
 
 // ── Job ────────────────────────────────────────────────────────────────────────
 
@@ -73,6 +80,8 @@ export interface UploadJob {
   existingImageId?: string;
   /** Optional UI issue classification derived by pipeline decisions. */
   issueKind?: UploadJobIssueKind;
+  /** Candidate addresses used when title-derived location cannot be auto-disambiguated. */
+  addressCandidates?: UploadAddressCandidate[];
   /** Allows one explicit user-approved bypass of duplicate skip handling. */
   forceDuplicateUpload?: boolean;
 

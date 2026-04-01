@@ -50,7 +50,10 @@
     @if (detailImageId()) {
       <app-media-detail-view
         [imageId]="detailImageId()"
+        [addressSearchRequestImageId]="detailAddressSearchRequestImageId()"
+        [addressSearchRequestId]="detailAddressSearchRequestId()"
         (closed)="onDetailClose()"
+        (addressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
       />
     } @else if (activeTab() === 'selected-items') {

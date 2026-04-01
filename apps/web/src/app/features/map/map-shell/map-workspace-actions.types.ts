@@ -1,0 +1,64 @@
+export type MapWorkspaceContextType =
+  | 'single_marker'
+  | 'cluster_marker'
+  | 'radius_selection'
+  | 'workspace_single'
+  | 'workspace_multi';
+
+export interface MarkerContextPayload {
+  markerKey: string;
+  count: number;
+  lat: number;
+  lng: number;
+  imageId?: string;
+  sourceCells: Array<{ lat: number; lng: number }>;
+}
+
+export interface MarkerActionContext {
+  contextType: 'single_marker' | 'cluster_marker';
+  markerKey: string;
+  count: number;
+  primaryImageId: string | null;
+  imageIds: string[];
+  coords: { lat: number; lng: number };
+  sourceCells: Array<{ lat: number; lng: number }>;
+}
+
+export interface MapActionContext {
+  contextType: 'map_point';
+  count: number;
+  primaryImageId: string | null;
+  imageIds: string[];
+  coords: { lat: number; lng: number };
+  sourceCells: Array<{ lat: number; lng: number }>;
+}
+
+export interface RadiusActionContext {
+  contextType: 'radius_selection';
+  count: number;
+  imageIds: string[];
+}
+
+export type MapMenuActionId =
+  | 'create_marker_here'
+  | 'zoom_house'
+  | 'zoom_street'
+  | 'copy_address'
+  | 'copy_gps'
+  | 'open_google_maps';
+
+export type MarkerMenuActionId =
+  | 'open_details_or_selection'
+  | 'open_in_media'
+  | 'zoom_house'
+  | 'zoom_street'
+  | 'assign_to_project'
+  | 'change_location_map'
+  | 'change_location_address'
+  | 'copy_address'
+  | 'copy_gps'
+  | 'open_google_maps'
+  | 'remove_from_project'
+  | 'delete_media';
+
+export type RadiusMenuActionId = 'create_project_from_radius' | 'assign_to_project';

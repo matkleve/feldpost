@@ -17,6 +17,8 @@ import {
   UiStatusBadgeDirective,
   UiStatusBadgeSizeSmDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
+import type { ResolvedAction } from '../../../action-system/action-types';
+import type { WorkspaceSingleActionId } from '../workspace-detail-actions.types';
 
 @Component({
   selector: 'app-image-detail-header',
@@ -51,6 +53,7 @@ export class ImageDetailHeaderComponent {
   readonly mediaTypeLabel = input<string>('');
   readonly editingTitle = input(false);
   readonly showContextMenu = input(false);
+  readonly contextActions = input<ReadonlyArray<ResolvedAction<WorkspaceSingleActionId>>>([]);
 
   readonly closed = output<void>();
   readonly titleEditRequested = output<void>();
@@ -58,8 +61,7 @@ export class ImageDetailHeaderComponent {
   readonly titleEditCancelled = output<void>();
   readonly contextMenuToggled = output<void>();
   readonly contextMenuClosed = output<void>();
-  readonly deleteRequested = output<void>();
-  readonly copyCoordinatesRequested = output<void>();
+  readonly actionSelected = output<WorkspaceSingleActionId>();
 
   constructor() {
     effect(() => {

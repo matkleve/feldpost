@@ -23,21 +23,21 @@ For cluster markers, the menu header shows a compact summary (for example: `12 p
 
 ## Actions & Interactions
 
-| #   | User Action                                       | System Response                                          | Triggers                                             |
-| --- | ------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
-| 1   | Right-clicks single marker (desktop)              | Opens marker context menu anchored to marker             | marker target hit-test                               |
-| 2   | Long-presses single marker (mobile)               | Opens action-sheet marker menu                           | touch long-press recognizer                          |
-| 3   | Selects `Details oeffnen` (single)                | Opens Workspace Pane and focuses image detail            | selection + detail routing state                     |
-| 4   | Selects `Auswahl oeffnen` (cluster)               | Loads cluster images into Active Selection               | `WorkspaceViewService.fetchClusterImages(...)`       |
-| 5   | Selects `Hierhin zoomen (Hausnaehe)`              | Centers marker and zooms to building-level context       | `MapAdapter.setView(markerLatLng, 19)`               |
-| 6   | Selects `Hierhin zoomen (Strassennaehe)`          | Centers marker and zooms to street-level context         | `MapAdapter.setView(markerLatLng, 17)`               |
-| 7   | Selects `Projekt hinzufuegen...`                  | Opens project assignment flow for selected marker images | project assignment UI                                |
-| 8   | Selects `Adresse kopieren`                        | Resolves marker address and copies to clipboard          | `GeocodingService.reverse()` + clipboard             |
-| 9   | Selects `GPS kopieren`                            | Copies marker lat/lng and shows success toast            | clipboard + toast                                    |
-| 10  | Selects `In Google Maps oeffnen`                  | Opens a new browser tab at marker coordinates            | `window.open(https://www.google.com/maps?q=lat,lng)` |
-| 11  | Selects `Foto loeschen` (single only)             | Opens confirmation, then deletes image on confirm        | delete flow                                          |
-| 12  | Clicks outside / presses Escape / taps backdrop   | Closes menu without side effects                         | dismiss handler                                      |
-| 13  | Starts drag instead of long-press hold completion | Cancels menu and continues map gesture                   | gesture arbitration                                  |
+| #   | User Action                                       | Section     | System Response                                          | Triggers                                             |
+| --- | ------------------------------------------------- | ----------- | -------------------------------------------------------- | ---------------------------------------------------- |
+| 1   | Right-clicks single marker (desktop)              | primary     | Opens marker context menu anchored to marker             | marker target hit-test                               |
+| 2   | Long-presses single marker (mobile)               | primary     | Opens action-sheet marker menu                           | touch long-press recognizer                          |
+| 3   | Selects `Details oeffnen` (single)                | primary     | Opens Workspace Pane and focuses image detail            | selection + detail routing state                     |
+| 4   | Selects `Auswahl oeffnen` (cluster)               | primary     | Loads cluster images into Active Selection               | `WorkspaceViewService.fetchClusterImages(...)`       |
+| 5   | Selects `Hierhin zoomen (Hausnaehe)`              | primary     | Centers marker and zooms to building-level context       | `MapAdapter.setView(markerLatLng, 19)`               |
+| 6   | Selects `Hierhin zoomen (Strassennaehe)`          | primary     | Centers marker and zooms to street-level context         | `MapAdapter.setView(markerLatLng, 17)`               |
+| 7   | Selects `Projekt hinzufuegen...`                  | primary     | Opens project assignment flow for selected marker images | project assignment UI                                |
+| 8   | Selects `Adresse kopieren`                        | secondary   | Resolves marker address and copies to clipboard          | `GeocodingService.reverse()` + clipboard             |
+| 9   | Selects `GPS kopieren`                            | secondary   | Copies marker lat/lng and shows success toast            | clipboard + toast                                    |
+| 10  | Selects `In Google Maps oeffnen`                  | secondary   | Opens a new browser tab at marker coordinates            | `window.open(https://www.google.com/maps?q=lat,lng)` |
+| 11  | Selects `Foto loeschen` (single only)             | destructive | Opens confirmation, then deletes image on confirm        | delete flow                                          |
+| 12  | Clicks outside / presses Escape / taps backdrop   | secondary   | Closes menu without side effects                         | dismiss handler                                      |
+| 13  | Starts drag instead of long-press hold completion | primary     | Cancels menu and continues map gesture                   | gesture arbitration                                  |
 
 ## Component Hierarchy
 

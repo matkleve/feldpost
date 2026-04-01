@@ -35,28 +35,32 @@ const STATIC_ACTION_LABELS: Partial<Record<UploadItemMenuAction, [string, string
   open_existing_media: ['upload.item.menu.issue.openExisting', 'Open existing media'],
   upload_anyway: ['upload.item.menu.issue.uploadAnyway', 'Upload anyway'],
   open_project: ['upload.item.menu.project.open', 'Open project'],
-  add_to_project: ['auto.0013.add_to_project', 'Add to project'],
+  assign_to_project: ['auto.0013.add_to_project', 'Add to project'],
   retry: ['projects.page.error.retry', 'Retry'],
   cancel_upload: ['upload.item.menu.destructive.cancelUpload', 'Cancel upload'],
   delete_media: ['workspace.imageDetail.action.delete', 'Delete media'],
+  candidate_select: ['upload.address.prompt.action.selectCandidate', 'Select suggested address'],
+  manual_location_entry: ['upload.item.menu.location.enterAddress', 'Enter address manually'],
+  cancel_location_prompt: ['upload.address.prompt.action.cancel', 'Cancel location prompt'],
   dismiss: ['upload.item.menu.destructive.dismiss', 'Dismiss'],
   download: ['auto.0099.download', 'Download'],
 };
 
 const ACTION_ICON_MAP: Record<UploadItemMenuAction, string> = {
   view_file_details: 'open_in_new',
-  add_to_project: 'folder_open',
+  assign_to_project: 'folder_open',
   download: 'download',
   open_in_media: 'open_in_new',
   open_project: 'folder_open',
   toggle_priority: 'priority_high',
   open_existing_media: 'open_in_new',
   upload_anyway: 'publish',
-  add_gps_issue: 'pin_drop',
-  change_address_issue: 'search',
   retry: 'refresh',
   change_location_map: 'pin_drop',
   change_location_address: 'search',
+  candidate_select: 'check_circle',
+  manual_location_entry: 'edit_location_alt',
+  cancel_location_prompt: 'close',
   cancel_upload: 'delete',
   remove_from_project: 'delete',
   delete_media: 'delete',
@@ -119,14 +123,6 @@ export function actionLabel(
         ? t('upload.item.menu.location.changeGps', 'Change GPS location')
         : t('upload.item.menu.location.addGps', 'Add GPS location');
     case 'change_location_address':
-      return job.titleAddress
-        ? t('upload.item.menu.location.changeAddress', 'Change address')
-        : t('upload.item.menu.location.addAddress', 'Add address');
-    case 'add_gps_issue':
-      return job.coords
-        ? t('upload.item.menu.location.changeLocation', 'Change location')
-        : t('upload.item.menu.location.addGps', 'Add GPS');
-    case 'change_address_issue':
       return job.titleAddress
         ? t('upload.item.menu.location.changeAddress', 'Change address')
         : t('upload.item.menu.location.addAddress', 'Add address');

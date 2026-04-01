@@ -32,6 +32,15 @@ export class MarkerContextPhotoDeleteService {
     );
   }
 
+  confirmPhotoDeleteCount(count: number): boolean {
+    return (
+      typeof window === 'undefined' ||
+      window.confirm(
+        `${count} Medien wirklich loeschen? Dieser Vorgang kann nicht rueckgaengig gemacht werden.`,
+      )
+    );
+  }
+
   async deleteImageById(client: SupabaseClient, imageId: string): Promise<DeleteImageByIdResult> {
     const { error } = await client
       .from('media_items')

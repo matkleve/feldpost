@@ -65,6 +65,10 @@ import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
 import { ImageDetailPhotoEventsHelper } from './media-detail-photo-events.helper';
 import { ImageDetailUploadHelper } from './media-detail-upload.helper';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
+import { ActionEngineService } from '../../action-system/action-engine.service';
+import type { ResolvedAction } from '../../action-system/action-types';
+import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from './workspace-detail-actions.registry';
+import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
@@ -102,9 +106,13 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly mediaOrchestrator = inject(MediaOrchestratorService);
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
+  private readonly actionEngineService = inject(ActionEngineService);
 
   readonly imageId = input<string | null>(null);
+  readonly addressSearchRequestImageId = input<string | null>(null);
+  readonly addressSearchRequestId = input(0);
   readonly closed = output<void>();
+  readonly addressSearchRequestConsumed = output<number>();
   readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
 
   readonly image = signal<ImageRecord | null>(null);
@@ -135,6 +143,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly activeJobId = signal<string | null>(null);
 
   private abortController: AbortController | null = null;
+  private lastAddressSearchRequestId = 0;
 
   readonly thumbState = computed<PhotoLoadState>(() => {
     const id = this.imageId();
@@ -263,6 +272,21 @@ export class MediaDetailViewComponent implements OnDestroy {
     }),
   );
 
+  readonly workspaceSingleActions = computed<
+    ReadonlyArray<ResolvedAction<WorkspaceSingleActionId>>
+  >(() =>
+    this.actionEngineService.resolveActions(WORKSPACE_SINGLE_ACTION_DEFINITIONS, {
+      contextType: 'workspace_single',
+      hasCoordinates: this.hasCoordinates(),
+    }),
+  );
+
+  readonly workspaceHeaderActions = computed(() =>
+    this.workspaceSingleActions().filter(
+      (action) => action.id === 'copy_gps' || action.id === 'delete_media',
+    ),
+  );
+
   private readonly projectMembershipHelper = new ImageDetailProjectMembershipHelper({
     supabase: this.supabaseService,
     projectsService: this.projectsService,
@@ -389,6 +413,24 @@ export class MediaDetailViewComponent implements OnDestroy {
       } else {
         this.reset();
       }
+    });
+
+    effect(() => {
+      const requestId = this.addressSearchRequestId();
+      const requestImageId = this.addressSearchRequestImageId();
+      const currentImageId = this.imageId();
+      if (
+        requestId <= 0 ||
+        requestId === this.lastAddressSearchRequestId ||
+        !requestImageId ||
+        requestImageId !== currentImageId
+      ) {
+        return;
+      }
+
+      this.lastAddressSearchRequestId = requestId;
+      this.openAddressSearch();
+      this.addressSearchRequestConsumed.emit(requestId);
     });
 
     this.uploadManager.imageReplaced$
@@ -538,6 +580,25 @@ export class MediaDetailViewComponent implements OnDestroy {
       duration: 2000,
     });
     this.showContextMenu.set(false);
+  }
+
+  onWorkspaceSingleActionSelected(actionId: WorkspaceSingleActionId): void {
+    switch (actionId) {
+      case 'zoom_street':
+        this.zoomToLocation();
+        return;
+      case 'assign_to_project':
+        this.openProjectPicker();
+        return;
+      case 'copy_gps':
+        this.copyCoordinates();
+        return;
+      case 'delete_media':
+        this.confirmDelete();
+        return;
+      default:
+        return;
+    }
   }
 
   openCapturedAtEditor(): void {

@@ -1,5 +1,7 @@
 # Dropdown System
 
+> **Action contract:** [action-context-matrix](action-context-matrix.md)
+
 ## What It Is
 
 A composable CSS class system (`dd-*`) for all floating dropdown/menu surfaces in Feldpost. Every dropdown picks the pieces it needs — search, items, drag handles, section labels, action rows — from a shared global class library in `styles.scss`. Component SCSS only contains what's truly unique to that dropdown.

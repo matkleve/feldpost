@@ -5,6 +5,7 @@ import { ShareSetService } from '../../../../core/share-set.service';
 import { ZipExportService } from '../../../../core/zip-export.service';
 import { ToastService } from '../../../../core/toast.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { ActionEngineService } from '../../../action-system/action-engine.service';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
@@ -14,6 +15,16 @@ import {
   UiInputControlDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
+import { WORKSPACE_EXPORT_ACTION_DEFINITIONS } from '../workspace-export-actions.registry';
+import type { WorkspaceExportActionId } from '../workspace-export-actions.types';
+
+const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
+  'workspace.export.action.selectAll': 'Select all',
+  'workspace.export.action.selectNone': 'Select none',
+  'workspace.export.action.share': 'Share',
+  'workspace.export.action.copyLink': 'Copy link',
+  'workspace.export.action.downloadZip': 'Export ZIP',
+};
 
 @Component({
   selector: 'app-workspace-pane-footer',
@@ -35,6 +46,7 @@ export class WorkspacePaneFooterComponent {
   readonly images = input.required<WorkspaceImage[]>();
 
   protected readonly selectionService = inject(WorkspaceSelectionService);
+  private readonly actionEngine = inject(ActionEngineService);
   private readonly i18nService = inject(I18nService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly zipExportService = inject(ZipExportService);
@@ -53,12 +65,41 @@ export class WorkspacePaneFooterComponent {
     return this.images().filter((img) => selected.has(img.id));
   });
 
-  selectAll(): void {
-    this.selectionService.selectAllInScope(this.scopeIds());
-  }
+  readonly actions = computed(() =>
+    this.actionEngine.resolveActions(
+      WORKSPACE_EXPORT_ACTION_DEFINITIONS,
+      {
+        contextType: 'workspace_multi',
+        selectedCount: this.selectionService.selectedCount(),
+        canNativeShare: typeof navigator !== 'undefined' && 'share' in navigator,
+      },
+      {
+        translateLabel: (key) => this.t(key, WORKSPACE_EXPORT_LABEL_FALLBACKS[key] ?? key),
+      },
+    ),
+  );
 
-  selectNone(): void {
-    this.selectionService.clearSelection();
+  onActionSelected(actionId: WorkspaceExportActionId): void {
+    switch (actionId) {
+      case 'select_all':
+        this.selectionService.selectAllInScope(this.scopeIds());
+        return;
+      case 'select_none':
+        this.selectionService.clearSelection();
+        return;
+      case 'share_link':
+        void this.shareLink();
+        return;
+      case 'copy_link':
+        void this.copyLink();
+        return;
+      case 'native_share':
+        void this.shareLink();
+        return;
+      case 'download_zip':
+        this.openZipDialog();
+        return;
+    }
   }
 
   async copyLink(): Promise<void> {
@@ -190,4 +231,3 @@ export class WorkspacePaneFooterComponent {
     }
   }
 }
-

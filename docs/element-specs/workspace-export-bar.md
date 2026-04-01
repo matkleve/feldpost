@@ -7,6 +7,8 @@
 
 The Workspace Export Bar is a bottom action surface in the Workspace Pane that appears when at least one media item is selected. It enables batch actions for the current selection across three areas: selection controls (select all/none), curation actions (add to project, change address, delete), and export actions (share as stable link, copy link, download as ZIP).
 
+The bar follows the same shared action ordering as the upload-panel contract: primary actions first, secondary utility actions next, and destructive actions last. In practice that means selection and curation lead the bar, export utilities come after them, and delete stays visually and semantically separated.
+
 ## What It Looks Like
 
 The bar is anchored to the bottom edge of the Workspace Pane content area and spans full pane width. Height is 3.5rem (56px) minimum touch target, with horizontal padding 0.75rem (12px) and control gap 0.5rem. Background uses `--color-bg-elevated`, top border `1px` in `--color-border-subtle`, and a soft shadow token used by elevated overlays. It enters with a vertical translate and opacity transition from `docs/design/motion.md` timing tokens. Primary actions are left-to-right: selection controls, count summary, curation actions, then export actions.
@@ -321,35 +323,35 @@ erDiagram
 
 ## File Map
 
-| File                                                                   | Purpose                                                      |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `features/map/workspace-pane/workspace-export-bar.component.ts`        | Bottom action bar component                                  |
-| `features/map/workspace-pane/workspace-export-bar.component.html`      | Template for selection and export actions                    |
-| `features/map/workspace-pane/workspace-export-bar.component.scss`      | Bar layout, transitions, responsive behavior                 |
-| `features/map/map-shell/map-shell.component.ts`                        | Host wiring for `?share` URL token resolve and pane opening  |
-| `features/map/workspace-pane/add-to-project-dialog.component.ts`       | Batch add-to-project dialog behavior                         |
-| `features/map/workspace-pane/add-to-project-dialog.component.html`     | Project picker for selected media                            |
-| `features/map/workspace-pane/add-to-project-dialog.component.scss`     | Add-to-project dialog styles                                 |
-| `features/map/workspace-pane/change-address-dialog.component.ts`       | Batch change-address dialog behavior                         |
-| `features/map/workspace-pane/change-address-dialog.component.html`     | Address editor for selected media                            |
-| `features/map/workspace-pane/change-address-dialog.component.scss`     | Change-address dialog styles                                 |
-| `features/map/workspace-pane/delete-selection-dialog.component.ts`     | Batch delete confirmation dialog behavior                    |
-| `features/map/workspace-pane/delete-selection-dialog.component.html`   | Destructive confirmation content                             |
-| `features/map/workspace-pane/delete-selection-dialog.component.scss`   | Delete dialog styles                                         |
-| `features/map/workspace-pane/share-selection-dialog.component.ts`      | Share-link dialog component                                  |
-| `features/map/workspace-pane/share-selection-dialog.component.html`    | Share dialog template                                        |
-| `features/map/workspace-pane/share-selection-dialog.component.scss`    | Share dialog styles                                          |
-| `features/map/workspace-pane/download-selection-dialog.component.ts`   | ZIP download dialog component                                |
-| `features/map/workspace-pane/download-selection-dialog.component.html` | Download dialog template                                     |
-| `features/map/workspace-pane/download-selection-dialog.component.scss` | Download dialog styles                                       |
-| `core/workspace-selection.service.ts`                                  | Selection state, toggles, select all/none, keyboard handling |
-| `core/workspace-view.service.ts`                                       | Ordered image hydration for resolved share-set IDs           |
-| `core/media-bulk-actions.service.ts`                                   | Batch add-to-project, change-address, and delete operations  |
-| `core/share-set.service.ts`                                            | Create/resolve share-set tokens via Supabase                 |
-| `core/zip-export.service.ts`                                           | Fetch signed URLs/files, build ZIP blob, trigger download    |
-| `supabase/migrations/20260318090000_share_sets.sql`                    | `share_sets` + `share_set_items` tables, indexes, RLS, RPC   |
-| `docs/use-cases/workspace-export.md`                                   | Behavioral scenarios and validation checklist                |
-| `docs/implementation-blueprints/workspace-export-bar.md`               | Delivery plan with file-level implementation tasks           |
+| File                                                                                     | Purpose                                                      |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts`   | Bottom action bar component                                  |
+| `features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html` | Template for selection and export actions                    |
+| `features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.scss` | Bar layout, transitions, responsive behavior                 |
+| `features/map/map-shell/map-shell.component.ts`                                          | Host wiring for `?share` URL token resolve and pane opening  |
+| `features/map/workspace-pane/add-to-project-dialog.component.ts`                         | Batch add-to-project dialog behavior                         |
+| `features/map/workspace-pane/add-to-project-dialog.component.html`                       | Project picker for selected media                            |
+| `features/map/workspace-pane/add-to-project-dialog.component.scss`                       | Add-to-project dialog styles                                 |
+| `features/map/workspace-pane/change-address-dialog.component.ts`                         | Batch change-address dialog behavior                         |
+| `features/map/workspace-pane/change-address-dialog.component.html`                       | Address editor for selected media                            |
+| `features/map/workspace-pane/change-address-dialog.component.scss`                       | Change-address dialog styles                                 |
+| `features/map/workspace-pane/delete-selection-dialog.component.ts`                       | Batch delete confirmation dialog behavior                    |
+| `features/map/workspace-pane/delete-selection-dialog.component.html`                     | Destructive confirmation content                             |
+| `features/map/workspace-pane/delete-selection-dialog.component.scss`                     | Delete dialog styles                                         |
+| `features/map/workspace-pane/share-selection-dialog.component.ts`                        | Share-link dialog component                                  |
+| `features/map/workspace-pane/share-selection-dialog.component.html`                      | Share dialog template                                        |
+| `features/map/workspace-pane/share-selection-dialog.component.scss`                      | Share dialog styles                                          |
+| `features/map/workspace-pane/download-selection-dialog.component.ts`                     | ZIP download dialog component                                |
+| `features/map/workspace-pane/download-selection-dialog.component.html`                   | Download dialog template                                     |
+| `features/map/workspace-pane/download-selection-dialog.component.scss`                   | Download dialog styles                                       |
+| `core/workspace-selection.service.ts`                                                    | Selection state, toggles, select all/none, keyboard handling |
+| `core/workspace-view.service.ts`                                                         | Ordered image hydration for resolved share-set IDs           |
+| `core/media-bulk-actions.service.ts`                                                     | Batch add-to-project, change-address, and delete operations  |
+| `core/share-set.service.ts`                                                              | Create/resolve share-set tokens via Supabase                 |
+| `core/zip-export.service.ts`                                                             | Fetch signed URLs/files, build ZIP blob, trigger download    |
+| `supabase/migrations/20260318090000_share_sets.sql`                                      | `share_sets` + `share_set_items` tables, indexes, RLS, RPC   |
+| `docs/use-cases/workspace-export.md`                                                     | Behavioral scenarios and validation checklist                |
+| `docs/implementation-blueprints/workspace-export-bar.md`                                 | Delivery plan with file-level implementation tasks           |
 
 ## Wiring
 

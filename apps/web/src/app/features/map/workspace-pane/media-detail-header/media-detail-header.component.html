@@ -66,28 +66,19 @@
       (closeRequested)="onContextMenuCloseRequested()"
     >
       <div class="dd-items" role="menu" (keydown)="onContextMenuKeydown($event)">
-        <button
-          class="dd-item dd-item--danger"
-          type="button"
-          role="menuitem"
-          (click)="deleteRequested.emit()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">delete</span>
-          <span class="dd-item__label">{{
-            t('workspace.imageDetail.action.delete', 'Delete image')
-          }}</span>
-        </button>
-        <button
-          class="dd-item"
-          type="button"
-          role="menuitem"
-          (click)="copyCoordinatesRequested.emit()"
-        >
-          <span class="material-icons dd-item__icon" aria-hidden="true">content_copy</span>
-          <span class="dd-item__label">{{
-            t('workspace.imageDetail.action.copyCoordinates', 'Copy coordinates')
-          }}</span>
-        </button>
+        @for (action of contextActions(); track action.id) {
+          <button
+            class="dd-item"
+            [class.dd-item--danger]="action.section === 'destructive'"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (click)="actionSelected.emit(action.id)"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="dd-item__label">{{ action.label }}</span>
+          </button>
+        }
       </div>
     </app-dropdown-shell>
   }

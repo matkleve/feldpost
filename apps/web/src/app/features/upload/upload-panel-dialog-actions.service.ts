@@ -124,6 +124,55 @@ export class UploadPanelDialogActionsService {
     this.ctx.locationPreviewCleared();
   }
 
+  async onAddressAmbiguousCandidateSelect(job: UploadJob): Promise<void> {
+    const candidate = job.addressCandidates?.[0];
+    if (!candidate) {
+      this.openLocationAddressDialog(job);
+      return;
+    }
+
+    if (!job.imageId && job.phase === 'missing_data') {
+      this.uploadManager.selectAddressCandidate(job.id, candidate);
+      this.toastService.show({
+        message: this.t('upload.location.update.success', 'Location updated.'),
+        type: 'success',
+        dedupe: true,
+      });
+      return;
+    }
+
+    if (!job.imageId) {
+      return;
+    }
+
+    const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(job.imageId, {
+      lat: candidate.lat,
+      lng: candidate.lng,
+      addressLabel: candidate.addressLabel,
+      city: null,
+      district: null,
+      street: null,
+      streetNumber: null,
+      zip: null,
+      country: null,
+    });
+    if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
+      this.toastService.show({
+        message: this.t('upload.location.update.failed', 'Location could not be updated.'),
+        type: 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.ctx.imageUploaded({ id: job.imageId, lat: result.lat, lng: result.lng });
+    this.toastService.show({
+      message: this.t('upload.location.update.success', 'Location updated.'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
   async onLocationAddressSuggestionApply(suggestion: ForwardGeocodeResult): Promise<void> {
     const job = this.dialogSignals.pendingLocationAddressJob();
     if (!job) {

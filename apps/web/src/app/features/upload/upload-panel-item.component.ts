@@ -23,18 +23,19 @@ const UPLOAD_ITEM_MENU_OFFSET_Y = 4;
 
 export type UploadItemMenuAction =
   | 'view_file_details'
-  | 'add_to_project'
+  | 'assign_to_project'
   | 'download'
   | 'open_in_media'
   | 'open_project'
   | 'toggle_priority'
   | 'open_existing_media'
   | 'upload_anyway'
-  | 'add_gps_issue'
-  | 'change_address_issue'
   | 'retry'
   | 'change_location_map'
   | 'change_location_address'
+  | 'candidate_select'
+  | 'manual_location_entry'
+  | 'cancel_location_prompt'
   | 'cancel_upload'
   | 'remove_from_project'
   | 'delete_media'
@@ -50,11 +51,11 @@ export type UploadItemMenuAction =
  *
  * Action Gating (Spec: upload-panel.md § Wiring/Data):
  * ✅ Uploading lane: view_file_details, cancel_upload
- * ✅ Uploaded lane: change_location_*, open_in_media, add_to_project, open_project?, priority?, download?
+ * ✅ Uploaded lane: change_location_*, open_in_media, assign_to_project, open_project?, priority?, download?
  * ✅ Issues lane: Actions depend on issue kind:
  *    - duplicate_photo: open_existing_media, upload_anyway
- *    - missing_gps: add_gps_issue, change_address_issue, retry
- *    - document_unresolved: add_gps_issue, change_address_issue, add_to_project
+ *    - missing_gps: change_location_map, change_location_address, retry
+ *    - document_unresolved: change_location_map, change_location_address, assign_to_project
  *    - upload_error/conflict_review: retry
  *
  * Menu Placement (Spec: down-first with fallback upward when clipped):
@@ -186,14 +187,21 @@ export class UploadPanelItemComponent implements OnDestroy {
         }
         actions.push('upload_anyway');
       } else if (issueKind === 'document_unresolved') {
-        actions.push('add_gps_issue');
-        actions.push('change_address_issue');
-        actions.push('add_to_project');
+        actions.push('change_location_map');
+        actions.push('change_location_address');
+        actions.push('assign_to_project');
       } else if (issueKind === 'conflict_review' || issueKind === 'upload_error') {
         actions.push('retry');
+      } else if (issueKind === 'address_ambiguous') {
+        if ((job.addressCandidates?.length ?? 0) > 0) {
+          actions.push('candidate_select');
+        }
+        actions.push('manual_location_entry');
+        actions.push('cancel_location_prompt');
+        return actions;
       } else if (issueKind === 'missing_gps') {
-        actions.push('add_gps_issue');
-        actions.push('change_address_issue');
+        actions.push('change_location_map');
+        actions.push('change_location_address');
         actions.push('retry');
       }
       actions.push('dismiss');
@@ -201,7 +209,7 @@ export class UploadPanelItemComponent implements OnDestroy {
     } else if (lane === 'uploaded' && job.imageId) {
       actions.push('change_location_map');
       actions.push('change_location_address');
-      actions.push('add_to_project');
+      actions.push('assign_to_project');
       if (boundProjectIds.length > 0 && this.showOpenProject()) {
         actions.push('open_project');
       }
@@ -229,6 +237,7 @@ export class UploadPanelItemComponent implements OnDestroy {
       action === 'cancel_upload' ||
       action === 'remove_from_project' ||
       action === 'delete_media' ||
+      action === 'cancel_location_prompt' ||
       action === 'dismiss'
     );
   }

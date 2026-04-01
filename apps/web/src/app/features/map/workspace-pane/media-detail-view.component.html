@@ -43,14 +43,14 @@
       [mediaTypeLabel]="mediaTypeLabel()"
       [editingTitle]="editingField() === 'address_label'"
       [showContextMenu]="showContextMenu()"
+      [contextActions]="workspaceHeaderActions()"
       (closed)="close()"
       (titleEditRequested)="editingField.set('address_label')"
       (titleSaveRequested)="saveImageField('address_label', $event)"
       (titleEditCancelled)="editingField.set(null)"
       (contextMenuToggled)="toggleContextMenu()"
       (contextMenuClosed)="closeContextMenu()"
-      (deleteRequested)="confirmDelete()"
-      (copyCoordinatesRequested)="copyCoordinates()"
+      (actionSelected)="onWorkspaceSingleActionSelected($event)"
     />
 
     <div class="detail-scroll">
@@ -121,11 +121,8 @@
         </div>
 
         <app-detail-actions
-          [hasCoordinates]="hasCoordinates()"
-          (zoomToLocation)="zoomToLocation()"
-          (addToProject)="openProjectPicker()"
-          (copyCoordinates)="copyCoordinates()"
-          (deleteImage)="confirmDelete()"
+          [actions]="workspaceSingleActions()"
+          (actionSelected)="onWorkspaceSingleActionSelected($event)"
         />
       </div>
     </div>

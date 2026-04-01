@@ -1,6 +1,6 @@
 # Upload Panel
 
-> **Related specs:** [media-renderer-system](media-renderer-system.md), [upload-manager](upload-manager.md), [file-type-chips](file-type-chips.md)
+> **Related specs:** [media-renderer-system](media-renderer-system.md), [upload-manager](upload-manager.md), [file-type-chips](file-type-chips.md), [action-context-matrix](action-context-matrix.md)
 
 ## What It Is
 
@@ -245,6 +245,8 @@ Row state rendering requirements:
 | `issues: missing_gps`                        | `Add GPS`, `Add/Change address`, `Retry`                                                                                                                                                              | `Dismiss`                                                                                                                             | danger text + danger icon |
 | `issues: document_unresolved`                | `Add GPS`, `Add/Change address`, `Assign project`                                                                                                                                                     | `Dismiss`                                                                                                                             | danger text + danger icon |
 | `issues: conflict_review` or `upload_error`  | `Retry`                                                                                                                                                                                               | `Dismiss`                                                                                                                             | danger text + danger icon |
+
+The `primary` / `secondary` / `destructive` section order in this contract is the canonical basis for shared action menus on map and workspace surfaces. Keep that ordering stable when a registry is reused outside the upload panel.
 
 ### Dropdown Visibility Rationale
 
