@@ -163,9 +163,9 @@ export class ThumbnailGridComponent implements OnDestroy {
     }
   });
 
-  readonly linkedHoveredImageIds = input<Set<string>>(new Set());
+  readonly linkedHoveredMediaIds = input<Set<string>>(new Set());
   readonly thumbnailClicked = output<string>();
-  readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
   readonly hoverStarted = output<ThumbnailCardHoverEvent>();
   readonly hoverEnded = output<string>();
 
@@ -290,8 +290,8 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.selectionService.toggle(event.imageId, { additive: event.additive });
   }
 
-  isLinkedHovered(imageId: string): boolean {
-    return this.linkedHoveredImageIds().has(imageId);
+  isLinkedHovered(mediaId: string): boolean {
+    return this.linkedHoveredMediaIds().has(mediaId);
   }
 
   /** Batch-sign thumbnails for currently visible images after a debounce. */

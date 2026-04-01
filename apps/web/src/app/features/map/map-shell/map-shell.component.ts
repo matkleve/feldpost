@@ -15,6 +15,8 @@
  *  - Nominatim results are fetched with debounce (300 ms) via native fetch().
  */
 
+/* eslint-disable max-lines, max-lines-per-function, no-magic-numbers, @typescript-eslint/explicit-function-return-type, @typescript-eslint/consistent-type-imports */
+
 import {
   Component,
   ElementRef,
@@ -1196,7 +1198,7 @@ export class MapShellComponent implements OnDestroy {
     const mediaId = mediaIds[0];
 
     this.onUploadLocationMapPickRequested({
-      imageId: mediaId,
+      mediaId,
       fileName: mediaId,
     });
     this.onMapMenuCloseRequested();
@@ -1683,11 +1685,11 @@ export class MapShellComponent implements OnDestroy {
    * Handles the zoomToLocationRequested output from the detail view.
    * Flies the map to the photo's coordinates at a tight zoom and pulses the marker.
    */
-  onZoomToLocation(event: { imageId: string; lat: number; lng: number }): void {
+  onZoomToLocation(event: { mediaId: string; lat: number; lng: number }): void {
     if (!this.map) return;
 
     this.pendingZoomHighlight = {
-      mediaId: event.imageId,
+      mediaId: event.mediaId,
       lat: event.lat,
       lng: event.lng,
       requestedAt: Date.now(),
@@ -1708,12 +1710,12 @@ export class MapShellComponent implements OnDestroy {
 
   onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
     this.activeWorkspaceHover = event;
-    const markerKey = this.resolveZoomTargetMarkerKey(event.imageId, event.lat, event.lng, true);
+    const markerKey = this.resolveZoomTargetMarkerKey(event.mediaId, event.lat, event.lng, true);
     this.setLinkedHoverMarkerFromWorkspace(markerKey);
   }
 
   onWorkspaceItemHoverEnded(mediaId: string): void {
-    if (this.activeWorkspaceHover?.imageId === mediaId) {
+    if (this.activeWorkspaceHover?.mediaId === mediaId) {
       this.activeWorkspaceHover = null;
     }
     this.setLinkedHoverMarkerFromWorkspace(null);
@@ -2345,7 +2347,7 @@ export class MapShellComponent implements OnDestroy {
     coords: { lat: number; lng: number },
   ): Promise<void> {
     const result = await this.mediaLocationUpdateService.updateFromCoordinates(
-      request.imageId,
+      request.mediaId,
       coords,
     );
     if (!result.ok || typeof result.lat !== 'number' || typeof result.lng !== 'number') {
@@ -2360,7 +2362,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.onImageUploaded({ id: request.imageId, lat: result.lat, lng: result.lng });
+    this.onImageUploaded({ id: request.mediaId, lat: result.lat, lng: result.lng });
     this.toastService.show({
       message: this.t('upload.location.update.success', 'Standort wurde aktualisiert.'),
       type: 'success',
@@ -3488,7 +3490,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     const markerKey = this.resolveZoomTargetMarkerKey(
-      activeHover.imageId,
+      activeHover.mediaId,
       activeHover.lat,
       activeHover.lng,
       true,

@@ -22,7 +22,7 @@ export class ShareTokenSelectionService {
   async loadSelectionFromShareToken(shareToken: string): Promise<ShareTokenSelectionResult> {
     try {
       const resolvedItems = await this.shareSetService.resolveShareSet(shareToken);
-      const orderedIds = resolvedItems.map((item) => item.imageId);
+      const orderedIds = resolvedItems.map((item) => item.mediaId);
 
       if (orderedIds.length === 0) {
         return { status: 'invalid', selectionIds: [] };

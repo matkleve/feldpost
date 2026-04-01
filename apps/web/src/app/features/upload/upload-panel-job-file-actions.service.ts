@@ -230,7 +230,7 @@ export class UploadPanelJobFileActionsService {
       return;
     }
 
-    this.ctx.locationMapPickRequested({ imageId: mediaId, fileName: job.file.name });
+    this.ctx.locationMapPickRequested({ mediaId, fileName: job.file.name });
     this.toastService.show({
       message: this.t('upload.location.mapPick.hint', 'Click on the map to set the location.'),
       type: 'info',

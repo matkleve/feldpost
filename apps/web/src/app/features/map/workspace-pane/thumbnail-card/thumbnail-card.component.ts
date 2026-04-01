@@ -21,7 +21,7 @@ export interface ThumbnailCardInteraction {
 }
 
 export interface ThumbnailCardHoverEvent {
-  imageId: string;
+  mediaId: string;
   lat: number;
   lng: number;
 }
@@ -121,7 +121,7 @@ export class ThumbnailCardComponent implements AfterViewInit {
   readonly selectionToggled = output<ThumbnailCardInteraction>();
   readonly hoverStarted = output<ThumbnailCardHoverEvent>();
   readonly hoverEnded = output<string>();
-  readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
   readonly hasCoordinates = computed(
     () => Number.isFinite(this.image().latitude) && Number.isFinite(this.image().longitude),
   );
@@ -223,7 +223,7 @@ export class ThumbnailCardComponent implements AfterViewInit {
     event.stopPropagation();
     if (!this.hasCoordinates()) return;
     this.zoomToLocationRequested.emit({
-      imageId: this.image().id,
+      mediaId: this.image().id,
       lat: this.image().latitude,
       lng: this.image().longitude,
     });
@@ -241,7 +241,7 @@ export class ThumbnailCardComponent implements AfterViewInit {
   onHoverStart(): void {
     if (!this.hasCoordinates()) return;
     this.hoverStarted.emit({
-      imageId: this.image().id,
+      mediaId: this.image().id,
       lat: this.image().latitude,
       lng: this.image().longitude,
     });

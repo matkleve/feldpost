@@ -108,14 +108,14 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly projectsService = inject(ProjectsService);
   private readonly actionEngineService = inject(ActionEngineService);
 
-  readonly imageId = input<string | null>(null);
+  readonly mediaId = input<string | null>(null);
   readonly addressSearchRequestImageId = input<string | null>(null);
   readonly addressSearchRequestId = input(0);
   readonly closed = output<void>();
   readonly addressSearchRequestConsumed = output<number>();
-  readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
 
-  readonly image = signal<ImageRecord | null>(null);
+  readonly media = signal<ImageRecord | null>(null);
   readonly metadata = signal<MetadataEntry[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -146,16 +146,18 @@ export class MediaDetailViewComponent implements OnDestroy {
   private lastAddressSearchRequestId = 0;
 
   readonly thumbState = computed<PhotoLoadState>(() => {
-    const id = this.imageId();
+    const id = this.mediaId();
     return id ? this.photoLoad.getLoadState(id, 'thumb')() : 'idle';
   });
 
   readonly fullState = computed<PhotoLoadState>(() => {
-    const id = this.imageId();
+    const id = this.mediaId();
     return id ? this.photoLoad.getLoadState(id, 'full')() : 'idle';
   });
 
-  readonly hasPhoto = computed(() => !!this.image()?.storage_path);
+  readonly image = this.media;
+
+  readonly hasPhoto = computed(() => !!this.media()?.storage_path);
 
   readonly replacing = computed(() => {
     const jobId = this.activeJobId();
@@ -165,36 +167,36 @@ export class MediaDetailViewComponent implements OnDestroy {
   });
 
   readonly isCorrected = computed(() => {
-    const img = this.image();
-    if (!img || img.latitude == null || img.exif_latitude == null) return false;
-    return img.latitude !== img.exif_latitude || img.longitude !== img.exif_longitude;
+    const media = this.media();
+    if (!media || media.latitude == null || media.exif_latitude == null) return false;
+    return media.latitude !== media.exif_latitude || media.longitude !== media.exif_longitude;
   });
 
   readonly hasCoordinates = computed(() => {
-    const img = this.image();
-    return img?.latitude != null && img?.longitude != null;
+    const media = this.media();
+    return media?.latitude != null && media?.longitude != null;
   });
 
-  readonly displayTitle = computed(() => resolveDisplayTitle(this.image(), this.t));
+  readonly displayTitle = computed(() => resolveDisplayTitle(this.media(), this.t));
 
   readonly mediaTypeLabel = computed(() =>
-    resolveMediaTypeLabel(this.image(), this.mediaType(), this.mediaMimeType(), this.t),
+    resolveMediaTypeLabel(this.media(), this.mediaType(), this.mediaMimeType(), this.t),
   );
 
   readonly detailViewLabel = computed(
-    () => `${this.mediaTypeLabel()} ${this.t('workspace.imageDetail.detailsSuffix', 'details')}`,
+    () => `${this.mediaTypeLabel()} ${this.t('workspace.mediaDetail.detailsSuffix', 'details')}`,
   );
 
-  readonly captureDate = computed(() => formatCaptureDate(this.image(), this.i18nService.locale()));
+  readonly captureDate = computed(() => formatCaptureDate(this.media(), this.i18nService.locale()));
 
-  readonly uploadDate = computed(() => formatUploadDate(this.image(), this.i18nService.locale()));
+  readonly uploadDate = computed(() => formatUploadDate(this.media(), this.i18nService.locale()));
 
   readonly projectName = computed(() => {
-    const image = this.image();
+    const media = this.media();
     return resolveProjectName(
       this.projectOptions(),
       this.selectedProjectIds(),
-      image?.project_id ?? null,
+      media?.project_id ?? null,
     );
   });
 
@@ -217,7 +219,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     if (!mime) return false;
     return (
       mime === 'application/pdf' ||
-      mime === 'image/tiff' ||
+      mime === 'media/tiff' ||
       mime === 'application/msword' ||
       mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     );
@@ -225,9 +227,9 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly canAssignMultipleProjects = computed(() => true);
 
-  readonly fullAddress = computed(() => resolveFullAddress(this.image()));
+  readonly fullAddress = computed(() => resolveFullAddress(this.media()));
 
-  readonly isImageLoading = computed(() => {
+  readonly isMediaLoading = computed(() => {
     const thumb = this.thumbState();
     const full = this.fullState();
     if (thumb === 'no-photo') return false;
@@ -236,17 +238,21 @@ export class MediaDetailViewComponent implements OnDestroy {
     return true;
   });
 
-  readonly imageReady = computed(() => {
+  readonly isImageLoading = this.isMediaLoading;
+
+  readonly mediaReady = computed(() => {
     if (this.fullResPreloaded()) return true;
     return this.thumbState() === 'loaded' && !!this.thumbnailUrl();
   });
+
+  readonly imageReady = computed(() => this.mediaReady());
 
   readonly canOpenLightbox = computed(() => {
     if (!(this.fullResUrl() || this.thumbnailUrl())) return false;
     return isImageLikeMedia(
       this.mediaType(),
       this.mediaMimeType(),
-      this.image()?.storage_path ?? null,
+      this.media()?.storage_path ?? null,
     );
   });
 
@@ -263,7 +269,7 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly infoChips = computed(() =>
     buildInfoChips({
-      image: this.image(),
+      image: this.media(),
       projectName: this.projectName(),
       selectedProjectCount: this.selectedProjectIds().size,
       captureDate: this.captureDate(),
@@ -292,7 +298,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     projectsService: this.projectsService,
     toastService: this.toastService,
     t: this.t,
-    media: this.image,
+    media: this.media,
     selectedProjectIds: this.selectedProjectIds,
     mediaItemId: this.mediaItemId,
     mediaType: this.mediaType,
@@ -310,7 +316,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       projectMemberships: this.projectMembershipHelper,
     },
     signals: {
-      image: this.image,
+      image: this.media,
       metadata: this.metadata,
       loading: this.loading,
       error: this.error,
@@ -332,8 +338,8 @@ export class MediaDetailViewComponent implements OnDestroy {
       supabase: this.supabaseService,
     },
     signals: {
-      image: this.image,
-      imageId: () => this.imageId(),
+      image: this.media,
+      imageId: () => this.mediaId(),
       metadata: this.metadata,
       saving: this.saving,
     },
@@ -345,7 +351,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       toastService: this.toastService,
     },
     signals: {
-      image: this.image,
+      image: this.media,
       editingField: this.editingField,
       saving: this.saving,
       editDate: this.editDate,
@@ -363,12 +369,12 @@ export class MediaDetailViewComponent implements OnDestroy {
       toastService: this.toastService,
     },
     signals: {
-      image: this.image,
+      image: this.media,
       fullResPreloaded: this.fullResPreloaded,
       activeJobId: this.activeJobId,
     },
     callbacks: {
-      reloadSignedUrlsForCurrentImage: () => this.reloadSignedUrlsForCurrentImage(),
+      reloadSignedUrlsForCurrentMedia: () => this.reloadSignedUrlsForCurrentMedia(),
       t: this.t,
     },
   });
@@ -379,14 +385,14 @@ export class MediaDetailViewComponent implements OnDestroy {
       uploadManager: this.uploadManager,
     },
     signals: {
-      image: this.image,
+      image: this.media,
       replaceError: this.replaceError,
       activeJobId: this.activeJobId,
     },
     callbacks: {
       findJobForFailure: (event) => {
         const job = this.uploadManager.jobs().find((candidate) => candidate.id === event.jobId);
-        return job?.targetImageId === this.imageId();
+        return job?.targetImageId === this.mediaId();
       },
     },
   });
@@ -396,7 +402,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       supabase: this.supabaseService,
     },
     signals: {
-      imageId: () => this.imageId(),
+      imageId: () => this.mediaId(),
       showDeleteConfirm: this.showDeleteConfirm,
       showContextMenu: this.showContextMenu,
     },
@@ -407,9 +413,9 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   constructor() {
     effect(() => {
-      const id = this.imageId();
+      const id = this.mediaId();
       if (id) {
-        void this.loadImage(id);
+        void this.loadMedia(id);
       } else {
         this.reset();
       }
@@ -418,7 +424,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     effect(() => {
       const requestId = this.addressSearchRequestId();
       const requestImageId = this.addressSearchRequestImageId();
-      const currentImageId = this.imageId();
+      const currentImageId = this.mediaId();
       if (
         requestId <= 0 ||
         requestId === this.lastAddressSearchRequestId ||
@@ -436,14 +442,14 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.uploadManager.imageReplaced$
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.imageId === this.imageId()),
+        filter((event) => event.imageId === this.mediaId()),
       )
       .subscribe((event) => void this.handleImageReplaced(event));
 
     this.uploadManager.imageAttached$
       .pipe(
         takeUntilDestroyed(),
-        filter((event) => event.imageId === this.imageId()),
+        filter((event) => event.imageId === this.mediaId()),
       )
       .subscribe((event) => void this.handleImageAttached(event));
 
@@ -466,7 +472,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   private reset(): void {
-    this.image.set(null);
+    this.media.set(null);
     this.metadata.set([]);
     this.selectedProjectIds.set(new Set());
     this.mediaItemId.set(null);
@@ -487,17 +493,17 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.replaceError.set(null);
   }
 
-  private async loadImage(id: string): Promise<void> {
+  private async loadMedia(id: string): Promise<void> {
     this.abortController?.abort();
     this.abortController = new AbortController();
     await this.dataFacade.loadImage(id, this.abortController.signal);
   }
 
-  private async reloadSignedUrlsForCurrentImage(): Promise<void> {
-    const img = this.image();
-    if (!img?.storage_path) return;
+  private async reloadSignedUrlsForCurrentMedia(): Promise<void> {
+    const media = this.media();
+    if (!media?.storage_path) return;
     const signal = this.abortController?.signal ?? new AbortController().signal;
-    await this.dataFacade.loadSignedUrls(img, signal);
+    await this.dataFacade.loadSignedUrls(media, signal);
   }
 
   onDetailSlotMeasured(slot: { widthRem: number; heightRem: number }): void {
@@ -538,9 +544,13 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   zoomToLocation(): void {
-    const img = this.image();
-    if (!img || img.latitude == null || img.longitude == null) return;
-    this.zoomToLocationRequested.emit({ imageId: img.id, lat: img.latitude, lng: img.longitude });
+    const media = this.media();
+    if (!media || media.latitude == null || media.longitude == null) return;
+    this.zoomToLocationRequested.emit({
+      mediaId: media.id,
+      lat: media.latitude,
+      lng: media.longitude,
+    });
   }
 
   async revertCoordinatesToExif(): Promise<void> {
@@ -568,14 +578,14 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   copyCoordinates(): void {
-    const img = this.image();
-    if (!img || img.latitude == null || img.longitude == null) return;
-    const text = `${img.latitude.toFixed(6)}, ${img.longitude.toFixed(6)}`;
+    const media = this.media();
+    if (!media || media.latitude == null || media.longitude == null) return;
+    const text = `${media.latitude.toFixed(6)}, ${media.longitude.toFixed(6)}`;
     navigator.clipboard.writeText(text).catch(() => {
       /* clipboard may be unavailable */
     });
     this.toastService.show({
-      message: this.t('workspace.imageDetail.toast.coordinatesCopied', 'Coordinates copied'),
+      message: this.t('workspace.mediaDetail.toast.coordinatesCopied', 'Coordinates copied'),
       type: 'info',
       duration: 2000,
     });

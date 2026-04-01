@@ -22,7 +22,7 @@ interface ImageDetailPhotoEventsHelperDeps {
     activeJobId: WritableSignal<string | null>;
   };
   callbacks: {
-    reloadSignedUrlsForCurrentImage: () => Promise<void>;
+    reloadSignedUrlsForCurrentMedia: () => Promise<void>;
     t: DetailTranslateFn;
   };
 }
@@ -40,7 +40,7 @@ export class ImageDetailPhotoEventsHelper {
     this.deps.signals.activeJobId.set(null);
 
     this.deps.services.photoLoad.invalidate(event.imageId);
-    await this.deps.callbacks.reloadSignedUrlsForCurrentImage();
+    await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
       URL.revokeObjectURL(event.localObjectUrl);
@@ -64,7 +64,7 @@ export class ImageDetailPhotoEventsHelper {
     this.deps.signals.activeJobId.set(null);
 
     this.deps.services.photoLoad.invalidate(event.imageId);
-    await this.deps.callbacks.reloadSignedUrlsForCurrentImage();
+    await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
       URL.revokeObjectURL(event.localObjectUrl);

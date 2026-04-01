@@ -47,10 +47,10 @@
       </button>
     </div>
 
-    @if (detailImageId()) {
+    @if (detailMediaId()) {
       <app-media-detail-view
-        [imageId]="detailImageId()"
-        [addressSearchRequestImageId]="detailAddressSearchRequestImageId()"
+        [mediaId]="detailMediaId()"
+        [addressSearchRequestImageId]="detailAddressSearchRequestMediaId()"
         [addressSearchRequestId]="detailAddressSearchRequestId()"
         (closed)="onDetailClose()"
         (addressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
@@ -59,7 +59,7 @@
     } @else if (activeTab() === 'selected-items') {
       <app-workspace-pane-toolbar />
       <app-thumbnail-grid
-        [linkedHoveredImageIds]="linkedHoveredImageIds()"
+        [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
         (thumbnailClicked)="onThumbnailClick($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
         (hoverStarted)="onWorkspaceItemHoverStarted($event)"

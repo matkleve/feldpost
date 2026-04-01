@@ -61,7 +61,7 @@ export class UploadPanelRowInteractionsService {
     }
     if (!this.rows.canZoomToJob(job)) return;
     this.ctx.zoomToLocationRequested({
-      imageId: job.imageId!,
+      mediaId: job.imageId!,
       lat: job.coords!.lat,
       lng: job.coords!.lng,
     });

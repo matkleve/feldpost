@@ -38,8 +38,8 @@ export class WorkspacePaneComponent {
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   // ── Inputs from MapShell ──────────────────────────────────────────────────
-  readonly detailImageId = input<string | null>(null);
-  readonly detailAddressSearchRequestImageId = input<string | null>(null);
+  readonly detailMediaId = input<string | null>(null);
+  readonly detailAddressSearchRequestMediaId = input<string | null>(null);
   readonly detailAddressSearchRequestId = input(0);
   readonly activeTab = input<WorkspacePaneTab>('selected-items');
   readonly title = input('');
@@ -49,7 +49,7 @@ export class WorkspacePaneComponent {
   readonly projectColorToken = input<string | null>(null);
   readonly colorPickerEnabled = input(false);
   readonly colorPickerOpen = input(false);
-  readonly linkedHoveredImageIds = input<Set<string>>(new Set());
+  readonly linkedHoveredMediaIds = input<Set<string>>(new Set());
 
   // ── Outputs to MapShell ──────────────────────────────────────────────────
   readonly closed = output<void>();
@@ -57,7 +57,7 @@ export class WorkspacePaneComponent {
   readonly detailAddressSearchRequestConsumed = output<number>();
   readonly detailRequested = output<string>();
   readonly activeTabChange = output<WorkspacePaneTab>();
-  readonly zoomToLocationRequested = output<{ imageId: string; lat: number; lng: number }>();
+  readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
   readonly imageUploaded = output<ImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly uploadLocationPreviewRequested = output<UploadLocationPreviewEvent>();
@@ -96,7 +96,7 @@ export class WorkspacePaneComponent {
     this.detailAddressSearchRequestConsumed.emit(requestId);
   }
 
-  onZoomToLocation(event: { imageId: string; lat: number; lng: number }): void {
+  onZoomToLocation(event: { mediaId: string; lat: number; lng: number }): void {
     this.zoomToLocationRequested.emit(event);
   }
 
@@ -120,8 +120,8 @@ export class WorkspacePaneComponent {
     this.workspaceItemHoverStarted.emit(event);
   }
 
-  onWorkspaceItemHoverEnded(imageId: string): void {
-    this.workspaceItemHoverEnded.emit(imageId);
+  onWorkspaceItemHoverEnded(mediaId: string): void {
+    this.workspaceItemHoverEnded.emit(mediaId);
   }
 
   setActiveTab(tab: WorkspacePaneTab): void {

@@ -9,7 +9,7 @@ export interface ShareSetCreateResult {
 
 export interface ShareSetItem {
   shareSetId: string;
-  imageId: string;
+  mediaId: string;
   itemOrder: number;
 }
 
@@ -18,11 +18,11 @@ export class ShareSetService {
   private readonly supabase = inject(SupabaseService);
 
   async createOrReuseShareSet(
-    imageIds: string[],
+    mediaIds: string[],
     expiresAt?: string,
   ): Promise<ShareSetCreateResult> {
     const { data, error } = await this.supabase.client.rpc('create_or_reuse_share_set', {
-      p_image_ids: imageIds,
+      p_image_ids: mediaIds,
       p_expires_at: expiresAt ?? null,
     });
 
@@ -57,7 +57,7 @@ export class ShareSetService {
 
     return data.map((row) => ({
       shareSetId: row.share_set_id,
-      imageId: row.media_item_id,
+      mediaId: row.media_item_id,
       itemOrder: row.item_order,
     }));
   }

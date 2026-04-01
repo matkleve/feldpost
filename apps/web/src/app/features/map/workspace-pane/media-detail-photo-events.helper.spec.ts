@@ -29,7 +29,7 @@ const MOCK_IMAGE: ImageRecord = {
 describe('ImageDetailPhotoEventsHelper', () => {
   it('updates image state and reloads URLs after replace', async () => {
     const image = signal<ImageRecord | null>({ ...MOCK_IMAGE });
-    const reloadSignedUrlsForCurrentImage = vi.fn(async () => {});
+    const reloadSignedUrlsForCurrentMedia = vi.fn(async () => {});
     const invalidate = vi.fn();
     const batchSignThumbnails = vi.fn(async () => {});
     const helper = new ImageDetailPhotoEventsHelper({
@@ -47,7 +47,7 @@ describe('ImageDetailPhotoEventsHelper', () => {
         activeJobId: signal('job-1'),
       },
       callbacks: {
-        reloadSignedUrlsForCurrentImage,
+        reloadSignedUrlsForCurrentMedia,
         t: (_key, fallback) => fallback,
       },
     });
@@ -62,7 +62,7 @@ describe('ImageDetailPhotoEventsHelper', () => {
 
     expect(image()!.storage_path).toBe('images/new.jpg');
     expect(invalidate).toHaveBeenCalledWith('img-1');
-    expect(reloadSignedUrlsForCurrentImage).toHaveBeenCalled();
+    expect(reloadSignedUrlsForCurrentMedia).toHaveBeenCalled();
     expect(batchSignThumbnails).toHaveBeenCalled();
     expect(revokeSpy).toHaveBeenCalledWith('blob:test');
     revokeSpy.mockRestore();

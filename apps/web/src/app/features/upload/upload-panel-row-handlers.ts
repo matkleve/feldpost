@@ -3,12 +3,16 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { UploadManagerService, type UploadJob, type UploadPhase } from '../../core/upload/upload-manager.service';
+import {
+  UploadManagerService,
+  type UploadJob,
+  type UploadPhase,
+} from '../../core/upload/upload-manager.service';
 import type { ExifCoords } from '../../core/upload/upload.service';
 import { getLaneForJob as mapJobToLane, type UploadLane } from './upload-phase.helpers';
 
 export interface ZoomToLocationEvent {
-  imageId: string;
+  mediaId: string;
   lat: number;
   lng: number;
 }

@@ -12,6 +12,6 @@ export interface UploadLocationPreviewEvent {
 }
 
 export interface UploadLocationMapPickRequest {
-  imageId: string;
+  mediaId: string;
   fileName: string;
 }
