@@ -19967,14 +19967,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.uploading', 'Uploading', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.uploading', 'Queue', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Uploading', 'published'
+select t.id, 'en', 'Queue', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -19982,7 +19982,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Wird hochgeladen', 'published'
+select t.id, 'de', 'Warteschlange', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -19990,7 +19990,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Caricamento', 'published'
+select t.id, 'it', 'Coda', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -20246,6 +20246,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.destructive.removeFromProjects', 'Remove from projects', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel destructive item for multiple project bindings')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Remove from projects', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.removeFromProjects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus Projekten entfernen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.removeFromProjects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimuovi dai progetti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.removeFromProjects'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.item.menu.destructive.dismiss', 'Dismiss', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel destructive item')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -20334,6 +20365,192 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Rimosso dal progetto.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.project.remove.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.project.removeMany.success', 'Removed from projects.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message for multiple project bindings')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Removed from projects.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.removeMany.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus Projekten entfernt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.removeMany.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Rimosso dai progetti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.project.removeMany.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.media.unavailable', 'Media is not persisted yet.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message when delete requested for non-persisted media')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media is not persisted yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium ist noch nicht gespeichert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Il media non e ancora salvato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.unavailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.media.delete.failed', 'Could not delete media.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message on media delete failure')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not delete media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.delete.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium konnte nicht geloescht werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.delete.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile eliminare il media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.delete.failed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.media.delete.success', 'Media deleted.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message on media delete success')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media deleted.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.delete.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium geloescht.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.delete.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media eliminato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.media.delete.success'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.location.addGps', 'Add GPS', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel issue action')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.addGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'GPS hinzufuegen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.addGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.addGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'projects.dialog.error.loadFailed', 'Could not load projects.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message on project dialog option load failure')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not load projects.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.dialog.error.loadFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte konnten nicht geladen werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.dialog.error.loadFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile caricare i progetti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'projects.dialog.error.loadFailed'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

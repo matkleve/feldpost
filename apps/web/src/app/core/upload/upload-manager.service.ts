@@ -256,9 +256,7 @@ export class UploadManagerService {
 
   // ── beforeunload ───────────────────────────────────────────────────────────
 
-  private readonly beforeUnloadHandler = (e: BeforeUnloadEvent): void => {
-    e.preventDefault();
-  };
+  private readonly beforeUnloadHandler = (_e: BeforeUnloadEvent): void => {};
 
   constructor() {
     registerUploadManagerEffects({

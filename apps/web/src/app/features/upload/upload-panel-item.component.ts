@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import {
@@ -11,6 +11,7 @@ import {
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 import { getIssueKind, getLaneForJob, phaseToStatusClass } from './upload-phase.helpers';
 import { statusLabelText, actionLabel, actionIcon } from './upload-panel-item-helpers';
+import { getBoundProjectIds } from './upload-panel-project-bindings.util';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
@@ -21,7 +22,6 @@ const UPLOAD_ITEM_MENU_WIDTH = 224;
 const UPLOAD_ITEM_MENU_OFFSET_Y = 4;
 
 export type UploadItemMenuAction =
-  | 'view_progress'
   | 'view_file_details'
   | 'add_to_project'
   | 'download'
@@ -30,12 +30,14 @@ export type UploadItemMenuAction =
   | 'toggle_priority'
   | 'open_existing_media'
   | 'upload_anyway'
-  | 'place_on_map'
+  | 'add_gps_issue'
+  | 'change_address_issue'
   | 'retry'
   | 'change_location_map'
   | 'change_location_address'
   | 'cancel_upload'
   | 'remove_from_project'
+  | 'delete_media'
   | 'dismiss';
 
 /**
@@ -47,13 +49,13 @@ export type UploadItemMenuAction =
  *  - Issue kind (duplicate_photo|missing_gps|document_unresolved|upload_error)
  *
  * Action Gating (Spec: upload-panel.md § Wiring/Data):
- * ✅ Uploading lane: view_progress, cancel_upload, remove_from_project
- * ✅ Uploaded lane: download, view_file_details, open_project, open_in_media, remove_from_project
+ * ✅ Uploading lane: view_file_details, cancel_upload
+ * ✅ Uploaded lane: change_location_*, open_in_media, add_to_project, open_project?, priority?, download?
  * ✅ Issues lane: Actions depend on issue kind:
- *    - duplicate_photo: upload_anyway, open_existing_media
- *    - missing_gps: place_on_map, change_location_map, change_location_address
- *    - document_unresolved: place_on_map, change_location_map, change_location_address, add_to_project
- *    - upload_error: retry, cancel_upload
+ *    - duplicate_photo: open_existing_media, upload_anyway
+ *    - missing_gps: add_gps_issue, change_address_issue, retry
+ *    - document_unresolved: add_gps_issue, change_address_issue, add_to_project
+ *    - upload_error/conflict_review: retry
  *
  * Menu Placement (Spec: down-first with fallback upward when clipped):
  * ✅ Implemented via DropdownShellComponent (UPLOAD_ITEM_MENU_WIDTH=224px, offset-y=4px)
@@ -75,7 +77,9 @@ export type UploadItemMenuAction =
   templateUrl: './upload-panel-item.component.html',
   styleUrl: './upload-panel-item.component.scss',
 })
-export class UploadPanelItemComponent {
+export class UploadPanelItemComponent implements OnDestroy {
+  private static activeMenuOwner: UploadPanelItemComponent | null = null;
+
   private readonly i18nService = inject(I18nService);
   private readonly mediaOrchestrator = inject(MediaOrchestratorService);
 
@@ -165,10 +169,10 @@ export class UploadPanelItemComponent {
   availableMenuActions(): UploadItemMenuAction[] {
     const job = this.job();
     const lane = getLaneForJob(job);
+    const boundProjectIds = getBoundProjectIds(job);
     let actions: UploadItemMenuAction[] = [];
 
     if (lane === 'uploading') {
-      actions.push('view_progress');
       actions.push('view_file_details');
       actions.push('cancel_upload');
       return actions;
@@ -182,13 +186,14 @@ export class UploadPanelItemComponent {
         }
         actions.push('upload_anyway');
       } else if (issueKind === 'document_unresolved') {
-        actions.push('place_on_map');
-        actions.push('change_location_address');
+        actions.push('add_gps_issue');
+        actions.push('change_address_issue');
         actions.push('add_to_project');
       } else if (issueKind === 'conflict_review' || issueKind === 'upload_error') {
         actions.push('retry');
       } else if (issueKind === 'missing_gps') {
-        actions.push('place_on_map');
+        actions.push('add_gps_issue');
+        actions.push('change_address_issue');
         actions.push('retry');
       }
       actions.push('dismiss');
@@ -196,17 +201,21 @@ export class UploadPanelItemComponent {
     } else if (lane === 'uploaded' && job.imageId) {
       actions.push('change_location_map');
       actions.push('change_location_address');
-      if (this.showOpenProject()) {
+      actions.push('add_to_project');
+      if (boundProjectIds.length > 0 && this.showOpenProject()) {
         actions.push('open_project');
-      } else {
-        actions.push('add_to_project');
       }
       actions.push('open_in_media');
-      actions.push('download');
+      if (job.storagePath) {
+        actions.push('download');
+      }
       if (this.priorityEnabled()) {
         actions.push('toggle_priority');
       }
-      actions.push('remove_from_project');
+      if (boundProjectIds.length > 0) {
+        actions.push('remove_from_project');
+      }
+      actions.push('delete_media');
       return actions;
     }
 
@@ -216,7 +225,12 @@ export class UploadPanelItemComponent {
   }
 
   isDestructiveAction(action: UploadItemMenuAction): boolean {
-    return action === 'cancel_upload' || action === 'remove_from_project' || action === 'dismiss';
+    return (
+      action === 'cancel_upload' ||
+      action === 'remove_from_project' ||
+      action === 'delete_media' ||
+      action === 'dismiss'
+    );
   }
 
   actionIcon(action: UploadItemMenuAction): string {
@@ -243,10 +257,12 @@ export class UploadPanelItemComponent {
     event.preventDefault();
     event.stopPropagation();
     const menuHeight = this.availableMenuActions().length * 44 + 48;
-    this.menuPosition.set(
-      this.clampMenuPosition(event.clientX, event.clientY - menuHeight, menuHeight),
-    );
-    this.menuOpen.set(true);
+    const downwardY = event.clientY + UPLOAD_ITEM_MENU_OFFSET_Y;
+    const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8;
+    const menuY = hasSpaceBelow
+      ? downwardY
+      : event.clientY - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y;
+    this.openMenuAt(event.clientX, menuY, menuHeight);
   }
 
   onMenuTriggerClick(event: MouseEvent): void {
@@ -266,17 +282,16 @@ export class UploadPanelItemComponent {
       const hasSpaceBelow = downwardY + menuHeight <= window.innerHeight - 8; // 8px margin
 
       const menuY = hasSpaceBelow ? downwardY : rect.top - menuHeight - UPLOAD_ITEM_MENU_OFFSET_Y;
-
-      this.menuPosition.set(
-        this.clampMenuPosition(rect.right - UPLOAD_ITEM_MENU_WIDTH, menuY, menuHeight),
-      );
+      this.openMenuAt(rect.right - UPLOAD_ITEM_MENU_WIDTH, menuY, menuHeight);
     } else {
-      this.menuPosition.set(this.clampMenuPosition(event.clientX, event.clientY, 200));
+      this.openMenuAt(event.clientX, event.clientY, 200);
     }
-    this.menuOpen.set(true);
   }
 
   onMenuCloseRequested(): void {
+    if (UploadPanelItemComponent.activeMenuOwner === this) {
+      UploadPanelItemComponent.activeMenuOwner = null;
+    }
     this.menuOpen.set(false);
   }
 
@@ -302,6 +317,12 @@ export class UploadPanelItemComponent {
     event.stopPropagation();
     this.menuOpen.set(false);
     this.dismissFile.emit(this.job().id);
+  }
+
+  ngOnDestroy(): void {
+    if (UploadPanelItemComponent.activeMenuOwner === this) {
+      UploadPanelItemComponent.activeMenuOwner = null;
+    }
   }
 
   onSelectionChanged(event: Event): void {
@@ -381,5 +402,18 @@ export class UploadPanelItemComponent {
       x: Math.min(Math.max(x, margin), window.innerWidth - menuWidth - margin),
       y: Math.min(Math.max(y, margin), window.innerHeight - menuHeight - margin),
     };
+  }
+
+  private openMenuAt(x: number, y: number, menuHeight: number): void {
+    // upload-panel.md § Dropdown Visibility Rationale: only one row menu should be active at once.
+    const previousOwner = UploadPanelItemComponent.activeMenuOwner;
+    if (previousOwner && previousOwner !== this) {
+      previousOwner.menuOpen.set(false);
+      previousOwner.menuPosition.set(null);
+    }
+
+    this.menuPosition.set(this.clampMenuPosition(x, y, menuHeight));
+    this.menuOpen.set(true);
+    UploadPanelItemComponent.activeMenuOwner = this;
   }
 }

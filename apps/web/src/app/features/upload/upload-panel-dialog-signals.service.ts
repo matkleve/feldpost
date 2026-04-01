@@ -29,6 +29,10 @@ export class UploadPanelDialogSignals {
   readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
   readonly projectSelectionDialogSelectedId = signal<string | null>(null);
   readonly pendingProjectAssignmentJob = signal<UploadJob | null>(null);
+  readonly projectNameDialogOpen = signal(false);
+  readonly projectNameDialogTitle = signal('');
+  readonly projectNameDialogMessage = signal('');
+  readonly projectNameDialogInitialValue = signal('');
 
   // ── Duplicate Resolution Dialog ────────────────────────────────────────
 
@@ -90,6 +94,22 @@ export class UploadPanelDialogSignals {
 
   setPendingProjectAssignmentJob(job: UploadJob | null): void {
     this.pendingProjectAssignmentJob.set(job);
+  }
+
+  setProjectNameDialogOpen(value: boolean): void {
+    this.projectNameDialogOpen.set(value);
+  }
+
+  setProjectNameDialogTitle(value: string): void {
+    this.projectNameDialogTitle.set(value);
+  }
+
+  setProjectNameDialogMessage(value: string): void {
+    this.projectNameDialogMessage.set(value);
+  }
+
+  setProjectNameDialogInitialValue(value: string): void {
+    this.projectNameDialogInitialValue.set(value);
   }
 
   // ── Duplicate Resolution Dialog Setters ────────────────────────────────

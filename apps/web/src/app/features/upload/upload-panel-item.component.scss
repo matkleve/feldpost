@@ -13,6 +13,7 @@
 
   background: var(--color-bg-surface);
   border: 1px solid color-mix(in srgb, var(--color-border) 62%, transparent);
+  box-shadow: var(--elevation-subtle);
   padding-inline-end: calc(var(--container-padding-inline-compact) + 2rem + var(--spacing-2));
   transition:
     background 120ms ease-out,

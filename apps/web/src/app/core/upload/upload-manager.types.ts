@@ -88,6 +88,8 @@ export interface UploadJob {
   oldThumbnailPath?: string;
   /** Optional primary project context for mixed-media shadow writes. */
   projectId?: string;
+  /** Optional explicit set of bound projects for rows that belong to multiple projects. */
+  projectIds?: string[];
   /** If conflict detected, the existing photoless row that matched. */
   conflictCandidate?: ConflictCandidate;
   /** User's resolution when a conflict was detected. */

@@ -67,6 +67,7 @@ Reference workflow and checklist:
 - Prefer standardized shared UI components from `apps/web/src/app/shared/` (especially dialogs/modals) before building feature-local variants
 - Avoid browser-native UI primitives (`window.prompt`, `window.confirm`, native context UI) for product flows when a shared component exists
 - When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
+- For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`).
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting
 

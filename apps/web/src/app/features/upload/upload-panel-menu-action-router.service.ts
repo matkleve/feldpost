@@ -49,9 +49,6 @@ export class UploadPanelMenuActionRouterService {
   }
 
   private readonly menuHandlers: Record<UploadItemMenuAction, (job: UploadJob) => Promise<void>> = {
-    view_progress: async (job) => {
-      this.showJobStatusToast(job);
-    },
     view_file_details: async (job) => {
       this.showJobStatusToast(job);
     },
@@ -59,13 +56,18 @@ export class UploadPanelMenuActionRouterService {
       await this.fileActions.openExistingDuplicateInMedia(job);
     },
     upload_anyway: async (job) => {
-      this.dialogActions.openDuplicateResolutionDialog(job);
+      // upload-panel.md § Row Action Registry Shape: upload_anyway directly forces duplicate bypass.
+      this.uploadManager.forceDuplicateUpload(job.id);
+      this.ctx.setLane('uploading');
     },
     change_location_map: async (job) => {
-      this.fileActions.requestLocationPickOnMap(job);
+      await this.fileActions.requestLocationPickOnMap(job);
     },
-    place_on_map: async (job) => {
+    add_gps_issue: async (job) => {
       this.handlePlaceOnMap(job);
+    },
+    change_address_issue: async (job) => {
+      this.dialogActions.openLocationAddressDialog(job);
     },
     change_location_address: async (job) => {
       this.dialogActions.openLocationAddressDialog(job);
@@ -90,7 +92,13 @@ export class UploadPanelMenuActionRouterService {
       this.uploadManager.cancelJob(job.id);
     },
     remove_from_project: async (job) => {
-      const ok = await this.fileActions.removeUploadedJobFromProject(job);
+      const ok = await this.fileActions.removeUploadedJobFromProjects(job);
+      if (ok) {
+        this.ctx.dismissFile(job.id);
+      }
+    },
+    delete_media: async (job) => {
+      const ok = await this.fileActions.deleteUploadedMedia(job);
       if (ok) {
         this.ctx.dismissFile(job.id);
       }
@@ -114,10 +122,11 @@ export class UploadPanelMenuActionRouterService {
   private handlePlaceOnMap(job: UploadJob): void {
     const issueKind = getIssueKind(job);
     if (issueKind === 'missing_gps' || issueKind === 'document_unresolved') {
+      // upload-panel.md § Actions 15m: issue rows enter placement workflow via placementRequested.
       this.ctx.placementRequested(job.id);
       return;
     }
-    this.fileActions.requestLocationPickOnMap(job);
+    void this.fileActions.requestLocationPickOnMap(job);
   }
 
   async handleMenuAction(job: UploadJob, action: UploadItemMenuAction): Promise<void> {

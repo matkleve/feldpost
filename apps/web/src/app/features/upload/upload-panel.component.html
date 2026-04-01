@@ -164,7 +164,7 @@
             [selectable]="embeddedInPane()"
             [selected]="selectedUploadJobIds().has(job.id)"
             [documentFallbackLabel]="documentFallbackLabel(job)"
-            [showOpenProject]="!!job.projectId"
+            [showOpenProject]="!!job.projectId || !!job.projectIds?.length"
             [priorityEnabled]="priorityWorkflowEnabled()"
             [prioritized]="prioritizedUploadedJobIds().has(job.id)"
             (requestPlacement)="

@@ -55,17 +55,17 @@ export function buildLaneSwitchOptions(
   return [
     {
       id: 'uploading',
-      label: t('upload.panel.lane.uploading', 'Uploading'),
+      label: t('upload.panel.lane.uploading', 'Queue'),
       icon: 'cloud_upload',
-      type: 'icon-only',
-      ariaLabel: `${t('upload.panel.lane.uploading', 'Uploading')} (${counts.uploading})`,
-      title: t('upload.panel.lane.uploading', 'Uploading'),
+      type: 'icon-with-text',
+      ariaLabel: `${t('upload.panel.lane.uploading', 'Queue')} (${counts.uploading})`,
+      title: t('upload.panel.lane.uploading', 'Queue'),
     },
     {
       id: 'uploaded',
       label: t('upload.panel.lane.uploaded', 'Uploaded'),
       icon: 'check_circle',
-      type: 'icon-only',
+      type: 'icon-with-text',
       ariaLabel: `${t('upload.panel.lane.uploaded', 'Uploaded')} (${counts.uploaded})`,
       title: t('upload.panel.lane.uploaded', 'Uploaded'),
     },
