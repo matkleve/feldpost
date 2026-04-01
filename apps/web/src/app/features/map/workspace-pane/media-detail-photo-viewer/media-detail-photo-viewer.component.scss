@@ -7,8 +7,6 @@
   place-items: center;
   width: fit-content;
   max-width: 100%;
-  background: var(--color-bg-base);
-  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   border: none;
@@ -37,7 +35,7 @@
 
 .detail-image-media {
   display: block;
-  width: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
+  width: min(calc(100%), calc(40rem / 1.618));
   max-width: 100%;
   min-height: 0;
   --universal-media-slot-border: 0;

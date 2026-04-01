@@ -201,14 +201,14 @@ stateDiagram-v2
 
 ## Lane Item Features
 
-| Lane                                       | Availability                                                 | Item Actions                                                                                                                                      | Notes                                                                                                                                                                 |
-| ------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `uploading`                                | queued, parsing, validating, uploading, saving, enrichment   | `View progress`, `View file details`, `Cancel upload`                                                                                             | No navigation to saved media targets before persistence is complete                                                                                                   |
-| `uploaded`                                 | persisted uploads and attachments with successful completion | `Change location > Add/Change GPS`, `Change location > Add/Change address`, `Open in /media`, `Assign project`, `Download`, optional `Prioritize` | Row click performs map focus only when coordinates exist; `Assign project` supports assign/reassign in one flow; `Prioritize` appears only when capability is enabled |
-| `issues: duplicate_photo`                  | dedupe review                                                | `Open existing media`, `Upload anyway`, `Dismiss`                                                                                                 | `Upload anyway` only for duplicate-photo rows                                                                                                                         |
-| `issues: missing_gps`                      | GPS/manual placement needed                                  | `Add GPS`, `Add/Change address`, `Retry`, `Dismiss`                                                                                               | `Retry` re-queues only when retry preconditions are met                                                                                                               |
-| `issues: document_unresolved`              | document without GPS/address                                 | `Add GPS`, `Add/Change address`, `Assign project`, `Dismiss`                                                                                      | `Assign project` resolves geospatially missing documents as project-bound artifacts                                                                                   |
-| `issues: conflict_review` / `upload_error` | conflict or hard error                                       | `Retry`, `Dismiss`                                                                                                                                | No force-upload actions in these issue kinds                                                                                                                          |
+| Lane                                       | Availability                                                 | Item Actions                                                                                                                                                                        | Notes                                                                                                                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `uploading`                                | queued, parsing, validating, uploading, saving, enrichment   | `View file details`, `Cancel upload`                                                                                                                                                | Queue lane is user-facing label; internal lane id remains `uploading`                                                                                                          |
+| `uploaded`                                 | persisted uploads and attachments with successful completion | `Change location > Add/Change GPS`, `Change location > Add/Change address`, `Open in /media`, `Add to project`, optional `Open project`, optional `Prioritize`, optional `Download` | `Add to project` opens shared project-selector primitive with multi-select and deselect support; `Open project` opens direct on single binding or submenu on multiple bindings |
+| `issues: duplicate_photo`                  | dedupe review                                                | `Open existing media`, `Upload anyway`, `Dismiss`                                                                                                                                   | `Upload anyway` only for duplicate-photo rows                                                                                                                                  |
+| `issues: missing_gps`                      | GPS/manual placement needed                                  | `Add GPS`, `Add/Change address`, `Retry`, `Dismiss`                                                                                                                                 | `Retry` re-queues only when retry preconditions are met                                                                                                                        |
+| `issues: document_unresolved`              | document without GPS/address                                 | `Add GPS`, `Add/Change address`, `Assign project`, `Dismiss`                                                                                                                        | `Assign project` resolves geospatially missing documents as project-bound artifacts                                                                                            |
+| `issues: conflict_review` / `upload_error` | conflict or hard error                                       | `Retry`, `Dismiss`                                                                                                                                                                  | No force-upload actions in these issue kinds                                                                                                                                   |
 
 Row state rendering requirements:
 
@@ -237,34 +237,63 @@ Row state rendering requirements:
 
 ### Media Item Menu Contract
 
-| Lane / Issue Kind                            | Non-destructive actions                                                                                                                           | Destructive action (last item)                                | Destructive styling       |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------- |
-| `uploading`                                  | `View progress`, `View file details`                                                                                                              | `Cancel upload`                                               | danger text + danger icon |
-| `uploaded` (with or without project binding) | `Change location > Add/Change GPS`, `Change location > Add/Change address`, `Open in /media`, `Assign project`, optional `Prioritize`, `Download` | `Remove from project` when project-bound; otherwise `Dismiss` | danger text + danger icon |
-| `issues: duplicate_photo`                    | `Open existing media`, `Upload anyway`                                                                                                            | `Dismiss`                                                     | danger text + danger icon |
-| `issues: missing_gps`                        | `Add GPS`, `Add/Change address`, `Retry`                                                                                                          | `Dismiss`                                                     | danger text + danger icon |
-| `issues: document_unresolved`                | `Add GPS`, `Add/Change address`, `Assign project`                                                                                                 | `Dismiss`                                                     | danger text + danger icon |
-| `issues: conflict_review` or `upload_error`  | `Retry`                                                                                                                                           | `Dismiss`                                                     | danger text + danger icon |
+| Lane / Issue Kind                            | Non-destructive actions                                                                                                                                                                               | Destructive section (last group)                                                                                                      | Destructive styling       |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `uploading`                                  | `View file details`                                                                                                                                                                                   | `Cancel upload`                                                                                                                       | danger text + danger icon |
+| `uploaded` (with or without project binding) | `Change location > Add/Change GPS`, `Change location > Add/Change address`, `Open in /media`, `Add to project` (shared selector), optional `Open project`, optional `Prioritize`, optional `Download` | If project-bound: `Remove from project` (single) OR `Remove from projects` (multi). Always include `Delete media` for uploaded media. | danger text + danger icon |
+| `issues: duplicate_photo`                    | `Open existing media`, `Upload anyway`                                                                                                                                                                | `Dismiss`                                                                                                                             | danger text + danger icon |
+| `issues: missing_gps`                        | `Add GPS`, `Add/Change address`, `Retry`                                                                                                                                                              | `Dismiss`                                                                                                                             | danger text + danger icon |
+| `issues: document_unresolved`                | `Add GPS`, `Add/Change address`, `Assign project`                                                                                                                                                     | `Dismiss`                                                                                                                             | danger text + danger icon |
+| `issues: conflict_review` or `upload_error`  | `Retry`                                                                                                                                                                                               | `Dismiss`                                                                                                                             | danger text + danger icon |
 
 ### Dropdown Visibility Rationale
 
 | Condition                                        | Why this option appears                                                       |
 | ------------------------------------------------ | ----------------------------------------------------------------------------- |
-| Lane = `uploading`                               | Item is still transient; only progress/detail/cancel actions are valid        |
+| Lane = `uploading`                               | Item is still transient; only detail/cancel actions are valid                 |
 | Lane = `uploaded` and media persisted            | Location/project/download actions require saved media identity                |
+| Uploaded row with one bound project              | `Open project` navigates directly to that project                             |
+| Uploaded row with multiple bound projects        | `Open project` opens subdropdown to choose target project                     |
+| Uploaded row with one or more project bindings   | Destructive section includes project-unbind action (`Remove from project(s)`) |
+| Uploaded row with persisted media                | Destructive section includes `Delete media`                                   |
 | Issue kind = `duplicate_photo`                   | Duplicate needs resolution choices (`open existing`, `upload anyway`)         |
 | Issue kind = `missing_gps`                       | Missing location needs placement/correction actions                           |
 | Issue kind = `document_unresolved`               | Document lacks resolvable location; allow GPS, address, or project resolution |
 | Issue kind = `conflict_review` or `upload_error` | Safe recovery path is retry/dismiss only                                      |
-| Destructive item always last                     | Keeps action hierarchy predictable and prevents accidental destructive clicks |
+| Destructive section always last                  | Keeps action hierarchy predictable and prevents accidental destructive clicks |
 
 ### Action Label Contract
 
-| Action family  | Label when value missing | Label when value already exists                      |
-| -------------- | ------------------------ | ---------------------------------------------------- |
-| GPS action     | `Add GPS`                | `Change GPS`                                         |
-| Address action | `Add address`            | `Change address`                                     |
-| Project action | `Assign project`         | `Assign project` (opens preselected current project) |
+| Action family  | Label when value missing | Label when value already exists                                            |
+| -------------- | ------------------------ | -------------------------------------------------------------------------- |
+| GPS action     | `Add GPS`                | `Change GPS`                                                               |
+| Address action | `Add address`            | `Change address`                                                           |
+| Project action | `Add to project`         | `Add to project` (opens shared selector with current bindings preselected) |
+| Open project   | Hidden                   | `Open project` (direct for one binding, subdropdown for multiple bindings) |
+
+### Row Action Registry Shape (Contract)
+
+All row actions MUST be declared in a registry and filtered by lane/state/capabilities. The UI may not hardcode action visibility in scattered conditional blocks.
+
+| id                        | label contract                                 | section       | lane gate                                    | state/issue gate                                 | capability gates                     | run contract                             |
+| ------------------------- | ---------------------------------------------- | ------------- | -------------------------------------------- | ------------------------------------------------ | ------------------------------------ | ---------------------------------------- |
+| `view_file_details`       | `View file details`                            | `primary`     | `uploading`                                  | all non-terminal upload phases                   | none                                 | info/details drawer                      |
+| `cancel_upload`           | `Cancel upload`                                | `destructive` | `uploading`                                  | active or queued                                 | none                                 | cancel pipeline job                      |
+| `change_location_map`     | `Add GPS` / `Change GPS`                       | `edit`        | `uploaded`                                   | persisted                                        | `imageId`                            | map-pick and persist location            |
+| `change_location_address` | `Add address` / `Change address`               | `edit`        | `uploaded`                                   | persisted                                        | `imageId`                            | open address finder and persist          |
+| `open_in_media`           | `Open in /media`                               | `primary`     | `uploaded`                                   | persisted                                        | `imageId`                            | navigate to media focus                  |
+| `add_to_project`          | `Add to project`                               | `primary`     | `uploaded`, `issues` (`document_unresolved`) | for uploaded and unresolved-document resolution  | shared project selector available    | open shared project selector primitive   |
+| `open_project`            | `Open project`                                 | `primary`     | `uploaded`                                   | persisted                                        | one or more bound projects           | direct navigation or project subdropdown |
+| `toggle_priority`         | `Prioritize`                                   | `primary`     | `uploaded`                                   | persisted                                        | priority workflow capability enabled | toggle priority state                    |
+| `download`                | `Download`                                     | `primary`     | `uploaded`                                   | persisted                                        | `imageId` and `storagePath`          | force attachment download                |
+| `remove_from_project`     | `Remove from project` / `Remove from projects` | `destructive` | `uploaded`                                   | persisted                                        | one or more bound projects           | open remove-membership flow              |
+| `delete_media`            | `Delete media`                                 | `destructive` | `uploaded`                                   | persisted                                        | `imageId`                            | delete persisted media                   |
+| `open_existing_media`     | `Open existing media`                          | `primary`     | `issues`                                     | `duplicate_photo`                                | `existingImageId`                    | navigate to existing media               |
+| `upload_anyway`           | `Upload anyway`                                | `primary`     | `issues`                                     | `duplicate_photo`                                | none                                 | force duplicate upload flow              |
+| `add_gps_issue`           | `Add GPS`                                      | `edit`        | `issues`                                     | `missing_gps`, `document_unresolved`             | map-pick capability                  | placement workflow                       |
+| `change_address_issue`    | `Add address` / `Change address`               | `edit`        | `issues`                                     | `missing_gps`, `document_unresolved`             | none                                 | address finder workflow                  |
+| `retry`                   | `Retry`                                        | `primary`     | `issues`                                     | `missing_gps`, `conflict_review`, `upload_error` | retry preconditions met              | retry job                                |
+| `dismiss`                 | `Dismiss`                                      | `destructive` | `issues`                                     | all issue kinds                                  | none                                 | dismiss row                              |
 
 ### Media Item Action Wiring (Mermaid)
 
@@ -296,19 +325,19 @@ sequenceDiagram
 
 ## Destructive Menu Convention
 
-The row 3-dot menu always ends with exactly one destructive entry, and this entry is always visually separated by a divider.
+The row 3-dot menu always ends with one destructive section (divider + one or more destructive entries).
 
-| Row State                        | Bottom destructive label | Required operation                              |
-| -------------------------------- | ------------------------ | ----------------------------------------------- |
-| Active upload (`uploading` lane) | `Cancel upload`          | `cancelJob(jobId)`                              |
-| Uploaded (`uploaded` lane)       | `Remove from project`    | remove project-bound media from project context |
-| Issue or failed (`issues` lane)  | `Dismiss`                | `dismissJob(jobId)`                             |
+| Row State                        | Destructive entries                                                           | Required operation                                    |
+| -------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Active upload (`uploading` lane) | `Cancel upload`                                                               | `cancelJob(jobId)`                                    |
+| Uploaded (`uploaded` lane)       | `Remove from project` or `Remove from projects` (when bound) + `Delete media` | unbind from one/many projects; delete persisted media |
+| Issue or failed (`issues` lane)  | `Dismiss`                                                                     | `dismissJob(jobId)`                                   |
 
 Notes:
 
 - Compact mode and embedded mode share the same destructive naming convention.
-- `Upload anyway` is a non-destructive duplicate-resolution action and MUST NOT replace the destructive bottom item.
-- The destructive menu item (`Dismiss`, `Cancel upload`, `Remove from project`) uses danger styling for label and icon.
+- `Upload anyway` is a non-destructive duplicate-resolution action and MUST NOT replace the destructive section.
+- Every destructive menu entry uses danger styling for label and icon.
 
 ## Component Hierarchy
 
