@@ -39,6 +39,76 @@
   </div>
 </app-pane-footer>
 
+@if (projectDialogOpen()) {
+  <app-project-select-dialog
+    [title]="t('workspace.export.projectDialog.title', 'Select project')"
+    [message]="t('workspace.export.projectDialog.message', 'Choose a project for selected media.')"
+    [options]="projectOptions()"
+    [selectedId]="projectDialogSelectedId()"
+    [confirmLabel]="t('workspace.export.projectDialog.confirm', 'Assign')"
+    [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (selectedIdChange)="onProjectDialogSelected($event)"
+    (confirmed)="confirmProjectDialog($event)"
+    (cancelled)="closeProjectDialog()"
+  />
+}
+
+@if (addressDialogOpen()) {
+  <app-text-input-dialog
+    [title]="t('workspace.export.addressDialog.title', 'Change address')"
+    [message]="
+      t('workspace.export.addressDialog.message', 'Apply one address to all selected media.')
+    "
+    [placeholder]="t('workspace.export.addressDialog.placeholder', 'Enter address')"
+    [confirmLabel]="t('workspace.export.addressDialog.confirm', 'Apply')"
+    [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (confirmed)="confirmAddressDialog($event)"
+    (cancelled)="closeAddressDialog()"
+  />
+}
+
+@if (deleteDialogOpen()) {
+  <div class="workspace-action__dialog-backdrop" (click)="closeDeleteDialog()"></div>
+  <section
+    class="workspace-action__dialog"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="t('workspace.export.deleteDialog.aria', 'Delete selection')"
+  >
+    <h3>{{ t('workspace.export.deleteDialog.title', 'Delete selected media') }}</h3>
+    <p>
+      {{
+        t(
+          'workspace.export.deleteDialog.message',
+          'This action cannot be undone. All selected media will be deleted.'
+        )
+      }}
+    </p>
+
+    <div class="workspace-action__dialog-actions">
+      <button
+        uiButton
+        type="button"
+        class="workspace-action__btn"
+        [disabled]="pending()"
+        (click)="closeDeleteDialog()"
+      >
+        {{ t('workspace.export.dialog.cancel', 'Cancel') }}
+      </button>
+      <button
+        uiButton
+        uiButtonPrimary
+        type="button"
+        class="workspace-action__btn workspace-action__btn--primary"
+        [disabled]="pending()"
+        (click)="confirmDeleteDialog()"
+      >
+        {{ t('workspace.export.deleteDialog.confirm', 'Delete') }}
+      </button>
+    </div>
+  </section>
+}
+
 @if (zipDialogOpen()) {
   <div class="workspace-action__dialog-backdrop" (click)="closeZipDialog()"></div>
   <section

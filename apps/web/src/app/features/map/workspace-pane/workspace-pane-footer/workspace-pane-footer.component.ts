@@ -5,6 +5,10 @@ import { ShareSetService } from '../../../../core/share-set.service';
 import { ZipExportService } from '../../../../core/zip-export.service';
 import { ToastService } from '../../../../core/toast.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { SupabaseService } from '../../../../core/supabase/supabase.service';
+import { GeocodingService } from '../../../../core/geocoding.service';
+import { MediaLocationUpdateService } from '../../../../core/media-location-update.service';
+import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { ActionEngineService } from '../../../action-system/action-engine.service';
 import {
   UiButtonDirective,
@@ -17,8 +21,16 @@ import {
 import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
 import { WORKSPACE_EXPORT_ACTION_DEFINITIONS } from '../workspace-export-actions.registry';
 import type { WorkspaceExportActionId } from '../workspace-export-actions.types';
+import {
+  ProjectSelectDialogComponent,
+  type ProjectSelectOption,
+} from '../../../../shared/project-select-dialog/project-select-dialog.component';
+import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
 
 const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
+  'auto.0013.add_to_project': 'Add to project',
+  'upload.item.menu.location.changeAddress': 'Change address',
+  'workspace.imageDetail.action.delete': 'Delete media',
   'workspace.export.action.selectAll': 'Select all',
   'workspace.export.action.selectNone': 'Select none',
   'workspace.export.action.share': 'Share',
@@ -37,6 +49,8 @@ const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
     UiButtonIconWithTextDirective,
     UiInputControlDirective,
     PaneFooterComponent,
+    ProjectSelectDialogComponent,
+    TextInputDialogComponent,
   ],
   templateUrl: './workspace-pane-footer.component.html',
   styleUrl: './workspace-pane-footer.component.scss',
@@ -48,6 +62,10 @@ export class WorkspacePaneFooterComponent {
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly actionEngine = inject(ActionEngineService);
   private readonly i18nService = inject(I18nService);
+  private readonly supabaseService = inject(SupabaseService);
+  private readonly geocodingService = inject(GeocodingService);
+  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly zipExportService = inject(ZipExportService);
   private readonly toastService = inject(ToastService);
@@ -59,6 +77,11 @@ export class WorkspacePaneFooterComponent {
   readonly zipTitle = signal('');
   readonly zipProgress = signal(0);
   readonly shareUrl = signal<string | null>(null);
+  readonly projectDialogOpen = signal(false);
+  readonly projectOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
+  readonly projectDialogSelectedId = signal<string | null>(null);
+  readonly addressDialogOpen = signal(false);
+  readonly deleteDialogOpen = signal(false);
 
   readonly selectedImages = computed(() => {
     const selected = this.selectionService.selectedMediaIds();
@@ -87,6 +110,12 @@ export class WorkspacePaneFooterComponent {
       case 'select_none':
         this.selectionService.clearSelection();
         return;
+      case 'assign_to_project':
+        void this.openProjectDialog();
+        return;
+      case 'change_location_address':
+        this.addressDialogOpen.set(true);
+        return;
       case 'share_link':
         void this.shareLink();
         return;
@@ -99,6 +128,199 @@ export class WorkspacePaneFooterComponent {
       case 'download_zip':
         this.openZipDialog();
         return;
+      case 'delete_media':
+        this.deleteDialogOpen.set(true);
+        return;
+    }
+  }
+
+  onProjectDialogSelected(projectId: string): void {
+    this.projectDialogSelectedId.set(projectId);
+  }
+
+  closeProjectDialog(): void {
+    if (this.pending()) {
+      return;
+    }
+
+    this.projectDialogOpen.set(false);
+    this.projectDialogSelectedId.set(null);
+  }
+
+  async confirmProjectDialog(projectId: string): Promise<void> {
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      this.closeProjectDialog();
+      return;
+    }
+
+    this.pending.set(true);
+    try {
+      const rows = selectedMediaItemIds.map((mediaItemId) => ({
+        media_item_id: mediaItemId,
+        project_id: projectId,
+      }));
+      const { error } = await this.supabaseService.client
+        .from('media_projects')
+        .upsert(rows, { onConflict: 'media_item_id,project_id', ignoreDuplicates: true });
+
+      if (error) {
+        this.toastService.show({
+          message: error.message,
+          type: 'error',
+        });
+        return;
+      }
+
+      this.toastService.show({
+        message: this.t('workspace.export.success.projectAssigned', 'Assigned to project.'),
+        type: 'success',
+      });
+      this.closeProjectDialog();
+    } finally {
+      this.pending.set(false);
+    }
+  }
+
+  closeAddressDialog(): void {
+    if (this.pending()) {
+      return;
+    }
+    this.addressDialogOpen.set(false);
+  }
+
+  async confirmAddressDialog(addressQuery: string): Promise<void> {
+    const addressText = addressQuery.trim();
+    if (!addressText) {
+      return;
+    }
+
+    const suggestion = await this.geocodingService.forward(addressText);
+    if (!suggestion) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.addressNotFound', 'Address could not be resolved.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      this.closeAddressDialog();
+      return;
+    }
+
+    this.pending.set(true);
+    let updatedCount = 0;
+    try {
+      for (const mediaItemId of selectedMediaItemIds) {
+        const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
+          mediaItemId,
+          {
+            lat: suggestion.lat,
+            lng: suggestion.lng,
+            addressLabel: suggestion.addressLabel,
+            city: suggestion.city,
+            district: suggestion.district,
+            street: suggestion.street,
+            streetNumber: suggestion.streetNumber,
+            zip: suggestion.zip,
+            country: suggestion.country,
+          },
+        );
+        if (result.ok) {
+          updatedCount += 1;
+        }
+      }
+
+      if (updatedCount === 0) {
+        this.toastService.show({
+          message: this.t('workspace.export.error.addressUpdateFailed', 'Address update failed.'),
+          type: 'error',
+        });
+        return;
+      }
+
+      const selectedImageIds = this.selectionService.selectedMediaIds();
+      this.workspaceViewService.rawImages.update((images) =>
+        images.map((image) =>
+          selectedImageIds.has(image.id)
+            ? {
+                ...image,
+                latitude: suggestion.lat,
+                longitude: suggestion.lng,
+                addressLabel: suggestion.addressLabel,
+                city: suggestion.city,
+                district: suggestion.district,
+                street: suggestion.street,
+                streetNumber: suggestion.streetNumber,
+                zip: suggestion.zip,
+                country: suggestion.country,
+              }
+            : image,
+        ),
+      );
+
+      this.toastService.show({
+        message: this.t('workspace.export.success.addressUpdated', 'Address updated.'),
+        type: 'success',
+      });
+      this.closeAddressDialog();
+    } finally {
+      this.pending.set(false);
+    }
+  }
+
+  closeDeleteDialog(): void {
+    if (this.pending()) {
+      return;
+    }
+    this.deleteDialogOpen.set(false);
+  }
+
+  async confirmDeleteDialog(): Promise<void> {
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      this.closeDeleteDialog();
+      return;
+    }
+
+    this.pending.set(true);
+    try {
+      const { error } = await this.supabaseService.client
+        .from('media_items')
+        .delete()
+        .in('id', selectedMediaItemIds);
+
+      if (error) {
+        this.toastService.show({ message: error.message, type: 'error' });
+        return;
+      }
+
+      const selectedIds = this.selectionService.selectedMediaIds();
+      this.workspaceViewService.rawImages.update((images) =>
+        images.filter((image) => !selectedIds.has(image.id)),
+      );
+      this.selectionService.clearSelection();
+      this.toastService.show({
+        message: this.t('workspace.export.success.deleted', 'Selected media deleted.'),
+        type: 'success',
+      });
+      this.closeDeleteDialog();
+    } finally {
+      this.pending.set(false);
     }
   }
 
@@ -229,5 +451,61 @@ export class WorkspacePaneFooterComponent {
     } finally {
       this.pending.set(false);
     }
+  }
+
+  private async openProjectDialog(): Promise<void> {
+    this.pending.set(true);
+    try {
+      const { data, error } = await this.supabaseService.client
+        .from('projects')
+        .select('id,name')
+        .order('name', { ascending: true });
+
+      if (error || !Array.isArray(data) || data.length === 0) {
+        this.toastService.show({
+          message: this.t('workspace.export.error.noProjectsAvailable', 'No projects available.'),
+          type: 'warning',
+        });
+        return;
+      }
+
+      this.projectOptions.set(
+        data
+          .filter(
+            (row): row is { id: string; name: string } =>
+              typeof row.id === 'string' && typeof row.name === 'string' && row.name.length > 0,
+          )
+          .map((row) => ({ id: row.id, name: row.name })),
+      );
+      this.projectDialogSelectedId.set(this.projectOptions()[0]?.id ?? null);
+      this.projectDialogOpen.set(true);
+    } finally {
+      this.pending.set(false);
+    }
+  }
+
+  private async resolveSelectedMediaItemIds(): Promise<string[]> {
+    const selectedIds = Array.from(this.selectionService.selectedMediaIds());
+    if (selectedIds.length === 0) {
+      return [];
+    }
+
+    const idList = selectedIds.join(',');
+    const { data, error } = await this.supabaseService.client
+      .from('media_items')
+      .select('id,source_image_id')
+      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        data
+          .map((row) => (typeof row.id === 'string' ? row.id : null))
+          .filter((id): id is string => !!id),
+      ),
+    );
   }
 }

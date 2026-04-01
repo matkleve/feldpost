@@ -290,7 +290,7 @@ describe('MapShellComponent', () => {
     const component = fixture.componentInstance as unknown as {
       selectedMarkerKey: { set: (value: string | null) => void; (): string | null };
       selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
-      detailImageId: { set: (value: string | null) => void; (): string | null };
+      detailMediaId: { set: (value: string | null) => void; (): string | null };
       clearRadiusSelectionVisuals: ReturnType<typeof vi.fn>;
       handleMapClick: (event: {
         latlng: { lat: number; lng: number };
@@ -305,7 +305,7 @@ describe('MapShellComponent', () => {
 
     component.selectedMarkerKey.set('cluster-1');
     component.selectedMarkerKeys.set(new Set(['cluster-1', 'cluster-2']));
-    component.detailImageId.set('img-1');
+    component.detailMediaId.set('img-1');
     component.clearRadiusSelectionVisuals = vi.fn();
 
     component.handleMapClick({
@@ -315,7 +315,7 @@ describe('MapShellComponent', () => {
 
     expect(component.selectedMarkerKey()).toBeNull();
     expect(component.selectedMarkerKeys().size).toBe(0);
-    expect(component.detailImageId()).toBeNull();
+    expect(component.detailMediaId()).toBeNull();
     expect(clearActiveSelectionSpy).toHaveBeenCalled();
     expect(component.clearRadiusSelectionVisuals).toHaveBeenCalled();
   });
@@ -721,7 +721,7 @@ describe('MapShellComponent', () => {
     (fixture.componentInstance as unknown as { map: unknown }).map = mapStub;
 
     fixture.componentInstance.onZoomToLocation({
-      imageId: 'img-1',
+      mediaId: 'img-1',
       lat: 48.2082,
       lng: 16.3738,
     });
@@ -1282,7 +1282,7 @@ describe('MapShellComponent', () => {
           count: number;
           lat: number;
           lng: number;
-          imageId?: string;
+          mediaId?: string;
           sourceCells?: Array<{ lat: number; lng: number }>;
         }
       >;
@@ -1293,7 +1293,7 @@ describe('MapShellComponent', () => {
           count: number;
           lat: number;
           lng: number;
-          imageId?: string;
+          mediaId?: string;
         } | null;
       };
       openMarkerContextMenu: (
@@ -1308,7 +1308,7 @@ describe('MapShellComponent', () => {
       count: 1,
       lat: 48.2,
       lng: 16.37,
-      imageId: 'img-1',
+      mediaId: 'img-1',
       sourceCells: [{ lat: 48.2, lng: 16.37 }],
     });
 
@@ -1316,7 +1316,7 @@ describe('MapShellComponent', () => {
 
     expect(component.markerContextMenuOpen()).toBe(true);
     expect(component.markerContextMenuPayload()?.markerKey).toBe('single-1');
-    expect(component.markerContextMenuPayload()?.imageId).toBe('img-1');
+    expect(component.markerContextMenuPayload()?.mediaId).toBe('img-1');
   });
 
   it('enterPlacementMode auto-places missing-data jobs at active draft marker', () => {
@@ -1736,7 +1736,7 @@ describe('MapShellComponent', () => {
           lat: number;
           lng: number;
           sourceCells?: Array<{ lat: number; lng: number }>;
-          imageId?: string;
+          mediaId?: string;
         }
       >;
       handlePhotoMarkerClick: (
@@ -1752,7 +1752,7 @@ describe('MapShellComponent', () => {
       lat: 48.2,
       lng: 16.37,
       sourceCells: [{ lat: 48.2, lng: 16.37 }],
-      imageId: 'img-single',
+      mediaId: 'img-single',
     });
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
@@ -1786,7 +1786,7 @@ describe('MapShellComponent', () => {
     await component.handlePhotoMarkerClick('single-1', { originalEvent: { ctrlKey: true } });
 
     expect(setSpy).toHaveBeenCalled();
-    expect(fixture.componentInstance.detailImageId()).toBeNull();
+    expect(fixture.componentInstance.detailMediaId()).toBeNull();
   });
 
   it('marker hover links workspace items without selecting marker', () => {
@@ -1833,7 +1833,7 @@ describe('MapShellComponent', () => {
           count: number;
           lat: number;
           lng: number;
-          imageId?: string;
+          mediaId?: string;
         }
       >;
       bindMarkerHoverInteraction: (markerKey: string, marker: unknown) => void;
@@ -1844,7 +1844,7 @@ describe('MapShellComponent', () => {
       count: 1,
       lat: 48.2,
       lng: 16.37,
-      imageId: 'img-hovered',
+      mediaId: 'img-hovered',
     });
 
     component.bindMarkerHoverInteraction('cluster-1', createMarkerStub());
@@ -1855,12 +1855,12 @@ describe('MapShellComponent', () => {
 
     expect(fixture.componentInstance.selectedMarkerKey()).toBeNull();
     expect(fixture.componentInstance.selectedMarkerKeys().size).toBe(0);
-    expect(Array.from(fixture.componentInstance.linkedHoveredWorkspaceImageIds())).toEqual([
+    expect(Array.from(fixture.componentInstance.linkedHoveredWorkspaceMediaIds())).toEqual([
       'img-hovered',
     ]);
 
     onLeave?.();
-    expect(fixture.componentInstance.linkedHoveredWorkspaceImageIds().size).toBe(0);
+    expect(fixture.componentInstance.linkedHoveredWorkspaceMediaIds().size).toBe(0);
   });
 
   it('marker hover enter/leave does not refresh marker icons', () => {

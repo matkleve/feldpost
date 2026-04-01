@@ -10,7 +10,7 @@ export interface MarkerContextPayload {
   count: number;
   lat: number;
   lng: number;
-  imageId?: string;
+  mediaId?: string;
   sourceCells: Array<{ lat: number; lng: number }>;
 }
 
@@ -18,8 +18,8 @@ export interface MarkerActionContext {
   contextType: 'single_marker' | 'cluster_marker';
   markerKey: string;
   count: number;
-  primaryImageId: string | null;
-  imageIds: string[];
+  primaryMediaId: string | null;
+  mediaIds: string[];
   coords: { lat: number; lng: number };
   sourceCells: Array<{ lat: number; lng: number }>;
 }
@@ -27,8 +27,8 @@ export interface MarkerActionContext {
 export interface MapActionContext {
   contextType: 'map_point';
   count: number;
-  primaryImageId: string | null;
-  imageIds: string[];
+  primaryMediaId: string | null;
+  mediaIds: string[];
   coords: { lat: number; lng: number };
   sourceCells: Array<{ lat: number; lng: number }>;
 }
@@ -36,7 +36,7 @@ export interface MapActionContext {
 export interface RadiusActionContext {
   contextType: 'radius_selection';
   count: number;
-  imageIds: string[];
+  mediaIds: string[];
 }
 
 export type MapMenuActionId =

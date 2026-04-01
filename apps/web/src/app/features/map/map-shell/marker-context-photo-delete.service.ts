@@ -9,18 +9,18 @@ export interface DeleteImageByIdResult {
 export interface SingleMarkerContextPayload {
   markerKey: string;
   count: number;
-  imageId?: string;
+  mediaId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class MarkerContextPhotoDeleteService {
   getSingleImageTarget(
     payload: SingleMarkerContextPayload | null,
-  ): { markerKey: string; imageId: string } | null {
-    if (!payload || payload.count !== 1 || !payload.imageId) {
+  ): { markerKey: string; mediaId: string } | null {
+    if (!payload || payload.count !== 1 || !payload.mediaId) {
       return null;
     }
-    return { markerKey: payload.markerKey, imageId: payload.imageId };
+    return { markerKey: payload.markerKey, mediaId: payload.mediaId };
   }
 
   confirmPhotoDelete(): boolean {
@@ -41,11 +41,11 @@ export class MarkerContextPhotoDeleteService {
     );
   }
 
-  async deleteImageById(client: SupabaseClient, imageId: string): Promise<DeleteImageByIdResult> {
+  async deleteImageById(client: SupabaseClient, mediaId: string): Promise<DeleteImageByIdResult> {
     const { error } = await client
       .from('media_items')
       .delete()
-      .or(`id.eq.${imageId},source_image_id.eq.${imageId}`);
+      .or(`id.eq.${mediaId},source_image_id.eq.${mediaId}`);
     if (error) {
       return { ok: false, errorMessage: error.message };
     }

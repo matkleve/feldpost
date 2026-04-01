@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 interface MarkerStateLike {
   count: number;
-  imageId?: string;
+  mediaId?: string;
   lat: number;
   lng: number;
   sourceCells?: Array<{ lat: number; lng: number }>;
@@ -61,8 +61,8 @@ export class MarkerSelectionSyncService {
       return new Set();
     }
 
-    if (markerState.count === 1 && markerState.imageId) {
-      return new Set([markerState.imageId]);
+    if (markerState.count === 1 && markerState.mediaId) {
+      return new Set([markerState.mediaId]);
     }
 
     const sourceCells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];

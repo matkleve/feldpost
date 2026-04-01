@@ -116,7 +116,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 1,
     icon: 'pin_drop',
     fallbackLabel: 'Change GPS location',
-    visibleWhen: (context) => context.contextType === 'single_marker',
+    visibleWhen: () => true,
   },
   {
     id: 'change_location_address',
@@ -124,7 +124,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 1,
     icon: 'search',
     fallbackLabel: 'Change address',
-    visibleWhen: (context) => context.contextType === 'single_marker',
+    visibleWhen: () => true,
   },
   {
     id: 'copy_address',

@@ -5,17 +5,17 @@ import type { PhotoMarkerState } from './map-marker-reconcile.facade';
 @Injectable({ providedIn: 'root' })
 export class ZoomTargetMarkerService {
   findMarkerKeyForZoomTarget(params: {
-    imageId: string;
+    mediaId: string;
     lat: number;
     lng: number;
     allowClusterFallback: boolean;
     map: L.Map | undefined;
-    markersByImageId: Map<string, string>;
+    markersByMediaId: Map<string, string>;
     uploadedPhotoMarkers: Map<string, PhotoMarkerState>;
     toMarkerKey: (lat: number, lng: number) => string;
     clusterFallbackMaxMeters: number;
   }): string | null {
-    const byImageId = params.markersByImageId.get(params.imageId);
+    const byImageId = params.markersByMediaId.get(params.mediaId);
     if (byImageId) {
       const state = params.uploadedPhotoMarkers.get(byImageId);
       if (state && state.count === 1) {

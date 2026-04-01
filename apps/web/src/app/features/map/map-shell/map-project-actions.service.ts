@@ -110,12 +110,12 @@ export class MapProjectActionsService {
 
   private async resolveOrganizationIdForImage(
     client: SupabaseClient,
-    imageId: string,
+    mediaId: string,
   ): Promise<string | null> {
     const { data, error } = await client
       .from('media_items')
       .select('organization_id')
-      .or(`id.eq.${imageId},source_image_id.eq.${imageId}`)
+      .or(`id.eq.${mediaId},source_image_id.eq.${mediaId}`)
       .limit(1)
       .maybeSingle();
 

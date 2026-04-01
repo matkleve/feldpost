@@ -5,6 +5,9 @@ export interface WorkspaceExportActionContext {
 }
 
 export type WorkspaceExportActionId =
+  | 'assign_to_project'
+  | 'change_location_address'
+  | 'delete_media'
   | 'select_all'
   | 'select_none'
   | 'share_link'

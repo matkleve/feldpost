@@ -263,7 +263,7 @@ export class MapShellComponent implements OnDestroy {
 
   /** Reference to the UploadPanelComponent child (for placeFile calls). */
   private readonly uploadPanelChild = viewChild(UploadPanelComponent);
-  private readonly pendingMapFocus = signal<{ imageId: string; lat: number; lng: number } | null>(
+  private readonly pendingMapFocus = signal<{ mediaId: string; lat: number; lng: number } | null>(
     this.mapFocusPayloadService.readMapFocusPayload(this.router),
   );
 
@@ -460,7 +460,7 @@ export class MapShellComponent implements OnDestroy {
   readonly workspacePaneDefaultWidth = computed(() => this.viewportWidth * 0.618);
   readonly selectedMarkerKey = this.state.selectedMarkerKey;
   readonly selectedMarkerKeys = this.state.selectedMarkerKeys;
-  readonly linkedHoveredWorkspaceImageIds = this.state.linkedHoveredWorkspaceImageIds;
+  readonly linkedHoveredWorkspaceMediaIds = this.state.linkedHoveredWorkspaceMediaIds;
   readonly mapContextMenuOpen = this.state.mapContextMenuOpen;
   readonly mapContextMenuPosition = this.state.mapContextMenuPosition;
   readonly mapContextMenuCoords = this.state.mapContextMenuCoords;
@@ -489,7 +489,7 @@ export class MapShellComponent implements OnDestroy {
     count: this.mapProjectActionsService.getActiveSelectionImageIds(
       this.workspaceViewService.rawImages(),
     ).length,
-    imageIds: this.mapProjectActionsService.getActiveSelectionImageIds(
+    mediaIds: this.mapProjectActionsService.getActiveSelectionImageIds(
       this.workspaceViewService.rawImages(),
     ),
   }));
@@ -535,14 +535,17 @@ export class MapShellComponent implements OnDestroy {
   readonly projectNameDialogTitle = this.state.projectNameDialogTitle;
   readonly projectNameDialogMessage = this.state.projectNameDialogMessage;
   readonly projectNameDialogInitialValue = this.state.projectNameDialogInitialValue;
-  readonly detailAddressSearchRequest = signal<{ imageId: string; requestId: number } | null>(null);
+  readonly batchAddressDialogOpen = this.state.batchAddressDialogOpen;
+  readonly batchAddressDialogTitle = this.state.batchAddressDialogTitle;
+  readonly batchAddressDialogMessage = this.state.batchAddressDialogMessage;
+  readonly detailAddressSearchRequest = signal<{ mediaId: string; requestId: number } | null>(null);
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
    * Set to a DB image UUID when the user clicks a thumbnail or marker detail action.
    * Set to null to return to the thumbnail grid.
    */
-  readonly detailImageId = this.state.detailImageId;
+  readonly detailMediaId = this.state.detailMediaId;
 
   /** Thumbnail URL for the currently selected single marker. */
   readonly selectedMarkerThumbnail = computed(() => {
@@ -556,7 +559,7 @@ export class MapShellComponent implements OnDestroy {
   readonly selectedMarkerImageId = computed(() => {
     const key = this.selectedMarkerKey();
     if (!key) return null;
-    return this.uploadedPhotoMarkers.get(key)?.imageId ?? null;
+    return this.uploadedPhotoMarkers.get(key)?.mediaId ?? null;
   });
 
   // ── Private helpers ───────────────────────────────────────────────────────
@@ -628,10 +631,10 @@ export class MapShellComponent implements OnDestroy {
   private zoomAnimating = false;
 
   /**
-   * Secondary index: imageId → markerKey for O(1) lookups when
+   * Secondary index: mediaId → markerKey for O(1) lookups when
    * handling upload manager events (replace, attach).
    */
-  private readonly markersByImageId = new Map<string, string>();
+  private readonly markersByMediaId = new Map<string, string>();
   private readonly markerMotionPreference = signal<MarkerMotionPreference>('smooth');
   private readonly markerMotionEventHandler = (event: Event): void => {
     const detail = (event as CustomEvent<{ markerMotion?: MarkerMotionPreference }>).detail;
@@ -676,7 +679,7 @@ export class MapShellComponent implements OnDestroy {
   private linkedHoverMarkerFromWorkspaceKey: string | null = null;
   private linkedHoverMarkerFromMapKey: string | null = null;
   private pendingZoomHighlight: {
-    imageId: string;
+    mediaId: string;
     lat: number;
     lng: number;
     requestedAt: number;
@@ -692,7 +695,7 @@ export class MapShellComponent implements OnDestroy {
         this.setLinkedHoverMarkerFromWorkspace(null);
         return;
       }
-      this.setLinkedHoverMarkerFromWorkspace(this.markersByImageId.get(mediaId) ?? null);
+      this.setLinkedHoverMarkerFromWorkspace(this.markersByMediaId.get(mediaId) ?? null);
     },
   };
 
@@ -763,7 +766,7 @@ export class MapShellComponent implements OnDestroy {
     this.markerStateMutationsService.cleanupMarkerLayersAndCaches({
       uploadedPhotoMarkers: this.uploadedPhotoMarkers,
       photoMarkerLayer: this.photoMarkerLayer,
-      markersByImageId: this.markersByImageId,
+      markersByMediaId: this.markersByMediaId,
       cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
     });
   }
@@ -861,7 +864,7 @@ export class MapShellComponent implements OnDestroy {
       this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
@@ -988,8 +991,8 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onRadiusContextCreateProjectFromSelection(): Promise<void> {
-    const imageIds = this.radiusMenuContext().imageIds;
-    if (imageIds.length === 0) {
+    const mediaIds = this.radiusMenuContext().mediaIds;
+    if (mediaIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien in Radius-Auswahl verfuegbar.',
         type: 'warning',
@@ -1008,7 +1011,7 @@ export class MapShellComponent implements OnDestroy {
     const created = await this.mapProjectActionsService.createProjectFromFirstImage({
       client: this.supabaseService.client,
       projectName,
-      firstImageId: imageIds[0],
+      firstImageId: mediaIds[0],
     });
     if (!created.ok || !created.project) {
       if (created.reason === 'organization-missing') {
@@ -1030,7 +1033,7 @@ export class MapShellComponent implements OnDestroy {
 
     const assigned = await this.mapContextActionsService.assignImagesToProject(
       this.supabaseService.client,
-      imageIds,
+      mediaIds,
       created.project.id,
     );
     const assignFailureMessage =
@@ -1046,7 +1049,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.toastService.show({
-      message: `Projekt "${created.project.name}" erstellt und ${imageIds.length} Medien zugewiesen.`,
+      message: `Projekt "${created.project.name}" erstellt und ${mediaIds.length} Medien zugewiesen.`,
       type: 'success',
       dedupe: true,
     });
@@ -1054,8 +1057,8 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onRadiusContextAssignToProject(): Promise<void> {
-    const imageIds = this.radiusMenuContext().imageIds;
-    if (imageIds.length === 0) {
+    const mediaIds = this.radiusMenuContext().mediaIds;
+    if (mediaIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien in Radius-Auswahl verfuegbar.',
         type: 'warning',
@@ -1073,7 +1076,7 @@ export class MapShellComponent implements OnDestroy {
 
     const assigned = await this.mapContextActionsService.assignImagesToProject(
       this.supabaseService.client,
-      imageIds,
+      mediaIds,
       project.id,
     );
     const assignFailureMessage =
@@ -1082,7 +1085,7 @@ export class MapShellComponent implements OnDestroy {
       this.toastService.show({
         message: this.mapProjectActionsService.formatProjectAssignmentSuccess(
           project.name,
-          imageIds.length,
+          mediaIds.length,
         ),
         type: 'success',
         dedupe: true,
@@ -1146,8 +1149,8 @@ export class MapShellComponent implements OnDestroy {
 
   async onMarkerContextOpenInMedia(): Promise<void> {
     const payload = this.markerContextMenuPayload();
-    const imageId = payload?.imageId;
-    if (!imageId) {
+    const mediaId = payload?.mediaId;
+    if (!mediaId) {
       this.toastService.show({
         message: 'Diese Aktion ist nur fuer einzelne Marker verfuegbar.',
         type: 'warning',
@@ -1157,8 +1160,8 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.workspaceSelectionService.setSingle(imageId);
-    this.workspacePaneObserver.setDetailImageId(imageId);
+    this.workspaceSelectionService.setSingle(mediaId);
+    this.workspacePaneObserver.setDetailImageId(mediaId);
     this.workspacePaneObserver.setOpen(true);
     await this.router.navigate(['/media']);
     this.onMapMenuCloseRequested();
@@ -1169,11 +1172,10 @@ export class MapShellComponent implements OnDestroy {
   }
 
   async onMarkerContextChangeLocationMap(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    const imageId = payload?.imageId;
-    if (!imageId) {
+    const mediaIds = await this.resolveMarkerContextMediaIds();
+    if (mediaIds.length === 0) {
       this.toastService.show({
-        message: 'Standort kann hier nur fuer einzelne Medien geaendert werden.',
+        message: 'Keine Medien fuer Standortaenderung gefunden.',
         type: 'warning',
         dedupe: true,
       });
@@ -1181,19 +1183,30 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
+    if (mediaIds.length > 1) {
+      this.toastService.show({
+        message: `${mediaIds.length} Medien ausgewaehlt. Kartenbasierte Massenverschiebung folgt im naechsten Schritt.`,
+        type: 'info',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    const mediaId = mediaIds[0];
+
     this.onUploadLocationMapPickRequested({
-      imageId,
-      fileName: imageId,
+      imageId: mediaId,
+      fileName: mediaId,
     });
     this.onMapMenuCloseRequested();
   }
 
   async onMarkerContextChangeLocationAddress(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    const imageId = payload?.imageId;
-    if (!imageId) {
+    const mediaIds = await this.resolveMarkerContextMediaIds();
+    if (mediaIds.length === 0) {
       this.toastService.show({
-        message: 'Adressaenderung ist hier nur fuer einzelne Medien verfuegbar.',
+        message: 'Keine Medien fuer Adressaenderung gefunden.',
         type: 'warning',
         dedupe: true,
       });
@@ -1201,10 +1214,86 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.openDetailView(imageId);
+    if (mediaIds.length > 1) {
+      this.state.batchAddressDialogTitle.set('Adresse fuer Auswahl aendern');
+      this.state.batchAddressDialogMessage.set(
+        `${mediaIds.length} Medien erhalten dieselbe Adresse.`,
+      );
+      this.state.batchAddressTargetMediaIds.set(mediaIds);
+      this.state.batchAddressDialogOpen.set(true);
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    const mediaId = mediaIds[0];
+
+    this.openDetailView(mediaId);
     const currentRequestId = this.detailAddressSearchRequest()?.requestId ?? 0;
-    this.detailAddressSearchRequest.set({ imageId, requestId: currentRequestId + 1 });
+    this.detailAddressSearchRequest.set({ mediaId, requestId: currentRequestId + 1 });
     this.onMapMenuCloseRequested();
+  }
+
+  onBatchAddressDialogCancelled(): void {
+    this.state.batchAddressDialogOpen.set(false);
+    this.state.batchAddressTargetMediaIds.set([]);
+  }
+
+  async onBatchAddressDialogConfirmed(addressInput: string): Promise<void> {
+    const input = addressInput.trim();
+    if (!input) {
+      return;
+    }
+
+    const targetImageIds = this.state.batchAddressTargetMediaIds();
+    if (targetImageIds.length === 0) {
+      this.onBatchAddressDialogCancelled();
+      return;
+    }
+
+    const suggestion = await this.geocodingService.forward(input);
+    if (!suggestion) {
+      this.toastService.show({
+        message: 'Adresse konnte nicht aufgeloest werden.',
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    let updatedCount = 0;
+    for (const mediaId of targetImageIds) {
+      const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(mediaId, {
+        lat: suggestion.lat,
+        lng: suggestion.lng,
+        addressLabel: suggestion.addressLabel,
+        city: suggestion.city,
+        district: suggestion.district,
+        street: suggestion.street,
+        streetNumber: suggestion.streetNumber,
+        zip: suggestion.zip,
+        country: suggestion.country,
+      });
+      if (result.ok) {
+        updatedCount += 1;
+      }
+    }
+
+    if (updatedCount === 0) {
+      this.toastService.show({
+        message: 'Adressaenderung ist fehlgeschlagen.',
+        type: 'error',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.toastService.show({
+      message: `${updatedCount} Medienadresse(n) aktualisiert.`,
+      type: 'success',
+      dedupe: true,
+    });
+    this.onBatchAddressDialogCancelled();
+    await this.queryViewportMarkers();
   }
 
   onDetailAddressSearchRequestConsumed(requestId: number): void {
@@ -1226,12 +1315,12 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const imageIds = await this.mapContextActionsService.resolveMarkerContextImageIds(
+    const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
       payload,
       (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
       this.map?.getZoom() ?? 13,
     );
-    if (imageIds.length === 0) {
+    if (mediaIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien fuer Projektzuweisung gefunden.',
         type: 'warning',
@@ -1243,7 +1332,7 @@ export class MapShellComponent implements OnDestroy {
 
     const assigned = await this.mapContextActionsService.assignImagesToProject(
       this.supabaseService.client,
-      imageIds,
+      mediaIds,
       project.id,
     );
     const assignFailureMessage =
@@ -1261,7 +1350,7 @@ export class MapShellComponent implements OnDestroy {
     this.toastService.show({
       message: this.mapProjectActionsService.formatProjectAssignmentSuccess(
         project.name,
-        imageIds.length,
+        mediaIds.length,
       ),
       type: 'success',
       dedupe: true,
@@ -1330,12 +1419,12 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const imageIds = await this.mapContextActionsService.resolveMarkerContextImageIds(
+    const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
       payload,
       (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
       this.map?.getZoom() ?? 13,
     );
-    const uniqueImageIds = Array.from(new Set(imageIds));
+    const uniqueImageIds = Array.from(new Set(mediaIds));
     if (uniqueImageIds.length === 0) {
       this.toastService.show({
         message: 'Keine Medien fuer Projektentfernung gefunden.',
@@ -1407,12 +1496,12 @@ export class MapShellComponent implements OnDestroy {
     const payload = this.markerContextMenuPayload();
 
     if (payload && payload.count > 1) {
-      const imageIds = await this.mapContextActionsService.resolveMarkerContextImageIds(
+      const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
         payload,
         (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
         this.map?.getZoom() ?? 13,
       );
-      const uniqueImageIds = Array.from(new Set(imageIds));
+      const uniqueImageIds = Array.from(new Set(mediaIds));
       if (uniqueImageIds.length === 0) {
         this.toastService.show({
           message: 'Keine Medien zum Loeschen gefunden.',
@@ -1430,10 +1519,10 @@ export class MapShellComponent implements OnDestroy {
 
       let deletedCount = 0;
       let failedCount = 0;
-      for (const imageId of uniqueImageIds) {
+      for (const mediaId of uniqueImageIds) {
         const deleted = await this.markerContextPhotoDeleteService.deleteImageById(
           this.supabaseService.client,
-          imageId,
+          mediaId,
         );
         if (!deleted.ok) {
           failedCount += 1;
@@ -1443,7 +1532,7 @@ export class MapShellComponent implements OnDestroy {
       }
 
       if (deletedCount > 0) {
-        this.detailImageId.set(null);
+        this.detailMediaId.set(null);
         this.setSelectedMarker(null);
         this.setSelectedMarkerKeys(new Set());
         this.workspaceSelectionService.clearSelection();
@@ -1473,7 +1562,7 @@ export class MapShellComponent implements OnDestroy {
 
     const deleted = await this.markerContextPhotoDeleteService.deleteImageById(
       this.supabaseService.client,
-      target.imageId,
+      target.mediaId,
     );
     if (!deleted.ok) {
       this.toastService.show({
@@ -1486,17 +1575,17 @@ export class MapShellComponent implements OnDestroy {
 
     this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
       markerKey: target.markerKey,
-      imageId: target.imageId,
+      mediaId: target.mediaId,
       uploadedPhotoMarkers: this.uploadedPhotoMarkers,
       photoMarkerLayer: this.photoMarkerLayer,
-      markersByImageId: this.markersByImageId,
+      markersByMediaId: this.markersByMediaId,
       selectedMarkerKey: this.selectedMarkerKey(),
       selectedMarkerKeys: this.selectedMarkerKeys(),
-      detailImageId: this.detailImageId(),
+      detailMediaId: this.detailMediaId(),
       cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
       setSelectedMarker: (markerKey) => this.setSelectedMarker(markerKey),
       setSelectedMarkerKeys: (markerKeys) => this.setSelectedMarkerKeys(markerKeys),
-      setDetailImageId: (imageId) => this.detailImageId.set(imageId),
+      setDetailImageId: (mediaId) => this.detailMediaId.set(mediaId),
     });
 
     this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
@@ -1519,7 +1608,7 @@ export class MapShellComponent implements OnDestroy {
 
   /** Closes the Image Detail View and returns to the thumbnail grid. */
   closeDetailView(): void {
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
   }
 
   /** Closes the workspace pane entirely and clears selection state. */
@@ -1528,7 +1617,7 @@ export class MapShellComponent implements OnDestroy {
       this.removeDraftMediaMarker();
     }
     this.photoPanelOpen.set(false);
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
@@ -1542,11 +1631,11 @@ export class MapShellComponent implements OnDestroy {
    * Opens the Image Detail View for the given DB image UUID.
    * Also ensures the photo panel is open.
    */
-  openDetailView(imageId: string): void {
+  openDetailView(mediaId: string): void {
     if (!this.photoPanelOpen()) {
       this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
-    this.detailImageId.set(imageId);
+    this.detailMediaId.set(mediaId);
     this.photoPanelOpen.set(true);
   }
 
@@ -1598,7 +1687,7 @@ export class MapShellComponent implements OnDestroy {
     if (!this.map) return;
 
     this.pendingZoomHighlight = {
-      imageId: event.imageId,
+      mediaId: event.imageId,
       lat: event.lat,
       lng: event.lng,
       requestedAt: Date.now(),
@@ -1623,8 +1712,8 @@ export class MapShellComponent implements OnDestroy {
     this.setLinkedHoverMarkerFromWorkspace(markerKey);
   }
 
-  onWorkspaceItemHoverEnded(imageId: string): void {
-    if (this.activeWorkspaceHover?.imageId === imageId) {
+  onWorkspaceItemHoverEnded(mediaId: string): void {
+    if (this.activeWorkspaceHover?.imageId === mediaId) {
       this.activeWorkspaceHover = null;
     }
     this.setLinkedHoverMarkerFromWorkspace(null);
@@ -1634,19 +1723,19 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneObserver.setActiveTab(tab);
   }
 
-  private highlightZoomTargetMarker(imageId: string, lat: number, lng: number, attempt = 0): void {
+  private highlightZoomTargetMarker(mediaId: string, lat: number, lng: number, attempt = 0): void {
     const pendingForImage = this.detailZoomHighlightService.getPendingForImage(
       this.pendingZoomHighlight,
-      imageId,
+      mediaId,
     );
     const allowClusterFallback = this.detailZoomHighlightService.shouldAllowClusterFallback(
       pendingForImage,
       MapShellComponent.DETAIL_LOCATION_WAIT_FOR_SINGLE_MS,
     );
 
-    const markerKey = this.resolveZoomTargetMarkerKey(imageId, lat, lng, allowClusterFallback);
+    const markerKey = this.resolveZoomTargetMarkerKey(mediaId, lat, lng, allowClusterFallback);
     if (!markerKey) {
-      this.scheduleZoomHighlightRetry(imageId, lat, lng, attempt);
+      this.scheduleZoomHighlightRetry(mediaId, lat, lng, attempt);
       return;
     }
 
@@ -1657,22 +1746,22 @@ export class MapShellComponent implements OnDestroy {
         MapShellComponent.DETAIL_LOCATION_IDLE_FALLBACK_MS,
       )
     ) {
-      this.scheduleZoomHighlightRetry(imageId, lat, lng, attempt);
+      this.scheduleZoomHighlightRetry(mediaId, lat, lng, attempt);
       return;
     }
 
     const markerWrapper = this.resolveZoomHighlightMarkerWrapper(markerKey);
     if (!markerWrapper || !this.isZoomHighlightRenderReady(markerWrapper)) {
-      this.scheduleZoomHighlightRetry(imageId, lat, lng, attempt);
+      this.scheduleZoomHighlightRetry(mediaId, lat, lng, attempt);
       return;
     }
 
     this.startZoomMarkerSpotlight(markerWrapper);
-    this.clearPendingZoomHighlightForImage(imageId);
+    this.clearPendingZoomHighlightForImage(mediaId);
   }
 
   private scheduleZoomHighlightRetry(
-    imageId: string,
+    mediaId: string,
     lat: number,
     lng: number,
     attempt: number,
@@ -1681,7 +1770,7 @@ export class MapShellComponent implements OnDestroy {
       attempt,
       MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_MAX_RETRIES,
       MapShellComponent.DETAIL_LOCATION_HIGHLIGHT_RETRY_MS,
-      () => this.highlightZoomTargetMarker(imageId, lat, lng, attempt + 1),
+      () => this.highlightZoomTargetMarker(mediaId, lat, lng, attempt + 1),
     );
   }
 
@@ -1692,8 +1781,8 @@ export class MapShellComponent implements OnDestroy {
     return this.detailZoomHighlightService.resolveMarkerWrapper(markerElement);
   }
 
-  private clearPendingZoomHighlightForImage(imageId: string): void {
-    if (this.pendingZoomHighlight?.imageId === imageId) {
+  private clearPendingZoomHighlightForImage(mediaId: string): void {
+    if (this.pendingZoomHighlight?.mediaId === mediaId) {
       this.pendingZoomHighlight = null;
     }
   }
@@ -1707,7 +1796,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.highlightZoomTargetMarker(pending.imageId, pending.lat, pending.lng);
+    this.highlightZoomTargetMarker(pending.mediaId, pending.lat, pending.lng);
   }
 
   private waitForMapIdleThenFlushZoomHighlight(): void {
@@ -1736,18 +1825,18 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private resolveZoomTargetMarkerKey(
-    imageId: string,
+    mediaId: string,
     lat: number,
     lng: number,
     allowClusterFallback: boolean,
   ): string | null {
     return this.zoomTargetMarkerService.findMarkerKeyForZoomTarget({
-      imageId,
+      mediaId,
       lat,
       lng,
       allowClusterFallback,
       map: this.map,
-      markersByImageId: this.markersByImageId,
+      markersByMediaId: this.markersByMediaId,
       uploadedPhotoMarkers: this.uploadedPhotoMarkers,
       toMarkerKey: (latValue: number, lngValue: number) => this.toMarkerKey(latValue, lngValue),
       clusterFallbackMaxMeters: MapShellComponent.DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS,
@@ -2107,7 +2196,7 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      this.detailImageId.set(null);
+      this.detailMediaId.set(null);
       this.setSelectedMarker(null);
       this.setSelectedMarkerKeys(new Set());
       this.searchPlacementActive.set(false);
@@ -2228,7 +2317,7 @@ export class MapShellComponent implements OnDestroy {
     // The pane is closed only via its own close button.
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
     this.clearRadiusSelectionVisuals();
@@ -2630,7 +2719,7 @@ export class MapShellComponent implements OnDestroy {
       this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
     this.setSelectedMarker(null);
   }
 
@@ -2834,7 +2923,7 @@ export class MapShellComponent implements OnDestroy {
    * localObjectUrl so the thumbnail swaps instantly (no placeholder flash).
    */
   private handleImageReplaced(event: ImageReplacedEvent): void {
-    const markerKey = this.markersByImageId.get(event.imageId);
+    const markerKey = this.markersByMediaId.get(event.imageId);
     if (!markerKey) return;
     const state = this.uploadedPhotoMarkers.get(markerKey);
     if (!state) return;
@@ -2855,7 +2944,7 @@ export class MapShellComponent implements OnDestroy {
    * to real thumbnail using the localObjectUrl from the upload.
    */
   private handleImageAttached(event: ImageAttachedEvent): void {
-    const markerKey = this.markersByImageId.get(event.imageId);
+    const markerKey = this.markersByMediaId.get(event.imageId);
     if (!markerKey) return;
     const state = this.uploadedPhotoMarkers.get(markerKey);
     if (!state) return;
@@ -2912,13 +3001,13 @@ export class MapShellComponent implements OnDestroy {
       lng: event.lng,
       thumbnailUrl: event.thumbnailUrl,
       direction: event.direction,
-      imageId: event.id,
+      mediaId: event.id,
       optimistic: true,
     });
 
     // Maintain secondary index for upload manager event lookups.
     if (event.id) {
-      this.markersByImageId.set(event.id, markerKey);
+      this.markersByMediaId.set(event.id, markerKey);
     }
   }
 
@@ -2990,7 +3079,7 @@ export class MapShellComponent implements OnDestroy {
       !this.uploadedPhotoMarkers.has(this.linkedHoverMarkerFromMapKey)
     ) {
       this.setLinkedHoverMarkerFromMap(null);
-      this.linkedHoveredWorkspaceImageIds.set(new Set());
+      this.linkedHoveredWorkspaceMediaIds.set(new Set());
     }
   }
 
@@ -3029,13 +3118,13 @@ export class MapShellComponent implements OnDestroy {
     return {
       photoMarkerLayer: this.photoMarkerLayer!,
       uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-      markersByImageId: this.markersByImageId,
+      markersByMediaId: this.markersByMediaId,
       selectedMarkerKey: () => this.selectedMarkerKey(),
       setSelectedMarkerKey: (markerKey: string | null) => this.selectedMarkerKey.set(markerKey),
       findReusableMarkerKey: (row, keys) =>
         this.mapMarkerReuseStrategyService.findReusableMarkerKey(
           this.map,
-          this.markersByImageId,
+          this.markersByMediaId,
           this.uploadedPhotoMarkers,
           row,
           keys,
@@ -3143,7 +3232,7 @@ export class MapShellComponent implements OnDestroy {
     this.handleExclusiveMarkerSelection(
       markerKey,
       markerState.count,
-      markerState.imageId,
+      markerState.mediaId,
       cells,
       zoom,
     );
@@ -3170,13 +3259,13 @@ export class MapShellComponent implements OnDestroy {
     selectedKeys.add(markerKey);
     this.setSelectedMarkerKeys(selectedKeys);
     void this.addMarkerCellsToSelection(cells, zoom);
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
   }
 
   private handleExclusiveMarkerSelection(
     markerKey: string,
     markerCount: number,
-    imageId: string | undefined,
+    mediaId: string | undefined,
     cells: Array<{ lat: number; lng: number }>,
     zoom: number,
   ): void {
@@ -3185,13 +3274,13 @@ export class MapShellComponent implements OnDestroy {
     void this.workspaceViewService.loadMultiClusterImages(cells, zoom);
 
     // Single-image marker: also jump directly to detail view.
-    if (markerCount === 1 && imageId) {
-      this.openDetailView(imageId);
+    if (markerCount === 1 && mediaId) {
+      this.openDetailView(mediaId);
       return;
     }
 
     // Cluster click: ensure detail view is dismissed so thumbnail grid shows.
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
   }
 
   /** Attach click + touch long-press interactions consistently for each new marker. */
@@ -3246,7 +3335,7 @@ export class MapShellComponent implements OnDestroy {
           return;
         }
         this.setLinkedHoverMarkerFromMap(null);
-        this.linkedHoveredWorkspaceImageIds.set(new Set());
+        this.linkedHoveredWorkspaceMediaIds.set(new Set());
       },
     });
   }
@@ -3378,7 +3467,7 @@ export class MapShellComponent implements OnDestroy {
 
   private setLinkedHoveredWorkspaceImageIdsForMarker(markerKey: string | null): void {
     if (!markerKey) {
-      this.linkedHoveredWorkspaceImageIds.set(new Set());
+      this.linkedHoveredWorkspaceMediaIds.set(new Set());
       return;
     }
 
@@ -3388,7 +3477,7 @@ export class MapShellComponent implements OnDestroy {
       this.workspaceViewService.rawImages(),
       (lat, lng) => this.toMarkerKey(lat, lng),
     );
-    this.linkedHoveredWorkspaceImageIds.set(matchedIds);
+    this.linkedHoveredWorkspaceMediaIds.set(matchedIds);
   }
 
   private refreshActiveWorkspaceHoverLink(): void {
@@ -3727,7 +3816,7 @@ export class MapShellComponent implements OnDestroy {
       count: state.count,
       lat: state.lat,
       lng: state.lng,
-      imageId: state.imageId,
+      mediaId: state.mediaId,
       sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
     });
     this.markerContextMenuOpen.set(true);
@@ -3782,7 +3871,7 @@ export class MapShellComponent implements OnDestroy {
     this.clearRadiusSelectionVisuals();
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
-    this.detailImageId.set(null);
+    this.detailMediaId.set(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
   }
@@ -3836,6 +3925,21 @@ export class MapShellComponent implements OnDestroy {
 
   onProjectNameDialogCancelled(): void {
     this.mapProjectDialogService.cancelProjectName(this.state);
+  }
+
+  private async resolveMarkerContextMediaIds(): Promise<string[]> {
+    const payload = this.markerContextMenuPayload();
+    if (!payload) {
+      return [];
+    }
+
+    const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
+      payload,
+      (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
+      this.map?.getZoom() ?? 13,
+    );
+
+    return Array.from(new Set(mediaIds));
   }
 
   /**

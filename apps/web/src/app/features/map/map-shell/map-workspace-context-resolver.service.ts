@@ -15,8 +15,8 @@ export class MapWorkspaceContextResolverService {
     return {
       contextType: 'map_point',
       count: 1,
-      primaryImageId: null,
-      imageIds: [],
+      primaryMediaId: null,
+      mediaIds: [],
       coords: {
         lat: coords.lat,
         lng: coords.lng,
@@ -34,8 +34,8 @@ export class MapWorkspaceContextResolverService {
       contextType: payload.count > 1 ? 'cluster_marker' : 'single_marker',
       markerKey: payload.markerKey,
       count: payload.count,
-      primaryImageId: payload.imageId ?? null,
-      imageIds: payload.imageId ? [payload.imageId] : [],
+      primaryMediaId: payload.mediaId ?? null,
+      mediaIds: payload.mediaId ? [payload.mediaId] : [],
       coords: {
         lat: payload.lat,
         lng: payload.lng,

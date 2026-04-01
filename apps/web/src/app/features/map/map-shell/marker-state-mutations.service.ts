@@ -10,7 +10,7 @@ export class MarkerStateMutationsService {
   cleanupMarkerLayersAndCaches(params: {
     uploadedPhotoMarkers: Map<string, MarkerStateLike>;
     photoMarkerLayer: L.LayerGroup | null;
-    markersByImageId: Map<string, string>;
+    markersByMediaId: Map<string, string>;
     cancelMarkerMoveAnimation: (marker: L.Marker) => void;
   }): void {
     for (const state of params.uploadedPhotoMarkers.values()) {
@@ -19,22 +19,22 @@ export class MarkerStateMutationsService {
 
     params.photoMarkerLayer?.clearLayers();
     params.uploadedPhotoMarkers.clear();
-    params.markersByImageId.clear();
+    params.markersByMediaId.clear();
   }
 
   removeDeletedPhotoFromMapUi(params: {
     markerKey: string;
-    imageId: string;
+    mediaId: string;
     uploadedPhotoMarkers: Map<string, MarkerStateLike>;
     photoMarkerLayer: L.LayerGroup | null;
-    markersByImageId: Map<string, string>;
+    markersByMediaId: Map<string, string>;
     selectedMarkerKey: string | null;
     selectedMarkerKeys: Set<string>;
-    detailImageId: string | null;
+    detailMediaId: string | null;
     cancelMarkerMoveAnimation: (marker: L.Marker) => void;
     setSelectedMarker: (markerKey: string | null) => void;
     setSelectedMarkerKeys: (markerKeys: Set<string>) => void;
-    setDetailImageId: (imageId: string | null) => void;
+    setDetailImageId: (mediaId: string | null) => void;
   }): void {
     const markerState = params.uploadedPhotoMarkers.get(params.markerKey);
     if (markerState && params.photoMarkerLayer) {
@@ -43,7 +43,7 @@ export class MarkerStateMutationsService {
       params.uploadedPhotoMarkers.delete(params.markerKey);
     }
 
-    params.markersByImageId.delete(params.imageId);
+    params.markersByMediaId.delete(params.mediaId);
 
     if (params.selectedMarkerKey === params.markerKey) {
       params.setSelectedMarker(null);
@@ -55,7 +55,7 @@ export class MarkerStateMutationsService {
       params.setSelectedMarkerKeys(next);
     }
 
-    if (params.detailImageId === params.imageId) {
+    if (params.detailMediaId === params.mediaId) {
       params.setDetailImageId(null);
     }
   }

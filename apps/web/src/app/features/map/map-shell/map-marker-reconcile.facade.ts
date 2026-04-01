@@ -27,7 +27,7 @@ export interface PhotoMarkerState {
   corrected?: boolean;
   uploading?: boolean;
   sourceCells?: Array<{ lat: number; lng: number }>;
-  imageId?: string;
+  mediaId?: string;
   optimistic?: boolean;
   thumbnailLoading?: boolean;
   signedAt?: number;
@@ -42,7 +42,7 @@ export interface MarkerIconOverride {
 export interface ReconcileDependencies {
   photoMarkerLayer: L.LayerGroup;
   uploadedPhotoMarkers: Map<string, PhotoMarkerState>;
-  markersByImageId: Map<string, string>;
+  markersByMediaId: Map<string, string>;
   selectedMarkerKey: () => string | null;
   setSelectedMarkerKey: (markerKey: string | null) => void;
   findReusableMarkerKey: (row: ReconcileIncomingRow, recyclableKeys: Set<string>) => string | null;
@@ -132,8 +132,8 @@ export class MapMarkerReconcileFacade {
 
       deps.cancelMarkerMoveAnimation(oldState.marker);
       deps.photoMarkerLayer.removeLayer(oldState.marker);
-      if (oldState.imageId) {
-        deps.markersByImageId.delete(oldState.imageId);
+      if (oldState.mediaId) {
+        deps.markersByMediaId.delete(oldState.mediaId);
       }
       if (deps.selectedMarkerKey() === oldKey) {
         deps.setSelectedMarkerKey(null);
@@ -160,10 +160,10 @@ export class MapMarkerReconcileFacade {
     }
 
     const newImageId = count === 1 ? this.resolveMarkerMediaItemId(row) : undefined;
-    if (existing.imageId !== newImageId) {
-      if (existing.imageId) deps.markersByImageId.delete(existing.imageId);
-      if (newImageId) deps.markersByImageId.set(newImageId, key);
-      existing.imageId = newImageId;
+    if (existing.mediaId !== newImageId) {
+      if (existing.mediaId) deps.markersByMediaId.delete(existing.mediaId);
+      if (newImageId) deps.markersByMediaId.set(newImageId, key);
+      existing.mediaId = newImageId;
     }
     existing.fallbackLabel = fallbackLabel;
 
@@ -221,13 +221,13 @@ export class MapMarkerReconcileFacade {
       reusableState.signedAt = undefined;
     }
 
-    const previousImageId = reusableState.imageId;
+    const previousImageId = reusableState.mediaId;
     const nextImageId = count === 1 ? this.resolveMarkerMediaItemId(row) : undefined;
     if (previousImageId !== nextImageId) {
-      if (previousImageId) deps.markersByImageId.delete(previousImageId);
-      if (nextImageId) deps.markersByImageId.set(nextImageId, key);
+      if (previousImageId) deps.markersByMediaId.delete(previousImageId);
+      if (nextImageId) deps.markersByMediaId.set(nextImageId, key);
     } else if (nextImageId) {
-      deps.markersByImageId.set(nextImageId, key);
+      deps.markersByMediaId.set(nextImageId, key);
     }
 
     if (deps.selectedMarkerKey() === reusableKey) {
@@ -249,7 +249,7 @@ export class MapMarkerReconcileFacade {
     reusableState.corrected = corrected;
     reusableState.thumbnailSourcePath = thumbnailSourcePath;
     reusableState.fallbackLabel = fallbackLabel;
-    reusableState.imageId = nextImageId;
+    reusableState.mediaId = nextImageId;
     reusableState.optimistic = false;
 
     deps.uploadedPhotoMarkers.delete(reusableKey);
@@ -304,12 +304,12 @@ export class MapMarkerReconcileFacade {
       corrected,
       thumbnailSourcePath,
       fallbackLabel,
-      imageId: count === 1 ? this.resolveMarkerMediaItemId(row) : undefined,
+      mediaId: count === 1 ? this.resolveMarkerMediaItemId(row) : undefined,
     });
 
     const markerMediaItemId = this.resolveMarkerMediaItemId(row);
     if (count === 1 && markerMediaItemId) {
-      deps.markersByImageId.set(markerMediaItemId, key);
+      deps.markersByMediaId.set(markerMediaItemId, key);
     }
   }
 

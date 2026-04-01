@@ -6,7 +6,7 @@ import type { PhotoMarkerState, ReconcileIncomingRow } from './map-marker-reconc
 export class MapMarkerReuseStrategyService {
   findReusableMarkerKey(
     map: L.Map | undefined,
-    markersByImageId: Map<string, string>,
+    markersByMediaId: Map<string, string>,
     uploadedPhotoMarkers: Map<string, PhotoMarkerState>,
     row: Pick<
       ReconcileIncomingRow,
@@ -19,7 +19,7 @@ export class MapMarkerReuseStrategyService {
     const incomingMediaItemId = row.media_item_id ?? row.image_id;
 
     if (incomingIsSingle && incomingMediaItemId) {
-      const byImageId = markersByImageId.get(incomingMediaItemId);
+      const byImageId = markersByMediaId.get(incomingMediaItemId);
       if (byImageId && recyclableKeys.has(byImageId)) {
         return byImageId;
       }

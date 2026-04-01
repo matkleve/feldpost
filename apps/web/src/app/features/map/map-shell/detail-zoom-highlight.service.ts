@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
 
 export interface PendingZoomHighlightLike {
-  imageId: string;
+  mediaId: string;
   lat: number;
   lng: number;
   requestedAt: number;
@@ -12,9 +12,9 @@ export interface PendingZoomHighlightLike {
 export class DetailZoomHighlightService {
   getPendingForImage(
     pendingZoomHighlight: PendingZoomHighlightLike | null,
-    imageId: string,
+    mediaId: string,
   ): PendingZoomHighlightLike | null {
-    return pendingZoomHighlight?.imageId === imageId ? pendingZoomHighlight : null;
+    return pendingZoomHighlight?.mediaId === mediaId ? pendingZoomHighlight : null;
   }
 
   shouldAllowClusterFallback(

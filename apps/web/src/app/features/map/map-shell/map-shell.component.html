@@ -339,6 +339,18 @@
       (cancelled)="onProjectNameDialogCancelled()"
     />
   }
+
+  @if (batchAddressDialogOpen()) {
+    <app-text-input-dialog
+      [title]="batchAddressDialogTitle()"
+      [message]="batchAddressDialogMessage()"
+      placeholder="Adresse eingeben"
+      confirmLabel="Anwenden"
+      cancelLabel="Abbrechen"
+      (confirmed)="onBatchAddressDialogConfirmed($event)"
+      (cancelled)="onBatchAddressDialogCancelled()"
+    />
+  }
 </div>
 
 @if (photoPanelOpen()) {
@@ -352,10 +364,10 @@
   >
     <app-workspace-pane
       [activeTab]="workspacePaneActiveTab()"
-      [detailImageId]="detailImageId()"
-      [detailAddressSearchRequestImageId]="detailAddressSearchRequest()?.imageId ?? null"
+      [detailImageId]="detailMediaId()"
+      [detailAddressSearchRequestImageId]="detailAddressSearchRequest()?.mediaId ?? null"
       [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
-      [linkedHoveredImageIds]="linkedHoveredWorkspaceImageIds()"
+      [linkedHoveredImageIds]="linkedHoveredWorkspaceMediaIds()"
       (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
       (closed)="closeWorkspacePane()"
       (detailClosed)="closeDetailView()"

@@ -7,7 +7,7 @@ export class MapShellState {
   readonly workspacePaneWidth = signal(360);
   readonly selectedMarkerKey = signal<string | null>(null);
   readonly selectedMarkerKeys = signal<Set<string>>(new Set());
-  readonly linkedHoveredWorkspaceImageIds = signal<Set<string>>(new Set());
+  readonly linkedHoveredWorkspaceMediaIds = signal<Set<string>>(new Set());
 
   readonly mapContextMenuOpen = signal(false);
   readonly mapContextMenuPosition = signal<{ x: number; y: number } | null>(null);
@@ -22,7 +22,7 @@ export class MapShellState {
     count: number;
     lat: number;
     lng: number;
-    imageId?: string;
+    mediaId?: string;
     sourceCells: Array<{ lat: number; lng: number }>;
   } | null>(null);
 
@@ -41,5 +41,10 @@ export class MapShellState {
   readonly projectNameDialogMessage = signal('Gib einen Projektnamen ein.');
   readonly projectNameDialogInitialValue = signal('');
 
-  readonly detailImageId = signal<string | null>(null);
+  readonly batchAddressDialogOpen = signal(false);
+  readonly batchAddressDialogTitle = signal('Adresse fuer Auswahl aendern');
+  readonly batchAddressDialogMessage = signal('Adresse fuer alle ausgewaehlten Medien anwenden.');
+  readonly batchAddressTargetMediaIds = signal<ReadonlyArray<string>>([]);
+
+  readonly detailMediaId = signal<string | null>(null);
 }

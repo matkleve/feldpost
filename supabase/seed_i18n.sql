@@ -14542,6 +14542,533 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.projectDialog.title', 'Select project', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Select project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt auswaehlen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Seleziona progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.projectDialog.message', 'Choose a project for selected media.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Choose a project for selected media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Waehle ein Projekt fuer die ausgewaehlten Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scegli un progetto per i media selezionati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.projectDialog.confirm', 'Assign', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Assign', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zuweisen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Assegna', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.projectDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.addressDialog.title', 'Change address', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cambia indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.addressDialog.message', 'Apply one address to all selected media.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Apply one address to all selected media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Eine Adresse auf alle ausgewaehlten Medien anwenden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Applica un indirizzo a tutti i media selezionati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.addressDialog.placeholder', 'Enter address', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html attr:placeholder')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Enter address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse eingeben', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Inserisci indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.placeholder'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.addressDialog.confirm', 'Apply', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Apply', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anwenden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Applica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.addressDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.deleteDialog.aria', 'Delete selection', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete selection', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auswahl loeschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina selezione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.deleteDialog.title', 'Delete selected media', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete selected media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausgewaehlte Medien loeschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina media selezionati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.deleteDialog.message', 'This action cannot be undone. All selected media will be deleted.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This action cannot be undone. All selected media will be deleted.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Diese Aktion kann nicht rueckgaengig gemacht werden. Alle ausgewaehlten Medien werden geloescht.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa azione non puo essere annullata. Tutti i media selezionati verranno eliminati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.message'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.deleteDialog.confirm', 'Delete', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Delete', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Loeschen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elimina', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.deleteDialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.success.projectAssigned', 'Assigned to project.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Assigned to project.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.projectAssigned'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dem Projekt zugewiesen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.projectAssigned'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Assegnato al progetto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.projectAssigned'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.error.addressNotFound', 'Address could not be resolved.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address could not be resolved.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.addressNotFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse konnte nicht aufgeloest werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.addressNotFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile risolvere l''indirizzo.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.addressNotFound'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.error.addressUpdateFailed', 'Address update failed.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address update failed.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.addressUpdateFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressaktualisierung fehlgeschlagen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.addressUpdateFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiornamento indirizzo non riuscito.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.addressUpdateFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.success.addressUpdated', 'Address updated.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address updated.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.addressUpdated'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse aktualisiert.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.addressUpdated'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indirizzo aggiornato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.addressUpdated'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.success.deleted', 'Selected media deleted.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Selected media deleted.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.deleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausgewaehlte Medien geloescht.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.deleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media selezionati eliminati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.success.deleted'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.export.error.noProjectsAvailable', 'No projects available.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No projects available.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.noProjectsAvailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Projekte verfuegbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.noProjectsAvailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun progetto disponibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.export.error.noProjectsAvailable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auth.register.action.creatingAccount', 'Creating account�', 'en', 'apps/web/src/app/features/auth/register/register.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

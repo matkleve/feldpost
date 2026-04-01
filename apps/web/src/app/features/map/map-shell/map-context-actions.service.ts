@@ -78,17 +78,17 @@ export class MapContextActionsService {
 
   async assignImagesToProject(
     client: SupabaseClient,
-    imageIds: string[],
+    mediaIds: string[],
     projectId: string,
   ): Promise<AssignImagesToProjectResult> {
-    if (imageIds.length === 0) {
+    if (mediaIds.length === 0) {
       return { ok: false, reason: 'empty' };
     }
 
     const { data: mediaRows, error: mediaLookupError } = await client
       .from('media_items')
       .select('id,source_image_id')
-      .or(`id.in.(${imageIds.join(',')}),source_image_id.in.(${imageIds.join(',')})`);
+      .or(`id.in.(${mediaIds.join(',')}),source_image_id.in.(${mediaIds.join(',')})`);
 
     if (mediaLookupError) {
       return { ok: false, reason: 'error', errorMessage: mediaLookupError.message };
@@ -118,10 +118,10 @@ export class MapContextActionsService {
     return { ok: true, reason: 'success' };
   }
 
-  async resolveMarkerContextImageIds(
+  async resolveMarkerContextMediaIds(
     payload: {
       count: number;
-      imageId?: string;
+      mediaId?: string;
       sourceCells: Array<{ lat: number; lng: number }>;
     },
     fetchClusterImages: (
@@ -130,8 +130,8 @@ export class MapContextActionsService {
     ) => Promise<WorkspaceImage[]>,
     zoom: number,
   ): Promise<string[]> {
-    if (payload.count === 1 && payload.imageId) {
-      return [payload.imageId];
+    if (payload.count === 1 && payload.mediaId) {
+      return [payload.mediaId];
     }
 
     const images = await fetchClusterImages(payload.sourceCells, zoom);

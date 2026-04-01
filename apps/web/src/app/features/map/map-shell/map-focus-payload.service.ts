@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 export interface MapFocusPayload {
-  imageId: string;
+  mediaId: string;
   lat: number;
   lng: number;
 }
@@ -20,7 +20,7 @@ export class MapFocusPayloadService {
       return null;
     }
 
-    return { imageId: payload.imageId, lat: payload.lat, lng: payload.lng };
+    return { mediaId: payload.mediaId, lat: payload.lat, lng: payload.lng };
   }
 
   private readMapFocusCandidate(router: Router): unknown {
@@ -36,7 +36,7 @@ export class MapFocusPayloadService {
 
   private isMapFocusPayload(payload: Partial<MapFocusPayload>): payload is MapFocusPayload {
     return (
-      typeof payload.imageId === 'string' &&
+      typeof payload.mediaId === 'string' &&
       typeof payload.lat === 'number' &&
       typeof payload.lng === 'number'
     );
