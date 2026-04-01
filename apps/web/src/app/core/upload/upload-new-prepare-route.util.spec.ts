@@ -191,6 +191,12 @@ function createRouteDeps(options: {
     filenameParser: {
       extractAddress: vi.fn().mockReturnValue(options.parsedAddress),
     },
+    locationConfig: {
+      getConfig: vi.fn().mockReturnValue({
+        titleConfidenceThreshold: 0.8,
+        filenameAlwaysOverridesFolder: true,
+      }),
+    },
     conflictService: {
       findConflict: vi.fn().mockResolvedValue(null),
     },

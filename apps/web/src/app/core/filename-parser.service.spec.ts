@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FilenameParserService } from './filename-parser.service';
+import { LocationPathParserService } from './location-path-parser.service';
+import { UploadLocationConfigService } from './upload/upload-location-config.service';
 
 describe('FilenameParserService', () => {
   const service = new FilenameParserService();
@@ -26,6 +28,15 @@ describe('FilenameParserService', () => {
 
   it('rejects generic non-address filename words in fallback path', () => {
     const parsed = service.extractAddress('Photo 4.jpg');
+    expect(parsed).toBeUndefined();
+  });
+
+  it('uses configurable single-word minimum length threshold', () => {
+    const config = new UploadLocationConfigService();
+    config.patchConfig({ filenameSingleWordMinLength: 10, filenameSingleWordCityMinLength: 4 });
+    const configurableService = new FilenameParserService(new LocationPathParserService(), config);
+
+    const parsed = configurableService.extractAddress('Fahrafeld 4.jpg');
     expect(parsed).toBeUndefined();
   });
 });

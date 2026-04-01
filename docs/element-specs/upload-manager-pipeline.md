@@ -25,6 +25,7 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 | 2   | User selects a folder                                            | Scans recursively, creates scanning batch, then queues jobs                                            | Chromium/File System Access only                                                                          |
 | 2a  | Folder name contains `Project: [projectname]`                    | Resolves project by case-insensitive name; creates project if missing, assigns jobs to project context | Project context extraction is deterministic and case-insensitive                                          |
 | 3   | Folder name contains parseable address                           | Stores batch-level folder address hint and applies it to jobs without own address                      | Default only, never forced override                                                                       |
+| 3a  | Folder has nested address hierarchy (`Wien/Hauptstrasse 5/…`)    | Builds per-file folder candidate by traversing `directorySegments` leaf→root                           | Nearest matching folder segment wins; root hint used only as fallback                                     |
 | 4   | Individual file name contains parseable address                  | File-level address overrides inherited folder hint                                                     | Most-specific textual source wins                                                                         |
 | 4a  | Parsed file/folder address is low-confidence                     | Keeps parsed fragment as note only; does not qualify as resolved address                               | Prevents nonsense title strings from bypassing issues routing                                             |
 | 4b  | Street+house resolves to multiple cities                         | Runs disambiguation algorithm and computes ranked candidate probabilities                              | Auto-assign only above threshold                                                                          |
@@ -83,31 +84,112 @@ Upload Manager Pipeline
 
 Deterministische Reihenfolge (first-match-wins):
 
-1. Quelle EXIF-GPS pruefen.
-2. Wenn GPS vorhanden: Konfliktpruefung auf Koordinatenbasis ausfuehren und Upload fortsetzen.
-3. Wenn GPS fehlt: Titel/Filename-Adresse extrahieren.
-4. Nur bei `high` Confidence die Titeladresse als aufloesbaren Standort akzeptieren.
-5. Bei `low`/fehlender Titeladresse in `missing_data` routen:
-   - Foto: `issueKind=missing_gps`
-   - Dokument: `issueKind=document_unresolved`
-6. Nach erfolgreichem Save:
-   - Nur Koordinaten vorhanden -> reverse geocode (coords -> address)
-   - Nur Titeladresse vorhanden -> forward geocode (address -> coords)
-   - Beide vorhanden -> keine automatische Reconciliation in diesem Schritt.
+1. Pro Datei `directorySegments` aus der Ordnerstruktur aufbauen.
+2. Folder-Kandidat erzeugen:
+
+- Segmente leaf→root traversieren (`folderHierarchyTraversalOrder`)
+- nur high-confidence Segmenttreffer zulassen (`folderHintRequireHighConfidence`)
+- root hint nur als fallback (`folderHintUseRootFallback`)
+
+3. Titel/Filename-Kandidat extrahieren und confidence score bestimmen.
+4. Vorrangsregel anwenden: Dateiname gewinnt immer gegen Folder-Kandidat (`filenameAlwaysOverridesFolder`).
+5. Nur den gemergten Kandidaten ab `titleConfidenceThreshold` weiterverarbeiten.
+6. Kandidat forward-geocoden und Mehrtreffer gegen `minMeaningfulScore` filtern.
+7. Bei genau einem sinnvollen Treffer: Titel als Standortquelle verwenden.
+8. Bei mehreren Treffern: Cluster-Disambiguierung mit `clusterAssistWeight` + `minTopGap` ausfuehren.
+9. Wenn weiterhin mehrdeutig und EXIF vorhanden: EXIF als Assistenz mit `exifAssistRadiusMeters` pruefen.
+10. Wenn danach eindeutig: Titel-Treffer verwenden.
+11. Wenn weiter mehrdeutig: User-Prompt fuer Kandidatenauswahl.
+12. Wenn kein aufloesbarer Titelkandidat: EXIF als Fallback verwenden.
+13. Wenn weder Titel noch EXIF aufloesbar: `missing_data` issue setzen.
+
+Algorithmus-Parameter (`UploadLocationConfig`) mit Defaults:
+
+| Parameter                                   | Default              | Bedeutung                                                                                                             |
+| ------------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `exifAssistRadiusMeters`                    | `300`                | EXIF darf Mehrtreffer nur bestaetigen, wenn EXIF-Koordinaten innerhalb dieses Radius zu genau einem Kandidaten liegen |
+| `minMeaningfulScore`                        | `0.55`               | Untergrenze fuer geocoding Treffer, die als sinnvolle Kandidaten gelten                                               |
+| `minTopGap`                                 | `0.1`                | Mindestabstand zwischen Platz 1 und Platz 2, damit Cluster-Entscheid als eindeutig gilt                               |
+| `titleConfidenceThreshold`                  | `0.8`                | Mindestconfidence fuer Parser-Ergebnis, um als Titelkandidat in den Geocoding-Pfad zu gehen                           |
+| `clusterAssistWeight.project`               | `0.7`                | Gewicht fuer bereits bekannte Projektstandorte bei Mehrtreffer-Ranking                                                |
+| `clusterAssistWeight.company`               | `0.3`                | Gewicht fuer bekannte Unternehmenscluster bei Mehrtreffer-Ranking                                                     |
+| `folderHierarchyTraversalOrder`             | `'leaf-to-root'`     | Traversierungsrichtung der `directorySegments`; dateinahe Ordner haben Prioritaet                                     |
+| `folderHintRequireHighConfidence`           | `true`               | Nur high-confidence Segmenttreffer aus Ordnern duerfen als Folder-Kandidat gelten                                     |
+| `folderHintUseRootFallback`                 | `true`               | Root folder hint wird nur genutzt, wenn kein spezifischer Segmenttreffer gefunden wurde                               |
+| `filenameAlwaysOverridesFolder`             | `true`               | Erzwingt die Vorrangsregel file > folder fuer den finalen Titelkandidaten                                             |
+| `maxDirectorySegmentsForHint`               | `32`                 | Schutzgrenze fuer Segmentauswertung pro Datei in tiefen Ordnerbaeumen                                                 |
+| `parserBaseConfidence`                      | `0.5`                | Basisvertrauen fuer Pfad-/Titelparser                                                                                 |
+| `parserCityStreetIncrement`                 | `0.2`                | Inkrement fuer Stadt/Strassen-Signale im Parser                                                                       |
+| `parserZipIncrement`                        | `0.25`               | Inkrement fuer PLZ-Signal im Parser                                                                                   |
+| `disambiguationAutoAssignThreshold`         | `0.95`               | Schwellwert fuer automatische Stadtzuweisung                                                                          |
+| `disambiguationReviewLowerBound`            | `0.7`                | Untergrenze, ab der Kandidaten noch als pruefbar gelten statt sofort verwerfen                                        |
+| `disambiguationZipCandidateProbability`     | `0.8`                | Kandidatenwahrscheinlichkeit bei passender PLZ                                                                        |
+| `disambiguationDefaultCandidateProbability` | `0.2`                | Basiswahrscheinlichkeit ohne PLZ-Match                                                                                |
+| `disambiguationAlgorithm`                   | `'cluster-majority'` | Disambiguierungsverfahren fuer city ranking                                                                           |
+| `filenameSingleWordMinLength`               | `8`                  | Mindestlaenge fuer einwortige Strassennamen im Fallback-Pfad                                                          |
+| `filenameSingleWordCityMinLength`           | `3`                  | Mindestlaenge fuer City-Anteil bei einwortigem Strassennamen                                                          |
+| `filenameMultiWordTokenMinLength`           | `3`                  | Mindestlaenge pro Token bei mehrwortigen Fallback-Strassen                                                            |
+| `filenameTrailingArtifactMinDigits`         | `3`                  | Untergrenze fuer zu entfernende Dateiende-Zaehlreste                                                                  |
+| `filenameTrailingArtifactMaxDigits`         | `6`                  | Obergrenze fuer zu entfernende Dateiende-Zaehlreste                                                                   |
+| `geocodeCacheTtlMs`                         | `300000`             | Cache-TTL fuer geocoding Antworten                                                                                    |
+| `geocodeMaxProxyAttempts`                   | `3`                  | Maximale Retry-Anzahl fuer geocode Proxy-Aufrufe                                                                      |
+| `geocodeLogDedupWindowMs`                   | `30000`              | Deduplizierungsfenster fuer wiederholte Fehlerlogs                                                                    |
+| `geocodeAuthFailureCooldownMs`              | `120000`             | Cooldown nach Auth-Fehlern vor neuem geocode Versuch                                                                  |
+| `geocodeSearchDefaultLimit`                 | `10`                 | Standardlimit fuer Forward-Search Trefferliste                                                                        |
 
 Pseudo-Ablauf:
 
 ```ts
-if (job.coords) {
-  // Path A: GPS-priorisiert
-  runConflictCheck(coords);
-  upload(coords);
-} else if (titleAddress.confidence === "high") {
-  // Path B: Titeladresse-priorisiert
-  runConflictCheck(titleAddress);
-  upload(undefined);
+const folderCandidate = buildFolderHierarchyCandidate(job.directorySegments, {
+  traversalOrder: config.folderHierarchyTraversalOrder,
+  requireHighConfidence: config.folderHintRequireHighConfidence,
+  useRootFallback: config.folderHintUseRootFallback,
+  maxSegments: config.maxDirectorySegmentsForHint,
+});
+
+const fileCandidate = extractTitleCandidate(job.fileName);
+const mergedCandidate =
+  fileCandidate && config.filenameAlwaysOverridesFolder
+    ? fileCandidate
+    : (fileCandidate ?? folderCandidate);
+
+if (
+  mergedCandidate &&
+  mergedCandidate.confidence >= config.titleConfidenceThreshold
+) {
+  const hits = forwardGeocodeAll(mergedCandidate.text);
+  const meaningful = hits.filter((h) => h.score >= config.minMeaningfulScore);
+
+  if (meaningful.length === 1) {
+    useTitle(meaningful[0]);
+  } else if (meaningful.length > 1) {
+    const ranked = rankWithClusters(meaningful, {
+      projectWeight: config.clusterAssistWeight.project,
+      companyWeight: config.clusterAssistWeight.company,
+      minTopGap: config.minTopGap,
+    });
+
+    if (ranked.isUnique) {
+      useTitle(ranked.best);
+    } else if (job.coords) {
+      const exifNarrowed = narrowWithExif(
+        meaningful,
+        job.coords,
+        config.exifAssistRadiusMeters,
+      );
+      if (exifNarrowed.length === 1) useTitle(exifNarrowed[0]);
+      else promptUserForLocationChoice(meaningful);
+    } else {
+      promptUserForLocationChoice(meaningful);
+    }
+  } else if (job.coords) {
+    useExif(job.coords);
+  } else {
+    routeToMissingDataIssue();
+  }
+} else if (job.coords) {
+  useExif(job.coords);
 } else {
-  // Path C: nicht ausreichend aufloesbar
   routeToMissingDataIssue();
 }
 
@@ -123,51 +205,71 @@ flowchart TD
   A[Submission via UploadPanel or ImageDetail] --> B[UploadManagerService]
   B --> C[UploadQueueService slot assignment max 3]
   C --> D[Resolve textual location context]
-  D --> E{File title address?}
-  E -->|Yes| F[Use file-level title address]
+  D --> D1[Build folder candidate from directorySegments]
+  D1 --> D2[Traverse by folderHierarchyTraversalOrder leaf to root]
+  D2 --> D3[Accept only high-confidence folder hits folderHintRequireHighConfidence true]
+  D3 --> D4[Apply root fallback when folderHintUseRootFallback true]
+  D4 --> D5[Merge candidates with filenameAlwaysOverridesFolder true]
+  D5 --> E{Title candidate score >= titleConfidenceThreshold 0.8?}
+  E -->|Yes| F[Forward geocode all hits then filter score >= minMeaningfulScore 0.55]
   E -->|No| G{Folder-level address hint?}
-  G -->|Yes| H[Inherit folder address]
+  G -->|Yes| H[Inherit folder address and retry title candidate path]
   G -->|No| I[No textual address]
-  H --> H1[Run address disambiguation when city ambiguous]
-  F --> J[Upload*PipelineService run by job.mode]
-  H1 --> J
-  I --> J
-  J --> K[Validation and parsing_exif]
-  K --> L{EXIF plus text-derived coords both present?}
-  L -->|Yes| M[Distance compare with 15m tolerance]
-  M --> N[Persist mismatch status plus both sources]
-  L -->|No| N
-  N --> O{Media type photo/image?}
-  O -->|Yes| P[hashing and dedup_check]
-  O -->|video| U[uploading then saving_record]
-  O -->|document| O2{Has GPS or high-confidence parseable address?}
+  F --> H1{Exactly one meaningful hit?}
+  H --> H1
+  H1 -->|Yes| J[Use title hit and continue upload]
+  H1 -->|No multiple| H2[Rank with cluster weights project 0.7 and company 0.3]
+  H2 --> H3{Top gap >= minTopGap 0.1?}
+  H3 -->|Yes| J
+  H3 -->|No| H4{EXIF available?}
+  H4 -->|Yes| H5[EXIF assist match within exifAssistRadiusMeters 300]
+  H5 --> H6{Exactly one nearby hit?}
+  H6 -->|Yes| J
+  H6 -->|No| H7[Prompt user to choose candidate]
+  H4 -->|No| H7
+  I --> K{EXIF available as fallback?}
+  K -->|Yes| J2[Use EXIF fallback and continue upload]
+  K -->|No| ZA2[missing_data issue]
+  J --> L[Validation and parsing_exif]
+  J2 --> L
+  L --> M{EXIF plus text-derived coords both present?}
+  M -->|Yes| N[Distance compare with mismatch tolerance]
+  N --> O[Persist mismatch status plus both sources]
+  M -->|No| O
+  O --> P{Media type photo/image?}
+  P -->|Yes| Q[hashing and dedup_check]
+  P -->|video| U[uploading then saving_record]
+  P -->|document| O2{Has GPS or parseable textual address?}
   O2 -->|Yes| U
   O2 -->|No| ZA[missing_data + issueKind=document_unresolved]
-  P --> Q{Dedup match?}
-  Q -->|Yes| R[set duplicate_issue and emit duplicateDetected$]
-  R --> S[Open duplicate-resolution modal]
-  S --> T{Decision}
-  T -->|use_existing| U1[emit duplicateResolved use_existing]
-  T -->|upload_anyway| U2[continue as new upload]
-  T -->|reject| U3[set skipped_rejected and emit uploadSkipped$]
+  Q --> R{Dedup match?}
+  R -->|Yes| S[set duplicate_issue and emit duplicateDetected$]
+  S --> T[Open duplicate-resolution modal]
+  T --> V{Decision}
+  V -->|use_existing| U1[emit duplicateResolved use_existing]
+  V -->|upload_anyway| U2[continue as new upload]
+  V -->|reject| U3[set skipped_rejected and emit uploadSkipped$]
   U2 --> U
-  Q -->|No| V{Conflict candidate?}
-  V -->|Yes| W[set awaiting_conflict_resolution plus emit locationConflict$]
-  W --> X[User conflictResolution]
-  X --> J
-  V -->|No| U
+  R -->|No| W{Conflict candidate?}
+  W -->|Yes| X[set awaiting_conflict_resolution plus emit locationConflict$]
+  X --> Y[User conflictResolution]
+  Y --> J
+  W -->|No| U
   U --> V2{Needs enrichment?}
-  V2 -->|coords| Y[resolving_address]
+  V2 -->|coords| Y2[resolving_address]
   V2 -->|title/folder address| Z[resolving_coordinates]
-  V2 -->|manual placement required| ZA2[missing_data + issueKind=missing_gps]
-  ZA2 --> ZB[placeJob sets queued]
+  V2 -->|manual placement required| ZA3[missing_data + issueKind=missing_gps]
+  ZA3 --> ZB[placeJob sets queued]
   ZA --> ZB
   ZA --> ZC[assignJobToProject sets queued]
   ZB --> J
   ZC --> J
-  Y --> AA[complete]
+  Y2 --> AA[complete]
   Z --> AA
   U --> AA
+  H7 --> AA2[user prompt result]
+  AA2 -->|selected candidate| J
+  AA2 -->|cancelled| ZA2
   AA --> AB[Emit image and batch events]
 ```
 
@@ -382,11 +484,11 @@ sequenceDiagram
 
 - [x] Standard multi-file upload creates one batch and one job per file.
 - [x] Folder upload uses scanning state before queueing discovered files.
-- [ ] Folder `Project: [projectname]` context is parsed and applied case-insensitively (create if missing, else assign existing).
-- [ ] Folder uploads inherit a folder-level textual address for files that do not provide their own title address.
-- [ ] File-level title addresses override inherited folder-level addresses.
+- [x] Folder `Project: [projectname]` context is parsed and applied case-insensitively (create if missing, else assign existing).
+- [x] Folder uploads inherit a folder-level textual address for files that do not provide their own title address.
+- [x] File-level title addresses override inherited folder-level addresses.
 - [ ] Ambiguous street+house matches run disambiguation ranking and auto-assign only when probability >= configured threshold.
-- [ ] EXIF GPS is never discarded when title/folder addresses exist.
+- [x] EXIF GPS is never discarded when title/folder addresses exist.
 - [ ] Text-derived coordinates and EXIF coordinates are compared with a 15m tolerance.
 - [ ] Mismatches beyond 15m are persisted as structured location mismatch state and surfaced to detail UI.
 - [x] Hash deduplication runs only for photo/image media types.

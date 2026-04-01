@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import { Injectable } from '@angular/core';
+import { UploadLocationConfigService } from './upload/upload-location-config.service';
 import { CITY_REGISTRY } from './location-path-parser/city-registry.const';
 import { POSTAL_CODE_PATTERNS } from './location-path-parser/postal-code-patterns.const';
 import { runDisambiguation } from './location-path-parser/disambiguation-algorithms';
@@ -47,13 +48,6 @@ export interface AddressExtractionResult {
   source: AddressSource;
 }
 
-const BASE_CONFIDENCE = 0.5;
-const CITY_STREET_INCREMENT = 0.2;
-const ZIP_INCREMENT = 0.25;
-const AUTO_ASSIGN_THRESHOLD = 0.95;
-const REVIEW_LOWER_BOUND = 0.7;
-const ZIP_CANDIDATE_PROBABILITY = 0.8;
-const DEFAULT_CANDIDATE_PROBABILITY = 0.2;
 const DEFAULT_DISAMBIGUATION: DisambiguationOutcome = {
   algorithm: 'cluster-majority',
   chosen_city: null,
@@ -83,7 +77,13 @@ function uniq(values: readonly string[]): string[] {
 
 @Injectable({ providedIn: 'root' })
 export class LocationPathParserService {
-  private readonly disambiguationAlgorithm: DisambiguationAlgorithm = 'cluster-majority';
+  private readonly disambiguationAlgorithm: DisambiguationAlgorithm;
+
+  constructor(
+    private readonly locationConfig: UploadLocationConfigService = new UploadLocationConfigService(),
+  ) {
+    this.disambiguationAlgorithm = this.locationConfig.getConfig().disambiguationAlgorithm;
+  }
 
   parsePathSegments(fullPath: string): AddressExtractionResult {
     const context = emptyContext();
@@ -93,7 +93,7 @@ export class LocationPathParserService {
     const segments = splitPathSegments(fullPath);
     const filename = segments.at(-1) ?? '';
     const folders = filename.includes('.') ? segments.slice(0, -1) : segments;
-    let confidence = BASE_CONFIDENCE;
+    let confidence = this.locationConfig.getConfig().parserBaseConfidence;
 
     folders.forEach((segment, index) => {
       const signal = this.applyFolderSegment(segment, context, source, index);
@@ -139,7 +139,7 @@ export class LocationPathParserService {
     const notes: string[] = [];
     const ignored: string[] = [];
     const stem = stripFileExtension(filename).replace(/[_-]+/g, ' ').trim();
-    let confidence = BASE_CONFIDENCE;
+    let confidence = this.locationConfig.getConfig().parserBaseConfidence;
 
     if (!stem) {
       return this.formatResult({
@@ -288,7 +288,7 @@ export class LocationPathParserService {
     ) {
       context.zip = zipCity.zip;
       source.zip_source = `folder_level_${index}`;
-      boost += ZIP_INCREMENT;
+      boost += this.locationConfig.getConfig().parserZipIncrement;
     }
 
     const cityCandidate = zipCity.city
@@ -301,7 +301,7 @@ export class LocationPathParserService {
       context.country = cityCandidate.country;
       source.country_source = `folder_level_${index}`;
     }
-    return boost + CITY_STREET_INCREMENT;
+    return boost + this.locationConfig.getConfig().parserCityStreetIncrement;
   }
 
   private applyFolderStreet(
@@ -315,7 +315,9 @@ export class LocationPathParserService {
     if ((hasStreetKeyword(segment) || parsedStreet.street) && !context.street) {
       context.street = parsedStreet.street;
       source.street_source = `folder_level_${index}`;
-      if (hasStreetKeyword(segment)) boost += CITY_STREET_INCREMENT;
+      if (hasStreetKeyword(segment)) {
+        boost += this.locationConfig.getConfig().parserCityStreetIncrement;
+      }
     }
     if (parsedStreet.houseNumber && !context.house_number) {
       context.house_number = parsedStreet.houseNumber;
@@ -338,7 +340,7 @@ export class LocationPathParserService {
     if (zipCity.zip && this.validateAddressComponent(zipCity.zip, 'zip', context.country)) {
       context.zip = zipCity.zip;
       source.zip_source = 'filename';
-      boost += ZIP_INCREMENT;
+      boost += this.locationConfig.getConfig().parserZipIncrement;
     }
 
     const cityMatch = zipCity.city ? findCityBySegment(zipCity.city) : null;
@@ -347,7 +349,7 @@ export class LocationPathParserService {
     context.country = cityMatch.country;
     source.city_source = 'filename';
     source.country_source = 'filename';
-    return boost + CITY_STREET_INCREMENT;
+    return boost + this.locationConfig.getConfig().parserCityStreetIncrement;
   }
 
   private applyStreetFromStem(
@@ -368,7 +370,9 @@ export class LocationPathParserService {
       context.unit = parsedStreet.unit;
       source.unit_source = 'filename';
     }
-    return parsedStreet.street && hasStreetKeyword(stem) ? CITY_STREET_INCREMENT : 0;
+    return parsedStreet.street && hasStreetKeyword(stem)
+      ? this.locationConfig.getConfig().parserCityStreetIncrement
+      : 0;
   }
 
   private applyFallbackFromStem(
@@ -431,8 +435,8 @@ export class LocationPathParserService {
     const candidates = CITY_REGISTRY.map((city) => ({
       city: city.name,
       probability: city.zips.includes(context.zip ?? '')
-        ? ZIP_CANDIDATE_PROBABILITY
-        : DEFAULT_CANDIDATE_PROBABILITY,
+        ? this.locationConfig.getConfig().disambiguationZipCandidateProbability
+        : this.locationConfig.getConfig().disambiguationDefaultCandidateProbability,
       zipMatch: !!context.zip && city.zips.includes(context.zip),
       countryMatch: !!context.country && city.country === context.country,
       parserConfidence: confidence,
@@ -445,8 +449,8 @@ export class LocationPathParserService {
       this.disambiguationAlgorithm,
       candidates,
       {},
-      AUTO_ASSIGN_THRESHOLD,
-      REVIEW_LOWER_BOUND,
+      this.locationConfig.getConfig().disambiguationAutoAssignThreshold,
+      this.locationConfig.getConfig().disambiguationReviewLowerBound,
     );
     if (result.auto_assigned && result.chosen_city) context.city = result.chosen_city;
     return result;
@@ -463,7 +467,7 @@ export class LocationPathParserService {
     if (
       !disambiguation.auto_assigned &&
       disambiguation.probability > 0 &&
-      disambiguation.probability < REVIEW_LOWER_BOUND
+      disambiguation.probability < this.locationConfig.getConfig().disambiguationReviewLowerBound
     )
       return 'low_disambiguation_probability';
     return null;

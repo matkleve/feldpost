@@ -10,6 +10,11 @@
 import { TestBed } from '@angular/core/testing';
 import { GeocodingService, type ReverseGeocodeResult } from './geocoding.service';
 import { SupabaseService } from './supabase/supabase.service';
+import {
+  DEFAULT_UPLOAD_LOCATION_CONFIG,
+  type UploadLocationConfig,
+} from './upload/upload-location-config';
+import { UploadLocationConfigService } from './upload/upload-location-config.service';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -87,7 +92,7 @@ describe('GeocodingService', () => {
     expect(result!.street).toBe('Burgstraße 7');
     expect(result!.country).toBe('Switzerland');
     expect(result!.countryCode).toBe('ch');
-    expect(result!.addressLabel).toBe('Burgstraße 7, 8001 Zürich, Switzerland');
+    expect(result!.addressLabel).toBe('Burgstraße 7, 8001 Zürich');
   });
 
   it('maps country_code from nested address in forward search hits', async () => {
@@ -353,5 +358,75 @@ describe('GeocodingService', () => {
     expect(b).not.toBeNull();
     expect(c).not.toBeNull();
   });
-});
 
+  it('uses configurable max proxy attempts', async () => {
+    const configurableInvoke = vi.fn().mockResolvedValue({
+      data: null,
+      error: {
+        name: 'FunctionsHttpError',
+        message: 'Edge function returned status 502',
+        status: 502,
+      },
+    });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        GeocodingService,
+        { provide: SupabaseService, useValue: mockSupabaseService(configurableInvoke) },
+        {
+          provide: UploadLocationConfigService,
+          useValue: {
+            getConfig: () => ({
+              ...DEFAULT_UPLOAD_LOCATION_CONFIG,
+              geocodeMaxProxyAttempts: 1,
+            }),
+          },
+        },
+      ],
+    });
+
+    const configured = TestBed.inject(GeocodingService);
+    const result = await configured.reverse(47.3769, 8.5417);
+
+    expect(result).toBeNull();
+    expect(configurableInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses configurable default search limit when options.limit is omitted', async () => {
+    const configurableInvoke = vi.fn().mockResolvedValue({
+      data: [],
+      error: null,
+    });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        GeocodingService,
+        { provide: SupabaseService, useValue: mockSupabaseService(configurableInvoke) },
+        {
+          provide: UploadLocationConfigService,
+          useValue: {
+            getConfig: (): UploadLocationConfig => ({
+              ...DEFAULT_UPLOAD_LOCATION_CONFIG,
+              geocodeSearchDefaultLimit: 7,
+            }),
+          },
+        },
+      ],
+    });
+
+    const configured = TestBed.inject(GeocodingService);
+    await configured.search('wien');
+
+    expect(configurableInvoke).toHaveBeenCalledWith(
+      'geocode',
+      expect.objectContaining({
+        body: expect.objectContaining({
+          action: 'forward',
+          limit: 7,
+        }),
+      }),
+    );
+  });
+});

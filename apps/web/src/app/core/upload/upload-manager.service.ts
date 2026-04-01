@@ -64,6 +64,7 @@ import {
   submitUploadManagerFolder,
   type UploadManagerSubmitDeps,
 } from './upload-manager-submit.util';
+import { UploadLocationConfigService } from './upload-location-config.service';
 import { TERMINAL_PHASES, UploadJobStateService, phaseLabel } from './upload-job-state.service';
 import type { PipelineContext } from './upload-manager.types';
 import { UploadNewPipelineService } from './upload-new-pipeline.service';
@@ -131,6 +132,7 @@ export class UploadManagerService {
   private readonly filenameParser = inject(FilenameParserService);
   private readonly mediaPreview = inject(MediaPreviewService);
   private readonly projects = inject(ProjectsService);
+  private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly newPipeline = inject(UploadNewPipelineService);
   private readonly replacePipeline = inject(UploadReplacePipelineService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
@@ -174,17 +176,22 @@ export class UploadManagerService {
       }
       return parsed.address;
     },
-    extractAddressFromFolderPathSegments: (segments) => {
-      // Walk from leaf to root so the most specific folder wins.
-      // Spec context: docs/element-specs/upload-manager-pipeline.md (file > folder specificity).
-      for (let index = segments.length - 1; index >= 0; index -= 1) {
-        const parsed = this.filenameParser.extractAddress(segments[index]);
-        if (parsed && parsed.confidence === 'high') {
+    extractAddressFromFolderPathSegments: (segments, traversalOrder, requireHighConfidence) => {
+      const orderedSegments =
+        traversalOrder === 'root-to-leaf' ? [...segments] : [...segments].reverse();
+
+      for (const segment of orderedSegments) {
+        const parsed = this.filenameParser.extractAddress(segment);
+        if (!parsed) {
+          continue;
+        }
+        if (!requireHighConfidence || parsed.confidence === 'high') {
           return parsed.address;
         }
       }
       return undefined;
     },
+    getLocationConfig: () => this.locationConfig.getConfig(),
     loadProjects: () => this.projects.loadProjects(),
     createProject: async (name: string) => {
       const draftProject = await this.projects.createDraftProject();

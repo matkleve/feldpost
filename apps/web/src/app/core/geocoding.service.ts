@@ -14,6 +14,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase/supabase.service';
+import { UploadLocationConfigService } from './upload/upload-location-config.service';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -105,11 +106,6 @@ interface NominatimSearchResponse {
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
-const MAX_PROXY_ATTEMPTS = 3;
-const LOG_DEDUP_WINDOW_MS = 30 * 1000;
-const AUTH_FAILURE_COOLDOWN_MS = 2 * 60 * 1000;
-
 interface GeocodeFailureDetails {
   status: number | null;
   code: string | null;
@@ -123,6 +119,7 @@ interface GeocodeFailureDetails {
 @Injectable({ providedIn: 'root' })
 export class GeocodingService {
   private readonly supabase = inject(SupabaseService);
+  private readonly locationConfig = inject(UploadLocationConfigService);
 
   private readonly reverseCache = new Map<
     string,
@@ -171,7 +168,10 @@ export class GeocodingService {
         if (!data?.address) return null;
 
         const result = this.parseReverseResponse(data);
-        this.reverseCache.set(cacheKey, { data: result, expires: Date.now() + CACHE_TTL_MS });
+        this.reverseCache.set(cacheKey, {
+          data: result,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
         return result;
       } catch {
         return null;
@@ -212,7 +212,10 @@ export class GeocodingService {
         const result = this.parseForwardResponse(results[0]);
         if (!result) return null;
 
-        this.forwardCache.set(cacheKey, { data: result, expires: Date.now() + CACHE_TTL_MS });
+        this.forwardCache.set(cacheKey, {
+          data: result,
+          expires: Date.now() + this.locationConfig.getConfig().geocodeCacheTtlMs,
+        });
         return result;
       } catch {
         return null;
@@ -236,7 +239,7 @@ export class GeocodingService {
           action: 'forward',
           q: trimmed,
         };
-        if (options?.limit) body['limit'] = options.limit;
+        body['limit'] = options?.limit ?? this.locationConfig.getConfig().geocodeSearchDefaultLimit;
         if (options?.countrycodes?.length) {
           body['countrycodes'] = options.countrycodes.join(',');
         }
@@ -280,7 +283,8 @@ export class GeocodingService {
 
     let lastError: unknown;
 
-    for (let attempt = 1; attempt <= MAX_PROXY_ATTEMPTS; attempt += 1) {
+    const maxAttempts = this.locationConfig.getConfig().geocodeMaxProxyAttempts;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
         const headers = await this.getFunctionAuthHeaders();
         const { data, error } = await this.supabase.client.functions.invoke('geocode', {
@@ -294,10 +298,11 @@ export class GeocodingService {
         lastError = error;
         const details = await this.extractFailureDetails(error);
         const retryable = this.isRetryableFailure(details);
-        const finalAttempt = attempt >= MAX_PROXY_ATTEMPTS || !retryable;
+        const finalAttempt = attempt >= maxAttempts || !retryable;
 
         if (details.status === 401) {
-          this.authFailureUntilMs = Date.now() + AUTH_FAILURE_COOLDOWN_MS;
+          this.authFailureUntilMs =
+            Date.now() + this.locationConfig.getConfig().geocodeAuthFailureCooldownMs;
         }
 
         if (finalAttempt) {
@@ -390,7 +395,7 @@ export class GeocodingService {
 
     const now = Date.now();
     const lastLoggedAt = this.recentFailureLogs.get(key) ?? 0;
-    if (now - lastLoggedAt < LOG_DEDUP_WINDOW_MS) {
+    if (now - lastLoggedAt < this.locationConfig.getConfig().geocodeLogDedupWindowMs) {
       return;
     }
     this.recentFailureLogs.set(key, now);
@@ -398,7 +403,7 @@ export class GeocodingService {
     console.warn('[Geocoding] geocode request failed', {
       operation,
       attempt,
-      maxAttempts: MAX_PROXY_ATTEMPTS,
+      maxAttempts: this.locationConfig.getConfig().geocodeMaxProxyAttempts,
       retryable,
       status: details.status,
       code: details.code,
@@ -548,4 +553,3 @@ export class GeocodingService {
     return values.find((v) => v != null) ?? null;
   }
 }
-

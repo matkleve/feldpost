@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import type { ProjectListItem } from '../projects/projects.types';
 import type { FileScanProgress, ScannedFileEntry } from '../folder-scan.service';
+import type { UploadLocationConfig } from './upload-location-config';
 import type { UploadBatch, UploadJob, UploadPhase, SubmitOptions } from './upload-manager.types';
 
 export interface UploadManagerSubmitDeps {
@@ -13,7 +14,12 @@ export interface UploadManagerSubmitDeps {
   scanDirectory: (dirHandle: FileSystemDirectoryHandle) => Promise<ReadonlyArray<ScannedFileEntry>>;
   scanProgress$: Observable<FileScanProgress>;
   extractAddressFromFolderName: (folderName: string) => string | undefined;
-  extractAddressFromFolderPathSegments: (segments: readonly string[]) => string | undefined;
+  extractAddressFromFolderPathSegments: (
+    segments: readonly string[],
+    traversalOrder: UploadLocationConfig['folderHierarchyTraversalOrder'],
+    requireHighConfidence: boolean,
+  ) => string | undefined;
+  getLocationConfig: () => UploadLocationConfig;
   loadProjects: () => Promise<ReadonlyArray<ProjectListItem>>;
   createProject: (name: string) => Promise<string | undefined>;
   queuedLabel: string;
@@ -170,14 +176,26 @@ function createNewUploadJobs(
   deps: UploadManagerSubmitDeps,
   folderAddressHint?: string,
 ): UploadJob[] {
+  const locationConfig = deps.getLocationConfig();
+
   return scannedEntries.map((entry) => {
     // Folder hint precedence for mixed trees:
     // 1) nearest matching directory segment hint
     // 2) root folder hint fallback
     // File-level title extraction remains authoritative in routing.
     // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3/4).
+    const maxSegments = Math.max(0, Math.floor(locationConfig.maxDirectorySegmentsForHint));
+    const boundedSegments =
+      maxSegments === 0
+        ? []
+        : entry.directorySegments.slice(-Math.min(entry.directorySegments.length, maxSegments));
+    const hierarchyHint = deps.extractAddressFromFolderPathSegments(
+      boundedSegments,
+      locationConfig.folderHierarchyTraversalOrder,
+      locationConfig.folderHintRequireHighConfidence,
+    );
     const perFileFolderHint =
-      deps.extractAddressFromFolderPathSegments(entry.directorySegments) ?? folderAddressHint;
+      hierarchyHint ?? (locationConfig.folderHintUseRootFallback ? folderAddressHint : undefined);
 
     return {
       id: crypto.randomUUID(),

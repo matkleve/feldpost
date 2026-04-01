@@ -35,6 +35,7 @@ import { isCancelledUploadJob } from './upload-cancelled.util';
 import { UploadConflictService } from './upload-conflict.service';
 import { UploadEnrichmentService } from './upload-enrichment.service';
 import { UploadJobStateService } from './upload-job-state.service';
+import { UploadLocationConfigService } from './upload-location-config.service';
 import type { PipelineContext } from './upload-manager.types';
 import {
   prepareNewJobForUpload,
@@ -56,6 +57,7 @@ export class UploadNewPipelineService {
   private readonly filenameParser = inject(FilenameParserService);
   private readonly conflictService = inject(UploadConflictService);
   private readonly enrichment = inject(UploadEnrichmentService);
+  private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly photoLoad = inject(PhotoLoadService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly supabase = inject(SupabaseService);
@@ -125,6 +127,7 @@ export class UploadNewPipelineService {
     queue: UploadQueueService;
     uploadService: UploadService;
     filenameParser: FilenameParserService;
+    locationConfig: UploadLocationConfigService;
     conflictService: UploadConflictService;
     attachPipeline: UploadAttachPipelineService;
   } {
@@ -133,6 +136,7 @@ export class UploadNewPipelineService {
       queue: this.queue,
       uploadService: this.uploadService,
       filenameParser: this.filenameParser,
+      locationConfig: this.locationConfig,
       conflictService: this.conflictService,
       attachPipeline: this.attachPipeline,
     };

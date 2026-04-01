@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LocationPathParserService } from './location-path-parser.service';
+import { UploadLocationConfigService } from './upload/upload-location-config.service';
 
 describe('LocationPathParserService', () => {
   const service = new LocationPathParserService();
@@ -46,5 +47,15 @@ describe('LocationPathParserService', () => {
 
   it('validates umlaut unit token format (Tür)', () => {
     expect(service.validateAddressComponent('Tür 12', 'unit')).toBe(true);
+  });
+
+  it('uses configurable disambiguation auto-assign threshold', () => {
+    const config = new UploadLocationConfigService();
+    config.patchConfig({ disambiguationAutoAssignThreshold: 0.999 });
+    const configurableService = new LocationPathParserService(config);
+
+    const result = configurableService.parsePathSegments('/Austria/1070/Denisgasse 12/photo.jpg');
+    expect(result.disambiguation.algorithm).toBe('cluster-majority');
+    expect(result.disambiguation.auto_assigned).toBe(false);
   });
 });

@@ -4,6 +4,7 @@ import {
   submitUploadManagerFolder,
   type UploadManagerSubmitDeps,
 } from './upload-manager-submit.util';
+import { DEFAULT_UPLOAD_LOCATION_CONFIG } from './upload-location-config';
 import type { UploadJob } from './upload-manager.types';
 import type { ScannedFileEntry } from '../folder-scan.service';
 
@@ -23,6 +24,7 @@ function createBaseDeps(overrides: Partial<UploadManagerSubmitDeps> = {}): Uploa
     scanProgress$,
     extractAddressFromFolderName: vi.fn().mockReturnValue(undefined),
     extractAddressFromFolderPathSegments: vi.fn().mockReturnValue(undefined),
+    getLocationConfig: vi.fn().mockReturnValue(DEFAULT_UPLOAD_LOCATION_CONFIG),
     loadProjects: vi.fn().mockResolvedValue([]),
     createProject: vi.fn().mockResolvedValue(undefined),
     queuedLabel: 'Queued',
@@ -101,6 +103,59 @@ describe('submitUploadManagerFolder folder hint policy', () => {
   });
 });
 
+describe('submitUploadManagerFolder hierarchy config controls', () => {
+  it('does not apply root folder hint when folderHintUseRootFallback is disabled', async () => {
+    const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+    const entries: ScannedFileEntry[] = [
+      { file, relativePath: 'Unknown/photo.jpg', directorySegments: ['Unknown'] },
+    ];
+    const deps = createBaseDeps({
+      scanDirectory: vi.fn().mockResolvedValue(entries),
+      extractAddressFromFolderName: vi.fn().mockReturnValue('Root 99, Wien'),
+      getLocationConfig: vi.fn().mockReturnValue({
+        ...DEFAULT_UPLOAD_LOCATION_CONFIG,
+        folderHintUseRootFallback: false,
+      }),
+    });
+
+    const dirHandle = { name: 'Root 99, Wien' } as FileSystemDirectoryHandle;
+    await submitUploadManagerFolder(dirHandle, undefined, deps);
+
+    const jobs = (deps.addJobs as ReturnType<typeof vi.fn>).mock.calls[0][0] as UploadJob[];
+    expect(jobs[0].titleAddress).toBeUndefined();
+    expect(jobs[0].titleAddressSource).toBeUndefined();
+  });
+
+  it('limits directory segments passed to hierarchy parser using maxDirectorySegmentsForHint', async () => {
+    const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+    const entries: ScannedFileEntry[] = [
+      {
+        file,
+        relativePath: 'a/b/c/d/photo.jpg',
+        directorySegments: ['a', 'b', 'c', 'd'],
+      },
+    ];
+    const extractAddressFromFolderPathSegments = vi.fn().mockReturnValue(undefined);
+    const deps = createBaseDeps({
+      scanDirectory: vi.fn().mockResolvedValue(entries),
+      extractAddressFromFolderPathSegments,
+      getLocationConfig: vi.fn().mockReturnValue({
+        ...DEFAULT_UPLOAD_LOCATION_CONFIG,
+        maxDirectorySegmentsForHint: 2,
+      }),
+    });
+
+    const dirHandle = { name: 'Mixed Upload' } as FileSystemDirectoryHandle;
+    await submitUploadManagerFolder(dirHandle, undefined, deps);
+
+    expect(extractAddressFromFolderPathSegments).toHaveBeenCalledWith(
+      ['c', 'd'],
+      'leaf-to-root',
+      true,
+    );
+  });
+});
+
 function createMixedStructureDeps(): UploadManagerSubmitDeps {
   const viennaFile = new File(['a'], 'v1.jpg', { type: 'image/jpeg' });
   const berlinFile = new File(['b'], 'b1.jpg', { type: 'image/jpeg' });
@@ -120,11 +175,17 @@ function createMixedStructureDeps(): UploadManagerSubmitDeps {
   return createBaseDeps({
     scanDirectory: vi.fn().mockResolvedValue(entries),
     extractAddressFromFolderName: vi.fn().mockReturnValue('Roothint 1, Wien'),
-    extractAddressFromFolderPathSegments: vi.fn((segments: readonly string[]) => {
-      const joined = segments.join('/');
-      if (joined.includes('Denisgasse 12')) return 'Denisgasse 12, Wien';
-      if (joined.includes('Arsenalstrasse 3')) return 'Arsenalstrasse 3, Berlin';
-      return undefined;
-    }),
+    extractAddressFromFolderPathSegments: vi.fn(
+      (
+        segments: readonly string[],
+        _traversalOrder: 'leaf-to-root' | 'root-to-leaf',
+        _requireHighConfidence: boolean,
+      ) => {
+        const joined = segments.join('/');
+        if (joined.includes('Denisgasse 12')) return 'Denisgasse 12, Wien';
+        if (joined.includes('Arsenalstrasse 3')) return 'Arsenalstrasse 3, Berlin';
+        return undefined;
+      },
+    ),
   });
 }

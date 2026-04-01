@@ -58,6 +58,24 @@ LocationPathParserService
 
 ## Data
 
+### Folder Hierarchy Resolution Contract
+
+Hierarchie-Aufbau fuer Ordnerstruktur als Adressquelle (`Wien/Hauptstrasse 5/...`):
+
+1. `FolderScanService` liefert pro Datei `directorySegments` (root → parent folder).
+2. Fuer die Kandidatenbildung werden Segmente leaf→root ausgewertet (dateinahe Segmente zuerst).
+3. Nur high-confidence Segmenttreffer duerfen als gueltiger Folder-Kandidat gelten.
+4. Falls kein Segmenttreffer vorliegt, darf der root folder hint als fallback genutzt werden.
+5. Dateiname bleibt immer priorisiert: file > folder > root fallback.
+
+Konfigurierbare Parameter (UploadLocationConfig):
+
+- `folderHierarchyTraversalOrder='leaf-to-root'`
+- `folderHintRequireHighConfidence=true`
+- `folderHintUseRootFallback=true`
+- `filenameAlwaysOverridesFolder=true`
+- `maxDirectorySegmentsForHint=32`
+
 ### Data Flow (Mermaid — Parsing Process)
 
 ```mermaid
@@ -176,6 +194,10 @@ flowchart TD
 - **Address Disambiguation Strategy**: Selects ranking mode (`cluster-majority`, `distance-weighted`, `bayesian-context`) for ambiguous street+house matches.
 - **Address Auto-Assign Threshold**: Probability threshold (default `0.95`) above which the top-ranked city is selected automatically.
 - **Address Review Lower Bound**: Probability lower bound (default `0.70`) below which an issue is emitted instead of soft review.
+- **Folder Hierarchy Traversal Order**: Traversal direction for `directorySegments`; default `leaf-to-root` so nearest folder wins.
+- **Folder Hint Confidence Gate**: Requires high-confidence folder segment parsing before accepting a folder candidate (default `true`).
+- **Folder Root Fallback**: Allows root folder hint only when no specific segment candidate exists (default `true`).
+- **Filename Override Rule**: Keeps filename/title as strongest textual source over any folder-derived candidate (default `true`).
 
 ## File Map
 

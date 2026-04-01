@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { LocationPathParserService } from './location-path-parser.service';
+import { UploadLocationConfigService } from './upload/upload-location-config.service';
 
 /** Camera-generated filename prefixes that carry no address information. */
 const CAMERA_PREFIXES = /^(IMG|DSC|DCIM|P|PXL|MVIMG|PANO|VID|MOV|Screenshot)[\s_-]/i;
@@ -56,6 +57,7 @@ export interface ParsedAddress {
 export class FilenameParserService {
   constructor(
     private readonly locationPathParser: LocationPathParserService = new LocationPathParserService(),
+    private readonly locationConfig: UploadLocationConfigService = new UploadLocationConfigService(),
   ) {}
 
   /**
@@ -83,7 +85,7 @@ export class FilenameParserService {
 
     const withoutTrailingArtifacts = normalised
       // Remove trailing camera-like counters, e.g. "_0327", "-0001".
-      .replace(/[\s,]+\d{3,6}$/g, '')
+      .replace(this.trailingArtifactPattern(), '')
       .trim();
 
     const cleaned = withoutTrailingArtifacts.replace(/\s+/g, ' ').trim();
@@ -147,11 +149,30 @@ export class FilenameParserService {
     // - single-word street names must be long enough
     // - multi-word names are accepted with normal token length
     if (streetWords.length === 1) {
-      if (streetWords[0].length < 8 && cityPart.length < 3) return undefined;
+      if (
+        streetWords[0].length < this.locationConfig.getConfig().filenameSingleWordMinLength &&
+        cityPart.length < this.locationConfig.getConfig().filenameSingleWordCityMinLength
+      ) {
+        return undefined;
+      }
     } else if (streetWords.some((word) => word.length < 3)) {
-      return undefined;
+      if (
+        streetWords.some(
+          (word) => word.length < this.locationConfig.getConfig().filenameMultiWordTokenMinLength,
+        )
+      ) {
+        return undefined;
+      }
     }
 
     return cleaned;
+  }
+
+  private trailingArtifactPattern(): RegExp {
+    const config = this.locationConfig.getConfig();
+    return new RegExp(
+      `[\\s,]+\\d{${config.filenameTrailingArtifactMinDigits},${config.filenameTrailingArtifactMaxDigits}}$`,
+      'g',
+    );
   }
 }

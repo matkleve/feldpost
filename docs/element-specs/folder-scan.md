@@ -21,18 +21,20 @@ This is infrastructure without UI. The scanner receives a `FileSystemDirectoryHa
 
 ## Actions & Interactions
 
-| #   | Trigger                                   | System Response                                                 | Notes                         |
-| --- | ----------------------------------------- | --------------------------------------------------------------- | ----------------------------- |
-| 1   | User selects folder via File System API   | Scanner initializes and marks batch status as `scanning`        | Start of folder import flow   |
-| 2   | Scanner recursively discovers files       | Emits `scanProgress$` with running count of discovered files    | Real-time UI feedback         |
-| 3   | Folder name contains parseable address    | Extracts folder address and stores as `batch.folderAddressHint` | Default for all jobs in batch |
-| 4   | Individual file name contains address     | Parsing is delegated to `FilenameParserService`                 | Per-file extraction           |
-| 5   | File-level address extracted successfully | File address overrides folder hint for that specific job        | File > Folder precedence      |
-| 6   | File has no address-like filename         | Job inherits folder-address hint if present                     | Normal inheritance            |
-| 7   | Folder contains subdirectories            | Recursively scans all levels; suppresses directory-only entries | Depth-unlimited recursion     |
-| 8   | Scan discovers zero files                 | Emits `scanProgress$` with 0 count; allows empty batch creation | Edge case handled gracefully  |
-| 9   | Scan completes                            | Updates batch status to `uploading`; returns array of UploadJob | Ready for pipeline            |
-| 10  | User cancels scan mid-process             | Halts recursion and doesn't queue pending jobs                  | Abort signal respected        |
+| #   | Trigger                                   | System Response                                                               | Notes                                      |
+| --- | ----------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------ |
+| 1   | User selects folder via File System API   | Scanner initializes and marks batch status as `scanning`                      | Start of folder import flow                |
+| 2   | Scanner recursively discovers files       | Emits `scanProgress$` with running count of discovered files                  | Real-time UI feedback                      |
+| 3   | Folder name contains parseable address    | Extracts folder address and stores as `batch.folderAddressHint`               | Default for all jobs in batch              |
+| 3a  | Scanner records nested folder structure   | Persists `directorySegments` per file (root→parent) for later hint resolution | Enables per-file hierarchy candidate build |
+| 4   | Individual file name contains address     | Parsing is delegated to `FilenameParserService`                               | Per-file extraction                        |
+| 5   | File-level address extracted successfully | File address overrides folder hint for that specific job                      | File > Folder precedence                   |
+| 5a  | Multiple folder levels contain addresses  | Uses nearest matching segment (leaf→root); root hint only fallback            | Segment proximity wins inside folder layer |
+| 6   | File has no address-like filename         | Job inherits folder-address hint if present                                   | Normal inheritance                         |
+| 7   | Folder contains subdirectories            | Recursively scans all levels; suppresses directory-only entries               | Depth-unlimited recursion                  |
+| 8   | Scan discovers zero files                 | Emits `scanProgress$` with 0 count; allows empty batch creation               | Edge case handled gracefully               |
+| 9   | Scan completes                            | Updates batch status to `uploading`; returns array of UploadJob               | Ready for pipeline                         |
+| 10  | User cancels scan mid-process             | Halts recursion and doesn't queue pending jobs                                | Abort signal respected                     |
 
 ## Component Hierarchy
 
@@ -72,7 +74,8 @@ flowchart TD
   G --> F
   H --> I["Extract folder-level address from folderName"]
   I --> J["Store as batch.folderAddressHint"]
-  J --> K["Call FilenameParserService.parseFilename(fileName, relativePath)"]
+  J --> J1["Persist directorySegments per file for hierarchy resolution"]
+  J1 --> K["Call FilenameParserService.parseFilename(fileName, relativePath)"]
   K --> L["Get FilenameParseResult with address + date"]
   L --> M{"File-level address extracted?"}
   M -->|Yes| N["Use file address as titleAddressSource='file'"]
@@ -88,17 +91,18 @@ flowchart TD
 
 ### Data Structure
 
-| Field / Artifact        | Source                                  | Type                        | Notes                                  |
-| ----------------------- | --------------------------------------- | --------------------------- | -------------------------------------- |
-| Input dirHandle         | User file picker                        | `FileSystemDirectoryHandle` | Requires permissions granted           |
-| Folder root path        | dirHandle.name                          | `string`                    | Top-level folder name                  |
-| Folder address hint     | `LocationPathParserService` on root     | `string \| null`            | Root folder may contain city/street    |
-| Discovered files        | Recursive directory traversal           | `Set<FileSystemFileHandle>` | All files at all depths                |
-| Relative file path      | Path from root to file                  | `string`                    | E.g., "Subfolder/Image.jpg"            |
-| Scan progress count     | Incremented per file discovered         | `number`                    | Emitted via `scanProgress$`            |
-| Per-file address hint   | `FilenameParserService.parseFilename()` | `AddressContext \| null`    | Filename-extracted or null             |
-| Address source tracking | 'file' \| 'folder' \| null              | `string \| null`            | Indicates which level provided address |
-| Batch status transition | `'scanning'` → `'uploading'`            | `string`                    | Lifecycle marker                       |
+| Field / Artifact        | Source                                  | Type                        | Notes                                                  |
+| ----------------------- | --------------------------------------- | --------------------------- | ------------------------------------------------------ |
+| Input dirHandle         | User file picker                        | `FileSystemDirectoryHandle` | Requires permissions granted                           |
+| Folder root path        | dirHandle.name                          | `string`                    | Top-level folder name                                  |
+| Folder address hint     | `LocationPathParserService` on root     | `string \| null`            | Root folder may contain city/street                    |
+| Discovered files        | Recursive directory traversal           | `Set<FileSystemFileHandle>` | All files at all depths                                |
+| Relative file path      | Path from root to file                  | `string`                    | E.g., "Subfolder/Image.jpg"                            |
+| Directory segments      | Recursive scan traversal                | `string[]`                  | Ordered root→parent, used for leaf→root hint selection |
+| Scan progress count     | Incremented per file discovered         | `number`                    | Emitted via `scanProgress$`                            |
+| Per-file address hint   | `FilenameParserService.parseFilename()` | `AddressContext \| null`    | Filename-extracted or null                             |
+| Address source tracking | 'file' \| 'folder' \| null              | `string \| null`            | Indicates which level provided address                 |
+| Batch status transition | `'scanning'` → `'uploading'`            | `string`                    | Lifecycle marker                                       |
 
 ### Output Format
 
