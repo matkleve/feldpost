@@ -19,10 +19,11 @@ applyTo: "**/*.service.ts"
 
 ## Storage
 
-- Private `images/` bucket
+- Private `media/` bucket
 - Paths are relative: `{org_id}/{user_id}/{uuid}.jpg`
 - Use signed URLs at runtime — never store or serve absolute URLs
 - `UploadService` handles file upload orchestration
+  ta
 
 ## References
 

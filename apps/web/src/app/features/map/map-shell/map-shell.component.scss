@@ -258,6 +258,14 @@
 
   &__header {
     display: block;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .dd-items {
+    overflow-y: auto;
+    max-height: min(20rem, calc(100vh - 9rem));
   }
 }
 

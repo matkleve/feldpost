@@ -31,7 +31,7 @@ export class MapWorkspaceContextResolverService {
     }
 
     return {
-      contextType: payload.count > 1 ? 'cluster_marker' : 'single_marker',
+      contextType: payload.count > 1 ? 'map_cluster' : 'map_marker',
       markerKey: payload.markerKey,
       count: payload.count,
       primaryMediaId: payload.mediaId ?? null,
@@ -40,6 +40,7 @@ export class MapWorkspaceContextResolverService {
         lat: payload.lat,
         lng: payload.lng,
       },
+      isMultiSelection: payload.isMultiSelection ?? false,
       sourceCells: payload.sourceCells,
     };
   }

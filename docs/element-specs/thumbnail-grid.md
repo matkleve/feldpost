@@ -18,13 +18,43 @@ Grid of 128×128px thumbnail cards, auto-filling the available width (typically 
 
 ## Actions
 
-| #   | User Action                    | System Response                                                                                                                       | Triggers                    |
-| --- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| 1   | Scrolls the grid               | More thumbnails load via virtual scrolling                                                                                            | Viewport update             |
-| 2   | Clicks a thumbnail             | Opens Image Detail View (replaces grid)                                                                                               | `detailImageId` set         |
-| 3   | Changes sort order             | Grid reorders (Date↓, Date↑, Distance, Name)                                                                                          | `sortOrder` changes         |
-| 4   | Hovers a thumbnail             | Reveals Thumbnail Card actions (checkbox, add to group, ⋯)                                                                            | Quiet Actions               |
-| 5   | Selects one or more thumbnails | Shows Workspace Export Bar with bulk actions for the selected set (`Add to project`, `Change address`, `Delete`, plus export actions) | `selectedMediaIds.size > 0` |
+| #   | User Action                    | System Response                                                                                                                                          | Triggers                    |
+| --- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| 1   | Scrolls the grid               | More thumbnails load via virtual scrolling                                                                                                               | Viewport update             |
+| 2   | Clicks a thumbnail             | Opens Image Detail View (replaces grid)                                                                                                                  | `detailImageId` set         |
+| 3   | Changes sort order             | Grid reorders (Date↓, Date↑, Distance, Name)                                                                                                             | `sortOrder` changes         |
+| 4   | Hovers a thumbnail             | Reveals Thumbnail Card actions (checkbox, add to group, ⋯)                                                                                               | Quiet Actions               |
+| 5   | Selects one or more thumbnails | Shows Workspace Export Bar with bulk actions for the selected set (`Assign project`, `Change address`, `Delete`, plus export actions including download) | `selectedMediaIds.size > 0` |
+
+## Context Menu Contract (ws_grid_thumbnail)
+
+The thumbnail card context menu (desktop right-click, mobile long-press) MUST resolve to context ID `ws_grid_thumbnail` from the canonical Action-Context-Matrix.
+
+### Menu Scope
+
+- Target is the pressed card's media item (`targetCount = 1` by default).
+- If the pressed card is part of an active multi-selection, the menu MAY resolve to the full selected set (`targetCount > 1`) when the selection policy is enabled.
+- Action visibility and enabled state are resolved by the centralized action engine using `ws_grid_thumbnail` plus guard metadata.
+
+### Required Action Set
+
+The menu surface MUST be sourced from the matrix contract for `ws_grid_thumbnail`, including:
+
+- Primary: `open_in_media`, `zoom_house`, `zoom_street`, `copy_address`, `copy_gps`, `open_google_maps`, `assign_to_project`, `change_location_map`, `change_location_address`, `remove_from_project`, `delete_media`
+- Secondary/export: `download`, `share_link`, `copy_link`, `native_share`
+
+### Guard Semantics
+
+- `locationKnown` guards: location-dependent actions are hidden or disabled when no deterministic location exists.
+- `targetCount` guards: bulk-sensitive actions remain available only when policy constraints for count are met.
+- `deviceSupportsNativeShare` guard: `native_share` is shown only on supported devices.
+- `afterUpload` guards are not applicable in `ws_grid_thumbnail`; this context only resolves persisted media items.
+
+### Interaction Rules
+
+- Desktop: secondary click opens the menu on the thumbnail card anchor.
+- Mobile: long-press opens the same menu contract.
+- Executing an action delegates to the shared action router; thumbnail-grid must not implement action-specific business logic inline.
 
 ## Component Hierarchy
 
@@ -136,5 +166,5 @@ sequenceDiagram
 - [ ] Sorting controls change order immediately
 - [ ] Click on card opens Image Detail View
 - [ ] Hover reveals card actions (Quiet Actions pattern)
-- [ ] Selecting thumbnails opens Workspace Export Bar with `Add to project`, `Change address`, and `Delete` actions for the selected set
+- [ ] Selecting thumbnails opens Workspace Export Bar with `Assign project`, `Change address`, `Delete`, and download actions for the selected set
 - [ ] Empty state with guidance text and "Go to map" button

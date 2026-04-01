@@ -9,6 +9,7 @@
 A unified interaction system for secondary-click (right-click / long-press) behavior on the map. It defines which menu opens for map, marker, and active-radius targets and prevents conflicting behavior.
 
 This system is the source of truth for precedence, gesture arbitration, and option sets across all three context menus.
+Its labels stay surface-specific, but the canonical action IDs still map to `map_single`, `map_cluster`, and `map_point` in the action-context-matrix.
 
 It also follows the shared action-section contract from the upload panel: `primary` actions come first, `secondary` actions follow, and any destructive action is always last.
 
@@ -49,17 +50,18 @@ Map menu focuses creation/navigation utilities. Marker menu focuses item-level o
 
 ### Marker Context Menu Options
 
-| Option                           | Availability     | Effect                      |
-| -------------------------------- | ---------------- | --------------------------- |
-| `Details oeffnen`                | Single marker    | Open detail view            |
-| `Auswahl oeffnen`                | Cluster marker   | Load cluster selection      |
-| `Hierhin zoomen (Hausnaehe)`     | Single + cluster | `setView(markerLatLng, 19)` |
-| `Hierhin zoomen (Strassennaehe)` | Single + cluster | `setView(markerLatLng, 17)` |
-| `Projekt hinzufuegen...`         | Single + cluster | Open assign-to-project flow |
-| `Adresse kopieren`               | Single + cluster | Reverse geocode + copy      |
-| `GPS kopieren`                   | Single + cluster | Copy `lat,lng`              |
-| `In Google Maps oeffnen`         | Single + cluster | Open external map tab       |
-| `Foto loeschen`                  | Single marker    | Confirm + delete            |
+| Option                           | Availability     | Effect                          |
+| -------------------------------- | ---------------- | ------------------------------- |
+| `Details oeffnen`                | Single marker    | Open detail view                |
+| `Auswahl oeffnen`                | Cluster marker   | Load cluster selection          |
+| `Hierhin zoomen (Hausnaehe)`     | Single + cluster | `setView(markerLatLng, 19)`     |
+| `Hierhin zoomen (Strassennaehe)` | Single + cluster | `setView(markerLatLng, 17)`     |
+| `Assign project...`              | Single + cluster | Open assign-to-project flow     |
+| `Adresse kopieren`               | Single + cluster | Reverse geocode + copy          |
+| `GPS kopieren`                   | Single + cluster | Copy `lat,lng`                  |
+| `In Google Maps oeffnen`         | Single + cluster | Open external map tab           |
+| `Download`                       | Single + cluster | Download media (cluster as ZIP) |
+| `Foto loeschen`                  | Single marker    | Confirm + delete                |
 
 ### Radius Context Menu Options
 

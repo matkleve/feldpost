@@ -15,19 +15,33 @@ import {
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { FilterService } from '../../../core/filter.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
+import { ToastService } from '../../../core/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
 import {
   ThumbnailCardComponent,
+  ThumbnailCardContextMenuEvent,
   ThumbnailCardHoverEvent,
   ThumbnailCardInteraction,
 } from './thumbnail-card/thumbnail-card.component';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
 
 /** Flat renderable item — either a group header or a grid of images. */
 type RenderItem =
   | { type: 'header'; heading: string; imageCount: number; level: number }
   | { type: 'grid'; images: WorkspaceImage[] };
+
+type ThumbnailContextActionId = 'remove_from_project' | 'delete_media';
+
+export const WS_GRID_THUMBNAIL_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
+
+export const WS_GRID_THUMBNAIL_ACTION_IDS: ReadonlyArray<ThumbnailContextActionId> = [
+  'remove_from_project',
+  'delete_media',
+];
 
 @Component({
   selector: 'app-thumbnail-grid',
@@ -111,6 +125,7 @@ type RenderItem =
                     (selectionToggled)="onSelectionToggled($event)"
                     (hoverStarted)="hoverStarted.emit($event)"
                     (hoverEnded)="hoverEnded.emit($event)"
+                    (contextMenuRequested)="onThumbnailContextMenuRequested($event)"
                   />
                 }
               </div>
@@ -133,19 +148,55 @@ type RenderItem =
               (selectionToggled)="onSelectionToggled($event)"
               (hoverStarted)="hoverStarted.emit($event)"
               (hoverEnded)="hoverEnded.emit($event)"
+              (contextMenuRequested)="onThumbnailContextMenuRequested($event)"
             />
           }
         </div>
       }
+
+      @if (thumbnailContextMenuOpen() && thumbnailContextMenuPosition(); as menuPos) {
+        <app-dropdown-shell
+          class="map-context-menu"
+          [top]="menuPos.y"
+          [left]="menuPos.x"
+          [minWidth]="224"
+          [panelClass]="'map-context-menu option-menu-surface'"
+          (closeRequested)="closeThumbnailContextMenu()"
+        >
+          <div
+            class="dd-items"
+            role="menu"
+            tabindex="-1"
+            [attr.aria-label]="t('workspace.thumbnailGrid.menu.aria', 'Thumbnail context menu')"
+          >
+            @for (action of thumbnailContextActions(); track action.id) {
+              <button
+                class="dd-item dd-item--danger"
+                type="button"
+                role="menuitem"
+                [disabled]="action.disabled"
+                (click)="onThumbnailContextActionSelected(action.id)"
+              >
+                <span class="material-icons dd-item__icon" aria-hidden="true">{{
+                  action.icon
+                }}</span>
+                <span class="dd-item__label">{{ action.label }}</span>
+              </button>
+            }
+          </div>
+        </app-dropdown-shell>
+      }
     </div>
   `,
   styleUrl: './thumbnail-grid.component.scss',
-  imports: [ThumbnailCardComponent, GroupHeaderComponent],
+  imports: [ThumbnailCardComponent, GroupHeaderComponent, DropdownShellComponent],
 })
 export class ThumbnailGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
+  private readonly supabaseService = inject(SupabaseService);
+  private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
@@ -172,6 +223,9 @@ export class ThumbnailGridComponent implements OnDestroy {
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
   readonly maxColumns = signal(1);
+  readonly thumbnailContextMenuOpen = signal(false);
+  readonly thumbnailContextMenuPosition = signal<{ x: number; y: number } | null>(null);
+  readonly thumbnailContextMenuMediaId = signal<string | null>(null);
 
   readonly sections = computed(() => this.viewService.groupedSections());
 
@@ -211,6 +265,25 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   readonly skeletonCards = Array.from({ length: 12 }, (_, i) => i);
   readonly languageTick = computed(() => this.currentLanguage());
+  readonly thumbnailContextActions = computed<
+    ReadonlyArray<{
+      id: ThumbnailContextActionId;
+      icon: string;
+      label: string;
+      disabled: boolean;
+    }>
+  >(() => {
+    const selectedCount = this.selectionService.selectedCount();
+    return WS_GRID_THUMBNAIL_ACTION_IDS.map((id) => ({
+      id,
+      icon: id === 'remove_from_project' ? 'remove_circle_outline' : 'delete',
+      label:
+        id === 'remove_from_project'
+          ? this.t('upload.item.menu.destructive.removeFromProject', 'Remove from project')
+          : this.t('workspace.imageDetail.action.delete', 'Delete media'),
+      disabled: selectedCount <= 0,
+    }));
+  });
 
   constructor() {
     afterNextRender(() => {
@@ -290,6 +363,36 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.selectionService.toggle(event.imageId, { additive: event.additive });
   }
 
+  onThumbnailContextMenuRequested(event: ThumbnailCardContextMenuEvent): void {
+    const selected = this.selectionService.selectedMediaIds();
+    if (!selected.has(event.mediaId)) {
+      this.selectionService.clearSelection();
+      this.selectionService.toggle(event.mediaId, { additive: true });
+    }
+
+    this.thumbnailContextMenuMediaId.set(event.mediaId);
+    this.thumbnailContextMenuPosition.set({
+      x: Math.max(8, Math.min(event.clientX, window.innerWidth - 232)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - 160)),
+    });
+    this.thumbnailContextMenuOpen.set(true);
+  }
+
+  closeThumbnailContextMenu(): void {
+    this.thumbnailContextMenuOpen.set(false);
+  }
+
+  async onThumbnailContextActionSelected(actionId: ThumbnailContextActionId): Promise<void> {
+    if (actionId === 'remove_from_project') {
+      await this.removeSelectedFromProject();
+      this.closeThumbnailContextMenu();
+      return;
+    }
+
+    await this.deleteSelectedMedia();
+    this.closeThumbnailContextMenu();
+  }
+
   isLinkedHovered(mediaId: string): boolean {
     return this.linkedHoveredMediaIds().has(mediaId);
   }
@@ -337,5 +440,103 @@ export class ThumbnailGridComponent implements OnDestroy {
     const cardWidth = this.thumbnailCardSizePx();
     const columns = Math.max(1, Math.floor((measured + gap) / (cardWidth + gap)));
     this.maxColumns.set(columns);
+  }
+
+  private async resolveSelectedMediaItemIds(): Promise<string[]> {
+    const selectedIds = Array.from(this.selectionService.selectedMediaIds());
+    if (selectedIds.length === 0) {
+      return [];
+    }
+
+    const idList = selectedIds.join(',');
+    const { data, error } = await this.supabaseService.client
+      .from('media_items')
+      .select('id,source_image_id')
+      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return Array.from(
+      new Set(
+        data
+          .map((row) => (typeof row.id === 'string' ? row.id : null))
+          .filter((id): id is string => !!id),
+      ),
+    );
+  }
+
+  private async removeSelectedFromProject(): Promise<void> {
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    const { error } = await this.supabaseService.client
+      .from('media_projects')
+      .delete()
+      .in('media_item_id', selectedMediaItemIds);
+
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error' });
+      return;
+    }
+
+    const selectedImageIds = this.selectionService.selectedMediaIds();
+    this.viewService.rawImages.update((images) =>
+      images.map((image) =>
+        selectedImageIds.has(image.id)
+          ? {
+              ...image,
+              projectId: null,
+              projectName: null,
+            }
+          : image,
+      ),
+    );
+
+    this.toastService.show({
+      message: this.t(
+        'upload.item.menu.project.remove.success',
+        'Removed from project successfully.',
+      ),
+      type: 'success',
+    });
+  }
+
+  private async deleteSelectedMedia(): Promise<void> {
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    const selectedIds = this.selectionService.selectedMediaIds();
+    const { error } = await this.supabaseService.client
+      .from('media_items')
+      .delete()
+      .in('id', selectedMediaItemIds);
+
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error' });
+      return;
+    }
+
+    this.viewService.rawImages.update((images) =>
+      images.filter((image) => !selectedIds.has(image.id)),
+    );
+    this.selectionService.clearSelection();
+    this.toastService.show({
+      message: this.t('workspace.export.success.deleted', 'Selected media deleted.'),
+      type: 'success',
+    });
   }
 }

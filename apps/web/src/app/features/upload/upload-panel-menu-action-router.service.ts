@@ -16,10 +16,11 @@
 import { Injectable, inject } from '@angular/core';
 import { ToastService } from '../../core/toast.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
-import type { UploadItemMenuAction } from './upload-panel-item.component';
+import type { UploadItemActionContext, UploadItemMenuAction } from './upload-panel-item.component';
 import { getIssueKind } from './upload-phase.helpers';
 import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
 import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
+import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
 
 export interface UploadPanelMenuActionRouterOptions {
   placementRequested: (jobId: string) => void;
@@ -133,7 +134,14 @@ export class UploadPanelMenuActionRouterService {
     void this.fileActions.requestLocationPickOnMap(job);
   }
 
-  async handleMenuAction(job: UploadJob, action: UploadItemMenuAction): Promise<void> {
+  async handleMenuAction(
+    job: UploadJob,
+    action: UploadItemMenuAction,
+    context?: UploadItemActionContext,
+  ): Promise<void> {
+    if (context && context.contextType !== ACTION_CONTEXT_IDS.uploadItem) {
+      return;
+    }
     const handler = this.menuHandlers[action];
     await handler(job);
   }

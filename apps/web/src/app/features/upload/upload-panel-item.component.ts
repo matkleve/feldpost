@@ -17,6 +17,7 @@ import { MediaOrchestratorService } from '../../core/media/media-orchestrator.se
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
 import type { MediaRenderState, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
+import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
 
 const UPLOAD_ITEM_MENU_WIDTH = 224;
 const UPLOAD_ITEM_MENU_OFFSET_Y = 4;
@@ -40,6 +41,18 @@ export type UploadItemMenuAction =
   | 'remove_from_project'
   | 'delete_media'
   | 'dismiss';
+
+export interface UploadItemActionContext {
+  contextType: typeof ACTION_CONTEXT_IDS.uploadItem;
+  lane: 'uploading' | 'uploaded' | 'issues';
+  issueKind: ReturnType<typeof getIssueKind>;
+}
+
+export interface UploadItemActionEvent {
+  job: UploadJob;
+  action: UploadItemMenuAction;
+  context: UploadItemActionContext;
+}
 
 /**
  * UploadPanelItemComponent — per-file row in upload panel.
@@ -98,7 +111,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly dismissFile = output<string>();
   readonly rowMainClick = output<UploadJob>();
   readonly rowMainKeydown = output<{ job: UploadJob; event: KeyboardEvent }>();
-  readonly menuActionSelected = output<{ job: UploadJob; action: UploadItemMenuAction }>();
+  readonly menuActionSelected = output<UploadItemActionEvent>();
   readonly selectionChanged = output<{ jobId: string; selected: boolean }>();
 
   readonly menuOpen = signal(false);
@@ -306,13 +319,29 @@ export class UploadPanelItemComponent implements OnDestroy {
 
   onMenuAction(action: UploadItemMenuAction): void {
     this.menuOpen.set(false);
-    this.menuActionSelected.emit({ job: this.job(), action });
+    this.menuActionSelected.emit({
+      job: this.job(),
+      action,
+      context: {
+        contextType: ACTION_CONTEXT_IDS.uploadItem,
+        lane: getLaneForJob(this.job()),
+        issueKind: getIssueKind(this.job()),
+      },
+    });
   }
 
   onOpenExistingMediaShortcut(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    this.menuActionSelected.emit({ job: this.job(), action: 'open_existing_media' });
+    this.menuActionSelected.emit({
+      job: this.job(),
+      action: 'open_existing_media',
+      context: {
+        contextType: ACTION_CONTEXT_IDS.uploadItem,
+        lane: getLaneForJob(this.job()),
+        issueKind: getIssueKind(this.job()),
+      },
+    });
   }
 
   onRequestPlacement(event: MouseEvent): void {

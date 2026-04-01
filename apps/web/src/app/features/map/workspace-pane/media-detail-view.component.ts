@@ -66,6 +66,7 @@ import { ImageDetailPhotoEventsHelper } from './media-detail-photo-events.helper
 import { ImageDetailUploadHelper } from './media-detail-upload.helper';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
 import { ActionEngineService } from '../../action-system/action-engine.service';
+import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
 import type { ResolvedAction } from '../../action-system/action-types';
 import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from './workspace-detail-actions.registry';
 import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
@@ -282,7 +283,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     ReadonlyArray<ResolvedAction<WorkspaceSingleActionId>>
   >(() =>
     this.actionEngineService.resolveActions(WORKSPACE_SINGLE_ACTION_DEFINITIONS, {
-      contextType: 'workspace_single',
+      contextType: ACTION_CONTEXT_IDS.wsFooter,
       hasCoordinates: this.hasCoordinates(),
     }),
   );
@@ -603,6 +604,9 @@ export class MediaDetailViewComponent implements OnDestroy {
       case 'copy_gps':
         this.copyCoordinates();
         return;
+      case 'remove_from_project':
+        void this.removeFromAllProjects();
+        return;
       case 'delete_media':
         this.confirmDelete();
         return;
@@ -653,6 +657,31 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   onFileSelected(event: Event | File): void {
     this.uploadHelper.onFileSelected(event);
+  }
+
+  private async removeFromAllProjects(): Promise<void> {
+    const memberships = Array.from(this.selectedProjectIds());
+    if (memberships.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.imageDetail.toast.noProjectMembership', 'No project assigned.'),
+        type: 'info',
+      });
+      this.showContextMenu.set(false);
+      return;
+    }
+
+    for (const projectId of memberships) {
+      await this.projectMembershipHelper.toggleProjectMembership(projectId);
+    }
+
+    this.toastService.show({
+      message: this.t(
+        'upload.item.menu.project.remove.success',
+        'Removed from project successfully.',
+      ),
+      type: 'success',
+    });
+    this.showContextMenu.set(false);
   }
 
   private async handleImageReplaced(event: ImageReplacedEvent): Promise<void> {

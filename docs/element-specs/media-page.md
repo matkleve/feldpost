@@ -42,7 +42,7 @@ AppShell (top-level, persistent across routes)
 │   │   └── MediaGridComponent
 │   │       ├── GroupSectionHeader × N
 │   │       │   └── ThumbnailCard × N
-│   │       │       ├── image preview (photo/video thumb or doc icon)
+│   │       │       ├── media preview (photo/video thumb or doc icon)
 │   │       │       ├── Title + date overlay
 │   │       │       ├── Address chip (optional)
 │   │       │       └── Hover state (linked-hover to workspace)
@@ -84,7 +84,7 @@ AppShell (top-level, persistent across routes)
 | #   | User Action                                        | System Response                                                     | Notes                                 |
 | --- | -------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------- |
 | 1a  | Navigates to `/media`                              | MediaPageComponent loads, workspace pane shows "Selected Items" tab | Filtered to "All media" if no filters |
-| 1b  | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped images                 | localStorage or query params          |
+| 1b  | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                  | localStorage or query params          |
 | 2   | Uses Grouping operator (project/date/address)      | Grid reorganizes with section headers (if toolbar shown)            | Computed via `WorkspaceViewService`   |
 | 3   | Uses Sorting operator (newest/oldest/name)         | Grid re-sorts within groups                                         | Reactive recompute                    |
 | 4   | Uses Filter operator (project/date/tag/media-type) | Grid hides non-matching items                                       | Cascading filter logic                |
@@ -126,7 +126,7 @@ MediaPageComponent (new route component, flex 1)
 └── MediaGridComponent (new - flat structure using .ui-container/.ui-item equivalents)
     ├── GroupSectionHeader × N (if grouping active)
     │   └── ThumbnailCard × N (reused from workspace)
-    │       ├── Image/video/doc preview
+    │       ├── Media/video/doc preview
     │       ├── Title + date overlay
     │       ├── Address chip (optional)
     │       └── Hover state (linked-hover)
@@ -162,7 +162,7 @@ WorkspacePaneComponent (seitenübergreifend)
 ```mermaid
 flowchart LR
     A["Navigate /media"] --> B["MediaPageComponent"]
-    B --> C["Query: all images from DB"]
+    B --> C["Query: all media from DB"]
     C --> D["MediaGridComponent"]
     D --> E["Render grid with grouping"]
 
@@ -171,7 +171,7 @@ flowchart LR
     H -->|Selected Items| I["Show media grid"]
     H -->|Upload| J["Show UploadPanelComponent"]
     J --> K["Lane buckets by issue kind + lane semantics"]
-    K --> L["Uploaded actions: add to project, prioritize, open media, download"]
+    K --> L["Uploaded actions: assign project, prioritize, open media, download"]
 ```
 
 ---
@@ -185,7 +185,7 @@ flowchart LR
 | `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | How grid is organized into sections          |
 | `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | Grid sort order                              |
 | `activeFilters`    | `FilterSpec[]`                                      | `[]`       | Applied filter chips (projects, date ranges) |
-| `filteredImages`   | `Signal<Image[]>`                                   | `[]`       | Computed: images matching active filters     |
+| `filteredImages`   | `Signal<Image[]>`                                   | `[]`       | Computed: media matching active filters      |
 | `groupedAndSorted` | `Signal<ImageGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted        |
 | `hoveredImageId`   | `string \| null`                                    | `null`     | Current thumbnail under pointer              |
 | `detailImageId`    | `string \| null`                                    | `null`     | If set, detail modal is open                 |
@@ -326,7 +326,7 @@ sequenceDiagram
 
     Browser->>ReflectorRouter: Navigate to /media
     ReflectorRouter->>MediaPage: Route activated
-    MediaPage->>MediaGrid: Render (load images from DB)
+    MediaPage->>MediaGrid: Render (load media from DB)
     MediaGrid->>Pane: Workspace pane already mounted by AppShell
     Pane->>Pane: activeTab = 'selected-items'
     Upload-->>Pane: Subscribe to jobs() for Upload tab
@@ -348,14 +348,14 @@ sequenceDiagram
 
 - [ ] `/media` route accessible from main navigation
 - [ ] MediaPageComponent renders breadcrumb: "/" > "Media"
-- [ ] Page loads all media (images, videos, documents) from DB
+- [ ] Page loads all media (photos, videos, documents) from DB
 - [ ] Workspace pane opens by default, "Selected Items" tab active
 
 **Media Grid (MVP - Phase 1):**
 
 - [ ] MediaGridComponent displays thumbnails in responsive grid (2–4 columns)
 - [ ] ThumbnailCard component reused from workspace (same styling)
-- [ ] Each card shows image/video/doc preview + title + date overlay + address chip
+- [ ] Each card shows media/video/doc preview + title + date overlay + address chip
 - [ ] Clicking card opens detail view (modal overlay)
 - [ ] Closing detail returns to grid with state preserved
 - [ ] Hovering card shows optional linked-hover effect

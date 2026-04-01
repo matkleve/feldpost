@@ -1,6 +1,6 @@
 export type MapWorkspaceContextType =
-  | 'single_marker'
-  | 'cluster_marker'
+  | 'map_marker'
+  | 'map_cluster'
   | 'radius_selection'
   | 'workspace_single'
   | 'workspace_multi';
@@ -11,16 +11,18 @@ export interface MarkerContextPayload {
   lat: number;
   lng: number;
   mediaId?: string;
+  isMultiSelection?: boolean;
   sourceCells: Array<{ lat: number; lng: number }>;
 }
 
 export interface MarkerActionContext {
-  contextType: 'single_marker' | 'cluster_marker';
+  contextType: 'map_marker' | 'map_cluster';
   markerKey: string;
   count: number;
   primaryMediaId: string | null;
   mediaIds: string[];
   coords: { lat: number; lng: number };
+  isMultiSelection: boolean;
   sourceCells: Array<{ lat: number; lng: number }>;
 }
 

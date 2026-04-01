@@ -206,6 +206,7 @@ export class MapShellComponent implements OnDestroy {
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_MS = 2000;
   private static readonly CONTEXT_MENU_NATIVE_HANDSHAKE_PX = 24;
   private static readonly CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
+  private static readonly MARKER_CONTEXT_MENU_SUPPRESS_MS = 320;
   private static readonly QUICK_RADIUS_METERS = 250;
   private static readonly HOUSE_PROXIMITY_ZOOM = 19;
   private static readonly STREET_PROXIMITY_ZOOM = 17;
@@ -621,6 +622,7 @@ export class MapShellComponent implements OnDestroy {
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
   private nativeContextMenuBypassUntil = 0;
+  private markerContextMenuSuppressUntil = 0;
 
   /**
    * Bounds that were last fetched (including 10% buffer).
@@ -651,6 +653,13 @@ export class MapShellComponent implements OnDestroy {
   };
   private readonly mapContainerContextMenuHandler = (event: MouseEvent): void => {
     if (event.button !== 2) {
+      return;
+    }
+
+    if (this.isMarkerDomTarget(event)) {
+      // Keep native browser menu suppressed, but let marker listeners receive
+      // the event so marker context actions can open reliably.
+      event.preventDefault();
       return;
     }
 
@@ -1122,7 +1131,12 @@ export class MapShellComponent implements OnDestroy {
 
   get markerContextIsCluster(): boolean {
     const payload = this.markerContextMenuPayload();
-    return !!payload && payload.count > 1;
+    return !!payload && payload.count > 1 && !payload.isMultiSelection;
+  }
+
+  get markerContextIsMulti(): boolean {
+    const payload = this.markerContextMenuPayload();
+    return !!payload?.isMultiSelection;
   }
 
   async onMarkerMenuActionSelected(actionId: MarkerMenuActionId): Promise<void> {
@@ -2417,6 +2431,16 @@ export class MapShellComponent implements OnDestroy {
 
     event.originalEvent.preventDefault();
 
+    if (this.isMarkerDomTarget(event.originalEvent)) {
+      this.pendingSecondaryPress = null;
+      return;
+    }
+
+    if (Date.now() <= this.markerContextMenuSuppressUntil) {
+      this.pendingSecondaryPress = null;
+      return;
+    }
+
     // Short secondary click should open the context menu. Radius drawing already
     // clears pendingSecondaryPress during mousemove once drag threshold is crossed.
     if (!this.pendingSecondaryPress || this.radiusDrawActive) {
@@ -2430,6 +2454,16 @@ export class MapShellComponent implements OnDestroy {
 
   private handleMapContextMenu(event: L.LeafletMouseEvent): void {
     if (this.consumeNativeContextMenuBypass()) {
+      return;
+    }
+
+    if (this.isMarkerDomTarget(event.originalEvent)) {
+      this.pendingSecondaryPress = null;
+      return;
+    }
+
+    if (Date.now() <= this.markerContextMenuSuppressUntil) {
+      this.pendingSecondaryPress = null;
       return;
     }
 
@@ -2507,6 +2541,15 @@ export class MapShellComponent implements OnDestroy {
 
     this.nativeContextMenuBypassUntil = 0;
     return true;
+  }
+
+  private isMarkerDomTarget(event: MouseEvent): boolean {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return false;
+    }
+
+    return !!target.closest('.map-photo-marker, .leaflet-marker-icon');
   }
 
   private startRadiusSelectionDraw(startLatLng: L.LatLng, additive: boolean): void {
@@ -3321,6 +3364,8 @@ export class MapShellComponent implements OnDestroy {
         this.pendingSecondaryPress = null;
       },
       onOpen: (event: MouseEvent) => {
+        this.markerContextMenuSuppressUntil =
+          Date.now() + MapShellComponent.MARKER_CONTEXT_MENU_SUPPRESS_MS;
         this.openMarkerContextMenu(markerKey, event);
       },
     });
@@ -3813,14 +3858,44 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuOpen.set(false);
     this.radiusContextMenuOpen.set(false);
     this.markerContextMenuPosition.set(position);
-    this.markerContextMenuPayload.set({
-      markerKey,
-      count: state.count,
-      lat: state.lat,
-      lng: state.lng,
-      mediaId: state.mediaId,
-      sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
-    });
+    const selectedMarkerKeys = this.selectedMarkerKeys();
+    const isMultiSelection = selectedMarkerKeys.size > 1 && selectedMarkerKeys.has(markerKey);
+
+    if (isMultiSelection) {
+      const multiStates = Array.from(selectedMarkerKeys)
+        .map((key) => this.uploadedPhotoMarkers.get(key))
+        .filter((candidate): candidate is NonNullable<typeof candidate> => !!candidate);
+
+      const combinedSourceCells = Array.from(
+        new Map(
+          multiStates
+            .flatMap((marker) => marker.sourceCells ?? [{ lat: marker.lat, lng: marker.lng }])
+            .map((cell) => [this.toMarkerKey(cell.lat, cell.lng), cell]),
+        ).values(),
+      );
+
+      const combinedCount = multiStates.reduce((sum, marker) => sum + Math.max(1, marker.count), 0);
+
+      this.markerContextMenuPayload.set({
+        markerKey,
+        count: combinedCount,
+        lat: state.lat,
+        lng: state.lng,
+        isMultiSelection: true,
+        sourceCells: combinedSourceCells,
+      });
+    } else {
+      this.markerContextMenuPayload.set({
+        markerKey,
+        count: state.count,
+        lat: state.lat,
+        lng: state.lng,
+        mediaId: state.mediaId,
+        isMultiSelection: false,
+        sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
+      });
+    }
+
     this.markerContextMenuOpen.set(true);
     this.focusFirstOpenMapMenuItem();
     this.suppressMapClickUntil = Date.now() + MapShellComponent.RADIUS_CLICK_GUARD_MS;

@@ -34,11 +34,19 @@ export const WORKSPACE_SINGLE_ACTION_DEFINITIONS: ReadonlyArray<
     enabledWhen: (context) => context.hasCoordinates,
   },
   {
-    id: 'delete_media',
+    id: 'remove_from_project',
     section: 'destructive',
     priority: 0,
+    icon: 'remove_circle_outline',
+    fallbackLabel: 'Remove from project',
+    visibleWhen: () => true,
+  },
+  {
+    id: 'delete_media',
+    section: 'destructive',
+    priority: 1,
     icon: 'delete',
-    fallbackLabel: 'Delete image',
+    fallbackLabel: 'Delete media',
     visibleWhen: () => true,
   },
 ];

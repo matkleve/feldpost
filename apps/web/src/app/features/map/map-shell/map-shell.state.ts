@@ -23,6 +23,7 @@ export class MapShellState {
     lat: number;
     lng: number;
     mediaId?: string;
+    isMultiSelection?: boolean;
     sourceCells: Array<{ lat: number; lng: number }>;
   } | null>(null);
 

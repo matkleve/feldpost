@@ -193,7 +193,9 @@
         (closeRequested)="onMapMenuCloseRequested()"
       >
         <div class="map-context-menu__header option-menu-header">
-          @if (markerContextIsSingle) {
+          @if (markerContextIsMulti) {
+            {{ markerMenu.count }} Medien ausgewaehlt
+          } @else if (markerContextIsSingle) {
             Foto Marker
           } @else {
             {{ markerMenu.count }} Fotos an dieser Stelle
@@ -218,6 +220,10 @@
               <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
               <span class="dd-item__label">{{ action.label }}</span>
             </button>
+          }
+
+          @if (markerPrimaryActions().length > 0 && markerSecondaryActions().length > 0) {
+            <div class="dd-divider" aria-hidden="true"></div>
           }
 
           @for (action of markerSecondaryActions(); track action.id) {

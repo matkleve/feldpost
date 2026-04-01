@@ -1,201 +1,234 @@
 # Action Context Matrix
 
-> **Related specs:** [upload-panel](upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-export-bar](workspace-export-bar.md), [dropdown-system](dropdown-system.md)
+> **Related specs:** [upload-panel](upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-export-bar](workspace-export-bar.md), [media-detail-actions](media-detail-actions.md), [upload-manager-pipeline](upload-manager-pipeline.md)
 
 ## What It Is
 
-The Action Context Matrix is the canonical contract for which actions are available in which UI context.
-It prevents duplicate or conflicting action definitions across Upload, Map, and Workspace surfaces.
+The Action Context Matrix is the canonical cross-surface contract for which actions exist in which UI context.
+It prevents drift between map, media detail, workspace, and upload menus by giving every action a single availability table.
 
 ## What It Looks Like
 
-The matrix is represented as context-first action tables with deterministic section ordering: `primary`, `secondary`, `destructive`.
-Each action row includes portability guidance from upload semantics to marker, cluster, and multi-selection semantics.
-Destructive actions are always grouped last and require explicit target-count confirmation for multi-target contexts.
-The visual menu shell stays unchanged (`dd-items`, `dd-item`, `dd-divider`), while visibility and ordering are driven by this contract.
+The matrix is read column-first by context ID. Each row is one action, and each cell records whether the action is available, guarded, or blocked in that context.
+Context-specific guards are written directly in the table so the contract stays testable: upload-only gates, count guards, batch policies, target-resolution rules, and device capability checks are visible in one place.
+The visual shell is still the shared dropdown/action-sheet shell, but section order is driven by this matrix rather than local menu code.
 
 ## Where It Lives
 
 - **Docs location**: `docs/element-specs/action-context-matrix.md`
-- **Used by**: Upload row menus, map context menus, marker context menus, workspace selection actions
-- **Trigger**: Any feature work that adds, removes, or reorders actions
+- **Used by**: map menus, media detail menus, workspace thumbnail actions, workspace footer actions, upload row menus, and `/media` page actions
+- **Trigger**: Any feature work that adds, removes, renames, or reorders actions
 
 ## Actions & Interactions
 
-| #   | User Action                                       | System Response                                                       | Triggers                   |
-| --- | ------------------------------------------------- | --------------------------------------------------------------------- | -------------------------- |
-| 1   | Adds or changes an action in Upload/Map/Workspace | Action is evaluated against this matrix before implementation         | Spec update workflow       |
-| 2   | Ports an upload action to map/workspace           | Action is marked `Keep`, `Add`, `Adapt`, or `Do not port` per context | Portability matrix         |
-| 3   | Adds destructive action for cluster/multi         | Requires explicit affected-count confirmation                         | Destructive guard contract |
-| 4   | Adds utility action (`copy_*`, external open)     | Must define deterministic target policy for cluster/multi             | Context resolver contract  |
+| #   | User Action                            | System Response                                                                       | Trigger              |
+| --- | -------------------------------------- | ------------------------------------------------------------------------------------- | -------------------- |
+| 1   | Adds a new action to any surfaced menu | The action must be placed into the matrix before implementation work starts           | Spec update workflow |
+| 2   | Moves an action between contexts       | The matrix decides whether the action is kept, adapted, or blocked in the new context | Context migration    |
+| 3   | Introduces a guarded batch action      | The matrix records the batch policy, count guard, or target-resolution rule           | Safety contract      |
+| 4   | Adds an upload issue prompt action     | The matrix keeps it upload-internal unless a consumer spec explicitly reuses it       | Upload issue routing |
 
-### Canonical Context Types
+### Canonical Context Definitions
 
-| Context ID         | Description                                            | Typical surface                  |
-| ------------------ | ------------------------------------------------------ | -------------------------------- |
-| `single_marker`    | One persisted media target                             | Marker menu                      |
-| `cluster_marker`   | Multiple persisted media targets from a marker cluster | Marker menu                      |
-| `map_point`        | Empty-map point target from secondary-click            | Map context menu                 |
-| `radius_selection` | Current in-radius set target                           | Radius context menu              |
-| `workspace_single` | One selected media target in workspace detail          | Workspace detail actions         |
-| `workspace_multi`  | Multiple selected media targets                        | Workspace export/context actions |
-| `upload_row`       | Upload job/media row scoped by lane and issue kind     | Upload panel menu                |
+| Context ID          | Description                                                 |
+| ------------------- | ----------------------------------------------------------- |
+| `map_single`        | Right-click / long-press on a single marker                 |
+| `map_cluster`       | Right-click / long-press on a marker cluster                |
+| `map_point`         | Right-click on empty map surface                            |
+| `media_detail`      | 3-dot menu in the open Media Detail View                    |
+| `ws_grid_thumbnail` | Tap / right-click on a thumbnail in the Workspace Pane grid |
+| `ws_footer_single`  | Footer toolbar for a single selection in Workspace          |
+| `ws_footer_multi`   | Footer toolbar for a multi-selection in Workspace           |
+| `upload_row`        | 3-dot menu in the Upload Panel row                          |
+| `media_page`        | Actions in the `/media` library view                        |
 
-### Canonical Action Inventory (v2)
+### Action Matrix
 
-This is the complete inventory for marker-related actions across Upload, Map, Workspace, Cluster, and Detail surfaces.
+Legend: `✅` available, `⚠️` available with guard or policy, `—` not available.
 
-| Action ID                    | Label (EN)                         | Available in                                                                                               | Section       | Upload-only | Notes                                                                 |
-| ---------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------- | ----------- | --------------------------------------------------------------------- |
-| `open_details_or_selection`  | Open details / Open selection      | `single_marker`, `cluster_marker`                                                                          | `primary`     | No          | Canonical marker entry action                                         |
-| `create_marker_here`         | Create media marker here           | `map_point`                                                                                                | `primary`     | No          | Map context creation action                                           |
-| `zoom_house`                 | Zoom here (house proximity)        | `map_point`, `single_marker`, `cluster_marker`                                                             | `primary`     | No          | Shared map navigation action                                          |
-| `zoom_street`                | Zoom here (street proximity)       | `map_point`, `single_marker`, `cluster_marker`                                                             | `primary`     | No          | Shared map navigation action                                          |
-| `copy_address`               | Copy address                       | `map_point`, `single_marker`, `cluster_marker`, conditional `workspace_single`/`workspace_multi`           | `secondary`   | No          | Keep deterministic policy for cluster/multi                           |
-| `copy_gps`                   | Copy GPS                           | `map_point`, `single_marker`, `cluster_marker`, `workspace_single`                                         | `secondary`   | No          | `copy_coordinates` is treated as alias label of this canonical action |
-| `open_google_maps`           | Open in Google Maps                | `map_point`, `single_marker`, `cluster_marker`, conditional `workspace_multi`                              | `secondary`   | No          | External navigation utility                                           |
-| `assign_to_project`          | Assign to project                  | `upload_row`, `single_marker`, `cluster_marker`, `workspace_single`, `workspace_multi`, `radius_selection` | `primary`     | No          | Canonical assignment action                                           |
-| `open_project`               | Open project                       | `upload_row` and optional map/workspace contexts                                                           | `primary`     | No          | Context-sensitive deep-link                                           |
-| `open_in_media`              | Open in media                      | `upload_row`, `single_marker` and optional workspace contexts                                              | `primary`     | No          | Single focus or multi filtered view                                   |
-| `download`                   | Download                           | `upload_row`, optional marker/workspace contexts                                                           | `secondary`   | No          | Batch path for cluster/multi                                          |
-| `download_zip`               | Download ZIP                       | `workspace_multi`                                                                                          | `secondary`   | No          | Workspace export action                                               |
-| `toggle_priority`            | Prioritize / Remove priority       | `upload_row` and optional map/workspace contexts                                                           | `secondary`   | No          | Capability-gated                                                      |
-| `change_location_map`        | Add/Change GPS location            | `upload_row`, planned `single_marker`/`cluster_marker`/`workspace_multi`                                   | `primary`     | No          | Batch guard required for multi-target                                 |
-| `change_location_address`    | Add/Change address                 | `upload_row`, planned `single_marker`/`cluster_marker`/`workspace_multi`                                   | `primary`     | No          | Batch guard required for multi-target                                 |
-| `remove_from_project`        | Remove from project(s)             | `upload_row`, `single_marker`, `cluster_marker`, planned workspace contexts                                | `destructive` | No          | Membership removal without deleting media                             |
-| `delete_media`               | Delete media                       | `upload_row`, `single_marker`, `workspace_single`, `workspace_multi`, guarded `cluster_marker`             | `destructive` | No          | Allowed for persisted media only                                      |
-| `create_project_from_radius` | Create new project from radius     | `radius_selection`                                                                                         | `primary`     | No          | Radius-specific project creation                                      |
-| `select_all`                 | Select all                         | `workspace_multi`                                                                                          | `primary`     | No          | Workspace selection control                                           |
-| `select_none`                | Select none                        | `workspace_multi`                                                                                          | `primary`     | No          | Workspace selection control                                           |
-| `share_link`                 | Share link                         | `workspace_multi`                                                                                          | `secondary`   | No          | Workspace share-set action                                            |
-| `copy_link`                  | Copy link                          | `workspace_multi`                                                                                          | `secondary`   | No          | Workspace share utility                                               |
-| `native_share`               | Share                              | `workspace_multi` (device support)                                                                         | `secondary`   | No          | Native share sheet                                                    |
-| `view_file_details`          | View file details                  | `upload_row` (`uploading`)                                                                                 | `primary`     | Yes         | Upload lifecycle UI action                                            |
-| `cancel_upload`              | Cancel upload                      | `upload_row` (`uploading`)                                                                                 | `destructive` | Yes         | Upload lifecycle action                                               |
-| `open_existing_media`        | Open existing media                | `upload_row` (`issues: duplicate_photo`)                                                                   | `primary`     | Yes         | Duplicate issue resolution path                                       |
-| `upload_anyway`              | Upload anyway                      | `upload_row` (`issues: duplicate_photo`)                                                                   | `primary`     | Yes         | Upload conflict override                                              |
-| `retry`                      | Retry                              | `upload_row` (`issues`)                                                                                    | `primary`     | Yes         | Upload pipeline retry                                                 |
-| `dismiss`                    | Dismiss                            | `upload_row` (`issues/terminal`)                                                                           | `destructive` | Yes         | Queue/history triage action                                           |
-| `candidate_select`           | Select suggested address candidate | `upload_row` (`address_ambiguous` prompt)                                                                  | `primary`     | Yes         | Implemented as preferred-candidate apply path                         |
-| `manual_location_entry`      | Enter location manually            | `upload_row` (`address_ambiguous` prompt)                                                                  | `secondary`   | Yes         | Opens address editor/search flow                                      |
-| `cancel_location_prompt`     | Cancel location prompt             | `upload_row` (`address_ambiguous` prompt)                                                                  | `destructive` | Yes         | Explicit cancel/abort action for ambiguous-address prompt             |
+| Action ID                   | map_single | map_cluster      | map_point | media_detail | ws_grid_thumbnail | ws_footer_single | ws_footer_multi       | upload_row                  | media_page      | Notes                                                                       |
+| --------------------------- | ---------- | ---------------- | --------- | ------------ | ----------------- | ---------------- | --------------------- | --------------------------- | --------------- | --------------------------------------------------------------------------- |
+| `open_details_or_selection` | ✅         | ✅               | —         | —            | ✅                | —                | —                     | ✅ (after upload)           | —               | Upload row only after upload; cluster opens selection                       |
+| `open_in_media`             | ✅         | —                | —         | ✅           | ✅                | —                | —                     | ✅ (after upload)           | ✅              | Opens /media focus or selection target                                      |
+| `create_marker_here`        | —          | —                | ✅        | —            | —                 | —                | —                     | —                           | —               | Empty-map creation only                                                     |
+| `zoom_house`                | ✅         | ✅               | —         | ✅           | ✅                | ✅               | —                     | ✅ (if location exists)     | ✅              | Single and cluster zoom; upload row only when a location exists             |
+| `zoom_street`               | ✅         | ✅               | —         | ✅           | ✅                | ✅               | —                     | ✅ (if location exists)     | ✅              | Same availability as `zoom_house`                                           |
+| `copy_address`              | ✅         | ✅               | —         | ✅           | —                 | ✅               | ⚠️ target rule needed | —                           | ✅              | Footer multi needs deterministic target policy                              |
+| `copy_gps`                  | ✅         | ✅               | —         | ✅           | —                 | ✅               | ⚠️ target rule needed | —                           | ✅              | Same availability as `copy_address`                                         |
+| `open_google_maps`          | ✅         | ✅               | —         | ✅           | —                 | ✅               | —                     | ✅ (if location exists)     | ✅              | No meaningful link for dispersed footer-multi points                        |
+| `assign_to_project`         | ✅         | ✅ (count guard) | ✅        | ✅           | ✅                | ✅               | ✅ (count guard)      | ✅                          | ✅              | All contexts; cluster and footer-multi require count guard                  |
+| `change_location_map`       | ✅         | ⚠️ batch policy  | —         | ✅           | —                 | ✅               | —                     | ✅                          | ✅              | Workspace multi uses batch policy only through explicit bulk flows          |
+| `change_location_address`   | ✅         | ⚠️ batch policy  | —         | ✅           | —                 | ✅               | ⚠️ batch UI           | ✅                          | ✅              | Footer multi uses a bulk editor UI                                          |
+| `remove_from_project`       | ✅         | ✅               | —         | ✅           | ✅                | ✅               | ✅                    | ✅                          | ✅              | All contexts except `map_point`; cluster and multi need target resolution   |
+| `delete_media`              | ✅         | ✅ (count guard) | —         | ✅           | ✅                | ✅               | ✅ (count guard)      | ✅                          | ✅              | All contexts except `map_point`; cluster and multi need count guard         |
+| `download`                  | ✅         | ✅ (ZIP)         | —         | ✅           | ✅                | ✅               | ✅ (ZIP)              | ✅ (after upload)           | ✅              | Multi-target contexts resolve to ZIP behavior; upload row only after upload |
+| `share_link`                | ✅         | ✅               | —         | ✅           | ✅                | ✅               | ✅                    | ✅ (after upload)           | ✅              | Not available before upload in upload row                                   |
+| `copy_link`                 | ✅         | ✅               | —         | ✅           | ✅                | ✅               | ✅                    | ✅ (after upload)           | ✅              | Same availability as `share_link`                                           |
+| `native_share`              | ✅         | ✅               | —         | ✅           | ✅                | ✅               | ✅                    | ✅ (after upload)           | ✅              | Supported devices only                                                      |
+| `download_zip`              | —          | ✅               | —         | —            | —                 | —                | ✅                    | —                           | ✅ (multi only) | Explicit bulk-download action                                               |
+| `select_all`                | —          | —                | —         | —            | —                 | ✅               | —                     | —                           | ✅              | Selection-control only                                                      |
+| `select_none`               | —          | —                | —         | —            | —                 | ✅               | —                     | —                           | ✅              | Selection-control only                                                      |
+| `candidate_select`          | —          | —                | —         | —            | —                 | —                | —                     | ✅ (address_ambiguous only) | —               | Upload-internal prompt action                                               |
+| `manual_location_entry`     | —          | —                | —         | —            | —                 | —                | —                     | ✅ (address_ambiguous only) | —               | Upload-internal prompt action                                               |
+| `cancel_location_prompt`    | —          | —                | —         | —            | —                 | —                | —                     | ✅ (address_ambiguous only) | —               | Upload-internal prompt action                                               |
 
-### Upload Action Portability (Canonical)
+### Upload-Only / Upload-Internal Actions
 
-| Upload action (source)                    | single_marker | cluster_marker | workspace_multi | Recommendation | Why                                                           |
-| ----------------------------------------- | ------------- | -------------- | --------------- | -------------- | ------------------------------------------------------------- |
-| `View file details`                       | Adapt         | No             | No              | Adapt          | Reuse as detail-open behavior in marker single context        |
-| `Cancel upload`                           | No            | No             | No              | Do not port    | Upload lifecycle only                                         |
-| `Change location > Add/Change GPS`        | Adapt         | Adapt          | Adapt           | Add            | Persisted-media location edit; cluster/multi as batch flow    |
-| `Change location > Add/Change address`    | Adapt         | Adapt          | Adapt           | Add            | Same as GPS edit, address-first flow                          |
-| `Open in /media`                          | Adapt         | Adapt          | Adapt           | Add            | Single focus or multi filtered selection                      |
-| `Assign project`                          | Yes           | Yes            | Yes             | Keep           | Canonical cross-context assignment action                     |
-| `Open project`                            | Adapt         | Adapt          | Adapt           | Add            | Context-sensitive direct open or chooser                      |
-| `Prioritize`                              | Adapt         | Adapt          | Adapt           | Optional add   | Capability-gated workflow enhancement                         |
-| `Download`                                | Yes           | Adapt          | Adapt           | Add            | Single direct, cluster/multi batch path                       |
-| `Open existing media` (`duplicate_photo`) | No            | No             | No              | Do not port    | Upload issue-resolution only                                  |
-| `Upload anyway` (`duplicate_photo`)       | No            | No             | No              | Do not port    | Upload conflict decision only                                 |
-| `Retry` (issue/error)                     | No            | No             | No              | Do not port    | Upload pipeline only                                          |
-| `Dismiss` (issue/error)                   | No            | No             | No              | Do not port    | Upload queue/history triage only                              |
-| `Remove from project(s)`                  | Yes           | Yes            | Yes             | Add            | Destructive membership removal, non-delete                    |
-| `Delete media`                            | Yes           | Adapt          | Yes             | Keep + guard   | Cluster/multi require count confirmation and resolved targets |
+These actions stay inside upload issue handling unless a consumer spec explicitly documents otherwise.
 
-### Existing Actions That Must Stay
-
-| Action                      | Contexts                                     | Section       | Keep reason                                                |
-| --------------------------- | -------------------------------------------- | ------------- | ---------------------------------------------------------- |
-| `copy_address`              | single/conditional cluster/conditional multi | `secondary`   | Core utility action across surfaces                        |
-| `copy_gps`                  | single/conditional cluster/conditional multi | `secondary`   | Core utility action across surfaces                        |
-| `open_google_maps`          | single/cluster/conditional multi             | `secondary`   | Established external-navigation utility                    |
-| `zoom_house`                | single/cluster                               | `primary`     | Fast map work action                                       |
-| `zoom_street`               | single/cluster                               | `primary`     | Fast map work action                                       |
-| `open_details_or_selection` | single/cluster                               | `primary`     | Canonical entry action                                     |
-| `delete_media`              | single/cluster/workspace_multi               | `destructive` | Canonical destructive action where persisted target exists |
+| Action ID             | Upload scope               | Reason                  |
+| --------------------- | -------------------------- | ----------------------- |
+| `view_file_details`   | Uploading rows only        | Lifecycle inspection    |
+| `cancel_upload`       | Uploading rows only        | Lifecycle cancellation  |
+| `open_existing_media` | Duplicate-photo issue only | Duplicate review path   |
+| `upload_anyway`       | Duplicate-photo issue only | Duplicate override path |
+| `retry`               | Upload issues only         | Pipeline retry          |
+| `dismiss`             | Upload issues only         | Terminal triage         |
 
 ## Component Hierarchy
 
 ```text
-ActionContextMatrixSpec (docs contract)
-├── Upload domain registry (`upload_actions`)
-├── Map/workspace registry (`map_workspace_actions`)
-├── Shared resolver contracts (context normalization)
-└── Shared action engine (section order + visibility + enablement)
+ActionContextMatrixSpec
+├── Context registry
+│   ├── map_single
+│   ├── map_cluster
+│   ├── map_point
+│   ├── media_detail
+│   ├── ws_grid_thumbnail
+│   ├── ws_footer_single
+│   ├── ws_footer_multi
+│   ├── upload_row
+│   └── media_page
+├── Action registry
+├── Guard registry
+└── Consumer specs
+    ├── upload-panel
+    ├── map-secondary-click-system
+    ├── media-detail-actions
+    ├── workspace-export-bar
+    └── upload-manager-pipeline
 ```
 
-## Data Requirements
+## Data
 
-### Data Flow (Mermaid)
+### Context Resolution Pipeline
 
 ```mermaid
-flowchart LR
-  U[Action candidate] --> C{Context type}
-  C --> S[single_marker]
-  C --> K[cluster_marker]
-  C --> W[workspace_multi]
-  C --> R[upload_row]
-  S --> P[Portability decision]
-  K --> P
-  W --> P
-  R --> P
-  P -->|Keep/Add/Adapt| REG[Registry entry]
-  P -->|Do not port| UREG[Upload-only registry]
-  REG --> ENG[Shared action engine]
-  ENG --> UI[Menu render order: primary->secondary->destructive]
+flowchart TD
+  A[User gesture] --> B[Resolve surface context]
+  B --> C{Context ID}
+  C -->|map_single| D[Marker target]
+  C -->|map_cluster| E[Cluster target]
+  C -->|map_point| F[Empty-map target]
+  C -->|media_detail| G[Open detail view]
+  C -->|ws_grid_thumbnail| H[Workspace thumbnail target]
+  C -->|ws_footer_single| I[Single selection target]
+  C -->|ws_footer_multi| J[Multi selection target]
+  C -->|upload_row| K[Upload row target]
+  C -->|media_page| L[/media library target]
+  D --> M[Evaluate action row]
+  E --> M
+  F --> M
+  G --> M
+  H --> M
+  I --> M
+  J --> M
+  K --> M
+  L --> M
+  M --> N{Guard satisfied?}
+  N -->|yes| O[Action is visible and enabled]
+  N -->|no| P[Action is hidden or disabled]
 ```
 
-| Field          | Source   | Type        | Purpose                                 |
-| -------------- | -------- | ----------- | --------------------------------------- |
-| `contextType`  | resolver | string enum | Action availability scope               |
-| `targetCount`  | resolver | number      | Guard for destructive and batch actions |
-| `targetIds`    | resolver | string[]    | Concrete execution targets              |
-| `capabilities` | resolver | record      | Feature flags and policy gates          |
-| `section`      | registry | enum        | Visual and keyboard grouping            |
+| Field                  | Source            | Type        | Purpose                                                            |
+| ---------------------- | ----------------- | ----------- | ------------------------------------------------------------------ |
+| `contextId`            | resolver          | string enum | Selects the correct availability column                            |
+| `issueKind`            | upload pipeline   | string enum | Narrows upload-only actions and prompts                            |
+| `targetCount`          | resolver          | number      | Count guard for cluster and multi actions                          |
+| `locationKnown`        | resolver          | boolean     | Controls location-dependent actions                                |
+| `selectionCount`       | resolver          | number      | Controls footer and multi-selection actions                        |
+| `supportedShareDevice` | device capability | boolean     | Enables native share only on supported devices                     |
+| `afterUpload`          | upload state      | boolean     | Prevents pre-upload row actions from leaking into upload row menus |
+| `addressSource`        | upload pipeline   | string enum | Records file vs folder vs country precedence                       |
 
 ## State
 
-| Name              | TypeScript Type | Default        | What it controls                           |
-| ----------------- | --------------- | -------------- | ------------------------------------------ |
-| `contextType`     | context enum    | per invocation | Which action subset is visible             |
-| `resolvedActions` | action array    | `[]`           | Ordered menu actions                       |
-| `hasDestructive`  | `boolean`       | `false`        | Divider and destructive section visibility |
-| `targetCount`     | `number`        | `0`            | Confirmation requirements                  |
+| Name                   | TypeScript Type | Default        | What it controls                                                           |
+| ---------------------- | --------------- | -------------- | -------------------------------------------------------------------------- |
+| `contextId`            | context enum    | per invocation | Which availability column is read                                          |
+| `issueKind`            | issue-kind enum | `null`         | Upload prompt and issue-specific action gates                              |
+| `targetCount`          | `number`        | `0`            | Count guards and batch policies                                            |
+| `selectionCount`       | `number`        | `0`            | Selection-driven footer and page actions                                   |
+| `locationKnown`        | `boolean`       | `false`        | Location-dependent actions such as zoom, maps, and download fallback rules |
+| `afterUpload`          | `boolean`       | `false`        | Upload row visibility for post-upload actions                              |
+| `nativeShareSupported` | `boolean`       | `false`        | Native share eligibility                                                   |
 
 ## File Map
 
-| File                                                               | Purpose                                 |
-| ------------------------------------------------------------------ | --------------------------------------- |
-| `docs/element-specs/action-context-matrix.md`                      | Canonical cross-context action contract |
-| `apps/web/src/app/features/action-system/action-types.ts`          | Shared action types                     |
-| `apps/web/src/app/features/action-system/action-engine.service.ts` | Shared ordering/filtering engine        |
+| File                                               | Purpose                                                                     |
+| -------------------------------------------------- | --------------------------------------------------------------------------- |
+| `docs/element-specs/action-context-matrix.md`      | Canonical cross-context action contract                                     |
+| `docs/element-specs/upload-manager-pipeline.md`    | Full upload location-resolution algorithm and upload-internal issue routing |
+| `docs/element-specs/upload-panel.md`               | Upload row consumer of the matrix                                           |
+| `docs/element-specs/map-secondary-click-system.md` | Map consumer of the matrix                                                  |
+| `docs/element-specs/media-detail-actions.md`       | Media detail consumer of the matrix                                         |
+| `docs/element-specs/workspace-export-bar.md`       | Workspace footer multi-selection consumer                                   |
+| `docs/element-specs/media-page.md`                 | `/media` page consumer                                                      |
 
 ## Wiring
 
-### Integration Sequence (Mermaid)
+### Integration Sequence
 
 ```mermaid
 sequenceDiagram
-  participant Spec as Action Context Matrix Spec
-  participant Domain as Domain Registry (Upload or Map/Workspace)
-  participant Resolver as Context Resolver
-  participant Engine as Action Engine
-  participant UI as Menu Host
+  participant U as User
+  participant S as Surface
+  participant P as Context Resolver
+  participant M as Action Matrix
+  participant G as Guard Policy
+  participant V as Visible Menu
 
-  UI->>Resolver: Resolve context payload
-  Resolver-->>Domain: Normalized context
-  Domain-->>Engine: Action definitions + context
-  Engine-->>UI: Ordered visible actions
-  UI->>UI: Render primary/secondary/destructive sections
+  U->>S: Open menu or trigger action surface
+  S->>P: Resolve contextId, targetCount, issueKind, locationKnown
+  P->>M: Read availability row for contextId
+  M->>G: Evaluate guard rules for selected action
+  alt guard passes
+    G-->>V: Show enabled action
+  else guard fails
+    G-->>V: Hide or disable action with note
+  end
 ```
 
-- Upload and map/workspace registries must reference the same section-order contract.
-- Ported actions keep canonical IDs when intent is identical.
-- Destructive actions for `cluster_marker` and `workspace_multi` require affected-count confirmation.
-- UI labels may vary by surface, but Action ID and section semantics must stay stable.
+- `upload-manager-pipeline.md` owns the full upload location-resolution algorithm, including the `file > folder > country` precedence rule.
+- `address_ambiguous` stays upload-internal and does not become a map or workspace issue kind.
+- `map_cluster` and `ws_footer_multi` require explicit count or batch guards for project assignment, destructive actions, and location edits.
+- `media_page` and `ws_footer_multi` may expose the same action ID with different execution shape, but the matrix entry remains the same canonical contract.
+
+### Upload Location Precedence
+
+| Source order | Rule                     | Notes                                                                   |
+| ------------ | ------------------------ | ----------------------------------------------------------------------- |
+| File         | Wins first               | File-level address or title candidate overrides folder-derived hints    |
+| Folder       | Wins when file is absent | Folder-derived hints are fallback only                                  |
+| Country      | Last fallback            | Country-level fallback is only used when file and folder do not resolve |
+
+### Upload-Internal Issue Kind: `address_ambiguous`
+
+| Scope             | Actions                                                               | Notes                                     |
+| ----------------- | --------------------------------------------------------------------- | ----------------------------------------- |
+| `upload_row` only | `candidate_select`, `manual_location_entry`, `cancel_location_prompt` | No map, workspace, or media-page exposure |
+
+### Upload Pipeline Reference
+
+Use [upload-manager-pipeline](upload-manager-pipeline.md) for the full resolution algorithm, prompt order, and issue-state transitions. The matrix only decides action availability; the pipeline decides how unresolved locations become `missing_gps`, `document_unresolved`, or `address_ambiguous` flows.
 
 ## Acceptance Criteria
 
-- [ ] A single canonical spec maps upload actions to `single_marker`, `cluster_marker`, and `workspace_multi` contexts.
-- [x] `delete_media` is explicitly allowed where a persisted media target exists, including cluster/multi with guards.
-- [ ] `copy_address` and `copy_gps` are explicitly retained as cross-surface utility actions.
-- [ ] Upload-only lifecycle actions (`retry`, `dismiss`, `upload_anyway`) are explicitly excluded from map/workspace registries.
-- [ ] Section ordering is documented as `primary`, `secondary`, `destructive` across all contexts.
+- [ ] All nine context IDs are present exactly as `map_single`, `map_cluster`, `map_point`, `media_detail`, `ws_grid_thumbnail`, `ws_footer_single`, `ws_footer_multi`, `upload_row`, and `media_page`.
+- [ ] The action table has one column per context ID and every listed action is mapped in that table.
+- [ ] `open_details_or_selection`, `open_in_media`, `zoom_house`, `zoom_street`, `copy_address`, `copy_gps`, `open_google_maps`, `assign_to_project`, `change_location_map`, `change_location_address`, `remove_from_project`, `delete_media`, `download`, `share_link`, `copy_link`, `native_share`, `download_zip`, `select_all`, `select_none`, `candidate_select`, `manual_location_entry`, and `cancel_location_prompt` are all present as action IDs.
+- [ ] `address_ambiguous` is documented as upload-internal only, with exactly `candidate_select`, `manual_location_entry`, and `cancel_location_prompt`.
+- [ ] `file > folder > country` is documented as the address-source precedence rule and points to [upload-manager-pipeline](upload-manager-pipeline.md).
+- [ ] `map_point` excludes all actions except `create_marker_here`.
+- [ ] Cluster and multi-target actions include explicit count guards, batch policies, or target-resolution rules where required.
+- [ ] Multi-target download behavior is separated from the explicit `download_zip` action.

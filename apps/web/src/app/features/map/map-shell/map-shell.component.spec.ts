@@ -983,6 +983,35 @@ describe('MapShellComponent', () => {
     expect(component.mapContextMenuCoords()).toEqual({ lat: 48.2, lng: 16.37 });
   });
 
+  it('map container contextmenu handler keeps marker events propagating', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      mapContainerContextMenuHandler: (event: MouseEvent) => void;
+    };
+
+    const markerEl = document.createElement('div');
+    markerEl.className = 'map-photo-marker';
+    const child = document.createElement('span');
+    markerEl.appendChild(child);
+
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    const event = {
+      button: 2,
+      target: child,
+      preventDefault,
+      stopPropagation,
+    } as unknown as MouseEvent;
+
+    component.mapContainerContextMenuHandler(event);
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(stopPropagation).not.toHaveBeenCalled();
+  });
+
   it('tracks whether any context menu is open for trigger semantics', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
 
@@ -1317,6 +1346,76 @@ describe('MapShellComponent', () => {
     expect(component.markerContextMenuOpen()).toBe(true);
     expect(component.markerContextMenuPayload()?.markerKey).toBe('single-1');
     expect(component.markerContextMenuPayload()?.mediaId).toBe('img-1');
+  });
+
+  it('opens marker context as multi-selection when multiple markers are selected', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const mapStub = {
+      latLngToContainerPoint: vi.fn().mockReturnValue({ x: 10, y: 10 }),
+      getContainer: vi.fn().mockReturnValue({
+        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0 }),
+      }),
+      remove: vi.fn(),
+    };
+
+    const component = fixture.componentInstance as unknown as {
+      map: unknown;
+      uploadedPhotoMarkers: Map<
+        string,
+        {
+          marker: unknown;
+          count: number;
+          lat: number;
+          lng: number;
+          mediaId?: string;
+          sourceCells?: Array<{ lat: number; lng: number }>;
+        }
+      >;
+      selectedMarkerKeys: { set: (value: Set<string>) => void };
+      markerContextMenuPayload: {
+        (): {
+          markerKey: string;
+          count: number;
+          lat: number;
+          lng: number;
+          mediaId?: string;
+          isMultiSelection?: boolean;
+          sourceCells: Array<{ lat: number; lng: number }>;
+        } | null;
+      };
+      openMarkerContextMenu: (
+        markerKey: string,
+        sourceEvent?: { clientX: number; clientY: number },
+      ) => void;
+    };
+
+    component.map = mapStub;
+    component.uploadedPhotoMarkers.set('single-1', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2,
+      lng: 16.37,
+      mediaId: 'img-1',
+      sourceCells: [{ lat: 48.2, lng: 16.37 }],
+    });
+    component.uploadedPhotoMarkers.set('single-2', {
+      marker: createMarkerStub(),
+      count: 1,
+      lat: 48.2007,
+      lng: 16.3707,
+      mediaId: 'img-2',
+      sourceCells: [{ lat: 48.2007, lng: 16.3707 }],
+    });
+
+    component.selectedMarkerKeys.set(new Set(['single-1', 'single-2']));
+    component.openMarkerContextMenu('single-1', { clientX: 220, clientY: 240 });
+
+    expect(component.markerContextMenuPayload()?.isMultiSelection).toBe(true);
+    expect(component.markerContextMenuPayload()?.count).toBe(2);
+    expect(component.markerContextMenuPayload()?.mediaId).toBeUndefined();
+    expect(component.markerContextMenuPayload()?.sourceCells.length).toBe(2);
   });
 
   it('enterPlacementMode auto-places missing-data jobs at active draft marker', () => {

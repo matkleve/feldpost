@@ -17,7 +17,7 @@
 import { Injectable, inject, type WritableSignal } from '@angular/core';
 import type { ForwardGeocodeResult } from '../../core/geocoding.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
-import type { UploadItemMenuAction } from './upload-panel-item.component';
+import type { UploadItemActionContext, UploadItemMenuAction } from './upload-panel-item.component';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
 import {
@@ -102,8 +102,12 @@ export class UploadPanelJobActionsService {
     this.uploadManager.placeJob(jobId, { lat, lng });
   }
 
-  async handleMenuAction(job: UploadJob, action: UploadItemMenuAction): Promise<void> {
-    await this.menuActionRouter.handleMenuAction(job, action);
+  async handleMenuAction(
+    job: UploadJob,
+    action: UploadItemMenuAction,
+    context?: UploadItemActionContext,
+  ): Promise<void> {
+    await this.menuActionRouter.handleMenuAction(job, action, context);
   }
 
   onLocationAddressDialogQueryInput(query: string): void {

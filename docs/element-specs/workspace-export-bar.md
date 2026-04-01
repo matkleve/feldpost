@@ -5,7 +5,9 @@
 
 ## What It Is
 
-The Workspace Export Bar is a bottom action surface in the Workspace Pane that appears when at least one media item is selected. It enables batch actions for the current selection across three areas: selection controls (select all/none), curation actions (add to project, change address, delete), and export actions (share as stable link, copy link, download as ZIP).
+The Workspace Export Bar is a bottom action surface in the Workspace Pane that appears when at least one media item is selected. It enables batch actions for the current selection across three areas: selection controls (select all/none), curation actions (assign project, change address, delete), and export actions (share as stable link, copy link, download as ZIP).
+
+This bar is the `ws_footer_multi` consumer in the action-context-matrix, so its buttons keep the matrix action IDs even when labels stay localized.
 
 The bar follows the same shared action ordering as the upload-panel contract: primary actions first, secondary utility actions next, and destructive actions last. In practice that means selection and curation lead the bar, export utilities come after them, and delete stays visually and semantically separated.
 
@@ -31,7 +33,7 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 | 4   | Selects first item                                    | Export bar animates in from bottom                                                | `selectedMediaIds.size` from 0 to 1 |
 | 5   | Clicks `Select all`                                   | Selects all currently scoped items (filtered/grouped result set, not whole DB)    | `selectAllInScope()`                |
 | 6   | Clicks `Select none`                                  | Clears selection, bar animates out                                                | `clearSelection()`                  |
-| 7   | Clicks `Add to project`                               | Opens project picker dialog scoped to current organization                        | `addToProjectDialogOpen = true`     |
+| 7   | Clicks `Assign project`                               | Opens project picker dialog scoped to current organization                        | `addToProjectDialogOpen = true`     |
 | 8   | Confirms add to existing project                      | Upserts project memberships for all selected media IDs                            | `bulkAddToProject(ids, projectId)`  |
 | 9   | Clicks `Change address`                               | Opens bulk address editor with preview count                                      | `changeAddressDialogOpen = true`    |
 | 10  | Confirms address change                               | Updates selected media rows with normalized address value                         | `bulkChangeAddress(ids, address)`   |
@@ -67,7 +69,7 @@ WorkspacePane
 │   ├── SelectionSummary
 │   │   └── Label: "X selected"
 │   ├── CurationActions
-│   │   ├── Button: Add to project
+│   │   ├── Button: Assign project
 │   │   ├── Button: Change address
 │   │   └── Button: Delete (danger)
 │   ├── ExportActions
@@ -125,7 +127,7 @@ flowchart LR
 | Selected IDs          | `WorkspaceSelectionService`                 | `Set<string>`   | Canonical identity source for export actions               |
 | Selection scope IDs   | `WorkspaceViewService.groupedSections()`    | `string[]`      | Used by `Select all` for current filtered/grouped scope    |
 | Project membership    | `MediaBulkActionsService.bulkAddToProject`  | mutation result | Upserts selected IDs into `image_projects` for a project   |
-| Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected images address fields in one batch        |
+| Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected media address fields in one batch         |
 | Bulk delete mutation  | `MediaBulkActionsService.bulkDeleteMedia`   | mutation result | Deletes selected media records with storage cleanup        |
 | Share token           | `ShareSetService`                           | `string`        | URL-safe token, high entropy, deterministic mapping policy |
 | Share-set fingerprint | Backend function                            | `string`        | Hash of sorted media IDs + org context for dedup/lookup    |
@@ -345,7 +347,7 @@ erDiagram
 | `features/map/workspace-pane/download-selection-dialog.component.html`                   | Download dialog template                                     |
 | `features/map/workspace-pane/download-selection-dialog.component.scss`                   | Download dialog styles                                       |
 | `core/workspace-selection.service.ts`                                                    | Selection state, toggles, select all/none, keyboard handling |
-| `core/workspace-view.service.ts`                                                         | Ordered image hydration for resolved share-set IDs           |
+| `core/workspace-view.service.ts`                                                         | Ordered media hydration for resolved share-set IDs           |
 | `core/media-bulk-actions.service.ts`                                                     | Batch add-to-project, change-address, and delete operations  |
 | `core/share-set.service.ts`                                                              | Create/resolve share-set tokens via Supabase                 |
 | `core/zip-export.service.ts`                                                             | Fetch signed URLs/files, build ZIP blob, trigger download    |
@@ -392,8 +394,8 @@ sequenceDiagram
 - [x] Ctrl-click (Windows/Linux) and Cmd-click (macOS) toggle selection on media cards.
 - [ ] First selection opens export bar with transition; zero selection closes it.
 - [x] Export bar always includes `Select none` and `Select all` actions.
-- [ ] Export bar includes `Add to project`, `Change address`, and `Delete` actions for selected media.
-- [ ] `Add to project` applies to every currently selected ID and reports per-item failures non-destructively.
+- [ ] Export bar includes `Assign project`, `Change address`, and `Delete` actions for selected media.
+- [ ] `Assign project` applies to every currently selected ID and reports per-item failures non-destructively.
 - [ ] `Change address` updates every selected media row and refreshes both grid labels and marker tooltip/address surfaces.
 - [ ] `Delete` requires explicit confirmation and removes all selected media while clearing stale selection IDs.
 - [ ] `Select all` targets current workspace scope (active filters/grouping/tab), not entire dataset.

@@ -10,6 +10,7 @@ import { GeocodingService } from '../../../../core/geocoding.service';
 import { MediaLocationUpdateService } from '../../../../core/media-location-update.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view.service';
 import { ActionEngineService } from '../../../action-system/action-engine.service';
+import { ACTION_CONTEXT_IDS } from '../../../action-system/action-context-ids';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
@@ -28,9 +29,6 @@ import {
 import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
 
 const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
-  'auto.0013.add_to_project': 'Add to project',
-  'upload.item.menu.location.changeAddress': 'Change address',
-  'workspace.imageDetail.action.delete': 'Delete media',
   'workspace.export.action.selectAll': 'Select all',
   'workspace.export.action.selectNone': 'Select none',
   'workspace.export.action.share': 'Share',
@@ -92,7 +90,7 @@ export class WorkspacePaneFooterComponent {
     this.actionEngine.resolveActions(
       WORKSPACE_EXPORT_ACTION_DEFINITIONS,
       {
-        contextType: 'workspace_multi',
+        contextType: ACTION_CONTEXT_IDS.wsFooter,
         selectedCount: this.selectionService.selectedCount(),
         canNativeShare: typeof navigator !== 'undefined' && 'share' in navigator,
       },
@@ -110,26 +108,14 @@ export class WorkspacePaneFooterComponent {
       case 'select_none':
         this.selectionService.clearSelection();
         return;
-      case 'assign_to_project':
-        void this.openProjectDialog();
-        return;
-      case 'change_location_address':
-        this.addressDialogOpen.set(true);
-        return;
       case 'share_link':
         void this.shareLink();
         return;
       case 'copy_link':
         void this.copyLink();
         return;
-      case 'native_share':
-        void this.shareLink();
-        return;
       case 'download_zip':
         this.openZipDialog();
-        return;
-      case 'delete_media':
-        this.deleteDialogOpen.set(true);
         return;
     }
   }
@@ -507,5 +493,52 @@ export class WorkspacePaneFooterComponent {
           .filter((id): id is string => !!id),
       ),
     );
+  }
+
+  private async removeFromProject(): Promise<void> {
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    this.pending.set(true);
+    try {
+      const { error } = await this.supabaseService.client
+        .from('media_projects')
+        .delete()
+        .in('media_item_id', selectedMediaItemIds);
+
+      if (error) {
+        this.toastService.show({ message: error.message, type: 'error' });
+        return;
+      }
+
+      const selectedImageIds = this.selectionService.selectedMediaIds();
+      this.workspaceViewService.rawImages.update((images) =>
+        images.map((image) =>
+          selectedImageIds.has(image.id)
+            ? {
+                ...image,
+                projectId: null,
+                projectName: null,
+              }
+            : image,
+        ),
+      );
+
+      this.toastService.show({
+        message: this.t(
+          'upload.item.menu.project.remove.success',
+          'Removed from project successfully.',
+        ),
+        type: 'success',
+      });
+    } finally {
+      this.pending.set(false);
+    }
   }
 }

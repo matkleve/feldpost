@@ -26,6 +26,12 @@ export interface ThumbnailCardHoverEvent {
   lng: number;
 }
 
+export interface ThumbnailCardContextMenuEvent {
+  mediaId: string;
+  clientX: number;
+  clientY: number;
+}
+
 @Component({
   selector: 'app-thumbnail-card',
   imports: [ThumbnailCardMediaComponent],
@@ -39,6 +45,7 @@ export interface ThumbnailCardHoverEvent {
       [class.thumbnail-card--large]="viewMode() === 'large'"
       (mouseenter)="onHoverStart()"
       (mouseleave)="onHoverEnd()"
+      (contextmenu)="onContextMenu($event)"
     >
       <app-thumbnail-card-media
         [image]="image()"
@@ -121,6 +128,7 @@ export class ThumbnailCardComponent implements AfterViewInit {
   readonly selectionToggled = output<ThumbnailCardInteraction>();
   readonly hoverStarted = output<ThumbnailCardHoverEvent>();
   readonly hoverEnded = output<string>();
+  readonly contextMenuRequested = output<ThumbnailCardContextMenuEvent>();
   readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
   readonly hasCoordinates = computed(
     () => Number.isFinite(this.image().latitude) && Number.isFinite(this.image().longitude),
@@ -249,6 +257,16 @@ export class ThumbnailCardComponent implements AfterViewInit {
 
   onHoverEnd(): void {
     this.hoverEnded.emit(this.image().id);
+  }
+
+  onContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextMenuRequested.emit({
+      mediaId: this.image().id,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
   }
 
   private requestedTierForViewMode(viewMode: ThumbnailSizePreset): MediaTier {

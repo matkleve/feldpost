@@ -173,7 +173,9 @@
             (dismissFile)="dismissFile(job.id)"
             (rowMainClick)="rowInteractionHandlers.onRowMainClick(job)"
             (rowMainKeydown)="rowInteractionHandlers.onRowMainKeydown(job, $event.event)"
-            (menuActionSelected)="actionHandlers.handleMenuAction($event.job, $event.action)"
+            (menuActionSelected)="
+              actionHandlers.handleMenuAction($event.job, $event.action, $event.context)
+            "
             (selectionChanged)="bulkHandlers.onRowSelectionChanged($event)"
           ></app-upload-panel-item>
         }
