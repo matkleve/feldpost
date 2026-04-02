@@ -2,13 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { MediaTier } from '../../core/media/media-renderer.types';
 import { PHOTO_NO_PHOTO_ICON, PHOTO_PLACEHOLDER_ICON } from '../../core/photo-load.service';
 
-export type MediaItemRenderState =
-  | 'placeholder'
-  | 'icon-only'
-  | 'loading'
-  | 'loaded'
-  | 'error'
-  | 'no-photo';
+export type MediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
 
 @Component({
   selector: 'app-media-item-render-surface',
@@ -18,7 +12,8 @@ export type MediaItemRenderState =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaItemRenderSurfaceComponent {
-  readonly renderState = input<MediaItemRenderState>('placeholder');
+  readonly renderState = input<MediaItemRenderState>('loading');
+  readonly isImage = input(true);
   readonly thumbnailUrl = input('');
   readonly icon = input('image');
   readonly altText = input('');

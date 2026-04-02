@@ -4,6 +4,36 @@ type MediaTypeDefinitionLike = {
   label: string;
 };
 
+export type LegacyMediaItemRenderState =
+  | 'placeholder'
+  | 'icon-only'
+  | 'loading'
+  | 'loaded'
+  | 'error'
+  | 'no-photo';
+
+export type NormalizedMediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
+
+export function normalizeMediaItemRenderState(
+  state: LegacyMediaItemRenderState,
+): NormalizedMediaItemRenderState {
+  switch (state) {
+    case 'placeholder':
+      return 'loading';
+    case 'icon-only':
+    case 'loaded':
+      return 'content';
+    case 'loading':
+      return 'loading';
+    case 'error':
+      return 'error';
+    case 'no-photo':
+      return 'no-media';
+    default:
+      return 'loading';
+  }
+}
+
 export function resolveMediaTypeLabel(
   definition: MediaTypeDefinitionLike,
   badge: string | null,

@@ -33,6 +33,7 @@
         <app-media-item-render-surface
           class="media-item__preview"
           [renderState]="mediaRenderState()"
+          [isImage]="canRenderImage()"
           [thumbnailUrl]="thumbnailUrl()"
           [icon]="mediaIcon()"
           [altText]="titleText()"

@@ -28,7 +28,12 @@ import {
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
 import { rectToRemSize, requestedTierForMode } from './media-item-slot.utils';
-import { formatMediaItemDate, resolveMediaTypeLabel } from './media-item.utils';
+import {
+  formatMediaItemDate,
+  normalizeMediaItemRenderState,
+  resolveMediaTypeLabel,
+  type LegacyMediaItemRenderState,
+} from './media-item.utils';
 
 export const MEDIA_ITEM_ACTION_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
@@ -89,7 +94,7 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
     if (!preferredPath) return 'no-photo';
     return this.photoLoadService.getLoadState(record.id, 'thumb')();
   });
-  readonly mediaRenderState = computed<MediaItemRenderState>(() => {
+  readonly legacyMediaRenderState = computed<LegacyMediaItemRenderState>(() => {
     const record = this.item();
     if (!record) return 'placeholder';
     if (!this.canRenderImage()) return 'icon-only';
@@ -107,6 +112,9 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
         return 'placeholder';
     }
   });
+  readonly mediaRenderState = computed<MediaItemRenderState>(() =>
+    normalizeMediaItemRenderState(this.legacyMediaRenderState()),
+  );
   readonly resolvedLoading = computed(() => this.loading());
   readonly uploadOverlay = computed<UploadOverlayState | null>(() =>
     resolveMediaItemUploadOverlay(this.uploadManager.jobs(), this.item()),
