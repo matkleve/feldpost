@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { DateSaveEvent } from './captured-date-editor.component';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
@@ -70,6 +71,9 @@ import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
 import type { ResolvedAction } from '../../action-system/action-types';
 import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from './workspace-detail-actions.registry';
 import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
+import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
@@ -108,13 +112,22 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
   private readonly actionEngineService = inject(ActionEngineService);
+  private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly router = inject(Router);
 
   readonly mediaId = input<string | null>(null);
   readonly addressSearchRequestImageId = input<string | null>(null);
   readonly addressSearchRequestId = input(0);
   readonly closed = output<void>();
   readonly addressSearchRequestConsumed = output<number>();
-  readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
+  readonly zoomToLocationRequested = output<{
+    mediaId: string;
+    lat: number;
+    lng: number;
+    zoomMode?: 'house' | 'street';
+  }>();
+  readonly locationMapPickRequested = output<UploadLocationMapPickRequest>();
 
   readonly media = signal<ImageRecord | null>(null);
   readonly metadata = signal<MetadataEntry[]>([]);
@@ -177,6 +190,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     const media = this.media();
     return media?.latitude != null && media?.longitude != null;
   });
+
+  readonly hasAddress = computed(() => this.fullAddress().trim().length > 0);
 
   readonly displayTitle = computed(() => resolveDisplayTitle(this.media(), this.t));
 
@@ -282,17 +297,15 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly workspaceSingleActions = computed<
     ReadonlyArray<ResolvedAction<WorkspaceSingleActionId>>
   >(() =>
+    // Spec link: docs/element-specs/media-detail-actions.md -> action surface parity in detail menus.
     this.actionEngineService.resolveActions(WORKSPACE_SINGLE_ACTION_DEFINITIONS, {
       contextType: ACTION_CONTEXT_IDS.wsFooter,
       hasCoordinates: this.hasCoordinates(),
+      hasAddress: this.hasAddress(),
     }),
   );
 
-  readonly workspaceHeaderActions = computed(() =>
-    this.workspaceSingleActions().filter(
-      (action) => action.id === 'copy_gps' || action.id === 'delete_media',
-    ),
-  );
+  readonly workspaceHeaderActions = computed(() => this.workspaceSingleActions());
 
   private readonly projectMembershipHelper = new ImageDetailProjectMembershipHelper({
     supabase: this.supabaseService,
@@ -544,13 +557,15 @@ export class MediaDetailViewComponent implements OnDestroy {
     await this.metadataHelper.removeMetadata(entry);
   }
 
-  zoomToLocation(): void {
+  zoomToLocation(zoomMode: 'house' | 'street' = 'street'): void {
     const media = this.media();
     if (!media || media.latitude == null || media.longitude == null) return;
+    // Spec link: docs/element-specs/media-detail-actions.md -> separate zoom_house and zoom_street behaviors.
     this.zoomToLocationRequested.emit({
       mediaId: media.id,
       lat: media.latitude,
       lng: media.longitude,
+      zoomMode,
     });
   }
 
@@ -594,15 +609,37 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   onWorkspaceSingleActionSelected(actionId: WorkspaceSingleActionId): void {
+    this.closeContextMenu();
     switch (actionId) {
+      case 'open_details_or_selection':
+        this.showAlreadyOpenDetailsInfo();
+        return;
+      case 'open_in_media':
+        void this.openInMedia();
+        return;
+      case 'zoom_house':
+        this.zoomToLocation('house');
+        return;
       case 'zoom_street':
-        this.zoomToLocation();
+        this.zoomToLocation('street');
         return;
       case 'assign_to_project':
         this.openProjectPicker();
         return;
+      case 'change_location_map':
+        this.requestMapLocationPick();
+        return;
+      case 'change_location_address':
+        this.openAddressSearch();
+        return;
+      case 'copy_address':
+        void this.copyAddress();
+        return;
       case 'copy_gps':
         this.copyCoordinates();
+        return;
+      case 'open_google_maps':
+        this.openInGoogleMaps();
         return;
       case 'remove_from_project':
         void this.removeFromAllProjects();
@@ -613,6 +650,11 @@ export class MediaDetailViewComponent implements OnDestroy {
       default:
         return;
     }
+  }
+
+  onThumbnailContextRequested(): void {
+    // Spec link: docs/element-specs/media-detail-photo-viewer.md -> right-click should open detail context actions.
+    this.showContextMenu.set(true);
   }
 
   openCapturedAtEditor(): void {
@@ -690,5 +732,81 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   private async handleImageAttached(event: ImageAttachedEvent): Promise<void> {
     await this.photoEventsHelper.handleImageAttached(event);
+  }
+
+  private async openInMedia(): Promise<void> {
+    const media = this.media();
+    if (!media) {
+      return;
+    }
+
+    // Spec link: docs/element-specs/media-detail-actions.md -> action parity with single marker menu.
+    this.workspaceSelectionService.setSingle(media.id);
+    this.workspacePaneObserver.setDetailImageId(media.id);
+    this.workspacePaneObserver.setOpen(true);
+    await this.router.navigate(['/media']);
+  }
+
+  private requestMapLocationPick(): void {
+    const media = this.media();
+    if (!media) {
+      return;
+    }
+
+    // Spec link: docs/element-specs/media-detail-actions.md -> change-location-map action availability.
+    this.locationMapPickRequested.emit({
+      mediaId: media.id,
+      fileName: media.id,
+    });
+  }
+
+  private async copyAddress(): Promise<void> {
+    const address = this.fullAddress().trim();
+    if (!address) {
+      this.toastService.show({
+        message: this.t('workspace.mediaDetail.toast.addressMissing', 'No address available.'),
+        type: 'warning',
+        duration: 2200,
+      });
+      return;
+    }
+
+    // Spec link: docs/element-specs/media-detail-actions.md -> copy-address action in detail context menu.
+    await navigator.clipboard.writeText(address).catch(() => {
+      /* clipboard may be unavailable */
+    });
+    this.toastService.show({
+      message: this.t('workspace.mediaDetail.toast.addressCopied', 'Address copied'),
+      type: 'success',
+      duration: 2000,
+    });
+  }
+
+  private openInGoogleMaps(): void {
+    const media = this.media();
+    if (
+      !media ||
+      media.latitude == null ||
+      media.longitude == null ||
+      typeof window === 'undefined'
+    ) {
+      return;
+    }
+
+    // Spec link: docs/element-specs/media-detail-actions.md -> open-google-maps action parity.
+    const url = `https://www.google.com/maps?q=${media.latitude},${media.longitude}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  private showAlreadyOpenDetailsInfo(): void {
+    // Spec link: docs/element-specs/media-detail-actions.md -> keep single-marker action parity in detail menu.
+    this.toastService.show({
+      message: this.t(
+        'workspace.mediaDetail.toast.detailsAlreadyOpen',
+        'Details are already open.',
+      ),
+      type: 'info',
+      duration: 1800,
+    });
   }
 }

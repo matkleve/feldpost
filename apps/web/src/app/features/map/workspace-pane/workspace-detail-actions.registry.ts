@@ -7,6 +7,32 @@ import type {
 export const WORKSPACE_SINGLE_ACTION_DEFINITIONS: ReadonlyArray<
   ActionDefinition<WorkspaceSingleActionContext, WorkspaceSingleActionId>
 > = [
+  // Spec link: docs/element-specs/media-detail-actions.md -> detail menu must expose single-marker actions.
+  {
+    id: 'open_details_or_selection',
+    section: 'primary',
+    priority: 0,
+    icon: 'open_in_new',
+    fallbackLabel: 'Open details',
+    visibleWhen: () => true,
+  },
+  {
+    id: 'open_in_media',
+    section: 'primary',
+    priority: 0,
+    icon: 'open_in_new',
+    fallbackLabel: 'Open in media',
+    visibleWhen: () => true,
+  },
+  {
+    id: 'zoom_house',
+    section: 'primary',
+    priority: 0,
+    icon: 'center_focus_strong',
+    fallbackLabel: 'Zoom to house',
+    visibleWhen: () => true,
+    enabledWhen: (context) => context.hasCoordinates,
+  },
   {
     id: 'zoom_street',
     section: 'primary',
@@ -25,11 +51,45 @@ export const WORKSPACE_SINGLE_ACTION_DEFINITIONS: ReadonlyArray<
     visibleWhen: () => true,
   },
   {
+    id: 'change_location_map',
+    section: 'primary',
+    priority: 0,
+    icon: 'pin_drop',
+    fallbackLabel: 'Change location on map',
+    visibleWhen: () => true,
+  },
+  {
+    id: 'change_location_address',
+    section: 'primary',
+    priority: 0,
+    icon: 'search',
+    fallbackLabel: 'Change address',
+    visibleWhen: () => true,
+  },
+  {
+    id: 'copy_address',
+    section: 'secondary',
+    priority: 0,
+    icon: 'content_copy',
+    fallbackLabel: 'Copy address',
+    visibleWhen: () => true,
+    enabledWhen: (context) => context.hasAddress,
+  },
+  {
     id: 'copy_gps',
     section: 'secondary',
     priority: 0,
     icon: 'content_copy',
     fallbackLabel: 'Copy coordinates',
+    visibleWhen: () => true,
+    enabledWhen: (context) => context.hasCoordinates,
+  },
+  {
+    id: 'open_google_maps',
+    section: 'secondary',
+    priority: 0,
+    icon: 'open_in_new',
+    fallbackLabel: 'Open in Google Maps',
     visibleWhen: () => true,
     enabledWhen: (context) => context.hasCoordinates,
   },

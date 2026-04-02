@@ -1837,8 +1837,21 @@ export class MapShellComponent implements OnDestroy {
    * Handles the zoomToLocationRequested output from the detail view.
    * Flies the map to the photo's coordinates at a tight zoom and pulses the marker.
    */
-  onZoomToLocation(event: { mediaId: string; lat: number; lng: number }): void {
+  onZoomToLocation(event: {
+    mediaId: string;
+    lat: number;
+    lng: number;
+    zoomMode?: 'house' | 'street';
+  }): void {
     if (!this.map) return;
+
+    // Spec link: docs/element-specs/media-detail-actions.md -> detail menu supports house/street zoom variants.
+    const requestedZoom =
+      event.zoomMode === 'house'
+        ? MapShellComponent.HOUSE_PROXIMITY_ZOOM
+        : event.zoomMode === 'street'
+          ? MapShellComponent.STREET_PROXIMITY_ZOOM
+          : MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM;
 
     this.pendingZoomHighlight = {
       mediaId: event.mediaId,
@@ -1850,7 +1863,7 @@ export class MapShellComponent implements OnDestroy {
     // Keep Leaflet dimensions in sync with the currently visible map area
     // before calculating the fly-to center.
     this.map.invalidateSize();
-    this.map.setView([event.lat, event.lng], MapShellComponent.DETAIL_LOCATION_FOCUS_ZOOM, {
+    this.map.setView([event.lat, event.lng], requestedZoom, {
       animate: false,
     });
 

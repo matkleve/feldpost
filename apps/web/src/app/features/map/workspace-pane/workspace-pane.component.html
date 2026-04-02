@@ -48,6 +48,7 @@
     </div>
 
     @if (detailMediaId()) {
+      <!-- Spec link: docs/element-specs/media-detail-actions.md -> detail actions route map-pick through pane output wiring. -->
       <app-media-detail-view
         [mediaId]="detailMediaId()"
         [addressSearchRequestImageId]="detailAddressSearchRequestMediaId()"
@@ -55,6 +56,7 @@
         (closed)="onDetailClose()"
         (addressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
+        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
     } @else if (activeTab() === 'selected-items') {
       <app-workspace-pane-toolbar />

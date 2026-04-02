@@ -56,6 +56,7 @@ export class MediaDetailPhotoViewerComponent implements AfterViewInit {
 
   readonly fileSelected = output<File>();
   readonly slotMeasured = output<{ widthRem: number; heightRem: number }>();
+  readonly contextMenuRequested = output<void>();
   readonly showLightbox = signal(false);
 
   readonly currentViewerState = computed<MediaRenderState>(() => {
@@ -137,6 +138,12 @@ export class MediaDetailPhotoViewerComponent implements AfterViewInit {
       return;
     }
     this.showLightbox.set(true);
+  }
+
+  requestContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextMenuRequested.emit();
   }
 
   triggerFileInput(): void {

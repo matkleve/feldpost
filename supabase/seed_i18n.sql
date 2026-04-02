@@ -995,6 +995,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.mediaDetail.toast.addressMissing', 'No address available.', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No address available.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressMissing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Keine Adresse verfuegbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressMissing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nessun indirizzo disponibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressMissing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.mediaDetail.toast.addressCopied', 'Address copied', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address copied', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressCopied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse kopiert', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressCopied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indirizzo copiato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.addressCopied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.mediaDetail.toast.detailsAlreadyOpen', 'Details are already open.', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Details are already open.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.detailsAlreadyOpen'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Details sind bereits geoeffnet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.detailsAlreadyOpen'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I dettagli sono gia aperti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.mediaDetail.toast.detailsAlreadyOpen'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'auto.0031.appearance', 'Appearance', 'en', 'apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

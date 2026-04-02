@@ -19,6 +19,7 @@
         t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')
       "
       (click)="openLightbox()"
+      (contextmenu)="requestContextMenu($event)"
     >
       <app-universal-media
         class="detail-image-media"

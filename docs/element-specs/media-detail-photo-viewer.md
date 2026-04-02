@@ -31,6 +31,7 @@ A rounded-corner image (`--radius-lg`) centered with side margins (`--spacing-4`
 | 6   | Replace upload fails            | Inline error below photo; no DB/storage changes                                                                                                                          | `replaceError` set     |
 | 7   | Clicks upload button (no photo) | Opens file picker; delegates to `uploadManager.attachFile(imageId, file)`                                                                                                | Attach pipeline starts |
 | 8   | Attach upload succeeds          | `imageAttached$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → switches from upload placeholder to photo display                      | Photo display shown    |
+| 9   | Right-clicks detail thumbnail   | Opens the same detail context action menu as the header 3-dot trigger                                                                                                    | Detail context menu    |
 
 ## Component Hierarchy
 

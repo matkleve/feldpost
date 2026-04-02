@@ -66,7 +66,10 @@
       (closeRequested)="onContextMenuCloseRequested()"
     >
       <div class="dd-items" role="menu" (keydown)="onContextMenuKeydown($event)">
-        @for (action of contextActions(); track action.id) {
+        @for (action of contextActions(); track action.id; let index = $index) {
+          @if (index > 0 && contextActions()[index - 1]?.section !== action.section) {
+            <div class="dd-divider" role="separator"></div>
+          }
           <button
             class="dd-item"
             [class.dd-item--danger]="action.section === 'destructive'"

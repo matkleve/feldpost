@@ -57,7 +57,12 @@ export class WorkspacePaneComponent {
   readonly detailAddressSearchRequestConsumed = output<number>();
   readonly detailRequested = output<string>();
   readonly activeTabChange = output<WorkspacePaneTab>();
-  readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
+  readonly zoomToLocationRequested = output<{
+    mediaId: string;
+    lat: number;
+    lng: number;
+    zoomMode?: 'house' | 'street';
+  }>();
   readonly imageUploaded = output<ImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly uploadLocationPreviewRequested = output<UploadLocationPreviewEvent>();
@@ -96,7 +101,13 @@ export class WorkspacePaneComponent {
     this.detailAddressSearchRequestConsumed.emit(requestId);
   }
 
-  onZoomToLocation(event: { mediaId: string; lat: number; lng: number }): void {
+  onZoomToLocation(event: {
+    mediaId: string;
+    lat: number;
+    lng: number;
+    zoomMode?: 'house' | 'street';
+  }): void {
+    // Spec link: docs/element-specs/media-detail-actions.md -> forward zoom mode so house/street actions stay distinct.
     this.zoomToLocationRequested.emit(event);
   }
 

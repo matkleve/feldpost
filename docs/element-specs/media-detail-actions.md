@@ -6,9 +6,9 @@
 
 ## What It Is
 
-The actions section at the bottom of the Media Detail View and the marker synchronization system that keeps map markers up to date when media properties change. Actions include zooming to the photo's map location, assigning the media to a project, coordinate copying, download, and media deletion.
+The actions section at the bottom of the Media Detail View and the marker synchronization system that keeps map markers up to date when media properties change. The same single-media action contract is available in the detail header 3-dot menu and via right-click on the detail thumbnail surface.
 
-This surface consumes the canonical matrix actions `zoom_house`, `zoom_street`, `copy_address`, `copy_gps`, `assign_to_project`, `open_in_media`, and `delete_media`.
+This surface consumes the canonical matrix actions `open_details_or_selection`, `open_in_media`, `zoom_house`, `zoom_street`, `assign_to_project`, `change_location_map`, `change_location_address`, `copy_address`, `copy_gps`, `open_google_maps`, `remove_from_project`, and `delete_media`.
 
 ## What It Looks Like
 
@@ -30,15 +30,20 @@ Actions use **`dd-item`** button styling — not bordered outline buttons. Each 
 
 ## Actions
 
-| #   | User Action               | System Response                                                       | Triggers            |
-| --- | ------------------------- | --------------------------------------------------------------------- | ------------------- |
-| 1   | Clicks "Zoom to location" | Pans & zooms map to photo's coordinates, highlights marker with pulse | Map flyTo + marker  |
-| 2   | Clicks "Assign project"   | Opens project membership picker (multi-select)                        | Project memberships |
-| 3   | Clicks "Copy coordinates" | Copies coordinates to clipboard, shows toast confirmation             | Clipboard + toast   |
-| 4   | Clicks "Download media"   | Downloads the current media file                                      | Storage download    |
-| 5   | Clicks "Delete media"     | Shows delete confirmation dialog                                      | `showDeleteConfirm` |
-| 6   | Confirms delete           | Deletes media from DB and storage, returns to grid                    | Supabase delete     |
-| 7   | Cancels delete            | Dismisses dialog                                                      | Dialog dismissed    |
+| #   | User Action                        | System Response                                                       | Triggers            |
+| --- | ---------------------------------- | --------------------------------------------------------------------- | ------------------- |
+| 1   | Clicks "Open details"              | Keeps detail view open and confirms current context                   | Info toast          |
+| 2   | Clicks "Zoom to location"          | Pans & zooms map to photo's coordinates, highlights marker with pulse | Map flyTo + marker  |
+| 3   | Clicks "Assign project"            | Opens project membership picker (multi-select)                        | Project memberships |
+| 4   | Clicks "Copy coordinates"          | Copies coordinates to clipboard, shows toast confirmation             | Clipboard + toast   |
+| 5   | Clicks "Copy address"              | Copies resolved detail address text to clipboard                      | Clipboard + toast   |
+| 6   | Clicks "Open in Google Maps"       | Opens a new browser tab with marker coordinates                       | Browser navigation  |
+| 7   | Clicks "Change location (map)"     | Starts map-pick relocation flow in map shell                          | Map pick mode       |
+| 8   | Clicks "Change location (address)" | Opens address-search inline editing in detail section                 | Inline address edit |
+| 9   | Clicks "Remove from project"       | Removes media from assigned projects                                  | Project memberships |
+| 10  | Clicks "Delete media"              | Shows delete confirmation dialog                                      | `showDeleteConfirm` |
+| 11  | Confirms delete                    | Deletes media from DB and storage, returns to grid                    | Supabase delete     |
+| 12  | Cancels delete                     | Dismisses dialog                                                      | Dialog dismissed    |
 
 ## Marker Sync — Live Updates
 
@@ -118,9 +123,12 @@ flowchart TD
 - [x] Zoom to location pans & zooms map to photo coordinates (flyTo, zoom 18)
 - [x] Zoom to location highlights the target marker with a pulse animation
 - [x] Zoom to location is disabled when media has no coordinates
+- [x] Detail 3-dot menu exposes the full single-marker action contract
+- [x] Right-click on detail thumbnail opens the same action menu as the 3-dot trigger
+- [x] Change location actions (map/address) are available from detail context menu
+- [x] Copy address and open Google Maps are available from detail context menu
 - [ ] Assign project opens project membership picker (multi-select)
 - [x] Copy coordinates writes to clipboard with toast confirmation
-- [ ] Download media starts file download for the current media item
 - [x] Delete confirmation dialog shown before removal
 - [x] Replace media triggers marker thumbnail update via `UploadManagerService.imageReplaced$` (not direct output events)
 - [x] Media upload to photoless row triggers marker update via `UploadManagerService.imageAttached$`

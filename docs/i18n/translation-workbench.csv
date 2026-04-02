@@ -31,6 +31,9 @@ auto.0030.app_preferences_coming_in_m_ui8,App preferences � coming in M-UI8.,a
 workspace.pane.tabs.aria,Workspace tabs,apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html attr:aria-label,Workspace tabs,Workspace-Tabs,Schede workspace
 workspace.pane.tab.selectedItems,Selected Items,apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html text-node,Selected Items,Ausgewaehlte Elemente,Elementi selezionati
 workspace.pane.tab.upload,Upload,apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html text-node,Upload,Upload,Carica
+workspace.mediaDetail.toast.addressMissing,No address available.,apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message,No address available.,Keine Adresse verfuegbar.,Nessun indirizzo disponibile.
+workspace.mediaDetail.toast.addressCopied,Address copied,apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message,Address copied,Adresse kopiert,Indirizzo copiato
+workspace.mediaDetail.toast.detailsAlreadyOpen,Details are already open.,apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message,Details are already open.,Details sind bereits geoeffnet.,I dettagli sono gia aperti.
 auto.0031.appearance,Appearance,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Appearance,Appearance,Aspetto
 auto.0035.auswahl_oeffnen,Auswahl oeffnen,apps/web/src/app/features/map/map-shell/map-shell.component.html interpolation-literal,Auswahl oeffnen,Auswahl oeffnen,Apri la selezione
 auto.0036.auto_locate_after_login,Auto-locate after login,apps/web/src/app/features/settings-overlay/settings-overlay.component.html interpolation-literal,Auto-locate after login,Auto-locate after login,Localizzazione automatica dopo l'accesso
