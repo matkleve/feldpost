@@ -1,0 +1,70 @@
+<app-item-state-frame
+  [itemId]="itemId()"
+  [mode]="activeMode()"
+  [loading]="resolvedLoading()"
+  [error]="error()"
+  [empty]="empty()"
+  [selected]="selected()"
+  [disabled]="disabled()"
+  [loadingLabel]="loadingLabel()"
+  [errorLabel]="errorLabel()"
+  [emptyLabel]="emptyLabel()"
+  [retryLabel]="t('media.page.retry', 'Retry')"
+  (retryRequested)="onRetryRequested($event)"
+>
+  @if (item(); as media) {
+    <article
+      class="media-item"
+      [class.media-item--row]="activeMode() === 'row'"
+      [class.media-item--grid-sm]="activeMode() === 'grid-sm'"
+      [class.media-item--grid-md]="activeMode() === 'grid-md'"
+      [class.media-item--grid-lg]="activeMode() === 'grid-lg'"
+      [class.media-item--card]="activeMode() === 'card'"
+      (contextmenu)="onContextMenu($event)"
+    >
+      <button
+        type="button"
+        class="media-item__open"
+        [attr.aria-label]="
+          t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') + ' ' + titleText()
+        "
+        (click)="onOpenClick($event)"
+      >
+        <figure class="media-item__preview" aria-hidden="true">
+          @if (showThumbnailImage()) {
+            <img class="media-item__preview-image" [src]="thumbnailUrl()" [alt]="titleText()" />
+          } @else {
+            <span class="material-icons media-item__preview-icon" aria-hidden="true">{{
+              mediaIcon()
+            }}</span>
+          }
+        </figure>
+
+        <div class="media-item__meta">
+          <p class="media-item__title">{{ titleText() }}</p>
+
+          @if (capturedAtText().length > 0) {
+            <p class="media-item__date">{{ capturedAtText() }}</p>
+          }
+
+          @if (subtitleText().length > 0) {
+            <p class="media-item__subtitle">{{ subtitleText() }}</p>
+          }
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="media-item__select"
+        [class.media-item__select--active]="selected()"
+        [attr.aria-pressed]="selected()"
+        [attr.aria-label]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
+        (click)="onSelectClick($event)"
+      >
+        @if (selected()) {
+          <span class="material-icons" aria-hidden="true">check</span>
+        }
+      </button>
+    </article>
+  }
+</app-item-state-frame>

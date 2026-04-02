@@ -71,6 +71,59 @@ Reference workflow and checklist:
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting
 
+## SCSS Ownership and Comment Contract (Mandatory)
+
+Every SCSS file is responsible for exactly one component. Styling responsibilities
+are strictly non-overlapping across component layers.
+
+### Geometry ownership
+
+- Layout container components own columns, gaps, and breakpoints only.
+- Shared state-frame components own loading, error, empty, and selection visuals only.
+- Domain item components own only domain-specific visuals: typography, icons, media details.
+- Any given CSS property may be defined in exactly one component layer.
+  Defining the same property in multiple layers is forbidden.
+
+### Intermediate wrapper rule
+
+Structural or functional wrapper elements — any element that exists solely for
+JS hooks, Angular directives, state layers, ng-content, or similar —
+must carry zero styling. The following properties are explicitly forbidden
+on intermediate wrappers:
+
+width, height, min-width, min-height, max-width, max-height,
+aspect-ratio, padding, margin, position, top, right, bottom, left,
+inset, display, flex, grid, gap, overflow, transform, opacity,
+visibility, pointer-events, z-index
+
+Exception: a single property may appear on an intermediate wrapper only if it is
+functionally unavoidable. It must be accompanied by a comment explaining exactly
+why it cannot live on the layout owner or the content element instead.
+
+### The two-element rule
+
+In any rendered stack, only two elements may carry geometry:
+
+1. The outermost layout owner — sets the space
+2. The innermost content element — fills the space (e.g. `img` with `object-fit`)
+
+Everything in between: zero styling.
+
+### Comment contract
+
+Every CSS class, custom property, and keyframe must have two comment lines
+directly above it:
+
+- Line 1: what it does
+- Line 2: spec reference
+
+Example:
+
+```scss
+// Defines column layout for grid-md mode, 3 columns with token-based gap
+// @see item-grid.md#layout-modes
+.item-grid--grid-md { ... }
+
 ## Bulk Operation Safety (Mandatory Quality Gates)
 
 **QUALITY OVER SPEED. These gates prevent data loss and error cascades.**
@@ -166,3 +219,4 @@ Required steps for any new/changed visible text:
 5. If new language content is needed, keep `en/de/it` columns populated (no mixed-language fragments).
 
 Translation data in DB (`app_texts` + `app_text_translations`) is part of the feature definition, not an optional follow-up.
+```

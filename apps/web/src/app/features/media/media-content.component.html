@@ -1,16 +1,34 @@
 <section class="media-content">
   @if (loading()) {
-    <app-media-loading [variant]="cardVariant()" />
+    <app-item-grid [mode]="itemMode()">
+      @for (placeholderId of loadingPlaceholderIds; track placeholderId) {
+        <app-item-state-frame
+          [itemId]="'media-loading-' + placeholderId"
+          [mode]="itemMode()"
+          [loading]="true"
+          [disabled]="true"
+          [loadingLabel]="loadingLabel()"
+        />
+      }
+    </app-item-grid>
   } @else if (error()) {
     <app-media-error (retry)="retry.emit()" />
   } @else if (items().length === 0) {
     <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
   } @else {
-    <app-media-grid
-      [items]="items()"
-      [variant]="cardVariant()"
-      [projectNameFor]="projectNameFor()"
-      (itemClicked)="itemClicked.emit($event)"
-    />
+    <app-item-grid [mode]="itemMode()" [role]="'listbox'">
+      @for (item of items(); track item.id) {
+        <app-media-item
+          [itemId]="item.id"
+          [item]="item"
+          [mode]="itemMode()"
+          [projectName]="projectNameFor()(item.project_id)"
+          [selected]="isSelected(item.id)"
+          [actionContextId]="mediaItemActionContext"
+          (opened)="itemClicked.emit($event)"
+          (selectedChange)="onSelectionToggled(item.id)"
+        />
+      }
+    </app-item-grid>
   }
 </section>

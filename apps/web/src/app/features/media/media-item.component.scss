@@ -1,0 +1,115 @@
+// Styles media domain content surface inside the shared state frame.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item {
+  position: relative;
+}
+
+// Styles the primary media item interaction button and keeps content semantics local.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__open {
+  display: block;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: var(--spacing-2);
+  cursor: pointer;
+}
+
+// Styles media preview surface and visual treatment without owning outer geometry.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__preview {
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-bg-surface) 90%, var(--color-bg-base));
+}
+
+// Styles thumbnail image rendering semantics for media content.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__preview-image {
+  display: block;
+}
+
+// Styles fallback icon for non-image or unavailable preview assets.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__preview-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3);
+  color: var(--color-text-secondary);
+}
+
+// Styles metadata text group for title, date, and domain subtitle.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__meta {
+  margin-top: var(--spacing-2);
+}
+
+// Styles the media title typography.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-dense);
+  color: var(--color-text-primary);
+}
+
+// Styles the captured-date typography.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__date {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+}
+
+// Styles subtitle typography for project/type metadata.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__subtitle {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+}
+
+// Styles selection toggle control for media domain item actions.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__select {
+  position: absolute;
+  inset-block-start: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+// Styles active selection state for the media item toggle control.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__select--active {
+  border-color: var(--color-clay);
+  background: var(--color-clay);
+  color: var(--color-bg-surface);
+}
+
+// Styles keyboard focus visibility for primary open action.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__open:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 2px;
+}
+
+// Styles keyboard focus visibility for selection control.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.media-item__select:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 2px;
+}

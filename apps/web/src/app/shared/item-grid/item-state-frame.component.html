@@ -1,0 +1,39 @@
+<article
+  class="item-state-frame"
+  [class.item-state-frame--grid-sm]="mode() === 'grid-sm'"
+  [class.item-state-frame--grid-md]="mode() === 'grid-md'"
+  [class.item-state-frame--grid-lg]="mode() === 'grid-lg'"
+  [class.item-state-frame--row]="mode() === 'row'"
+  [class.item-state-frame--card]="mode() === 'card'"
+  [class.item-state-frame--selected]="selected()"
+  [class.item-state-frame--disabled]="disabled()"
+>
+  <div class="item-state-frame__content" [attr.aria-hidden]="hideProjectedContent()">
+    <ng-content />
+  </div>
+
+  @if (showLoadingState()) {
+    <div
+      class="item-state-frame__state-layer item-state-frame__state-layer--loading"
+      role="status"
+      [attr.aria-label]="loadingLabel()"
+    >
+      <span class="item-state-frame__spinner"></span>
+    </div>
+  }
+
+  @if (showErrorState()) {
+    <div class="item-state-frame__state-layer item-state-frame__state-layer--error" role="alert">
+      <p class="item-state-frame__state-label">{{ errorLabel() }}</p>
+      <button type="button" class="item-state-frame__retry" (click)="onRetryClick()">
+        {{ retryLabel() }}
+      </button>
+    </div>
+  }
+
+  @if (showEmptyState()) {
+    <div class="item-state-frame__state-layer item-state-frame__state-layer--empty" role="status">
+      <p class="item-state-frame__state-label">{{ emptyLabel() }}</p>
+    </div>
+  }
+</article>

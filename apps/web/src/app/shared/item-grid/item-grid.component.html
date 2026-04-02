@@ -1,0 +1,11 @@
+<section
+  class="item-grid"
+  [class.item-grid--grid-sm]="mode() === 'grid-sm'"
+  [class.item-grid--grid-md]="mode() === 'grid-md'"
+  [class.item-grid--grid-lg]="mode() === 'grid-lg'"
+  [class.item-grid--row]="mode() === 'row'"
+  [class.item-grid--card]="mode() === 'card'"
+  [attr.role]="role()"
+>
+  <ng-content />
+</section>

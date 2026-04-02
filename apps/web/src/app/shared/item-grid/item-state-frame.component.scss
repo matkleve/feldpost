@@ -1,0 +1,149 @@
+// Declares host as state-frame wrapper without grid geometry ownership.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+:host {
+  display: block;
+  min-height: 0;
+}
+
+// Defines shared state-frame visual surface used by all domain items.
+// @see docs/element-specs/item-grid.md#scss-responsibilities
+.item-state-frame {
+  // Defines spinner diameter token matching workspace thumbnail loading reference.
+  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+  --item-loading-spinner-size: 1.1rem;
+
+  // Defines spinner stroke width token matching workspace thumbnail loading reference.
+  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+  --item-loading-spinner-border-width: 2px;
+
+  // Defines spinner track alpha token matching workspace thumbnail loading reference.
+  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+  --item-loading-spinner-track-alpha: 24%;
+
+  // Defines spinner animation duration token matching workspace thumbnail loading reference.
+  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+  --item-loading-spinner-duration: 700ms;
+
+  // Defines spinner accent color token for unified loading semantics.
+  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+  --item-loading-spinner-color: var(--color-clay);
+
+  // Defines spinner corner radius token for circular loading ring.
+  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+  --item-loading-spinner-radius: var(--radius-full);
+
+  position: relative;
+  min-height: 0;
+  border-radius: var(--container-radius-control);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  transition: var(--interactive-transition-standard);
+}
+
+// Applies shared selected-state emphasis independent of domain content.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame--selected {
+  border-color: var(--color-clay);
+  box-shadow: var(--shadow-sm);
+}
+
+// Applies shared disabled-state dimming and interaction lock.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+// Hosts projected domain content region below state overlays.
+// @see docs/element-specs/item-grid.md#component-hierarchy
+.item-state-frame__content {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+// Defines common overlay layer for loading, error, and empty states.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame__state-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: color-mix(in srgb, var(--color-bg-base) 76%, transparent);
+  color: var(--color-text-secondary);
+}
+
+// Applies loading-specific foreground color for unified spinner state.
+// @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+.item-state-frame__state-layer--loading {
+  color: var(--item-loading-spinner-color);
+}
+
+// Renders the unified loading circle with tokenized geometry and motion.
+// @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+.item-state-frame__spinner {
+  inline-size: var(--item-loading-spinner-size);
+  block-size: var(--item-loading-spinner-size);
+  border-radius: var(--item-loading-spinner-radius);
+  border: var(--item-loading-spinner-border-width) solid
+    color-mix(in srgb, currentcolor var(--item-loading-spinner-track-alpha), transparent);
+  border-top-color: currentcolor;
+  animation: item-state-frame-spin var(--item-loading-spinner-duration) linear infinite;
+}
+
+// Applies destructive color semantics for shared error layer.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame__state-layer--error {
+  color: var(--color-danger);
+}
+
+// Applies neutral text semantics for shared empty layer.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame__state-layer--empty {
+  color: var(--color-text-secondary);
+}
+
+// Styles shared textual label inside all state overlays.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame__state-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  text-align: center;
+}
+
+// Styles shared retry action for error state recovery.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame__retry {
+  min-block-size: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  padding-inline: var(--spacing-3);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: var(--interactive-transition-standard);
+}
+
+// Defines interactive hover and focus treatment for retry action.
+// @see docs/element-specs/item-grid.md#state
+.item-state-frame__retry:hover,
+.item-state-frame__retry:focus-visible {
+  border-color: var(--color-clay);
+  background: color-mix(in srgb, var(--color-clay) 10%, var(--color-bg-surface));
+}
+
+// Defines continuous clockwise loading animation for unified spinner.
+// @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+@keyframes item-state-frame-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
