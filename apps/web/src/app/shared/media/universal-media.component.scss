@@ -41,10 +41,6 @@
 
 .universal-media__asset {
   display: block;
-  width: var(--universal-media-asset-width);
-  height: var(--universal-media-asset-height);
-  max-width: var(--universal-media-asset-max-width);
-  max-height: var(--universal-media-asset-max-height);
   object-fit: contain;
   object-position: top center;
 }
