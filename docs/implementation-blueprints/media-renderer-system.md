@@ -9,7 +9,7 @@ Introduce one shared media rendering architecture with:
 - a universal `UniversalMediaComponent`
 - incremental migration of all existing surfaces
 
-This blueprint follows the contract in `docs/element-specs/media-renderer-system.md`.
+This blueprint follows the archived legacy contract in `docs/archive/element-specs-legacy/2026-04-02-item-grid-consolidation/media-renderer-system.md` and is superseded in active runtime by `docs/element-specs/media-delivery-orchestrator.md` plus `docs/element-specs/item-grid.md`/`docs/element-specs/media-item.md`.
 
 ## Non-Goals
 

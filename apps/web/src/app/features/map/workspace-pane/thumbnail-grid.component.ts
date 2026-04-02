@@ -36,6 +36,8 @@ import {
   type ProjectSelectOption,
 } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
+import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
+import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
 import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
 
@@ -286,9 +288,10 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
                 (toggle)="viewService.toggleGroupCollapsed(item.heading)"
               />
             } @else {
-              <div
+              <app-item-grid
                 class="thumbnail-grid__cards"
                 [class.thumbnail-grid__cards--start]="isUnderfilled(item.images.length)"
+                [mode]="itemGridMode()"
               >
                 @for (img of item.images; track img.id) {
                   <app-thumbnail-card
@@ -304,14 +307,15 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
                     (contextMenuRequested)="onThumbnailContextMenuRequested($event)"
                   />
                 }
-              </div>
+              </app-item-grid>
             }
           }
         }
       } @else {
-        <div
+        <app-item-grid
           class="thumbnail-grid__cards"
           [class.thumbnail-grid__cards--start]="isUnderfilled(flatImages().length)"
+          [mode]="itemGridMode()"
         >
           @for (img of flatImages(); track img.id) {
             <app-thumbnail-card
@@ -327,7 +331,7 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
               (contextMenuRequested)="onThumbnailContextMenuRequested($event)"
             />
           }
-        </div>
+        </app-item-grid>
       }
 
       @if (thumbnailContextMenuOpen() && thumbnailContextMenuPosition(); as menuPos) {
@@ -435,6 +439,7 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
   styleUrl: './thumbnail-grid.component.scss',
   imports: [
     ThumbnailCardComponent,
+    ItemGridComponent,
     GroupHeaderComponent,
     DropdownShellComponent,
     ProjectSelectDialogComponent,
@@ -489,6 +494,19 @@ export class ThumbnailGridComponent implements OnDestroy {
   readonly sections = computed(() => this.viewService.groupedSections());
 
   readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
+  readonly itemGridMode = computed<ItemDisplayMode>(() => {
+    switch (this.viewService.thumbnailSizePreset()) {
+      case 'row':
+        return 'row';
+      case 'small':
+        return 'grid-sm';
+      case 'large':
+        return 'grid-lg';
+      case 'medium':
+      default:
+        return 'grid-md';
+    }
+  });
 
   /** Flatten grouped sections into a linear list of headers + grids. */
   readonly renderItems = computed<RenderItem[]>(() => {

@@ -1,6 +1,6 @@
 # Photo Load Service
 
-> **Related specs:** [media-renderer-system](media-renderer-system.md), [photo-marker](photo-marker.md), [thumbnail-card](thumbnail-card.md), [media-detail-photo-viewer](media-detail-photo-viewer.md), [image-detail-view](media-detail-view.md)
+> **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [item-grid](item-grid.md), [media-item](media-item.md), [photo-marker](photo-marker.md), [media-detail-photo-viewer](media-detail-photo-viewer.md), [image-detail-view](media-detail-view.md)
 > **Use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
 ## What It Is

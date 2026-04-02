@@ -1,7 +1,7 @@
 # Media Detail — Media Viewer
 
 > **Parent spec:** [media-detail-view](media-detail-view.md)
-> **Architecture parent:** [media-renderer-system](media-renderer-system.md)
+> **Architecture parent:** [media-delivery-orchestrator](media-delivery-orchestrator.md)
 > **Photo loading service:** [photo-load-service](photo-load-service.md)
 > **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 > **Editing use cases:** [use-cases/image-editing.md](../use-cases/image-editing.md) (IE-10)

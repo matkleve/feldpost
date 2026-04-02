@@ -208,8 +208,11 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 
 - ✅ `active-selection-view.md` — Active Selection View (composed workspace content: toolbar + grid + grouping + filtering)
 - ✅ `group-tab-bar.md` — Group Tab Bar
+- ✅ `item-grid.md` — Universal item-grid layout and item contract (active)
+- ✅ `media-item.md` — Media domain item contract (active)
+- ✅ `project-item.md` — Project domain item contract (active)
 - ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
-- ✅ `thumbnail-card.md` — Thumbnail Card (128×128 with hover actions)
+- Archived legacy `thumbnail-card.md` — see `docs/archive/element-specs-legacy/2026-04-02-item-grid-consolidation/thumbnail-card.md`
 - ✅ `workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
 - ✅ `workspace-view-system.md` — Workspace View System (data pipeline architecture)
 
@@ -248,7 +251,8 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
 - ✅ `language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
 - ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
-- ✅ `media-renderer-system.md` — Universal media rendering contract (file-type registry, adaptive slot-based tier model, shared orchestrator + component API)
+- ✅ `media-delivery-orchestrator.md` — Global media delivery contract (tier/fallback/url policy)
+- Archived legacy `media-renderer-system.md` — see `docs/archive/element-specs-legacy/2026-04-02-item-grid-consolidation/media-renderer-system.md`
 
 ### Planned / Missing Specs
 

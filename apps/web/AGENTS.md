@@ -27,6 +27,7 @@ src/app/
 - Never call Leaflet or Supabase directly — use service abstractions
 - All DB types from Supabase-generated types — no `any`
 - Match the component hierarchy in the element spec exactly
+- Every production component must have its own dedicated spec in `docs/element-specs/` (parent specs can reference child specs, but not replace them)
 - Use glossary names from `docs/glossary.md`
 - Floating/overlay elements go in Map Zone, not outside Map Shell
 - Prefer shared standardized UI components in `src/app/shared/` before implementing feature-local duplicates

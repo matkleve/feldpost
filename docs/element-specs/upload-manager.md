@@ -1,6 +1,6 @@
 # Upload Manager
 
-> **Related specs:** [media-renderer-system](media-renderer-system.md), [upload-panel](upload-panel.md), [photo-load-service](photo-load-service.md)
+> **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [upload-panel](upload-panel.md), [photo-load-service](photo-load-service.md)
 
 ## What It Is
 

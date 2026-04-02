@@ -184,6 +184,13 @@ Example:
 4. Reuse shared UI and adapter abstractions before introducing new structure
 5. Verify the result against `docs/agent-workflows/implementation-checklist.md`
 
+## Component Spec Coverage (Mandatory)
+
+- Every production component must have its own dedicated element spec in `docs/element-specs/`.
+- Parent specs may define shared contracts, but domain and shared components still require child specs for their own behavior, state, wiring, and acceptance criteria.
+- Do not collapse multiple non-trivial component contracts into one monolithic spec when child-spec split is possible.
+- Before implementing or refactoring a component, create or update that component's dedicated spec first.
+
 ## Feedback-to-Spec Sync (Mandatory)
 
 - When user feedback changes expected behavior, update the relevant spec(s) first in the same work session.

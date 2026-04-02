@@ -3,6 +3,7 @@
 ## Element Specs
 
 - Every UI element has a spec in `element-specs/` — this is the **implementation contract**
+- Every production component has its own dedicated spec file; parent specs reference child specs instead of collapsing multiple component contracts into one document
 - Specs are the source of truth: code must match spec, not the other way around
 - Update specs **before** modifying features
 - When user feedback changes behavior expectations, update the relevant spec sections immediately in the same session (Actions, Mermaids, Wiring/Data, Acceptance Criteria)

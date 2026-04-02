@@ -1,6 +1,6 @@
 # File-Type Chips (Upload Area Feature)
 
-> **Architecture parent:** [media-renderer-system](media-renderer-system.md)
+> **Architecture parent:** [media-delivery-orchestrator](media-delivery-orchestrator.md)
 
 ## What It Is
 
