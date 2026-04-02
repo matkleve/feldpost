@@ -30,15 +30,17 @@
         "
         (click)="onOpenClick($event)"
       >
-        <figure class="media-item__preview" aria-hidden="true">
-          @if (showThumbnailImage()) {
-            <img class="media-item__preview-image" [src]="thumbnailUrl()" [alt]="titleText()" />
-          } @else {
-            <span class="material-icons media-item__preview-icon" aria-hidden="true">{{
-              mediaIcon()
-            }}</span>
-          }
-        </figure>
+        <app-media-item-render-surface
+          class="media-item__preview"
+          [renderState]="mediaRenderState()"
+          [thumbnailUrl]="thumbnailUrl()"
+          [icon]="mediaIcon()"
+          [altText]="titleText()"
+          [requestedTier]="requestedTier()"
+          [effectiveTier]="effectiveTier()"
+          [slotWidthRem]="slotWidthRem()"
+          [slotHeightRem]="slotHeightRem()"
+        />
 
         <div class="media-item__meta">
           <p class="media-item__title">{{ titleText() }}</p>
@@ -53,18 +55,20 @@
         </div>
       </button>
 
-      <button
-        type="button"
-        class="media-item__select"
-        [class.media-item__select--active]="selected()"
-        [attr.aria-pressed]="selected()"
-        [attr.aria-label]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
-        (click)="onSelectClick($event)"
-      >
-        @if (selected()) {
-          <span class="material-icons" aria-hidden="true">check</span>
-        }
-      </button>
+      <app-media-item-upload-overlay
+        class="media-item__upload-overlay"
+        [overlay]="uploadOverlay()"
+      />
+
+      <app-media-item-quiet-actions
+        class="media-item__quiet-actions"
+        [selected]="selected()"
+        [disabled]="disabled()"
+        [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
+        [contextLabel]="t('workspace.imageDetail.action.more.aria', 'More actions')"
+        (selectRequested)="onSelectRequested()"
+        (contextRequested)="onContextActionRequested()"
+      />
     </article>
   }
 </app-item-state-frame>

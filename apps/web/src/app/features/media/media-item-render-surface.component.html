@@ -1,0 +1,42 @@
+<figure class="media-item-render-surface" aria-hidden="true">
+  <div
+    class="media-item-render-surface__slot"
+    [attr.data-tier-requested]="requestedTier()"
+    [attr.data-tier-effective]="effectiveTier()"
+    [attr.data-slot-width-rem]="slotWidthRem()"
+    [attr.data-slot-height-rem]="slotHeightRem()"
+  >
+    @if (renderState() === 'loaded' && thumbnailUrl().length > 0) {
+      <img class="media-item-render-surface__asset" [src]="thumbnailUrl()" [alt]="altText()" />
+    } @else if (renderState() === 'loading') {
+      <div class="media-item-render-surface__layer media-item-render-surface__layer--placeholder">
+        <img
+          class="media-item-render-surface__placeholder-icon"
+          [src]="placeholderIconUrl"
+          alt=""
+        />
+      </div>
+      <div class="media-item-render-surface__layer media-item-render-surface__layer--loading">
+        <span class="media-item-render-surface__spinner"></span>
+      </div>
+    } @else if (renderState() === 'error' || renderState() === 'no-photo') {
+      <div class="media-item-render-surface__layer media-item-render-surface__layer--no-photo">
+        <img class="media-item-render-surface__no-photo-icon" [src]="noPhotoIconUrl" alt="" />
+      </div>
+    } @else if (renderState() === 'icon-only') {
+      <div class="media-item-render-surface__layer media-item-render-surface__layer--icon-only">
+        <span class="material-icons media-item-render-surface__icon" aria-hidden="true">{{
+          icon()
+        }}</span>
+      </div>
+    } @else {
+      <div class="media-item-render-surface__layer media-item-render-surface__layer--placeholder">
+        <img
+          class="media-item-render-surface__placeholder-icon"
+          [src]="placeholderIconUrl"
+          alt=""
+        />
+      </div>
+    }
+  </div>
+</figure>

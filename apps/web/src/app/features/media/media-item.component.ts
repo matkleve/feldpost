@@ -1,131 +1,173 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import type { OnChanges, SimpleChanges } from '@angular/core';
-import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import type { AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import type { PhotoLoadState } from '../../core/photo-load.model';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { PhotoLoadService } from '../../core/photo-load.service';
+import type { MediaTier, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
-import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
+import { PhotoLoadService } from '../../core/photo-load.service';
+import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { ItemComponent, type ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';
+import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
+import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
+import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
+import {
+  MediaItemRenderSurfaceComponent,
+  type MediaItemRenderState,
+} from './media-item-render-surface.component';
+import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
+import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
+import { rectToRemSize, requestedTierForMode } from './media-item-slot.utils';
+import { formatMediaItemDate, resolveMediaTypeLabel } from './media-item.utils';
 
 export const MEDIA_ITEM_ACTION_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
-export const MEDIA_ITEM_ACTION_IDS: readonly string[] = [
-  'open_in_media',
-  'zoom_house',
-  'zoom_street',
-  'copy_address',
-  'copy_gps',
-  'open_google_maps',
-  'assign_to_project',
-  'change_location_map',
-  'change_location_address',
-  'remove_from_project',
-  'delete_media',
-  'download',
-  'share_link',
-  'copy_link',
-  'native_share',
-];
-
 @Component({
   selector: 'app-media-item',
-  imports: [ItemStateFrameComponent],
+  imports: [
+    ItemStateFrameComponent,
+    MediaItemRenderSurfaceComponent,
+    MediaItemUploadOverlayComponent,
+    MediaItemQuietActionsComponent,
+  ],
   templateUrl: './media-item.component.html',
   styleUrl: './media-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MediaItemComponent extends ItemComponent implements OnChanges {
+export class MediaItemComponent extends ItemComponent implements OnChanges, AfterViewInit {
   private readonly i18nService = inject(I18nService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly photoLoadService = inject(PhotoLoadService);
+  private readonly uploadManager = inject(UploadManagerService);
   private readonly mediaOrchestrator = inject(MediaOrchestratorService);
   private thumbnailRequestId = 0;
+  private resizeObserver: ResizeObserver | null = null;
 
   readonly item = input<ImageRecord | null>(null);
   readonly projectName = input<string>('');
-
   readonly thumbnailUrl = signal('');
-  readonly thumbnailFailed = signal(false);
-  readonly thumbnailLoading = signal(false);
-
-  readonly hasItem = computed(() => !!this.item());
-
+  readonly slotWidthRem = signal<number | null>(null);
+  readonly slotHeightRem = signal<number | null>(null);
   readonly activeMode = computed<ItemDisplayMode>(() => this.mode());
-
   readonly loadingLabel = computed(() => this.t('common.loading', 'Loading media...'));
-
   readonly errorLabel = computed(() => this.t('media.page.error', 'Failed to load media'));
-
   readonly emptyLabel = computed(() => this.t('media.page.empty', 'No media found'));
-
-  // Resolves default action context for media items from the canonical matrix contract.
-  // @see docs/element-specs/action-context-matrix.md#canonical-context-definitions
-  readonly mediaActionContextId = computed(
-    () => this.actionContextId() ?? MEDIA_ITEM_ACTION_CONTEXT,
-  );
 
   readonly fileIdentity = computed(() => {
     const record = this.item();
     const storagePath = record?.storage_path ?? null;
-    const extension = storagePath?.split('.').pop()?.toLowerCase() ?? '';
-
-    return {
-      fileName: storagePath,
-      extension,
-    };
+    return { fileName: storagePath, extension: storagePath?.split('.').pop()?.toLowerCase() ?? '' };
   });
 
   readonly fileType = computed(() => this.mediaOrchestrator.resolveFileType(this.fileIdentity()));
-
   readonly mediaIcon = computed(() => this.mediaOrchestrator.resolveIcon(this.fileIdentity()));
-
   readonly canRenderImage = computed(() => this.fileType().category === 'image');
-
-  readonly resolvedLoading = computed(
-    () => this.loading() || (this.canRenderImage() && this.thumbnailLoading()),
+  readonly requestedTier = computed<MediaTier>(() => requestedTierForMode(this.activeMode()));
+  readonly effectiveTier = computed<MediaTier>(() =>
+    this.mediaOrchestrator.selectRequestedTierForSlot({
+      requestedTier: this.requestedTier(),
+      slotWidthRem: this.slotWidthRem(),
+      slotHeightRem: this.slotHeightRem(),
+      context: 'grid',
+    }),
   );
-
-  readonly showThumbnailImage = computed(
-    () => this.thumbnailUrl().length > 0 && !this.thumbnailFailed() && this.canRenderImage(),
-  );
-
-  readonly titleText = computed(() => {
+  readonly photoLoadState = computed<PhotoLoadState>(() => {
     const record = this.item();
-    if (!record) {
-      return this.t('media.page.title', 'Media');
-    }
-
-    return record.address_label || this.t('media.page.title', 'Media');
+    if (!record || !this.canRenderImage()) return 'idle';
+    const preferredPath = record.thumbnail_path ?? record.storage_path;
+    if (!preferredPath) return 'no-photo';
+    return this.photoLoadService.getLoadState(record.id, 'thumb')();
   });
+  readonly mediaRenderState = computed<MediaItemRenderState>(() => {
+    const record = this.item();
+    if (!record) return 'placeholder';
+    if (!this.canRenderImage()) return 'icon-only';
+    if (this.thumbnailUrl().length > 0) return 'loaded';
+    switch (this.photoLoadState()) {
+      case 'loading':
+      case 'loaded':
+        return 'loading';
+      case 'error':
+        return 'error';
+      case 'no-photo':
+        return 'no-photo';
+      case 'idle':
+      default:
+        return 'placeholder';
+    }
+  });
+  readonly resolvedLoading = computed(() => this.loading());
+  readonly uploadOverlay = computed<UploadOverlayState | null>(() =>
+    resolveMediaItemUploadOverlay(this.uploadManager.jobs(), this.item()),
+  );
 
+  readonly titleText = computed(
+    () => this.item()?.address_label || this.t('media.page.title', 'Media'),
+  );
   readonly subtitleText = computed(() => {
     const project = this.projectName();
-    const type = this.mediaTypeLabel();
-
-    if (project.length > 0 && type.length > 0) {
-      return `${project} · ${type}`;
-    }
-
-    if (project.length > 0) {
-      return project;
-    }
-
-    return type;
+    const type = resolveMediaTypeLabel(
+      this.fileType(),
+      this.mediaOrchestrator.resolveBadge(this.fileIdentity()),
+      (key, fallback) => this.t(key, fallback),
+    );
+    if (project.length > 0 && type.length > 0) return `${project} · ${type}`;
+    return project.length > 0 ? project : type;
   });
-
   readonly capturedAtText = computed(() => {
     const record = this.item();
-    if (!record) {
-      return '';
-    }
-
-    return this.formatDate(record.captured_at, record.has_time);
+    return record
+      ? formatMediaItemDate(record.captured_at, this.i18nService.locale(), record.has_time)
+      : '';
   });
 
+  constructor() {
+    super();
+    this.destroyRef.onDestroy(() => {
+      this.resizeObserver?.disconnect();
+      this.resizeObserver = null;
+    });
+
+    this.photoLoadService.urlChanged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        const record = this.item();
+        if (!record || event.imageId !== record.id || event.size !== 'thumb') return;
+        this.thumbnailUrl.set(event.url ?? '');
+      });
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['item']) {
-      void this.resolveThumbnailUrl(this.item());
-    }
+    if (changes['item']) void this.resolveThumbnailUrl(this.item());
+  }
+
+  ngAfterViewInit(): void {
+    const previewElement = this.hostElement.nativeElement.querySelector(
+      '.media-item__preview',
+    ) as HTMLElement | null;
+    if (!previewElement) return;
+
+    this.updateSlot(previewElement.getBoundingClientRect());
+    if (typeof ResizeObserver === 'undefined') return;
+
+    this.resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      this.updateSlot(entry.contentRect);
+    });
+
+    this.resizeObserver.observe(previewElement);
   }
 
   t(key: string, fallback: string): string {
@@ -136,30 +178,17 @@ export class MediaItemComponent extends ItemComponent implements OnChanges {
   onOpenClick(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-
-    if (this.disabled()) {
-      return;
-    }
-
+    if (this.disabled()) return;
     this.emitOpened();
   }
 
-  onSelectClick(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (this.disabled()) {
-      return;
-    }
-
+  onSelectRequested(): void {
+    if (this.disabled()) return;
     this.emitSelectedChange(!this.selected());
   }
 
   onRetryRequested(itemId: string): void {
-    if (itemId !== this.itemId()) {
-      return;
-    }
-
+    if (itemId !== this.itemId()) return;
     void this.resolveThumbnailUrl(this.item());
     this.emitRetryRequested();
   }
@@ -167,82 +196,46 @@ export class MediaItemComponent extends ItemComponent implements OnChanges {
   onContextMenu(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-
-    if (this.disabled()) {
-      return;
-    }
-
+    if (this.disabled()) return;
     this.emitContextAction('open_in_media');
   }
 
-  private mediaTypeLabel(): string {
-    const definition = this.fileType();
-    const badge = this.mediaOrchestrator.resolveBadge(this.fileIdentity());
-
-    switch (definition.category) {
-      case 'image':
-        return this.t('media.meta.type.image', 'Image');
-      case 'video':
-        return this.t('media.meta.type.video', 'Video');
-      case 'document':
-        return definition.id === 'pdf' ? this.t('media.meta.type.pdf', 'PDF') : definition.label;
-      case 'spreadsheet':
-      case 'presentation':
-      case 'audio':
-        return definition.label;
-      default:
-        return badge ?? definition.label;
-    }
-  }
-
-  private formatDate(dateString: string | null, includeTime = false): string {
-    if (!dateString) {
-      return '';
-    }
-
-    try {
-      const locale = this.i18nService.locale();
-      const options: Intl.DateTimeFormatOptions = includeTime
-        ? { dateStyle: 'medium', timeStyle: 'short' }
-        : { dateStyle: 'medium' };
-      return new Intl.DateTimeFormat(locale, options).format(new Date(dateString));
-    } catch {
-      return '';
-    }
+  onContextActionRequested(): void {
+    if (this.disabled()) return;
+    this.emitContextAction('open_in_media');
   }
 
   private async resolveThumbnailUrl(record: ImageRecord | null): Promise<void> {
-    const preferredPath = record?.thumbnail_path ?? record?.storage_path;
-
-    if (!preferredPath || !this.isLikelyImagePath(preferredPath)) {
-      this.thumbnailFailed.set(false);
-      this.thumbnailLoading.set(false);
+    if (!record) {
       this.thumbnailUrl.set('');
       return;
     }
-
+    const preferredPath = record.thumbnail_path ?? record.storage_path;
+    if (!preferredPath || !this.isLikelyImagePath(preferredPath)) {
+      this.thumbnailUrl.set('');
+      if (!preferredPath) this.photoLoadService.markNoPhoto(record.id);
+      return;
+    }
     if (/^(https?:|blob:|data:)/i.test(preferredPath)) {
-      this.thumbnailFailed.set(false);
-      this.thumbnailLoading.set(false);
       this.thumbnailUrl.set(preferredPath);
       return;
     }
-
     const requestId = ++this.thumbnailRequestId;
-    this.thumbnailLoading.set(true);
-
-    const signed = await this.photoLoadService.getSignedUrl(preferredPath, 'thumb', record?.id);
-    if (requestId !== this.thumbnailRequestId) {
-      return;
-    }
-
-    this.thumbnailFailed.set(!signed.url);
+    const signed = await this.photoLoadService.getSignedUrl(preferredPath, 'thumb', record.id);
+    if (requestId !== this.thumbnailRequestId) return;
     this.thumbnailUrl.set(signed.url ?? '');
-    this.thumbnailLoading.set(false);
   }
 
   private isLikelyImagePath(path: string): boolean {
     const extension = path.split('.').pop()?.toLowerCase() ?? '';
     return this.mediaOrchestrator.resolveFileType({ extension }).category === 'image';
+  }
+
+  private updateSlot(rect: Pick<DOMRectReadOnly, 'width' | 'height'>): void {
+    const remSize = rectToRemSize(rect);
+    if (!remSize) return;
+
+    this.slotWidthRem.set(remSize.widthRem);
+    this.slotHeightRem.set(remSize.heightRem);
   }
 }

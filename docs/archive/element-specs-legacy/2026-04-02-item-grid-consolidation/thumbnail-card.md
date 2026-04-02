@@ -1,3 +1,5 @@
+> Archived: replaced by item-grid.md as of 2026-04-02.
+
 # Thumbnail Card
 
 > **Architecture parent:** [media-renderer-system](media-renderer-system.md)

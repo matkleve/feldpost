@@ -1,0 +1,13 @@
+@if (overlay()) {
+  <div class="media-item-upload-overlay" aria-hidden="true">
+    <div class="media-item-upload-overlay__fill" [style.width.%]="progressPercent()"></div>
+
+    <div class="media-item-upload-overlay__content">
+      <span class="material-icons media-item-upload-overlay__icon" aria-hidden="true">upload</span>
+
+      @if (overlay()?.label; as label) {
+        <span class="media-item-upload-overlay__label">{{ label }}</span>
+      }
+    </div>
+  </div>
+}

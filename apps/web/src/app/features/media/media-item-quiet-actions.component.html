@@ -1,0 +1,23 @@
+<div class="media-item-quiet-actions">
+  <button
+    type="button"
+    class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
+    [class.media-item-quiet-actions__button--select-active]="selected()"
+    [attr.aria-pressed]="selected()"
+    [attr.aria-label]="selectLabel()"
+    (click)="onSelectClick($event)"
+  >
+    @if (selected()) {
+      <span class="material-icons" aria-hidden="true">check</span>
+    }
+  </button>
+
+  <button
+    type="button"
+    class="media-item-quiet-actions__button media-item-quiet-actions__button--context"
+    [attr.aria-label]="contextLabel()"
+    (click)="onContextClick($event)"
+  >
+    <span class="material-icons" aria-hidden="true">more_horiz</span>
+  </button>
+</div>
