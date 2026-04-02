@@ -18,6 +18,10 @@ import { WorkspaceSelectionService } from '../../../core/workspace-selection.ser
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import { GeocodingService } from '../../../core/geocoding.service';
+import { MediaLocationUpdateService } from '../../../core/media-location-update.service';
+import { ShareSetService } from '../../../core/share-set.service';
+import { ZipExportService } from '../../../core/zip-export.service';
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
 import {
   ThumbnailCardComponent,
@@ -27,20 +31,192 @@ import {
 } from './thumbnail-card/thumbnail-card.component';
 import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import {
+  ProjectSelectDialogComponent,
+  type ProjectSelectOption,
+} from '../../../shared/project-select-dialog/project-select-dialog.component';
+import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
+import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
 
 /** Flat renderable item — either a group header or a grid of images. */
 type RenderItem =
   | { type: 'header'; heading: string; imageCount: number; level: number }
   | { type: 'grid'; images: WorkspaceImage[] };
 
-type ThumbnailContextActionId = 'remove_from_project' | 'delete_media';
+type ThumbnailContextActionSection = 'primary' | 'secondary' | 'destructive';
+
+type ThumbnailContextActionId =
+  | 'open_in_media'
+  | 'zoom_house'
+  | 'zoom_street'
+  | 'copy_address'
+  | 'copy_gps'
+  | 'open_google_maps'
+  | 'assign_to_project'
+  | 'change_location_map'
+  | 'change_location_address'
+  | 'remove_from_project'
+  | 'delete_media'
+  | 'download'
+  | 'share_link'
+  | 'copy_link'
+  | 'native_share';
 
 export const WS_GRID_THUMBNAIL_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
 export const WS_GRID_THUMBNAIL_ACTION_IDS: ReadonlyArray<ThumbnailContextActionId> = [
+  'open_in_media',
+  'zoom_house',
+  'zoom_street',
+  'copy_address',
+  'copy_gps',
+  'open_google_maps',
+  'assign_to_project',
+  'change_location_map',
+  'change_location_address',
   'remove_from_project',
   'delete_media',
+  'download',
+  'share_link',
+  'copy_link',
+  'native_share',
+];
+
+type ThumbnailContextActionDefinition = {
+  id: ThumbnailContextActionId;
+  icon: string;
+  section: ThumbnailContextActionSection;
+  labelKey: string;
+  fallbackLabel: string;
+  visibleWhen: (context: {
+    targetCount: number;
+    locationKnown: boolean;
+    deviceSupportsNativeShare: boolean;
+  }) => boolean;
+};
+
+const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextActionDefinition> = [
+  {
+    id: 'open_in_media',
+    icon: 'open_in_new',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.openInMedia',
+    fallbackLabel: 'Open in media',
+    visibleWhen: (context) => context.targetCount === 1,
+  },
+  {
+    id: 'zoom_house',
+    icon: 'center_focus_strong',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.zoomHouse',
+    fallbackLabel: 'Hierhin zoomen (Hausnaehe)',
+    visibleWhen: (context) => context.targetCount === 1 && context.locationKnown,
+  },
+  {
+    id: 'zoom_street',
+    icon: 'zoom_in',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.zoomStreet',
+    fallbackLabel: 'Hierhin zoomen (Strassennaehe)',
+    visibleWhen: (context) => context.targetCount === 1 && context.locationKnown,
+  },
+  {
+    id: 'copy_address',
+    icon: 'content_copy',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.copyAddress',
+    fallbackLabel: 'Adresse kopieren',
+    visibleWhen: (context) => context.targetCount === 1 && context.locationKnown,
+  },
+  {
+    id: 'copy_gps',
+    icon: 'content_copy',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.copyGps',
+    fallbackLabel: 'GPS kopieren',
+    visibleWhen: (context) => context.targetCount === 1 && context.locationKnown,
+  },
+  {
+    id: 'open_google_maps',
+    icon: 'open_in_new',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.openGoogleMaps',
+    fallbackLabel: 'In Google Maps oeffnen',
+    visibleWhen: (context) => context.targetCount === 1 && context.locationKnown,
+  },
+  {
+    id: 'assign_to_project',
+    icon: 'folder_open',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.assignToProject',
+    fallbackLabel: 'Projekt hinzufuegen...',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'change_location_map',
+    icon: 'pin_drop',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.changeLocationMap',
+    fallbackLabel: 'Change GPS location',
+    visibleWhen: (context) => context.targetCount === 1,
+  },
+  {
+    id: 'change_location_address',
+    icon: 'search',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.changeLocationAddress',
+    fallbackLabel: 'Change address',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'download',
+    icon: 'folder_zip',
+    section: 'secondary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.download',
+    fallbackLabel: 'Export ZIP',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'share_link',
+    icon: 'share',
+    section: 'secondary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.shareLink',
+    fallbackLabel: 'Share link',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'copy_link',
+    icon: 'content_copy',
+    section: 'secondary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.copyLink',
+    fallbackLabel: 'Copy link',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'native_share',
+    icon: 'ios_share',
+    section: 'secondary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.nativeShare',
+    fallbackLabel: 'Share',
+    visibleWhen: (context) => context.targetCount > 0 && context.deviceSupportsNativeShare,
+  },
+  {
+    id: 'remove_from_project',
+    icon: 'remove_circle_outline',
+    section: 'destructive',
+    labelKey: 'upload.item.menu.destructive.removeFromProject',
+    fallbackLabel: 'Remove from project',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'delete_media',
+    icon: 'delete',
+    section: 'destructive',
+    labelKey: 'workspace.imageDetail.action.delete',
+    fallbackLabel: 'Delete media',
+    visibleWhen: (context) => context.targetCount > 0,
+  },
 ];
 
 @Component({
@@ -169,9 +345,9 @@ export const WS_GRID_THUMBNAIL_ACTION_IDS: ReadonlyArray<ThumbnailContextActionI
             tabindex="-1"
             [attr.aria-label]="t('workspace.thumbnailGrid.menu.aria', 'Thumbnail context menu')"
           >
-            @for (action of thumbnailContextActions(); track action.id) {
+            @for (action of thumbnailPrimaryActions(); track action.id) {
               <button
-                class="dd-item dd-item--danger"
+                class="dd-item"
                 type="button"
                 role="menuitem"
                 [disabled]="action.disabled"
@@ -183,13 +359,87 @@ export const WS_GRID_THUMBNAIL_ACTION_IDS: ReadonlyArray<ThumbnailContextActionI
                 <span class="dd-item__label">{{ action.label }}</span>
               </button>
             }
+
+            @if (thumbnailPrimaryActions().length > 0 && thumbnailSecondaryActions().length > 0) {
+              <div class="dd-divider" aria-hidden="true"></div>
+            }
+
+            @for (action of thumbnailSecondaryActions(); track action.id) {
+              <button
+                class="dd-item"
+                type="button"
+                role="menuitem"
+                [disabled]="action.disabled"
+                (click)="onThumbnailContextActionSelected(action.id)"
+              >
+                <span class="material-icons dd-item__icon" aria-hidden="true">{{
+                  action.icon
+                }}</span>
+                <span class="dd-item__label">{{ action.label }}</span>
+              </button>
+            }
+
+            @if (thumbnailDestructiveActions().length > 0) {
+              <div class="dd-divider" aria-hidden="true"></div>
+
+              @for (action of thumbnailDestructiveActions(); track action.id) {
+                <button
+                  class="dd-item dd-item--danger"
+                  type="button"
+                  role="menuitem"
+                  [disabled]="action.disabled"
+                  (click)="onThumbnailContextActionSelected(action.id)"
+                >
+                  <span class="material-icons dd-item__icon" aria-hidden="true">{{
+                    action.icon
+                  }}</span>
+                  <span class="dd-item__label">{{ action.label }}</span>
+                </button>
+              }
+            }
           </div>
         </app-dropdown-shell>
+      }
+
+      @if (projectDialogOpen()) {
+        <app-project-select-dialog
+          [title]="t('workspace.export.projectDialog.title', 'Select project')"
+          [message]="
+            t('workspace.export.projectDialog.message', 'Choose a project for selected media.')
+          "
+          [options]="projectOptions()"
+          [selectedId]="projectDialogSelectedId()"
+          [confirmLabel]="t('workspace.export.projectDialog.confirm', 'Assign')"
+          [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+          (selectedIdChange)="onProjectDialogSelected($event)"
+          (confirmed)="confirmProjectDialog($event)"
+          (cancelled)="closeProjectDialog()"
+        />
+      }
+
+      @if (addressDialogOpen()) {
+        <app-text-input-dialog
+          [title]="t('workspace.export.addressDialog.title', 'Change address')"
+          [message]="
+            t('workspace.export.addressDialog.message', 'Apply one address to all selected media.')
+          "
+          [placeholder]="t('workspace.export.addressDialog.placeholder', 'Enter address')"
+          [confirmLabel]="t('workspace.export.addressDialog.confirm', 'Apply')"
+          [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+          (confirmed)="confirmAddressDialog($event)"
+          (cancelled)="closeAddressDialog()"
+        />
       }
     </div>
   `,
   styleUrl: './thumbnail-grid.component.scss',
-  imports: [ThumbnailCardComponent, GroupHeaderComponent, DropdownShellComponent],
+  imports: [
+    ThumbnailCardComponent,
+    GroupHeaderComponent,
+    DropdownShellComponent,
+    ProjectSelectDialogComponent,
+    TextInputDialogComponent,
+  ],
 })
 export class ThumbnailGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
@@ -198,6 +448,10 @@ export class ThumbnailGridComponent implements OnDestroy {
   private readonly supabaseService = inject(SupabaseService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
+  private readonly geocodingService = inject(GeocodingService);
+  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly shareSetService = inject(ShareSetService);
+  private readonly zipExportService = inject(ZipExportService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
 
@@ -219,6 +473,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   readonly zoomToLocationRequested = output<{ mediaId: string; lat: number; lng: number }>();
   readonly hoverStarted = output<ThumbnailCardHoverEvent>();
   readonly hoverEnded = output<string>();
+  readonly locationMapPickRequested = output<UploadLocationMapPickRequest>();
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -226,6 +481,10 @@ export class ThumbnailGridComponent implements OnDestroy {
   readonly thumbnailContextMenuOpen = signal(false);
   readonly thumbnailContextMenuPosition = signal<{ x: number; y: number } | null>(null);
   readonly thumbnailContextMenuMediaId = signal<string | null>(null);
+  readonly projectDialogOpen = signal(false);
+  readonly projectOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
+  readonly projectDialogSelectedId = signal<string | null>(null);
+  readonly addressDialogOpen = signal(false);
 
   readonly sections = computed(() => this.viewService.groupedSections());
 
@@ -265,25 +524,59 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   readonly skeletonCards = Array.from({ length: 12 }, (_, i) => i);
   readonly languageTick = computed(() => this.currentLanguage());
+  readonly targetMediaIds = computed(() => Array.from(this.selectionService.selectedMediaIds()));
+  readonly targetCount = computed(() => this.targetMediaIds().length);
+  readonly primaryTargetImage = computed<WorkspaceImage | null>(() => {
+    const preferredId = this.thumbnailContextMenuMediaId();
+    const selected = this.selectionService.selectedMediaIds();
+    const images = this.viewService.rawImages();
+
+    if (preferredId && selected.has(preferredId)) {
+      return images.find((image) => image.id === preferredId) ?? null;
+    }
+
+    return images.find((image) => selected.has(image.id)) ?? null;
+  });
+  readonly targetLocationKnown = computed(() => {
+    const image = this.primaryTargetImage();
+    return !!image && Number.isFinite(image.latitude) && Number.isFinite(image.longitude);
+  });
+
   readonly thumbnailContextActions = computed<
     ReadonlyArray<{
       id: ThumbnailContextActionId;
       icon: string;
+      section: ThumbnailContextActionSection;
       label: string;
       disabled: boolean;
     }>
   >(() => {
-    const selectedCount = this.selectionService.selectedCount();
-    return WS_GRID_THUMBNAIL_ACTION_IDS.map((id) => ({
-      id,
-      icon: id === 'remove_from_project' ? 'remove_circle_outline' : 'delete',
-      label:
-        id === 'remove_from_project'
-          ? this.t('upload.item.menu.destructive.removeFromProject', 'Remove from project')
-          : this.t('workspace.imageDetail.action.delete', 'Delete media'),
-      disabled: selectedCount <= 0,
+    const context = {
+      targetCount: this.targetCount(),
+      locationKnown: this.targetLocationKnown(),
+      deviceSupportsNativeShare: typeof navigator !== 'undefined' && 'share' in navigator,
+    };
+
+    return THUMBNAIL_CONTEXT_ACTION_DEFINITIONS.filter((definition) =>
+      definition.visibleWhen(context),
+    ).map((definition) => ({
+      id: definition.id,
+      icon: definition.icon,
+      section: definition.section,
+      label: this.t(definition.labelKey, definition.fallbackLabel),
+      disabled: context.targetCount <= 0,
     }));
   });
+
+  readonly thumbnailPrimaryActions = computed(() =>
+    this.thumbnailContextActions().filter((action) => action.section === 'primary'),
+  );
+  readonly thumbnailSecondaryActions = computed(() =>
+    this.thumbnailContextActions().filter((action) => action.section === 'secondary'),
+  );
+  readonly thumbnailDestructiveActions = computed(() =>
+    this.thumbnailContextActions().filter((action) => action.section === 'destructive'),
+  );
 
   constructor() {
     afterNextRender(() => {
@@ -373,7 +666,7 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.thumbnailContextMenuMediaId.set(event.mediaId);
     this.thumbnailContextMenuPosition.set({
       x: Math.max(8, Math.min(event.clientX, window.innerWidth - 232)),
-      y: Math.max(8, Math.min(event.clientY, window.innerHeight - 160)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - 360)),
     });
     this.thumbnailContextMenuOpen.set(true);
   }
@@ -383,14 +676,187 @@ export class ThumbnailGridComponent implements OnDestroy {
   }
 
   async onThumbnailContextActionSelected(actionId: ThumbnailContextActionId): Promise<void> {
-    if (actionId === 'remove_from_project') {
-      await this.removeSelectedFromProject();
-      this.closeThumbnailContextMenu();
+    switch (actionId) {
+      case 'open_in_media':
+        this.openInMedia();
+        break;
+      case 'zoom_house':
+      case 'zoom_street':
+        this.zoomToPrimaryTarget();
+        break;
+      case 'copy_address':
+        await this.copyPrimaryAddress();
+        break;
+      case 'copy_gps':
+        await this.copyPrimaryGps();
+        break;
+      case 'open_google_maps':
+        this.openPrimaryInGoogleMaps();
+        break;
+      case 'assign_to_project':
+        await this.openProjectDialog();
+        break;
+      case 'change_location_map':
+        this.requestMapLocationPickForPrimaryTarget();
+        break;
+      case 'change_location_address':
+        this.openAddressDialog();
+        break;
+      case 'download':
+        await this.downloadSelectionZip();
+        break;
+      case 'share_link':
+        await this.createShareLink(false);
+        break;
+      case 'copy_link':
+        await this.createShareLink(true);
+        break;
+      case 'native_share':
+        await this.nativeShareLink();
+        break;
+      case 'remove_from_project':
+        await this.removeSelectedFromProject();
+        break;
+      case 'delete_media':
+        await this.deleteSelectedMedia();
+        break;
+      default:
+        break;
+    }
+
+    this.closeThumbnailContextMenu();
+  }
+
+  onProjectDialogSelected(projectId: string): void {
+    this.projectDialogSelectedId.set(projectId);
+  }
+
+  closeProjectDialog(): void {
+    this.projectDialogOpen.set(false);
+    this.projectDialogSelectedId.set(null);
+  }
+
+  openAddressDialog(): void {
+    if (this.targetCount() <= 0) {
+      return;
+    }
+    this.addressDialogOpen.set(true);
+  }
+
+  closeAddressDialog(): void {
+    this.addressDialogOpen.set(false);
+  }
+
+  async confirmAddressDialog(addressQuery: string): Promise<void> {
+    const addressText = addressQuery.trim();
+    if (!addressText) {
       return;
     }
 
-    await this.deleteSelectedMedia();
-    this.closeThumbnailContextMenu();
+    const suggestion = await this.geocodingService.forward(addressText);
+    if (!suggestion) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.addressNotFound', 'Address could not be resolved.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      this.closeAddressDialog();
+      return;
+    }
+
+    let updatedCount = 0;
+    for (const mediaItemId of selectedMediaItemIds) {
+      const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(
+        mediaItemId,
+        {
+          lat: suggestion.lat,
+          lng: suggestion.lng,
+          addressLabel: suggestion.addressLabel,
+          city: suggestion.city,
+          district: suggestion.district,
+          street: suggestion.street,
+          streetNumber: suggestion.streetNumber,
+          zip: suggestion.zip,
+          country: suggestion.country,
+        },
+      );
+      if (result.ok) {
+        updatedCount += 1;
+      }
+    }
+
+    if (updatedCount === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.addressUpdateFailed', 'Address update failed.'),
+        type: 'error',
+      });
+      return;
+    }
+
+    const selectedImageIds = this.selectionService.selectedMediaIds();
+    this.viewService.rawImages.update((images) =>
+      images.map((image) =>
+        selectedImageIds.has(image.id)
+          ? {
+              ...image,
+              latitude: suggestion.lat,
+              longitude: suggestion.lng,
+              addressLabel: suggestion.addressLabel,
+              city: suggestion.city,
+              district: suggestion.district,
+              street: suggestion.street,
+              streetNumber: suggestion.streetNumber,
+              zip: suggestion.zip,
+              country: suggestion.country,
+            }
+          : image,
+      ),
+    );
+
+    this.toastService.show({
+      message: this.t('workspace.export.success.addressUpdated', 'Address updated.'),
+      type: 'success',
+    });
+    this.closeAddressDialog();
+  }
+
+  async confirmProjectDialog(projectId: string): Promise<void> {
+    const selectedMediaItemIds = await this.resolveSelectedMediaItemIds();
+    if (selectedMediaItemIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      this.closeProjectDialog();
+      return;
+    }
+
+    const rows = selectedMediaItemIds.map((mediaItemId) => ({
+      media_item_id: mediaItemId,
+      project_id: projectId,
+    }));
+    const { error } = await this.supabaseService.client
+      .from('media_projects')
+      .upsert(rows, { onConflict: 'media_item_id,project_id', ignoreDuplicates: true });
+
+    if (error) {
+      this.toastService.show({ message: error.message, type: 'error' });
+      return;
+    }
+
+    this.toastService.show({
+      message: this.t('workspace.export.success.projectAssigned', 'Assigned to project.'),
+      type: 'success',
+    });
+    this.closeProjectDialog();
   }
 
   isLinkedHovered(mediaId: string): boolean {
@@ -440,6 +906,240 @@ export class ThumbnailGridComponent implements OnDestroy {
     const cardWidth = this.thumbnailCardSizePx();
     const columns = Math.max(1, Math.floor((measured + gap) / (cardWidth + gap)));
     this.maxColumns.set(columns);
+  }
+
+  private openInMedia(): void {
+    const target = this.primaryTargetImage();
+    if (!target) {
+      return;
+    }
+    this.thumbnailClicked.emit(target.id);
+  }
+
+  private zoomToPrimaryTarget(): void {
+    const target = this.primaryTargetImage();
+    if (!target) {
+      return;
+    }
+    if (!Number.isFinite(target.latitude) || !Number.isFinite(target.longitude)) {
+      return;
+    }
+
+    this.zoomToLocationRequested.emit({
+      mediaId: target.id,
+      lat: target.latitude,
+      lng: target.longitude,
+    });
+  }
+
+  private async copyPrimaryAddress(): Promise<void> {
+    const target = this.primaryTargetImage();
+    if (!target || !Number.isFinite(target.latitude) || !Number.isFinite(target.longitude)) {
+      return;
+    }
+
+    const reverse = await this.geocodingService.reverse(target.latitude, target.longitude);
+    const address = reverse?.addressLabel?.trim();
+    if (!address) {
+      this.toastService.show({
+        message: this.t(
+          'workspace.thumbnailGrid.menu.error.addressMissing',
+          'Address could not be resolved.',
+        ),
+        type: 'warning',
+      });
+      return;
+    }
+
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+      this.toastService.show({
+        message: this.t(
+          'workspace.export.error.clipboardUnavailable',
+          'Clipboard is not available.',
+        ),
+        type: 'error',
+      });
+      return;
+    }
+
+    await navigator.clipboard.writeText(address);
+    this.toastService.show({
+      message: this.t('workspace.thumbnailGrid.menu.success.addressCopied', 'Address copied.'),
+      type: 'success',
+      dedupe: true,
+    });
+  }
+
+  private async copyPrimaryGps(): Promise<void> {
+    const target = this.primaryTargetImage();
+    if (!target || !Number.isFinite(target.latitude) || !Number.isFinite(target.longitude)) {
+      return;
+    }
+
+    const gpsText = `${target.latitude.toFixed(6)}, ${target.longitude.toFixed(6)}`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(gpsText);
+      this.toastService.show({
+        message: this.t('workspace.thumbnailGrid.menu.success.gpsCopied', 'GPS copied.'),
+        type: 'success',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.toastService.show({
+      message: gpsText,
+      type: 'info',
+      dedupe: true,
+    });
+  }
+
+  private openPrimaryInGoogleMaps(): void {
+    const target = this.primaryTargetImage();
+    if (
+      !target ||
+      !Number.isFinite(target.latitude) ||
+      !Number.isFinite(target.longitude) ||
+      typeof window === 'undefined'
+    ) {
+      return;
+    }
+
+    window.open(
+      `https://www.google.com/maps?q=${target.latitude},${target.longitude}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+  }
+
+  private requestMapLocationPickForPrimaryTarget(): void {
+    const target = this.primaryTargetImage();
+    if (!target) {
+      return;
+    }
+
+    this.locationMapPickRequested.emit({
+      mediaId: target.id,
+      fileName: target.storagePath || target.id,
+    });
+  }
+
+  private async downloadSelectionZip(): Promise<void> {
+    const selectedImages = this.viewService
+      .rawImages()
+      .filter((img) => this.selectionService.selectedMediaIds().has(img.id));
+    if (selectedImages.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    const firstProject = selectedImages.find((img) => !!img.projectName)?.projectName;
+    const zipTitle = this.zipExportService.buildDefaultTitle({
+      selectedProjectName: firstProject,
+      selectedCount: selectedImages.length,
+    });
+
+    await this.zipExportService.exportSelectionAsZip(selectedImages, zipTitle);
+    this.toastService.show({
+      message: this.t('workspace.export.success.zipStarted', 'ZIP download started.'),
+      type: 'success',
+    });
+  }
+
+  private async createShareLink(copyToClipboard: boolean): Promise<string | null> {
+    const selectedIds = this.targetMediaIds();
+    if (selectedIds.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noImagesSelected', 'No images selected.'),
+        type: 'error',
+      });
+      return null;
+    }
+
+    try {
+      const result = await this.shareSetService.createOrReuseShareSet(selectedIds);
+      const url = `${window.location.origin}/?share=${result.token}`;
+
+      if (copyToClipboard) {
+        if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+          this.toastService.show({
+            message: this.t(
+              'workspace.export.error.clipboardUnavailable',
+              'Clipboard is not available.',
+            ),
+            type: 'error',
+          });
+          return url;
+        }
+
+        await navigator.clipboard.writeText(url);
+        this.toastService.show({
+          message: this.t('workspace.export.success.linkCopied', 'Share link copied.'),
+          type: 'success',
+          dedupe: true,
+        });
+      }
+
+      return url;
+    } catch (error) {
+      this.toastService.show({
+        message:
+          error instanceof Error
+            ? error.message
+            : this.t(
+                'workspace.export.error.linkCreateFailed',
+                'Freigabelink konnte nicht erstellt werden.',
+              ),
+        type: 'error',
+      });
+      return null;
+    }
+  }
+
+  private async nativeShareLink(): Promise<void> {
+    const url = await this.createShareLink(false);
+    if (!url || typeof navigator === 'undefined' || !('share' in navigator)) {
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: this.t('workspace.export.share.title', 'Workspace export'),
+        text: this.t('workspace.export.share.text', 'Shared media selection'),
+        url,
+      });
+    } catch {
+      // No-op: user may cancel native share.
+    }
+  }
+
+  private async openProjectDialog(): Promise<void> {
+    const { data, error } = await this.supabaseService.client
+      .from('projects')
+      .select('id,name')
+      .order('name', { ascending: true });
+
+    if (error || !Array.isArray(data) || data.length === 0) {
+      this.toastService.show({
+        message: this.t('workspace.export.error.noProjectsAvailable', 'No projects available.'),
+        type: 'warning',
+      });
+      return;
+    }
+
+    this.projectOptions.set(
+      data
+        .filter(
+          (row): row is { id: string; name: string } =>
+            typeof row.id === 'string' && typeof row.name === 'string' && row.name.length > 0,
+        )
+        .map((row) => ({ id: row.id, name: row.name })),
+    );
+    this.projectDialogSelectedId.set(this.projectOptions()[0]?.id ?? null);
+    this.projectDialogOpen.set(true);
   }
 
   private async resolveSelectedMediaItemIds(): Promise<string[]> {

@@ -31,7 +31,11 @@ export class MapWorkspaceContextResolverService {
     }
 
     return {
-      contextType: payload.count > 1 ? 'map_cluster' : 'map_marker',
+      contextType: payload.isMultiSelection
+        ? 'map_multi'
+        : payload.count > 1
+          ? 'map_cluster'
+          : 'map_marker',
       markerKey: payload.markerKey,
       count: payload.count,
       primaryMediaId: payload.mediaId ?? null,

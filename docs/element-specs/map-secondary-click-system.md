@@ -29,13 +29,13 @@ Map menu focuses creation/navigation utilities. Marker menu focuses item-level o
 
 ### Precedence Matrix
 
-| Priority | Target / Gesture                                     | Result                                   |
-| -------- | ---------------------------------------------------- | ---------------------------------------- |
-| 1        | Secondary click on marker                            | Open Marker Context Menu                 |
-| 2        | Active radius + secondary click inside radius        | Open Radius Context Menu                 |
-| 3        | Active radius + short secondary click outside radius | Close radius (no map menu on same click) |
-| 4        | Empty map + secondary drag >= threshold              | Start/continue Radius Selection draw     |
-| 5        | Empty map + short secondary click                    | Open Map Context Menu                    |
+| Priority | Target / Gesture                                                             | Result                                    |
+| -------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
+| 1        | Active radius + secondary click on target inside radius (map/marker/cluster) | Open Radius Context Menu                  |
+| 2        | Active radius + secondary click on marker/cluster outside radius             | Close radius and open Marker Context Menu |
+| 3        | Active radius + short secondary click outside radius (empty map path)        | Close radius (no map menu on same click)  |
+| 4        | Empty map + secondary drag >= threshold                                      | Start/continue Radius Selection draw      |
+| 5        | Empty map + short secondary click                                            | Open Map Context Menu                     |
 
 ### Map Context Menu Options
 
@@ -50,25 +50,27 @@ Map menu focuses creation/navigation utilities. Marker menu focuses item-level o
 
 ### Marker Context Menu Options
 
-| Option                           | Availability     | Effect                          |
-| -------------------------------- | ---------------- | ------------------------------- |
-| `Details oeffnen`                | Single marker    | Open detail view                |
-| `Auswahl oeffnen`                | Cluster marker   | Load cluster selection          |
-| `Hierhin zoomen (Hausnaehe)`     | Single + cluster | `setView(markerLatLng, 19)`     |
-| `Hierhin zoomen (Strassennaehe)` | Single + cluster | `setView(markerLatLng, 17)`     |
-| `Assign project...`              | Single + cluster | Open assign-to-project flow     |
-| `Adresse kopieren`               | Single + cluster | Reverse geocode + copy          |
-| `GPS kopieren`                   | Single + cluster | Copy `lat,lng`                  |
-| `In Google Maps oeffnen`         | Single + cluster | Open external map tab           |
-| `Download`                       | Single + cluster | Download media (cluster as ZIP) |
-| `Foto loeschen`                  | Single marker    | Confirm + delete                |
+| Option                           | Availability             | Effect                        |
+| -------------------------------- | ------------------------ | ----------------------------- |
+| `Details oeffnen`                | Single marker            | Open detail view              |
+| `Auswahl oeffnen`                | Cluster + multi          | Load selection into workspace |
+| `Hierhin zoomen (Hausnaehe)`     | Single marker            | `setView(markerLatLng, 19)`   |
+| `Hierhin zoomen (Strassennaehe)` | Single marker            | `setView(markerLatLng, 17)`   |
+| `Assign project...`              | Single + cluster + multi | Open assign-to-project flow   |
+| `Adresse kopieren`               | Single marker            | Reverse geocode + copy        |
+| `GPS kopieren`                   | Single marker            | Copy `lat,lng`                |
+| `In Google Maps oeffnen`         | Single marker            | Open external map tab         |
+| `Aus Projekten entfernen`        | Single + cluster + multi | Remove memberships            |
+| `Foto loeschen`                  | Single + cluster + multi | Confirm + delete              |
 
 ### Radius Context Menu Options
 
-| Option                     | Effect                                          |
-| -------------------------- | ----------------------------------------------- |
-| `Neues Projekt aus Radius` | Create project from in-radius result set        |
-| `Zu Projekt zuweisen...`   | Assign in-radius result set to existing project |
+| Option                    | Effect                                   |
+| ------------------------- | ---------------------------------------- |
+| `Auswahl oeffnen`         | Keep/show selected radius result set     |
+| `Projekt hinzufuegen...`  | Assign in-radius result set to project   |
+| `Aus Projekten entfernen` | Remove project memberships for selection |
+| `Foto loeschen`           | Confirm + delete selected radius media   |
 
 ## Component Hierarchy
 

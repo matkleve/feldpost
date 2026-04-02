@@ -166,9 +166,26 @@
         aria-label="Radius context menu"
         (keydown)="onMapMenuKeydown($event)"
       >
-        @for (action of radiusMenuActions(); track action.id) {
+        @for (action of radiusPrimaryActions(); track action.id) {
           <button
             class="dd-item"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (click)="onRadiusMenuActionSelected(action.id)"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
+            <span class="dd-item__label">{{ action.label }}</span>
+          </button>
+        }
+
+        @if (radiusPrimaryActions().length > 0 && radiusDestructiveActions().length > 0) {
+          <div class="dd-divider" aria-hidden="true"></div>
+        }
+
+        @for (action of radiusDestructiveActions(); track action.id) {
+          <button
+            class="dd-item dd-item--danger"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"

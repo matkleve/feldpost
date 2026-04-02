@@ -502,6 +502,12 @@ export class MapShellComponent implements OnDestroy {
       this.radiusMenuContext(),
     ),
   );
+  readonly radiusPrimaryActions = computed(() =>
+    this.radiusMenuActions().filter((action) => action.section === 'primary'),
+  );
+  readonly radiusDestructiveActions = computed(() =>
+    this.radiusMenuActions().filter((action) => action.section === 'destructive'),
+  );
   readonly markerContextMenuOpen = this.state.markerContextMenuOpen;
   readonly markerContextMenuPosition = this.state.markerContextMenuPosition;
   readonly markerContextMenuPayload = this.state.markerContextMenuPayload;
@@ -1113,15 +1119,147 @@ export class MapShellComponent implements OnDestroy {
 
   async onRadiusMenuActionSelected(actionId: RadiusMenuActionId): Promise<void> {
     switch (actionId) {
-      case 'create_project_from_radius':
-        await this.onRadiusContextCreateProjectFromSelection();
+      case 'open_selection':
+        this.onRadiusContextOpenSelection();
         return;
       case 'assign_to_project':
         await this.onRadiusContextAssignToProject();
         return;
+      case 'remove_from_project':
+        await this.onRadiusContextRemoveFromProject();
+        return;
+      case 'delete_media':
+        await this.onRadiusContextDeleteMedia();
+        return;
       default:
         return;
     }
+  }
+
+  onRadiusContextOpenSelection(): void {
+    this.ensurePhotoPanelOpen();
+    this.detailMediaId.set(null);
+    this.onMapMenuCloseRequested();
+  }
+
+  async onRadiusContextRemoveFromProject(): Promise<void> {
+    const uniqueImageIds = Array.from(new Set(this.radiusMenuContext().mediaIds));
+    if (uniqueImageIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Medien fuer Projektentfernung gefunden.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    const idList = uniqueImageIds.join(',');
+    const { data: mediaRows, error: mediaLookupError } = await this.supabaseService.client
+      .from('media_items')
+      .select('id,source_image_id')
+      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
+
+    if (mediaLookupError) {
+      this.toastService.show({
+        message: 'Projektzuordnungen konnten nicht geladen werden.',
+        type: 'error',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    const mediaItemIds = Array.from(
+      new Set((mediaRows ?? []).map((row: { id: string }) => row.id).filter(Boolean)),
+    );
+    if (mediaItemIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Projektzuordnungen gefunden.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    const { error: removeError } = await this.supabaseService.client
+      .from('media_projects')
+      .delete()
+      .in('media_item_id', mediaItemIds);
+
+    if (removeError) {
+      this.toastService.show({
+        message: 'Entfernen aus Projekten ist fehlgeschlagen.',
+        type: 'error',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    this.toastService.show({
+      message: 'Medien aus Projekten entfernt.',
+      type: 'success',
+      dedupe: true,
+    });
+    this.onMapMenuCloseRequested();
+  }
+
+  async onRadiusContextDeleteMedia(): Promise<void> {
+    const uniqueImageIds = Array.from(new Set(this.radiusMenuContext().mediaIds));
+    if (uniqueImageIds.length === 0) {
+      this.toastService.show({
+        message: 'Keine Medien zum Loeschen gefunden.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    if (!this.markerContextPhotoDeleteService.confirmPhotoDeleteCount(uniqueImageIds.length)) {
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    let deletedCount = 0;
+    let failedCount = 0;
+    for (const mediaId of uniqueImageIds) {
+      const deleted = await this.markerContextPhotoDeleteService.deleteImageById(
+        this.supabaseService.client,
+        mediaId,
+      );
+      if (!deleted.ok) {
+        failedCount += 1;
+        continue;
+      }
+      deletedCount += 1;
+    }
+
+    if (deletedCount > 0) {
+      this.detailMediaId.set(null);
+      this.setSelectedMarker(null);
+      this.setSelectedMarkerKeys(new Set());
+      this.workspaceSelectionService.clearSelection();
+      this.workspaceViewService.clearActiveSelection();
+      await this.queryViewportMarkers();
+      this.toastService.show({
+        message: `${deletedCount} Medien geloescht.`,
+        type: 'success',
+        dedupe: true,
+      });
+    }
+
+    if (failedCount > 0) {
+      this.toastService.show({
+        message: `${failedCount} Medien konnten nicht geloescht werden.`,
+        type: 'error',
+        dedupe: true,
+      });
+    }
+
+    this.onMapMenuCloseRequested();
   }
 
   get markerContextIsSingle(): boolean {
@@ -3364,6 +3502,27 @@ export class MapShellComponent implements OnDestroy {
         this.pendingSecondaryPress = null;
       },
       onOpen: (event: MouseEvent) => {
+        if (this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals)) {
+          const state = this.uploadedPhotoMarkers.get(markerKey);
+          if (state) {
+            const markerLatLng = L.latLng(state.lat, state.lng);
+            const isInsideCommittedRadius = this.radiusSelectionService.isInsideAnyCommittedRadius(
+              this.map,
+              this.radiusCommittedVisuals,
+              markerLatLng,
+            );
+
+            if (isInsideCommittedRadius) {
+              this.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
+              return;
+            }
+
+            // Clicking a marker outside the active radius exits radius mode
+            // and falls through to marker/cluster context for that marker.
+            this.clearActiveRadiusSelection();
+          }
+        }
+
         this.markerContextMenuSuppressUntil =
           Date.now() + MapShellComponent.MARKER_CONTEXT_MENU_SUPPRESS_MS;
         this.openMarkerContextMenu(markerKey, event);

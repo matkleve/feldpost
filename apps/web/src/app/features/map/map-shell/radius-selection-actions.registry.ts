@@ -5,11 +5,11 @@ export const RADIUS_SELECTION_ACTION_DEFINITIONS: ReadonlyArray<
   ActionDefinition<RadiusActionContext, RadiusMenuActionId>
 > = [
   {
-    id: 'create_project_from_radius',
+    id: 'open_selection',
     section: 'primary',
     priority: 0,
-    icon: 'create_new_folder',
-    fallbackLabel: 'New project from selection',
+    icon: 'grid_view',
+    fallbackLabel: 'Auswahl oeffnen',
     visibleWhen: (context) => context.count > 0,
   },
   {
@@ -17,7 +17,23 @@ export const RADIUS_SELECTION_ACTION_DEFINITIONS: ReadonlyArray<
     section: 'primary',
     priority: 1,
     icon: 'folder_open',
-    fallbackLabel: 'Assign to project',
+    fallbackLabel: 'Projekt hinzufuegen...',
+    visibleWhen: (context) => context.count > 0,
+  },
+  {
+    id: 'remove_from_project',
+    section: 'destructive',
+    priority: 0,
+    icon: 'remove_circle_outline',
+    fallbackLabel: 'Aus Projekten entfernen',
+    visibleWhen: (context) => context.count > 0,
+  },
+  {
+    id: 'delete_media',
+    section: 'destructive',
+    priority: 1,
+    icon: 'delete',
+    fallbackLabel: 'Foto loeschen',
     visibleWhen: (context) => context.count > 0,
   },
 ];

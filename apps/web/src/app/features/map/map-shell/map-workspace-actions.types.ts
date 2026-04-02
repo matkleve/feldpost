@@ -1,6 +1,7 @@
 export type MapWorkspaceContextType =
   | 'map_marker'
   | 'map_cluster'
+  | 'map_multi'
   | 'radius_selection'
   | 'workspace_single'
   | 'workspace_multi';
@@ -16,7 +17,7 @@ export interface MarkerContextPayload {
 }
 
 export interface MarkerActionContext {
-  contextType: 'map_marker' | 'map_cluster';
+  contextType: 'map_marker' | 'map_cluster' | 'map_multi';
   markerKey: string;
   count: number;
   primaryMediaId: string | null;
@@ -63,4 +64,8 @@ export type MarkerMenuActionId =
   | 'remove_from_project'
   | 'delete_media';
 
-export type RadiusMenuActionId = 'create_project_from_radius' | 'assign_to_project';
+export type RadiusMenuActionId =
+  | 'open_selection'
+  | 'assign_to_project'
+  | 'remove_from_project'
+  | 'delete_media';

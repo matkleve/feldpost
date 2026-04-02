@@ -76,7 +76,8 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 0,
     icon: 'grid_view',
     fallbackLabel: 'Auswahl oeffnen',
-    visibleWhen: (context) => context.contextType === 'map_cluster',
+    visibleWhen: (context) =>
+      context.contextType === 'map_cluster' || context.contextType === 'map_multi',
   },
   {
     id: 'open_in_media',
@@ -92,7 +93,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 1,
     icon: 'center_focus_strong',
     fallbackLabel: 'Hierhin zoomen (Hausnaehe)',
-    visibleWhen: () => true,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'zoom_street',
@@ -100,7 +101,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 1,
     icon: 'zoom_in',
     fallbackLabel: 'Hierhin zoomen (Strassennaehe)',
-    visibleWhen: () => true,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'assign_to_project',
@@ -116,7 +117,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 1,
     icon: 'pin_drop',
     fallbackLabel: 'Change GPS location',
-    visibleWhen: (context) => !context.isMultiSelection,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'change_location_address',
@@ -124,7 +125,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 1,
     icon: 'search',
     fallbackLabel: 'Change address',
-    visibleWhen: (context) => !context.isMultiSelection,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'copy_address',
@@ -132,7 +133,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 0,
     icon: 'content_copy',
     fallbackLabel: 'Adresse kopieren',
-    visibleWhen: (context) => !context.isMultiSelection,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'copy_gps',
@@ -140,7 +141,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 0,
     icon: 'content_copy',
     fallbackLabel: 'GPS kopieren',
-    visibleWhen: (context) => !context.isMultiSelection,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'open_google_maps',
@@ -148,7 +149,7 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     priority: 0,
     icon: 'open_in_new',
     fallbackLabel: 'In Google Maps oeffnen',
-    visibleWhen: (context) => !context.isMultiSelection,
+    visibleWhen: (context) => context.contextType === 'map_marker',
   },
   {
     id: 'delete_media',

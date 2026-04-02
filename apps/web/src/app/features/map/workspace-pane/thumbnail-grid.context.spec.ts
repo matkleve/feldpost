@@ -9,7 +9,23 @@ describe('Thumbnail Grid Context Contract', () => {
     expect(WS_GRID_THUMBNAIL_CONTEXT).toBe('ws_grid_thumbnail');
   });
 
-  it('exposes only thumbnail destructive actions', () => {
-    expect(WS_GRID_THUMBNAIL_ACTION_IDS).toEqual(['remove_from_project', 'delete_media']);
+  it('exposes complete ws_grid_thumbnail action set', () => {
+    expect(WS_GRID_THUMBNAIL_ACTION_IDS).toEqual([
+      'open_in_media',
+      'zoom_house',
+      'zoom_street',
+      'copy_address',
+      'copy_gps',
+      'open_google_maps',
+      'assign_to_project',
+      'change_location_map',
+      'change_location_address',
+      'remove_from_project',
+      'delete_media',
+      'download',
+      'share_link',
+      'copy_link',
+      'native_share',
+    ]);
   });
 });

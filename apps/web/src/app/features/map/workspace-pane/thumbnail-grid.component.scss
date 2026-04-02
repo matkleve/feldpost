@@ -141,3 +141,8 @@
     opacity: 0.8;
   }
 }
+
+:host ::ng-deep .map-context-menu .dd-items {
+  max-height: min(20rem, calc(100vh - 10rem));
+  overflow-y: auto;
+}
