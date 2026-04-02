@@ -8,43 +8,14 @@
 // Defines shared state-frame visual surface used by all domain items.
 // @see docs/element-specs/item-grid.md#scss-responsibilities
 .item-state-frame {
-  // Defines spinner diameter token matching workspace thumbnail loading reference.
-  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-  --item-loading-spinner-size: 1.1rem;
-
-  // Defines spinner stroke width token matching workspace thumbnail loading reference.
-  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-  --item-loading-spinner-border-width: 2px;
-
-  // Defines spinner track alpha token matching workspace thumbnail loading reference.
-  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-  --item-loading-spinner-track-alpha: 24%;
-
-  // Defines spinner animation duration token matching workspace thumbnail loading reference.
-  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-  --item-loading-spinner-duration: 700ms;
-
-  // Defines spinner accent color token for unified loading semantics.
-  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-  --item-loading-spinner-color: var(--color-clay);
-
-  // Defines spinner corner radius token for circular loading ring.
-  // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-  --item-loading-spinner-radius: var(--radius-full);
-
   position: relative;
   min-height: 0;
-  border-radius: var(--container-radius-control);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-surface);
   transition: var(--interactive-transition-standard);
 }
 
 // Applies shared selected-state emphasis independent of domain content.
 // @see docs/element-specs/item-grid.md#state
 .item-state-frame--selected {
-  border-color: var(--color-clay);
   box-shadow: var(--shadow-sm);
 }
 
@@ -82,19 +53,18 @@
 // Applies loading-specific foreground color for unified spinner state.
 // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
 .item-state-frame__state-layer--loading {
-  color: var(--item-loading-spinner-color);
+  color: var(--color-clay);
 }
 
 // Renders the unified loading circle with tokenized geometry and motion.
 // @see docs/element-specs/item-grid.md#unified-loading-circle-contract
 .item-state-frame__spinner {
-  inline-size: var(--item-loading-spinner-size);
-  block-size: var(--item-loading-spinner-size);
-  border-radius: var(--item-loading-spinner-radius);
-  border: var(--item-loading-spinner-border-width) solid
-    color-mix(in srgb, currentcolor var(--item-loading-spinner-track-alpha), transparent);
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  border-radius: var(--radius-full);
+  border: 2px solid color-mix(in srgb, currentcolor 24%, transparent);
   border-top-color: currentcolor;
-  animation: item-state-frame-spin var(--item-loading-spinner-duration) linear infinite;
+  animation: item-state-frame-spin 700ms linear infinite;
 }
 
 // Applies destructive color semantics for shared error layer.

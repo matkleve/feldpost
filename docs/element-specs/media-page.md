@@ -359,6 +359,7 @@ sequenceDiagram
 - [ ] Clicking card opens detail view (modal overlay)
 - [ ] Closing detail returns to grid with state preserved
 - [ ] Hovering card shows optional linked-hover effect
+- [ ] Initial unknown-count loading uses spinner-free media placeholders sized to approximately 3 viewport heights (`columns x rows(3 viewports)`).
 
 **Workspace Pane Integration:**
 

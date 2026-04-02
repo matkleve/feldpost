@@ -1,8 +1,19 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {
+  UiButtonDirective,
+  UiButtonIconOnlyDirective,
+  UiButtonSecondaryDirective,
+  UiButtonSizeSmDirective,
+} from '../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-media-item-quiet-actions',
-  imports: [],
+  imports: [
+    UiButtonDirective,
+    UiButtonSizeSmDirective,
+    UiButtonSecondaryDirective,
+    UiButtonIconOnlyDirective,
+  ],
   templateUrl: './media-item-quiet-actions.component.html',
   styleUrl: './media-item-quiet-actions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -10,11 +21,12 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 export class MediaItemQuietActionsComponent {
   readonly selected = input(false);
   readonly disabled = input(false);
+  readonly mapDisabled = input(false);
   readonly selectLabel = input('');
-  readonly contextLabel = input('');
+  readonly mapLabel = input('');
 
   readonly selectRequested = output<void>();
-  readonly contextRequested = output<void>();
+  readonly mapRequested = output<void>();
 
   onSelectClick(event: Event): void {
     event.preventDefault();
@@ -25,12 +37,12 @@ export class MediaItemQuietActionsComponent {
     this.selectRequested.emit();
   }
 
-  onContextClick(event: Event): void {
+  onMapClick(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    if (this.disabled()) {
+    if (this.disabled() || this.mapDisabled()) {
       return;
     }
-    this.contextRequested.emit();
+    this.mapRequested.emit();
   }
 }

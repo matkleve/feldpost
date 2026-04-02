@@ -1,7 +1,15 @@
+<!-- Hosts absolute corner actions for media-item hover/focus affordances. -->
+<!-- @see docs/element-specs/media-item.md#component-hierarchy -->
 <div class="media-item-quiet-actions">
+  <!-- Renders top-left select toggle button for media item selection state. -->
+  <!-- @see docs/element-specs/media-item.md#actions--interactions -->
   <button
     type="button"
     class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
+    uiButton
+    uiButtonSizeSm
+    uiButtonSecondary
+    uiButtonIconOnly
     [class.media-item-quiet-actions__button--select-active]="selected()"
     [attr.aria-pressed]="selected()"
     [attr.aria-label]="selectLabel()"
@@ -12,12 +20,19 @@
     }
   </button>
 
+  <!-- Renders top-right map quick action as icon-only control. -->
+  <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
   <button
     type="button"
-    class="media-item-quiet-actions__button media-item-quiet-actions__button--context"
-    [attr.aria-label]="contextLabel()"
-    (click)="onContextClick($event)"
+    class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
+    uiButton
+    uiButtonSizeSm
+    uiButtonSecondary
+    uiButtonIconOnly
+    [disabled]="mapDisabled()"
+    [attr.aria-label]="mapLabel()"
+    (click)="onMapClick($event)"
   >
-    <span class="material-icons" aria-hidden="true">more_horiz</span>
+    <span class="material-icons" aria-hidden="true">map</span>
   </button>
 </div>

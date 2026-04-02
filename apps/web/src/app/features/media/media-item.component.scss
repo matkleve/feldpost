@@ -1,29 +1,33 @@
 // Styles media domain content surface inside the shared state frame.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/element-specs/media-item.md#component-hierarchy
 .media-item {
   position: relative;
+  width: fit-content;
+  margin-inline: auto;
 }
 
 // Styles the primary media item interaction button and keeps content semantics local.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/element-specs/media-item.md#what-it-looks-like
 .media-item__open {
-  display: block;
+  display: inline-block;
+  width: fit-content;
   border: 0;
   background: transparent;
   color: inherit;
   text-align: left;
-  padding: var(--spacing-2);
+  padding: 0;
   cursor: pointer;
 }
 
 // Styles media preview surface and visual treatment without owning outer geometry.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/element-specs/media-item.md#what-it-looks-like
 .media-item__preview {
   display: block;
+  width: fit-content;
 }
 
 // Positions upload overlay component above preview but below quiet actions.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/element-specs/media-item.md#acceptance-criteria
 .media-item__upload-overlay {
   position: absolute;
   inset: 0;
@@ -31,7 +35,7 @@
 }
 
 // Positions quiet-actions overlay and defines hidden-at-rest behavior.
-// @see docs/element-specs/thumbnail-card.md#actions
+// @see docs/element-specs/media-item.md#what-it-looks-like
 .media-item__quiet-actions {
   position: absolute;
   inset: 0;
@@ -44,52 +48,18 @@
     transform 80ms ease;
 }
 
-// Styles metadata text group for title, date, and domain subtitle.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
-.media-item__meta {
-  margin-top: var(--spacing-2);
-}
-
-// Styles the media title typography.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
-.media-item__title {
-  margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-dense);
-  color: var(--color-text-primary);
-}
-
-// Styles the captured-date typography.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
-.media-item__date {
-  margin: var(--spacing-1) 0 0;
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-secondary);
-}
-
-// Styles subtitle typography for project/type metadata.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
-.media-item__subtitle {
-  margin: var(--spacing-1) 0 0;
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-secondary);
-}
-
 // Reveals quiet actions on hover, focus-within, and selected states without layout shift.
-// @see docs/element-specs/thumbnail-card.md#actions
-.media-item:hover .media-item__quiet-actions,
-.media-item:focus-within .media-item__quiet-actions,
-.item-state-frame--selected .media-item__quiet-actions {
+// @see docs/element-specs/media-item.md#actions--interactions
+.media-item__preview:hover .media-item__quiet-actions,
+.media-item__preview:focus-within .media-item__quiet-actions,
+.item-state-frame--selected .media-item__preview .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
 // Styles keyboard focus visibility for primary open action.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/element-specs/media-item.md#actions--interactions
 .media-item__open:focus-visible {
   outline: 2px solid var(--color-clay);
   outline-offset: 2px;

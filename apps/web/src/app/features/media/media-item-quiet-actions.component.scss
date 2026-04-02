@@ -5,39 +5,31 @@
 }
 
 // Defines the internal two-corner action layout for media card affordances.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/element-specs/media-item.md#what-it-looks-like
 .media-item-quiet-actions {
   position: relative;
   min-height: 0;
 }
 
-// Defines shared quiet-action button surface for select and context actions.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// Defines shared quiet-action button surface for select and map actions.
+// @see docs/element-specs/media-item.md#actions--interactions
 .media-item-quiet-actions__button {
   position: absolute;
   inset-block-start: var(--spacing-2);
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-base);
-  color: var(--color-text-primary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
 }
 
 // Positions selection action in the top-left corner of the media item.
-// @see docs/element-specs/thumbnail-card.md#component-hierarchy
+// @see docs/element-specs/media-item.md#what-it-looks-like
 .media-item-quiet-actions__button--select {
   inset-inline-start: var(--spacing-2);
+  border-radius: var(--radius-full);
 }
 
-// Positions context action in the top-right corner of the media item.
-// @see docs/element-specs/thumbnail-card.md#component-hierarchy
-.media-item-quiet-actions__button--context {
+// Positions map action in the top-right corner of the media item.
+// @see docs/element-specs/media-item.md#what-it-looks-like
+.media-item-quiet-actions__button--map {
   inset-inline-end: var(--spacing-2);
+  background: var(--action-bg-default);
 }
 
 // Defines active styling for selected-state quiet selection action.
@@ -49,7 +41,7 @@
 }
 
 // Defines keyboard focus ring for quiet actions.
-// @see docs/element-specs/thumbnail-card.md#actions
+// @see docs/element-specs/media-item.md#actions--interactions
 .media-item-quiet-actions__button:focus-visible {
   outline: 2px solid var(--color-clay);
   outline-offset: 2px;

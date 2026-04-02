@@ -28,8 +28,8 @@ import {
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
 import { rectToRemSize, requestedTierForMode } from './media-item-slot.utils';
+import type { ChipVariant } from '../../shared/components/chip/chip.component';
 import {
-  formatMediaItemDate,
   normalizeMediaItemRenderState,
   resolveMediaTypeLabel,
   type LegacyMediaItemRenderState,
@@ -60,7 +60,6 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
   private resizeObserver: ResizeObserver | null = null;
 
   readonly item = input<ImageRecord | null>(null);
-  readonly projectName = input<string>('');
   readonly thumbnailUrl = signal('');
   readonly slotWidthRem = signal<number | null>(null);
   readonly slotHeightRem = signal<number | null>(null);
@@ -78,6 +77,33 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
   readonly fileType = computed(() => this.mediaOrchestrator.resolveFileType(this.fileIdentity()));
   readonly mediaIcon = computed(() => this.mediaOrchestrator.resolveIcon(this.fileIdentity()));
   readonly canRenderImage = computed(() => this.fileType().category === 'image');
+  readonly hasMapLocation = computed(() => {
+    const record = this.item();
+    return !!record && record.latitude !== null && record.longitude !== null;
+  });
+  readonly mediaTypeLabel = computed(() =>
+    resolveMediaTypeLabel(
+      this.fileType(),
+      this.mediaOrchestrator.resolveBadge(this.fileIdentity()),
+      (key, fallback) => this.t(key, fallback),
+    ),
+  );
+  readonly fileTypeChipVariant = computed<ChipVariant>(() => {
+    switch (this.fileType().category) {
+      case 'image':
+        return 'filetype-image';
+      case 'video':
+        return 'filetype-video';
+      case 'document':
+        return 'filetype-document';
+      case 'spreadsheet':
+        return 'filetype-spreadsheet';
+      case 'presentation':
+        return 'filetype-presentation';
+      default:
+        return 'default';
+    }
+  });
   readonly requestedTier = computed<MediaTier>(() => requestedTierForMode(this.activeMode()));
   readonly effectiveTier = computed<MediaTier>(() =>
     this.mediaOrchestrator.selectRequestedTierForSlot({
@@ -115,7 +141,6 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
   readonly mediaRenderState = computed<MediaItemRenderState>(() =>
     normalizeMediaItemRenderState(this.legacyMediaRenderState()),
   );
-  readonly resolvedLoading = computed(() => this.loading());
   readonly uploadOverlay = computed<UploadOverlayState | null>(() =>
     resolveMediaItemUploadOverlay(this.uploadManager.jobs(), this.item()),
   );
@@ -123,22 +148,6 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
   readonly titleText = computed(
     () => this.item()?.address_label || this.t('media.page.title', 'Media'),
   );
-  readonly subtitleText = computed(() => {
-    const project = this.projectName();
-    const type = resolveMediaTypeLabel(
-      this.fileType(),
-      this.mediaOrchestrator.resolveBadge(this.fileIdentity()),
-      (key, fallback) => this.t(key, fallback),
-    );
-    if (project.length > 0 && type.length > 0) return `${project} · ${type}`;
-    return project.length > 0 ? project : type;
-  });
-  readonly capturedAtText = computed(() => {
-    const record = this.item();
-    return record
-      ? formatMediaItemDate(record.captured_at, this.i18nService.locale(), record.has_time)
-      : '';
-  });
 
   constructor() {
     super();
@@ -208,9 +217,9 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
     this.emitContextAction('open_in_media');
   }
 
-  onContextActionRequested(): void {
-    if (this.disabled()) return;
-    this.emitContextAction('open_in_media');
+  onMapActionRequested(): void {
+    if (this.disabled() || !this.hasMapLocation()) return;
+    this.emitContextAction('zoom_house');
   }
 
   private async resolveThumbnailUrl(record: ImageRecord | null): Promise<void> {

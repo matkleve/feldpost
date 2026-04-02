@@ -1,14 +1,14 @@
 <section class="media-content">
   @if (loading()) {
     <app-item-grid [mode]="itemMode()">
-      @for (placeholderId of loadingPlaceholderIds; track placeholderId) {
+      @for (placeholderId of loadingPlaceholderIds(); track placeholderId) {
         <app-item-state-frame
           [itemId]="'media-loading-' + placeholderId"
           [mode]="itemMode()"
-          [loading]="true"
           [disabled]="true"
-          [loadingLabel]="loadingLabel()"
-        />
+        >
+          <app-media-item-render-surface [renderState]="'loading'" />
+        </app-item-state-frame>
       }
     </app-item-grid>
   } @else if (error()) {
@@ -22,7 +22,6 @@
           [itemId]="item.id"
           [item]="item"
           [mode]="itemMode()"
-          [projectName]="projectNameFor()(item.project_id)"
           [selected]="isSelected(item.id)"
           [actionContextId]="mediaItemActionContext"
           (opened)="itemClicked.emit($event)"

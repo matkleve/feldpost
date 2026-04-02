@@ -1,19 +1,22 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import type { MediaTier } from '../../core/media/media-renderer.types';
 import { PHOTO_NO_PHOTO_ICON, PHOTO_PLACEHOLDER_ICON } from '../../core/photo-load.service';
+import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 
 export type MediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
 
 @Component({
   selector: 'app-media-item-render-surface',
-  imports: [],
+  imports: [ChipComponent],
   templateUrl: './media-item-render-surface.component.html',
   styleUrl: './media-item-render-surface.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaItemRenderSurfaceComponent {
+  readonly slotMode = input<'grid-sm' | 'grid-md' | 'grid-lg' | 'row' | 'card'>('grid-md');
   readonly renderState = input<MediaItemRenderState>('loading');
   readonly isImage = input(true);
+  readonly isDocument = input(false);
   readonly thumbnailUrl = input('');
   readonly icon = input('image');
   readonly altText = input('');
@@ -21,7 +24,62 @@ export class MediaItemRenderSurfaceComponent {
   readonly effectiveTier = input<MediaTier>('small');
   readonly slotWidthRem = input<number | null>(null);
   readonly slotHeightRem = input<number | null>(null);
+  readonly fileTypeIcon = input('image');
+  readonly fileTypeText = input('');
+  readonly fileTypeChipVariant = input<ChipVariant>('default');
+
+  readonly loadedAssetRatio = signal<number | null>(null);
+  readonly mediaFrameRatio = computed(() => {
+    if (this.isDocument()) {
+      return 1 / 1.414;
+    }
+    const ratio = this.loadedAssetRatio();
+    return ratio && Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+  });
+  readonly mediaFrameBaseRem = computed(() => {
+    switch (this.slotMode()) {
+      case 'grid-sm':
+        return 8;
+      case 'grid-lg':
+        return 13;
+      case 'card':
+        return 14;
+      case 'row':
+        return 10;
+      case 'grid-md':
+      default:
+        return 10;
+    }
+  });
+  readonly mediaFrameWidthRem = computed(() => {
+    const ratio = this.mediaFrameRatio();
+    const base = this.mediaFrameBaseRem();
+    return ratio >= 1 ? base : base * ratio;
+  });
+  readonly mediaFrameHeightRem = computed(() => {
+    const ratio = this.mediaFrameRatio();
+    const base = this.mediaFrameBaseRem();
+    return ratio >= 1 ? base / ratio : base;
+  });
 
   readonly placeholderIconUrl = PHOTO_PLACEHOLDER_ICON;
   readonly noPhotoIconUrl = PHOTO_NO_PHOTO_ICON;
+
+  constructor() {
+    effect(
+      () => {
+        this.thumbnailUrl();
+        this.loadedAssetRatio.set(null);
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  onAssetLoaded(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    if (!image || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+      return;
+    }
+    this.loadedAssetRatio.set(image.naturalWidth / image.naturalHeight);
+  }
 }

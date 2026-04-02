@@ -1,38 +1,53 @@
-<figure class="media-item-render-surface" aria-hidden="true">
+<!-- Defines plain square slot geometry without decorative frame styling. -->
+<!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+<div
+  class="media-item-render-surface__slot"
+  aria-hidden="true"
+  [attr.data-tier-requested]="requestedTier()"
+  [attr.data-tier-effective]="effectiveTier()"
+  [attr.data-slot-width-rem]="slotWidthRem()"
+  [attr.data-slot-height-rem]="slotHeightRem()"
+  [style.width.rem]="mediaFrameWidthRem()"
+  [style.height.rem]="mediaFrameHeightRem()"
+>
+  <!-- Defines media-frame bounds where border/radius/hover/actions/chip are anchored. -->
+  <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
   <div
-    class="media-item-render-surface__slot"
-    [attr.data-tier-requested]="requestedTier()"
-    [attr.data-tier-effective]="effectiveTier()"
-    [attr.data-slot-width-rem]="slotWidthRem()"
-    [attr.data-slot-height-rem]="slotHeightRem()"
+    class="media-item-render-surface__media-frame"
+    [class.media-item-render-surface__media-frame--top]="isDocument()"
   >
-    @if (renderState() === 'content') {
-      @if (isImage() && thumbnailUrl().length > 0) {
-        <img class="media-item-render-surface__asset" [src]="thumbnailUrl()" [alt]="altText()" />
-      } @else {
-        <div class="media-item-render-surface__layer media-item-render-surface__layer--icon-only">
-          <span class="material-icons media-item-render-surface__icon" aria-hidden="true">{{
-            icon()
-          }}</span>
-        </div>
-      }
-    } @else if (renderState() === 'loading') {
-      <div class="media-item-render-surface__layer media-item-render-surface__layer--placeholder">
-        <img
-          class="media-item-render-surface__placeholder-icon"
-          [src]="placeholderIconUrl"
-          alt=""
-        />
-      </div>
-      <div class="media-item-render-surface__layer media-item-render-surface__layer--loading">
-        <span class="media-item-render-surface__spinner"></span>
+    <!-- Renders loaded media asset with fit-contain behavior when image content exists. -->
+    <!-- @see docs/element-specs/media-item.md#actions--interactions -->
+    @if (renderState() === 'content' && isImage() && thumbnailUrl().length > 0) {
+      <img
+        class="media-item-render-surface__asset"
+        [class.media-item-render-surface__asset--document]="isDocument()"
+        [src]="thumbnailUrl()"
+        [alt]="altText()"
+        (load)="onAssetLoaded($event)"
+      />
+    } @else if (renderState() === 'content') {
+      <!-- Renders non-image icon fallback in canonical content state. -->
+      <!-- @see docs/element-specs/media-item.md#state-normalization-decision-mandatory -->
+      <div
+        class="media-item-render-surface__fallback media-item-render-surface__fallback--icon-only"
+      >
+        <span class="material-icons media-item-render-surface__icon" aria-hidden="true">{{
+          icon()
+        }}</span>
       </div>
     } @else if (renderState() === 'error' || renderState() === 'no-media') {
-      <div class="media-item-render-surface__layer media-item-render-surface__layer--no-photo">
+      <!-- Renders deterministic no-media/error fallback surface. -->
+      <!-- @see docs/element-specs/media-item.md#actions--interactions -->
+      <div
+        class="media-item-render-surface__fallback media-item-render-surface__fallback--no-photo"
+      >
         <img class="media-item-render-surface__no-photo-icon" [src]="noPhotoIconUrl" alt="" />
       </div>
     } @else {
-      <div class="media-item-render-surface__layer media-item-render-surface__layer--placeholder">
+      <!-- Renders loading/default placeholder pulse with centered photo icon (no spinner). -->
+      <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
+      <div class="media-item-render-surface__fallback media-item-render-surface__fallback--loading">
         <img
           class="media-item-render-surface__placeholder-icon"
           [src]="placeholderIconUrl"
@@ -40,5 +55,21 @@
         />
       </div>
     }
+
+    <!-- Anchors file-type chip in lower-right corner of rendered media frame. -->
+    <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+    @if (fileTypeText().length > 0) {
+      <app-chip
+        class="media-item-render-surface__chip"
+        [icon]="fileTypeIcon()"
+        [text]="fileTypeText()"
+        [variant]="fileTypeChipVariant()"
+        [size]="'sm'"
+      />
+    }
+
+    <!-- Projects upload and quiet-action overlays so they align to media-frame bounds, not tile bounds. -->
+    <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+    <ng-content select="[mediaOverlay]"></ng-content>
   </div>
-</figure>
+</div>

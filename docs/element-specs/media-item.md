@@ -6,7 +6,7 @@ Media Item is the domain-specific item contract for rendering a single media ent
 
 ## What It Looks Like
 
-The component renders a framed preview slot above metadata text and keeps layout stable across all render states. Loading uses a pulse placeholder that fills the slot and shows a centered photo icon, while loaded content fades in without geometry jumps. `grid-sm` and `grid-md` use square slot geometry, `row` uses metadata-driven dynamic ratio, and `grid-lg` applies document A4 behavior while non-document media keeps stable contain/cover semantics by tier. During loading, a known ratio must already be applied; if no ratio is available yet, fallback is the square slot from the active grid mode. Quiet actions are hidden at rest and reveal on hover/focus in 80ms without layout shift. Visual tokens come from shared color, spacing, and radius custom properties; accessibility-sensitive dimensions use `rem`.
+The component renders a plain square media slot and keeps layout stable across all render states. The slot is the only owner of thumbnail border and radius styling (no outer frame styling on the state wrapper), and media is rendered with native aspect ratio using `object-fit: contain` inside that square. Loading uses a pulse placeholder with centered photo icon (no spinner). Border/radius/hover affordances, quiet-action corners, and file-type chip placement are anchored to the rendered media frame inside the square slot, not to the full tile bounds. Quiet actions are hidden at rest and reveal on hover/focus in 80ms: select in the upper-left and map (icon-only) in the upper-right. Both quiet actions use the shared primitive small button style; select is circular and map has visible background. During loading, a known ratio must already be applied; if no ratio is available yet, fallback is the square slot from the active grid mode. Visual tokens come from shared color, spacing, and radius custom properties; accessibility-sensitive dimensions use `rem`.
 
 ## Where It Lives
 
@@ -30,13 +30,14 @@ The component renders a framed preview slot above metadata text and keeps layout
 | 6   | Mode changes to `grid-lg` and file is document     | Apply A4 portrait behavior (`1 / 1.414`) for preview slot                                                                                                                  | `mode='grid-lg'` + document type     |
 | 7   | Mode changes to `grid-lg` and file is not document | Apply non-document large-grid preview behavior using orchestrator tier rules                                                                                               | `mode='grid-lg'` + non-document type |
 | 8   | Mode changes to `row`                              | Derive slot ratio from media metadata and apply fade transition on ratio-relevant source change; if metadata ratio is unavailable, fallback to square until ratio resolves | `mode='row'`                         |
-| 9   | Mode changes to `card`                             | Use card preview behavior with stable slot frame and metadata below                                                                                                        | `mode='card'`                        |
+| 9   | Mode changes to `card`                             | Use card preview behavior with stable slot frame                                                                                                                           | `mode='card'`                        |
 | 10  | Upload phase/progress is active for this media     | Render upload overlay under quiet actions with progress fill, icon, and label                                                                                              | upload phase update                  |
 | 11  | User hovers/focuses media item                     | Reveal quiet actions in 80ms; keep keyboard access for all exposed controls                                                                                                | hover/focus                          |
-| 12  | User triggers selection/context action             | Emit canonical action event for `ws_grid_thumbnail` contract                                                                                                               | action click/keyboard                |
-| 13  | Slot dimensions change                             | Convert slot size to `rem`, resolve requested/effective tier via orchestrator                                                                                              | resize observer                      |
-| 14  | User views a video item                            | Show play-indicator overlay in content state                                                                                                                               | file type is video                   |
-| 15  | `/media` appends large result sets                 | Insert rows progressively in deterministic batches `columns x 3`                                                                                                           | list append/pagination               |
+| 12  | User triggers selection/map action                 | Emit canonical action event for `ws_grid_thumbnail` contract (`select` and map jump)                                                                                       | action click/keyboard                |
+| 13  | Media item enters visible content/no-media state   | Show file-type chip (icon + text) in lower-right corner of rendered media frame                                                                                            | render layer visible                 |
+| 14  | Slot dimensions change                             | Convert slot size to `rem`, resolve requested/effective tier via orchestrator                                                                                              | resize observer                      |
+| 15  | User views a video item                            | Show play-indicator overlay in content state                                                                                                                               | file type is video                   |
+| 16  | `/media` appends large result sets                 | Insert rows progressively in deterministic batches `columns x 3`                                                                                                           | list append/pagination               |
 
 ### State Normalization Decision (Mandatory)
 
@@ -80,12 +81,8 @@ MediaItemComponent
 │   └── Progress fill + icon + label (z-index below quiet actions)
 ├── MediaItemQuietActionsComponent
 │   ├── Select action
-│   ├── Context action
+│   ├── Map action (icon-only)
 │   └── Keyboard focusable controls
-└── Media metadata area
-    ├── Title
-    ├── Subtitle/type
-    └── Captured date
 ```
 
 ## Data
@@ -194,7 +191,6 @@ This guarantees no geometry jump from loading to content.
 - Inputs:
   - `itemId`, `mode`, `loading`, `error`, `empty`, `selected`, `disabled`, `actionContextId`
   - `item` (domain media record)
-  - `projectName`
 - Outputs:
   - `selectedChange`
   - `opened`
@@ -244,14 +240,19 @@ sequenceDiagram
 - [ ] Loading state uses pulse placeholder with centered photo icon and no spinner.
 - [ ] Media loading visual ownership is singular: render-surface owns loading visuals; shared state frame does not duplicate a second loading overlay for media items.
 - [ ] `grid-sm` and `grid-md` use square media slot behavior.
+- [ ] Media tile border/radius styling is owned by the media slot container, not by outer state-frame wrapper geometry.
 - [ ] `grid-lg` applies A4 portrait ratio for document media.
 - [ ] Document media below `grid-lg` uses square slot behavior.
 - [ ] `row` mode derives ratio from media metadata and fades on ratio-relevant source changes.
 - [ ] Loading state uses known ratio when available; otherwise fallback ratio is square (`1 / 1`) until metadata ratio resolves.
 - [ ] `card` mode keeps stable framed preview behavior.
 - [ ] Video content state shows play-indicator overlay.
+- [ ] File-type chip (icon + text) is anchored lower-right in rendered media frame bounds.
 - [ ] Upload overlay appears below quiet actions and keeps correct z-order.
-- [ ] Quiet actions reveal in 80ms on hover/focus and are fully keyboard accessible.
+- [ ] Quiet actions reveal in 80ms on hover/focus and are fully keyboard accessible (select top-left, map top-right icon-only).
+- [ ] Select and map quiet actions use shared primitive small button styling.
+- [ ] Select quiet action is circular; map quiet action has visible background surface.
+- [ ] Quiet actions are anchored to rendered media frame corners, not full square-tile corners.
 - [ ] Requested/effective tier is resolved from `slotWidthRem`/`slotHeightRem` through orchestrator only.
 - [ ] `/media` progressive insertion uses deterministic batch size `columns x 3`.
 - [ ] File map and wiring match the defined sub-components and service ownership exactly.

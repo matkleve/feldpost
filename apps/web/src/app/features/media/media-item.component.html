@@ -1,7 +1,7 @@
 <app-item-state-frame
   [itemId]="itemId()"
   [mode]="activeMode()"
-  [loading]="resolvedLoading()"
+  [loading]="false"
   [error]="error()"
   [empty]="empty()"
   [selected]="selected()"
@@ -13,6 +13,8 @@
   (retryRequested)="onRetryRequested($event)"
 >
   @if (item(); as media) {
+    <!-- Hosts media-item domain surface with mode modifiers and context-menu wiring. -->
+    <!-- @see docs/element-specs/media-item.md#component-hierarchy -->
     <article
       class="media-item"
       [class.media-item--row]="activeMode() === 'row'"
@@ -22,6 +24,8 @@
       [class.media-item--card]="activeMode() === 'card'"
       (contextmenu)="onContextMenu($event)"
     >
+      <!-- Defines primary open action region without decorative wrapper around preview slot. -->
+      <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
       <button
         type="button"
         class="media-item__open"
@@ -30,10 +34,14 @@
         "
         (click)="onOpenClick($event)"
       >
+        <!-- Renders square media slot with canonical state layers and lower-right file-type chip. -->
+        <!-- @see docs/element-specs/media-item.md#actions--interactions -->
         <app-media-item-render-surface
           class="media-item__preview"
+          [slotMode]="activeMode()"
           [renderState]="mediaRenderState()"
           [isImage]="canRenderImage()"
+          [isDocument]="fileType().category === 'document'"
           [thumbnailUrl]="thumbnailUrl()"
           [icon]="mediaIcon()"
           [altText]="titleText()"
@@ -41,35 +49,35 @@
           [effectiveTier]="effectiveTier()"
           [slotWidthRem]="slotWidthRem()"
           [slotHeightRem]="slotHeightRem()"
-        />
-
-        <div class="media-item__meta">
-          <p class="media-item__title">{{ titleText() }}</p>
-
-          @if (capturedAtText().length > 0) {
-            <p class="media-item__date">{{ capturedAtText() }}</p>
+          [fileTypeIcon]="mediaIcon()"
+          [fileTypeText]="mediaTypeLabel()"
+          [fileTypeChipVariant]="fileTypeChipVariant()"
+        >
+          <!-- Projects upload overlay so it stays inside rendered media-frame bounds. -->
+          <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
+          @if (uploadOverlay(); as overlay) {
+            <app-media-item-upload-overlay
+              mediaOverlay
+              class="media-item__upload-overlay"
+              [overlay]="overlay"
+            />
           }
 
-          @if (subtitleText().length > 0) {
-            <p class="media-item__subtitle">{{ subtitleText() }}</p>
-          }
-        </div>
+          <!-- Projects quiet actions so corner buttons align to rendered media-frame bounds. -->
+          <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+          <app-media-item-quiet-actions
+            mediaOverlay
+            class="media-item__quiet-actions"
+            [selected]="selected()"
+            [disabled]="disabled()"
+            [mapDisabled]="!hasMapLocation()"
+            [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
+            [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
+            (selectRequested)="onSelectRequested()"
+            (mapRequested)="onMapActionRequested()"
+          />
+        </app-media-item-render-surface>
       </button>
-
-      <app-media-item-upload-overlay
-        class="media-item__upload-overlay"
-        [overlay]="uploadOverlay()"
-      />
-
-      <app-media-item-quiet-actions
-        class="media-item__quiet-actions"
-        [selected]="selected()"
-        [disabled]="disabled()"
-        [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
-        [contextLabel]="t('workspace.imageDetail.action.more.aria', 'More actions')"
-        (selectRequested)="onSelectRequested()"
-        (contextRequested)="onContextActionRequested()"
-      />
     </article>
   }
 </app-item-state-frame>
