@@ -84,7 +84,7 @@ None.
 
 ### Inputs / Outputs
 
-- Inputs: `itemId`, `mode`, `loading`, `error`, `empty`, `selected`, `disabled`, labels
+- Inputs: `itemId`, `mode`, `loading`, `error`, `empty`, `selected` (compatibility input, no selected visual ownership), `disabled`, labels
 - Outputs: `retryRequested`
 
 ### Subscriptions
@@ -131,6 +131,15 @@ sequenceDiagram
 | Error state layer   | `.item-state-frame__state-layer--error`   | `.item-state-frame`                      | `.item-state-frame__retry` | `.item-state-frame__state-layer--error`   | state/error (1)       | retry remains clickable while content is hidden          |
 | Empty state layer   | `.item-state-frame__state-layer--empty`   | `.item-state-frame`                      | none                       | `.item-state-frame__state-layer--empty`   | state/empty (1)       | empty message overlays content area without layout shift |
 | Disabled state      | `.item-state-frame`                       | `.item-state-frame`                      | none (locked)              | `.item-state-frame--disabled`             | state/disabled        | content is dimmed and non-interactive                    |
+
+### Ownership Triad Declaration
+
+| Behavior            | Geometry Owner                            | State Owner                               | Visual Owner                              | Same element? |
+| ------------------- | ----------------------------------------- | ----------------------------------------- | ----------------------------------------- | ------------- |
+| Loading state layer | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading` | ✅            |
+| Error state layer   | `.item-state-frame__state-layer--error`   | `.item-state-frame__state-layer--error`   | `.item-state-frame__state-layer--error`   | ✅            |
+| Empty state layer   | `.item-state-frame__state-layer--empty`   | `.item-state-frame__state-layer--empty`   | `.item-state-frame__state-layer--empty`   | ✅            |
+| Disabled state      | `.item-state-frame`                       | `.item-state-frame--disabled`             | `.item-state-frame--disabled`             | ✅            |
 
 ### Stacking Context
 

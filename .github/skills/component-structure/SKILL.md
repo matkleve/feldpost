@@ -25,6 +25,44 @@ Required checklist:
 - State Ownership: each visual state names exactly one owner element
 - Pseudo-CSS: include a minimal contract snippet for `:host`, overlays, and `img`/content
 
+## 1.2) Ownership Triad Rule (Hard Blocker)
+
+Every visual behavior in a component has exactly three owners.
+They must be explicitly declared before any HTML or CSS is written.
+
+| Owner          | Responsible for                                                                   | Forbidden from                |
+| -------------- | --------------------------------------------------------------------------------- | ----------------------------- |
+| Geometry Owner | width, height, aspect-ratio, display                                              | state classes, event bindings |
+| State Owner    | state class bindings (`[class.x]`)                                                | geometry properties           |
+| Visual Owner   | CSS rules that produce visible output (color, border, shadow, opacity, animation) | geometry of other elements    |
+
+### Core rule (default)
+
+Geometry Owner == State Owner == Visual Owner
+
+By default, all three owners point to the same element.
+Any divergence is an exception and must be documented.
+
+### Mandatory declaration format (per component spec)
+
+| Behavior      | Geometry Owner                            | State Owner                                         | Visual Owner                                        | Same element?               |
+| ------------- | ----------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | --------------------------- |
+| selected ring | `.media-item-render-surface__media-frame` | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                          |
+| loading pulse | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading`           | `.item-state-frame__state-layer--loading`           | ✅                          |
+| hover reveal  | `.media-item__quiet-actions`              | `.media-item--selected` (on parent)                 | `.media-item__quiet-actions`                        | ⚠️ exception — document why |
+
+### Exceptions
+
+- Document the exception in the spec table with reason.
+- Use `position: absolute; inset: 0` on the visual owner relative to the geometry owner's stacking context.
+- Never duplicate geometry ownership across layers.
+
+### Stacking context rule
+
+Exactly one element per component declares `position: relative`.
+This element is the geometry owner for all absolutely positioned children.
+All overlays, badges, and action layers use `position: absolute; inset: 0` relative to this single owner.
+
 ### Correct vs Incorrect Stacking Context Example
 
 Correct:

@@ -7,7 +7,7 @@ This system is a full replacement contract: once a surface is migrated, legacy g
 
 ## What It Looks Like
 
-The system has two architectural layers: a layout-only `ItemGridComponent` and a state-contract `ItemComponent` base class consumed by domain-specific item components. Layout modes are `grid-sm`, `grid-md`, `grid-lg`, `row`, and `card`, with responsive transitions driven only by design tokens and shared primitives. Item content is projected from domain components; grid layout never renders domain text or actions itself. Loading is rendered as a pulse placeholder layer (spinner forbidden), and media loading uses a centered photo icon in that pulse layer as defined by the media child spec. State transitions follow one deterministic chain (`loading -> content | error | no-media`). For grid surfaces, media slot geometry is plain square and media content renders with native ratio via `object-fit: contain`; quick actions reveal select (top-left) and map (top-right icon-only), and file-type chip (icon + text) anchors lower-right. All styles use semantic component class names and component-scoped SCSS files.
+The system has two architectural layers: a layout-only `ItemGridComponent` and a state-contract `ItemComponent` base class consumed by domain-specific item components. Layout modes are `grid-sm`, `grid-md`, `grid-lg`, `row`, and `card`, with responsive transitions driven only by design tokens and shared primitives. Item content is projected from domain components; grid layout never renders domain text or actions itself. Shared loading is rendered as a pulse placeholder layer (spinner forbidden), while media loading is owned by `MediaItemRenderSurfaceComponent` with a centered photo icon in its loading fallback. State transitions follow one deterministic chain (`loading -> content | error | no-media`). For grid surfaces, media slot geometry is plain square and media content renders with native ratio via `object-fit: contain`; quick actions reveal select (top-left) and map (top-right icon-only), and file-type chip (icon + text) anchors lower-right. All styles use semantic component class names and component-scoped SCSS files.
 For media items, `MediaItemComponent` rebuilds the visual/state contract in feature code (state layers, upload overlays, adaptive tier behavior, quiet actions, row-mode dynamic ratio), without runtime wrapping/importing of archived shared media components.
 All media consumers (map marker, workspace selected-items, `/media`, and detail view) must resolve tier and URL fallback through the shared media-delivery orchestrator contract.
 
@@ -29,24 +29,24 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 
 ## Actions
 
-| #   | User Action                                                                            | System Response                                                                                                                     | Trigger                           |
-| --- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| 1   | Parent surface sets `mode` to `grid-sm`, `grid-md`, `grid-lg`, `row`, or `card`        | ItemGrid applies matching semantic layout class and tokenized geometry                                                              | `mode` input change               |
-| 2   | Parent projects domain items into ItemGrid                                             | Grid renders projected item slots without domain logic                                                                              | Content projection                |
-| 3   | Domain item enters loading state                                                       | Base ItemComponent renders pulse placeholder (spinner forbidden); domain child spec defines loading icon semantics                  | `loading=true`                    |
-| 4   | Domain item enters error state                                                         | Base ItemComponent renders shared error surface and exposes retry output                                                            | `error=true`                      |
-| 5   | Parent provides empty collection                                                       | Parent-level empty region renders using shared empty contract while ItemGrid keeps layout shell stable                              | `items.length===0`                |
-| 6   | User selects or deselects an item                                                      | Base ItemComponent toggles shared selected styling and emits selection event                                                        | pointer/keyboard selection action |
-| 7   | User opens item action menu on media item                                              | MediaItem action set is resolved from action-context matrix for `ws_grid_thumbnail` contract                                        | action trigger in MediaItem       |
-| 8   | Viewport crosses tokenized breakpoints                                                 | Grid column count and spacing adapt by design token values only                                                                     | responsive recalculation          |
-| 9   | Migration step for a surface is completed                                              | New item-grid system becomes the only runtime path for that surface in one cutover; legacy components move to archive, not deletion | migration completion gate         |
-| 10  | Media item render state changes (`loading`, `content`, `error`, `no-media`)            | MediaItem render surface switches layers using one deterministic state chain with no visual gaps                                    | media render state update         |
-| 11  | Upload phase/progress is active for the represented media                              | MediaItem shows upload overlay (progress fill + icon + label), layered behind quiet actions                                         | upload state update               |
-| 12  | User hovers/focuses media item on desktop                                              | Quiet actions fade in without layout shift; selection/map actions remain keyboard reachable                                         | hover/focus interaction           |
-| 13  | Media item slot dimensions change                                                      | MediaItem measures slot size in `rem`, resolves requested/effective tier via orchestrator, and keeps rendering stable               | resize observer event             |
-| 14  | User triggers media item context action                                                | MediaItem resolves full `ws_grid_thumbnail` action set and emits canonical action events                                            | context action trigger            |
-| 15  | `/media` receives or appends large result sets                                         | Media list inserts rows progressively with deterministic batch size `columns x 3` to keep interaction fluid                         | list append / pagination          |
-| 16  | Any media consumer requests preview rendering (`map`, `workspace`, `/media`, `detail`) | Consumer resolves requested/effective tier and URL fallback through shared media-delivery orchestrator chain before render binding  | media render request              |
+| #   | User Action                                                                            | System Response                                                                                                                                                   | Trigger                           |
+| --- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| 1   | Parent surface sets `mode` to `grid-sm`, `grid-md`, `grid-lg`, `row`, or `card`        | ItemGrid applies matching semantic layout class and tokenized geometry                                                                                            | `mode` input change               |
+| 2   | Parent projects domain items into ItemGrid                                             | Grid renders projected item slots without domain logic                                                                                                            | Content projection                |
+| 3   | Domain item enters loading state                                                       | Loading owner is resolved by domain contract: shared domains use ItemStateFrame pulse placeholder; media uses render-surface loading fallback (spinner forbidden) | `loading=true`                    |
+| 4   | Domain item enters error state                                                         | Base ItemComponent renders shared error surface and exposes retry output                                                                                          | `error=true`                      |
+| 5   | Parent provides empty collection                                                       | Parent-level empty region renders using shared empty contract while ItemGrid keeps layout shell stable                                                            | `items.length===0`                |
+| 6   | User selects or deselects an item                                                      | Base ItemComponent propagates selected state and emits selection event; selected emphasis is rendered by the domain visual owner                                  | pointer/keyboard selection action |
+| 7   | User opens item action menu on media item                                              | MediaItem action set is resolved from action-context matrix for `ws_grid_thumbnail` contract                                                                      | action trigger in MediaItem       |
+| 8   | Viewport crosses tokenized breakpoints                                                 | Grid column count and spacing adapt by design token values only                                                                                                   | responsive recalculation          |
+| 9   | Migration step for a surface is completed                                              | New item-grid system becomes the only runtime path for that surface in one cutover; legacy components move to archive, not deletion                               | migration completion gate         |
+| 10  | Media item render state changes (`loading`, `content`, `error`, `no-media`)            | MediaItem render surface switches layers using one deterministic state chain with no visual gaps                                                                  | media render state update         |
+| 11  | Upload phase/progress is active for the represented media                              | MediaItem shows upload overlay (progress fill + icon + label), layered behind quiet actions                                                                       | upload state update               |
+| 12  | User hovers/focuses media item on desktop                                              | Quiet actions fade in without layout shift; selection/map actions remain keyboard reachable                                                                       | hover/focus interaction           |
+| 13  | Media item slot dimensions change                                                      | MediaItem measures slot size in `rem`, resolves requested/effective tier via orchestrator, and keeps rendering stable                                             | resize observer event             |
+| 14  | User triggers media item context action                                                | MediaItem resolves full `ws_grid_thumbnail` action set and emits canonical action events                                                                          | context action trigger            |
+| 15  | `/media` receives or appends large result sets                                         | Media list inserts rows progressively with deterministic batch size `columns x 3` to keep interaction fluid                                                       | list append / pagination          |
+| 16  | Any media consumer requests preview rendering (`map`, `workspace`, `/media`, `detail`) | Consumer resolves requested/effective tier and URL fallback through shared media-delivery orchestrator chain before render binding                                | media render request              |
 
 ## Component Hierarchy
 
@@ -60,7 +60,7 @@ ItemGridSystem
 │   │   ├── Loading layer (pulse placeholder)
 │   │   ├── Error layer
 │   │   ├── Empty layer
-│   │   └── Selection layer
+│   │   └── No selected visual ownership (selection stays domain-owned)
 │   └── Domain content outlet (overridden by subclasses)
 ├── MediaItemComponent (extends ItemComponent)
 │   ├── MediaItemRenderSurfaceComponent (features/media; no shared wrapper)
@@ -100,23 +100,23 @@ flowchart TD
   M --> N[action-context-matrix.md ws_grid_thumbnail]
 ```
 
-| Field             | Source                             | Type                                                       | Purpose                                       |
-| ----------------- | ---------------------------------- | ---------------------------------------------------------- | --------------------------------------------- |
-| `mode`            | Parent page/workspace container    | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'`   | Drives layout mode in ItemGrid                |
-| `items`           | Domain adapter output              | `ReadonlyArray<ItemViewModel>`                             | Rendered item collection                      |
-| `loading`         | Domain adapter/item async pipeline | `boolean`                                                  | Shared loading state in ItemComponent         |
-| `error`           | Domain adapter/item async pipeline | `boolean`                                                  | Shared error state in ItemComponent           |
-| `empty`           | Parent collection state            | `boolean`                                                  | Shared empty state signaling                  |
-| `selected`        | Selection service / parent state   | `boolean`                                                  | Shared selected styling and behavior          |
-| `actionContextId` | Domain adapter                     | `string`                                                   | Binds item action menus to matrix contract    |
-| `photoLoadState`  | `PhotoLoadService`                 | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | Canonical media loading and fallback state    |
-| `slotWidthRem`    | Media item measurement             | `number \| null`                                           | Adaptive tier selection input                 |
-| `slotHeightRem`   | Media item measurement             | `number \| null`                                           | Adaptive tier selection input                 |
-| `requestedTier`   | Media item mode mapping            | `MediaTier`                                                | Target render tier before orchestration       |
-| `effectiveTier`   | `MediaOrchestratorService`         | `MediaTier`                                                | Actual tier after slot-aware resolution       |
-| `uploadOverlay`   | `UploadManagerService` bridge      | `UploadOverlayState \| null`                               | Upload progress and status layer              |
-| `gridColumns`     | Grid layout resolver               | `number`                                                   | Current resolved column count                 |
-| `batchInsertSize` | Media list progressive renderer    | `number`                                                   | Deterministic append size (`gridColumns x 3`) |
+| Field             | Source                             | Type                                                       | Purpose                                              |
+| ----------------- | ---------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
+| `mode`            | Parent page/workspace container    | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'`   | Drives layout mode in ItemGrid                       |
+| `items`           | Domain adapter output              | `ReadonlyArray<ItemViewModel>`                             | Rendered item collection                             |
+| `loading`         | Domain adapter/item async pipeline | `boolean`                                                  | Shared loading state in ItemComponent                |
+| `error`           | Domain adapter/item async pipeline | `boolean`                                                  | Shared error state in ItemComponent                  |
+| `empty`           | Parent collection state            | `boolean`                                                  | Shared empty state signaling                         |
+| `selected`        | Selection service / parent state   | `boolean`                                                  | Selected state propagation for domain-owned emphasis |
+| `actionContextId` | Domain adapter                     | `string`                                                   | Binds item action menus to matrix contract           |
+| `photoLoadState`  | `PhotoLoadService`                 | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | Canonical media loading and fallback state           |
+| `slotWidthRem`    | Media item measurement             | `number \| null`                                           | Adaptive tier selection input                        |
+| `slotHeightRem`   | Media item measurement             | `number \| null`                                           | Adaptive tier selection input                        |
+| `requestedTier`   | Media item mode mapping            | `MediaTier`                                                | Target render tier before orchestration              |
+| `effectiveTier`   | `MediaOrchestratorService`         | `MediaTier`                                                | Actual tier after slot-aware resolution              |
+| `uploadOverlay`   | `UploadManagerService` bridge      | `UploadOverlayState \| null`                               | Upload progress and status layer                     |
+| `gridColumns`     | Grid layout resolver               | `number`                                                   | Current resolved column count                        |
+| `batchInsertSize` | Media list progressive renderer    | `number`                                                   | Deterministic append size (`gridColumns x 3`)        |
 
 ## State
 
@@ -126,7 +126,7 @@ flowchart TD
 | `loading`         | `boolean`                                                | `false`     | Non-overridable loading layer rendering in ItemComponent |
 | `error`           | `boolean`                                                | `false`     | Non-overridable error layer rendering in ItemComponent   |
 | `empty`           | `boolean`                                                | `false`     | Non-overridable empty layer rendering in ItemComponent   |
-| `selected`        | `boolean`                                                | `false`     | Shared selected state styling and ARIA                   |
+| `selected`        | `boolean`                                                | `false`     | Selected state propagation and ARIA                      |
 | `disabled`        | `boolean`                                                | `false`     | Shared interaction gating for unavailable items          |
 | `actionContextId` | `string \| null`                                         | `null`      | Resolves domain actions via action matrix                |
 | `batchInsertSize` | `number \| null`                                         | `null`      | Progressive `/media` insertion size (`columns x 3`)      |
@@ -150,7 +150,7 @@ Every domain item extending ItemComponent must expose these inputs/outputs:
   - `retryRequested`
   - `contextActionRequested`
 
-Shared state rendering (loading/error/empty/selection) is owned by ItemComponent and is not overridable by domain subclasses.
+Shared state rendering (loading/error/empty) is owned by ItemComponent and is not overridable by domain subclasses. Selected emphasis is domain-owned.
 
 ### Pulse Placeholder Contract (Mandatory)
 
@@ -212,14 +212,26 @@ The loading visual standard for Item Grid surfaces is a pulse placeholder layer.
 
 ### Ownership Matrix
 
-| Behavior                   | Visual Geometry Owner                     | Stacking Context Owner                   | Interaction Hit-Area Owner                   | Selector(s)                                         | Layer (z-index/token) | Test Oracle                                                           |
-| -------------------------- | ----------------------------------------- | ---------------------------------------- | -------------------------------------------- | --------------------------------------------------- | --------------------- | --------------------------------------------------------------------- |
-| Shared loading layer       | `.item-state-frame__state-layer--loading` | `.item-state-frame` (grid overlay stack) | none (passive state)                         | `.item-state-frame__state-layer--loading`           | state/loading (1)     | loading layer covers projected content without changing grid geometry |
-| Shared error layer         | `.item-state-frame__state-layer--error`   | `.item-state-frame`                      | `.item-state-frame__retry`                   | `.item-state-frame__state-layer--error`             | state/error (1)       | error layer is visible and retry button remains clickable             |
-| Shared empty layer         | `.item-state-frame__state-layer--empty`   | `.item-state-frame`                      | none (passive state)                         | `.item-state-frame__state-layer--empty`             | state/empty (1)       | empty message overlays projected content with stable slot bounds      |
-| Media selected emphasis    | media render frame in domain item         | domain item host (`app-media-item:host`) | `.media-item__open` and quiet-action buttons | `.media-item-render-surface__media-frame--selected` | surface/selected      | selected ring is visible only on media frame, not on full tile        |
-| Media upload overlay       | media render frame bounds                 | domain item host (`app-media-item:host`) | none (passive overlay)                       | `.media-item__upload-overlay`                       | overlay/upload (1)    | upload overlay does not shift layout and stays below quiet actions    |
-| Media quiet actions reveal | quiet action controls                     | domain item host (`app-media-item:host`) | `.media-item-quiet-actions__button*`         | `.media-item__quiet-actions`                        | overlay/actions (3)   | quiet actions reveal on hover/focus and remain keyboard reachable     |
+| Behavior                   | Visual Geometry Owner                           | Stacking Context Owner                   | Interaction Hit-Area Owner                   | Selector(s)                                         | Layer (z-index/token) | Test Oracle                                                                     |
+| -------------------------- | ----------------------------------------------- | ---------------------------------------- | -------------------------------------------- | --------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------- |
+| Shared loading layer       | `.item-state-frame__state-layer--loading`       | `.item-state-frame` (grid overlay stack) | none (passive state)                         | `.item-state-frame__state-layer--loading`           | state/loading (1)     | loading layer covers projected content without changing grid geometry           |
+| Media loading fallback     | `.media-item-render-surface__fallback--loading` | `app-media-item:host`                    | none (passive state)                         | `.media-item-render-surface__fallback--loading`     | layer/content (0)     | media loading placeholder is frame-scoped and does not use shared wrapper layer |
+| Shared error layer         | `.item-state-frame__state-layer--error`         | `.item-state-frame`                      | `.item-state-frame__retry`                   | `.item-state-frame__state-layer--error`             | state/error (1)       | error layer is visible and retry button remains clickable                       |
+| Shared empty layer         | `.item-state-frame__state-layer--empty`         | `.item-state-frame`                      | none (passive state)                         | `.item-state-frame__state-layer--empty`             | state/empty (1)       | empty message overlays projected content with stable slot bounds                |
+| Media selected emphasis    | media render frame in domain item               | domain item host (`app-media-item:host`) | `.media-item__open` and quiet-action buttons | `.media-item-render-surface__media-frame--selected` | surface/selected      | selected ring is visible only on media frame, not on full tile                  |
+| Media upload overlay       | media render frame bounds                       | domain item host (`app-media-item:host`) | none (passive overlay)                       | `.media-item__upload-overlay`                       | overlay/upload (1)    | upload overlay does not shift layout and stays below quiet actions              |
+| Media quiet actions reveal | quiet action controls                           | domain item host (`app-media-item:host`) | `.media-item-quiet-actions__button*`         | `.media-item__quiet-actions`                        | overlay/actions (3)   | quiet actions reveal on hover/focus and remain keyboard reachable               |
+
+### Ownership Triad Declaration
+
+| Behavior                   | Geometry Owner                                  | State Owner                                         | Visual Owner                                        | Same element?                                              |
+| -------------------------- | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- |
+| Shared loading layer       | `.item-state-frame__state-layer--loading`       | `.item-state-frame__state-layer--loading`           | `.item-state-frame__state-layer--loading`           | ✅                                                         |
+| Media loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | ✅                                                         |
+| Shared error layer         | `.item-state-frame__state-layer--error`         | `.item-state-frame__state-layer--error`             | `.item-state-frame__state-layer--error`             | ✅                                                         |
+| Shared empty layer         | `.item-state-frame__state-layer--empty`         | `.item-state-frame__state-layer--empty`             | `.item-state-frame__state-layer--empty`             | ✅                                                         |
+| Media selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                                                         |
+| Media quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | ⚠️ exception — reveal is intentionally parent-state driven |
 
 ### Stacking Context
 
@@ -240,13 +252,13 @@ No undeclared z-index values are allowed in domain item components.
 
 ### State Ownership
 
-| Visual state  | Owner element                                                      | Notes                                    |
-| ------------- | ------------------------------------------------------------------ | ---------------------------------------- |
-| Loading pulse | `app-item-state-frame` (`.item-state-frame__state-layer--loading`) | Shared state contract; spinner forbidden |
-| Error surface | `app-item-state-frame` (`.item-state-frame__state-layer--error`)   | Shared retry and message handling        |
-| Empty surface | `app-item-state-frame` (`.item-state-frame__state-layer--empty`)   | Shared empty fallback                    |
-| Selected ring | Domain visual geometry owner (media frame selector)                | Domain-owned selected emphasis           |
-| Hover reveal  | `app-media-item` quiet-actions layer                               | Domain-owned interaction affordance      |
+| Visual state  | Owner element                                                                                                                                        | Notes                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Loading pulse | Shared domains: `app-item-state-frame` (`.item-state-frame__state-layer--loading`); media exception: `.media-item-render-surface__fallback--loading` | Spinner forbidden; owner is explicitly declared per domain contract |
+| Error surface | `app-item-state-frame` (`.item-state-frame__state-layer--error`)                                                                                     | Shared retry and message handling                                   |
+| Empty surface | `app-item-state-frame` (`.item-state-frame__state-layer--empty`)                                                                                     | Shared empty fallback                                               |
+| Selected ring | Domain visual geometry owner (media frame selector)                                                                                                  | Domain-owned selected emphasis                                      |
+| Hover reveal  | `app-media-item` quiet-actions layer                                                                                                                 | Domain-owned interaction affordance                                 |
 
 ### Pseudo-CSS Contract
 
@@ -298,7 +310,7 @@ img {
 - Every SCSS file is responsible for exactly one component.
 - Geometry ownership is strictly split:
   - `ItemGridComponent` SCSS defines only grid layout (columns, gaps, breakpoints).
-  - `ItemComponent` / `ItemStateFrameComponent` SCSS defines only shared state frame surfaces (loading/error/empty/selection).
+  - `ItemComponent` / `ItemStateFrameComponent` SCSS defines only shared state frame surfaces (loading/error/empty).
   - Domain item SCSS (`MediaItemComponent`, `ProjectItemComponent`, etc.) defines only domain content styling (typography, icons, media affordances).
 - Explicitly forbidden: setting the same dimension in multiple component layers.
   - No duplicate `width` / `height` / `max-height` ownership across grid, state-frame, and domain item styles.
@@ -324,7 +336,7 @@ Example:
 | `apps/web/src/app/shared/item-grid/item-grid.component.scss`               | Tokenized grid/row/card geometry classes                                                      |
 | `apps/web/src/app/shared/item-grid/item.component.ts`                      | Abstract base class defining mandatory inputs/outputs and non-overridable states              |
 | `apps/web/src/app/shared/item-grid/item-state-frame.component.ts`          | Shared non-overridable state renderer used by ItemComponent                                   |
-| `apps/web/src/app/shared/item-grid/item-state-frame.component.html`        | Loading/error/empty/selection frame template                                                  |
+| `apps/web/src/app/shared/item-grid/item-state-frame.component.html`        | Loading/error/empty state-frame template                                                      |
 | `apps/web/src/app/shared/item-grid/item-state-frame.component.scss`        | Unified state visuals including pulse placeholder behavior                                    |
 | `apps/web/src/app/features/media/media-item.component.ts`                  | Domain media item extending ItemComponent                                                     |
 | `apps/web/src/app/features/media/media-item.component.html`                | Media-specific content projection region                                                      |
@@ -394,7 +406,7 @@ sequenceDiagram
   P->>G: Bind mode and project domain items
   G->>D: Project domain item components
   D->>B: Inherit shared state contract
-  B-->>D: Render loading/error/empty/selection layers
+  B-->>D: Render shared loading/error/empty layers
   D->>M: Resolve action availability by context id
   M-->>D: Return visible/enabled actions
   D-->>P: Emit selectedChange/opened/retry/contextActionRequested
@@ -441,7 +453,8 @@ sequenceDiagram
 - [x] ItemGridComponent supports exactly five modes: `grid-sm`, `grid-md`, `grid-lg`, `row`, `card`.
 - [x] Responsive transitions are controlled only by design tokens; no hardcoded breakpoint literals in component SCSS.
 - [x] ItemComponent defines one mandatory shared input/output contract for all domain item components.
-- [x] Loading, error, empty, and selection visuals are rendered by ItemComponent shared state frame and are not overridable by domain item subclasses.
+- [x] Loading, error, and empty visuals are rendered by ItemComponent shared state frame and are not overridable by domain item subclasses.
+- [x] Selected emphasis is domain-owned (for example media/project frame-level selectors) while base contract only propagates selected state and events.
 - [x] Loading visuals use pulse placeholder contract; spinner is forbidden and loading icon semantics are domain-owned.
 - [x] All SCSS uses semantic component names and token-based values; no generic menu/list utility class naming in new item-grid system files.
 - [x] SCSS ownership is strict: grid layout in ItemGrid, state visuals in ItemStateFrame, domain visuals in domain item components.

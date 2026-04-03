@@ -8,7 +8,7 @@ Current detail/grid behavior remains map-compatible while the same contract is r
 
 ## What It Looks Like
 
-**Desktop:** right-side pane rendered by the App Shell layout (not map-specific). It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between thumbnail-grid mode and image-detail mode.
+**Desktop:** right-side pane rendered by the App Shell layout (not map-specific). It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between item-grid mode and image-detail mode.
 
 The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or `WorkspaceToolbarComponent` plus `ItemGridComponent` with projected domain items. When one or more media items are selected, `WorkspaceFooterComponent` appears at the bottom.
 

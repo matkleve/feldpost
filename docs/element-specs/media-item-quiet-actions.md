@@ -130,6 +130,14 @@ sequenceDiagram
 | Select active style        | select button                             | same as above          | select button              | `.media-item-quiet-actions__button--select-active`                  | actions/select-active | selected state shows highlighted select control      |
 | Focus ring                 | focused button                            | same as above          | focused button             | `.media-item-quiet-actions__button:focus-visible`                   | actions/focus         | focus ring appears only on keyboard focus            |
 
+### Ownership Triad Declaration
+
+| Behavior            | Geometry Owner                              | State Owner                                                              | Visual Owner                                       | Same element?                                                   |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------- |
+| Select active style | `.media-item-quiet-actions__button--select` | `.media-item-quiet-actions__button--select-active`                       | `.media-item-quiet-actions__button--select-active` | ✅                                                              |
+| Focus ring          | `.media-item-quiet-actions__button`         | `.media-item-quiet-actions__button:focus-visible`                        | `.media-item-quiet-actions__button:focus-visible`  | ✅                                                              |
+| Action reveal       | `.media-item__quiet-actions`                | `.media-item--selected` / `:hover` / `:focus-within` (parent state gate) | `.media-item__quiet-actions`                       | ⚠️ exception — reveal is controlled by parent interaction state |
+
 ### Stacking Context
 
 - Parent media item host provides stacking and absolute overlay placement.

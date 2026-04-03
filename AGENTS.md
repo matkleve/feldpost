@@ -197,6 +197,54 @@ Each spec must include one behavior-to-CSS ownership matrix with these columns:
 
 No implementation may start without this matrix.
 
+## Ownership Triad Rule (Hard Blocker)
+
+Every visual behavior in a component has exactly three owners.
+They must be explicitly declared before any HTML or CSS is written.
+
+| Owner | Responsible for | Forbidden from |
+| --- | --- | --- |
+| Geometry Owner | width, height, aspect-ratio, display | state classes, event bindings |
+| State Owner | state class bindings (`[class.x]`) | geometry properties |
+| Visual Owner | CSS rules that produce visible output (color, border, shadow, opacity, animation) | geometry of other elements |
+
+### The Core Rule (Default)
+
+Geometry Owner == State Owner == Visual Owner
+
+By default, all three point to the same element.
+If they diverge, the implementation is valid only as an explicitly documented exception.
+
+### Why they diverge (common failure modes)
+
+- State class on parent, visual effect intended on child -> wrong
+- Geometry set on wrapper, visual owner is different element -> wrong
+- `position: relative` on wrong element causes overlay to size against wrong container -> wrong
+
+### Declaration format (mandatory per component spec)
+
+Every spec must declare this table before implementation:
+
+| Behavior | Geometry Owner | State Owner | Visual Owner | Same element? |
+| --- | --- | --- | --- | --- |
+| selected ring | `.media-item-render-surface__media-frame` | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅ |
+| loading pulse | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading` | `.item-state-frame__state-layer--loading` | ✅ |
+| hover reveal | `.media-item__quiet-actions` | `.media-item--selected` (on parent) | `.media-item__quiet-actions` | ⚠️ exception — document why |
+
+### Exceptions
+
+If the three owners cannot be the same element, the exception must be:
+1. Documented explicitly in the spec table with reason
+2. Solved via `position: absolute; inset: 0` on the visual owner relative to the geometry owner's stacking context
+3. Never solved by duplicating geometry on multiple layers
+
+### Stacking Context Rule
+
+Exactly one element per component declares `position: relative`.
+This element is the Geometry Owner for all absolutely positioned children.
+All overlays, badges, and action layers use `position: absolute; inset: 0`
+relative to this single stacking context owner.
+
 ### Stacking Context
 
 Exactly one element per component declares `position: relative`.

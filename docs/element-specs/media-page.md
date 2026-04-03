@@ -41,8 +41,8 @@ AppShell (top-level, persistent across routes)
 │   │   ├── [Optional] MediaToolbar (grouping/sort/filter)
 │   │   └── MediaGridComponent
 │   │       ├── GroupSectionHeader × N
-│   │       │   └── ThumbnailCard × N
-│   │       │       ├── media preview (photo/video thumb or doc icon)
+│   │       │   └── ItemGridComponent + projected MediaItemComponent × N
+│   │       │       ├── media preview (photo/video tile or doc icon)
 │   │       │       ├── Title + date overlay
 │   │       │       ├── Address chip (optional)
 │   │       │       └── Hover state (linked-hover to workspace)
@@ -53,7 +53,7 @@ AppShell (top-level, persistent across routes)
 │       ├── TabSelectorComponent ← NEW: "Selected Items" | "Upload"
 │       └── ContentArea @switch(activeTab)
 │           ├── Tab: "Selected Items"
-│           │   └── [same ThumbnailGridComponent as workspace]
+│           │   └── [ItemGridComponent + projected MediaItemComponent]
 │           └── Tab: "Upload"
 │               └── [UploadPanelComponent 1:1 embed]
 │
@@ -115,7 +115,7 @@ AppShell (top-level, persistent across routes)
 
 ## Component Hierarchy
 
-**STRICT PRIMITIVE REQUIREMENT:** The Media Page and its grid structural components must strictly rely on `.ui-container` and `.ui-item`. Do not create deep nested `div` elements for the grid sections; the group headers and thumbnail cards should be structurally flat siblings or one-level deep inside a standard container.
+**STRICT PRIMITIVE REQUIREMENT:** The Media Page and its grid structural components must strictly rely on `.ui-container` and `.ui-item`. Do not create deep nested `div` elements for the grid sections; the group headers and media item tiles should be structurally flat siblings or one-level deep inside a standard container.
 
 ```text
 MediaPageComponent (new route component, flex 1)
@@ -125,7 +125,7 @@ MediaPageComponent (new route component, flex 1)
 │   ├── Standard dropdown/segmented primitives
 └── MediaGridComponent (new - flat structure using .ui-container/.ui-item equivalents)
     ├── GroupSectionHeader × N (if grouping active)
-    │   └── ThumbnailCard × N (reused from workspace)
+    │   └── ItemGridComponent + projected MediaItemComponent × N
     │       ├── Media/video/doc preview
     │       ├── Title + date overlay
     │       ├── Address chip (optional)
@@ -140,7 +140,7 @@ WorkspacePaneComponent (seitenübergreifend)
 │   └── "Upload" button
 └── ContentArea @switch(activeTab)
     ├── "Selected Items" tab
-    │   └── ThumbnailGridComponent (shows current page's selection)
+    │   └── ItemGridComponent + projected MediaItemComponent (shows current page's selection)
     └── "Upload" tab
         └── UploadPanelComponent (unchanged, 1:1 embed)
 ```
@@ -187,7 +187,7 @@ flowchart LR
 | `activeFilters`    | `FilterSpec[]`                                      | `[]`       | Applied filter chips (projects, date ranges) |
 | `filteredImages`   | `Signal<Image[]>`                                   | `[]`       | Computed: media matching active filters      |
 | `groupedAndSorted` | `Signal<ImageGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted        |
-| `hoveredImageId`   | `string \| null`                                    | `null`     | Current thumbnail under pointer              |
+| `hoveredImageId`   | `string \| null`                                    | `null`     | Current media item tile under pointer        |
 | `detailImageId`    | `string \| null`                                    | `null`     | If set, detail modal is open                 |
 
 **Cross-route contracts:**
@@ -260,7 +260,7 @@ export interface WorkspacePaneHostPort {
 | `features/media/media-page.component.ts`      | Route component for `/media`                                         |
 | `features/media/media-page.component.html`    | Template: breadcrumb + grid (no pane — pane is in AppShell)          |
 | `features/media/media-page.component.scss`    | Page layout styles                                                   |
-| `features/media/media-grid.component.ts`      | NEW: Responsive thumbnail grid with grouping                         |
+| `features/media/media-grid.component.ts`      | NEW: Responsive ItemGrid-backed media grid with grouping             |
 | `features/media/media-grid.component.html`    | Grid template with grouping sections                                 |
 | `features/media/media-grid.component.scss`    | Grid layout + responsive columns                                     |
 | `features/media/media-toolbar.component.ts`   | OPTIONAL Phase 2: Grouping/Sort/Filter operators                     |
@@ -282,7 +282,8 @@ export interface WorkspacePaneHostPort {
 
 **Reused Components:**
 
-- `ThumbnailCardComponent` (from workspace)
+- `ItemGridComponent` (shared)
+- `MediaItemComponent` (media domain item)
 - `MediaDetailViewComponent` (overlay variant)
 - `UploadPanelComponent` (full embed in Upload tab)
 
@@ -353,8 +354,8 @@ sequenceDiagram
 
 **Media Grid (MVP - Phase 1):**
 
-- [ ] MediaGridComponent displays thumbnails in responsive grid (2–4 columns)
-- [ ] ThumbnailCard component reused from workspace (same styling)
+- [ ] MediaGridComponent displays media items via ItemGrid in responsive grid (2–4 columns)
+- [ ] MediaItemComponent is reused as the domain item contract for media tiles
 - [ ] Each card shows media/video/doc preview + title + date overlay + address chip
 - [ ] Clicking card opens detail view (modal overlay)
 - [ ] Closing detail returns to grid with state preserved
@@ -367,7 +368,7 @@ sequenceDiagram
 - [ ] "Selected Items" tab shows grid of media selected on this page
 - [ ] "Upload" tab shows UploadPanelComponent (same as map view)
 - [ ] Tab state persists globally via `activeTabGlobal` (single source of truth)
-- [ ] Selecting thumbnails in media grid updates "Selected Items" tab count
+- [ ] Selecting media items in media grid updates "Selected Items" tab count
 - [ ] Selected-items content is provided through `SelectedItemsContextPort` (documented in/out contract)
 - [ ] Route change rebinds selected-items provider via observer hook without remounting pane
 
@@ -410,7 +411,7 @@ sequenceDiagram
 ## Design Details
 
 - **Grid Columns (responsive):** 2 (mobile) → 3 (tablet) → 4 (desktop 1440px+)
-- **Thumbnail Card Size:** 128×128px (matches workspace grid)
+- **Media Item Slot Size:** 128×128px (matches workspace grid default tile)
 - **Group Section Header Font:** Smaller than pane header, muted color token `--color-text-muted`
 - **Pane Width:** Same as map workspace (default 320px, 280–640px range)
 - **Pane Close Button:** Top-right, consistent with map/projects
@@ -423,7 +424,7 @@ sequenceDiagram
 - Route activation for `/media` and page-level media grid render
 - Workspace pane integration through existing AppShell ownership
 - Stable two-tab behavior (`selected-items` / `upload`) with global tab persistence
-- Reuse of existing thumbnail/detail/upload components and shared primitives (`.ui-container`, `.ui-item`)
+- Reuse of existing ItemGrid/MediaItem/detail/upload components and shared primitives (`.ui-container`, `.ui-item`)
 - No early feature-local wrappers or media-page-specific pane forks
 
 ### Expansion Delivery (post-MVP)

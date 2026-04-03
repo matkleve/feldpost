@@ -66,7 +66,7 @@ Legacy/internal loader statuses may still exist in services, but they must be no
 ### Loading Ownership Decision (Mandatory)
 
 - Media loading visuals are owned by `MediaItemRenderSurfaceComponent`.
-- `ItemStateFrameComponent` remains owner for shared error/empty/selection framing.
+- `ItemStateFrameComponent` remains owner for shared error/empty framing.
 - Double-loading overlays are forbidden: the media item must not render a second spinner/pulse layer above an already active media loading layer.
 
 ## Component Hierarchy
@@ -174,6 +174,15 @@ This guarantees no geometry jump from loading to content.
 | Selected emphasis    | `.media-item-render-surface__media-frame`       | `app-media-item:host`              | `.media-item__open` and quiet-action buttons | `.media-item-render-surface__media-frame--selected`                  | layer/selected (frame-level) | selected ring appears only around media frame, never full tile     |
 | Quiet actions reveal | quiet action controls                           | `app-media-item:host`              | `.media-item-quiet-actions__button*`         | `.media-item__quiet-actions`                                         | layer/actions (3)            | hover/focus reveals action controls in frame corners               |
 
+### Ownership Triad Declaration
+
+| Behavior             | Geometry Owner                                  | State Owner                                         | Visual Owner                                        | Same element?                                                                          |
+| -------------------- | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | ✅                                                                                     |
+| Upload overlay       | `.media-item__upload-overlay`                   | `.media-item__upload-overlay`                       | `.media-item__upload-overlay`                       | ✅                                                                                     |
+| Selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                                                                                     |
+| Quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | ⚠️ exception — reveal is intentionally controlled by parent hover/focus/selected state |
+
 ### Stacking Context
 
 - `app-media-item` `:host` is the sole stacking-context owner for domain overlays.
@@ -196,7 +205,7 @@ No additional undeclared z-index values are permitted for media-item visual laye
 
 | Visual state             | Owner element                                       | Behavior contract                                      |
 | ------------------------ | --------------------------------------------------- | ------------------------------------------------------ |
-| Loading pulse            | `app-item-state-frame` loading layer                | Shared pulse placeholder state                         |
+| Loading pulse            | `.media-item-render-surface__fallback--loading`     | Media loading placeholder state                        |
 | Error surface            | `app-item-state-frame` error layer                  | Shared retry-capable error state                       |
 | Empty/no-content surface | `app-item-state-frame` empty layer                  | Shared empty state                                     |
 | Selected ring            | `.media-item-render-surface__media-frame--selected` | Domain selected emphasis aligned to media frame bounds |

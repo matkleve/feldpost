@@ -38,10 +38,10 @@ MediaItemUploadOverlayComponent
 
 The component consumes upload overlay payload only and does not query backend data.
 
-| Field             | Source                           | Type                | Purpose                       |
-| ----------------- | -------------------------------- | ------------------- | ----------------------------- | ------------------------------- |
-| `overlay`         | MediaItem upload mapping         | `UploadOverlayState | null`                         | upload phase + progress + label |
-| `progressPercent` | computed from `overlay.progress` | `number`            | fill width binding (`0..100`) |
+| Field             | Source                           | Type                         | Purpose                         |
+| ----------------- | -------------------------------- | ---------------------------- | ------------------------------- |
+| `overlay`         | MediaItem upload mapping         | `UploadOverlayState \| null` | upload phase + progress + label |
+| `progressPercent` | computed from `overlay.progress` | `number`                     | fill width binding (`0..100`)   |
 
 ```mermaid
 flowchart TD
@@ -55,10 +55,10 @@ flowchart TD
 
 ## State
 
-| Name              | TypeScript Type     | Default | What it controls               |
-| ----------------- | ------------------- | ------- | ------------------------------ | --------------------------- |
-| `overlay`         | `UploadOverlayState | null`   | `null`                         | whether overlay is rendered |
-| `progressPercent` | `number`            | `0`     | progress fill width percentage |
+| Name              | TypeScript Type              | Default | What it controls               |
+| ----------------- | ---------------------------- | ------- | ------------------------------ |
+| `overlay`         | `UploadOverlayState \| null` | `null`  | whether overlay is rendered    |
+| `progressPercent` | `number`                     | `0`     | progress fill width percentage |
 
 ## File Map
 
@@ -117,6 +117,14 @@ sequenceDiagram
 | Upload tint surface | `.media-item-upload-overlay`          | `app-media-item:host` (provided by parent layer class) | none (passive)             | `.media-item__upload-overlay .media-item-upload-overlay` | overlay/upload (1)    | overlay covers frame bounds and does not intercept clicks |
 | Progress fill       | `.media-item-upload-overlay__fill`    | `.media-item-upload-overlay`                           | none                       | `.media-item-upload-overlay__fill`                       | overlay/upload-detail | fill width tracks clamped progress value                  |
 | Status strip        | `.media-item-upload-overlay__content` | `.media-item-upload-overlay`                           | none                       | `.media-item-upload-overlay__content`                    | overlay/upload-detail | icon/label stay readable above tint                       |
+
+### Ownership Triad Declaration
+
+| Behavior            | Geometry Owner                        | State Owner                           | Visual Owner                          | Same element? |
+| ------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------- |
+| Upload tint surface | `.media-item-upload-overlay`          | `.media-item-upload-overlay`          | `.media-item-upload-overlay`          | ✅            |
+| Progress fill       | `.media-item-upload-overlay__fill`    | `.media-item-upload-overlay__fill`    | `.media-item-upload-overlay__fill`    | ✅            |
+| Status strip        | `.media-item-upload-overlay__content` | `.media-item-upload-overlay__content` | `.media-item-upload-overlay__content` | ✅            |
 
 ### Stacking Context
 

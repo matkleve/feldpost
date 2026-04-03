@@ -6,7 +6,7 @@ Project Item is the domain-specific item contract for rendering one project entr
 
 ## What It Looks Like
 
-The component renders a tokenized project frame with name, counts, status, and activity metadata in a stable structure across modes. `row` emphasizes dense, scanable metadata with inline actions; grid/card modes prioritize visual grouping with a clear status region. Active and archived project states use deterministic token-based accents and badges. The item inherits shared loading/error/empty/selection behavior from ItemComponent and adds only project-domain content. Sizing and spacing use `rem` for interactive and layout-sensitive dimensions.
+The component renders a tokenized project frame with name, counts, status, and activity metadata in a stable structure across modes. `row` emphasizes dense, scanable metadata with inline actions; grid/card modes prioritize visual grouping with a clear status region. Active and archived project states use deterministic token-based accents and badges. The item inherits shared loading/error/empty behavior from ItemComponent, while selected emphasis is project-domain owned. Sizing and spacing use `rem` for interactive and layout-sensitive dimensions.
 
 ## Where It Lives
 
@@ -165,11 +165,31 @@ sequenceDiagram
   S-->>P: return updated project state
 ```
 
+## Visual Behavior Contract
+
+### Ownership Matrix
+
+| Behavior          | Visual Geometry Owner    | Stacking Context Owner  | Interaction Hit-Area Owner                | Selector(s)                                    | Layer (z-index/token) | Test Oracle                                       |
+| ----------------- | ------------------------ | ----------------------- | ----------------------------------------- | ---------------------------------------------- | --------------------- | ------------------------------------------------- |
+| Project frame     | `.project-item__frame`   | `app-project-item:host` | `.project-item__open`                     | `.project-item__frame`                         | layer/content (0)     | frame bounds remain stable across modes           |
+| Selected emphasis | `.project-item__frame`   | `app-project-item:host` | `.project-item__open` and action controls | `.project-item__frame--selected`               | layer/selected        | selected emphasis remains frame-scoped            |
+| Status badge      | `.project-item__status`  | `.project-item__frame`  | none                                      | `.project-item__status--active` / `--archived` | layer/content         | active vs archived badge is deterministic         |
+| Action reveal     | `.project-item__actions` | `app-project-item:host` | `.project-item__action-button*`           | `.project-item__actions`                       | layer/actions         | actions remain keyboard reachable and mode stable |
+
+### Ownership Triad Declaration
+
+| Behavior          | Geometry Owner           | State Owner                                                         | Visual Owner                                                        | Same element?                                                                        |
+| ----------------- | ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Project frame     | `.project-item__frame`   | `.project-item__frame`                                              | `.project-item__frame`                                              | ✅                                                                                   |
+| Selected emphasis | `.project-item__frame`   | `.project-item__frame--selected`                                    | `.project-item__frame--selected`                                    | ✅                                                                                   |
+| Status badge      | `.project-item__status`  | `.project-item__status--active` / `.project-item__status--archived` | `.project-item__status--active` / `.project-item__status--archived` | ✅                                                                                   |
+| Action reveal     | `.project-item__actions` | `.project-item--selected` (parent state gate)                       | `.project-item__actions`                                            | ⚠️ exception — reveal can be parent-state driven for stable focus/selection behavior |
+
 ## Acceptance Criteria
 
 - [ ] Project Item has its own dedicated child spec and is referenced by Item Grid parent spec.
 - [ ] The component supports all five Item Grid modes with explicit visual behavior.
-- [ ] Shared loading/error/empty/selection behavior remains owned by ItemComponent/ItemStateFrame.
+- [ ] Shared loading/error/empty behavior remains owned by ItemComponent/ItemStateFrame; selected emphasis is project-domain owned on `.project-item__frame`.
 - [ ] Project metadata rendering includes name, status, result count, media count, and last activity.
 - [ ] Project actions resolve through action-context matrix context binding, not hardcoded local menus.
 - [ ] Active vs archived status deterministically gates archive/restore/delete actions.
