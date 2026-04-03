@@ -19,6 +19,8 @@
     <!-- Renders loaded media asset with fit-contain behavior when image content exists. -->
     <!-- @see docs/element-specs/media-item.md#actions--interactions -->
     @if (renderState() === 'content' && isImage() && thumbnailUrl().length > 0) {
+      <!-- Renders actual signed thumbnail asset and captures natural ratio on load. -->
+      <!-- @see docs/element-specs/media-item.md#aspect-ratio-behavior-by-mode -->
       <img
         class="media-item-render-surface__asset"
         [class.media-item-render-surface__asset--document]="isDocument()"
@@ -32,6 +34,8 @@
       <div
         class="media-item-render-surface__fallback media-item-render-surface__fallback--icon-only"
       >
+        <!-- Displays file-type icon glyph for non-image content in icon-only content state. -->
+        <!-- @see docs/element-specs/media-item.md#state-normalization-decision-mandatory -->
         <span class="material-icons media-item-render-surface__icon" aria-hidden="true">{{
           icon()
         }}</span>
@@ -42,12 +46,16 @@
       <div
         class="media-item-render-surface__fallback media-item-render-surface__fallback--no-photo"
       >
+        <!-- Shows no-photo fallback icon when media is missing or failed. -->
+        <!-- @see docs/element-specs/media-item.md#actions--interactions -->
         <img class="media-item-render-surface__no-photo-icon" [src]="noPhotoIconUrl" alt="" />
       </div>
     } @else {
       <!-- Renders loading/default placeholder pulse with centered photo icon (no spinner). -->
       <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
       <div class="media-item-render-surface__fallback media-item-render-surface__fallback--loading">
+        <!-- Shows canonical loading placeholder icon inside pulse layer. -->
+        <!-- @see docs/element-specs/media-item.md#pulse-placeholder-contract-mandatory -->
         <img
           class="media-item-render-surface__placeholder-icon"
           [src]="placeholderIconUrl"
@@ -59,6 +67,8 @@
     <!-- Anchors file-type chip in lower-right corner of rendered media frame. -->
     <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
     @if (fileTypeText().length > 0) {
+      <!-- Renders semantic file-type chip with icon and localized type text. -->
+      <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
       <app-chip
         class="media-item-render-surface__chip"
         [icon]="fileTypeIcon()"
@@ -70,6 +80,8 @@
 
     <!-- Projects upload and quiet-action overlays so they align to media-frame bounds, not tile bounds. -->
     <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+    <!-- Projects overlay children marked with mediaOverlay attribute into frame-aligned overlay slot. -->
+    <!-- @see docs/element-specs/media-item.md#component-hierarchy -->
     <ng-content select="[mediaOverlay]"></ng-content>
   </div>
 </div>

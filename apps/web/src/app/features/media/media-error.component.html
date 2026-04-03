@@ -1,8 +1,16 @@
+<!-- Renders media error-state card when media loading request fails. -->
+<!-- @see docs/element-specs/item-grid.md#state -->
 <div class="media-error" role="alert">
+  <!-- Displays localized error headline for failed media load branch. -->
+  <!-- @see docs/element-specs/item-grid.md#state -->
   <h2 class="media-error__title">{{ t('media.page.error', 'Failed to load media') }}</h2>
+  <!-- Displays localized helper text instructing user to retry later. -->
+  <!-- @see docs/element-specs/item-grid.md#state -->
   <p class="media-error__body">
     {{ t('projects.page.error.body', 'Please try again in a moment.') }}
   </p>
+  <!-- Emits retry event so parent can restart media page loading. -->
+  <!-- @see docs/element-specs/item-grid.md#actions -->
   <button
     uiButton
     uiButtonSecondary

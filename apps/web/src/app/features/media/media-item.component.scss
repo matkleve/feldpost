@@ -9,21 +9,12 @@
 // Styles the primary media item interaction button and keeps content semantics local.
 // @see docs/element-specs/media-item.md#what-it-looks-like
 .media-item__open {
-  display: inline-block;
-  width: fit-content;
   border: 0;
   background: transparent;
   color: inherit;
   text-align: left;
   padding: 0;
   cursor: pointer;
-}
-
-// Styles media preview surface and visual treatment without owning outer geometry.
-// @see docs/element-specs/media-item.md#what-it-looks-like
-.media-item__preview {
-  display: block;
-  width: fit-content;
 }
 
 // Positions upload overlay component above preview but below quiet actions.

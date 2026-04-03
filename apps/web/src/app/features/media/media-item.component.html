@@ -1,7 +1,9 @@
+<!-- Applies shared item-state contract wrapper around the media-domain item surface. -->
+<!-- @see docs/element-specs/item-grid.md#component-hierarchy -->
 <app-item-state-frame
   [itemId]="itemId()"
   [mode]="activeMode()"
-  [loading]="false"
+  [loading]="loading()"
   [error]="error()"
   [empty]="empty()"
   [selected]="selected()"

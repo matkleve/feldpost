@@ -40,7 +40,9 @@ import { UploadManagerService } from '../../core/upload/upload-manager.service';
   styleUrl: './media.component.scss',
 })
 export class MediaComponent implements OnDestroy {
-  private static readonly PAGE_SIZE = 72;
+  private static readonly DEFAULT_CONTAINER_WIDTH_PX = 960;
+  private static readonly GRID_GAP_PX = 12;
+  private static readonly ROW_BATCH_MULTIPLIER = 3;
   private static readonly SCROLL_PREFETCH_PX = 600;
 
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
@@ -187,9 +189,10 @@ export class MediaComponent implements OnDestroy {
     }
 
     try {
+      const batchInsertSize = this.resolveBatchInsertSize();
       const result = await this.mediaQueryService.loadCurrentUserMedia({
         offset: this.nextOffset(),
-        limit: MediaComponent.PAGE_SIZE,
+        limit: batchInsertSize,
         includeCount: options.includeCount,
       });
 
@@ -230,5 +233,59 @@ export class MediaComponent implements OnDestroy {
     this.mediaItems.set([]);
     this.mediaTotalCount.set(null);
     this.projectNameById.set(new Map<string, string>());
+  }
+
+  // Resolves deterministic /media batch size contract: current columns x 3.
+  // @see docs/element-specs/item-grid.md#actions
+  private resolveBatchInsertSize(): number {
+    const mode = this.cardVariant();
+    if (mode === 'row') {
+      return MediaComponent.ROW_BATCH_MULTIPLIER;
+    }
+
+    const columnMin = this.resolveColumnMinPx(mode);
+    const width = this.resolveMediaContainerWidthPx();
+    const columns = Math.max(
+      1,
+      Math.floor((width + MediaComponent.GRID_GAP_PX) / (columnMin + MediaComponent.GRID_GAP_PX)),
+    );
+    return columns * 3;
+  }
+
+  // Uses rendered media container width when available, with stable fallback for first-load fetches.
+  // @see docs/element-specs/item-grid.md#actions
+  private resolveMediaContainerWidthPx(): number {
+    if (typeof document !== 'undefined') {
+      const container = document.querySelector('.media-content');
+      if (container instanceof HTMLElement && container.clientWidth > 0) {
+        return container.clientWidth;
+      }
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      Number.isFinite(window.innerWidth) &&
+      window.innerWidth > 0
+    ) {
+      return window.innerWidth;
+    }
+
+    return MediaComponent.DEFAULT_CONTAINER_WIDTH_PX;
+  }
+
+  // Mirrors item-grid mode column minimums used by media-content placeholder geometry.
+  // @see docs/element-specs/item-grid.md#data
+  private resolveColumnMinPx(variant: CardVariant): number {
+    switch (variant) {
+      case 'small':
+        return 128;
+      case 'large':
+        return 208;
+      case 'row':
+        return 1;
+      case 'medium':
+      default:
+        return 160;
+    }
   }
 }

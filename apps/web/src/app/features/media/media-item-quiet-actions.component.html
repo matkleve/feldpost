@@ -16,6 +16,8 @@
     (click)="onSelectClick($event)"
   >
     @if (selected()) {
+      <!-- Shows check glyph when item is currently selected. -->
+      <!-- @see docs/element-specs/media-item.md#actions--interactions -->
       <span class="material-icons" aria-hidden="true">check</span>
     }
   </button>
@@ -33,6 +35,8 @@
     [attr.aria-label]="mapLabel()"
     (click)="onMapClick($event)"
   >
+    <!-- Shows map glyph for jump-to-location quick action. -->
+    <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
     <span class="material-icons" aria-hidden="true">map</span>
   </button>
 </div>

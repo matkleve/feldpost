@@ -50,21 +50,20 @@
   color: var(--color-text-secondary);
 }
 
-// Applies loading-specific foreground color for unified spinner state.
-// @see docs/element-specs/item-grid.md#unified-loading-circle-contract
+// Applies loading-layer tone for pulse-placeholder state visuals.
+// @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory
 .item-state-frame__state-layer--loading {
-  color: var(--color-clay);
+  color: var(--color-text-secondary);
 }
 
-// Renders the unified loading circle with tokenized geometry and motion.
-// @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-.item-state-frame__spinner {
-  inline-size: 1.1rem;
-  block-size: 1.1rem;
-  border-radius: var(--radius-full);
-  border: 2px solid color-mix(in srgb, currentcolor 24%, transparent);
-  border-top-color: currentcolor;
-  animation: item-state-frame-spin 700ms linear infinite;
+// Renders pulse placeholder geometry used as shared loading indicator.
+// @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory
+.item-state-frame__pulse-placeholder {
+  inline-size: 3.5rem;
+  block-size: 1.25rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-bg-base) 35%, var(--color-bg-surface));
+  animation: item-state-frame-pulse 1200ms ease-in-out infinite;
 }
 
 // Applies destructive color semantics for shared error layer.
@@ -110,10 +109,15 @@
   background: color-mix(in srgb, var(--color-clay) 10%, var(--color-bg-surface));
 }
 
-// Defines continuous clockwise loading animation for unified spinner.
-// @see docs/element-specs/item-grid.md#unified-loading-circle-contract
-@keyframes item-state-frame-spin {
-  to {
-    transform: rotate(360deg);
+// Defines shared pulse animation for loading placeholder surfaces.
+// @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory
+@keyframes item-state-frame-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+
+  50% {
+    opacity: 1;
   }
 }

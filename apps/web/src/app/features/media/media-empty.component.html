@@ -1,6 +1,14 @@
+<!-- Renders media empty-state card with reason-dependent title, body, and primary action. -->
+<!-- @see docs/element-specs/item-grid.md#state -->
 <div class="media-empty">
+  <!-- Displays localized empty-state headline for auth-required or no-results branch. -->
+  <!-- @see docs/element-specs/item-grid.md#state -->
   <h2 class="media-empty__title">{{ titleText() }}</h2>
+  <!-- Displays localized empty-state explanatory body text. -->
+  <!-- @see docs/element-specs/item-grid.md#state -->
   <p class="media-empty__body">{{ bodyText() }}</p>
+  <!-- Triggers sign-in navigation or retry event depending on resolved empty-state reason. -->
+  <!-- @see docs/element-specs/item-grid.md#actions -->
   <button
     uiButton
     uiButtonSecondary
