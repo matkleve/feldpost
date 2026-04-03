@@ -2,7 +2,7 @@
 
 # Media Renderer System
 
-> **Related specs:** [photo-load-service](photo-load-service.md), [upload-manager](upload-manager.md), [upload-panel](upload-panel.md), [thumbnail-card](thumbnail-card.md), [media-detail-photo-viewer](media-detail-photo-viewer.md), [file-type-chips](file-type-chips.md)
+> **Related specs:** [photo-load-service](photo-load-service.md), [upload-manager](upload-manager.md), [upload-panel](upload-panel.md), [thumbnail-card](thumbnail-card.md), [media-detail-media-viewer](media-detail-media-viewer.md), [file-type-chips](file-type-chips.md)
 
 ## What It Is
 

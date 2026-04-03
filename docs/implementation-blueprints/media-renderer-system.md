@@ -24,7 +24,7 @@ This blueprint follows the archived legacy contract in `docs/archive/element-spe
 | 0     | Done        | Shared contracts and tier model defined in `media-renderer.types.ts`.                                                                                                                    |
 | 1     | Done        | `file-type-registry.ts` is live and consumed by upload feature paths.                                                                                                                    |
 | 2     | Done        | `media-orchestrator.service.ts` exists with fallback logic and adaptive slot-based tier selection API.                                                                                   |
-| 3     | Done        | `UniversalMediaComponent` complete; thumbnail-card, media-detail-photo-viewer, upload-panel-item, and media-card consumers integrated.                                                   |
+| 3     | Done        | `UniversalMediaComponent` complete; thumbnail-card, media-detail-media-viewer, upload-panel-item, and media-card consumers integrated.                                                   |
 | 4     | Done        | Upload-panel-item surface fully migrated; slot measurement (inline/2.75rem) working; adaptive tier gating applied.                                                                       |
 | 5     | Done        | Media-card surface fully migrated (4 variants: row/small/medium/large); adaptive tier selection (inline→mid2) applied; shared upload overlay now rendered via `UniversalMediaComponent`. |
 | 6     | In progress | Final cleanup and hardening pending; primary surfaces are migrated, docs still need legacy `image-detail-*` duplicate removal, and high-tier fallback/prerender behavior remains open.   |

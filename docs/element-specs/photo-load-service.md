@@ -1,23 +1,24 @@
 # Photo Load Service
 
-> **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [item-grid](item-grid.md), [media-item](media-item.md), [photo-marker](photo-marker.md), [media-detail-photo-viewer](media-detail-photo-viewer.md), [image-detail-view](media-detail-view.md)
+> **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [item-grid](item-grid.md), [media-item](media-item.md), [photo-marker](photo-marker.md), [media-detail-media-viewer](media-detail-media-viewer.md), [image-detail-view](media-detail-view.md)
 > **Use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
 ## What It Is
 
 A centralized Angular service that owns all photo signed-URL generation, caching, preloading, and loading-state management. Every surface that displays a photo (map markers, thumbnail cards, detail view, lightbox) uses this service instead of calling Supabase Storage directly. It replaces the scattered signing logic currently duplicated across `WorkspaceViewService`, `MapShellComponent`, and `MediaDetailViewComponent`.
+The service scope now covers media previews beyond photos as well (for example generated first-page document thumbnails), while preserving existing API compatibility.
 
 ## What It Looks Like
 
 Not a visual element — this is a headless service. However, it standardizes the visual loading states that consumers render:
 
 - **`idle`** — no URL requested yet; consumer shows nothing or a static placeholder
-- **`loading`** — signed URL requested or `<img>` downloading; consumer shows pulsing placeholder (gradient + camera icon, 1400ms ease-in-out)
-- **`loaded`** — image ready to display; consumer fades in the `<img>` (200ms)
+- **`loading`** — signed URL requested or `<img>` downloading; consumer shows neutral gray placeholder (icon-free baseline, 1200-1400ms soft pulse optional)
+- **`loaded`** — image ready to display; consumer dissolves from gray/warm-preview to sharp image (decode-first, no top-to-bottom visual fill)
 - **`error`** — signing or download failed; consumer shows static no-photo icon (crossed-out image, 0.55 opacity)
 - **`no-photo`** — `storage_path IS NULL`; consumer shows upload prompt or permanent no-photo icon immediately (no loading phase)
 
-The service provides a canonical SVG icon data-URI for both the camera placeholder and the no-photo icon so every consumer renders an identical visual.
+The service provides canonical assets for no-photo/error visuals and supports warm cached preview reuse so every consumer can render identical transition behavior.
 
 ### Load-State Machine
 
@@ -51,16 +52,19 @@ stateDiagram-v2
 
 ## Actions
 
-| #   | Consumer calls                    | Service response                                                                                                      | Returns / emits                         |
-| --- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| 1   | `getSignedUrl(storagePath, size)` | Checks cache → if valid, returns cached URL; else signs via Supabase Storage with size-appropriate transform          | `Promise<SignedUrlResult>`              |
-| 2   | `batchSign(items[], size)`        | Groups items by thumbnail-path vs storage-path; batch-signs where possible, individual-signs with transform otherwise | `Promise<Map<string, SignedUrlResult>>` |
-| 3   | `getLoadState(imageId, size)`     | Returns a readonly signal tracking the current `PhotoLoadState` for this image+size pair                              | `Signal<PhotoLoadState>`                |
-| 4   | `preload(url)`                    | Creates a hidden `Image()` element, resolves when loaded or rejects on error                                          | `Promise<boolean>`                      |
-| 5   | `invalidate(imageId)`             | Clears all cached URLs for this image (all sizes); next `getSignedUrl` will re-sign                                   | `void`                                  |
-| 6   | `invalidateStale(maxAgeMs)`       | Clears entries older than `maxAgeMs`; called on interval or before batch operations                                   | `number` (entries cleared)              |
-| 7   | `setLocalUrl(imageId, blobUrl)`   | Injects a local `ObjectURL` (from upload) into the cache at all sizes — loads in ~0ms, no network                     | `void`                                  |
-| 8   | `revokeLocalUrl(imageId)`         | Calls `URL.revokeObjectURL` on the cached blob and clears it; next access re-signs from storage                       | `void`                                  |
+| #   | Consumer calls                            | Service response                                                                                                      | Returns / emits                         |
+| --- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 1   | `getSignedUrl(storagePath, size)`         | Checks cache → if valid, returns cached URL; else signs via Supabase Storage with size-appropriate transform          | `Promise<SignedUrlResult>`              |
+| 2   | `batchSign(items[], size)`                | Groups items by thumbnail-path vs storage-path; batch-signs where possible, individual-signs with transform otherwise | `Promise<Map<string, SignedUrlResult>>` |
+| 3   | `getLoadState(imageId, size)`             | Returns a readonly signal tracking the current `PhotoLoadState` for this image+size pair                              | `Signal<PhotoLoadState>`                |
+| 4   | `preload(url)`                            | Creates a hidden `Image()` element, resolves when loaded or rejects on error                                          | `Promise<boolean>`                      |
+| 5   | `invalidate(imageId)`                     | Clears all cached URLs for this image (all sizes); next `getSignedUrl` will re-sign                                   | `void`                                  |
+| 6   | `invalidateStale(maxAgeMs)`               | Clears entries older than `maxAgeMs`; called on interval or before batch operations                                   | `number` (entries cleared)              |
+| 7   | `setLocalUrl(imageId, blobUrl)`           | Injects a local `ObjectURL` (from upload) into the cache at all sizes — loads in ~0ms, no network                     | `void`                                  |
+| 8   | `revokeLocalUrl(imageId)`                 | Calls `URL.revokeObjectURL` on the cached blob and clears it; next access re-signs from storage                       | `void`                                  |
+| 9   | `getBestCachedUrl(imageId, tier)`         | Returns best immediately available cached URL for same media (exact tier or deterministic fallback)                   | `string \| null`                        |
+| 10  | `getSignedUrl(..., decodeFirst)`          | Resolves URL and pre-decodes when requested so consumer can crossfade without progressive top-to-bottom paint         | `Promise<SignedUrlResult>`              |
+| 11  | `getSignedUrl(documentPreviewPath, size)` | Signs generated first-page document thumbnail path and serves it through same cache/state pipeline                    | `Promise<SignedUrlResult>`              |
 
 ### Event Streams
 
@@ -80,6 +84,7 @@ Not applicable — headless service. No template or DOM.
 | --------------------- | --------------------------------------------- | ----------- | ---------------------------------------------------------- |
 | `cache`               | `Map<string, CacheEntry>`                     | empty       | Stores signed URLs keyed by `${imageId}:${size}`           |
 | `loadStates`          | `Map<string, WritableSignal<PhotoLoadState>>` | empty       | Per image+size loading state; consumers read these signals |
+| `routeStableCache`    | `boolean`                                     | `true`      | Prevents forced cache clearing during route switches       |
 | `STALE_THRESHOLD_MS`  | `number`                                      | `3_000_000` | 50 minutes — matches current map-shell staleness window    |
 | `SIGN_EXPIRY_SECONDS` | `number`                                      | `3600`      | Supabase signed URL TTL                                    |
 
@@ -192,20 +197,21 @@ All components that currently sign URLs directly will `inject(PhotoLoadService)`
 
 - `MapShellComponent.maybeLoadThumbnails()` calls `photoLoad.invalidateStale(STALE_THRESHOLD_MS)` before re-signing visible markers
 - Alternatively, the service can run an internal `setInterval` cleanup (implementation choice)
+- Route changes (`/map` <-> `/media` <-> detail/workspace contexts) must not call blanket cache clear; staleness/explicit invalidation are the only clear paths.
 
 ### Placeholder assets
 
-The service exports two constants that consumers use for consistent visuals:
+The service exports canonical assets that consumers use for consistent visuals:
 
 ```typescript
-/** Camera icon SVG data-URI — used in loading/idle placeholders */
-export const PHOTO_PLACEHOLDER_ICON: string;
-
 /** Crossed-out image SVG data-URI — used in error/no-photo placeholders */
 export const PHOTO_NO_PHOTO_ICON: string;
+
+/** Optional media symbol SVG data-URI — not used for default /media cold placeholders */
+export const PHOTO_PLACEHOLDER_ICON: string;
 ```
 
-These replace the inline SVG data-URIs currently duplicated in `thumbnail-card.component.scss`, `map-shell.component.scss`, and `media-detail-view.component.scss`.
+These replace the inline SVG data-URIs currently duplicated in `thumbnail-card.component.scss`, `map-shell.component.scss`, and `media-detail-view.component.scss`. The `/media` default cold-start placeholder remains neutral gray and icon-free.
 
 ### Before / After Architecture
 
@@ -238,16 +244,29 @@ flowchart TB
 - [x] Repeated calls for the same path+size within the staleness window return the cached URL without a new Supabase request
 - [x] `batchSign()` uses `createSignedUrls` (batch) for items with `thumbnailPath`, individual `createSignedUrl` with transform for others
 - [x] `getLoadState(imageId, size)` returns a signal that transitions: `idle` → `loading` → `loaded` or `error`
+- [ ] Default loading placeholder contract is neutral gray and icon-free for media-grid cold start.
 - [x] When `storage_path` is null, `getLoadState` returns a signal with value `no-photo` immediately — no network request
 - [x] `preload(url)` resolves `true` when the image loads, `false` on error
+- [ ] Decode-first transition contract is available so consumers can dissolve to sharp image without top-to-bottom fill artifacts.
 - [x] `invalidate(imageId)` clears all size variants; next call re-signs
 - [x] `invalidateStale(ms)` only clears entries older than the threshold
 - [x] `setLocalUrl(imageId, blobUrl)` makes all sizes return the blob URL immediately
 - [x] `revokeLocalUrl(imageId)` calls `URL.revokeObjectURL` and clears the cache entry
-- [x] `PHOTO_PLACEHOLDER_ICON` and `PHOTO_NO_PHOTO_ICON` are valid SVG data-URIs identical to current placeholder icons
+- [ ] Cache survives route switches; navigation between `/map` and `/media` reuses already loaded URLs when still valid.
+- [ ] Service can return warm cached tier for immediate preview while requested tier resolves.
+- [ ] `PHOTO_NO_PHOTO_ICON` remains canonical for error/no-photo surfaces; `PHOTO_PLACEHOLDER_ICON` is optional and not required for `/media` cold-start loading.
+- [ ] Generated first-page document thumbnail paths are treated as first-class media sources in the same signing/cache/state flow.
 - [x] After integration, no component calls `supabase.client.storage.from('images').createSignedUrl` directly — all go through `PhotoLoadService`
 - [x] `urlChanged$` emits `{ imageId, size, url }` whenever a signed URL or local blob is cached
 - [x] `stateChanged$` emits on every `PhotoLoadState` transition (idle→loading, loading→loaded, etc.)
 - [x] `batchComplete$` emits `{ imageIds[], size }` when `batchSign()` finishes
 - [x] Signals are updated before events fire — both mechanisms stay in sync
 - [x] All 4 surfaces (marker, thumbnail card, detail view, lightbox) render identical placeholder/error visuals
+
+## Naming Evolution
+
+Current runtime class name stays `PhotoLoadService` for compatibility with existing injections and tests.
+
+- Preferred target name: `MediaLoadService`
+- Migration rule: introduce `MediaLoadService` as primary export and keep `PhotoLoadService` as a compatibility alias until consumers are migrated.
+- Contract rule: both names reference the same singleton cache/store during transition (no split caches).

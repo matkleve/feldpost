@@ -226,7 +226,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `projects-dropdown.md` — Projects Dropdown (project selection filter)
 - ✅ `active-filter-chips.md` — Active Filter Chips Strip
 - ✅ `media-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
-  - ✅ `media-detail-photo-viewer.md` — Photo Viewer (progressive loading, lightbox, replace/upload)
+  - ✅ `media-detail-media-viewer.md` — Media Viewer (progressive loading, lightbox, replace/upload)
   - ✅ `media-detail-inline-editing.md` — Inline Editing (property rows, address search)
   - ✅ `media-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
 - ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)

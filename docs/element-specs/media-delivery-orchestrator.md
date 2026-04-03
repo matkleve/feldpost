@@ -6,10 +6,11 @@
 
 Media Delivery Orchestrator is the global render-delivery contract for media previews and detail assets.
 It combines tier selection (`MediaOrchestratorService`) and signed-URL/load-state handling (`PhotoLoadService`) so every surface uses one deterministic media loading path.
+Map markers, workspace detail viewer, workspace selected-items, and `/media` item grid all read/write the same cache namespace keyed by media identity.
 
 ## What It Looks Like
 
-This is a headless contract, not a visual component. Its visible effect is consistency: map markers, workspace selected-items, media grid cards, and detail previews request tiers the same way and resolve fallback URLs by one shared policy. Loading visuals are still rendered by each consumer, but delivery state comes from the same source of truth. Ratio handling remains consumer-owned (for example row-mode ratio fallback), while URL and tier decisions stay centralized.
+This is a headless contract, not a visual component. Its visible effect is consistency: map markers, workspace selected-items, media grid cards, and detail previews request tiers the same way and resolve fallback URLs by one shared policy. Loading visuals are still rendered by each consumer, but delivery state comes from the same source of truth. Ratio handling remains consumer-owned (for example row-mode ratio fallback), while URL and tier decisions stay centralized. The contract is explicitly cache-first across routes: if media was already loaded on one surface, other surfaces must reuse cached tiers immediately and only revalidate in the background.
 
 ## Where It Lives
 
@@ -26,16 +27,19 @@ This is a headless contract, not a visual component. Its visible effect is consi
 
 ## Actions & Interactions
 
-| #   | Trigger                                    | System response                                                                                    | Output contract                     |
-| --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| 1   | Consumer receives media record + slot size | Resolve requested tier from consumer mode policy                                                   | `requestedTier`                     |
-| 2   | Slot size is known (`rem`)                 | Clamp/adapt requested tier by slot short edge and context floor                                    | `effectiveTier`                     |
-| 3   | Tier has no available URL                  | Walk deterministic fallback chain (`requested -> lower tiers`)                                     | first available tier URL            |
-| 4   | Storage path exists                        | Request signed URL through `PhotoLoadService`                                                      | signed URL + load-state updates     |
-| 5   | Storage path missing                       | Mark no-media state via `PhotoLoadService`                                                         | `no-photo` load-state               |
-| 6   | Asset loading fails                        | Publish error state without consumer-specific drift                                                | `error` load-state                  |
-| 7   | Consumer is map/workspace/media/detail     | Reuse same orchestrator + photo-load chain                                                         | consistent behavior across surfaces |
-| 8   | Consumer is row mode and ratio unknown     | Keep delivery chain unchanged; consumer uses ratio fallback (square) until metadata ratio resolves | stable geometry + shared delivery   |
+| #   | Trigger                                                  | System response                                                                                         | Output contract                      |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 1   | Consumer receives media record + slot size               | Resolve requested tier from consumer mode policy                                                        | `requestedTier`                      |
+| 2   | Slot size is known (`rem`)                               | Clamp/adapt requested tier by slot short edge and context floor                                         | `effectiveTier`                      |
+| 3   | Tier has no available URL                                | Walk deterministic fallback chain (`requested -> lower tiers`)                                          | first available tier URL             |
+| 4   | Storage path exists                                      | Request signed URL through `PhotoLoadService`                                                           | signed URL + load-state updates      |
+| 5   | Storage path missing                                     | Mark no-media state via `PhotoLoadService`                                                              | `no-photo` load-state                |
+| 6   | Asset loading fails                                      | Publish error state without consumer-specific drift                                                     | `error` load-state                   |
+| 7   | Consumer is map/workspace/media/detail                   | Reuse same orchestrator + photo-load chain                                                              | consistent behavior across surfaces  |
+| 8   | Consumer is row mode and ratio unknown                   | Keep delivery chain unchanged; consumer uses ratio fallback (square) until metadata ratio resolves      | stable geometry + shared delivery    |
+| 9   | Consumer requests media that already exists in cache     | Return warm cached URL immediately (same or nearest tier), then upgrade to requested tier in background | warm-preview-first rendering         |
+| 10  | User navigates `/map` -> `/media` or reverse             | Keep cache entries and load-states; no forced clearing on route switch                                  | route-stable media cache             |
+| 11  | Consumer requests document-like preview at eligible size | Resolve generated first-page document thumbnail path first, then apply normal tier/signing/cache policy | document-first-page preview contract |
 
 ## Component Hierarchy
 
@@ -75,26 +79,31 @@ flowchart TD
   H -->|error| K[PhotoLoadService error state]
 ```
 
-| Field            | Source                     | Type                                                       | Purpose                                  |
-| ---------------- | -------------------------- | ---------------------------------------------------------- | ---------------------------------------- |
-| `requestedTier`  | consumer mode policy       | `MediaTier`                                                | Initial quality request from UI mode     |
-| `slotWidthRem`   | consumer measurement       | `number \| null`                                           | Width input for adaptive tier selection  |
-| `slotHeightRem`  | consumer measurement       | `number \| null`                                           | Height input for adaptive tier selection |
-| `context`        | consumer                   | `'map' \| 'grid' \| 'upload' \| 'detail'`                  | Context floor for tier clamping          |
-| `effectiveTier`  | `MediaOrchestratorService` | `MediaTier`                                                | Slot-aware tier after clamping           |
-| `fallbackChain`  | `MediaOrchestratorService` | `ReadonlyArray<MediaTier>`                                 | Deterministic lower-tier fallback order  |
-| `signedUrl`      | `PhotoLoadService`         | `string \| null`                                           | Renderable URL for chosen path           |
-| `photoLoadState` | `PhotoLoadService`         | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | Canonical load state                     |
+| Field                 | Source                             | Type                                                       | Purpose                                        |
+| --------------------- | ---------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| `requestedTier`       | consumer mode policy               | `MediaTier`                                                | Initial quality request from UI mode           |
+| `slotWidthRem`        | consumer measurement               | `number \| null`                                           | Width input for adaptive tier selection        |
+| `slotHeightRem`       | consumer measurement               | `number \| null`                                           | Height input for adaptive tier selection       |
+| `context`             | consumer                           | `'map' \| 'grid' \| 'upload' \| 'detail'`                  | Context floor for tier clamping                |
+| `effectiveTier`       | `MediaOrchestratorService`         | `MediaTier`                                                | Slot-aware tier after clamping                 |
+| `fallbackChain`       | `MediaOrchestratorService`         | `ReadonlyArray<MediaTier>`                                 | Deterministic lower-tier fallback order        |
+| `sharedCacheKey`      | `PhotoLoadService`                 | `string`                                                   | Cross-surface cache key for the same media     |
+| `documentPreviewPath` | backend thumbnail generator output | `string \| null`                                           | Storage path of generated first-page thumbnail |
+| `signedUrl`           | `PhotoLoadService`                 | `string \| null`                                           | Renderable URL for chosen path                 |
+| `warmPreviewUrl`      | `PhotoLoadService`                 | `string \| null`                                           | Fast cached preview during tier upgrade        |
+| `photoLoadState`      | `PhotoLoadService`                 | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | Canonical load state                           |
 
 ## State
 
-| Name             | TypeScript type                                            | Default          | What it controls                           |
-| ---------------- | ---------------------------------------------------------- | ---------------- | ------------------------------------------ |
-| `contextFloor`   | `Record<MediaContext, MediaTier>`                          | service constant | Minimum allowed tier per context           |
-| `requestedTier`  | `MediaTier`                                                | consumer-defined | Target tier before slot adaptation         |
-| `effectiveTier`  | `MediaTier`                                                | computed         | Slot-aware tier for current render request |
-| `fallbackChain`  | `ReadonlyArray<MediaTier>`                                 | service constant | Tier downgrade order                       |
-| `photoLoadState` | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | `'idle'`         | Consumer-facing load semantics             |
+| Name                    | TypeScript type                                            | Default             | What it controls                                                |
+| ----------------------- | ---------------------------------------------------------- | ------------------- | --------------------------------------------------------------- |
+| `contextFloor`          | `Record<MediaContext, MediaTier>`                          | service constant    | Minimum allowed tier per context                                |
+| `requestedTier`         | `MediaTier`                                                | consumer-defined    | Target tier before slot adaptation                              |
+| `effectiveTier`         | `MediaTier`                                                | computed            | Slot-aware tier for current render request                      |
+| `fallbackChain`         | `ReadonlyArray<MediaTier>`                                 | service constant    | Tier downgrade order                                            |
+| `cachePolicy`           | `'cache-first-swr'`                                        | `'cache-first-swr'` | Reuse cached media before background refresh                    |
+| `documentPreviewMinRem` | `number`                                                   | `12`                | Minimum slot short edge to render first-page document thumbnail |
+| `photoLoadState`        | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | `'idle'`            | Consumer-facing load semantics                                  |
 
 ## File Map
 
@@ -132,7 +141,7 @@ Execute batches in order. Each batch is complete only when code, specs, and arch
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | 1. Type normalization         | Introduce canonical media render-state mapping (`loading/content/error/no-media`) at consumer boundaries; keep compatibility adapters for legacy states | `media-item.md` state mapping verified; `item-grid.md` acceptance remains aligned                 | None                                                                                                |
 | 2. Media page consumer        | Complete `MediaItemComponent` render-state normalization and remove legacy per-consumer state drift on `/media`                                         | `media-item.md` + `item-grid.md` acceptance checkboxes updated after implementation               | None                                                                                                |
-| 3. Detail consumer            | Align `media-detail-view.component.ts` delivery path to shared orchestrator + photo-load chain only                                                     | `media-detail-photo-viewer.md` references active delivery parent                                  | None                                                                                                |
+| 3. Detail consumer            | Align `media-detail-view.component.ts` delivery path to shared orchestrator + photo-load chain only                                                     | `media-detail-media-viewer.md` references active delivery parent                                  | None                                                                                                |
 | 4. Workspace one-shot cutover | Replace active top-level `app-thumbnail-grid` selected-items runtime with `ItemGridComponent` + projected `MediaItemComponent`                          | `workspace-pane.md`, `item-grid.md`, and `media-delivery-orchestrator.md` migration notes updated | `thumbnail-grid.component.ts` and `thumbnail-card-media.component.ts` no longer active runtime path |
 | 5. Map consumer alignment     | Remove ad-hoc map delivery branches so map markers use same delivery chain policy                                                                       | `photo-load-service.md` and delivery spec references validated                                    | None                                                                                                |
 | 6. Archive and cleanup        | Archive `universal-media.component.ts` runtime role and remove stale imports/comments; keep archival references only                                    | Spec index and blueprint index mark legacy renderer specs/components as archived                  | No active runtime imports of archived renderer wrappers                                             |
@@ -155,6 +164,10 @@ sequenceDiagram
 
   C->>O: resolve requestedTier + slot(rem) + context
   O-->>C: effectiveTier
+  C->>P: lookup cached URL(mediaId, effectiveTier or fallback)
+  P-->>C: warmPreviewUrl (if available)
+  C->>O: resolve documentPreviewPath eligibility by filetype + slot size
+  O-->>C: documentPreviewPath or null
   C->>O: resolveBestAvailableTier(paths, effectiveTier)
   O-->>C: chosen tier/path
   C->>P: getSignedUrl(chosenPath, size, mediaId)
@@ -171,8 +184,12 @@ sequenceDiagram
 - [ ] `MediaOrchestratorService` is the only source for requested/effective tier clamping and fallback-chain selection.
 - [ ] `PhotoLoadService` is the only source for signed URL retrieval and load-state lifecycle.
 - [ ] Map, workspace, `/media`, and detail consumers all use the same delivery chain.
+- [ ] Cache policy is route-stable and cache-first: navigating between `/map`, workspace, and `/media` does not force clearing already loaded media URLs.
+- [ ] Map markers, workspace detail viewer, and `/media` grid consumers share the same `PhotoLoadService` cache namespace for the same media identity.
+- [ ] Generated first-page document thumbnails are resolved through the same delivery chain (path resolution, signing, cache reuse, state updates).
 - [ ] Consumer-specific ratio logic (for example row mode) does not bypass centralized tier/URL policy.
 - [ ] Missing-path behavior resolves to canonical `no-photo` state via `PhotoLoadService`.
 - [ ] Delivery failures resolve to canonical `error` state and do not invent per-surface error semantics.
+- [ ] Warm cached tiers (lower or higher) can be used as immediate preview while requested tier is resolved in background.
 - [ ] Spec references in item/media/workspace contracts point to this document for delivery-policy ownership.
 - [ ] Merge vs archive matrix is fully executed: all marked archive targets have no active runtime imports, and all marked keep targets are the only active delivery policy source.

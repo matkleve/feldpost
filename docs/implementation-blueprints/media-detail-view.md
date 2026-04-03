@@ -5,16 +5,16 @@
 
 ## Existing Infrastructure
 
-| File                                                                      | What it provides |
-| ------------------------------------------------------------------------- | ---------------- |
-| `features/map/workspace-pane/media-detail-view.component.ts`              | Parent coordinator: load record, own shared state, wire child events |
-| `features/map/workspace-pane/image-detail-header/*`                       | Header UI and context-menu intent emission |
-| `features/map/workspace-pane/media-detail-photo-viewer/*`                 | Photo area UI, file-selection handoff, lightbox |
-| `features/map/workspace-pane/media-detail-inline-section/*`               | Details/location editing UI and project picker |
-| `features/map/workspace-pane/media-detail-project-membership.helper.ts`   | Project membership loading and persistence rules |
-| `core/supabase.service.ts`                                                | `SupabaseService.client` for queries |
-| `core/upload.service.ts`                                                  | File validation for replace/attach flow |
-| `core/photo-load.service.ts`                                              | Signed URL lookup, load-state tracking, preload |
+| File                                                                    | What it provides                                                     |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `features/map/workspace-pane/media-detail-view.component.ts`            | Parent coordinator: load record, own shared state, wire child events |
+| `features/map/workspace-pane/image-detail-header/*`                     | Header UI and context-menu intent emission                           |
+| `features/map/workspace-pane/media-detail-photo-viewer/*`               | Media preview UI, file-selection handoff, lightbox                   |
+| `features/map/workspace-pane/media-detail-inline-section/*`             | Details/location editing UI and project picker                       |
+| `features/map/workspace-pane/media-detail-project-membership.helper.ts` | Project membership loading and persistence rules                     |
+| `core/supabase.service.ts`                                              | `SupabaseService.client` for queries                                 |
+| `core/upload.service.ts`                                                | File validation for replace/attach flow                              |
+| `core/photo-load.service.ts`                                            | Signed URL lookup, load-state tracking, preload                      |
 
 ## Service Contract
 
@@ -37,13 +37,17 @@ displayTitle: Signal<string>;
 captureDate: Signal<string | null>;
 
 closed: OutputEmitterRef<void>;
-zoomToLocationRequested: OutputEmitterRef<{ imageId: string; lat: number; lng: number }>;
+zoomToLocationRequested: OutputEmitterRef<{
+  imageId: string;
+  lat: number;
+  lng: number;
+}>;
 ```
 
 ### Child Boundaries
 
 - `ImageDetailHeaderComponent`: header presentation only; emits title and context-menu intents.
-- `MediaDetailPhotoViewerComponent`: photo/upload presentation only; emits selected files back to the parent.
+- `MediaDetailPhotoViewerComponent`: media-preview/upload presentation only; emits selected files back to the parent.
 - `ImageDetailInlineSectionComponent`: details and location presentation only; emits edit, save, project, and location intents.
 - `MetadataSectionComponent` and `DetailActionsComponent`: focused presenter components retained from the earlier split.
 
@@ -84,4 +88,4 @@ sequenceDiagram
 
 - `MediaDetailViewComponent` remains the integration point for record loading and upload-manager subscriptions.
 - Project membership rules and persistence now live behind `media-detail-project-membership.helper.ts`.
-- Photo viewer state remains parent-owned for now; the extracted viewer is a presenter that emits file-selection intent.
+- Media viewer state remains parent-owned for now; the extracted viewer is a presenter that emits file-selection intent.

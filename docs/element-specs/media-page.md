@@ -73,7 +73,7 @@ AppShell (top-level, persistent across routes)
 - **Parent Container:** `AppShellComponent` main content flex area
 - **Workspace Pane:** Mounted by AppShellComponent (seitenübergreifend, not media-specific)
 - **Trigger:** Navigation from main nav, or view-all-media action
-- **Persistence:** Media page state (filters, sort, group) saved to localStorage; workspace pane state (tab, selection, uploads) is independent
+- **Persistence:** Media page state (filters, sort, group) saved to localStorage; media list snapshots and pagination cursor are cache-retained per user/query (no forced clear on normal revisit); workspace pane state (tab, selection, uploads) is independent
 
 ---
 
@@ -81,17 +81,19 @@ AppShell (top-level, persistent across routes)
 
 **Media Grid Tab (Selected Items in Workspace Pane):**
 
-| #   | User Action                                        | System Response                                                     | Notes                                 |
-| --- | -------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------- |
-| 1a  | Navigates to `/media`                              | MediaPageComponent loads, workspace pane shows "Selected Items" tab | Filtered to "All media" if no filters |
-| 1b  | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                  | localStorage or query params          |
-| 2   | Uses Grouping operator (project/date/address)      | Grid reorganizes with section headers (if toolbar shown)            | Computed via `WorkspaceViewService`   |
-| 3   | Uses Sorting operator (newest/oldest/name)         | Grid re-sorts within groups                                         | Reactive recompute                    |
-| 4   | Uses Filter operator (project/date/tag/media-type) | Grid hides non-matching items                                       | Cascading filter logic                |
-| 5   | Clicks thumbnail in grid                           | Opens media detail view (modal overlay)                             | Same detail component as workspace    |
-| 6   | Closes detail                                      | Returns to grid, clears `detailImageId`                             | Grid state preserved                  |
-| 7   | Hovers thumbnail                                   | Shows optional linked-hover underlay                                | Same pattern as workspace hover       |
-| 8   | Selects one or more thumbnails                     | Selected count updates in workspace pane header                     | Affects "Selected Items" tab content  |
+| #    | User Action                                        | System Response                                                                                 | Notes                                 |
+| ---- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------- |
+| 1a   | Navigates to `/media`                              | MediaPageComponent loads, workspace pane shows "Selected Items" tab                             | Filtered to "All media" if no filters |
+| 1a.1 | Navigates to `/media` again (same user/query)      | Previously cached media list is restored immediately; background revalidation updates diff-only | No hard reset/empty flash             |
+| 1b   | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                                              | localStorage or query params          |
+| 2    | Uses Grouping operator (project/date/address)      | Grid reorganizes with section headers (if toolbar shown)                                        | Computed via `WorkspaceViewService`   |
+| 3    | Uses Sorting operator (newest/oldest/name)         | Grid re-sorts within groups                                                                     | Reactive recompute                    |
+| 4    | Uses Filter operator (project/date/tag/media-type) | Grid hides non-matching items                                                                   | Cascading filter logic                |
+| 5    | Clicks thumbnail in grid                           | Opens media detail view (modal overlay)                                                         | Same detail component as workspace    |
+| 6    | Closes detail                                      | Returns to grid, clears `detailImageId`                                                         | Grid state preserved                  |
+| 7    | Hovers thumbnail                                   | Shows optional linked-hover underlay                                                            | Same pattern as workspace hover       |
+| 8    | Selects one or more thumbnails                     | Selected count updates in workspace pane header                                                 | Affects "Selected Items" tab content  |
+| 8a   | Media was already loaded on `/map` or detail       | Grid tile uses warm cached preview (blurred) and dissolves to requested sharp tier when ready   | Shared media cache contract           |
 
 **Upload Tab (Global, Seitenübergreifend):**
 
@@ -149,29 +151,34 @@ WorkspacePaneComponent (seitenübergreifend)
 
 ## Data Requirements
 
-| Source                      | Fields Needed                                                        | Purpose                                  |
-| --------------------------- | -------------------------------------------------------------------- | ---------------------------------------- |
-| `images` table              | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                             |
-| `saved_groups` table        | id, name, org_id, member images                                      | Group filter options (Phase 2)           |
-| `UploadManagerService`      | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data          |
-| `WorkspaceViewService`      | getGroupedAndFiltered() logic (reuse)                                | Grouping/filtering/sorting               |
-| `WorkspaceSelectionService` | selectedMediaIds, toggleSelection()                                  | Selection state for "Selected Items" tab |
+| Source                      | Fields Needed                                                        | Purpose                                      |
+| --------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
+| `images` table              | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
+| `MediaPageCacheService`     | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
+| `PhotoLoadService`          | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
+| `saved_groups` table        | id, name, org_id, member images                                      | Group filter options (Phase 2)               |
+| `UploadManagerService`      | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data              |
+| `WorkspaceViewService`      | getGroupedAndFiltered() logic (reuse)                                | Grouping/filtering/sorting                   |
+| `WorkspaceSelectionService` | selectedMediaIds, toggleSelection()                                  | Selection state for "Selected Items" tab     |
 
 ### Data Flow
 
 ```mermaid
 flowchart LR
     A["Navigate /media"] --> B["MediaPageComponent"]
-    B --> C["Query: all media from DB"]
-    C --> D["MediaGridComponent"]
-    D --> E["Render grid with grouping"]
+    B --> C{"Media list cache hit?"}
+    C -->|yes| D["Restore cached media list immediately"]
+    C -->|no| E["Show neutral gray placeholders"]
+    D --> F["Background revalidate query"]
+    E --> F
+    F --> G["Merge fresh diff into grid"]
 
-    F["UploadManagerService jobs signal"] --> G["WorkspacePaneComponent"]
-    G --> H{"Which tab?"}
-    H -->|Selected Items| I["Show media grid"]
-    H -->|Upload| J["Show UploadPanelComponent"]
-    J --> K["Lane buckets by issue kind + lane semantics"]
-    K --> L["Uploaded actions: assign project, prioritize, open media, download"]
+    H["UploadManagerService jobs signal"] --> I["WorkspacePaneComponent"]
+    I --> J{"Which tab?"}
+    J -->|Selected Items| K["Show media grid"]
+    J -->|Upload| L["Show UploadPanelComponent"]
+    L --> M["Lane buckets by issue kind + lane semantics"]
+    M --> N["Uploaded actions: assign project, prioritize, open media, download"]
 ```
 
 ---
@@ -180,15 +187,17 @@ flowchart LR
 
 **MediaPageComponent:**
 
-| Name               | Type                                                | Default    | Controls                                     |
-| ------------------ | --------------------------------------------------- | ---------- | -------------------------------------------- |
-| `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | How grid is organized into sections          |
-| `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | Grid sort order                              |
-| `activeFilters`    | `FilterSpec[]`                                      | `[]`       | Applied filter chips (projects, date ranges) |
-| `filteredImages`   | `Signal<Image[]>`                                   | `[]`       | Computed: media matching active filters      |
-| `groupedAndSorted` | `Signal<ImageGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted        |
-| `hoveredImageId`   | `string \| null`                                    | `null`     | Current media item tile under pointer        |
-| `detailImageId`    | `string \| null`                                    | `null`     | If set, detail modal is open                 |
+| Name               | Type                                                | Default    | Controls                                         |
+| ------------------ | --------------------------------------------------- | ---------- | ------------------------------------------------ |
+| `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | How grid is organized into sections              |
+| `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | Grid sort order                                  |
+| `activeFilters`    | `FilterSpec[]`                                      | `[]`       | Applied filter chips (projects, date ranges)     |
+| `filteredImages`   | `Signal<Image[]>`                                   | `[]`       | Computed: media matching active filters          |
+| `groupedAndSorted` | `Signal<ImageGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted            |
+| `cachedMediaItems` | `Signal<Image[]>`                                   | `[]`       | Route-stable cached snapshot for instant restore |
+| `cacheWarm`        | `Signal<boolean>`                                   | `false`    | Whether first paint came from cache              |
+| `hoveredImageId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
+| `detailImageId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |
 
 **Cross-route contracts:**
 
@@ -255,21 +264,22 @@ export interface WorkspacePaneHostPort {
 
 **New Files:**
 
-| File                                          | Purpose                                                              |
-| --------------------------------------------- | -------------------------------------------------------------------- |
-| `features/media/media-page.component.ts`      | Route component for `/media`                                         |
-| `features/media/media-page.component.html`    | Template: breadcrumb + grid (no pane — pane is in AppShell)          |
-| `features/media/media-page.component.scss`    | Page layout styles                                                   |
-| `features/media/media-grid.component.ts`      | NEW: Responsive ItemGrid-backed media grid with grouping             |
-| `features/media/media-grid.component.html`    | Grid template with grouping sections                                 |
-| `features/media/media-grid.component.scss`    | Grid layout + responsive columns                                     |
-| `features/media/media-toolbar.component.ts`   | OPTIONAL Phase 2: Grouping/Sort/Filter operators                     |
-| `features/media/media-toolbar.component.html` | Toolbar template (Phase 2)                                           |
-| `features/media/media-toolbar.component.scss` | Toolbar styles (Phase 2)                                             |
-| `core/media-view.service.ts`                  | Grouping, filtering, sorting logic (or share with workspace service) |
-| `core/workspace-pane-context.port.ts`         | Shared interface contract for selected-items context provider        |
-| `core/workspace-pane-host.port.ts`            | Host contract for tab and context binding                            |
-| `core/workspace-pane-observer.adapter.ts`     | Observer lifecycle adapter (route, upload, tab persistence)          |
+| File                                          | Purpose                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------- |
+| `features/media/media-page.component.ts`      | Route component for `/media`                                              |
+| `features/media/media-page.component.html`    | Template: breadcrumb + grid (no pane — pane is in AppShell)               |
+| `features/media/media-page.component.scss`    | Page layout styles                                                        |
+| `features/media/media-grid.component.ts`      | NEW: Responsive ItemGrid-backed media grid with grouping                  |
+| `features/media/media-grid.component.html`    | Grid template with grouping sections                                      |
+| `features/media/media-grid.component.scss`    | Grid layout + responsive columns                                          |
+| `features/media/media-toolbar.component.ts`   | OPTIONAL Phase 2: Grouping/Sort/Filter operators                          |
+| `features/media/media-toolbar.component.html` | Toolbar template (Phase 2)                                                |
+| `features/media/media-toolbar.component.scss` | Toolbar styles (Phase 2)                                                  |
+| `core/media-view.service.ts`                  | Grouping, filtering, sorting logic (or share with workspace service)      |
+| `core/media-page-cache.service.ts`            | Route-stable media list snapshot cache + background revalidation metadata |
+| `core/workspace-pane-context.port.ts`         | Shared interface contract for selected-items context provider             |
+| `core/workspace-pane-host.port.ts`            | Host contract for tab and context binding                                 |
+| `core/workspace-pane-observer.adapter.ts`     | Observer lifecycle adapter (route, upload, tab persistence)               |
 
 **Modified Files:**
 
@@ -360,7 +370,9 @@ sequenceDiagram
 - [ ] Clicking card opens detail view (modal overlay)
 - [ ] Closing detail returns to grid with state preserved
 - [ ] Hovering card shows optional linked-hover effect
-- [ ] Initial unknown-count loading uses spinner-free media placeholders sized to approximately 3 viewport heights (`columns x rows(3 viewports)`).
+- [ ] Initial unknown-count loading uses icon-free neutral gray placeholders sized to approximately 3 viewport heights (`columns x rows(3 viewports)`).
+- [ ] Revisiting `/media` with same user/query restores cached list immediately and does not hard-clear grid before revalidation.
+- [ ] If cached media tier exists from `/map` or detail/workspace, tile may render warm blurred preview before dissolving to requested sharp tier.
 
 **Workspace Pane Integration:**
 

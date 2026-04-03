@@ -653,7 +653,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   onThumbnailContextRequested(): void {
-    // Spec link: docs/element-specs/media-detail-photo-viewer.md -> right-click should open detail context actions.
+    // Spec link: docs/element-specs/media-detail-media-viewer.md -> right-click should open detail context actions.
     this.showContextMenu.set(true);
   }
 

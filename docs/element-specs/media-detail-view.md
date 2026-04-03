@@ -1,12 +1,13 @@
 # Media Detail View
 
 > **Blueprint:** [implementation-blueprints/media-detail-view.md](../implementation-blueprints/media-detail-view.md)
-> **Photo loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
-> **Editing use cases:** [use-cases/image-editing.md](../use-cases/image-editing.md)
+> **Media loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
+> **Media editing use cases:** [use-cases/image-editing.md](../use-cases/image-editing.md)
 
 ## What It Is
 
-The full detail view of a single photo or media-backed image record. It is the composition shell for the detail experience: it owns top-level layout, navigation, responsive placement, and the Quick Info Bar while delegating feature-specific behavior to child elements.
+The full detail view of a single media-backed record. It is the composition shell for the detail experience: it owns top-level layout, navigation, responsive placement, and the Quick Info Bar while delegating feature-specific behavior to child elements.
+It inherits the global media-delivery cache contract: the same media identity uses the same shared cache as map markers and `/media` tiles.
 
 ## Child Specs
 
@@ -14,12 +15,12 @@ Feature-specific behavior is owned by these child specs:
 
 | Child Spec                                                    | Covers                                                |
 | ------------------------------------------------------------- | ----------------------------------------------------- |
-| [media-detail-photo-viewer](media-detail-photo-viewer.md)     | Progressive loading, lightbox, replace/upload photo   |
+| [media-detail-media-viewer](media-detail-media-viewer.md)     | Progressive loading, lightbox, replace/upload media   |
 | [media-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows   |
 | [custom-metadata](custom-metadata.md)                         | Metadata CRUD, chip types, typeahead add flow         |
 | [media-detail-actions](media-detail-actions.md)               | Actions section, delete, marker sync, correction mode |
 
-The parent element coordinates shared state and section visibility only. Field-level editing, project membership management, location editing, photo interactions, metadata CRUD, and action-specific flows belong to the child specs above.
+The parent element coordinates shared state and section visibility only. Field-level editing, project membership management, location editing, media interactions, metadata CRUD, and action-specific flows belong to the child specs above.
 
 ## What It Looks Like
 
@@ -29,15 +30,15 @@ When the detail view is open, the **Workspace Toolbar** is hidden. The detail vi
 
 ### Layout Modes
 
-**Wide pane (>= 640px):** Two-column layout with photo left and metadata right.
+**Wide pane (>= 640px):** Two-column layout with media preview left and metadata right.
 
-**Narrow pane (< 640px):** Single-column stack with photo on top and metadata below. On mobile this becomes a full-screen overlay.
+**Narrow pane (< 640px):** Single-column stack with media preview on top and metadata below. On mobile this becomes a full-screen overlay.
 
 The overall container is capped at `900px` max width and centered.
 
 ### Quick Info Bar
 
-Immediately below the photo, a horizontal row of info chips provides at-a-glance context:
+Immediately below the media preview, a horizontal row of info chips provides at-a-glance context:
 
 - **Projects chip**: folder icon plus project summary. Click opens project membership editing.
 - **Date chip**: calendar icon plus formatted capture date. Click enters date edit mode.
@@ -60,13 +61,14 @@ The layout responds to the **workspace pane width**, not the browser viewport.
 
 ## Actions
 
-| #   | User Action                     | System Response                      |
-| --- | ------------------------------- | ------------------------------------ |
-| 1   | Clicks back arrow               | Returns to previous workspace state  |
-| 2   | Clicks close on mobile          | Closes overlay                       |
-| 3   | Clicks quick-info projects chip | Opens project membership editing     |
-| 4   | Clicks quick-info date chip     | Enters date edit mode                |
-| 5   | Clicks quick-info GPS chip      | Copies coordinates and shows a toast |
+| #   | User Action                                               | System Response                                                                  |
+| --- | --------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 1   | Clicks back arrow                                         | Returns to previous workspace state                                              |
+| 2   | Clicks close on mobile                                    | Closes overlay                                                                   |
+| 3   | Clicks quick-info projects chip                           | Opens project membership editing                                                 |
+| 4   | Clicks quick-info date chip                               | Enters date edit mode                                                            |
+| 5   | Clicks quick-info GPS chip                                | Copies coordinates and shows a toast                                             |
+| 6   | Opens detail for media already seen on marker or `/media` | Viewer resolves from shared cache first, then background-upgrades tier as needed |
 
 ## Component Hierarchy
 
@@ -105,7 +107,8 @@ MediaDetailView
 ## Acceptance Criteria
 
 - [x] Parent element focuses on composition, shared state, and navigation
-- [x] Quick Info Bar remains directly under the photo surface
+- [x] Quick Info Bar remains directly under the media preview surface
 - [x] Child specs own feature-specific behavior
+- [ ] Parent and child viewer adhere to shared cache identity contract with map marker and `/media` consumers.
 - [ ] Uses `ResizeObserver` on the host element to measure pane width
 - [ ] Mobile overlay behavior matches the parent spec

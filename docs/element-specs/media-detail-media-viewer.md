@@ -22,19 +22,19 @@ A rounded-corner media surface (`--radius-lg`) centered with side margins (`--sp
 
 ## Actions
 
-| #   | User Action                                             | System Response                                                                                                                                                                             | Triggers                        |
-| --- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| 1   | Clicks media preview                                    | Opens full-screen lightbox overlay (dark backdrop, `rgba(0,0,0,0.9)`). Media preview at `95vw / 95vh`, `object-fit: contain`. Close button (X) top-right.                                   | Lightbox opens                  |
-| 2   | Clicks lightbox backdrop / X                            | Closes lightbox                                                                                                                                                                             | Lightbox closes                 |
-| 3   | Presses Escape in lightbox                              | Closes lightbox                                                                                                                                                                             | Lightbox closes                 |
-| 4   | Clicks replace-media button                             | Opens file picker; delegates to `uploadManager.replaceFile(imageId, file)`                                                                                                                  | `replacing` → true              |
-| 5   | Replace upload succeeds                                 | `imageReplaced$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → all surfaces see new media instantly → service re-signs on next access                    | `replacing` → false             |
-| 6   | Replace upload fails                                    | Inline error below media surface; no DB/storage changes                                                                                                                                     | `replaceError` set              |
-| 7   | Clicks upload button (no media)                         | Opens file picker; delegates to `uploadManager.attachFile(imageId, file)`                                                                                                                   | Attach pipeline starts          |
-| 8   | Attach upload succeeds                                  | `imageAttached$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → switches from upload placeholder to media display                                         | Media display shown             |
-| 9   | Right-clicks detail thumbnail                           | Opens the same detail context action menu as the header 3-dot trigger                                                                                                                       | Detail context menu             |
-| 10  | Same media was loaded by marker or `/media`             | Detail viewer reuses cached URL tier immediately (warm preview or sharp), then upgrades in background when needed                                                                           | Shared `PhotoLoadService` cache |
-| 11  | Opens document detail with generated first-page preview | Viewer requests signed preview URL from `document_preview_path` through `PhotoLoadService`, shows preview when available, then keeps cache/tier-upgrade behavior consistent across surfaces | Document preview pipeline       |
+| #   | User Action                     | System Response                                                                                                                                                          | Triggers               |
+| --- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| 1   | Clicks media preview            | Opens full-screen lightbox overlay (dark backdrop, `rgba(0,0,0,0.9)`). Media preview at `95vw / 95vh`, `object-fit: contain`. Close button (X) top-right.                 | Lightbox opens         |
+| 2   | Clicks lightbox backdrop / X    | Closes lightbox                                                                                                                                                          | Lightbox closes        |
+| 3   | Presses Escape in lightbox      | Closes lightbox                                                                                                                                                          | Lightbox closes        |
+| 4   | Clicks replace-media button     | Opens file picker; delegates to `uploadManager.replaceFile(imageId, file)`                                                                                               | `replacing` → true     |
+| 5   | Replace upload succeeds         | `imageReplaced$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → all surfaces see new media instantly → service re-signs on next access | `replacing` → false    |
+| 6   | Replace upload fails            | Inline error below media surface; no DB/storage changes                                                                                                                   | `replaceError` set     |
+| 7   | Clicks upload button (no media) | Opens file picker; delegates to `uploadManager.attachFile(imageId, file)`                                                                                                | Attach pipeline starts |
+| 8   | Attach upload succeeds          | `imageAttached$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → switches from upload placeholder to media display                      | Media display shown    |
+| 9   | Right-clicks detail thumbnail   | Opens the same detail context action menu as the header 3-dot trigger                                                                                                    | Detail context menu    |
+| 10  | Same media was loaded by marker or `/media` | Detail viewer reuses cached URL tier immediately (warm preview or sharp), then upgrades in background when needed                                                         | Shared `PhotoLoadService` cache |
+| 11  | Opens document detail with generated first-page preview | Viewer requests signed preview URL from `document_preview_path` through `PhotoLoadService`, shows preview when available, then keeps cache/tier-upgrade behavior consistent across surfaces | Document preview pipeline |
 
 ## Component Hierarchy
 
@@ -324,14 +324,14 @@ stateDiagram-v2
 
 ## State
 
-| Name                      | Type                     | Default | Controls                                                                           |
-| ------------------------- | ------------------------ | ------- | ---------------------------------------------------------------------------------- |
-| `thumbState`              | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(imageId, 'thumb')` — drives placeholder/thumb    |
-| `fullState`               | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(imageId, 'full')` — drives full-res crossfade    |
-| `lightboxOpen`            | `boolean`                | `false` | Whether lightbox overlay is visible                                                |
-| `replacing`               | `boolean`                | `false` | Whether a replace operation is in progress                                         |
-| `replaceError`            | `string \| null`         | `null`  | Error message if replace failed                                                    |
-| `documentPreviewEligible` | `boolean`                | `false` | Whether viewer slot size and file type allow first-page document preview rendering |
+| Name           | Type                     | Default | Controls                                                                        |
+| -------------- | ------------------------ | ------- | ------------------------------------------------------------------------------- |
+| `thumbState`   | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(imageId, 'thumb')` — drives placeholder/thumb |
+| `fullState`    | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(imageId, 'full')` — drives full-res crossfade |
+| `lightboxOpen` | `boolean`                | `false` | Whether lightbox overlay is visible                                             |
+| `replacing`    | `boolean`                | `false` | Whether a replace operation is in progress                                      |
+| `replaceError` | `string \| null`         | `null`  | Error message if replace failed                                                 |
+| `documentPreviewEligible` | `boolean`      | `false` | Whether viewer slot size and file type allow first-page document preview rendering |
 
 > **Removed:** `fullResLoaded`, `thumbLoaded`, `heroSrc` — replaced by `PhotoLoadState` signals from `PhotoLoadService`. The component no longer manages signed URLs or loading booleans directly.
 
