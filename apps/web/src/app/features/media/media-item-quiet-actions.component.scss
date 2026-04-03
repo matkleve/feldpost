@@ -4,12 +4,6 @@
   display: block;
 }
 
-// Defines the internal two-corner action layout for media card affordances.
-// @see docs/element-specs/media-item.md#what-it-looks-like
-.media-item-quiet-actions {
-  min-block-size: 100%;
-}
-
 // Defines shared quiet-action button surface for select and map actions.
 // @see docs/element-specs/media-item.md#actions--interactions
 .media-item-quiet-actions__button {
