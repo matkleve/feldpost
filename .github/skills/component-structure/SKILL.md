@@ -13,6 +13,51 @@ These are hard gates. They are not optional guidelines.
 Create an ownership matrix before writing the first HTML.
 No code without matrix.
 
+## 1.1) Visual Behavior Contract (Required Before First HTML)
+
+Define a Visual Behavior Contract before writing the first HTML.
+No overlays, states, or interaction layers may be implemented without this contract.
+
+Required checklist:
+
+- Stacking Context: exactly one owner element with `position: relative`
+- Layer Order: explicit z-index map for content, upload, selected, quiet actions
+- State Ownership: each visual state names exactly one owner element
+- Pseudo-CSS: include a minimal contract snippet for `:host`, overlays, and `img`/content
+
+### Correct vs Incorrect Stacking Context Example
+
+Correct:
+
+```css
+:host {
+  position: relative; /* sole stacking context owner */
+}
+
+.upload-overlay,
+.selected-overlay,
+.quiet-actions {
+  position: absolute;
+  inset: 0;
+}
+```
+
+Incorrect:
+
+```css
+:host {
+  position: static;
+}
+
+.state-frame {
+  position: relative; /* wrong owner: wrapper takes overlay ownership */
+}
+
+.selected-shadow {
+  box-shadow: var(--shadow-sm); /* wrong: tile-level wrapper emphasis */
+}
+```
+
 ## 2) Interactive Tree Safety
 
 - No interactive element inside interactive element.
@@ -52,6 +97,9 @@ No code without matrix.
 - Duplicate CSS ownership for same purpose.
 - Loading/Error/Empty not mutually exclusive.
 - A state has more than one visual owner.
+- Visual Behavior Contract missing before first HTML.
+- Multiple stacking-context owners for the same overlay set.
+- Overlay z-index map missing or partially implicit.
 
 ### High
 

@@ -15,7 +15,7 @@
         >
           <!-- Renders canonical media loading surface inside each placeholder cell. -->
           <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
-          <app-media-item-render-surface [renderState]="'loading'" />
+          <app-media-item-render-surface [slotMode]="itemMode()" [renderState]="'loading'" />
         </app-item-state-frame>
       }
     </app-item-grid>

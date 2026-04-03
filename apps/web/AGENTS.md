@@ -34,6 +34,14 @@ src/app/
 - Prefer app dialogs/modals over browser-native `window.prompt` / `window.confirm` for product interactions
 - When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
 
+## Visual Behavior Contract (Required for UI Components)
+
+- Every component spec must define a behavior-to-CSS ownership matrix before implementation.
+- Matrix columns are mandatory: behavior, visual geometry owner, stacking-context owner, interaction hit-area owner, selector(s), layer, test oracle.
+- Stacking-context ownership and visual geometry ownership must be defined separately.
+- No overlay/state implementation is allowed without explicit selector-level ownership mapping.
+- Follow root governance in `AGENTS.md` section `Visual Behavior Contract (Mandatory per Component Spec)`.
+
 ## Build & Test
 
 - `npm run build` — production build

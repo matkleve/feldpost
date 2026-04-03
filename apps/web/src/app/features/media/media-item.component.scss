@@ -1,9 +1,17 @@
+// Declares media-item host as the sole stacking-context owner for domain overlays.
+// @see docs/element-specs/media-item.md#visual-behavior-contract
+:host {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+  min-height: 0;
+}
+
 // Styles media domain content surface inside the shared state frame.
 // @see docs/element-specs/media-item.md#component-hierarchy
 .media-item {
-  position: relative;
-  width: fit-content;
-  margin-inline: auto;
+  min-height: 0;
 }
 
 // Styles the primary media item interaction button and keeps content semantics local.
@@ -25,7 +33,7 @@
 .media-item__upload-overlay {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 1;
 }
 
 // Positions quiet-actions overlay and defines hidden-at-rest behavior.
@@ -46,7 +54,7 @@
 // @see docs/element-specs/media-item.md#actions--interactions
 .media-item:hover .media-item__quiet-actions,
 .media-item:focus-within .media-item__quiet-actions,
-.item-state-frame--selected .media-item .media-item__quiet-actions {
+.media-item--selected .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;

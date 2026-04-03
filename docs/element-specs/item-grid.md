@@ -17,6 +17,9 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 - Child specs:
   - `docs/element-specs/media-item.md`
   - `docs/element-specs/project-item.md`
+  - `docs/element-specs/item-state-frame.md`
+  - `docs/element-specs/media-item-upload-overlay.md`
+  - `docs/element-specs/media-item-quiet-actions.md`
   - `docs/element-specs/media-delivery-orchestrator.md`
 - Domain consumers:
   - Media page (`/media`) via media domain item adapter
@@ -204,6 +207,89 @@ The loading visual standard for Item Grid surfaces is a pulse placeholder layer.
   - `MediaItemRenderSurfaceComponent` (features/media): visual media layers and asset rendering
   - `MediaItemUploadOverlayComponent` (features/media): upload progress overlay layer
   - `MediaItemQuietActionsComponent` (features/media): hover/focus action affordances and action triggers
+
+## Visual Behavior Contract
+
+### Ownership Matrix
+
+| Behavior                   | Visual Geometry Owner                     | Stacking Context Owner                   | Interaction Hit-Area Owner                   | Selector(s)                                         | Layer (z-index/token) | Test Oracle                                                           |
+| -------------------------- | ----------------------------------------- | ---------------------------------------- | -------------------------------------------- | --------------------------------------------------- | --------------------- | --------------------------------------------------------------------- |
+| Shared loading layer       | `.item-state-frame__state-layer--loading` | `.item-state-frame` (grid overlay stack) | none (passive state)                         | `.item-state-frame__state-layer--loading`           | state/loading (1)     | loading layer covers projected content without changing grid geometry |
+| Shared error layer         | `.item-state-frame__state-layer--error`   | `.item-state-frame`                      | `.item-state-frame__retry`                   | `.item-state-frame__state-layer--error`             | state/error (1)       | error layer is visible and retry button remains clickable             |
+| Shared empty layer         | `.item-state-frame__state-layer--empty`   | `.item-state-frame`                      | none (passive state)                         | `.item-state-frame__state-layer--empty`             | state/empty (1)       | empty message overlays projected content with stable slot bounds      |
+| Media selected emphasis    | media render frame in domain item         | domain item host (`app-media-item:host`) | `.media-item__open` and quiet-action buttons | `.media-item-render-surface__media-frame--selected` | surface/selected      | selected ring is visible only on media frame, not on full tile        |
+| Media upload overlay       | media render frame bounds                 | domain item host (`app-media-item:host`) | none (passive overlay)                       | `.media-item__upload-overlay`                       | overlay/upload (1)    | upload overlay does not shift layout and stays below quiet actions    |
+| Media quiet actions reveal | quiet action controls                     | domain item host (`app-media-item:host`) | `.media-item-quiet-actions__button*`         | `.media-item__quiet-actions`                        | overlay/actions (3)   | quiet actions reveal on hover/focus and remain keyboard reachable     |
+
+### Stacking Context
+
+- Domain item host is the stacking-context owner for domain overlays.
+- Shared wrappers (`ItemStateFrameComponent`) must remain transparent wrappers and must not create a separate stacking context.
+- Visual geometry ownership can be a nested element (for example render frame) and must be listed separately in the ownership matrix.
+
+### Layer Order (z-index)
+
+| Layer                     | z-index                      | Owner                                               |
+| ------------------------- | ---------------------------- | --------------------------------------------------- |
+| Content (image/icon/text) | 0                            | Domain render surface content node                  |
+| Upload overlay            | 1                            | Domain item upload overlay                          |
+| Selected emphasis         | content/geometry owner layer | Domain visual geometry owner (frame-level selector) |
+| Quiet actions             | 3                            | Domain item quiet actions                           |
+
+No undeclared z-index values are allowed in domain item components.
+
+### State Ownership
+
+| Visual state  | Owner element                                                      | Notes                                    |
+| ------------- | ------------------------------------------------------------------ | ---------------------------------------- |
+| Loading pulse | `app-item-state-frame` (`.item-state-frame__state-layer--loading`) | Shared state contract; spinner forbidden |
+| Error surface | `app-item-state-frame` (`.item-state-frame__state-layer--error`)   | Shared retry and message handling        |
+| Empty surface | `app-item-state-frame` (`.item-state-frame__state-layer--empty`)   | Shared empty fallback                    |
+| Selected ring | Domain visual geometry owner (media frame selector)                | Domain-owned selected emphasis           |
+| Hover reveal  | `app-media-item` quiet-actions layer                               | Domain-owned interaction affordance      |
+
+### Pseudo-CSS Contract
+
+```css
+/* Domain item host is the stacking context for overlay layers */
+:host {
+  display: block;
+  position: relative;
+}
+
+/* Content is base layer */
+.media-item-content {
+  position: relative;
+  z-index: 0;
+}
+
+/* Overlay layers are host children and fill the same bounds */
+.media-item-upload-overlay,
+.media-item-quiet-actions {
+  position: absolute;
+  inset: 0;
+}
+
+.media-item-upload-overlay {
+  z-index: 1;
+}
+.media-item-quiet-actions {
+  z-index: 3;
+}
+
+/* Selected emphasis can be rendered on the nested geometry owner */
+.media-frame--selected {
+  box-shadow: inset 0 0 0 2px var(--color-clay);
+}
+
+/* Rendered media keeps native ratio inside owned content bounds */
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
+}
+```
 
 ## SCSS Responsibilities
 

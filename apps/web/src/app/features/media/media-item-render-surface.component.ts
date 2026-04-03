@@ -15,6 +15,7 @@ export type MediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
 export class MediaItemRenderSurfaceComponent {
   readonly slotMode = input<'grid-sm' | 'grid-md' | 'grid-lg' | 'row' | 'card'>('grid-md');
   readonly renderState = input<MediaItemRenderState>('loading');
+  readonly selected = input(false);
   readonly isImage = input(true);
   readonly isDocument = input(false);
   readonly thumbnailUrl = input('');

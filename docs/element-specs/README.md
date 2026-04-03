@@ -210,6 +210,9 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `group-tab-bar.md` — Group Tab Bar
 - ✅ `item-grid.md` — Universal item-grid layout and item contract (active)
 - ✅ `media-item.md` — Media domain item contract (active)
+- ✅ `item-state-frame.md` — Shared loading/error/empty state frame contract (active)
+- ✅ `media-item-upload-overlay.md` — Media upload overlay subcomponent contract (active)
+- ✅ `media-item-quiet-actions.md` — Media quiet-actions subcomponent contract (active)
 - ✅ `project-item.md` — Project domain item contract (active)
 - ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
 - Archived legacy `thumbnail-card.md` — see `docs/archive/element-specs-legacy/2026-04-02-item-grid-consolidation/thumbnail-card.md`

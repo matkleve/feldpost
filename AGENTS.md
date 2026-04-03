@@ -119,7 +119,7 @@ directly above it:
 
 Example:
 
-```scss
+````scss
 // Defines column layout for grid-md mode, 3 columns with token-based gap
 // @see item-grid.md#layout-modes
 .item-grid--grid-md { ... }
@@ -179,6 +179,84 @@ Example:
 - Per component: decide Tailwind or SCSS before implementing. No mixing without explicit plan.
 - Loading/Error/Empty are mutually exclusive. Each has exactly one visual owner.
 
+## Visual Behavior Contract (Mandatory per Component Spec)
+
+Every component spec must include a `## Visual Behavior Contract` section
+before any implementation starts. This section defines in pseudo-CSS
+exactly which element owns which visual behavior.
+
+Required entries for every component with overlays, states, or interactions:
+
+### Ownership Matrix (Mandatory)
+
+Each spec must include one behavior-to-CSS ownership matrix with these columns:
+
+| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
+| --- | --- | --- | --- | --- | --- | --- |
+| example | `.media-frame` | `:host` | `.open-button` | `.media-frame--selected` | `surface/selected` | selected ring only around media frame |
+
+No implementation may start without this matrix.
+
+### Stacking Context
+
+Exactly one element per component declares `position: relative`.
+All absolutely positioned children (overlays, badges, actions) are
+children of this element. No exceptions.
+
+Stacking context ownership must be defined separately from visual geometry ownership.
+The stacking owner can differ from the visual owner when overlays are anchored to a
+nested geometry surface.
+
+### Layer Order (z-index)
+
+Define every layer explicitly using named layer roles and concrete selectors.
+Recommended default mapping:
+- layer content: image, icon, text
+- layer upload: upload overlay
+- layer selected: selected emphasis
+- layer actions: quiet actions and controls
+No undeclared z-index values anywhere in the component.
+
+### State Ownership
+
+Every visual state must name its owner element:
+- loading pulse -> item-state-frame
+- selected ring -> visual geometry owner (for example media frame)
+- hover reveal -> domain item quiet-actions
+- error surface -> item-state-frame
+
+For each state, list the exact class/selector that renders the state.
+
+### Pseudo-CSS Contract Example
+
+```css
+:host {
+   display: block;
+   position: relative; /* sole stacking context owner */
+   aspect-ratio: [defined by domain item];
+}
+
+.overlay {
+   position: absolute;
+   inset: 0;
+   z-index: [declared value];
+}
+
+.selected-state {
+   /* Selected emphasis may be drawn on a nested visual owner */
+   box-shadow: inset 0 0 0 2px var(--color-clay);
+}
+
+img {
+   width: 100%;
+   height: 100%;
+   object-fit: contain;
+   object-position: top center;
+}
+````
+
+Any implementation that deviates from this contract is a blocker.
+
 ## Document Authority
 
 - **Project rules and invariants**: `AGENTS.md`
@@ -236,4 +314,7 @@ Required steps for any new/changed visible text:
 5. If new language content is needed, keep `en/de/it` columns populated (no mixed-language fragments).
 
 Translation data in DB (`app_texts` + `app_text_translations`) is part of the feature definition, not an optional follow-up.
+
+```
+
 ```

@@ -19,6 +19,7 @@
     <!-- @see docs/element-specs/media-item.md#component-hierarchy -->
     <article
       class="media-item"
+      [class.media-item--selected]="selected()"
       [class.media-item--row]="activeMode() === 'row'"
       [class.media-item--grid-sm]="activeMode() === 'grid-sm'"
       [class.media-item--grid-md]="activeMode() === 'grid-md'"
@@ -34,6 +35,7 @@
         [renderState]="mediaRenderState()"
         [isImage]="canRenderImage()"
         [isDocument]="fileType().category === 'document'"
+        [selected]="selected()"
         [thumbnailUrl]="thumbnailUrl()"
         [icon]="mediaIcon()"
         [altText]="titleText()"
@@ -44,31 +46,26 @@
         [fileTypeIcon]="mediaIcon()"
         [fileTypeText]="mediaTypeLabel()"
         [fileTypeChipVariant]="fileTypeChipVariant()"
-      >
-        <!-- Projects upload overlay so it stays inside rendered media-frame bounds. -->
-        <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
-        @if (uploadOverlay(); as overlay) {
-          <app-media-item-upload-overlay
-            mediaOverlay
-            class="media-item__upload-overlay"
-            [overlay]="overlay"
-          />
-        }
+      />
 
-        <!-- Projects quiet actions so corner buttons align to rendered media-frame bounds. -->
-        <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
-        <app-media-item-quiet-actions
-          mediaOverlay
-          class="media-item__quiet-actions"
-          [selected]="selected()"
-          [disabled]="disabled()"
-          [mapDisabled]="!hasMapLocation()"
-          [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
-          [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
-          (selectRequested)="onSelectRequested()"
-          (mapRequested)="onMapActionRequested()"
-        />
-      </app-media-item-render-surface>
+      <!-- Renders upload overlay as host-aligned absolute layer below selected and quiet-action layers. -->
+      <!-- @see docs/element-specs/media-item.md#visual-behavior-contract -->
+      @if (uploadOverlay(); as overlay) {
+        <app-media-item-upload-overlay class="media-item__upload-overlay" [overlay]="overlay" />
+      }
+
+      <!-- Renders quiet actions as the top-most overlay layer for hover/focus interactions. -->
+      <!-- @see docs/element-specs/media-item.md#visual-behavior-contract -->
+      <app-media-item-quiet-actions
+        class="media-item__quiet-actions"
+        [selected]="selected()"
+        [disabled]="disabled()"
+        [mapDisabled]="!hasMapLocation()"
+        [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
+        [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
+        (selectRequested)="onSelectRequested()"
+        (mapRequested)="onMapActionRequested()"
+      />
 
       <!-- Defines primary open action region as a sibling overlay so quiet-action buttons stay valid. -->
       <!-- @see docs/element-specs/media-item.md#actions--interactions -->

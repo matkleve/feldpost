@@ -2,15 +2,17 @@
 // @see docs/element-specs/item-grid.md#media-domain-sub-component-ownership-mandatory
 :host {
   display: block;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 // Defines upload overlay surface for active media upload phases.
 // @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
 .media-item-upload-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+  position: relative;
   display: flex;
+  inline-size: 100%;
+  block-size: 100%;
   align-items: flex-end;
   overflow: hidden;
   background: color-mix(in srgb, var(--color-bg-base) 45%, transparent);

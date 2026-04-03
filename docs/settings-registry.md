@@ -18,6 +18,10 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Email Change Security | account-settings-section.md | whether dual-email confirmation is required and how pending verification is shown. |
 | Export & Sharing | workspace-export-bar.md | default share-link expiration, allow token reuse vs forced regeneration, and whether native-share action is enabled on supported devices. |
 | File Type Visibility | project-mixed-media-pre-spec.md | default selected media families in map/workspace/project views. |
+| Filename Override Rule | location-path-parser.md | Keeps filename/title as strongest textual source over any folder-derived candidate (default `true`). |
+| Folder Hierarchy Traversal Order | location-path-parser.md | Traversal direction for `directorySegments`; default `leaf-to-root` so nearest folder wins. |
+| Folder Hint Confidence Gate | location-path-parser.md | Requires high-confidence folder segment parsing before accepting a folder candidate (default `true`). |
+| Folder Root Fallback | location-path-parser.md | Allows root folder hint only when no specific segment candidate exists (default `true`). |
 | Fullscreen Project Mode | project-mixed-media-pre-spec.md | default entry behavior for project detail (inline pane vs fullscreen). |
 | Identity Profile | account-page.md | display name edit behavior and validation. |
 | Identity Profile | account-settings-section.md | display name edit policy, formatting, and save behavior. |

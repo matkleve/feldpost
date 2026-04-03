@@ -36,6 +36,8 @@ import { MediaItemRenderSurfaceComponent } from './media-item-render-surface.com
   styleUrl: './media-content.component.scss',
 })
 export class MediaContentComponent implements AfterViewInit {
+  private static readonly LOADING_VIEWPORT_MULTIPLIER = 2;
+
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly i18nService = inject(I18nService);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
@@ -60,13 +62,21 @@ export class MediaContentComponent implements AfterViewInit {
 
     if (mode === 'row') {
       const rowHeightPx = 104;
-      return Math.max(6, Math.ceil((viewportHeight * 3) / rowHeightPx));
+      return Math.max(
+        6,
+        Math.ceil(
+          (viewportHeight * MediaContentComponent.LOADING_VIEWPORT_MULTIPLIER) / rowHeightPx,
+        ),
+      );
     }
 
     const columnMinPx = this.resolveColumnMinPx(mode);
     const columns = Math.max(1, Math.floor((width + gapPx) / (columnMinPx + gapPx)));
     const rowHeightPx = columnMinPx + gapPx;
-    const rows = Math.max(1, Math.ceil((viewportHeight * 3) / rowHeightPx));
+    const rows = Math.max(
+      1,
+      Math.ceil((viewportHeight * MediaContentComponent.LOADING_VIEWPORT_MULTIPLIER) / rowHeightPx),
+    );
     return columns * rows;
   });
   readonly loadingPlaceholderIds = computed(() =>

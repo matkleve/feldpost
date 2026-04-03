@@ -13,6 +13,10 @@ The component renders a plain square media slot and keeps layout stable across a
 - Parent spec: `docs/element-specs/item-grid.md`
 - Delivery policy owner: `docs/element-specs/media-delivery-orchestrator.md`
 - Child component root: `apps/web/src/app/features/media/media-item.component.ts`
+- Child specs:
+  - `docs/element-specs/media-item-upload-overlay.md`
+  - `docs/element-specs/media-item-quiet-actions.md`
+  - `docs/element-specs/item-state-frame.md`
 - Route consumers:
   - `/media`
   - Workspace pane selected-items grid on `/map` via `ItemGridComponent`
@@ -157,6 +161,85 @@ For all modes, including loading state:
 - Final fallback: square slot (`1 / 1`) from the active grid mode.
 
 This guarantees no geometry jump from loading to content.
+
+## Visual Behavior Contract
+
+### Ownership Matrix
+
+| Behavior             | Visual Geometry Owner                           | Stacking Context Owner             | Interaction Hit-Area Owner                   | Selector(s)                                                          | Layer (z-index/token)        | Test Oracle                                                        |
+| -------------------- | ----------------------------------------------- | ---------------------------------- | -------------------------------------------- | -------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------ |
+| Content media frame  | `.media-item-render-surface__media-frame`       | `app-media-item:host`              | `.media-item__open`                          | `.media-item__preview` and `.media-item-render-surface__media-frame` | layer/content (0)            | rendered media frame defines visible thumbnail bounds              |
+| Loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__slot` | none (passive state)                         | `.media-item-render-surface__fallback--loading`                      | layer/content (0)            | loading placeholder stays inside slot bounds and matches mode size |
+| Upload overlay       | media frame bounds                              | `app-media-item:host`              | none (passive overlay)                       | `.media-item__upload-overlay`                                        | layer/upload (1)             | upload overlay covers frame bounds and remains below quiet actions |
+| Selected emphasis    | `.media-item-render-surface__media-frame`       | `app-media-item:host`              | `.media-item__open` and quiet-action buttons | `.media-item-render-surface__media-frame--selected`                  | layer/selected (frame-level) | selected ring appears only around media frame, never full tile     |
+| Quiet actions reveal | quiet action controls                           | `app-media-item:host`              | `.media-item-quiet-actions__button*`         | `.media-item__quiet-actions`                                         | layer/actions (3)            | hover/focus reveals action controls in frame corners               |
+
+### Stacking Context
+
+- `app-media-item` `:host` is the sole stacking-context owner for domain overlays.
+- `app-item-state-frame` is a transparent state wrapper and must not create a competing stacking context.
+- `app-media-item-upload-overlay` and `app-media-item-quiet-actions` are absolute host-child overlays using `inset: 0`.
+- Selected visual emphasis is rendered by the visual geometry owner (`.media-item-render-surface__media-frame`), not by tile-level wrapper shadow.
+
+### Layer Order (z-index)
+
+| Layer          | z-index              | Element                                             |
+| -------------- | -------------------- | --------------------------------------------------- |
+| Content layer  | 0                    | `.media-item__preview` / rendered media content     |
+| Upload overlay | 1                    | `.media-item__upload-overlay`                       |
+| Selected ring  | frame-level emphasis | `.media-item-render-surface__media-frame--selected` |
+| Quiet actions  | 3                    | `.media-item__quiet-actions`                        |
+
+No additional undeclared z-index values are permitted for media-item visual layers.
+
+### State Ownership
+
+| Visual state             | Owner element                                       | Behavior contract                                      |
+| ------------------------ | --------------------------------------------------- | ------------------------------------------------------ |
+| Loading pulse            | `app-item-state-frame` loading layer                | Shared pulse placeholder state                         |
+| Error surface            | `app-item-state-frame` error layer                  | Shared retry-capable error state                       |
+| Empty/no-content surface | `app-item-state-frame` empty layer                  | Shared empty state                                     |
+| Selected ring            | `.media-item-render-surface__media-frame--selected` | Domain selected emphasis aligned to media frame bounds |
+| Hover/focus reveal       | `app-media-item-quiet-actions`                      | Quiet actions fade in/out in 80ms                      |
+
+### Pseudo-CSS Contract
+
+```css
+:host {
+  display: block;
+  position: relative; /* sole stacking context owner */
+}
+
+.media-item__preview {
+  position: relative;
+  z-index: 0;
+}
+
+.media-item__upload-overlay,
+.media-item__quiet-actions,
+.media-item__open {
+  position: absolute;
+  inset: 0;
+}
+
+.media-item__upload-overlay {
+  z-index: 1;
+}
+.media-item__quiet-actions {
+  z-index: 3;
+}
+
+.media-item-render-surface__media-frame--selected {
+  box-shadow: inset 0 0 0 2px var(--color-clay);
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
+}
+```
 
 ## File Map
 
