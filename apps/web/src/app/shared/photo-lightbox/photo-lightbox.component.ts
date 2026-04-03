@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, HostListener, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-photo-lightbox',
@@ -10,4 +10,9 @@ export class PhotoLightboxComponent {
   readonly imageUrl = input.required<string>();
   readonly alt = input<string>('Photo');
   readonly closed = output<void>();
+
+  @HostListener('document:keydown.escape')
+  onEscapePressed(): void {
+    this.closed.emit();
+  }
 }

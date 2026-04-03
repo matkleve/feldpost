@@ -142,7 +142,6 @@
           <div
             role="listbox"
             [attr.aria-label]="t('workspace.imageDetail.projects.options.aria', 'Project options')"
-            (keydown)="onProjectDropdownKeydown($event)"
           >
             <div class="detail-tags__hint">
               {{ t('workspace.imageDetail.projects.hint', 'Select an option or create one') }}
@@ -163,6 +162,7 @@
               <button
                 type="button"
                 class="detail-tags__create"
+                (keydown)="onProjectDropdownKeydown($event)"
                 (click)="projectCreateRequested.emit()"
               >
                 <span class="detail-tags__create-label">{{
@@ -180,6 +180,7 @@
                   type="button"
                   class="detail-tags__option"
                   [class.detail-tags__option--selected]="selectedProjectIds().has(opt.id)"
+                  (keydown)="onProjectDropdownKeydown($event)"
                   (click)="projectMembershipToggled.emit(opt.id)"
                 >
                   <span class="detail-tags__option-color" aria-hidden="true"></span>

@@ -108,19 +108,14 @@
       [panelClass]="mapMenuPanelClass()"
       (closeRequested)="onMapMenuCloseRequested()"
     >
-      <div
-        class="dd-items"
-        role="menu"
-        tabindex="-1"
-        aria-label="Map context menu"
-        (keydown)="onMapMenuKeydown($event)"
-      >
+      <div class="dd-items" role="menu" tabindex="-1" aria-label="Map context menu">
         @for (action of mapPrimaryActions(); track action.id) {
           <button
             class="dd-item"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
+            (keydown)="onMapMenuKeydown($event)"
             (click)="onMapMenuActionSelected(action.id)"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
@@ -137,6 +132,7 @@
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
+              (keydown)="onMapMenuKeydown($event)"
               (click)="onMapMenuActionSelected(action.id)"
             >
               <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
@@ -159,19 +155,14 @@
     >
       <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
 
-      <div
-        class="dd-items"
-        role="menu"
-        tabindex="-1"
-        aria-label="Radius context menu"
-        (keydown)="onMapMenuKeydown($event)"
-      >
+      <div class="dd-items" role="menu" tabindex="-1" aria-label="Radius context menu">
         @for (action of radiusPrimaryActions(); track action.id) {
           <button
             class="dd-item"
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
+            (keydown)="onMapMenuKeydown($event)"
             (click)="onRadiusMenuActionSelected(action.id)"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
@@ -189,6 +180,7 @@
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
+            (keydown)="onMapMenuKeydown($event)"
             (click)="onRadiusMenuActionSelected(action.id)"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
@@ -219,19 +211,14 @@
           }
         </div>
 
-        <div
-          class="dd-items"
-          role="menu"
-          tabindex="-1"
-          aria-label="Marker context menu"
-          (keydown)="onMapMenuKeydown($event)"
-        >
+        <div class="dd-items" role="menu" tabindex="-1" aria-label="Marker context menu">
           @for (action of markerPrimaryActions(); track action.id + '-' + action.label) {
             <button
               class="dd-item"
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
+              (keydown)="onMapMenuKeydown($event)"
               (click)="onMarkerMenuActionSelected(action.id)"
             >
               <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
@@ -249,6 +236,7 @@
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
+              (keydown)="onMapMenuKeydown($event)"
               (click)="onMarkerMenuActionSelected(action.id)"
             >
               <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>
@@ -265,6 +253,7 @@
                 type="button"
                 role="menuitem"
                 [disabled]="action.disabled"
+                (keydown)="onMapMenuKeydown($event)"
                 (click)="onMarkerMenuActionSelected(action.id)"
               >
                 <span class="material-icons dd-item__icon" aria-hidden="true">{{

@@ -15,9 +15,8 @@ import {
   input,
   output,
   signal,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
+import type { OnDestroy, OnInit } from '@angular/core';
 import { parseTimeInput } from '../../../shared/ui-primitives/parse-time-input';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
@@ -114,6 +113,19 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
     }
   };
 
+  private keydownHandler = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    if (!target || !this.elRef.nativeElement.contains(target)) {
+      return;
+    }
+
+    this.cancel.emit();
+  };
+
   constructor() {
     effect(() => {
       const date = this.initialDate();
@@ -137,11 +149,13 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
     // Defer to next tick so the initial click that opens the editor doesn't immediately close it
     setTimeout(() => {
       document.addEventListener('mousedown', this.clickOutsideHandler);
+      document.addEventListener('keydown', this.keydownHandler);
     });
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('mousedown', this.clickOutsideHandler);
+    document.removeEventListener('keydown', this.keydownHandler);
   }
 
   // ── Calendar grid builder ──────────────────────────────────────────────────
@@ -281,12 +295,6 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      this.cancel.emit();
-    }
-  }
-
   emitSave(): void {
     const date = this.selectedDate() || null;
     const time = parseTimeInput(this.timeInput()) || null;
@@ -337,4 +345,3 @@ export class CapturedDateEditorComponent implements OnInit, OnDestroy {
     return '';
   }
 }
-

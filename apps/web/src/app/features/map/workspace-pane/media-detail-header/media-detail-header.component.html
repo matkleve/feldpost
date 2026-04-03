@@ -65,7 +65,7 @@
       panelClass="detail-context-menu option-menu-surface"
       (closeRequested)="onContextMenuCloseRequested()"
     >
-      <div class="dd-items" role="menu" (keydown)="onContextMenuKeydown($event)">
+      <div class="dd-items" role="menu">
         @for (action of contextActions(); track action.id; let index = $index) {
           @if (index > 0 && contextActions()[index - 1]?.section !== action.section) {
             <div class="dd-divider" role="separator"></div>
@@ -76,6 +76,7 @@
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
+            (keydown)="onContextMenuKeydown($event)"
             (click)="actionSelected.emit(action.id)"
           >
             <span class="material-icons dd-item__icon" aria-hidden="true">{{ action.icon }}</span>

@@ -848,7 +848,8 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    const container = event.currentTarget as HTMLElement | null;
+    const currentTarget = event.currentTarget as HTMLElement | null;
+    const container = currentTarget?.closest('.dd-items') as HTMLElement | null;
     if (!container) {
       return;
     }

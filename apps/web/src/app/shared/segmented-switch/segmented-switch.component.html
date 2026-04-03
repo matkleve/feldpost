@@ -7,12 +7,7 @@
   [class.segmented-switch--md]="size() === 'md'"
   [class.segmented-switch--lg]="size() === 'lg'"
 >
-  <div
-    class="segmented-switch__group"
-    role="group"
-    [attr.aria-label]="ariaLabel()"
-    (keydown)="onSegmentedKeydown($event)"
-  >
+  <div class="segmented-switch__group" role="group" [attr.aria-label]="ariaLabel()">
     @for (option of segmentedOptions(); track option.id) {
       <button
         class="segmented-switch__button"
@@ -24,6 +19,7 @@
         [attr.aria-label]="option.ariaLabel || option.label"
         [attr.title]="option.title || option.label"
         [disabled]="disabled() || !!option.disabled"
+        (keydown)="onSegmentedKeydown($event)"
         (click)="selectOption(option)"
       >
         @if (option.icon && resolveType(option) !== 'text-only') {

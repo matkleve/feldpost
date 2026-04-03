@@ -5,21 +5,26 @@
     [class.upload-panel__file-main--has-menu]="hasMenuActions()"
     [class.upload-panel__file-main--selectable]="selectable()"
     [class.upload-panel__file-main--selected]="selected()"
-    [attr.role]="interactive() ? 'button' : null"
-    [attr.tabindex]="interactive() ? '0' : null"
-    [attr.aria-label]="
-      job().phase === 'missing_data'
-        ? 'Place ' + job().file.name + ' on map'
-        : canZoomToJob()
-          ? 'Zoom map to ' + job().file.name
-          : null
-    "
-    (click)="rowMainClick.emit(job())"
-    (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
     (contextmenu)="onRowContextMenu($event)"
   >
+    @if (interactive()) {
+      <button
+        type="button"
+        class="upload-panel__row-main-action"
+        [attr.aria-label]="
+          job().phase === 'missing_data'
+            ? 'Place ' + job().file.name + ' on map'
+            : canZoomToJob()
+              ? 'Zoom map to ' + job().file.name
+              : null
+        "
+        (click)="rowMainClick.emit(job())"
+        (keydown)="rowMainKeydown.emit({ job: job(), event: $event })"
+      ></button>
+    }
+
     @if (selectable()) {
-      <label class="upload-panel__selection" (click)="$event.stopPropagation()">
+      <label class="upload-panel__selection">
         <input
           class="upload-panel__selection-input"
           type="checkbox"

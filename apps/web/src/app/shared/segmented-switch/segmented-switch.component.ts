@@ -78,7 +78,8 @@ export class SegmentedSwitchComponent {
       return;
     }
 
-    const container = event.currentTarget as HTMLElement | null;
+    const currentTarget = event.currentTarget as HTMLElement | null;
+    const container = currentTarget?.closest('.segmented-switch__group') as HTMLElement | null;
     if (!container) {
       return;
     }

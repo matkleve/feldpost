@@ -19,7 +19,14 @@ const operationalNumberGuidance = {
   ignoreArrayIndexes: true,
 };
 
-const inherentlyInteractiveTags = new Set(['button', 'details', 'input', 'select', 'summary', 'textarea']);
+const inherentlyInteractiveTags = new Set([
+  'button',
+  'details',
+  'input',
+  'select',
+  'summary',
+  'textarea',
+]);
 const interactiveRoles = new Set([
   'button',
   'checkbox',
@@ -38,7 +45,15 @@ const interactiveRoles = new Set([
   'textbox',
   'treeitem',
 ]);
-const interactiveEvents = ['click', 'dblclick', 'keydown', 'keypress', 'keyup', 'mousedown', 'mouseup'];
+const interactiveEvents = [
+  'click',
+  'dblclick',
+  'keydown',
+  'keypress',
+  'keyup',
+  'mousedown',
+  'mouseup',
+];
 
 const feldpostTemplatePlugin = {
   rules: {
@@ -47,7 +62,8 @@ const feldpostTemplatePlugin = {
         type: 'problem',
         schema: [],
         messages: {
-          noNestedInteractive: 'Interactive elements must not be nested inside other interactive elements.',
+          noNestedInteractive:
+            'Interactive elements must not be nested inside other interactive elements.',
         },
       },
       create(context) {
@@ -100,7 +116,11 @@ function isInteractiveElement(node) {
     return true;
   }
 
-  return node.outputs.some((output) => interactiveEvents.some((eventName) => output.name === eventName || output.name.startsWith(`${eventName}.`)));
+  return node.outputs.some((output) =>
+    interactiveEvents.some(
+      (eventName) => output.name === eventName || output.name.startsWith(`${eventName}.`),
+    ),
+  );
 }
 
 function hasAttribute(node, attributeName) {
@@ -108,7 +128,9 @@ function hasAttribute(node, attributeName) {
 }
 
 function getAttributeValue(node, attributeName) {
-  const attribute = [...node.attributes, ...node.inputs].find((candidate) => candidate.name === attributeName);
+  const attribute = [...node.attributes, ...node.inputs].find(
+    (candidate) => candidate.name === attributeName,
+  );
   return typeof attribute?.value === 'string' ? attribute.value : null;
 }
 
@@ -203,15 +225,7 @@ export default tseslint.config(
       '@angular-eslint/template/no-positive-tabindex': 'error',
       '@angular-eslint/template/no-nested-tags': 'error',
       'feldpost-template/no-nested-interactive': 'error',
-      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
-    },
-  },
-
-  // ── ESLint config itself ──────────────────────────────────────────────────
-  {
-    files: ['eslint.config.mjs'],
-    rules: {
-      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['warn', { max: 120, skipBlankLines: true, skipComments: true }],
     },
   },
 );

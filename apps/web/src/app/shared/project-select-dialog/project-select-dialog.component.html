@@ -1,11 +1,18 @@
-<div
-  class="project-select-dialog-overlay"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="project-select-dialog-title"
-  (click)="cancelled.emit()"
->
-  <div uiContainer class="project-select-dialog ui-container" (click)="$event.stopPropagation()">
+<div class="project-select-dialog-overlay" role="presentation">
+  <button
+    type="button"
+    class="project-select-dialog-overlay__backdrop"
+    [attr.aria-label]="cancelLabel()"
+    (click)="cancelled.emit()"
+  ></button>
+
+  <div
+    uiContainer
+    class="project-select-dialog ui-container"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="project-select-dialog-title"
+  >
     <h2 id="project-select-dialog-title" class="project-select-dialog__title">{{ title() }}</h2>
 
     @if (message(); as content) {

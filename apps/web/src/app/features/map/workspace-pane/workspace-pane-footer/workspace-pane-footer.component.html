@@ -68,7 +68,12 @@
 }
 
 @if (deleteDialogOpen()) {
-  <div class="workspace-action__dialog-backdrop" (click)="closeDeleteDialog()"></div>
+  <button
+    class="workspace-action__dialog-backdrop"
+    type="button"
+    [attr.aria-label]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (click)="closeDeleteDialog()"
+  ></button>
   <section
     class="workspace-action__dialog"
     role="dialog"
@@ -110,7 +115,12 @@
 }
 
 @if (zipDialogOpen()) {
-  <div class="workspace-action__dialog-backdrop" (click)="closeZipDialog()"></div>
+  <button
+    class="workspace-action__dialog-backdrop"
+    type="button"
+    [attr.aria-label]="t('workspace.export.dialog.cancel', 'Cancel')"
+    (click)="closeZipDialog()"
+  ></button>
   <section
     class="workspace-action__dialog"
     role="dialog"
