@@ -3,7 +3,7 @@
 <app-item-state-frame
   [itemId]="itemId()"
   [mode]="activeMode()"
-  [loading]="loading()"
+  [loading]="false"
   [error]="error()"
   [empty]="empty()"
   [selected]="selected()"
@@ -14,7 +14,7 @@
   [retryLabel]="t('media.page.retry', 'Retry')"
   (retryRequested)="onRetryRequested($event)"
 >
-  @if (item(); as media) {
+  @if (item()) {
     <!-- Hosts media-item domain surface with mode modifiers and context-menu wiring. -->
     <!-- @see docs/element-specs/media-item.md#component-hierarchy -->
     <article
@@ -26,8 +26,52 @@
       [class.media-item--card]="activeMode() === 'card'"
       (contextmenu)="onContextMenu($event)"
     >
-      <!-- Defines primary open action region without decorative wrapper around preview slot. -->
-      <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+      <!-- Renders square media slot with canonical state layers and lower-right file-type chip. -->
+      <!-- @see docs/element-specs/media-item.md#actions--interactions -->
+      <app-media-item-render-surface
+        class="media-item__preview"
+        [slotMode]="activeMode()"
+        [renderState]="mediaRenderState()"
+        [isImage]="canRenderImage()"
+        [isDocument]="fileType().category === 'document'"
+        [thumbnailUrl]="thumbnailUrl()"
+        [icon]="mediaIcon()"
+        [altText]="titleText()"
+        [requestedTier]="requestedTier()"
+        [effectiveTier]="effectiveTier()"
+        [slotWidthRem]="slotWidthRem()"
+        [slotHeightRem]="slotHeightRem()"
+        [fileTypeIcon]="mediaIcon()"
+        [fileTypeText]="mediaTypeLabel()"
+        [fileTypeChipVariant]="fileTypeChipVariant()"
+      >
+        <!-- Projects upload overlay so it stays inside rendered media-frame bounds. -->
+        <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
+        @if (uploadOverlay(); as overlay) {
+          <app-media-item-upload-overlay
+            mediaOverlay
+            class="media-item__upload-overlay"
+            [overlay]="overlay"
+          />
+        }
+
+        <!-- Projects quiet actions so corner buttons align to rendered media-frame bounds. -->
+        <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+        <app-media-item-quiet-actions
+          mediaOverlay
+          class="media-item__quiet-actions"
+          [selected]="selected()"
+          [disabled]="disabled()"
+          [mapDisabled]="!hasMapLocation()"
+          [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
+          [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
+          (selectRequested)="onSelectRequested()"
+          (mapRequested)="onMapActionRequested()"
+        />
+      </app-media-item-render-surface>
+
+      <!-- Defines primary open action region as a sibling overlay so quiet-action buttons stay valid. -->
+      <!-- @see docs/element-specs/media-item.md#actions--interactions -->
       <button
         type="button"
         class="media-item__open"
@@ -35,51 +79,7 @@
           t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') + ' ' + titleText()
         "
         (click)="onOpenClick($event)"
-      >
-        <!-- Renders square media slot with canonical state layers and lower-right file-type chip. -->
-        <!-- @see docs/element-specs/media-item.md#actions--interactions -->
-        <app-media-item-render-surface
-          class="media-item__preview"
-          [slotMode]="activeMode()"
-          [renderState]="mediaRenderState()"
-          [isImage]="canRenderImage()"
-          [isDocument]="fileType().category === 'document'"
-          [thumbnailUrl]="thumbnailUrl()"
-          [icon]="mediaIcon()"
-          [altText]="titleText()"
-          [requestedTier]="requestedTier()"
-          [effectiveTier]="effectiveTier()"
-          [slotWidthRem]="slotWidthRem()"
-          [slotHeightRem]="slotHeightRem()"
-          [fileTypeIcon]="mediaIcon()"
-          [fileTypeText]="mediaTypeLabel()"
-          [fileTypeChipVariant]="fileTypeChipVariant()"
-        >
-          <!-- Projects upload overlay so it stays inside rendered media-frame bounds. -->
-          <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
-          @if (uploadOverlay(); as overlay) {
-            <app-media-item-upload-overlay
-              mediaOverlay
-              class="media-item__upload-overlay"
-              [overlay]="overlay"
-            />
-          }
-
-          <!-- Projects quiet actions so corner buttons align to rendered media-frame bounds. -->
-          <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
-          <app-media-item-quiet-actions
-            mediaOverlay
-            class="media-item__quiet-actions"
-            [selected]="selected()"
-            [disabled]="disabled()"
-            [mapDisabled]="!hasMapLocation()"
-            [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
-            [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
-            (selectRequested)="onSelectRequested()"
-            (mapRequested)="onMapActionRequested()"
-          />
-        </app-media-item-render-surface>
-      </button>
+      ></button>
     </article>
   }
 </app-item-state-frame>

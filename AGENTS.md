@@ -169,6 +169,16 @@ Example:
 - **Element specs are contracts** — implement features from `docs/element-specs/[element].md`; spec governance itself lives in `docs/element-specs/README.md`
 - **Glossary is canonical** — use exact names from `docs/glossary.md`
 
+## Component Structure Rules (Hard Blockers)
+
+- Ownership Matrix required before first HTML. No code without matrix.
+- Max 3 HTML levels per component. Every additional level requires documented justification.
+- No interactive element inside interactive element. No button inside button.
+- No aria-hidden on nodes with interactive descendants.
+- Every CSS property defined exactly once per purpose. Duplicate ownership is a blocker.
+- Per component: decide Tailwind or SCSS before implementing. No mixing without explicit plan.
+- Loading/Error/Empty are mutually exclusive. Each has exactly one visual owner.
+
 ## Document Authority
 
 - **Project rules and invariants**: `AGENTS.md`

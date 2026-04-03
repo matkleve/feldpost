@@ -15,6 +15,9 @@
   text-align: left;
   padding: 0;
   cursor: pointer;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 // Positions upload overlay component above preview but below quiet actions.
@@ -22,7 +25,7 @@
 .media-item__upload-overlay {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 // Positions quiet-actions overlay and defines hidden-at-rest behavior.
@@ -30,7 +33,7 @@
 .media-item__quiet-actions {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   opacity: 0;
   transform: translateY(-2px);
   pointer-events: none;
@@ -41,9 +44,9 @@
 
 // Reveals quiet actions on hover, focus-within, and selected states without layout shift.
 // @see docs/element-specs/media-item.md#actions--interactions
-.media-item__preview:hover .media-item__quiet-actions,
-.media-item__preview:focus-within .media-item__quiet-actions,
-.item-state-frame--selected .media-item__preview .media-item__quiet-actions {
+.media-item:hover .media-item__quiet-actions,
+.media-item:focus-within .media-item__quiet-actions,
+.item-state-frame--selected .media-item .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
