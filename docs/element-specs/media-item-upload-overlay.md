@@ -147,8 +147,6 @@ sequenceDiagram
 ```css
 :host {
   display: block;
-  inline-size: 100%;
-  block-size: 100%;
 }
 
 .media-item-upload-overlay {

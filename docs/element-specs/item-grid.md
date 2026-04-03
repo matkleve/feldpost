@@ -291,7 +291,10 @@ No undeclared z-index values are allowed in domain item components.
 
 /* Selected emphasis can be rendered on the nested geometry owner */
 .media-frame--selected {
-  box-shadow: inset 0 0 0 2px var(--color-clay);
+  outline: 2px solid var(--color-clay);
+  filter: drop-shadow(
+    0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent)
+  );
 }
 
 /* Rendered media keeps native ratio inside owned content bounds */

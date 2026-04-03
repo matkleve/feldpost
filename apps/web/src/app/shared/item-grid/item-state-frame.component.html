@@ -1,14 +1,6 @@
 <!-- Wraps projected domain content with shared loading, error, empty, selected, and disabled state handling. -->
 <!-- @see docs/element-specs/item-grid.md#state -->
-<article
-  class="item-state-frame"
-  [class.item-state-frame--grid-sm]="mode() === 'grid-sm'"
-  [class.item-state-frame--grid-md]="mode() === 'grid-md'"
-  [class.item-state-frame--grid-lg]="mode() === 'grid-lg'"
-  [class.item-state-frame--row]="mode() === 'row'"
-  [class.item-state-frame--card]="mode() === 'card'"
-  [class.item-state-frame--disabled]="disabled()"
->
+<article class="item-state-frame" [class.item-state-frame--disabled]="disabled()">
   <!-- Hosts projected domain content and toggles aria-hidden while a shared state layer is active. -->
   <!-- @see docs/element-specs/item-grid.md#base-class-contract-mandatory-for-all-domain-items -->
   <div class="item-state-frame__content" [attr.aria-hidden]="hideProjectedContent()">

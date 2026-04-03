@@ -20,11 +20,6 @@
     <article
       class="media-item"
       [class.media-item--selected]="selected()"
-      [class.media-item--row]="activeMode() === 'row'"
-      [class.media-item--grid-sm]="activeMode() === 'grid-sm'"
-      [class.media-item--grid-md]="activeMode() === 'grid-md'"
-      [class.media-item--grid-lg]="activeMode() === 'grid-lg'"
-      [class.media-item--card]="activeMode() === 'card'"
       (contextmenu)="onContextMenu($event)"
     >
       <!-- Renders square media slot with canonical state layers and lower-right file-type chip. -->

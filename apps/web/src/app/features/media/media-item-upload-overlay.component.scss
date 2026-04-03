@@ -2,8 +2,6 @@
 // @see docs/element-specs/item-grid.md#media-domain-sub-component-ownership-mandatory
 :host {
   display: block;
-  inline-size: 100%;
-  block-size: 100%;
 }
 
 // Defines upload overlay surface for active media upload phases.

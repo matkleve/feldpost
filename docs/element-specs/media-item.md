@@ -239,7 +239,10 @@ No additional undeclared z-index values are permitted for media-item visual laye
 }
 
 .media-item-render-surface__media-frame--selected {
-  box-shadow: inset 0 0 0 2px var(--color-clay);
+  outline: 2px solid var(--color-clay);
+  filter: drop-shadow(
+    0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent)
+  );
 }
 
 img {

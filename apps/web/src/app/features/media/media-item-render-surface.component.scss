@@ -30,9 +30,7 @@
 .media-item-render-surface__slot {
   position: relative;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 // Defines rendered media-frame geometry where all visual affordances are anchored.
@@ -50,7 +48,8 @@
 // Renders selected-state ring strictly on media-frame geometry bounds.
 // @see docs/element-specs/media-item.md#visual-behavior-contract
 .media-item-render-surface__media-frame--selected {
-  box-shadow: inset 0 0 0 2px var(--color-clay);
+  outline: 2px solid var(--color-clay);
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent));
 }
 
 // Aligns document media-frame to top-center inside square tile.
@@ -136,7 +135,6 @@
   inset-block-end: var(--media-item-render-surface-chip-inset);
   z-index: 2;
   max-inline-size: var(--media-item-render-surface-chip-max-inline-size);
-  pointer-events: auto;
   display: block;
 }
 
