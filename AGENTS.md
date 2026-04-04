@@ -67,6 +67,14 @@ Reference workflow and checklist:
 - Prefer standardized shared UI components from `apps/web/src/app/shared/` (especially dialogs/modals) before building feature-local variants
 - Avoid browser-native UI primitives (`window.prompt`, `window.confirm`, native context UI) for product flows when a shared component exists
 - When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
+- Use service-module symmetry for new/refactored services:
+  - Docs: `docs/element-specs/[service-name]/`
+  - Code: `apps/web/src/app/core/[service-name]/`
+  - Required files per module: `[service-name].service.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
+  - Keep one central `types.ts` per module; do not split into nested sub-service type files
+  - Keep facade slim and delegate heavy logic to local `adapters/`
+  - Forbid global adapter folders like `apps/web/src/app/core/adapters/`
+  - Archive replaced code to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/` as `.legacy.ts`
 - For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`).
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting

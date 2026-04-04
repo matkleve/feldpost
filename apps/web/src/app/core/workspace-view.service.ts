@@ -3,7 +3,7 @@ import { SupabaseService } from './supabase/supabase.service';
 import { FilterService } from './filter.service';
 import { LocationResolverService } from './location-resolver.service';
 import { PropertyRegistryService } from './property-registry.service';
-import { PhotoLoadService } from './photo-load.service';
+import { PhotoLoadService } from './photo-load.service'; // TODO: Migrate to MediaDownloadService
 import type {
   WorkspaceMediaCustomMetadata,
   WorkspaceImage,

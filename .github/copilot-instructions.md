@@ -38,6 +38,36 @@ supabase/           → Migrations, RLS policies, edge functions
 docs/               → Element specs, design tokens, glossary
 ```
 
+## Service Symmetry Standard (Mandatory)
+
+For every new service and service refactor, use mirrored doc/code structure:
+
+- Docs: `docs/element-specs/[service-name]/`
+- Code: `apps/web/src/app/core/[service-name]/`
+
+Within each service module, use this required file layout:
+
+- `[service-name].service.ts` (facade, single UI entrypoint)
+- `[service-name].types.ts` (all shared module interfaces/enums)
+- `[service-name].helpers.ts` (pure helpers and mappers)
+- `adapters/` (technical implementations only)
+- `README.md` (module index and overview)
+
+Do not create global flat adapter folders like `apps/web/src/app/core/adapters/`.
+Adapters must stay local to their owning service module.
+
+When replacing old code during symmetry refactors:
+
+- Never hard-delete immediately.
+- Move snapshots to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/`.
+- Use `.legacy.ts` filenames to avoid import conflicts.
+
+Scalable Symmetry rule:
+
+- One module, one central `types.ts`.
+- Keep facade slim; delegate heavy logic to local `adapters/`.
+- Do not introduce deep sub-service folder hierarchies.
+
 ## i18n Delivery Requirement
 
 For every UI text introduced or changed in components/templates:

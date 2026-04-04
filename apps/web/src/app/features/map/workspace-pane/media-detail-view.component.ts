@@ -27,8 +27,8 @@ import {
   PHOTO_NO_PHOTO_ICON,
   PHOTO_PLACEHOLDER_ICON,
   PhotoLoadService,
-} from '../../../core/photo-load.service';
-import { MediaOrchestratorService } from '../../../core/media/media-orchestrator.service';
+} from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { MediaOrchestratorService } from '../../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
 import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { PhotoLoadState } from '../../../core/photo-load.model';
 import { ForwardGeocodeResult } from '../../../core/geocoding.service';

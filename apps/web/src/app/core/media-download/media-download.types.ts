@@ -1,4 +1,4 @@
-import type { MediaTier } from './media/media-renderer.types';
+import type { MediaTier } from '../media/media-renderer.types';
 
 export type MediaDeliveryItemState =
   | 'idle'

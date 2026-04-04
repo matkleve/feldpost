@@ -1,7 +1,10 @@
+/* eslint-disable max-lines */
 import { Injectable, Injector, effect, inject, signal } from '@angular/core';
 import type { EffectRef, WritableSignal } from '@angular/core';
-import { MediaOrchestratorService } from './media/media-orchestrator.service';
-import type { MediaTier } from './media/media-renderer.types';
+import { EdgeExportOrchestratorAdapter } from './adapters/edge-export-orchestrator.adapter';
+import { SignedUrlCacheAdapter } from './adapters/signed-url-cache.adapter';
+import { TierResolverAdapter } from './adapters/tier-resolver.adapter';
+import type { MediaTier } from '../media/media-renderer.types';
 import {
   ALL_MEDIA_TIERS,
   CONTEXT_DEFAULT_TIER,
@@ -22,9 +25,7 @@ import type {
   MediaPreviewRequest,
   MediaPreviewResult,
 } from './media-download.types';
-import { PhotoLoadService } from './photo-load.service';
-import type { WorkspaceMedia } from './workspace-view.types';
-import { ZipExportService } from './zip-export.service';
+import type { WorkspaceMedia } from '../workspace-view.types';
 
 export type {
   DownloadBlobResult,
@@ -39,9 +40,9 @@ export type {
 @Injectable({ providedIn: 'root' })
 export class MediaDownloadService {
   private readonly injector = inject(Injector);
-  private readonly photoLoad = inject(PhotoLoadService);
-  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
-  private readonly zipExport = inject(ZipExportService);
+  private readonly signedUrlCache = inject(SignedUrlCacheAdapter);
+  private readonly tierResolver = inject(TierResolverAdapter);
+  private readonly edgeExport = inject(EdgeExportOrchestratorAdapter);
 
   private readonly stateStore = new Map<string, WritableSignal<MediaDeliveryItemState>>();
   private readonly stateBridgeEffects = new Map<string, EffectRef>();
@@ -52,17 +53,17 @@ export class MediaDownloadService {
     const stateSignal = this.getItemState(request.mediaId, resolvedTier);
 
     if (!request.storagePath) {
-      this.photoLoad.markNoPhoto(request.mediaId);
+      this.signedUrlCache.markNoPhoto(request.mediaId);
       stateSignal.set('no-media');
       return { url: null, resolvedTier: null, source: 'none', state: stateSignal() };
     }
 
     const tierSize = tierToPhotoSize(resolvedTier);
     const targetPath = this.resolvePathForTier(request, resolvedTier);
-    const hadLoaded = this.photoLoad.getLoadState(request.mediaId, tierSize)() === 'loaded';
+    const hadLoaded = this.signedUrlCache.getLoadState(request.mediaId, tierSize)() === 'loaded';
 
     stateSignal.set('signing');
-    const signed = await this.photoLoad.getSignedUrl(targetPath, tierSize, request.mediaId);
+    const signed = await this.signedUrlCache.getSignedUrl(targetPath, tierSize, request.mediaId);
 
     if (!signed.url || signed.error) {
       const errorCode = mapSigningErrorCode(signed.error ?? 'Failed to sign URL');
@@ -98,7 +99,7 @@ export class MediaDownloadService {
     const existing = this.stateStore.get(key);
     if (existing) return existing;
 
-    const legacySignal = this.photoLoad.getLoadState(mediaId, tierToPhotoSize(tier));
+    const legacySignal = this.signedUrlCache.getLoadState(mediaId, tierToPhotoSize(tier));
     const localState = signal<MediaDeliveryItemState>(mapLegacyState(legacySignal(), tier));
     this.stateStore.set(key, localState);
 
@@ -111,7 +112,7 @@ export class MediaDownloadService {
   }
 
   invalidate(mediaId: string): void {
-    this.photoLoad.invalidate(mediaId);
+    this.signedUrlCache.invalidate(mediaId);
     for (const tier of ALL_MEDIA_TIERS) {
       const key = this.stateKey(mediaId, tier);
       this.resolvedUrlCache.delete(key);
@@ -120,11 +121,11 @@ export class MediaDownloadService {
   }
 
   invalidateStale(maxAgeMs?: number): number {
-    return this.photoLoad.invalidateStale(maxAgeMs);
+    return this.signedUrlCache.invalidateStale(maxAgeMs);
   }
 
   injectLocalUrl(mediaId: string, blobUrl: string): void {
-    this.photoLoad.setLocalUrl(mediaId, blobUrl);
+    this.signedUrlCache.setLocalUrl(mediaId, blobUrl);
     for (const tier of ALL_MEDIA_TIERS) {
       const key = this.stateKey(mediaId, tier);
       this.resolvedUrlCache.set(key, blobUrl);
@@ -133,7 +134,7 @@ export class MediaDownloadService {
   }
 
   revokeLocalUrl(mediaId: string): void {
-    this.photoLoad.revokeLocalUrl(mediaId);
+    this.signedUrlCache.revokeLocalUrl(mediaId);
     for (const tier of ALL_MEDIA_TIERS) {
       const key = this.stateKey(mediaId, tier);
       this.resolvedUrlCache.delete(key);
@@ -142,7 +143,7 @@ export class MediaDownloadService {
   }
 
   async downloadBlob(storagePath: string): Promise<DownloadBlobResult> {
-    const signed = await this.photoLoad.getSignedUrl(storagePath, 'full', storagePath);
+    const signed = await this.signedUrlCache.getSignedUrl(storagePath, 'full', storagePath);
     if (!signed.url || signed.error) {
       return {
         ok: false,
@@ -179,7 +180,7 @@ export class MediaDownloadService {
     onProgress?.({ phase: 'edge-started', itemsTotal: items.length, itemsProcessed: 0 });
 
     try {
-      await this.zipExport.exportSelectionAsZip(items, title, (progress) => {
+      await this.edgeExport.exportSelectionAsZip(items, title, (progress) => {
         onProgress?.({
           phase: 'streaming',
           itemsTotal: items.length,
@@ -211,7 +212,7 @@ export class MediaDownloadService {
       : CONTEXT_DEFAULT_TIER[request.context];
     if (!request.boxPixels) return requestedTier;
 
-    return this.mediaOrchestrator.selectRequestedTierForSlot({
+    return this.tierResolver.selectRequestedTierForSlot({
       requestedTier,
       slotWidthRem: request.boxPixels.width / PIXELS_PER_REM,
       slotHeightRem: request.boxPixels.height / PIXELS_PER_REM,

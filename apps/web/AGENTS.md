@@ -26,6 +26,13 @@ src/app/
 - Standalone components only — no NgModules
 - Never call Leaflet or Supabase directly — use service abstractions
 - All DB types from Supabase-generated types — no `any`
+- Service-module symmetry is mandatory for new/refactored services:
+  - Docs in `docs/element-specs/[service-name]/`
+  - Code in `src/app/core/[service-name]/`
+  - Required module files: `[service-name].service.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
+  - Keep one shared `types.ts` per module and keep facade orchestration slim
+  - Do not create global adapter folders like `src/app/core/adapters/`
+  - Move replaced code snapshots to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/` and keep `.legacy.ts` suffix
 - Match the component hierarchy in the element spec exactly
 - Every production component must have its own dedicated spec in `docs/element-specs/` (parent specs can reference child specs, but not replace them)
 - Use glossary names from `docs/glossary.md`

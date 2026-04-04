@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import type { MediaTier } from '../../core/media/media-renderer.types';
-import { PHOTO_NO_PHOTO_ICON, PHOTO_PLACEHOLDER_ICON } from '../../core/photo-load.service';
+import { PHOTO_NO_PHOTO_ICON, PHOTO_PLACEHOLDER_ICON } from '../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 
 // Stable states: loading, content, content-selected, error, no-media.

@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, output } from '@angular/core';
-import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service';
+import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
 import type {
   MediaContext,
   MediaFileIdentity,

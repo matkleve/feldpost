@@ -136,7 +136,13 @@ function getAttributeValue(node, attributeName) {
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'coverage/**', 'node_modules/**'],
+    ignores: [
+      'dist/**',
+      'coverage/**',
+      'node_modules/**',
+      '**/archive/**', // Ignoriert alle Ordner namens archive überall
+      'src/app/core/archive/**', // Spezifischer Pfad, falls nötig
+    ],
     linterOptions: {
       noInlineConfig: false,
       reportUnusedDisableDirectives: 'warn',

@@ -24,7 +24,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { computeContentHash, readFileHead } from '../content-hash.util';
-import { PhotoLoadService } from '../photo-load.service';
+import { PhotoLoadService } from '../photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { SupabaseService } from '../supabase/supabase.service';
 import { isCancelledUploadJob } from './upload-cancelled.util';
 import { handleDedupSkip } from './upload-dedup-skip.util';

@@ -47,7 +47,7 @@ import {
 } from '../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
-import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service';
+import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { ToastService } from '../../../core/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';

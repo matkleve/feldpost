@@ -25,7 +25,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { PhotoLoadService } from '../photo-load.service';
+import { PhotoLoadService } from '../photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { SupabaseService } from '../supabase/supabase.service';
 import { computeAttachContentHash } from './upload-attach-hash.util';
 import { runAttachPostUpdate } from './upload-attach-post-update.util';

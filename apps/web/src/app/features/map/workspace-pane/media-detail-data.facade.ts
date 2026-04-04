@@ -1,7 +1,7 @@
 import type { WritableSignal } from '@angular/core';
 import type { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import type { MediaTier } from '../../../core/media/media-renderer.types';
-import type { PhotoLoadService } from '../../../core/photo-load.service';
+import type { PhotoLoadService } from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
 import {

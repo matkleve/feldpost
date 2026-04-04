@@ -11,7 +11,7 @@ import {
 import type { AfterViewInit } from '@angular/core';
 import type { ThumbnailSizePreset, WorkspaceImage } from '../../../../core/workspace-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { MediaOrchestratorService } from '../../../../core/media/media-orchestrator.service';
+import { MediaOrchestratorService } from '../../../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
 import type { MediaTier } from '../../../../core/media/media-renderer.types';
 import {
   ThumbnailCardMediaComponent,

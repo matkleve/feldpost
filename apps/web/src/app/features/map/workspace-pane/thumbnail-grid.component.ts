@@ -21,7 +21,7 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { GeocodingService } from '../../../core/geocoding.service';
 import { MediaLocationUpdateService } from '../../../core/media-location-update.service';
 import { ShareSetService } from '../../../core/share-set.service';
-import { ZipExportService } from '../../../core/zip-export.service';
+import { ZipExportService } from '../../../core/zip-export.service'; // TODO: Migrate to MediaDownloadService
 import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
 import {
   ThumbnailCardComponent,

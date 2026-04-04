@@ -28,7 +28,7 @@ import { GeocodingService } from '../../../core/geocoding.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { UploadService } from '../../../core/upload/upload.service';
 import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { PhotoLoadService } from '../../../core/photo-load.service';
+import { PhotoLoadService } from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 
