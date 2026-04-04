@@ -1,6 +1,10 @@
-import type { PhotoLoadState, PhotoSize } from '../photo-load.model';
 import type { MediaContext, MediaTier } from '../media/media-renderer.types';
-import type { MediaDeliveryErrorCode, MediaDeliveryItemState } from './media-download.types';
+import type {
+  MediaDeliveryErrorCode,
+  MediaDeliveryItemState,
+  PhotoLoadState,
+  PhotoSize,
+} from './media-download.types';
 
 export const PIXELS_PER_REM = 16;
 

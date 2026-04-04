@@ -8,7 +8,7 @@ import type { UploadService } from './upload.service';
 import type { ExifCoords, ParsedExif } from './upload.service';
 import type { UploadResult } from './upload.types';
 import type { SupabaseService } from '../supabase/supabase.service';
-import type { PhotoLoadService } from '../photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import type { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
 
 type RunNewUploadPhaseArgs = {
   jobId: string;

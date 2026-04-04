@@ -28,7 +28,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { FilenameParserService } from '../filename-parser/filename-parser.service';
-import { PhotoLoadService } from '../photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { isCancelledUploadJob } from './upload-cancelled.util';

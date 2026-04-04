@@ -1,6 +1,6 @@
 import { Injectable, inject, type WritableSignal } from '@angular/core';
 import { SignedUrlCacheAdapter } from '../media-download/adapters/signed-url-cache.adapter';
-import type { PhotoLoadState, PhotoSize, SignedUrlResult } from '../photo-load.model';
+import type { PhotoLoadState, PhotoSize, SignedUrlResult } from '../media-download/media-download.types';
 
 /** Camera icon SVG data-URI — used in loading/idle placeholders */
 export const PHOTO_PLACEHOLDER_ICON =

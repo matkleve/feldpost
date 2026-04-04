@@ -9,7 +9,7 @@ import type {
   SignedUrlResult,
   StateChangedEvent,
   UrlChangedEvent,
-} from '../../photo-load.model';
+} from '../media-download.types';
 import { SupabaseStorageAdapter } from './supabase-storage.adapter';
 
 const TRANSFORMS: Record<PhotoSize, { width: number; height: number; resize: 'cover' } | null> = {
@@ -85,7 +85,8 @@ export class SignedUrlCacheAdapter {
     await this.signOriginalBatch(pending, size, results);
     this.markMissingAsError(pending, size, results);
 
-    this.batchComplete$.next({ imageIds: items.map((item) => item.id), size });
+    const mediaIds = items.map((item) => item.id);
+    this.batchComplete$.next({ mediaIds, imageIds: mediaIds, size });
     return results;
   }
 
@@ -135,7 +136,7 @@ export class SignedUrlCacheAdapter {
       const state = this.loadStates.get(key);
       if (state) {
         state.set('idle');
-        this.stateChanged$.next({ imageId, size, state: 'idle' });
+        this.stateChanged$.next({ mediaId: imageId, imageId, size, state: 'idle' });
       }
     }
   }
@@ -243,11 +244,11 @@ export class SignedUrlCacheAdapter {
 
   private setCacheEntry(imageId: string, size: PhotoSize, entry: CacheEntry): void {
     this.cache.set(this.cacheKey(imageId, size), entry);
-    this.urlChanged$.next({ imageId, size, url: entry.url });
+    this.urlChanged$.next({ mediaId: imageId, imageId, size, url: entry.url });
   }
 
   private setLoadState(imageId: string, size: PhotoSize, newState: PhotoLoadState): void {
     this.getLoadState(imageId, size).set(newState);
-    this.stateChanged$.next({ imageId, size, state: newState });
+    this.stateChanged$.next({ mediaId: imageId, imageId, size, state: newState });
   }
 }

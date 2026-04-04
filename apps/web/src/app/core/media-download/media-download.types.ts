@@ -67,3 +67,42 @@ export interface ExportResult {
   errorCode?: MediaDeliveryErrorCode;
   message?: string;
 }
+
+// Legacy photo-load contracts kept temporarily for migration compatibility.
+export type PhotoLoadState = 'idle' | 'loading' | 'loaded' | 'error' | 'no-photo';
+
+export type PhotoSize = 'marker' | 'thumb' | 'full';
+
+export interface CacheEntry {
+  url: string;
+  signedAt: number;
+  isLocal: boolean;
+}
+
+export interface SignedUrlResult {
+  url: string | null;
+  error: string | null;
+}
+
+export interface UrlChangedEvent {
+  mediaId: string;
+  /** @deprecated Use mediaId. */
+  imageId?: string;
+  size: PhotoSize;
+  url: string;
+}
+
+export interface StateChangedEvent {
+  mediaId: string;
+  /** @deprecated Use mediaId. */
+  imageId?: string;
+  size: PhotoSize;
+  state: PhotoLoadState;
+}
+
+export interface BatchCompleteEvent {
+  mediaIds: string[];
+  /** @deprecated Use mediaIds. */
+  imageIds?: string[];
+  size: PhotoSize;
+}

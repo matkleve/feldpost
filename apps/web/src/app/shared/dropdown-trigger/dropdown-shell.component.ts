@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject, input, output } from '@angular/core';
+import { Component, ElementRef, inject, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-dropdown-shell',
@@ -13,22 +13,11 @@ import { Component, ElementRef, HostListener, inject, input, output } from '@ang
     '[style.max-width.px]': 'maxWidth()',
     '[style.z-index]': '"var(--z-dropdown)"',
     '(click)': '$event.stopPropagation()',
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'onEscape()',
   },
   styles: [
-    `
-      :host {
-        display: block;
-        max-width: calc(100vw - 1rem);
-        max-height: min(24rem, calc(100vh - 6rem));
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        background: var(--color-bg-elevated);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--elevation-dropdown);
-      }
-    `,
+    ':host { display: block; overflow: auto; overscroll-behavior: contain; display: flex; flex-direction: column; background: var(--color-bg-elevated); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--elevation-dropdown); }',
   ],
 })
 export class DropdownShellComponent {
@@ -51,7 +40,6 @@ export class DropdownShellComponent {
     this.closeRequested.emit();
   }
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.outsideCloseEnabled()) {
       return;
@@ -67,7 +55,6 @@ export class DropdownShellComponent {
     }
   }
 
-  @HostListener('document:keydown.escape')
   onEscape(): void {
     this.requestClose();
   }

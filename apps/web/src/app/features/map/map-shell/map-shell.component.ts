@@ -47,7 +47,10 @@ import {
 } from '../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import {
+  PhotoLoadService,
+  PHOTO_PLACEHOLDER_ICON,
+} from '../../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
 import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';

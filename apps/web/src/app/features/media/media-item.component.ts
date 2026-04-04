@@ -10,11 +10,11 @@ import {
 } from '@angular/core';
 import type { AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import type { PhotoLoadState } from '../../core/photo-load.model';
+import type { PhotoLoadState } from '../../core/media-download/media-download.types';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { MediaTier, UploadOverlayState } from '../../core/media/media-renderer.types';
+import { PhotoLoadService } from '../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
-import { PhotoLoadService } from '../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { ItemComponent, type ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';
@@ -186,7 +186,9 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         const record = this.item();
-        if (!record || event.imageId !== record.id || event.size !== 'thumb') return;
+        if (!record || (event.mediaId ?? event.imageId) !== record.id || event.size !== 'thumb') {
+          return;
+        }
         this.thumbnailUrl.set(event.url ?? '');
       });
   }
