@@ -911,5 +911,3 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     expect(allImages.every((img) => img.metadata?.['uuid-bauphase'] === 'Rohbau')).toBe(true);
   });
 });
-
-

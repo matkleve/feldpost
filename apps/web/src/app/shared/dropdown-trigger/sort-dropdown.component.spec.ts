@@ -17,10 +17,7 @@ function setup(overrides?: Partial<ReturnType<typeof buildFakeViewService>>) {
   const fakeViewService = { ...buildFakeViewService(), ...overrides };
 
   TestBed.configureTestingModule({
-    providers: [
-      MetadataService,
-      { provide: WorkspaceViewService, useValue: fakeViewService },
-    ],
+    providers: [MetadataService, { provide: WorkspaceViewService, useValue: fakeViewService }],
   });
 
   const fixture = TestBed.createComponent(SortDropdownComponent);
@@ -221,4 +218,3 @@ describe('SortDropdownComponent', () => {
     });
   });
 });
-
