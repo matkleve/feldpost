@@ -25,7 +25,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../media-download/media-download.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { computeAttachContentHash } from './upload-attach-hash.util';
 import { runAttachPostUpdate } from './upload-attach-post-update.util';
@@ -52,7 +52,7 @@ export class UploadAttachPipelineService {
   private readonly uploadService = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
-  private readonly photoLoad = inject(PhotoLoadService);
+  private readonly photoLoad = inject(MediaDownloadService);
   private readonly jobState = inject(UploadJobStateService);
   private readonly queue = inject(UploadQueueService);
   private readonly storage = inject(UploadStorageService);

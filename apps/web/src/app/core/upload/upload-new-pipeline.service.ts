@@ -28,7 +28,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { FilenameParserService } from '../filename-parser/filename-parser.service';
-import { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../media-download/media-download.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { isCancelledUploadJob } from './upload-cancelled.util';
@@ -58,7 +58,7 @@ export class UploadNewPipelineService {
   private readonly conflictService = inject(UploadConflictService);
   private readonly enrichment = inject(UploadEnrichmentService);
   private readonly locationConfig = inject(UploadLocationConfigService);
-  private readonly photoLoad = inject(PhotoLoadService);
+  private readonly photoLoad = inject(MediaDownloadService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly supabase = inject(SupabaseService);
 

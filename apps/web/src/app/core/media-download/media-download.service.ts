@@ -2,9 +2,16 @@
 import { Injectable, Injector, effect, inject, signal } from '@angular/core';
 import type { EffectRef, WritableSignal } from '@angular/core';
 import { EdgeExportOrchestratorAdapter } from './adapters/edge-export-orchestrator.adapter';
+import type { ZipExportContext } from './adapters/edge-export-orchestrator.adapter';
 import { SignedUrlCacheAdapter } from './adapters/signed-url-cache.adapter';
 import { TierResolverAdapter } from './adapters/tier-resolver.adapter';
-import type { MediaTier } from '../media/media-renderer.types';
+import type {
+  FileTypeDefinition,
+  MediaFileIdentity,
+  MediaRenderState,
+  MediaTier,
+  MediaTierSelectionInput,
+} from '../media/media-renderer.types';
 import {
   ALL_MEDIA_TIERS,
   CONTEXT_DEFAULT_TIER,
@@ -48,6 +55,7 @@ export type {
   StateChangedEvent,
   UrlChangedEvent,
 } from './media-download.types';
+export type { ZipExportContext } from './adapters/edge-export-orchestrator.adapter';
 
 /** Camera icon SVG data-URI — used in loading/idle placeholders. */
 export const PHOTO_PLACEHOLDER_ICON =
@@ -119,7 +127,7 @@ export class MediaDownloadService {
     return new Map(entries);
   }
 
-  // Legacy compatibility API (PhotoLoadService contract).
+  // Transitional compatibility API while legacy call sites are being removed.
   getLoadState(mediaId: string, size: PhotoSize): WritableSignal<PhotoLoadState> {
     return this.signedUrlCache.getLoadState(mediaId, size);
   }
@@ -266,6 +274,70 @@ export class MediaDownloadService {
     }
   }
 
+  buildDefaultTitle(context: ZipExportContext): string {
+    return this.edgeExport.buildDefaultTitle(context);
+  }
+
+  async exportSelectionAsZip(
+    items: WorkspaceMedia[],
+    title: string,
+    onProgress?: (value: number) => void,
+  ): Promise<void> {
+    await this.edgeExport.exportSelectionAsZip(items, title, onProgress);
+  }
+
+  resolveFileType(identity: MediaFileIdentity): FileTypeDefinition {
+    return this.tierResolver.resolveFileType(identity);
+  }
+
+  resolveBadge(identity: MediaFileIdentity): string | null {
+    return this.tierResolver.resolveBadge(identity);
+  }
+
+  resolveIcon(identity: MediaFileIdentity): string {
+    return this.tierResolver.resolveIcon(identity);
+  }
+
+  fallbackChainForTier(tier: MediaTier): readonly MediaTier[] {
+    return this.tierResolver.fallbackChainForTier(tier);
+  }
+
+  selectRequestedTierForSlot(input: MediaTierSelectionInput): MediaTier {
+    return this.tierResolver.selectRequestedTierForSlot(input);
+  }
+
+  resolveBestAvailableTier(
+    requestedTier: MediaTier,
+    availableTiers: readonly MediaTier[],
+  ): MediaTier {
+    return this.tierResolver.resolveBestAvailableTier(requestedTier, availableTiers);
+  }
+
+  placeholderState(): MediaRenderState {
+    return this.tierResolver.placeholderState();
+  }
+
+  iconOnlyState(): MediaRenderState {
+    return this.tierResolver.iconOnlyState();
+  }
+
+  loadingState(progress?: number): MediaRenderState {
+    return this.tierResolver.loadingState(progress);
+  }
+
+  loadedState(
+    url: string,
+    resolvedTier: MediaTier,
+    width?: number,
+    height?: number,
+  ): MediaRenderState {
+    return this.tierResolver.loadedState(url, resolvedTier, width, height);
+  }
+
+  errorState(reason: string): MediaRenderState {
+    return this.tierResolver.errorState(reason);
+  }
+
   private resolveTier(request: MediaPreviewRequest): MediaTier {
     const requestedTier = request.desiredSize
       ? desiredSizeToTier(request.desiredSize)
@@ -302,6 +374,3 @@ export class MediaDownloadService {
     return `${mediaId}:${tier}`;
   }
 }
-
-// Compatibility alias while migrating legacy PhotoLoadService imports.
-export { MediaDownloadService as PhotoLoadService };

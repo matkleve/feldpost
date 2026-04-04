@@ -21,8 +21,11 @@ import { I18nService } from '../../../core/i18n/i18n.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { ShareSetService } from '../../../core/share-set/share-set.service';
-import { ZipExportService } from '../../../core/zip-export/zip-export.service'; // TODO: Migrate to MediaDownloadService
-import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view/workspace-view.types';
+import { MediaDownloadService } from '../../../core/media-download/media-download.service';
+import type {
+  GroupedSection,
+  WorkspaceImage,
+} from '../../../core/workspace-view/workspace-view.types';
 import {
   ThumbnailCardComponent,
   ThumbnailCardContextMenuEvent,
@@ -456,7 +459,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   private readonly geocodingService = inject(GeocodingService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly shareSetService = inject(ShareSetService);
-  private readonly zipExportService = inject(ZipExportService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
 
@@ -1055,12 +1058,12 @@ export class ThumbnailGridComponent implements OnDestroy {
     }
 
     const firstProject = selectedImages.find((img) => !!img.projectName)?.projectName;
-    const zipTitle = this.zipExportService.buildDefaultTitle({
+    const zipTitle = this.mediaDownloadService.buildDefaultTitle({
       selectedProjectName: firstProject,
       selectedCount: selectedImages.length,
     });
 
-    await this.zipExportService.exportSelectionAsZip(selectedImages, zipTitle);
+    await this.mediaDownloadService.exportSelectionAsZip(selectedImages, zipTitle);
     this.toastService.show({
       message: this.t('workspace.export.success.zipStarted', 'ZIP download started.'),
       type: 'success',

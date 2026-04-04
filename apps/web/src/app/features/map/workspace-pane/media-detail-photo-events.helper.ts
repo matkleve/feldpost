@@ -3,7 +3,7 @@ import {
   ImageAttachedEvent,
   ImageReplacedEvent,
 } from '../../../core/upload/upload-manager.service';
-import { PhotoLoadService } from '../../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../../core/media-download/media-download.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { ImageRecord } from './media-detail-view.types';
@@ -12,7 +12,7 @@ type DetailTranslateFn = (key: string, fallback: string) => string;
 
 interface ImageDetailPhotoEventsHelperDeps {
   services: {
-    photoLoad: PhotoLoadService;
+    photoLoad: MediaDownloadService;
     workspaceView: WorkspaceViewService;
     toastService: ToastService;
   };

@@ -3,7 +3,7 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { FilterService } from '../filter/filter.service';
 import { LocationResolverService } from '../location-resolver/location-resolver.service';
 import { PropertyRegistryService } from '../property-registry/property-registry.service';
-import { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../media-download/media-download.service';
 import type {
   WorkspaceMediaCustomMetadata,
   WorkspaceImage,
@@ -23,7 +23,7 @@ export class WorkspaceViewService {
   private readonly filterService = inject(FilterService);
   private readonly locationResolver = inject(LocationResolverService);
   private readonly registry = inject(PropertyRegistryService);
-  private readonly photoLoad = inject(PhotoLoadService);
+  private readonly photoLoad = inject(MediaDownloadService);
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Input signals Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 

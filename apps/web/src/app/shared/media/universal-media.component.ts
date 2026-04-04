@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, output } from '@angular/core';
-import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import type {
   MediaContext,
   MediaFileIdentity,
@@ -25,7 +25,7 @@ const DEFAULT_MIN_HEIGHT_REM = 6;
   },
 })
 export class UniversalMediaComponent {
-  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
+  private readonly mediaOrchestrator = inject(MediaDownloadService);
 
   readonly fileIdentity = input<MediaFileIdentity>({});
   readonly context = input<MediaContext>('grid');

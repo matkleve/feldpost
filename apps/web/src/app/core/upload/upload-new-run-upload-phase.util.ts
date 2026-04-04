@@ -8,7 +8,7 @@ import type { UploadService } from './upload.service';
 import type { ExifCoords, ParsedExif } from './upload.service';
 import type { UploadResult } from './upload.types';
 import type { SupabaseService } from '../supabase/supabase.service';
-import type { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import type { MediaDownloadService } from '../media-download/media-download.service';
 
 type RunNewUploadPhaseArgs = {
   jobId: string;
@@ -22,7 +22,7 @@ type RunNewUploadPhaseArgs = {
   uploadService: UploadService;
   supabaseClient: SupabaseService['client'];
   enrich: UploadEnrichmentService;
-  photoLoad: PhotoLoadService;
+  photoLoad: MediaDownloadService;
   getUserId: () => string | undefined;
 };
 

@@ -112,7 +112,7 @@ flowchart LR
   MB --> DBI[(images, image_projects)]
   WS --> SS[ShareSetService]
   SS --> DB[(share_sets, share_set_items)]
-  WS --> ZE[ZipExportService]
+  WS --> ZE[MediaDownloadService]
   ZE --> ST[(Supabase Storage)]
   MB --> ST
   SS --> UI
@@ -133,7 +133,7 @@ flowchart LR
 | Share-set fingerprint | Backend function                            | `string`        | Hash of sorted media IDs + org context for dedup/lookup    |
 | Share-set rows        | `share_sets`, `share_set_items`             | relational rows | New schema to persist stable shared groups                 |
 | Export title default  | `ProjectService` + media metadata           | `string`        | Project name or heuristic `bestLabel + yyyy-mm-dd`         |
-| ZIP blob              | `ZipExportService`                          | `Blob`          | Mixed media archive download                               |
+| ZIP blob              | `MediaDownloadService`                      | `Blob`          | Mixed media archive download                               |
 
 ### SQL Contract (Share Sets)
 
@@ -350,7 +350,7 @@ erDiagram
 | `core/workspace-view.service.ts`                                                         | Ordered media hydration for resolved share-set IDs           |
 | `core/media-bulk-actions.service.ts`                                                     | Batch add-to-project, change-address, and delete operations  |
 | `core/share-set.service.ts`                                                              | Create/resolve share-set tokens via Supabase                 |
-| `core/zip-export.service.ts`                                                             | Fetch signed URLs/files, build ZIP blob, trigger download    |
+| `core/media-download/media-download.service.ts`                                          | Fetch signed URLs/files, build ZIP blob, trigger download    |
 | `supabase/migrations/20260318090000_share_sets.sql`                                      | `share_sets` + `share_set_items` tables, indexes, RLS, RPC   |
 | `docs/use-cases/workspace-export.md`                                                     | Behavioral scenarios and validation checklist                |
 | `docs/implementation-blueprints/workspace-export-bar.md`                                 | Delivery plan with file-level implementation tasks           |
@@ -366,7 +366,7 @@ sequenceDiagram
   participant Sel as WorkspaceSelectionService
   participant Bar as WorkspaceExportBar
   participant Share as ShareSetService
-  participant Zip as ZipExportService
+  participant Zip as MediaDownloadService
 
   User->>Grid: Ctrl/Cmd-click item
   Grid->>Sel: toggleSelection(id)
@@ -385,7 +385,7 @@ sequenceDiagram
 - `WorkspaceViewService` provides current scope IDs for deterministic `Select all` behavior.
 - `ShareSetService` uses Supabase APIs through service abstraction; components never call Supabase directly.
 - Shared links are resolved from `?share` in `MapShellComponent`, then hydrated into workspace data and selection state.
-- `ZipExportService` resolves signed file URLs and assembles ZIP in browser before download trigger.
+- `MediaDownloadService` resolves signed file URLs and assembles ZIP in browser before download trigger.
 
 ## Acceptance Criteria
 

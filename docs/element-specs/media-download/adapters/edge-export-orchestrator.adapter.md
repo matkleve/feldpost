@@ -16,7 +16,6 @@ Headless adapter. Client sends export payload once, edge function resolves binar
 - Spec: `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts`
 - Edge target: `supabase/functions/media-export-zip/index.ts`
-- Legacy source: `apps/web/src/app/core/zip-export.service.ts`
 
 ## Actions & Interactions
 
@@ -74,18 +73,18 @@ sequenceDiagram
 
 ## File Map
 
-| File                                                                                | Purpose                             |
-| ----------------------------------------------------------------------------------- | ----------------------------------- |
-| `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract        |
-| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | New adapter file                    |
-| `supabase/functions/media-export-zip/index.ts`                                      | Edge function implementation target |
-| `apps/web/src/app/core/zip-export.service.ts`                                       | Legacy client ZIP path to deprecate |
+| File                                                                                | Purpose                               |
+| ----------------------------------------------------------------------------------- | ------------------------------------- |
+| `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract          |
+| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | New adapter file                      |
+| `supabase/functions/media-export-zip/index.ts`                                      | Edge function implementation target   |
+| `apps/web/src/app/core/zip-export/zip-export.service.ts`                            | Legacy client ZIP path (now archived) |
 
 ## Wiring
 
 - Facade delegates all ZIP execution to this adapter.
 - No ZIP assembly logic remains in UI components.
-- Legacy `ZipExportService` remains temporary compatibility fallback until edge path is default.
+- Legacy `ZipExportService` compatibility wrapper has been removed after consumer migration.
 
 ## Acceptance Criteria
 
@@ -93,4 +92,4 @@ sequenceDiagram
 - [ ] Progress is stream-based, not client loop based.
 - [ ] Partial failures are surfaced without silent drops.
 - [ ] Terminal failures return non-retryable error metadata.
-- [ ] Adapter can replace legacy ZipExportService without UI API break.
+- [x] Adapter replaced legacy ZipExportService without UI API break.

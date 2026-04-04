@@ -9,9 +9,12 @@ import {
   signal,
 } from '@angular/core';
 import type { AfterViewInit } from '@angular/core';
-import type { ThumbnailSizePreset, WorkspaceImage } from '../../../../core/workspace-view/workspace-view.types';
+import type {
+  ThumbnailSizePreset,
+  WorkspaceImage,
+} from '../../../../core/workspace-view/workspace-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { MediaOrchestratorService } from '../../../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import type { MediaTier } from '../../../../core/media/media-renderer.types';
 import {
   ThumbnailCardMediaComponent,
@@ -117,7 +120,7 @@ export interface ThumbnailCardContextMenuEvent {
 })
 export class ThumbnailCardComponent implements AfterViewInit {
   private readonly i18nService = inject(I18nService);
-  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
+  private readonly mediaOrchestrator = inject(MediaDownloadService);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);

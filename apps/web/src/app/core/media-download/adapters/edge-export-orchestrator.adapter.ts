@@ -10,7 +10,7 @@ import {
   sanitizeExportTitle,
   SIGNED_URL_TTL_SECONDS,
   ZIP_INDEX_PAD_LENGTH,
-} from '../../zip-export/zip-export.helpers';
+} from '../media-download.helpers';
 
 export interface ZipExportContext {
   selectedProjectName?: string | null;

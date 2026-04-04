@@ -26,9 +26,8 @@ import { ToastService } from '../../../core/toast/toast.service';
 import {
   PHOTO_NO_PHOTO_ICON,
   PHOTO_PLACEHOLDER_ICON,
-  PhotoLoadService,
-} from '../../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
-import { MediaOrchestratorService } from '../../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
+  MediaDownloadService,
+} from '../../../core/media-download/media-download.service';
 import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { PhotoLoadState } from '../../../core/media-download/media-download.types';
 import { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
@@ -107,8 +106,8 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly uploadService = inject(UploadService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
-  private readonly photoLoad = inject(PhotoLoadService);
-  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
+  private readonly photoLoad = inject(MediaDownloadService);
+  private readonly mediaOrchestrator = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
   private readonly actionEngineService = inject(ActionEngineService);

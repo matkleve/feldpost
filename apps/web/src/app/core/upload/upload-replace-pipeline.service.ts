@@ -24,7 +24,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { computeContentHash, readFileHead } from '../content-hash.util';
-import { PhotoLoadService } from '../media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../media-download/media-download.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { isCancelledUploadJob } from './upload-cancelled.util';
 import { handleDedupSkip } from './upload-dedup-skip.util';
@@ -41,7 +41,7 @@ export class UploadReplacePipelineService {
   private readonly uploadService = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
-  private readonly photoLoad = inject(PhotoLoadService);
+  private readonly photoLoad = inject(MediaDownloadService);
   private readonly jobState = inject(UploadJobStateService);
   private readonly queue = inject(UploadQueueService);
   private readonly storage = inject(UploadStorageService);

@@ -48,9 +48,9 @@ import {
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import {
-  PhotoLoadService,
+  MediaDownloadService,
   PHOTO_PLACEHOLDER_ICON,
-} from '../../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+} from '../../../core/media-download/media-download.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
@@ -226,7 +226,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
-  private readonly photoLoadService = inject(PhotoLoadService);
+  private readonly photoLoadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);

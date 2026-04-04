@@ -13,8 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { PhotoLoadState } from '../../core/media-download/media-download.types';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { MediaTier, UploadOverlayState } from '../../core/media/media-renderer.types';
-import { PhotoLoadService } from '../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
-import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { ItemComponent, type ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';
@@ -55,9 +54,9 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
   private readonly i18nService = inject(I18nService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
-  private readonly photoLoadService = inject(PhotoLoadService);
+  private readonly photoLoadService = inject(MediaDownloadService);
   private readonly uploadManager = inject(UploadManagerService);
-  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
+  private readonly mediaOrchestrator = inject(MediaDownloadService);
   private thumbnailRequestId = 0;
   private resizeObserver: ResizeObserver | null = null;
 

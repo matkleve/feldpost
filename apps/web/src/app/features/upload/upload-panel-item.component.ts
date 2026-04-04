@@ -13,7 +13,7 @@ import { getIssueKind, getLaneForJob, phaseToStatusClass } from './upload-phase.
 import { statusLabelText, actionLabel, actionIcon } from './upload-panel-item-helpers';
 import { getBoundProjectIds } from './upload-panel-project-bindings.util';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
 import type { MediaRenderState, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
@@ -95,7 +95,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   private static activeMenuOwner: UploadPanelItemComponent | null = null;
 
   private readonly i18nService = inject(I18nService);
-  private readonly mediaOrchestrator = inject(MediaOrchestratorService);
+  private readonly mediaOrchestrator = inject(MediaDownloadService);
 
   readonly job = input.required<UploadJob>();
   readonly interactive = input<boolean>(false);

@@ -1,4 +1,4 @@
-# zip-export service module
+# zip-export service module (legacy snapshot)
 
 Facade: ./zip-export.service.ts
 Shared types: ./zip-export.types.ts

@@ -28,7 +28,7 @@ import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { UploadService } from '../../../core/upload/upload.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { PhotoLoadService } from '../../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../../core/media-download/media-download.service';
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 
@@ -1146,7 +1146,7 @@ function setupReplace() {
       { provide: UploadService, useValue: fakeUpload },
       { provide: UploadManagerService, useValue: fakeUploadManager },
       { provide: WorkspaceViewService, useValue: fakeWorkspaceView },
-      { provide: PhotoLoadService, useValue: fakePhotoLoad },
+      { provide: MediaDownloadService, useValue: fakePhotoLoad },
     ],
   });
 

@@ -2,7 +2,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import type { WorkspaceImage } from '../../../../core/workspace-view/workspace-view.types';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { ShareSetService } from '../../../../core/share-set/share-set.service';
-import { ZipExportService } from '../../../../core/zip-export/zip-export.service'; // TODO: Migrate to MediaDownloadService
+import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SupabaseService } from '../../../../core/supabase/supabase.service';
@@ -65,7 +65,7 @@ export class WorkspacePaneFooterComponent {
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly shareSetService = inject(ShareSetService);
-  private readonly zipExportService = inject(ZipExportService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
@@ -334,7 +334,7 @@ export class WorkspacePaneFooterComponent {
   openZipDialog(): void {
     const firstProject = this.selectedImages().find((img) => !!img.projectName)?.projectName;
     this.zipTitle.set(
-      this.zipExportService.buildDefaultTitle({
+      this.mediaDownloadService.buildDefaultTitle({
         selectedProjectName: firstProject,
         selectedCount: this.selectionService.selectedCount(),
       }),
@@ -360,7 +360,7 @@ export class WorkspacePaneFooterComponent {
 
     this.pending.set(true);
     try {
-      await this.zipExportService.exportSelectionAsZip(
+      await this.mediaDownloadService.exportSelectionAsZip(
         selectedImages,
         this.zipTitle(),
         (progress) => {
