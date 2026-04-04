@@ -3,7 +3,7 @@
 > **Element spec:** [element-specs/map-shell.md](../element-specs/map-shell.md)
 > **Blueprint:** [implementation-blueprints/map-shell.md](../implementation-blueprints/map-shell.md)
 > **Product use cases:** [UC1](README.md#uc1--technician-on-site-view-history), [UC2](README.md#uc2--clerk-preparing-a-quote), [UC3](README.md#uc3--upload-and-correct-a-new-image)
-> **Related specs:** [workspace-pane](../element-specs/workspace/workspace-pane.md), [drag-divider](../element-specs/drag-divider.md), [search-bar](../element-specs/search-bar/search-bar.md), [upload-button-zone](../element-specs/upload-button-zone.md), [photo-marker](../element-specs/media-marker/media-marker.md), [image-detail-view](../element-specs/media-detail/media-detail-view.md), [map-context-menu](../element-specs/map-context-menu.md)
+> **Related specs:** [workspace-pane](../element-specs/workspace/workspace-pane.md), [drag-divider](../element-specs/component/drag-divider.md), [search-bar](../element-specs/search-bar/search-bar.md), [upload-button-zone](../element-specs/component/upload-button-zone.md), [photo-marker](../element-specs/media-marker/media-marker.md), [image-detail-view](../element-specs/media-detail/media-detail-view.md), [map-context-menu](../element-specs/component/map-context-menu.md)
 > **Related use cases:** [map-context-menu](map-context-menu.md)
 
 ---
@@ -139,7 +139,7 @@ sequenceDiagram
 ## IS-5: Upload and Placement Mode (spec Actions #4, #5)
 
 **Product context:** UC3 — upload a new image, place it if no EXIF GPS.
-**Related:** [upload-button-zone spec](../element-specs/upload-button-zone.md)
+**Related:** [upload-button-zone spec](../element-specs/component/upload-button-zone.md)
 
 ```mermaid
 sequenceDiagram

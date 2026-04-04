@@ -200,7 +200,7 @@ flowchart TD
 | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `docs/element-specs/action-context-matrix.md`                  | Canonical cross-context action contract                                     |
 | `docs/element-specs/upload-manager/upload-manager-pipeline.md` | Full upload location-resolution algorithm and upload-internal issue routing |
-| `docs/element-specs/component/upload-panel.md`                 | Upload row consumer of the matrix                                           |
+| `docs/element-specs/component/upload-panel.md`                           | Upload row consumer of the matrix                                           |
 | `docs/element-specs/map-secondary-click-system.md`             | Map consumer of the matrix                                                  |
 | `docs/element-specs/media-detail/media-detail-actions.md`      | Media detail consumer of the matrix                                         |
 | `docs/element-specs/workspace/workspace-actions-bar.md`        | Workspace footer multi-selection consumer                                   |

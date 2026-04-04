@@ -44,7 +44,7 @@ feldpost/
 │   ├── migrations/              # SQL schema changes
 │   └── seed_i18n.sql           # Translation data
 ├── docs/                         # Documentation (this folder)
-│   ├── element-specs/           # UI implementation contracts
+│   ├── specs/           # UI implementation contracts
 │   ├── implementation-blueprints/ # Service patterns
 │   ├── design/                  # Design tokens & layout
 │   ├── agent-workflows/         # Agent guides

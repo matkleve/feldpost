@@ -1,6 +1,6 @@
 # Workspace Export — Use Cases & Interaction Scenarios
 
-> Related specs: [workspace-pane](../element-specs/workspace/workspace-pane.md), [active-selection-view](../element-specs/active-selection-view.md), [workspace-actions-bar](../element-specs/workspace/workspace-actions-bar.md)
+> Related specs: [workspace-pane](../element-specs/workspace/workspace-pane.md), [active-selection-view](../element-specs/component/active-selection-view.md), [workspace-actions-bar](../element-specs/workspace/workspace-actions-bar.md)
 
 ## Overview
 

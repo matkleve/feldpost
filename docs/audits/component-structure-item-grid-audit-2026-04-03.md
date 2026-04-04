@@ -1,4 +1,4 @@
-﻿# Component Structure Audit - Item Grid Stack (2026-04-03)
+# Component Structure Audit - Item Grid Stack (2026-04-03)
 
 ## Scope
 
@@ -15,7 +15,7 @@ Governed by:
 
 - `AGENTS.md` (Component Structure Rules, SCSS ownership contract)
 - `docs/element-specs/component/item-grid.md`
-- `docs/element-specs/media-item.md`
+- `docs/element-specs/component/media-item.md`
 
 ## Hard-Gate Status Summary
 
@@ -125,7 +125,7 @@ Implemented and verified:
 
 3. **Rule conflict between global transition guidance and media spec timing**
    - Global guidance: 120-250ms (`.github/instructions/styling.instructions.md`)
-   - Media spec and implementation use 80ms (`docs/element-specs/media-item.md`, `apps/web/src/app/features/media/media-item.component.scss:38`)
+   - Media spec and implementation use 80ms (`docs/element-specs/component/media-item.md`, `apps/web/src/app/features/media/media-item.component.scss:38`)
 
 ### Medium
 

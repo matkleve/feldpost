@@ -2,9 +2,9 @@
 
 ## Element Specs
 
-- Every UI element has a spec in `element-specs/` — this is the **implementation contract**
+- Every UI element has a spec in `specs/` — this is the **implementation contract**
 - Every production component has its own dedicated spec file; parent specs reference child specs instead of collapsing multiple component contracts into one document
-- Service specs must mirror code modules one-to-one: `docs/element-specs/[service-name]/` matches `apps/web/src/app/core/[service-name]/`
+- Service specs must mirror code modules one-to-one: `docs/specs/[service-name]/` matches `apps/web/src/app/core/[service-name]/`
 - Specs are the source of truth: code must match spec, not the other way around
 - Update specs **before** modifying features
 - When user feedback changes behavior expectations, update the relevant spec sections immediately in the same session (Actions, Mermaids, Wiring/Data, Acceptance Criteria)

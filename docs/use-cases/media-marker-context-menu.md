@@ -1,6 +1,6 @@
 # Media Marker Context Menu — Use Cases & Interaction Scenarios
 > **Element spec:** [element-specs/media-marker-context-menu.md](../element-specs/media-marker/media-marker-context-menu.md)
-> **Related specs:** [map-secondary-click-system](../element-specs/map-secondary-click-system.md), [map-context-menu](../element-specs/map-context-menu.md), [radius-selection](../element-specs/radius-selection.md), [workspace-pane](../element-specs/workspace/workspace-pane.md), [projects-dropdown](../element-specs/projects-dropdown.md)
+> **Related specs:** [map-secondary-click-system](../element-specs/map-secondary-click-system.md), [map-context-menu](../element-specs/component/map-context-menu.md), [radius-selection](../element-specs/component/radius-selection.md), [workspace-pane](../element-specs/workspace/workspace-pane.md), [projects-dropdown](../element-specs/component/projects-dropdown.md)
 
 ---
 

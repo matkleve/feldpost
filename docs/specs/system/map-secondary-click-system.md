@@ -126,9 +126,9 @@ flowchart TD
 | ------------------------------------------------------------------ | ---------------------------------------------- |
 | `apps/web/src/app/features/map/map-shell/map-shell.component.ts`   | Secondary-click precedence and action dispatch |
 | `apps/web/src/app/features/map/map-shell/map-shell.component.html` | Render all context menu surfaces               |
-| `docs/element-specs/component/map-context-menu.md`                 | Map menu details                               |
-| `docs/element-specs/media-marker/media-marker-context-menu.md`     | Marker menu details                            |
-| `docs/element-specs/component/radius-selection.md`                 | Radius draw + radius menu details              |
+| `docs/element-specs/component/map-context-menu.md`                           | Map menu details                               |
+| `docs/element-specs/media-marker/media-marker-context-menu.md`                  | Marker menu details                            |
+| `docs/element-specs/component/radius-selection.md`                           | Radius draw + radius menu details              |
 | `docs/use-cases/map-secondary-click-system.md`                     | End-to-end interaction scenarios               |
 
 ## Wiring

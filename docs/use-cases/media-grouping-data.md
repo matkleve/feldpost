@@ -1,5 +1,5 @@
 # Media Grouping — Data Sources & Derivation
-> **Related specs:** [grouping-dropdown](../element-specs/grouping-dropdown.md), [workspace-view-system](../element-specs/workspace/workspace-view-system.md), [workspace-toolbar](../element-specs/workspace/workspace-toolbar.md)
+> **Related specs:** [grouping-dropdown](../element-specs/component/grouping-dropdown.md), [workspace-view-system](../element-specs/workspace/workspace-view-system.md), [workspace-toolbar](../element-specs/workspace/workspace-toolbar.md)
 > **Related use cases:** [workspace-view WV-4, WV-5](workspace-view.md)
 
 ---
