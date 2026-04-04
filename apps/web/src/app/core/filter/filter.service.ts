@@ -1,13 +1,13 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import type { FilterRule, WorkspaceImage } from '../workspace-view/workspace-view.types';
 import { evaluateRulesForItem } from '../filter-rule-evaluator';
-import { PropertyRegistryService } from '../property-registry/property-registry.service';
+import { MetadataService } from '../metadata/metadata.service';
 
 let nextRuleId = 0;
 
 @Injectable({ providedIn: 'root' })
 export class FilterService {
-  private readonly registry = inject(PropertyRegistryService);
+  private readonly metadata = inject(MetadataService);
   readonly rules = signal<FilterRule[]>([]);
 
   readonly activeCount = computed(() => this.rules().length);
@@ -46,7 +46,7 @@ export class FilterService {
   }
 
   private getFieldValue(image: WorkspaceImage, property: string): string | null {
-    const val = this.registry.getFieldValue(image, property);
+    const val = this.metadata.getFilterValue(image, property);
     return val != null ? String(val) : null;
   }
 }

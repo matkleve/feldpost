@@ -28,6 +28,16 @@ UserLocationMarker                         ← Leaflet CircleMarker or DivIcon
 └── Dot                                    ← 18px circle, --color-primary, 3px white border, glow
 ```
 
+## Data
+
+| Source                   | Contract                                       | Operation                      |
+| ------------------------ | ---------------------------------------------- | ------------------------------ |
+| Browser geolocation      | `navigator.geolocation` current/watch position | Read/update marker position    |
+| GPS button intent        | `MapAdapter.showUserLocation()`                | Trigger marker create/recenter |
+| Map adapter marker layer | Leaflet marker/circle instance                 | Create/update/remove           |
+
+No Supabase data is required for this feature.
+
 ## State
 
 Managed by `MapAdapter` / GPS service — not a standalone Angular component.

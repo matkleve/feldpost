@@ -1,12 +1,12 @@
 # Custom Metadata System
 
-> **Parent spec:** [image-detail-view](media-detail-view.md)
+> **Parent spec:** [image-detail-view](media-detail/media-detail-view.md)
 > **Use cases:** [image-editing](../use-cases/image-editing.md) (IE-4, IE-5, IE-6)
-> **Database:** [database-schema](../database-schema.md) — `metadata_keys`, `image_metadata`
+> **Database:** [database-schema](../database-schema.md) -> `metadata_keys`, `image_metadata`
 
 ## What It Is
 
-The custom metadata system lets users tag images with arbitrary key/value pairs. Keys are shared across an organization (so all users see the same metadata vocabulary), while values are per-image. Users can add, edit, and remove metadata entries from the Image Detail View. Typing a key name shows autocomplete suggestions from existing org keys (Notion-style).
+The custom metadata system lets users tag media items with arbitrary key/value pairs. Keys are shared across an organization (so all users see the same metadata vocabulary), while values are per-media-item. Users can add, edit, and remove metadata entries from the Media Detail View. Typing a key name shows autocomplete suggestions from existing org keys (Notion-style).
 
 ## What It Looks Like
 
@@ -16,44 +16,44 @@ A section labeled **"Metadata"** (dd-section-label style) inside the Image Detai
 
 - **Route**: Any route with Image Detail View open
 - **Parent**: `MediaDetailViewComponent` in `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`
-- **Appears when**: Image detail view is open and image data is loaded
+- **Appears when**: Media detail view is open and media data is loaded
 
 ## Actions
 
-| #   | User Action                   | System Response                                                   | Triggers                                  |
-| --- | ----------------------------- | ----------------------------------------------------------------- | ----------------------------------------- |
-| 1   | Click metadata value          | MetadataPropertyRow enters edit mode — value becomes inline input | `editing.set(true)`                       |
-| 2   | Press Enter / blur on value   | Commit edit — optimistic update + Supabase upsert                 | `saveMetadata(entry, newValue)`           |
-| 3   | Press Escape in value input   | Cancel edit — restore original value, exit edit mode              | `editing.set(false)`                      |
-| 4   | Hover metadata row            | Warm clay tint background + delete icon appears on right          | CSS `:hover`                              |
-| 5   | Click delete icon             | Optimistic removal from list + Supabase delete                    | `removeMetadata(entry)`                   |
-| 6   | Click "Add metadata" button   | Reveal inline add form with key + value inputs                    | `showAddMetadata.set(true)`               |
-| 7   | Type in key input             | Filter org metadata keys, show autocomplete dropdown              | `onMetadataKeyInput(query)`               |
-| 8   | Click autocomplete suggestion | Fill key input with suggestion, close dropdown, focus value input | Template expression                       |
-| 9   | Press Enter in key input      | Move focus to value input                                         | `(keydown.enter)="newValueInput.focus()"` |
-| 10  | Press Enter in value input    | Save the new metadata entry                                       | `addMetadata(key, value)`                 |
-| 11  | Click save (check) button     | Save the new metadata entry                                       | `addMetadata(key, value)`                 |
-| 12  | Press Escape in add form      | Hide add form, clear suggestions                                  | `showAddMetadata.set(false)`              |
+| #   | User Action                   | System Response                                                    | Triggers                                  |
+| --- | ----------------------------- | ------------------------------------------------------------------ | ----------------------------------------- |
+| 1   | Click metadata value          | MetadataPropertyRow enters edit mode -> value becomes inline input | `editing.set(true)`                       |
+| 2   | Press Enter / blur on value   | Commit edit -> optimistic update + Supabase upsert                 | `saveMetadata(entry, newValue)`           |
+| 3   | Press Escape in value input   | Cancel edit -> restore original value, exit edit mode              | `editing.set(false)`                      |
+| 4   | Hover metadata row            | Warm clay tint background + delete icon appears on right           | CSS `:hover`                              |
+| 5   | Click delete icon             | Optimistic removal from list + Supabase delete                     | `removeMetadata(entry)`                   |
+| 6   | Click "Add metadata" button   | Reveal inline add form with key + value inputs                     | `showAddMetadata.set(true)`               |
+| 7   | Type in key input             | Filter org metadata keys, show autocomplete dropdown               | `onMetadataKeyInput(query)`               |
+| 8   | Click autocomplete suggestion | Fill key input with suggestion, close dropdown, focus value input  | Template expression                       |
+| 9   | Press Enter in key input      | Move focus to value input                                          | `(keydown.enter)="newValueInput.focus()"` |
+| 10  | Press Enter in value input    | Save the new metadata entry                                        | `addMetadata(key, value)`                 |
+| 11  | Click save (check) button     | Save the new metadata entry                                        | `addMetadata(key, value)`                 |
+| 12  | Press Escape in add form      | Hide add form, clear suggestions                                   | `showAddMetadata.set(false)`              |
 
 ## Component Hierarchy
 
 ```
-MetadataSection ← .detail-section, dd-section-label heading "Metadata"
-├── @for MetadataRowWrap ← .detail-metadata-row-wrap, flex row, hover clay tint
-│   ├── MetadataPropertyRowComponent ← click-to-edit key/value row
-│   │   ├── .prop-key ← key name, 0.8125rem, text-secondary
-│   │   └── .prop-value / .prop-input ← value display or inline input
-│   └── DeleteButton ← .detail-metadata-delete, absolute right, shown on :hover
-│
-├── [showAddMetadata] AddMetadataRow ← grid: 1fr 1fr auto
-│   ├── KeyInputWrap ← .detail-add-metadata-key-wrap, relative position
-│   │   ├── KeyInput ← text input with autocomplete trigger
-│   │   └── [metadataKeySuggestions.length > 0] SuggestionsDropdown ← dd-items, absolute, z-dropdown
-│   │       └── @for SuggestionButton ← dd-item with label icon + suggestion text
-│   ├── ValueInput ← text input, Enter to save
-│   └── SaveButton ← dd-item styled check icon button
-│
-└── [!showAddMetadata] AddMetadataButton ← dd-action-row, "Add metadata"
+MetadataSection -> .detail-section, dd-section-label heading "Metadata"
+|- @for MetadataRowWrap -> .detail-metadata-row-wrap, flex row, hover clay tint
+|  |- MetadataPropertyRowComponent -> click-to-edit key/value row
+|  ->   |- .prop-key -> key name, 0.8125rem, text-secondary
+|  ->   |- .prop-value / .prop-input -> value display or inline input
+|  |- DeleteButton -> .detail-metadata-delete, absolute right, shown on :hover
+->
+|- [showAddMetadata] AddMetadataRow -> grid: 1fr 1fr auto
+|  |- KeyInputWrap -> .detail-add-metadata-key-wrap, relative position
+|  ->   |- KeyInput -> text input with autocomplete trigger
+|  ->   |- [metadataKeySuggestions.length > 0] SuggestionsDropdown -> dd-items, absolute, z-dropdown
+|  ->       |- @for SuggestionButton -> dd-item with label icon + suggestion text
+|  |- ValueInput -> text input, Enter to save
+|  |- SaveButton -> dd-item styled check icon button
+->
+|- [!showAddMetadata] AddMetadataButton -> dd-action-row, "Add metadata"
 ```
 
 ## Data
@@ -81,6 +81,8 @@ SELECT metadata_key_id, value_text, metadata_keys(key_name)
 FROM image_metadata
 WHERE image_id = :mediaId
 ```
+
+Compatibility note: database objects still use `image_*` names (`image_metadata`, `image_id`), while runtime contracts should use `mediaId`.
 
 ### Query: Load org metadata keys (for autocomplete)
 
@@ -117,10 +119,71 @@ RETURNING id
 
 | Name                     | Type              | Default | Controls                                   |
 | ------------------------ | ----------------- | ------- | ------------------------------------------ |
-| `metadata`               | `MetadataEntry[]` | `[]`    | List of current image metadata entries     |
+| `metadata`               | `MetadataEntry[]` | `[]`    | List of current media metadata entries     |
 | `showAddMetadata`        | `boolean`         | `false` | Visibility of the add-metadata inline form |
 | `metadataKeySuggestions` | `string[]`        | `[]`    | Filtered autocomplete suggestions          |
 | `allMetadataKeyNames`    | `string[]`        | `[]`    | All org key names (loaded once per image)  |
+
+## File Map
+
+| File                                                                            | Purpose                                             |
+| ------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `docs/element-specs/custom-metadata.md`                                         | Custom metadata contract for media detail flows     |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`   | Parent orchestration for metadata load/mutate flows |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html` | Metadata section UI and event bindings              |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.scss` | Metadata section visuals, hover, and add-row layout |
+
+## Wiring
+
+### Injected Services
+
+- `SupabaseService` -> executes metadata select/upsert/delete operations.
+- `ToastService` (optional) -> shows save/delete failure feedback for rollback paths.
+
+### Inputs / Outputs
+
+- Input: `mediaId` for the currently selected media item.
+- Output from metadata row interactions: value changes and delete actions routed to parent handlers.
+
+### Subscriptions
+
+- Metadata reloads on selected `mediaId` changes.
+- Optimistic local state updates are reconciled with async persistence results.
+
+### Supabase Calls
+
+- `SELECT` metadata rows from `image_metadata` + joined `metadata_keys`.
+- `SELECT` key suggestions from `metadata_keys` by organization.
+- `UPSERT` metadata values into `image_metadata`.
+- `INSERT` new metadata key into `metadata_keys` when missing.
+- `DELETE` metadata row from `image_metadata`.
+
+```mermaid
+sequenceDiagram
+  participant UI as Metadata UI
+  participant C as MediaDetailViewComponent
+  participant S as Service Layer
+  participant DB as Supabase
+
+  UI->>C: open media detail (mediaId)
+  C->>S: loadMetadata(mediaId)
+  S->>DB: SELECT metadata + keys
+  DB-->>S: rows
+  S-->>C: normalized entries
+  C-->>UI: render metadata list
+
+  UI->>C: add/edit/remove metadata
+  C->>UI: optimistic update
+  C->>S: persist change
+  S->>DB: UPSERT/INSERT/DELETE
+  DB-->>S: success or error
+  alt success
+    S-->>C: confirm
+  else error
+    S-->>C: error
+    C-->>UI: rollback + error feedback
+  end
+```
 
 ## Database Schema
 
@@ -129,8 +192,8 @@ RETURNING id
 ```
 id               uuid PK default gen_random_uuid()
 key_name         text NOT NULL
-organization_id  uuid NOT NULL FK → organizations(id)
-created_by       uuid FK → profiles(id) ON DELETE SET NULL
+organization_id  uuid NOT NULL FK -> organizations(id)
+created_by       uuid FK -> profiles(id) ON DELETE SET NULL
 created_at       timestamptz NOT NULL default now()
 UNIQUE (organization_id, key_name)
 ```
@@ -138,8 +201,8 @@ UNIQUE (organization_id, key_name)
 ### `image_metadata` table
 
 ```
-image_id         uuid FK → images(id) ON DELETE CASCADE
-metadata_key_id  uuid FK → metadata_keys(id) ON DELETE CASCADE
+image_id         uuid FK -> images(id) ON DELETE CASCADE
+metadata_key_id  uuid FK -> metadata_keys(id) ON DELETE CASCADE
 value_text       text NOT NULL
 created_at       timestamptz default now()
 PRIMARY KEY (image_id, metadata_key_id)
@@ -161,7 +224,7 @@ PRIMARY KEY (image_id, metadata_key_id)
 
 ```
 WHEN user clicks "Add metadata":
-  showAddMetadata → true
+  showAddMetadata -> true
   reveal key + value inputs, focus key input
 
 WHEN user types in key input:
@@ -178,9 +241,9 @@ WHEN user presses Enter in key input:
   focus value input
 
 WHEN user presses Enter in value input OR clicks save:
-  IF key or value is empty → do nothing
+  IF key or value is empty -> do nothing
   look up metadata_keys for existing key with this name + org
-  IF not found → create new metadata_keys row
+  IF not found -> create new metadata_keys row
   upsert image_metadata with (image_id, key_id, value)
   append to metadata signal
   hide add form
@@ -194,7 +257,7 @@ WHEN user presses Escape in add form:
 
 ```
 WHEN user clicks value text in MetadataPropertyRow:
-  editing → true, swap to inline input
+  editing -> true, swap to inline input
 
 WHEN user commits (Enter / blur):
   emit valueChanged with new value
@@ -209,25 +272,25 @@ WHEN Supabase returns error:
 ### Remove Metadata
 
 ```
-WHEN user hovers row → show delete icon
+WHEN user hovers row -> show delete icon
 WHEN user clicks delete icon:
   optimistic removal from metadata signal
   delete from image_metadata where image_id + metadata_key_id
-  IF error → restore entry
+  IF error -> restore entry
 ```
 
 ## Acceptance Criteria
 
 - [ ] Metadata section shows all key/value pairs for the selected image
-- [ ] Click value → inline edit → Enter saves (optimistic update)
+- [ ] Click value -> inline edit -> Enter saves (optimistic update)
 - [ ] Escape cancels edit without saving
-- [ ] Hover row → warm clay tint + delete icon appears
+- [ ] Hover row -> warm clay tint + delete icon appears
 - [ ] Delete icon removes entry with optimistic update + rollback on error
 - [ ] "Add metadata" reveals key + value inputs
 - [ ] Typing in key input shows autocomplete from org metadata keys
 - [ ] Autocomplete excludes keys already on this image
 - [ ] Selecting suggestion fills key and focuses value
-- [ ] Enter in key → focus value, Enter in value → save
+- [ ] Enter in key -> focus value, Enter in value -> save
 - [ ] Empty key or value prevents save
 - [ ] New key name creates metadata_keys row if not found
 - [ ] Save button uses dd-item styling (not blue primary button)

@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { SortDropdownComponent } from './sort-dropdown.component';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
-import { PropertyRegistryService } from '../../core/property-registry/property-registry.service';
+import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig, PropertyRef } from '../../core/workspace-view/workspace-view.types';
 
 function buildFakeViewService() {
@@ -18,7 +18,7 @@ function setup(overrides?: Partial<ReturnType<typeof buildFakeViewService>>) {
 
   TestBed.configureTestingModule({
     providers: [
-      PropertyRegistryService,
+      MetadataService,
       { provide: WorkspaceViewService, useValue: fakeViewService },
     ],
   });
@@ -221,3 +221,4 @@ describe('SortDropdownComponent', () => {
     });
   });
 });
+

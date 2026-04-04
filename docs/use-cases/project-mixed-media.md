@@ -1,6 +1,6 @@
-# Project Mixed Media - Use Cases
+﻿# Project Mixed Media - Use Cases
 
-> Related specs: [projects-page](../element-specs/projects-page.md), [project-details-view](../element-specs/project-details-view.md), [upload-panel](../element-specs/upload-panel.md), [filter-panel](../element-specs/filter-panel.md)
+> Related specs: [projects-page](../element-specs/projects-page.md), [project-details-view](../element-specs/project-details-view.md), [upload-panel](../element-specs/upload-panel.md), [filter-panel](../element-specs/component/item-grid-filter-operator.md)
 
 ## Overview
 
@@ -225,3 +225,4 @@ Expected outcome:
 - [ ] Fullscreen project view separates GPS and project-only no-GPS lanes.
 - [ ] Project Sections remain user-defined, persisted, and reorderable.
 - [ ] Legacy photo-only workflows stay backward compatible.
+

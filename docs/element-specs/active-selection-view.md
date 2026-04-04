@@ -2,8 +2,8 @@
 
 > **Blueprint:** (pending — implement after foundation services are built)
 > **Use cases:** [use-cases/workspace-view.md](../use-cases/workspace-view.md)
-> **Architecture:** [workspace-view-system.md](workspace-view-system.md) (data pipeline, service contracts, RPC)
-> **Export interactions:** [workspace-export-bar.md](workspace-export-bar.md), [use-cases/workspace-export.md](../use-cases/workspace-export.md)
+> **Architecture:** [workspace/workspace-view-system.md](workspace/workspace-view-system.md) (data pipeline, service contracts, RPC)
+> **Export interactions:** [workspace/workspace-actions-bar.md](workspace/workspace-actions-bar.md), [use-cases/workspace-export.md](../use-cases/workspace-export.md)
 
 ## What It Is
 
@@ -49,11 +49,11 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 | 12  | New cluster/radius selection on map      | Replaces current Active Selection images, resets to unfiltered state                                     | `rawImages` replaced         |
 | 13  | Closes workspace pane                    | Active Selection cleared, all toolbar state reset                                                        | `rawImages` cleared          |
 | 14  | Hovers a thumbnail card                  | Reveals quiet actions: checkbox (multi-select), add-to-group, more (⋯)                                   | Quiet Actions pattern        |
-| 15  | Checks one or more thumbnail checkboxes  | Selection set updates and Workspace Export Bar appears with selected count and actions                   | `selectedMediaIds.size > 0`  |
+| 15  | Checks one or more thumbnail checkboxes  | Selection set updates and Workspace Actions Bar appears with selected count and actions                  | `selectedMediaIds.size > 0`  |
 | 16  | Clicks `Add to project` in export bar    | Opens bulk project picker and assigns all selected media to target project(s)                            | Bulk curation action         |
 | 17  | Clicks `Change address` in export bar    | Opens bulk address editor and updates address fields for all selected media                              | Bulk curation action         |
 | 18  | Clicks `Delete` in export bar            | Opens destructive confirmation and deletes all selected media on confirm                                 | Bulk curation action         |
-| 19  | Clicks "Select none" in export bar       | Clears current selection and hides Workspace Export Bar                                                  | `selectedMediaIds.size = 0`  |
+| 19  | Clicks "Select none" in export bar       | Clears current selection and hides Workspace Actions Bar                                                 | `selectedMediaIds.size = 0`  |
 
 ## Component Hierarchy
 
@@ -314,19 +314,19 @@ flowchart TD
 
 ## File Map
 
-| File                                                                          | Purpose                               | Spec Reference                                    |
-| ----------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------- |
-| `core/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group  | [workspace-view-system](workspace-view-system.md) |
-| `core/filter.service.ts`                                                      | Filter rule state + predicate builder | [filter-dropdown](filter-dropdown.md)             |
-| `core/metadata.service.ts`                                                    | Property CRUD + custom metadata       | [custom-properties](custom-properties.md)         |
-| `features/map/workspace-pane/workspace-toolbar.component.ts/html/scss`        | Toolbar with 4 buttons                | [workspace-toolbar](workspace-toolbar.md)         |
-| `features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.*` | Grouping dropdown with drag-reorder   | [grouping-dropdown](grouping-dropdown.md)         |
-| `features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.*`     | Sort dropdown with search             | [sort-dropdown](sort-dropdown.md)                 |
-| `features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.*`   | Notion-style filter builder           | [filter-dropdown](filter-dropdown.md)             |
-| `features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.*` | Projects checklist dropdown           | [projects-dropdown](projects-dropdown.md)         |
-| `features/map/workspace-pane/group-header.component.ts`                       | Collapsible group heading             | (this spec)                                       |
-| `features/map/workspace-pane/thumbnail-grid.component.*`                      | Virtual-scrolled image grid           | [thumbnail-grid](thumbnail-grid.md)               |
-| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                            | RPC for cluster image loading         | [workspace-view-system](workspace-view-system.md) |
+| File                                                                          | Purpose                               | Spec Reference                                              |
+| ----------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------- |
+| `core/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group  | [workspace-view-system](workspace/workspace-view-system.md) |
+| `core/filter.service.ts`                                                      | Filter rule state + predicate builder | [filter-dropdown](filter-dropdown.md)                       |
+| `core/metadata.service.ts`                                                    | Property CRUD + custom metadata       | [custom-properties](custom-properties.md)                   |
+| `features/map/workspace-pane/workspace-toolbar.component.ts/html/scss`        | Toolbar with 4 buttons                | [workspace-toolbar](workspace/workspace-toolbar.md)         |
+| `features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.*` | Grouping dropdown with drag-reorder   | [grouping-dropdown](grouping-dropdown.md)                   |
+| `features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.*`     | Sort dropdown with search             | [sort-dropdown](sort-dropdown.md)                           |
+| `features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.*`   | Notion-style filter builder           | [filter-dropdown](filter-dropdown.md)                       |
+| `features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.*` | Projects checklist dropdown           | [projects-dropdown](projects-dropdown.md)                   |
+| `features/map/workspace-pane/group-header.component.ts`                       | Collapsible group heading             | (this spec)                                                 |
+| `features/map/workspace-pane/thumbnail-grid.component.*`                      | Virtual-scrolled image grid           | [thumbnail-grid](thumbnail-grid.md)                         |
+| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                            | RPC for cluster image loading         | [workspace-view-system](workspace/workspace-view-system.md) |
 
 ## Wiring
 

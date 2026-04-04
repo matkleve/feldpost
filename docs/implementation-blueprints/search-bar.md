@@ -1,6 +1,6 @@
 # Search Bar — Implementation Blueprint
 
-> **Spec**: [element-specs/search-bar.md](../element-specs/search-bar.md)
+> **Spec**: [element-specs/search-bar.md](../element-specs/search-bar/search-bar.md)
 > **Status**: Core component and service layer are implemented. This blueprint only tracks follow-up implementation notes beyond the spec.
 
 ## Existing Infrastructure

@@ -1,7 +1,7 @@
-# Media Download Adapter - Tier Resolver
+﻿# Media Download Adapter - Tier Resolver
 
 > Parent spec: [../media-download-service.md](../media-download-service.md)
-> Related specs: [../../media-item.md](../../media-item.md), [../../item-grid.md](../../item-grid.md), [../../media-detail-media-viewer.md](../../media-detail-media-viewer.md)
+> Related specs: [../../media-item.md](../../media-item.md), [../../component/item-grid.md](../../component/item-grid.md), [../../media-detail/media-detail-media-viewer.md](../../media-detail/media-detail-media-viewer.md)
 
 ## What It Is
 
@@ -31,12 +31,12 @@ Headless adapter. Consumers pass `desiredSize` and optional `boxPixels`; adapter
 
 ```text
 TierResolverAdapter
-├── IntentMapper (desiredSize -> requestedTier)
-├── AdaptivePolicy (boxPixels/context -> effectiveTier)
-├── FallbackPolicy (effectiveTier -> fallbackChain)
-└── UrlStrategy
-    ├── StaticPathStrategy
-    └── DynamicTransformStrategy
+â”œâ”€â”€ IntentMapper (desiredSize -> requestedTier)
+â”œâ”€â”€ AdaptivePolicy (boxPixels/context -> effectiveTier)
+â”œâ”€â”€ FallbackPolicy (effectiveTier -> fallbackChain)
+â””â”€â”€ UrlStrategy
+    â”œâ”€â”€ StaticPathStrategy
+    â””â”€â”€ DynamicTransformStrategy
 ```
 
 ## Data Requirements

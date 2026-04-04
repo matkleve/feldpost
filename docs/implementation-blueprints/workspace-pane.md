@@ -1,6 +1,6 @@
 # Workspace Pane — Implementation Blueprint
 
-> **Spec**: [element-specs/workspace-pane.md](../element-specs/workspace-pane.md)
+> **Spec**: [element-specs/workspace/workspace-pane.md](../element-specs/workspace/workspace-pane.md)
 > **Status**: Core desktop pane is implemented as `WorkspacePaneComponent`. This blueprint is intentionally minimal and only tracks follow-up work that should not live in the spec.
 
 ## Why This Blueprint Still Exists
@@ -45,4 +45,4 @@ Upload tab now carries workspace-only multi-select intent (hover/focus checkbox 
 
 - Do not redesign the pane around a second future-only component abstraction.
 - Extend `WorkspacePaneComponent`, `WorkspaceViewService`, and `WorkspaceSelectionService` unless a real code-level constraint appears.
-- Keep rollout notes here; keep user-visible contract changes in `docs/element-specs/workspace-pane.md`.
+- Keep rollout notes here; keep user-visible contract changes in `docs/element-specs/workspace/workspace-pane.md`.

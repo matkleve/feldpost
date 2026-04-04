@@ -1,4 +1,4 @@
-# Project Mixed Media Pre-Spec
+﻿# Project Mixed Media Pre-Spec
 
 > Use cases: [project-mixed-media.md](../use-cases/project-mixed-media.md)
 
@@ -35,29 +35,29 @@ The map keeps current marker and cluster language, but individual markers gain m
 
 ```
 ProjectMixedMediaSystem
-├── MapZoneIntegration
-│   ├── MediaMarkerRenderer
-│   │   ├── [photo] SquareMarkerThumb
-│   │   ├── [document] PortraitMarkerThumb (3:4)
-│   │   └── [video] SquareMarkerThumb + PlayBadge
-│   └── MarkerDetailDrawer (shared)
-├── ProjectsPageIntegration
-│   ├── FileTypeFilterStrip (separate from Filter operator)
-│   │   ├── PhotosChip
-│   │   ├── VideosChip
-│   │   └── DocumentsChip
-│   └── ProjectFullscreenView
-│       ├── ProjectHeader
-│       ├── GpsMediaArea
-│       │   └── SectionedMediaGrid
-│       └── ProjectOnlyMediaArea
-│           └── SectionedMediaGrid
-└── MembershipAndSections
-    ├── SharedBadge
-    ├── MembershipEditor
-    ├── AddSectionAction
-    ├── SectionHeader
-    └── SectionItemAssignment
+â”œâ”€â”€ MapZoneIntegration
+â”‚   â”œâ”€â”€ MediaMarkerRenderer
+â”‚   â”‚   â”œâ”€â”€ [photo] SquareMarkerThumb
+â”‚   â”‚   â”œâ”€â”€ [document] PortraitMarkerThumb (3:4)
+â”‚   â”‚   â””â”€â”€ [video] SquareMarkerThumb + PlayBadge
+â”‚   â””â”€â”€ MarkerDetailDrawer (shared)
+â”œâ”€â”€ ProjectsPageIntegration
+â”‚   â”œâ”€â”€ FileTypeFilterStrip (separate from Filter operator)
+â”‚   â”‚   â”œâ”€â”€ PhotosChip
+â”‚   â”‚   â”œâ”€â”€ VideosChip
+â”‚   â”‚   â””â”€â”€ DocumentsChip
+â”‚   â””â”€â”€ ProjectFullscreenView
+â”‚       â”œâ”€â”€ ProjectHeader
+â”‚       â”œâ”€â”€ GpsMediaArea
+â”‚       â”‚   â””â”€â”€ SectionedMediaGrid
+â”‚       â””â”€â”€ ProjectOnlyMediaArea
+â”‚           â””â”€â”€ SectionedMediaGrid
+â””â”€â”€ MembershipAndSections
+    â”œâ”€â”€ SharedBadge
+    â”œâ”€â”€ MembershipEditor
+    â”œâ”€â”€ AddSectionAction
+    â”œâ”€â”€ SectionHeader
+    â””â”€â”€ SectionItemAssignment
 ```
 
 ## Data
@@ -128,7 +128,7 @@ erDiagram
 | `docs/element-specs/project-mixed-media-pre-spec.md`               | Pre-spec contract and rollout boundaries                                  |
 | `docs/implementation-blueprints/project-mixed-media-data-model.md` | Technical schema/RLS/migration blueprint for safe rollout                 |
 | `docs/element-specs/project-details-view.md`                       | Existing project detail view to extend with fullscreen and two-lane model |
-| `docs/element-specs/filter-panel.md`                               | Existing filter spec to keep stable while adding separate File Type strip |
+| `docs/element-specs/component/item-grid-filter-operator.md`                               | Existing filter spec to keep stable while adding separate File Type strip |
 | `docs/element-specs/upload-panel.md`                               | Existing upload entry to extend for mixed media intake                    |
 
 ## Wiring
@@ -212,3 +212,4 @@ sequenceDiagram
 - **File Type Visibility**: default selected media families in map/workspace/project views.
 - **Fullscreen Project Mode**: default entry behavior for project detail (inline pane vs fullscreen).
 - **Section Rules**: max sections per project, empty-section auto-collapse, and deletion confirmation mode.
+

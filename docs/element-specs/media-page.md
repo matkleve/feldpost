@@ -450,6 +450,6 @@ sequenceDiagram
 
 ## Related Specs
 
-- [workspace-pane.md](workspace-pane.md) — extended with Upload tab
+- [workspace/workspace-pane.md](workspace/workspace-pane.md) — extended with Upload tab
 - [upload-panel.md](upload-panel.md) — embedded in workspace pane Upload tab (no changes)
 - [media-detail-inline-editing.md](media-detail-inline-editing.md) — detail modal reused on media page

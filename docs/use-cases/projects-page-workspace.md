@@ -1,6 +1,6 @@
 # Projects Page Workspace Flow — Use Cases
 
-> **Related specs:** [projects-page](../element-specs/projects-page.md), [project-details-view](../element-specs/project-details-view.md), [image-detail-view](../element-specs/media-detail-view.md), [map-shell](../element-specs/map-shell.md)
+> **Related specs:** [projects-page](../element-specs/projects-page.md), [project-details-view](../element-specs/project-details-view.md), [image-detail-view](../element-specs/media-detail/media-detail-view.md), [map-shell](../element-specs/map-shell.md)
 > **Personas:** [Technician](../archive/use-cases-README.md#persona-technician), [Clerk](../archive/use-cases-README.md#persona-clerk)
 
 ---

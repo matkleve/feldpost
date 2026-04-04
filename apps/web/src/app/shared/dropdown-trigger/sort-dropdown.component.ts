@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { PropertyRegistryService } from '../../core/property-registry/property-registry.service';
+import { MetadataService } from '../../core/metadata/metadata.service';
 import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
@@ -108,7 +108,7 @@ export class SortDropdownComponent {
 
   private readonly viewService = inject(WorkspaceViewService);
   private readonly i18nService = inject(I18nService);
-  private readonly registry = inject(PropertyRegistryService);
+  private readonly metadata = inject(MetadataService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly optionsInput = input<SortDropdownOption[] | null>(null);
@@ -120,11 +120,11 @@ export class SortDropdownComponent {
     const provided = this.optionsInput();
     if (provided) return provided;
 
-    return this.registry.sortableProperties().map((p) => ({
-      id: p.id,
-      label: p.label,
-      icon: p.icon,
-      defaultDirection: p.defaultSortDirection,
+    return this.metadata.sortableMetadataFields().map((field) => ({
+      id: field.id,
+      label: field.label,
+      icon: field.icon,
+      defaultDirection: field.defaultSortDirection,
     }));
   });
 

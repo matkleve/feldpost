@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { DateSaveEvent } from './captured-date-editor.component';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
+import { MetadataService } from '../../../core/metadata/metadata.service';
 import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload/upload.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import {
@@ -103,6 +104,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
 
   private readonly supabaseService = inject(SupabaseService);
+  private readonly metadataService = inject(MetadataService);
   private readonly uploadService = inject(UploadService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
@@ -325,6 +327,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly dataFacade = new ImageDetailDataFacade({
     services: {
       supabase: this.supabaseService,
+      metadata: this.metadataService,
       photoLoad: this.photoLoad,
       projectMemberships: this.projectMembershipHelper,
     },
@@ -348,7 +351,7 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   private readonly metadataHelper = new ImageDetailMetadataHelper({
     services: {
-      supabase: this.supabaseService,
+      metadata: this.metadataService,
     },
     signals: {
       image: this.media,

@@ -18,7 +18,7 @@
 - `apps/web/src/app/core/upload-manager.types.ts` - Types & interfaces
 - `apps/web/src/app/core/upload-new-pipeline.service.ts` - New upload pipeline
 - `apps/web/src/app/core/upload-*.service.ts` - Various pipeline services
-- `docs/element-specs/upload-manager.md` - Specification (571 lines!)
+- `docs/element-specs/upload-manager/upload-manager.md` - Specification (571 lines!)
 
 ---
 
@@ -379,7 +379,7 @@ ng build --configuration=production
 ## 📚 Reference Materials
 
 ### Documentation
-- [Upload Manager Spec](../element-specs/upload-manager.md)
+- [Upload Manager Spec](../element-specs/upload-manager/upload-manager.md)
 - [Agent Quick Reference](../agent-quick-reference.md)
 - [Implementation Checklist](../agent-workflows/implementation-checklist.md)
 

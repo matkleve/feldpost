@@ -1,6 +1,6 @@
 # Media Download Service
 
-> Related specs: [item-grid](../item-grid.md), [media-item](../media-item.md), [media-detail-media-viewer](../media-detail-media-viewer.md), [workspace-export-bar](../workspace-export-bar.md), [upload-manager](../upload-manager.md), [action-context-matrix](../action-context-matrix.md)
+> Related specs: [item-grid](../component/item-grid.md), [media-item](../media-item.md), [media-detail-media-viewer](../media-detail/media-detail-media-viewer.md), [workspace-actions-bar](../workspace/workspace-actions-bar.md), [upload-manager](../upload-manager/upload-manager.md), [action-context-matrix](../action-context-matrix.md)
 > Adapter sub-specs: [tier-resolver.adapter](adapters/tier-resolver.adapter.md), [signed-url-cache.adapter](adapters/signed-url-cache.adapter.md), [edge-export-orchestrator.adapter](adapters/edge-export-orchestrator.adapter.md)
 
 ## What It Is
@@ -38,18 +38,18 @@ This is not a visual component. Its visible impact is consistency across map mar
 
 ### Existing Spec Coverage Audit
 
-| Existing spec                                       | Covered concern                                                 | Target adapter or facade ownership            | Decision                                     |
-| --------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
-| `docs/element-specs/item-grid.md`                   | Cross-surface preview consistency and tier/fallback consumption | Facade + Tier Resolver                        | Keep, reference new parent                   |
-| `docs/element-specs/media-item.md`                  | `/media` preview state mapping and tier usage                   | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/element-specs/media-detail-media-viewer.md`   | Detail progressive loading and shared cache contract            | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/element-specs/photo-marker.md`                | Marker preview loading runtime dependency                       | Facade + Signed URL Cache                     | Keep, point to runtime file/service boundary |
-| `docs/element-specs/workspace-export-bar.md`        | Export trigger behavior and UX expectations                     | Facade + Edge Export Orchestrator             | Keep, consume edge export contract           |
-| `docs/element-specs/upload-manager.md`              | Upload attach/replace blob bridge into media retrieval          | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/element-specs/upload-panel.md`                | Upload area file actions and integration context                | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/element-specs/file-type-chips.md`             | Upload area architecture parent linkage                         | Facade                                        | Keep, reference new parent                   |
-| `docs/element-specs/media-delivery-orchestrator.md` | Legacy combined tier+delivery policy contract                   | Replaced by facade + adapter split            | Archive as deprecated                        |
-| `docs/element-specs/photo-load-service.md`          | Legacy signed URL/cache headless contract                       | Replaced by signed-url-cache adapter contract | Archive as deprecated                        |
+| Existing spec                                                  | Covered concern                                                 | Target adapter or facade ownership            | Decision                                     |
+| -------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
+| `docs/element-specs/component/item-grid.md`                    | Cross-surface preview consistency and tier/fallback consumption | Facade + Tier Resolver                        | Keep, reference new parent                   |
+| `docs/element-specs/media-item.md`                             | `/media` preview state mapping and tier usage                   | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/element-specs/media-detail/media-detail-media-viewer.md` | Detail progressive loading and shared cache contract            | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/element-specs/media-marker/media-marker.md`              | Marker preview loading runtime dependency                       | Facade + Signed URL Cache                     | Keep, point to runtime file/service boundary |
+| `docs/element-specs/workspace/workspace-actions-bar.md`        | Export trigger behavior and UX expectations                     | Facade + Edge Export Orchestrator             | Keep, consume edge export contract           |
+| `docs/element-specs/upload-manager/upload-manager.md`          | Upload attach/replace blob bridge into media retrieval          | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/element-specs/upload-panel.md`                           | Upload area file actions and integration context                | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/element-specs/file-type-chips.md`                        | Upload area architecture parent linkage                         | Facade                                        | Keep, reference new parent                   |
+| `docs/element-specs/media-delivery-orchestrator.md`            | Legacy combined tier+delivery policy contract                   | Replaced by facade + adapter split            | Archive as deprecated                        |
+| `docs/archive/element-specs-legacy/photo-load-service.md`      | Legacy signed URL/cache headless contract                       | Replaced by signed-url-cache adapter contract | Archive as deprecated                        |
 
 ### Affected Code Audit (Migration Scope)
 

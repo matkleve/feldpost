@@ -1,4 +1,4 @@
-# Media Item
+﻿# Media Item
 
 ## What It Is
 
@@ -11,7 +11,7 @@ The slot is the only owner of thumbnail border and radius styling (no outer fram
 
 ## Where It Lives
 
-- Parent spec: `docs/element-specs/item-grid.md`
+- Parent spec: `docs/element-specs/component/item-grid.md`
 - Delivery policy owner: `docs/element-specs/media-download/media-download-service.md`
 - Child component root: `apps/web/src/app/features/media/media-item.component.ts`
 - Child specs:
@@ -76,20 +76,20 @@ Legacy/internal loader statuses may still exist in services, but they must be no
 
 ```text
 MediaItemComponent
-├── ItemStateFrame binding (shared state frame contract)
-│   └── Domain content outlet
-├── MediaItemRenderSurfaceComponent
-│   ├── Slot frame (mode/type-aware ratio)
-│   ├── Layer: loading (neutral gray placeholder, optional warm blurred cached preview)
-│   ├── Layer: content (asset + optional video play indicator)
-│   ├── Layer: error
-│   └── Layer: no-media
-├── MediaItemUploadOverlayComponent
-│   └── Progress fill + icon + label (z-index below quiet actions)
-├── MediaItemQuietActionsComponent
-│   ├── Select action
-│   ├── Map action (icon-only)
-│   └── Keyboard focusable controls
+â”œâ”€â”€ ItemStateFrame binding (shared state frame contract)
+â”‚   â””â”€â”€ Domain content outlet
+â”œâ”€â”€ MediaItemRenderSurfaceComponent
+â”‚   â”œâ”€â”€ Slot frame (mode/type-aware ratio)
+â”‚   â”œâ”€â”€ Layer: loading (neutral gray placeholder, optional warm blurred cached preview)
+â”‚   â”œâ”€â”€ Layer: content (asset + optional video play indicator)
+â”‚   â”œâ”€â”€ Layer: error
+â”‚   â””â”€â”€ Layer: no-media
+â”œâ”€â”€ MediaItemUploadOverlayComponent
+â”‚   â””â”€â”€ Progress fill + icon + label (z-index below quiet actions)
+â”œâ”€â”€ MediaItemQuietActionsComponent
+â”‚   â”œâ”€â”€ Select action
+â”‚   â”œâ”€â”€ Map action (icon-only)
+â”‚   â””â”€â”€ Keyboard focusable controls
 ```
 
 ## Data
@@ -266,10 +266,10 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 
 | Behavior             | Geometry Owner                                  | State Owner                                         | Visual Owner                                        | Same element?                                                                          |
 | -------------------- | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | ✅                                                                                     |
-| Upload overlay       | `.media-item__upload-overlay`                   | `.media-item__upload-overlay`                       | `.media-item__upload-overlay`                       | ✅                                                                                     |
-| Selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                                                                                     |
-| Quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | ⚠️ exception — reveal is intentionally controlled by parent hover/focus/selected state |
+| Loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | âœ…                                                                                     |
+| Upload overlay       | `.media-item__upload-overlay`                   | `.media-item__upload-overlay`                       | `.media-item__upload-overlay`                       | âœ…                                                                                     |
+| Selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | âœ…                                                                                     |
+| Quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | âš ï¸ exception â€” reveal is intentionally controlled by parent hover/focus/selected state |
 
 ### Stacking Context
 
@@ -446,3 +446,4 @@ sequenceDiagram
 - [ ] Visual output is driven by one enum state input and `[attr.data-state]`; boolean visual-state inputs are removed.
 - [ ] Transition choreography is tokenized (`var(--transition-*)`) with no magic-number timing values.
 - [ ] `npm run lint` and `ng build` are clean for the migration scope.
+

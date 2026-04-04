@@ -2247,7 +2247,7 @@ export class MapShellComponent implements OnDestroy {
 
         // Keep first route paint responsive, then run startup data work.
         this.initGeolocation();
-        void this.workspaceViewService.loadCustomProperties();
+        void this.workspaceViewService.loadMetadataFields();
 
         this.deferredStartupHandles.markerBootstrapTimer = setTimeout(() => {
           this.deferredStartupHandles.markerBootstrapTimer = null;

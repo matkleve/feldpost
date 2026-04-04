@@ -9,7 +9,7 @@ import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../../core/filter/filter.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { PropertyRegistryService } from '../../../../core/property-registry/property-registry.service';
+import { MetadataService } from '../../../../core/metadata/metadata.service';
 import type {
   PropertyRef,
   SortConfig,
@@ -44,7 +44,7 @@ export class WorkspaceToolbarComponent {
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
-  private readonly registry = inject(PropertyRegistryService);
+  private readonly metadata = inject(MetadataService);
   private readonly cardVariantSettings = inject(CardVariantSettingsService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
@@ -69,10 +69,10 @@ export class WorkspaceToolbarComponent {
   readonly activeGroupings = signal<GroupingProperty[]>([]);
   readonly availableGroupings = computed<GroupingProperty[]>(() => {
     const activeIds = new Set(this.activeGroupings().map((g) => g.id));
-    return this.registry
-      .groupableProperties()
-      .filter((p) => !activeIds.has(p.id))
-      .map((p) => ({ id: p.id, label: p.label, icon: p.icon }));
+    return this.metadata
+      .groupableMetadataFields()
+      .filter((field) => !activeIds.has(field.id))
+      .map((field) => ({ id: field.id, label: field.label, icon: field.icon }));
   });
 
   // Active-state indicators — wired to services

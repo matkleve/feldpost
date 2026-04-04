@@ -1,4 +1,4 @@
-# Media Renderer System - Implementation Blueprint
+﻿# Media Renderer System - Implementation Blueprint
 
 ## Goal
 
@@ -9,7 +9,7 @@ Introduce one shared media rendering architecture with:
 - a universal `UniversalMediaComponent`
 - incremental migration of all existing surfaces
 
-This blueprint is superseded in active runtime by `docs/element-specs/media-download/media-download-service.md` plus `docs/element-specs/item-grid.md`/`docs/element-specs/media-item.md`.
+This blueprint is superseded in active runtime by `docs/element-specs/media-download/media-download-service.md` plus `docs/element-specs/component/item-grid.md`/`docs/element-specs/media-item.md`.
 
 ## Non-Goals
 
@@ -26,7 +26,7 @@ This blueprint is superseded in active runtime by `docs/element-specs/media-down
 | 2     | Done        | `media-orchestrator.service.ts` exists with fallback logic and adaptive slot-based tier selection API.                                                                                   |
 | 3     | Done        | `UniversalMediaComponent` complete; thumbnail-card, media-detail-media-viewer, upload-panel-item, and media-card consumers integrated.                                                   |
 | 4     | Done        | Upload-panel-item surface fully migrated; slot measurement (inline/2.75rem) working; adaptive tier gating applied.                                                                       |
-| 5     | Done        | Media-card surface fully migrated (4 variants: row/small/medium/large); adaptive tier selection (inline→mid2) applied; shared upload overlay now rendered via `UniversalMediaComponent`. |
+| 5     | Done        | Media-card surface fully migrated (4 variants: row/small/medium/large); adaptive tier selection (inlineâ†’mid2) applied; shared upload overlay now rendered via `UniversalMediaComponent`. |
 | 6     | In progress | Final cleanup and hardening pending; primary surfaces are migrated, docs still need legacy `image-detail-*` duplicate removal, and high-tier fallback/prerender behavior remains open.   |
 
 ## Phase Plan
@@ -63,3 +63,4 @@ This blueprint is superseded in active runtime by `docs/element-specs/media-down
   - Mitigation: shared orchestrator state model and contract tests.
 - Risk: tier request can over-fetch high-res assets.
   - Mitigation: strict fallback chain, requested-tier cap, and lazy high-tier prerender trigger.
+

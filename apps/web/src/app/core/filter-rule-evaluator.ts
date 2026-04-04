@@ -1,4 +1,4 @@
-import type { PropertyType } from './property-registry/property-registry.types';
+import type { MetadataValueType } from './metadata/metadata.types';
 
 export type FilterRuleLike = {
   conjunction: string;
@@ -11,7 +11,7 @@ export const TEXT_FILTER_OPERATORS = ['contains', 'equals', 'is', 'is not', 'bef
 export const NUMBER_FILTER_OPERATORS = ['=', '≠', '>', '<', '≥', '≤'];
 export const DATE_FILTER_OPERATORS = ['is', 'is not', 'before', 'after'];
 
-export function operatorsForPropertyType(type: PropertyType | undefined): string[] {
+export function operatorsForPropertyType(type: MetadataValueType | undefined): string[] {
   switch (type) {
     case 'number':
       return NUMBER_FILTER_OPERATORS;

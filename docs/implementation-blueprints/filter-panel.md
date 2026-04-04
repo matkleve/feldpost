@@ -1,6 +1,6 @@
-# Filter Panel — Implementation Blueprint
+﻿# Filter Panel â€” Implementation Blueprint
 
-> **Spec**: [element-specs/filter-panel.md](../element-specs/filter-panel.md)
+> **Spec**: [element-specs/filter-panel.md](../element-specs/component/item-grid-filter-operator.md)
 > **Status**: Not implemented. FilterService does not exist. No filter UI exists.
 
 ## Existing Infrastructure
@@ -67,12 +67,12 @@ export type ActiveFilter =
 
 @Injectable({ providedIn: "root" })
 export class FilterService {
-  // ── State ──
+  // â”€â”€ State â”€â”€
   readonly filters = signal<ActiveFilter[]>([]);
   readonly activeCount = computed(() => this.filters().length);
   readonly hasActiveFilters = computed(() => this.filters().length > 0);
 
-  // ── Mutations ──
+  // â”€â”€ Mutations â”€â”€
   setTimeRange(from: string | null, to: string | null): void {
     this.upsertFilter({ type: "time-range", from, to });
   }
@@ -112,7 +112,7 @@ export class FilterService {
     this.filters.set([]);
   }
 
-  // ── Query building ──
+  // â”€â”€ Query building â”€â”€
   /** Returns Supabase query modifiers for the current filter set */
   buildQueryParams(): FilterQueryParams {
     const filters = this.filters();
@@ -145,11 +145,11 @@ export class FilterService {
     return params;
   }
 
-  // ── Chip labels ──
+  // â”€â”€ Chip labels â”€â”€
   getChipLabel(filter: ActiveFilter): string {
     switch (filter.type) {
       case "time-range":
-        return `Date: ${filter.from ?? "…"} – ${filter.to ?? "…"}`;
+        return `Date: ${filter.from ?? "â€¦"} â€“ ${filter.to ?? "â€¦"}`;
       case "project":
         return `Project: ${filter.projectName}`;
       case "metadata":
@@ -161,7 +161,7 @@ export class FilterService {
     }
   }
 
-  // ── Private ──
+  // â”€â”€ Private â”€â”€
   private upsertFilter(filter: ActiveFilter): void {
     this.filters.update((f) => [
       ...f.filter((existing) => existing.type !== filter.type),
@@ -170,7 +170,7 @@ export class FilterService {
   }
 }
 
-/** Maps to SQL param names: capturedAfter → filter_captured_after, capturedBefore → filter_captured_before */
+/** Maps to SQL param names: capturedAfter â†’ filter_captured_after, capturedBefore â†’ filter_captured_before */
 export interface FilterQueryParams {
   capturedAfter?: string;
   capturedBefore?: string;
@@ -185,7 +185,7 @@ export interface FilterQueryParams {
 
 ## Data Flow
 
-### Filter Panel → FilterService → Map Markers
+### Filter Panel â†’ FilterService â†’ Map Markers
 
 ```mermaid
 sequenceDiagram
@@ -386,3 +386,4 @@ private async queryViewportMarkers(): Promise<void> {
     });
 }
 ```
+

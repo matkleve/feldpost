@@ -50,6 +50,62 @@ MapShellComponent
     └── Grouping stage
 ```
 
+## Data
+
+| Source                           | Contract                                                           | Operation                          |
+| -------------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
+| Cluster/single marker result set | `cluster_images` RPC payload (`images` rows; compatibility naming) | Load raw workspace media list      |
+| Filter state                     | `FilterService` active filters + project selection                 | Transform pipeline stage           |
+| Sort state                       | Toolbar sort configuration                                         | Transform pipeline stage           |
+| Grouping state                   | Toolbar grouping configuration                                     | Transform pipeline stage           |
+| Output model                     | `groupedSections` view model                                       | Emit to workspace content renderer |
+
+Compatibility note: storage/query layers may still use `image*` naming while UI/domain contracts should prefer `media` terminology.
+
+## State
+
+| Name               | Type               | Default                | Controls                               |
+| ------------------ | ------------------ | ---------------------- | -------------------------------------- |
+| `rawImages`        | `WorkspaceMedia[]` | `[]`                   | Source list before pipeline transforms |
+| `activeFilters`    | `FilterRule[]`     | `[]`                   | Predicate stage inputs                 |
+| `activeSort`       | `SortConfig`       | implementation default | Sort order stage                       |
+| `activeGroupings`  | `PropertyRef[]`    | `[]`                   | Grouping stage                         |
+| `selectedProjects` | `Set<string>`      | empty set              | Project-based include/exclude scope    |
+| `groupedSections`  | `GroupedSection[]` | `[]`                   | Render-ready output model              |
+
+## File Map
+
+| File                                                                          | Purpose                                    |
+| ----------------------------------------------------------------------------- | ------------------------------------------ |
+| `docs/element-specs/workspace-view-system.md`                                 | System-level orchestration contract        |
+| `apps/web/src/app/features/map/workspace-pane/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
+| `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Parent host integration with map shell     |
+| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |
+| `apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts`    | Section/grid render consumer               |
+
+## Wiring
+
+### Injected Services
+
+- `WorkspaceViewService` - central orchestration for workspace model derivation.
+- `FilterService` - active filter state and radius/project constraints.
+- `MapShell`/map marker interaction layer - entrypoint for raw media loading triggers.
+
+### Inputs / Outputs
+
+- Inputs: marker interaction payload, toolbar grouping/sort/filter selections, project context.
+- Outputs: grouped workspace sections and detail-vs-grid mode decisions.
+
+### Subscriptions
+
+- Reactive recomputation on raw list, filters, sort config, grouping config, and selected projects changes.
+- Workspace content area subscribes to grouped output model signal.
+
+### Supabase Calls
+
+- `cluster_images` RPC for marker/cluster-originated list loading.
+- No direct persistence mutations in this system spec; write operations are delegated to child feature flows.
+
 ## Acceptance Criteria
 
 - [ ] Marker and cluster interactions always produce a valid workspace content model.

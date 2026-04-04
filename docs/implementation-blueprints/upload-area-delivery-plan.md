@@ -24,7 +24,7 @@ Source contracts:
 
 - `docs/element-specs/upload-button-zone.md`
 - `docs/element-specs/upload-panel.md`
-- `docs/element-specs/upload-manager.md`
+- `docs/element-specs/upload-manager/upload-manager.md`
 - `docs/use-cases/upload-panel.md`
 - `docs/role-permissions.md`
 

@@ -3,12 +3,9 @@ import type { ImageDetailProjectMembershipHelper } from './media-detail-project-
 import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { MediaDownloadService } from '../../../core/media-download/media-download.service';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
+import type { MetadataService } from '../../../core/metadata/metadata.service';
 import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
-import {
-  isImageLikeMedia,
-  mapImageMetadataRows,
-  resolvePreviewThumbnailPath,
-} from './media-detail-view.utils';
+import { isImageLikeMedia, resolvePreviewThumbnailPath } from './media-detail-view.utils';
 
 interface MediaDetailRow {
   id: string;
@@ -37,13 +34,10 @@ interface ProjectRow {
   name: string;
 }
 
-interface MetadataKeyRow {
-  key_name: string;
-}
-
 interface ImageDetailDataFacadeDeps {
   services: {
     supabase: SupabaseService;
+    metadata: MetadataService;
     photoLoad: MediaDownloadService;
     projectMemberships: ImageDetailProjectMembershipHelper;
   };
@@ -77,16 +71,14 @@ export class ImageDetailDataFacade {
 
     const legacyImageId = media.source_image_id ?? media.id;
     const image = this.toImageRecord(media, legacyImageId);
-
-    const metaResult = await this.deps.services.supabase.client
-      .from('media_metadata')
-      .select('metadata_key_id, value_text, metadata_keys(key_name)')
-      .eq('media_item_id', media.id);
+    const metadataEntries = await this.deps.services.metadata.loadMetadataEntriesForMediaItem(
+      media.id,
+    );
 
     this.deps.signals.image.set(image);
     this.deps.signals.error.set(null);
     this.deps.signals.loading.set(false);
-    this.deps.signals.metadata.set(mapImageMetadataRows(metaResult.data ?? []));
+    this.deps.signals.metadata.set(metadataEntries);
 
     if (image.storage_path) {
       void this.loadSignedUrls(image, abortSignal);
@@ -157,17 +149,9 @@ export class ImageDetailDataFacade {
   }
 
   async loadMetadataKeys(organizationId: string): Promise<void> {
-    const { data } = await this.deps.services.supabase.client
-      .from('metadata_keys')
-      .select('key_name')
-      .eq('organization_id', organizationId)
-      .order('key_name');
-
-    if (data) {
-      this.deps.signals.allMetadataKeyNames.set(
-        (data as MetadataKeyRow[]).map((metadataKey) => metadataKey.key_name),
-      );
-    }
+    const keyNames =
+      await this.deps.services.metadata.listMetadataKeyNamesForOrganization(organizationId);
+    this.deps.signals.allMetadataKeyNames.set(keyNames);
   }
 
   private resetLoadState(): void {

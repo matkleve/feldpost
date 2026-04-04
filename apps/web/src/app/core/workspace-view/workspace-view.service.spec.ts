@@ -1,5 +1,5 @@
-/**
- * WorkspaceViewService — address resolution tests.
+﻿/**
+ * WorkspaceViewService â€” address resolution tests.
  *
  * Strategy:
  *  - SupabaseService, GeocodingService, and FilterService are faked.
@@ -13,10 +13,10 @@ import { WorkspaceViewService } from './workspace-view/workspace-view.service';
 import { SupabaseService } from './supabase/supabase.service';
 import { FilterService } from './filter/filter.service';
 import { GeocodingService } from './geocoding/geocoding.service';
-import { PropertyRegistryService } from './property-registry/property-registry.service';
+import { MetadataService } from './metadata/metadata.service';
 import type { WorkspaceImage } from './workspace-view/workspace-view.types';
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function makeImage(overrides: Partial<WorkspaceImage> = {}): WorkspaceImage {
   return {
@@ -43,10 +43,10 @@ function makeImage(overrides: Partial<WorkspaceImage> = {}): WorkspaceImage {
 }
 
 const ZURICH_RESULT = {
-  addressLabel: 'Burgstraße 7, 8001 Zürich, Switzerland',
-  city: 'Zürich',
+  addressLabel: 'BurgstraÃŸe 7, 8001 ZÃ¼rich, Switzerland',
+  city: 'ZÃ¼rich',
   district: 'Altstadt',
-  street: 'Burgstraße 7',
+  street: 'BurgstraÃŸe 7',
   country: 'Switzerland',
 };
 
@@ -97,7 +97,7 @@ function setup(geocodingResult = ZURICH_RESULT) {
   TestBed.configureTestingModule({
     providers: [
       WorkspaceViewService,
-      PropertyRegistryService,
+      MetadataService,
       { provide: SupabaseService, useValue: fakeSupabase },
       { provide: GeocodingService, useValue: fakeGeocoding },
       { provide: FilterService, useValue: fakeFilter },
@@ -108,9 +108,9 @@ function setup(geocodingResult = ZURICH_RESULT) {
   return { service, fakeSupabase, fakeGeocoding };
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-describe('WorkspaceViewService — address resolution', () => {
+describe('WorkspaceViewService â€” address resolution', () => {
   it('resolves images with coordinates but no addressLabel', async () => {
     const { service, fakeGeocoding } = setup();
 
@@ -155,7 +155,7 @@ describe('WorkspaceViewService — address resolution', () => {
     expect(fakeGeocoding.reverse).not.toHaveBeenCalled();
   });
 
-  it('deduplicates — one geocode call per unique lat/lng pair', async () => {
+  it('deduplicates â€” one geocode call per unique lat/lng pair', async () => {
     const { service, fakeGeocoding } = setup();
 
     const images = [
@@ -167,15 +167,15 @@ describe('WorkspaceViewService — address resolution', () => {
 
     await vi.waitFor(() => expect(fakeGeocoding.reverse).toHaveBeenCalledTimes(2));
 
-    // Two unique coordinates → two calls.
+    // Two unique coordinates â†’ two calls.
     expect(fakeGeocoding.reverse).toHaveBeenCalledWith(47.3769, 8.5417);
     expect(fakeGeocoding.reverse).toHaveBeenCalledWith(46.948, 7.4474);
   });
 
-  it('uses exact coordinates for dedup — no rounding', async () => {
+  it('uses exact coordinates for dedup â€” no rounding', async () => {
     const { service, fakeGeocoding } = setup();
 
-    // These differ by 0.0001 — should be two separate geocode calls.
+    // These differ by 0.0001 â€” should be two separate geocode calls.
     const images = [
       makeImage({ id: 'a', latitude: 47.3769, longitude: 8.5417, addressLabel: null }),
       makeImage({ id: 'b', latitude: 47.377, longitude: 8.5417, addressLabel: null }),
@@ -220,13 +220,13 @@ describe('WorkspaceViewService — address resolution', () => {
     // Allow signal update to propagate.
     await vi.waitFor(() => {
       const updated = service.rawImages().find((i) => i.id === 'img-1');
-      expect(updated?.addressLabel).toBe('Burgstraße 7, 8001 Zürich, Switzerland');
+      expect(updated?.addressLabel).toBe('BurgstraÃŸe 7, 8001 ZÃ¼rich, Switzerland');
     });
 
     const updated = service.rawImages().find((i) => i.id === 'img-1')!;
-    expect(updated.city).toBe('Zürich');
+    expect(updated.city).toBe('ZÃ¼rich');
     expect(updated.district).toBe('Altstadt');
-    expect(updated.street).toBe('Burgstraße 7');
+    expect(updated.street).toBe('BurgstraÃŸe 7');
     expect(updated.country).toBe('Switzerland');
   });
 
@@ -263,7 +263,7 @@ describe('WorkspaceViewService — address resolution', () => {
     // Image 'b' should still get resolved even though 'a' failed.
     await vi.waitFor(() => {
       const updated = service.rawImages().find((i) => i.id === 'b');
-      expect(updated?.addressLabel).toBe('Burgstraße 7, 8001 Zürich, Switzerland');
+      expect(updated?.addressLabel).toBe('BurgstraÃŸe 7, 8001 ZÃ¼rich, Switzerland');
     });
 
     // Image 'a' should remain unresolved.
@@ -272,7 +272,7 @@ describe('WorkspaceViewService — address resolution', () => {
   });
 });
 
-describe('WorkspaceViewService — grouping with addresses', () => {
+describe('WorkspaceViewService â€” grouping with addresses', () => {
   it('groups by district using resolved address data', async () => {
     const { service } = setup();
 
@@ -306,20 +306,20 @@ describe('WorkspaceViewService — grouping with addresses', () => {
   it('groups by city using resolved address data', () => {
     const { service } = setup();
 
-    const images = [makeImage({ id: 'a', city: 'Zürich' }), makeImage({ id: 'b', city: 'Bern' })];
+    const images = [makeImage({ id: 'a', city: 'ZÃ¼rich' }), makeImage({ id: 'b', city: 'Bern' })];
     service.setActiveSelectionImages(images);
     service.activeGroupings.set([{ id: 'city', label: 'City', icon: '' }]);
 
     const sections = service.groupedSections();
     expect(sections.length).toBe(2);
-    expect(sections.map((s) => s.heading)).toContain('Zürich');
+    expect(sections.map((s) => s.heading)).toContain('ZÃ¼rich');
     expect(sections.map((s) => s.heading)).toContain('Bern');
   });
 });
 
-// ── Sort + Grouping Sync (WV-3b) ──────────────────────────────────────────────
+// â”€â”€ Sort + Grouping Sync (WV-3b) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-describe('WorkspaceViewService — sort + grouping sync', () => {
+describe('WorkspaceViewService â€” sort + grouping sync', () => {
   function setupSortGrouping() {
     const { service } = setup();
 
@@ -327,7 +327,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
     const images = [
       makeImage({
         id: 'z1',
-        city: 'Zürich',
+        city: 'ZÃ¼rich',
         projectName: 'Alpha',
         capturedAt: '2026-01-01T00:00:00Z',
       }),
@@ -351,7 +351,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
       }),
       makeImage({
         id: 'z2',
-        city: 'Zürich',
+        city: 'ZÃ¼rich',
         projectName: 'Beta',
         capturedAt: '2026-02-15T00:00:00Z',
       }),
@@ -378,7 +378,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
 
     const sections = service.groupedSections();
     const headings = sections.map((s) => s.heading);
-    expect(headings).toEqual(['Berlin', 'Wien', 'Zürich']);
+    expect(headings).toEqual(['Berlin', 'Wien', 'ZÃ¼rich']);
   });
 
   it('groups are sorted reverse-alphabetically when grouping direction is desc', () => {
@@ -393,7 +393,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
 
     const sections = service.groupedSections();
     const headings = sections.map((s) => s.heading);
-    expect(headings).toEqual(['Zürich', 'Wien', 'Berlin']);
+    expect(headings).toEqual(['ZÃ¼rich', 'Wien', 'Berlin']);
   });
 
   it('multi-level grouping respects sort directions for both levels', () => {
@@ -405,10 +405,10 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
     ]);
 
     const sections = service.groupedSections();
-    // Top level should be city A→Z (default asc)
-    expect(sections.map((s) => s.heading)).toEqual(['Berlin', 'Wien', 'Zürich']);
+    // Top level should be city Aâ†’Z (default asc)
+    expect(sections.map((s) => s.heading)).toEqual(['Berlin', 'Wien', 'ZÃ¼rich']);
 
-    // Berlin subgroups: Alpha, Beta (A→Z)
+    // Berlin subgroups: Alpha, Beta (Aâ†’Z)
     const berlinSubs = sections[0].subGroups!;
     expect(berlinSubs.map((s) => s.heading)).toEqual(['Alpha', 'Beta']);
   });
@@ -433,7 +433,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
   it('removes grouping-only sort key when grouping is removed', () => {
     const service = setupSortGrouping();
 
-    // Activate grouping — city gets auto-added to sorts
+    // Activate grouping â€” city gets auto-added to sorts
     service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
     expect(service.effectiveSorts().some((s) => s.key === 'city')).toBe(true);
 
@@ -441,7 +441,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
     service.activeGroupings.set([]);
 
     const effective = service.effectiveSorts();
-    // City was grouping-only — should be gone
+    // City was grouping-only â€” should be gone
     expect(effective.some((s) => s.key === 'city')).toBe(false);
     // Default sort remains
     expect(effective).toEqual([{ key: 'date-captured', direction: 'desc' }]);
@@ -463,7 +463,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
     service.activeGroupings.set([]);
 
     const effective = service.effectiveSorts();
-    // City was in user sorts before grouping — should remain
+    // City was in user sorts before grouping â€” should remain
     expect(effective.some((s) => s.key === 'city')).toBe(true);
   });
 
@@ -490,11 +490,11 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
     const service = setupSortGrouping();
 
     service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
-    // Default: date-captured desc — within Berlin group, b1 (March) should come before b2 (Jan)
+    // Default: date-captured desc â€” within Berlin group, b1 (March) should come before b2 (Jan)
 
     const sections = service.groupedSections();
     const berlin = sections.find((s) => s.heading === 'Berlin')!;
-    expect(berlin.images[0].id).toBe('b1'); // March — newest first
+    expect(berlin.images[0].id).toBe('b1'); // March â€” newest first
     expect(berlin.images[1].id).toBe('b2'); // January
   });
 
@@ -503,7 +503,7 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
 
     service.activeGroupings.set([{ id: 'city', label: 'City', icon: 'location_city' }]);
 
-    // Verify initial A→Z order
+    // Verify initial Aâ†’Z order
     let sections = service.groupedSections();
     expect(sections[0].heading).toBe('Berlin');
 
@@ -514,19 +514,19 @@ describe('WorkspaceViewService — sort + grouping sync', () => {
     ]);
 
     sections = service.groupedSections();
-    expect(sections[0].heading).toBe('Zürich');
+    expect(sections[0].heading).toBe('ZÃ¼rich');
     expect(sections[2].heading).toBe('Berlin');
   });
 });
 
-// ── Numeric sorting (custom number properties) ────────────────────────────────
+// â”€â”€ Numeric sorting (custom number properties) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-describe('WorkspaceViewService — numeric sorting', () => {
+describe('WorkspaceViewService â€” numeric sorting', () => {
   it('sorts number-type custom properties numerically, not lexicographically', () => {
     const { service } = setup();
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
-    registry.setCustomProperties([{ id: 'fang', key_name: 'Fang', key_type: 'number' }]);
+    registry.setMetadataFieldsFromKeys([{ id: 'fang', key_name: 'Fang', key_type: 'number' }]);
 
     const images = [
       makeImage({ id: 'a', metadata: { fang: '100' } }),
@@ -544,9 +544,9 @@ describe('WorkspaceViewService — numeric sorting', () => {
 
   it('sorts number-type custom properties descending', () => {
     const { service } = setup();
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
-    registry.setCustomProperties([{ id: 'fang', key_name: 'Fang', key_type: 'number' }]);
+    registry.setMetadataFieldsFromKeys([{ id: 'fang', key_name: 'Fang', key_type: 'number' }]);
 
     const images = [
       makeImage({ id: 'a', metadata: { fang: '1' } }),
@@ -562,9 +562,9 @@ describe('WorkspaceViewService — numeric sorting', () => {
 
   it('pushes null metadata values to the end during numeric sort', () => {
     const { service } = setup();
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
-    registry.setCustomProperties([{ id: 'fang', key_name: 'Fang', key_type: 'number' }]);
+    registry.setMetadataFieldsFromKeys([{ id: 'fang', key_name: 'Fang', key_type: 'number' }]);
 
     const images = [
       makeImage({ id: 'a', metadata: { fang: '5' } }),
@@ -577,14 +577,14 @@ describe('WorkspaceViewService — numeric sorting', () => {
     const sorted = service.groupedSections()[0].images;
     expect(sorted[0].id).toBe('c'); // 1
     expect(sorted[1].id).toBe('a'); // 5
-    expect(sorted[2].id).toBe('b'); // null → end
+    expect(sorted[2].id).toBe('b'); // null â†’ end
   });
 
   it('groups by number-type custom property', () => {
     const { service } = setup();
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
-    registry.setCustomProperties([{ id: 'floor', key_name: 'Floor', key_type: 'number' }]);
+    registry.setMetadataFieldsFromKeys([{ id: 'floor', key_name: 'Floor', key_type: 'number' }]);
 
     const images = [
       makeImage({ id: 'a', metadata: { floor: '1' } }),
@@ -602,10 +602,10 @@ describe('WorkspaceViewService — numeric sorting', () => {
   });
 });
 
-// ── Integration: loadCustomProperties → registry → dropdown signals ────────────
+// â”€â”€ Integration: loadCustomProperties â†’ registry â†’ dropdown signals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-describe('WorkspaceViewService — loadCustomProperties integration', () => {
-  it('loads metadata_keys from Supabase and registers them in PropertyRegistryService', async () => {
+describe('WorkspaceViewService â€” loadCustomProperties integration', () => {
+  it('loads metadata_keys from Supabase and registers them in MetadataService', async () => {
     const fakeMetadataKeys = [
       { id: 'uuid-bauphase', key_name: 'Bauphase' },
       { id: 'uuid-fang', key_name: 'Fang' },
@@ -632,7 +632,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkspaceViewService,
-        PropertyRegistryService,
+        MetadataService,
         { provide: SupabaseService, useValue: fakeSupabase },
         { provide: GeocodingService, useValue: buildFakeGeocoding() },
         { provide: FilterService, useValue: buildFakeFilterService() },
@@ -640,7 +640,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     });
 
     const service = TestBed.inject(WorkspaceViewService);
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
     // Before loading: only built-in properties
     const builtInCount = registry.allProperties().length;
@@ -682,7 +682,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkspaceViewService,
-        PropertyRegistryService,
+        MetadataService,
         { provide: SupabaseService, useValue: fakeSupabase },
         { provide: GeocodingService, useValue: buildFakeGeocoding() },
         { provide: FilterService, useValue: buildFakeFilterService() },
@@ -690,7 +690,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     });
 
     const service = TestBed.inject(WorkspaceViewService);
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
     await service.loadCustomProperties();
 
@@ -721,7 +721,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkspaceViewService,
-        PropertyRegistryService,
+        MetadataService,
         { provide: SupabaseService, useValue: fakeSupabase },
         { provide: GeocodingService, useValue: buildFakeGeocoding() },
         { provide: FilterService, useValue: buildFakeFilterService() },
@@ -729,7 +729,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     });
 
     const service = TestBed.inject(WorkspaceViewService);
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
     const before = registry.allProperties().length;
 
     await service.loadCustomProperties();
@@ -737,7 +737,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     expect(registry.allProperties().length).toBe(before);
   });
 
-  it('end-to-end: load custom property → add metadata to image → group by it', async () => {
+  it('end-to-end: load custom property â†’ add metadata to image â†’ group by it', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-bauphase', key_name: 'Bauphase' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -759,7 +759,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkspaceViewService,
-        PropertyRegistryService,
+        MetadataService,
         { provide: SupabaseService, useValue: fakeSupabase },
         { provide: GeocodingService, useValue: buildFakeGeocoding() },
         { provide: FilterService, useValue: buildFakeFilterService() },
@@ -767,7 +767,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     });
 
     const service = TestBed.inject(WorkspaceViewService);
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
     // Step 1: Load custom properties from DB
     await service.loadCustomProperties();
@@ -796,7 +796,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     expect(rohbau.images.length).toBe(2);
   });
 
-  it('end-to-end: load custom property → add metadata → sort numerically', async () => {
+  it('end-to-end: load custom property â†’ add metadata â†’ sort numerically', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-fang', key_name: 'Fang' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -818,7 +818,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkspaceViewService,
-        PropertyRegistryService,
+        MetadataService,
         { provide: SupabaseService, useValue: fakeSupabase },
         { provide: GeocodingService, useValue: buildFakeGeocoding() },
         { provide: FilterService, useValue: buildFakeFilterService() },
@@ -826,9 +826,9 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     });
 
     const service = TestBed.inject(WorkspaceViewService);
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
 
-    // Step 1: Load custom properties — Fang defaults to 'text' type from DB
+    // Step 1: Load custom properties â€” Fang defaults to 'text' type from DB
     await service.loadCustomProperties();
     expect(registry.sortableProperties().some((p) => p.label === 'Fang')).toBe(true);
 
@@ -849,7 +849,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     expect(sorted.map((i) => i.id)).toEqual(['a', 'c', 'b']);
   });
 
-  it('end-to-end: load custom property → add metadata → filter by it', async () => {
+  it('end-to-end: load custom property â†’ add metadata â†’ filter by it', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-bauphase', key_name: 'Bauphase' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -872,7 +872,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     TestBed.configureTestingModule({
       providers: [
         WorkspaceViewService,
-        PropertyRegistryService,
+        MetadataService,
         FilterService,
         { provide: SupabaseService, useValue: fakeSupabase },
         { provide: GeocodingService, useValue: buildFakeGeocoding() },
@@ -880,7 +880,7 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     });
 
     const service = TestBed.inject(WorkspaceViewService);
-    const registry = TestBed.inject(PropertyRegistryService);
+    const registry = TestBed.inject(MetadataService);
     const filterService = TestBed.inject(FilterService);
 
     // Step 1: Load custom properties
@@ -911,3 +911,4 @@ describe('WorkspaceViewService — loadCustomProperties integration', () => {
     expect(allImages.every((img) => img.metadata?.['uuid-bauphase'] === 'Rohbau')).toBe(true);
   });
 });
+

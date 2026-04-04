@@ -1,6 +1,6 @@
 # Action Context Matrix
 
-> **Related specs:** [upload-panel](upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-export-bar](workspace-export-bar.md), [media-detail-actions](media-detail-actions.md), [upload-manager-pipeline](upload-manager-pipeline.md)
+> **Related specs:** [upload-panel](upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-actions-bar](workspace/workspace-actions-bar.md), [media-detail-actions](media-detail-actions.md), [upload-manager-pipeline](upload-manager-pipeline.md)
 
 ## What It Is
 
@@ -136,7 +136,7 @@ ActionContextMatrixSpec
     ├── upload-panel
     ├── map-secondary-click-system
     ├── media-detail-actions
-    ├── workspace-export-bar
+    ├── workspace-actions-bar
     └── upload-manager-pipeline
 ```
 
@@ -196,15 +196,15 @@ flowchart TD
 
 ## File Map
 
-| File                                               | Purpose                                                                     |
-| -------------------------------------------------- | --------------------------------------------------------------------------- |
-| `docs/element-specs/action-context-matrix.md`      | Canonical cross-context action contract                                     |
-| `docs/element-specs/upload-manager-pipeline.md`    | Full upload location-resolution algorithm and upload-internal issue routing |
-| `docs/element-specs/upload-panel.md`               | Upload row consumer of the matrix                                           |
-| `docs/element-specs/map-secondary-click-system.md` | Map consumer of the matrix                                                  |
-| `docs/element-specs/media-detail-actions.md`       | Media detail consumer of the matrix                                         |
-| `docs/element-specs/workspace-export-bar.md`       | Workspace footer multi-selection consumer                                   |
-| `docs/element-specs/media-page.md`                 | `/media` page consumer                                                      |
+| File                                                           | Purpose                                                                     |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `docs/element-specs/action-context-matrix.md`                  | Canonical cross-context action contract                                     |
+| `docs/element-specs/upload-manager/upload-manager-pipeline.md` | Full upload location-resolution algorithm and upload-internal issue routing |
+| `docs/element-specs/upload-panel.md`                           | Upload row consumer of the matrix                                           |
+| `docs/element-specs/map-secondary-click-system.md`             | Map consumer of the matrix                                                  |
+| `docs/element-specs/media-detail/media-detail-actions.md`      | Media detail consumer of the matrix                                         |
+| `docs/element-specs/workspace/workspace-actions-bar.md`        | Workspace footer multi-selection consumer                                   |
+| `docs/element-specs/media-page.md`                             | `/media` page consumer                                                      |
 
 ## Wiring
 

@@ -1,6 +1,6 @@
 # Media Detail View - Implementation Blueprint
 
-> **Spec**: [element-specs/media-detail-view.md](../element-specs/media-detail-view.md)
+> **Spec**: [element-specs/media-detail-view.md](../element-specs/media-detail/media-detail-view.md)
 > **Status**: Refactored into a parent coordinator plus extracted section components. Remaining work should focus on behavioral gaps against child specs, not on further monolith reduction inside `MediaDetailViewComponent`.
 
 ## Existing Infrastructure

@@ -1,7 +1,7 @@
 # Map Secondary-Click System
 
 > **Use cases:** [use-cases/map-secondary-click-system.md](../use-cases/map-secondary-click-system.md)
-> **Child specs:** [map-context-menu](map-context-menu.md), [photo-marker-context-menu](photo-marker-context-menu.md), [radius-selection](radius-selection.md)
+> **Child specs:** [map-context-menu](map-context-menu.md), [media-marker-context-menu](media-marker/media-marker-context-menu.md), [radius-selection](radius-selection.md)
 > **Action contract:** [action-context-matrix](action-context-matrix.md)
 
 ## What It Is
@@ -127,7 +127,7 @@ flowchart TD
 | `apps/web/src/app/features/map/map-shell/map-shell.component.ts`   | Secondary-click precedence and action dispatch |
 | `apps/web/src/app/features/map/map-shell/map-shell.component.html` | Render all context menu surfaces               |
 | `docs/element-specs/map-context-menu.md`                           | Map menu details                               |
-| `docs/element-specs/photo-marker-context-menu.md`                  | Marker menu details                            |
+| `docs/element-specs/media-marker/media-marker-context-menu.md`                  | Marker menu details                            |
 | `docs/element-specs/radius-selection.md`                           | Radius draw + radius menu details              |
 | `docs/use-cases/map-secondary-click-system.md`                     | End-to-end interaction scenarios               |
 

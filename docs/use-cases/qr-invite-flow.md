@@ -1,7 +1,7 @@
-# QR Invite Flow - Use Cases and Interaction Scenarios
+﻿# QR Invite Flow - Use Cases and Interaction Scenarios
 
 > Element spec: [element-specs/qr-invite-flow.md](../element-specs/qr-invite-flow.md)
-> Related specs: [element-specs/settings-overlay.md](../element-specs/settings-overlay.md), [element-specs/search-bar.md](../element-specs/search-bar.md)
+> Related specs: [element-specs/settings-overlay.md](../element-specs/settings-overlay/settings-overlay.md), [element-specs/search-bar.md](../element-specs/search-bar/search-bar.md)
 
 ## Overview
 
@@ -210,3 +210,4 @@ Expected:
 - [ ] Covers three share channels and logging.
 - [ ] Covers accept, expire, and revoke lifecycle outcomes.
 - [ ] Covers RLS deny behavior for unauthorized creators.
+

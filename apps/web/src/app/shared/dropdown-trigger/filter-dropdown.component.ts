@@ -2,15 +2,15 @@ import { Component, computed, inject, input } from '@angular/core';
 import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../core/filter-rule-evaluator';
 import { FilterService } from '../../core/filter/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { PropertyRegistryService } from '../../core/property-registry/property-registry.service';
-import type { PropertyType } from '../../core/property-registry/property-registry.types';
+import { MetadataService } from '../../core/metadata/metadata.service';
+import type { MetadataValueType } from '../../core/metadata/metadata.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
 
 export interface FilterDropdownPropertyOption {
   id: string;
   label: string;
-  type: PropertyType;
+  type: MetadataValueType;
 }
 
 @Component({
@@ -91,7 +91,7 @@ export interface FilterDropdownPropertyOption {
 export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
-  private readonly registry = inject(PropertyRegistryService);
+  private readonly metadata = inject(MetadataService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly propertyOptionsInput = input<FilterDropdownPropertyOption[] | null>(null);
@@ -100,10 +100,10 @@ export class FilterDropdownComponent {
     const provided = this.propertyOptionsInput();
     if (provided) return provided;
 
-    return this.registry.filterableProperties().map((p) => ({
-      id: p.id,
-      label: p.label,
-      type: p.type,
+    return this.metadata.filterableMetadataFields().map((field) => ({
+      id: field.id,
+      label: field.label,
+      type: field.valueType,
     }));
   });
 
@@ -181,12 +181,12 @@ export class FilterDropdownComponent {
     return this.getPropertyType(propertyId) === 'number' ? 'number' : 'text';
   }
 
-  private getPropertyType(propertyId: string): PropertyType | undefined {
+  private getPropertyType(propertyId: string): MetadataValueType | undefined {
     const provided = this.propertyOptionsInput();
     if (provided) {
       return provided.find((option) => option.id === propertyId)?.type;
     }
 
-    return this.registry.getProperty(propertyId)?.type;
+    return this.metadata.getMetadataField(propertyId)?.valueType;
   }
 }

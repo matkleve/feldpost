@@ -50,6 +50,16 @@ UploadAreaComponent
   └── [optional] EmptyState (hidden when no jobs)
 ```
 
+## Data
+
+| Source                 | Contract                                                         | Operation               |
+| ---------------------- | ---------------------------------------------------------------- | ----------------------- |
+| `uploadManager.jobs()` | Upload job list with `file.name` and MIME context                | Read/reactive recompute |
+| `FILE_TYPE_MAP`        | Extension -> chip metadata (`type`, `icon`, `category`, `color`) | Pure lookup             |
+| `CATEGORY_ORDER`       | Deterministic category ordering                                  | Pure sort               |
+
+No direct Supabase calls are required for this feature; chips are derived from in-memory upload queue state.
+
 ## File-Type Categorization & Color Mapping
 
 | Category           | File Types                                          | Icon          | Primary Token             | Variant               | Notes                                               |
@@ -210,6 +220,37 @@ fileTypeChips = computed(() => {
 - Listen to `uploadManager.jobs()` signal
 - Recompute `fileTypeChips` whenever jobs array changes
 - Angular's computed property handles this automatically
+
+## File Map
+
+| File                                                              | Purpose                                           |
+| ----------------------------------------------------------------- | ------------------------------------------------- |
+| `docs/element-specs/file-type-chips.md`                           | Contract for upload file-type chip behavior       |
+| `apps/web/src/app/features/map/upload/upload-area.component.ts`   | Computes and exposes deduplicated chip view-model |
+| `apps/web/src/app/features/map/upload/upload-area.component.html` | Renders chip section and list                     |
+| `apps/web/src/app/features/map/upload/upload-area.component.scss` | Chip row layout, wrap/scroll behavior             |
+| `apps/web/src/app/shared/chip/chip.component.ts`                  | Shared chip primitive component API               |
+| `apps/web/src/app/shared/chip/chip.component.html`                | Shared chip primitive template                    |
+| `apps/web/src/app/shared/chip/chip.component.scss`                | Shared chip primitive visual variants             |
+
+## Wiring
+
+### Injected Services
+
+- `UploadManagerService` (or upload facade) - source of upload jobs signal.
+
+### Inputs / Outputs
+
+- Input: current upload jobs via `uploadManager.jobs()`.
+- Output: none - derived visual section only.
+
+### Subscriptions
+
+- `fileTypeChips` is recomputed whenever `uploadManager.jobs()` changes.
+
+### Supabase Calls
+
+None - this feature is local to queue visualization.
 
 ## Acceptance Criteria
 

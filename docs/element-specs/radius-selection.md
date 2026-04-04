@@ -50,6 +50,17 @@ RadiusSelection                            ← Leaflet circle overlay (L.Circle 
 
 Note: This is primarily a Leaflet layer managed by `MapAdapter`, not a standalone Angular component. The Angular side manages the state and filter integration.
 
+## Data
+
+| Source               | Contract                                   | Operation                            |
+| -------------------- | ------------------------------------------ | ------------------------------------ |
+| Radius gesture input | center point + drag distance               | Read for draw/commit behavior        |
+| Active radius filter | `FilterService` (`center`, `radiusMeters`) | Set/update/clear                     |
+| In-radius media set  | map/query pipeline result set              | Read for radius context-menu actions |
+| Project actions      | existing project creation/assignment flows | Delegate from radius menu            |
+
+No direct Supabase access from the radius overlay itself; persistence/query work is delegated to existing service flows.
+
 ## State
 
 | Name           | Type                           | Default | Controls                                     |

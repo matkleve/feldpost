@@ -1,6 +1,6 @@
 # Element Specs
 
-Last updated: 2026-03-13
+Last updated: 2026-04-04
 
 Structured implementation contracts for every UI element in Feldpost.
 These are the **source of truth** that agents implement from.
@@ -121,6 +121,36 @@ Cross-cutting options:
 
 Guidance: prefer one general structure with required core sections plus optional sections, rather than separate templates per element type.
 
+## Spec Symmetry Organization (Core-Aligned)
+
+For service-like domains and complex feature contracts, organize specs with the same mirrored intent used by core service symmetry.
+
+Mandatory mapping:
+
+- Docs: `docs/element-specs/[module-name]/`
+- Code: `apps/web/src/app/core/[module-name]/`
+
+Recommended module layout:
+
+```text
+docs/element-specs/[module-name]/
+  README.md
+  [module-name]-service.md
+  [module-name]-types.md
+  [module-name]-helpers.md
+  adapters/
+    [adapter-name].md
+```
+
+Rules:
+
+- Keep one module entry contract (`[module-name]-service.md`) that maps to the facade service.
+- Keep one central contract file for shared types (`[module-name]-types.md`).
+- Keep one helper contract file for pure helper logic (`[module-name]-helpers.md`).
+- Keep adapter contracts local in `adapters/` and avoid global flat adapter docs folders.
+- Treat module `README.md` as index and migration status source for that module.
+- Do not reference archived specs from active module README or active feature specs.
+
 ## Ownership Rules
 
 - `AGENTS.md` owns project-level rules, invariants, and required implementation workflow.
@@ -187,20 +217,20 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `map-shell.md` — Map Shell (top-level host)
 - ✅ `map-zone.md` — Map Zone (flex container for map + floating controls)
 - ✅ `sidebar.md` — Sidebar navigation rail
-- ✅ `workspace-pane.md` — Right-side collapsible panel with group tabs
+- ✅ `workspace/workspace-pane.md` — Right-side collapsible panel with group tabs
 - ✅ `drag-divider.md` — Drag Divider (resizable map/workspace split)
 
 ### Search
 
-- ✅ `search-bar.md` — Search Bar (multi-intent search surface)
-- ✅ `search-bar-query-behavior.md` — Search Bar Query Behavior (formatting, ghost completion, forgiving matching)
-- ✅ `search-bar-data-and-service.md` — Search Bar Data and Service (pipeline, ranking, geo-bias, service contract)
-- ✅ `search-tuning-settings.md` — Search Tuning Settings (editable filters/weights/penalties preview + persistence contract)
+- ✅ `search-bar/search-bar.md` — Search Bar (multi-intent search surface)
+- ✅ `search-bar/search-bar-query-behavior.md` — Search Bar Query Behavior (formatting, ghost completion, forgiving matching)
+- ✅ `search-bar/search-bar-data-and-service.md` — Search Bar Data and Service (pipeline, ranking, geo-bias, service contract)
+- ✅ `search-bar/search-tuning-settings.md` — Search Tuning Settings (editable filters/weights/penalties preview + persistence contract)
 
 ### Map Markers
 
-- ✅ `photo-marker.md` — Photo Marker (square thumbnail marker + cluster)
-- ✅ `photo-marker-context-menu.md` — Photo Marker Context Menu (right-click/long-press marker actions)
+- ✅ `media-marker/media-marker.md` — Media Marker (square thumbnail marker + cluster)
+- ✅ `media-marker/media-marker-context-menu.md` — Media Marker Context Menu (right-click/long-press marker actions)
 - ✅ `user-location-marker.md` — GPS user location marker
 
 ### Upload
@@ -208,36 +238,35 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `upload-button-zone.md` — Upload Button Zone (FAB toggle)
 - ✅ `upload-panel.md` — Upload Panel (drop zone + file list)
 - ✅ `placement-mode.md` — Placement Mode (banner + crosshair)
-- ✅ `upload-manager.md` — Upload Manager (parent service contract)
-  - ✅ `upload-manager-pipeline.md` — Upload Manager Pipeline (folder upload, dedup, conflict handling, replace/attach orchestration)
+- ✅ `upload-manager/upload-manager.md` — Upload Manager (parent service contract)
+  - ✅ `upload-manager/upload-manager-pipeline.md` — Upload Manager Pipeline (folder upload, dedup, conflict handling, replace/attach orchestration)
 
 ### Workspace & Groups
 
 - ✅ `active-selection-view.md` — Active Selection View (composed workspace content: toolbar + grid + grouping + filtering)
 - ✅ `group-tab-bar.md` — Group Tab Bar
-- ✅ `item-grid.md` — Universal item-grid layout and item contract (active)
+- ✅ `component/item-grid.md` — Universal item-grid layout and item contract (active)
 - ✅ `media-item.md` — Media domain item contract (active)
 - ✅ `item-state-frame.md` — Shared loading/error/empty state frame contract (active)
 - ✅ `media-item-upload-overlay.md` — Media upload overlay subcomponent contract (active)
 - ✅ `media-item-quiet-actions.md` — Media quiet-actions subcomponent contract (active)
 - ✅ `project-item.md` — Project domain item contract (active)
 - ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
-- ✅ `workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
-- ✅ `workspace-view-system.md` — Workspace View System (data pipeline architecture)
+- ✅ `workspace/workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
+- ✅ `workspace/workspace-view-system.md` — Workspace View System (data pipeline architecture)
 
 ### Panels & Detail
 
-- ✅ `filter-panel.md` — Filter Panel (accordion filters)
+- ✅ `component/item-grid-filter-operator.md` — Item Grid Filter Operator (filtering contract)
 - ✅ `filter-dropdown.md` — Filter Dropdown (shared dropdown primitive)
 - ✅ `projects-dropdown.md` — Projects Dropdown (project selection filter)
 - ✅ `active-filter-chips.md` — Active Filter Chips Strip
-- ✅ `media-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
-  - ✅ `media-detail-media-viewer.md` — Media Viewer (progressive loading, lightbox, replace/upload)
-  - ✅ `media-detail-inline-editing.md` — Inline Editing (property rows, address search)
-  - ✅ `media-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
+- ✅ `media-detail/media-detail-view.md` — Image Detail View (parent: layout, nav, quick info)
+  - ✅ `media-detail/media-detail-media-viewer.md` — Media Viewer (progressive loading, lightbox, replace/upload)
+  - ✅ `media-detail/media-detail-inline-editing.md` — Inline Editing (property rows, address search)
+  - ✅ `media-detail/media-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
 - ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)
 - ✅ `grouping-dropdown.md` — Grouping Dropdown (thumbnail group-by)
-- ✅ `card-variant-system.md` — Cross-feature card variant contract (`row`, `small`, `medium`, `large`) for media/project cards
 
 ### Controls
 
@@ -252,15 +281,15 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 
 - ✅ `auth-map-background.md` — Auth Map Background (fixed city backdrop for login/register)
 - ✅ `media-page.md` — Media Page
-- ✅ `settings-page.md` — Settings Page
-- ✅ `account-page.md` — Account Page
+- ✅ `settings-overlay/settings-page.md` — Settings Page (nested under Settings Overlay)
+- ✅ `settings-overlay/account-page.md` — Account Page (nested under Settings Overlay)
 
 ### Features (cross-cutting)
 
 - ✅ `custom-properties.md` — Custom Properties (user-defined metadata schema)
-- ✅ `language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
-- ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
-- ✅ `media-download-service.md` — Global media loading/download/export contract (tier/fallback/url/cache/error)
+- ✅ `settings-overlay/language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
+- ✅ `settings-overlay/account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
+- ✅ `media-download/media-download-service.md` — Global media loading/download/export contract (tier/fallback/url/cache/error)
 
 ### Planned / Missing Specs
 

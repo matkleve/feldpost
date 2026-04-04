@@ -1,4 +1,4 @@
-# Project Item
+﻿# Project Item
 
 ## What It Is
 
@@ -10,7 +10,7 @@ The component renders a tokenized project frame with name, counts, status, and a
 
 ## Where It Lives
 
-- Parent spec: `docs/element-specs/item-grid.md`
+- Parent spec: `docs/element-specs/component/item-grid.md`
 - Related page contract: `docs/element-specs/projects-page.md`
 - Child component root: `apps/web/src/app/features/projects/project-item.component.ts`
 - Route consumers:
@@ -37,26 +37,26 @@ The component renders a tokenized project frame with name, counts, status, and a
 
 ```text
 ProjectItemComponent
-├── ItemStateFrame binding (shared state frame contract)
-│   └── Domain content outlet
-├── Project visual frame
-│   ├── Project identity region
-│   │   ├── Project name
-│   │   ├── Project status badge (active/archived)
-│   │   └── Optional color chip
-│   ├── Project metadata region
-│   │   ├── Result count
-│   │   ├── Media count
-│   │   └── Last activity
-│   └── Project actions region
-│       ├── Open
-│       ├── Rename
-│       ├── Archive/Restore
-│       └── Delete (archived only)
-└── Mode-specific layout wrappers
-    ├── row
-    ├── grid-sm/grid-md/grid-lg
-    └── card
+â”œâ”€â”€ ItemStateFrame binding (shared state frame contract)
+â”‚   â””â”€â”€ Domain content outlet
+â”œâ”€â”€ Project visual frame
+â”‚   â”œâ”€â”€ Project identity region
+â”‚   â”‚   â”œâ”€â”€ Project name
+â”‚   â”‚   â”œâ”€â”€ Project status badge (active/archived)
+â”‚   â”‚   â””â”€â”€ Optional color chip
+â”‚   â”œâ”€â”€ Project metadata region
+â”‚   â”‚   â”œâ”€â”€ Result count
+â”‚   â”‚   â”œâ”€â”€ Media count
+â”‚   â”‚   â””â”€â”€ Last activity
+â”‚   â””â”€â”€ Project actions region
+â”‚       â”œâ”€â”€ Open
+â”‚       â”œâ”€â”€ Rename
+â”‚       â”œâ”€â”€ Archive/Restore
+â”‚       â””â”€â”€ Delete (archived only)
+â””â”€â”€ Mode-specific layout wrappers
+    â”œâ”€â”€ row
+    â”œâ”€â”€ grid-sm/grid-md/grid-lg
+    â””â”€â”€ card
 ```
 
 ## Data
@@ -275,10 +275,10 @@ sequenceDiagram
 
 | Behavior          | Geometry Owner           | State Owner                                                         | Visual Owner                                                        | Same element?                                                                        |
 | ----------------- | ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Project frame     | `.project-item__frame`   | `.project-item__frame`                                              | `.project-item__frame`                                              | ✅                                                                                   |
-| Selected emphasis | `.project-item__frame`   | `.project-item__frame--selected`                                    | `.project-item__frame--selected`                                    | ✅                                                                                   |
-| Status badge      | `.project-item__status`  | `.project-item__status--active` / `.project-item__status--archived` | `.project-item__status--active` / `.project-item__status--archived` | ✅                                                                                   |
-| Action reveal     | `.project-item__actions` | `.project-item--selected` (parent state gate)                       | `.project-item__actions`                                            | ⚠️ exception — reveal can be parent-state driven for stable focus/selection behavior |
+| Project frame     | `.project-item__frame`   | `.project-item__frame`                                              | `.project-item__frame`                                              | âœ…                                                                                   |
+| Selected emphasis | `.project-item__frame`   | `.project-item__frame--selected`                                    | `.project-item__frame--selected`                                    | âœ…                                                                                   |
+| Status badge      | `.project-item__status`  | `.project-item__status--active` / `.project-item__status--archived` | `.project-item__status--active` / `.project-item__status--archived` | âœ…                                                                                   |
+| Action reveal     | `.project-item__actions` | `.project-item--selected` (parent state gate)                       | `.project-item__actions`                                            | âš ï¸ exception â€” reveal can be parent-state driven for stable focus/selection behavior |
 
 ## Acceptance Criteria
 
@@ -295,3 +295,4 @@ sequenceDiagram
 - [ ] Visual output is driven by one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed.
 - [ ] Transition choreography uses tokenized timings (`var(--transition-*)`) and no magic numbers.
 - [ ] `npm run lint` and `ng build` are clean for the migration scope.
+

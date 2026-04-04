@@ -1,6 +1,6 @@
 # Workspace View — Use Cases & Interaction Scenarios
 
-> **Related specs:** [workspace-pane](../element-specs/workspace-pane.md), [workspace-view-system](../element-specs/workspace-view-system.md), [workspace-toolbar](../element-specs/workspace-toolbar.md), [thumbnail-grid](../element-specs/thumbnail-grid.md), [group-tab-bar](../element-specs/group-tab-bar.md), [filter-dropdown](../element-specs/filter-dropdown.md), [sort-dropdown](../element-specs/sort-dropdown.md), [grouping-dropdown](../element-specs/grouping-dropdown.md), [projects-dropdown](../element-specs/projects-dropdown.md)
+> **Related specs:** [workspace-pane](../element-specs/workspace/workspace-pane.md), [workspace-view-system](../element-specs/workspace/workspace-view-system.md), [workspace-toolbar](../element-specs/workspace/workspace-toolbar.md), [thumbnail-grid](../element-specs/thumbnail-grid.md), [group-tab-bar](../element-specs/group-tab-bar.md), [filter-dropdown](../element-specs/filter-dropdown.md), [sort-dropdown](../element-specs/sort-dropdown.md), [grouping-dropdown](../element-specs/grouping-dropdown.md), [projects-dropdown](../element-specs/projects-dropdown.md)
 > **Product use cases:** [UC1](../archive/use-cases-README.md#uc1--technician-on-site-view-history) §6–7, [UC2](../archive/use-cases-README.md#uc2--clerk-preparing-a-quote) §6–10
 > **Related interaction scenarios:** [map-shell IS-2](map-shell.md#is-2-open-workspace-pane-via-marker-click)
 
@@ -35,7 +35,7 @@ These scenarios describe what happens **inside the Active Selection view** after
 ## WV-1: Cluster Click Populates Active Selection
 
 **Product context:** UC1 §6 — technician taps cluster marker. UC2 §6 — clerk clicks cluster.
-**Related:** [map-shell IS-2](map-shell.md#is-2-open-workspace-pane-via-marker-click), [workspace-view-system §2](../element-specs/workspace-view-system.md)
+**Related:** [map-shell IS-2](map-shell.md#is-2-open-workspace-pane-via-marker-click), [workspace-view-system §2](../element-specs/workspace/workspace-view-system.md)
 
 ```mermaid
 sequenceDiagram

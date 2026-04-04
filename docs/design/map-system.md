@@ -41,4 +41,4 @@ block-beta
 
 Quoting Eleken's Head of Design: _"The challenge is balancing information density with readability. You need to decide what information is essential and how to present it without overwhelming the user."_
 
-**Marker and cluster details:** See [element-specs/photo-marker.md](../element-specs/photo-marker.md) for full marker anatomy, state diagram, clustering rules, and viewport lifecycle. Clustering is proximity-based, not tied to fixed city/street/address zoom bands.
+**Marker and cluster details:** See [element-specs/media-marker.md](../element-specs/media-marker/media-marker.md) for full marker anatomy, state diagram, clustering rules, and viewport lifecycle. Clustering is proximity-based, not tied to fixed city/street/address zoom bands.

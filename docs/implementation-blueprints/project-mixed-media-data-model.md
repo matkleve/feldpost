@@ -1,11 +1,11 @@
-# Project Mixed Media Data Model - Implementation Blueprint
+﻿# Project Mixed Media Data Model - Implementation Blueprint
 
 > Related specs:
 >
 > - [project-mixed-media-pre-spec](../element-specs/project-mixed-media-pre-spec.md)
 > - [project-details-view](../element-specs/project-details-view.md)
 > - [upload-panel](../element-specs/upload-panel.md)
-> - [filter-panel](../element-specs/filter-panel.md)
+> - [filter-panel](../element-specs/component/item-grid-filter-operator.md)
 >
 > Related use cases:
 >
@@ -351,3 +351,4 @@ Gate D (map ready):
 
 - gps media render correctly on map
 - no-gps never leaks into map markers
+

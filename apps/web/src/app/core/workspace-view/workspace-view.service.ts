@@ -2,10 +2,9 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
 import { FilterService } from '../filter/filter.service';
 import { LocationResolverService } from '../location-resolver/location-resolver.service';
-import { PropertyRegistryService } from '../property-registry/property-registry.service';
+import { MetadataService } from '../metadata/metadata.service';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import type {
-  WorkspaceMediaCustomMetadata,
   WorkspaceImage,
   GroupedSection,
   SortConfig,
@@ -22,7 +21,7 @@ export class WorkspaceViewService {
   private readonly supabase = inject(SupabaseService);
   private readonly filterService = inject(FilterService);
   private readonly locationResolver = inject(LocationResolverService);
-  private readonly registry = inject(PropertyRegistryService);
+  private readonly metadata = inject(MetadataService);
   private readonly photoLoad = inject(MediaDownloadService);
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Input signals Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
@@ -156,7 +155,7 @@ export class WorkspaceViewService {
       if (images.length > 0) {
         this.resolveUnresolvedAddresses(images);
         void this.batchSignThumbnails(images);
-        void this.loadImageMetadata(images);
+        void this.loadMetadataValues(images);
       }
     } finally {
       if (requestId === this.clusterLoadId) {
@@ -245,7 +244,7 @@ export class WorkspaceViewService {
     this.rawImages.set(images);
     this.resolveUnresolvedAddresses(images);
     void this.batchSignThumbnails(images);
-    void this.loadImageMetadata(images);
+    void this.loadMetadataValues(images);
   }
 
   /** Load and map images by explicit IDs while preserving the input order. */
@@ -498,108 +497,39 @@ export class WorkspaceViewService {
   }
 
   /**
-   * Load the organization's custom property definitions from the metadata_keys
-   * table and register them in the PropertyRegistryService so they appear in
-   * sort / group / filter dropdowns.
+   * Refresh metadata field definitions used by sort/group/filter controls.
    */
+  async loadMetadataFields(): Promise<void> {
+    await this.metadata.refreshMetadataFields();
+  }
+
+  /** @deprecated Kept temporarily for callsites still using old naming. */
   async loadCustomProperties(): Promise<void> {
-    const { data, error } = await this.supabase.client.from('metadata_keys').select('id, key_name');
-
-    if (error || !data || data.length === 0) return;
-
-    this.registry.setCustomProperties(
-      (data as Array<{ id: string; key_name: string }>).map((k) => ({
-        id: k.id,
-        key_name: k.key_name,
-        key_type: 'text',
-      })),
-    );
+    await this.loadMetadataFields();
   }
 
   private getSortValue(img: WorkspaceImage, key: string): string | number | null {
-    return this.registry.getSortValue(img, key);
+    return this.metadata.getSortableValue(img, key);
   }
 
   private getGroupValue(img: WorkspaceImage, propertyId: string): string {
-    return this.registry.getGroupValue(img, propertyId);
+    return this.metadata.getGroupingLabel(img, propertyId);
   }
 
   /**
-   * Load custom property values (media_metadata) for a batch of images.
-   * Patches the metadata map onto each WorkspaceImage in the signal.
+   * Load metadata values for a batch of media and patch the local signal.
    */
-  private async loadImageMetadata(images: WorkspaceImage[]): Promise<void> {
-    const imageIds = images.map((img) => img.id);
-    if (imageIds.length === 0) return;
+  private async loadMetadataValues(images: WorkspaceImage[]): Promise<void> {
+    const lookupIds = images.map((img) => img.id);
+    if (lookupIds.length === 0) return;
 
-    const imageIdSet = new Set(imageIds);
+    const metadataMap = await this.metadata.loadMetadataValuesByLookupIds(lookupIds);
+    if (metadataMap.size === 0) return;
 
-    const [directLinksResponse, sourceLinksResponse] = await Promise.all([
-      this.supabase.client.from('media_items').select('id,source_image_id').in('id', imageIds),
-      this.supabase.client
-        .from('media_items')
-        .select('id,source_image_id')
-        .in('source_image_id', imageIds),
-    ]);
-
-    const mediaRows = [
-      ...(Array.isArray(directLinksResponse.data)
-        ? (directLinksResponse.data as MediaSourceLinkRow[])
-        : []),
-      ...(Array.isArray(sourceLinksResponse.data)
-        ? (sourceLinksResponse.data as MediaSourceLinkRow[])
-        : []),
-    ].filter((row, index, all) => index === all.findIndex((candidate) => candidate.id === row.id));
-
-    if (mediaRows.length === 0) return;
-
-    const lookupIdsByMediaItemId = new Map<string, string[]>();
-    const mediaItemIds: string[] = [];
-
-    for (const row of mediaRows) {
-      const lookupIds = [row.id, row.source_image_id].filter(
-        (id): id is string => typeof id === 'string' && id.length > 0 && imageIdSet.has(id),
-      );
-      if (lookupIds.length === 0) continue;
-
-      lookupIdsByMediaItemId.set(row.id, lookupIds);
-      mediaItemIds.push(row.id);
-    }
-
-    if (mediaItemIds.length === 0) return;
-
-    const { data, error } = await this.supabase.client
-      .from('media_metadata')
-      .select('media_item_id, metadata_key_id, value_text')
-      .in('media_item_id', mediaItemIds);
-
-    if (error || !data || data.length === 0) return;
-
-    // Build map: imageId Ã¢â€ â€™ { metadataKeyId Ã¢â€ â€™ value }
-    const metadataMap = new Map<string, WorkspaceMediaCustomMetadata>();
-    for (const row of data as Array<{
-      media_item_id: string;
-      metadata_key_id: string;
-      value_text: string;
-    }>) {
-      const lookupIds = lookupIdsByMediaItemId.get(row.media_item_id);
-      if (!lookupIds || lookupIds.length === 0) continue;
-
-      for (const lookupId of lookupIds) {
-        let entry = metadataMap.get(lookupId);
-        if (!entry) {
-          entry = {};
-          metadataMap.set(lookupId, entry);
-        }
-        entry[row.metadata_key_id] = row.value_text;
-      }
-    }
-
-    // Patch metadata onto images
     this.rawImages.update((all) =>
       all.map((img) => {
-        const meta = metadataMap.get(img.id);
-        return meta ? { ...img, metadata: { ...img.metadata, ...meta } } : img;
+        const values = metadataMap.get(img.id);
+        return values ? { ...img, metadata: { ...img.metadata, ...values } } : img;
       }),
     );
   }
@@ -707,11 +637,6 @@ interface RawMediaProjectMembershipRow {
   media_item_id: string;
   project_id: string;
   projects: { name: string | null } | Array<{ name: string | null }> | null;
-}
-
-interface MediaSourceLinkRow {
-  id: string;
-  source_image_id: string | null;
 }
 
 function mapClusterRow(row: RawClusterRow): WorkspaceImage {

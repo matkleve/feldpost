@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Element Spec Lint — validates docs/element-specs/*.md
+ * Element Spec Lint — validates markdown specs under docs/element-specs recursively
  *
  * Rules:
  *   spec-max-lines        Max total lines per spec (default: 250, warn: 200)
@@ -20,7 +20,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join, basename, resolve } from "node:path";
+import { join, basename, resolve, relative } from "node:path";
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
@@ -105,7 +105,7 @@ function escapeTableCell(value) {
   return String(value).replace(/\|/g, "\\|").trim();
 }
 
-function parseSettingsEntries(filePath, parsed) {
+function parseSettingsEntries(filePath, parsed, specRootDir) {
   const diagnostics = [];
   const entries = [];
   const section = findSection(parsed.sections, "Settings");
@@ -128,7 +128,7 @@ function parseSettingsEntries(filePath, parsed) {
     if (match) {
       entries.push({
         section: match[1].trim(),
-        sourceSpec: basename(filePath),
+        sourceSpec: relative(specRootDir, filePath).replaceAll("\\", "/"),
         what: match[2].trim(),
       });
     }
@@ -160,7 +160,7 @@ function renderSettingsRegistry(entries) {
   const lines = [
     "# Settings Registry",
     "",
-    "Generated from all `## Settings` sections in `docs/element-specs/*.md`.",
+    "Generated from all `## Settings` sections in `docs/element-specs/**/*.md` (excluding README and audit docs).",
     "Do not edit manually; update element specs and run `node scripts/lint-specs.mjs --fix`.",
     "",
     "| Section | Source Spec | What it configures |",
@@ -182,14 +182,14 @@ function renderSettingsRegistry(entries) {
   return `${lines.join("\n")}\n`;
 }
 
-function ruleSettingsRegistrySync(specFiles, config, projectRoot) {
+function ruleSettingsRegistrySync(specFiles, config, projectRoot, specRootDir) {
   const diagnostics = [];
   const entries = [];
 
   for (const filePath of specFiles) {
     const content = readFileSync(filePath, "utf-8");
     const parsed = parseSections(content);
-    const parsedSettings = parseSettingsEntries(filePath, parsed);
+    const parsedSettings = parseSettingsEntries(filePath, parsed, specRootDir);
 
     entries.push(...parsedSettings.entries);
     diagnostics.push(...parsedSettings.diagnostics);
@@ -406,6 +406,44 @@ function parseArgs(argv) {
   return config;
 }
 
+function shouldIncludeSpecFile(filePath) {
+  const lowerName = basename(filePath).toLowerCase();
+  if (!lowerName.endsWith(".md")) {
+    return false;
+  }
+  if (lowerName === "readme.md" || lowerName.endsWith(".bak")) {
+    return false;
+  }
+
+  // Keep audit notes out of spec lint and generated settings registry.
+  if (lowerName.startsWith("spec-") && lowerName.includes("audit")) {
+    return false;
+  }
+
+  return true;
+}
+
+function collectSpecFiles(specDir) {
+  const files = [];
+  const stack = [specDir];
+
+  while (stack.length > 0) {
+    const currentDir = stack.pop();
+    const entries = readdirSync(currentDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile() && shouldIncludeSpecFile(fullPath)) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  return files.sort();
+}
+
 function main() {
   const config = parseArgs(process.argv);
 
@@ -419,12 +457,7 @@ function main() {
 
   let files;
   try {
-    files = readdirSync(specDir)
-      .filter(
-        (f) => f.endsWith(".md") && f !== "README.md" && !f.endsWith(".bak"),
-      )
-      .map((f) => join(specDir, f))
-      .sort();
+    files = collectSpecFiles(specDir);
   } catch (err) {
     console.error(`Error reading spec directory: ${specDir}`);
     console.error(err.message);
@@ -454,6 +487,7 @@ function main() {
     files,
     config,
     projectRoot,
+    specDir,
   );
 
   for (const diagnostic of settingsRegistryDiagnostics) {

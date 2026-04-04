@@ -80,7 +80,7 @@ This warm clay tint is used on **all** hover states — items, action rows, sear
 | 3   | Navigates item list via pointer | Label/icon/trailing align to `dd-item` layout contract      | Any `dd-item` consumer           |
 | 4   | Opens dropdown with search      | Search row uses `dd-search` and input/action primitives     | Sort, Projects                   |
 | 5   | Dropdown has no rows            | Empty state uses `dd-empty` style primitive                 | Sort, Filter, future consumers   |
-| 6   | Renders destructive menu action | Row uses `dd-item--danger` styling on icon and label        | Image detail context menu        |
+| 6   | Renders destructive menu action | Row uses `dd-item--danger` styling on icon and label        | Media detail context menu        |
 
 ## Dropdown Inventory
 
@@ -114,7 +114,7 @@ Component-specific: Checkbox column, count badge, "All projects" separator row.
 Uses: `dd-empty`, `dd-action-row`.
 Component-specific: Notion-style compound filter rules (form rows with selects/inputs — justified exception).
 
-**Image Detail Context Menu** — `media-detail-view.component.html`
+**Media Detail Context Menu** — `media-detail-view.component.html`
 Uses: `dd-items`, `dd-item`, `dd-item--danger`, `dd-item__icon`, `dd-item__label`.
 Component-specific: Absolute positioning, click-outside overlay.
 
@@ -133,6 +133,44 @@ Global dd-* classes (styles.scss)
 ├── image-detail context   ← items container, danger item
 └── [future] any new menu  ← pick and compose from dd-* classes
 ```
+
+## Data
+
+Not applicable - visual style system only. No direct domain data model or Supabase query is defined in this spec.
+
+## State
+
+Not applicable - state is owned by consuming dropdown components (sort/grouping/projects/filter/media-detail), not by the shared `dd-*` class contract itself.
+
+## File Map
+
+| File                                                                                              | Purpose                                                   |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `docs/element-specs/dropdown-system.md`                                                           | Shared dropdown visual contract                           |
+| `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
+| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
+| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
+| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
+| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
+
+## Wiring
+
+### Injected Services
+
+None - this spec defines CSS primitives and integration conventions.
+
+### Inputs / Outputs
+
+None at the system-spec level; inputs/outputs are defined by each consumer component.
+
+### Subscriptions
+
+None at the system-spec level.
+
+### Supabase Calls
+
+None - delegated to consumer feature services.
 
 ## Acceptance Criteria
 

@@ -1,4 +1,4 @@
-# Component Structure Audit - Item Grid Stack (2026-04-03)
+﻿# Component Structure Audit - Item Grid Stack (2026-04-03)
 
 ## Scope
 
@@ -14,7 +14,7 @@ Audited components:
 Governed by:
 
 - `AGENTS.md` (Component Structure Rules, SCSS ownership contract)
-- `docs/element-specs/item-grid.md`
+- `docs/element-specs/component/item-grid.md`
 - `docs/element-specs/media-item.md`
 
 ## Hard-Gate Status Summary
@@ -161,3 +161,4 @@ Implemented and verified:
 ## Next Gate Before ItemGrid Completion
 
 ItemGrid stack can be considered structurally ready only when all Blocker items in this audit are resolved.
+

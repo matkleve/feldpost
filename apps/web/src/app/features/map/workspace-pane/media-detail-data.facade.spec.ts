@@ -83,24 +83,6 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
             })),
           };
         }
-        if (table === 'media_metadata') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() =>
-                Promise.resolve({
-                  data: [
-                    {
-                      metadata_key_id: 'mk-1',
-                      value_text: 'A',
-                      metadata_keys: { key_name: 'Key' },
-                    },
-                  ],
-                  error: null,
-                }),
-              ),
-            })),
-          };
-        }
         if (table === 'projects') {
           return {
             select: vi.fn(() => ({
@@ -110,15 +92,17 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
             })),
           };
         }
-        return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              order: vi.fn(() => Promise.resolve({ data: [{ key_name: 'Phase' }] })),
-            })),
-          })),
-        };
+
+        return { select: vi.fn() };
       }),
     },
+  } as any;
+
+  const metadataService = {
+    loadMetadataEntriesForMediaItem: vi.fn(async () => [
+      { metadataKeyId: 'mk-1', key: 'Key', value: 'A' },
+    ]),
+    listMetadataKeyNamesForOrganization: vi.fn(async () => ['Phase']),
   } as any;
 
   const photoLoad = {
@@ -134,7 +118,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   } as any;
 
   const facade = new ImageDetailDataFacade({
-    services: { supabase, photoLoad, projectMemberships },
+    services: { supabase, metadata: metadataService, photoLoad, projectMemberships },
     signals: {
       image,
       metadata,
@@ -156,7 +140,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   return {
     facade,
     signals: { image, metadata, loading, error, fullResPreloaded, fullResUrl, thumbnailUrl },
-    deps: { photoLoad, projectMemberships },
+    deps: { metadataService, photoLoad, projectMemberships },
   };
 }
 
