@@ -13,7 +13,7 @@ import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types'
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaErrorComponent } from './media-error.component';
 import { MediaEmptyComponent } from './media-empty.component';
-import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ItemGridComponent } from '../../shared/item-grid/item-grid.component';
 import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';

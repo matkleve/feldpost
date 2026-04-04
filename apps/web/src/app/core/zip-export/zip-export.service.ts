@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { EdgeExportOrchestratorAdapter } from '../media-download/adapters/edge-export-orchestrator.adapter';
-import type { WorkspaceMedia } from '../workspace-view.types';
+import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 
 export interface ZipExportContext {
   selectedProjectName?: string | null;

@@ -1,25 +1,25 @@
 /**
- * UploadEnrichmentService — post-upload geocoding enrichment.
+ * UploadEnrichmentService ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â post-upload geocoding enrichment.
  *
- * Handles Path A (reverse-geocode GPS → address) and
- * Path B (forward-geocode filename address → GPS coordinates).
+ * Handles Path A (reverse-geocode GPS ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ address) and
+ * Path B (forward-geocode filename address ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ GPS coordinates).
  *
- * Ground rules (Spec: upload-manager-pipeline.md § Enrichment):
- * - Path A: EXIF coords exist → reverse-geocode to resolved_address via GeocodingService
+ * Ground rules (Spec: upload-manager-pipeline.md Ãƒâ€šÃ‚Â§ Enrichment):
+ * - Path A: EXIF coords exist ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ reverse-geocode to resolved_address via GeocodingService
  * - Path B: Address from filename/folder; forward-geocode to coords via GeocodingService
  * - RLS boundary: Address resolution respects org_id + user location context
  * - Fallback: If geocoding fails, proceed with available data (partial enrichment ok)
  *
  * Public API:
- *  - reverseGeocodeCoords(coords): Promise<string> → address
- *  - forwardGeocodeAddress(address): Promise<ExifCoords | null> → coords
+ *  - reverseGeocodeCoords(coords): Promise<string> ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ address
+ *  - forwardGeocodeAddress(address): Promise<ExifCoords | null> ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ coords
  *
  * Note: UploadService.uploadFile() calls resolveAddress() internally during storage upload,
  * so UploadEnrichmentService is currently used for validation and re-geocoding on demand.
  */
 
 import { Injectable, inject } from '@angular/core';
-import { GeocodingService } from '../geocoding.service';
+import { GeocodingService } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import type { ExifCoords } from './upload.service';
 
@@ -33,7 +33,7 @@ export class UploadEnrichmentService {
   private readonly supabase = inject(SupabaseService);
 
   /**
-   * Path A: reverse-geocode GPS → address.
+   * Path A: reverse-geocode GPS ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ address.
    * UploadService.uploadFile already calls resolveAddress() internally,
    * so this is currently a no-op placeholder for state tracking.
    */
@@ -44,7 +44,7 @@ export class UploadEnrichmentService {
   }
 
   /**
-   * Path B: forward-geocode title address → GPS coordinates.
+   * Path B: forward-geocode title address ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ GPS coordinates.
    * Updates the DB row with resolved coordinates and address fields.
    * Returns the resolved coords, or undefined on failure.
    */
@@ -71,7 +71,7 @@ export class UploadEnrichmentService {
 
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {
-      // Enrichment failure is silent — coords remain null.
+      // Enrichment failure is silent ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â coords remain null.
       return undefined;
     }
   }

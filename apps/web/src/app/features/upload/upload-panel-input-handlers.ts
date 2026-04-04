@@ -4,7 +4,7 @@
 
 import { Injectable, inject, signal } from '@angular/core';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
-import { WorkspaceViewService } from '../../core/workspace-view.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 
 interface DirectoryPickerWindow extends Window {
   showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;

@@ -1,11 +1,11 @@
 import { Injectable, inject, type WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProjectsService } from '../../core/projects/projects.service';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { UploadService } from '../../core/upload/upload.service';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
-import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';

@@ -12,17 +12,17 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { FilterService } from '../../../core/filter.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { FilterService } from '../../../core/filter/filter.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { ToastService } from '../../../core/toast.service';
+import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { GeocodingService } from '../../../core/geocoding.service';
-import { MediaLocationUpdateService } from '../../../core/media-location-update.service';
-import { ShareSetService } from '../../../core/share-set.service';
-import { ZipExportService } from '../../../core/zip-export.service'; // TODO: Migrate to MediaDownloadService
-import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view.types';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import { ShareSetService } from '../../../core/share-set/share-set.service';
+import { ZipExportService } from '../../../core/zip-export/zip-export.service'; // TODO: Migrate to MediaDownloadService
+import type { GroupedSection, WorkspaceImage } from '../../../core/workspace-view/workspace-view.types';
 import {
   ThumbnailCardComponent,
   ThumbnailCardContextMenuEvent,
@@ -41,7 +41,7 @@ import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
 import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
 
-/** Flat renderable item — either a group header or a grid of images. */
+/** Flat renderable item â€” either a group header or a grid of images. */
 type RenderItem =
   | { type: 'header'; heading: string; imageCount: number; level: number }
   | { type: 'grid'; images: WorkspaceImage[] };
@@ -243,7 +243,7 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
         </div>
       } @else if (viewService.emptySelection()) {
         <div class="thumbnail-grid__empty-selection">
-          <span class="thumbnail-grid__empty-icon">📷</span>
+          <span class="thumbnail-grid__empty-icon">ðŸ“·</span>
           <p>
             {{ t('workspace.thumbnailGrid.emptySelection.title', 'No photos at this location') }}
           </p>
@@ -898,7 +898,7 @@ export class ThumbnailGridComponent implements OnDestroy {
 
   private collectImages(
     section: GroupedSection,
-  ): import('../../../core/workspace-view.types').WorkspaceImage[] {
+  ): import('../../../core/workspace-view/workspace-view.types').WorkspaceImage[] {
     const result = [...section.images];
     if (section.subGroups) {
       for (const sub of section.subGroups) {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fetchGeocoderCandidates } from './search-bar-resolvers';
-import type { GeocoderSearchResult } from '../geocoding.service';
-import type { GeocoderSearchOptions } from '../geocoding.service';
+import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
+import type { GeocoderSearchOptions } from '../geocoding/geocoding.service';
 import type { SearchAddressCandidate, SearchQueryContext } from './search.models';
 
 describe('fetchGeocoderCandidates', () => {

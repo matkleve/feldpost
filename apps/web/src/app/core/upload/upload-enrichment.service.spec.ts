@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UploadEnrichmentService } from './upload-enrichment.service';
-import { GeocodingService } from '../geocoding.service';
+import { GeocodingService } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
 describe('UploadEnrichmentService', () => {

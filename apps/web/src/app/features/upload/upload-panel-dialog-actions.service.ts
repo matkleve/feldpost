@@ -22,11 +22,11 @@
  */
 
 import { Injectable, inject, signal } from '@angular/core';
-import { GeocodingService, type ForwardGeocodeResult } from '../../core/geocoding.service';
-import { MediaLocationUpdateService } from '../../core/media-location-update.service';
+import { GeocodingService, type ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
+import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';

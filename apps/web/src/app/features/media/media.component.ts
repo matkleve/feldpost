@@ -16,12 +16,12 @@ import { MediaContentComponent, type MediaContentState } from './media-content.c
 import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
-import { WorkspaceSelectionService } from '../../core/workspace-selection.service';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { CardVariantSettingsService } from '../../shared/ui-primitives/card-variant-settings.service';
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
-import { MediaQueryService } from '../../core/media-query.service';
+import { MediaQueryService } from '../../core/media-query/media-query.service';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';

@@ -1,4 +1,4 @@
-import type { WorkspaceImage } from '../workspace-view.types';
+import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 
 export type ProjectStatusFilter = 'all' | 'active' | 'archived';
 export type ProjectsViewMode = 'list' | 'cards';

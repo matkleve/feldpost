@@ -2,7 +2,7 @@ import {
   GeocodingService,
   GeocoderSearchOptions,
   GeocoderSearchResult,
-} from '../geocoding.service';
+} from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import {
   SearchAddressCandidate,

@@ -1,4 +1,4 @@
-import type { PropertyType } from './property-registry.types';
+import type { PropertyType } from './property-registry/property-registry.types';
 
 export type FilterRuleLike = {
   conjunction: string;

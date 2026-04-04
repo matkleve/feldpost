@@ -1,14 +1,14 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import type { WorkspaceImage } from '../../../../core/workspace-view.types';
-import { WorkspaceSelectionService } from '../../../../core/workspace-selection.service';
-import { ShareSetService } from '../../../../core/share-set.service';
-import { ZipExportService } from '../../../../core/zip-export.service'; // TODO: Migrate to MediaDownloadService
-import { ToastService } from '../../../../core/toast.service';
+import type { WorkspaceImage } from '../../../../core/workspace-view/workspace-view.types';
+import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
+import { ShareSetService } from '../../../../core/share-set/share-set.service';
+import { ZipExportService } from '../../../../core/zip-export/zip-export.service'; // TODO: Migrate to MediaDownloadService
+import { ToastService } from '../../../../core/toast/toast.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SupabaseService } from '../../../../core/supabase/supabase.service';
-import { GeocodingService } from '../../../../core/geocoding.service';
-import { MediaLocationUpdateService } from '../../../../core/media-location-update.service';
-import { WorkspaceViewService } from '../../../../core/workspace-view.service';
+import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
+import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
+import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { ActionEngineService } from '../../../action-system/action-engine.service';
 import { ACTION_CONTEXT_IDS } from '../../../action-system/action-context-ids';
 import {

@@ -5,7 +5,7 @@
  * All functions here are side-effect-free and can be tested independently.
  */
 
-import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding.service';
+import type { ForwardGeocodeResult, GeocoderSearchResult } from '../../core/geocoding/geocoding.service';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
 import { UPLOAD_LANES } from './upload-panel.constants';

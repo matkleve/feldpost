@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { I18nService } from '../i18n/i18n.service';
 import type { PropertyDefinition } from './property-registry.types';
-import type { WorkspaceImage } from '../workspace-view.types';
+import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 
 /** Icon mapping per custom property type. */
 const TYPE_ICONS: Record<string, string> = {
@@ -145,7 +145,7 @@ const BUILT_IN_PROPERTIES: PropertyDefinition[] = [
   },
 ];
 
-/** Field mapping for built-in properties → WorkspaceImage fields. */
+/** Field mapping for built-in properties Ã¢â€ â€™ WorkspaceImage fields. */
 const BUILT_IN_FIELD_MAP: Record<string, (img: WorkspaceImage) => string | number | null> = {
   'date-captured': (img) => img.capturedAt,
   captured_at: (img) => img.capturedAt,
@@ -219,7 +219,7 @@ export class PropertyRegistryService {
     const resolver = BUILT_IN_FIELD_MAP[propertyId];
     if (resolver) return resolver(img);
 
-    // Custom property — look up in image metadata (if available)
+    // Custom property Ã¢â‚¬â€ look up in image metadata (if available)
     return this.getCustomPropertyValue(img, propertyId);
   }
 
@@ -231,7 +231,7 @@ export class PropertyRegistryService {
     const builtInValue = this.getBuiltInGroupValue(img, propertyId);
     if (builtInValue !== null) return builtInValue;
 
-    // Custom property — prefix with property label
+    // Custom property Ã¢â‚¬â€ prefix with property label
     const value = this.getCustomPropertyValue(img, propertyId);
     const label = this.getProperty(propertyId)?.label ?? propertyId;
     if (value == null || value === '') {

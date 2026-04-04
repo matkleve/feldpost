@@ -1,9 +1,9 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../core/filter-rule-evaluator';
-import { FilterService } from '../../core/filter.service';
+import { FilterService } from '../../core/filter/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { PropertyRegistryService } from '../../core/property-registry.service';
-import type { PropertyType } from '../../core/property-registry.types';
+import { PropertyRegistryService } from '../../core/property-registry/property-registry.service';
+import type { PropertyType } from '../../core/property-registry/property-registry.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 import { UI_PRIMITIVE_DIRECTIVES } from '../ui-primitives/ui-primitives.directive';
 

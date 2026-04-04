@@ -1,4 +1,4 @@
-import { GeocoderSearchResult } from '../geocoding.service';
+import { GeocoderSearchResult } from '../geocoding/geocoding.service';
 import { SearchAddressCandidate, SearchQueryContext, SearchRecentCandidate } from './search.models';
 
 export interface AddressGroup {

@@ -11,8 +11,8 @@ import {
   type UploadLocationPreviewEvent,
 } from '../../upload/upload-panel.component';
 import { MaxWidthContainerComponent } from '../../../shared/containers';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import type { ThumbnailCardHoverEvent } from './thumbnail-card/thumbnail-card.component';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { WorkspacePaneTab } from '../../../core/workspace-pane-host.port';

@@ -14,7 +14,7 @@ import type { PhotoLoadState } from '../../core/photo-load.model';
 import { I18nService } from '../../core/i18n/i18n.service';
 import type { MediaTier, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
-import { PhotoLoadService } from '../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { PhotoLoadService } from '../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { ItemComponent, type ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';

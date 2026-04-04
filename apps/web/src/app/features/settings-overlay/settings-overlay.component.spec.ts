@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { SettingsPaneService } from '../../core/settings-pane.service';
+import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 import { SettingsOverlayComponent } from './settings-overlay.component';
 
 describe('SettingsOverlayComponent', () => {

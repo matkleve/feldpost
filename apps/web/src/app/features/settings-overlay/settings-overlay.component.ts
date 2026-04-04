@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { SettingsPaneService } from '../../core/settings-pane.service';
+import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 import {
   SegmentedSwitchComponent,
   type SegmentedSwitchOption,

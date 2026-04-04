@@ -5,7 +5,7 @@ import {
   GeocodingService,
   GeocoderSearchOptions,
   GeocoderSearchResult,
-} from '../geocoding.service';
+} from '../geocoding/geocoding.service';
 import {
   SearchAddressCandidate,
   SearchContentCandidate,

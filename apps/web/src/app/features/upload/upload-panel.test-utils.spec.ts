@@ -11,7 +11,7 @@ import {
   type UploadJob,
   type UploadPhase,
 } from '../../core/upload/upload-manager.service';
-import { WorkspaceViewService } from '../../core/workspace-view.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 
 export function buildFakeUploadManager() {
   const jobsSignal = signal<ReadonlyArray<UploadJob>>([]);

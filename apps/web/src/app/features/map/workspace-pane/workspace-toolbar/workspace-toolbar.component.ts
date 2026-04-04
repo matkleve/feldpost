@@ -6,15 +6,15 @@ import {
 import { FilterDropdownComponent } from '../../../../shared/dropdown-trigger/filter-dropdown.component';
 import { SortDropdownComponent } from '../../../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
-import { WorkspaceViewService } from '../../../../core/workspace-view.service';
-import { FilterService } from '../../../../core/filter.service';
+import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
+import { FilterService } from '../../../../core/filter/filter.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { PropertyRegistryService } from '../../../../core/property-registry.service';
+import { PropertyRegistryService } from '../../../../core/property-registry/property-registry.service';
 import type {
   PropertyRef,
   SortConfig,
   ThumbnailSizePreset,
-} from '../../../../core/workspace-view.types';
+} from '../../../../core/workspace-view/workspace-view.types';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
 import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import { CardVariantSwitchComponent } from '../../../../shared/ui-primitives/card-variant-switch.component';

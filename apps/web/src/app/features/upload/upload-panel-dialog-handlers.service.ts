@@ -13,17 +13,17 @@
 
 import { Injectable, inject, signal } from '@angular/core';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
-import { GeocodingService } from '../../core/geocoding.service';
-import { ToastService } from '../../core/toast.service';
-import { MediaLocationUpdateService } from '../../core/media-location-update.service';
+import { GeocodingService } from '../../core/geocoding/geocoding.service';
+import { ToastService } from '../../core/toast/toast.service';
+import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { MapProjectActionsService } from '../map/map-shell/map-project-actions.service';
 import { MapProjectDialogService } from '../map/map-shell/map-project-dialog.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
-import type { ForwardGeocodeResult } from '../../core/geocoding.service';
+import type { ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
 import type { ProjectSelectOption } from '../../shared/project-select-dialog/project-select-dialog.component';
-import type { GeocoderSearchResult } from '../../core/geocoding.service';
+import type { GeocoderSearchResult } from '../../core/geocoding/geocoding.service';
 
 export interface DialogSignals {
   projectSelectionDialogOpen: ReturnType<typeof signal<boolean>>;

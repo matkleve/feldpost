@@ -1,5 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
-import type { WorkspaceImage } from '../../../../../core/workspace-view.types';
+import type { WorkspaceImage } from '../../../../../core/workspace-view/workspace-view.types';
 import { UniversalMediaComponent } from '../../../../../shared/media/universal-media.component';
 import type { MediaTier } from '../../../../../core/media/media-renderer.types';
 

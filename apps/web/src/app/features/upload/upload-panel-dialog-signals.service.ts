@@ -6,7 +6,7 @@
  */
 
 import { Injectable, signal } from '@angular/core';
-import type { ForwardGeocodeResult } from '../../core/geocoding.service';
+import type { ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
 import type { ProjectSelectOption } from '../../shared/project-select-dialog/project-select-dialog.component';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 

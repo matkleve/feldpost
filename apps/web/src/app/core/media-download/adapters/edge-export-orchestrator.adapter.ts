@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import JSZip from 'jszip';
 import { SupabaseService } from '../../supabase/supabase.service';
-import type { WorkspaceMedia } from '../../workspace-view.types';
+import type { WorkspaceMedia } from '../../workspace-view/workspace-view.types';
 import {
   composeStreetWithNumber,
   extractFilenameFromStoragePath,
@@ -10,7 +10,7 @@ import {
   sanitizeExportTitle,
   SIGNED_URL_TTL_SECONDS,
   ZIP_INDEX_PAD_LENGTH,
-} from '../../zip-export.helpers';
+} from '../../zip-export/zip-export.helpers';
 
 export interface ZipExportContext {
   selectedProjectName?: string | null;

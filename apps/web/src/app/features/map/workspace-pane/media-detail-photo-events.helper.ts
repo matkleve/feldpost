@@ -3,9 +3,9 @@ import {
   ImageAttachedEvent,
   ImageReplacedEvent,
 } from '../../../core/upload/upload-manager.service';
-import { PhotoLoadService } from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
-import { ToastService } from '../../../core/toast.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { PhotoLoadService } from '../../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { ToastService } from '../../../core/toast/toast.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { ImageRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;

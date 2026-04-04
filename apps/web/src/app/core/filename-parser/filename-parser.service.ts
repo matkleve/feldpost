@@ -13,7 +13,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { LocationPathParserService } from '../location-path-parser.service';
+import { LocationPathParserService } from '../location-path-parser/location-path-parser.service';
 import { UploadLocationConfigService } from '../upload/upload-location-config.service';
 
 /** Camera-generated filename prefixes that carry no address information. */

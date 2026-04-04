@@ -1,8 +1,8 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { WorkspaceViewService } from '../../core/workspace-view.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { PropertyRegistryService } from '../../core/property-registry.service';
-import type { SortConfig } from '../../core/workspace-view.types';
+import { PropertyRegistryService } from '../../core/property-registry/property-registry.service';
+import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { StandardDropdownComponent } from './standard-dropdown.component';
 
 export type SortDropdownOption = {

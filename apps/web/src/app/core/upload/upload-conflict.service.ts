@@ -1,13 +1,13 @@
 /**
- * UploadConflictService — detects photoless row conflicts during upload.
+ * UploadConflictService ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â detects photoless row conflicts during upload.
  *
  * When a new upload's location matches an existing photoless image row,
  * this service identifies the conflict so the user can decide how to
  * resolve it (attach to existing, or create new).
  *
- * Ground rules (Spec: upload-manager-pipeline.md § Conflict Detection):
+ * Ground rules (Spec: upload-manager-pipeline.md Ãƒâ€šÃ‚Â§ Conflict Detection):
  * - Triggered: After EXIF/address parsing; before upload phase
- * - Matching criteria: Same location (coords ± tolerance) OR same address
+ * - Matching criteria: Same location (coords Ãƒâ€šÃ‚Â± tolerance) OR same address
  * - Candidate filtering: Only rows without photos (status != 'fully_documented')
  * - RLS boundary: Query respects org_id + user role permissions (Supabase RLS)
  * - Resolution modes: attach (add to existing row) or no_match (create new job)

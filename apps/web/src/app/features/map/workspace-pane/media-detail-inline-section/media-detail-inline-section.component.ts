@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { CapturedDateEditorComponent, DateSaveEvent } from '../captured-date-editor.component';
 import { AddressSearchComponent } from '../address-search/address-search.component';
-import { ForwardGeocodeResult } from '../../../../core/geocoding.service';
+import { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../media-detail-view.utils';
 import { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';

@@ -6,7 +6,7 @@ import {
 } from './upload-manager-submit.util';
 import { DEFAULT_UPLOAD_LOCATION_CONFIG } from './upload-location-config';
 import type { UploadJob } from './upload-manager.types';
-import type { ScannedFileEntry } from '../folder-scan.service';
+import type { ScannedFileEntry } from '../folder-scan/folder-scan.service';
 
 function createBaseDeps(overrides: Partial<UploadManagerSubmitDeps> = {}): UploadManagerSubmitDeps {
   const scanProgress$ = new Observable<{ fileCount: number }>(() => {

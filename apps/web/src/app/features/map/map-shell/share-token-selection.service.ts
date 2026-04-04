@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import type { ActivatedRouteSnapshot } from '@angular/router';
-import { ShareSetService } from '../../../core/share-set.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { ShareSetService } from '../../../core/share-set/share-set.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 
 export interface ShareTokenSelectionResult {
   status: 'invalid' | 'no-images' | 'success' | 'error';

@@ -1,7 +1,7 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MapAdapter } from '../../../core/map-adapter';
-import { ToastService } from '../../../core/toast.service';
+import { ToastService } from '../../../core/toast/toast.service';
 
 /**
  * Floating GPS Button that centers the map on the user's current location.

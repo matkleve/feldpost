@@ -21,7 +21,7 @@ import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-vari
 import { UiDropdownTriggerDirective } from '../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
 import { PaneToolbarComponent } from '../../shared/pane-toolbar/pane-toolbar.component';
 import type { ProjectsViewMode, ProjectStatusFilter } from '../../core/projects/projects.types';
-import type { SortConfig } from '../../core/workspace-view.types';
+import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { CARD_VARIANTS, type CardVariant } from '../../shared/ui-primitives/card-variant.types';
 
 type ProjectsToolbarDropdown = 'grouping' | 'filter' | 'sort' | null;

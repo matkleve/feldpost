@@ -1,9 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
-import { FilterService } from '../filter.service';
-import { LocationResolverService } from '../location-resolver.service';
-import { PropertyRegistryService } from '../property-registry.service';
-import { PhotoLoadService } from '../photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { FilterService } from '../filter/filter.service';
+import { LocationResolverService } from '../location-resolver/location-resolver.service';
+import { PropertyRegistryService } from '../property-registry/property-registry.service';
+import { PhotoLoadService } from '../photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import type {
   WorkspaceMediaCustomMetadata,
   WorkspaceImage,
@@ -25,7 +25,7 @@ export class WorkspaceViewService {
   private readonly registry = inject(PropertyRegistryService);
   private readonly photoLoad = inject(PhotoLoadService);
 
-  // ── Input signals ────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Input signals Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   readonly rawImages = signal<WorkspaceImage[]>([]);
   readonly selectedProjectIds = signal<Set<string>>(new Set());
@@ -34,10 +34,10 @@ export class WorkspaceViewService {
   readonly thumbnailSizePreset = signal<ThumbnailSizePreset>(this.readThumbnailSizePreset());
   readonly collapsedGroups = signal<Set<string>>(new Set());
   readonly isLoading = signal(false);
-  /** True once a marker click triggers a load — distinguishes "no selection" from "empty result". */
+  /** True once a marker click triggers a load Ã¢â‚¬â€ distinguishes "no selection" from "empty result". */
   readonly selectionActive = signal(false);
 
-  // ── Pipeline: computed signal chain ──────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Pipeline: computed signal chain Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   /**
    * Effective sort order: grouping keys prepended (in grouping order) before user sorts.
@@ -126,7 +126,7 @@ export class WorkspaceViewService {
   /** Total count after all filters applied. */
   readonly totalImageCount = computed(() => this.ruleFiltered().length);
 
-  // ── Public API ───────────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Public API Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   /** Monotonic counter to discard stale RPC responses on rapid marker clicks. */
   private clusterLoadId = 0;
@@ -398,7 +398,7 @@ export class WorkspaceViewService {
     () => this.selectionActive() && !this.isLoading() && this.rawImages().length === 0,
   );
 
-  /** Clear active selection data only — preserves toolbar settings (sort, filters, project, grouping). */
+  /** Clear active selection data only Ã¢â‚¬â€ preserves toolbar settings (sort, filters, project, grouping). */
   clearActiveSelection(): void {
     this.rawImages.set([]);
     this.selectionActive.set(false);
@@ -468,7 +468,7 @@ export class WorkspaceViewService {
     );
   }
 
-  // ── Private helpers ──────────────────────────────────────────────────────
+  // Ã¢â€â‚¬Ã¢â€â‚¬ Private helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   /**
    * Delegate location resolution to LocationResolverService.
@@ -575,7 +575,7 @@ export class WorkspaceViewService {
 
     if (error || !data || data.length === 0) return;
 
-    // Build map: imageId → { metadataKeyId → value }
+    // Build map: imageId Ã¢â€ â€™ { metadataKeyId Ã¢â€ â€™ value }
     const metadataMap = new Map<string, WorkspaceMediaCustomMetadata>();
     for (const row of data as Array<{
       media_item_id: string;
@@ -660,7 +660,7 @@ export class WorkspaceViewService {
   }
 }
 
-// ── RPC row mapping ──────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ RPC row mapping Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 interface RawClusterRow {
   image_id: string | null;

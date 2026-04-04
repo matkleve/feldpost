@@ -21,17 +21,17 @@ import {
   UploadFailedEvent,
   UploadManagerService,
 } from '../../../core/upload/upload-manager.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { ToastService } from '../../../core/toast.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { ToastService } from '../../../core/toast/toast.service';
 import {
   PHOTO_NO_PHOTO_ICON,
   PHOTO_PLACEHOLDER_ICON,
   PhotoLoadService,
-} from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
+} from '../../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { MediaOrchestratorService } from '../../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
 import type { MediaTier } from '../../../core/media/media-renderer.types';
 import type { PhotoLoadState } from '../../../core/photo-load.model';
-import { ForwardGeocodeResult } from '../../../core/geocoding.service';
+import { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import {
   DetailEditingField,
   ImageRecord,
@@ -72,7 +72,7 @@ import type { ResolvedAction } from '../../action-system/action-types';
 import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from './workspace-detail-actions.registry';
 import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
 import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';

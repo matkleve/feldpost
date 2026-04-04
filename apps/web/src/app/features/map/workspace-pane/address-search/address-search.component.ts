@@ -1,5 +1,5 @@
 import { Component, inject, input, output, signal } from '@angular/core';
-import { ForwardGeocodeResult, GeocodingService } from '../../../../core/geocoding.service';
+import { ForwardGeocodeResult, GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import {
   UiIconButtonGhostDirective,

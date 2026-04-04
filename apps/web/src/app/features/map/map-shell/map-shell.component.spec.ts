@@ -13,8 +13,8 @@ import { MapShellComponent } from './map-shell.component';
 import { UploadService } from '../../../core/upload/upload.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { GeocodingService } from '../../../core/geocoding.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { MarkerInteractionService } from './marker-interaction.service';
 
 function createMarkerStub() {

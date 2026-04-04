@@ -4,10 +4,10 @@ import type { OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
-import { FilterService } from '../../core/filter.service';
+import { FilterService } from '../../core/filter/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectsService } from '../../core/projects/projects.service';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import type {
@@ -18,7 +18,7 @@ import type {
 } from '../../core/projects/projects.types';
 import { GroupHeaderComponent } from '../../shared/ui-primitives/group-header.component';
 import { type GroupingProperty } from '../../shared/dropdown-trigger/grouping-dropdown.component';
-import type { SortConfig } from '../../core/workspace-view.types';
+import type { SortConfig } from '../../core/workspace-view/workspace-view.types';
 import { ProjectsConfirmDialogComponent } from './projects-confirm-dialog.component';
 import { ProjectsGridViewComponent } from './projects-grid-view.component';
 import { ProjectsPageHeaderComponent } from './projects-page-header.component';

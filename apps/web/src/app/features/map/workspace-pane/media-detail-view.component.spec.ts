@@ -24,11 +24,11 @@ import {
   UploadFailedEvent,
 } from '../../../core/upload/upload-manager.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { GeocodingService } from '../../../core/geocoding.service';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { UploadService } from '../../../core/upload/upload.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { PhotoLoadService } from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { PhotoLoadService } from '../../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 import type {
   WorkspaceMediaCustomMetadata,
   WorkspaceMediaFileMetadata,
-} from '../workspace-view.types';
+} from '../workspace-view/workspace-view.types';
 
 export const ZIP_INDEX_PAD_LENGTH = 3;
 export const ZIP_TITLE_MAX_LENGTH = 100;

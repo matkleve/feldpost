@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ToastService } from '../toast.service';
+import { ToastService } from '../toast/toast.service';
 import { UploadManagerService, type UploadFailedEvent } from './upload-manager.service';
 
 @Injectable({ providedIn: 'root' })

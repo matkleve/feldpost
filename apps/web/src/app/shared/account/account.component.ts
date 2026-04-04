@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { AuthService, MfaFactorViewModel } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { UserProfileService } from '../../core/user-profile.service';
-import { ToastService } from '../../core/toast.service';
+import { UserProfileService } from '../../core/user-profile/user-profile.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import {
   UiButtonDangerDirective,

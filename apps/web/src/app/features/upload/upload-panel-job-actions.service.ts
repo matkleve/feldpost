@@ -15,7 +15,7 @@
  */
 
 import { Injectable, inject, type WritableSignal } from '@angular/core';
-import type { ForwardGeocodeResult } from '../../core/geocoding.service';
+import type { ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
 import type { UploadItemActionContext, UploadItemMenuAction } from './upload-panel-item.component';
 import type { UploadLane } from './upload-phase.helpers';

@@ -14,7 +14,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { UploadManagerService, type UploadJob } from '../../core/upload/upload-manager.service';
 import type { UploadItemActionContext, UploadItemMenuAction } from './upload-panel-item.component';
 import { getIssueKind } from './upload-phase.helpers';

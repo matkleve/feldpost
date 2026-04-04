@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import * as L from 'leaflet';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { GeocodingService } from '../../../core/geocoding.service';
-import type { WorkspaceImage } from '../../../core/workspace-view.types';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import type { WorkspaceImage } from '../../../core/workspace-view/workspace-view.types';
 
 export interface AssignImagesToProjectResult {
   ok: boolean;

@@ -37,7 +37,7 @@ import {
 } from '../../upload/upload-panel.component';
 import { ExifCoords } from '../../../core/upload/upload.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { GeocodingService } from '../../../core/geocoding.service';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import {
   UploadManagerService,
   ImageReplacedEvent,
@@ -45,17 +45,17 @@ import {
   UploadFailedEvent,
   type UploadJob,
 } from '../../../core/upload/upload-manager.service';
-import { WorkspaceViewService } from '../../../core/workspace-view.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection.service';
-import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load.service'; // TODO: Migrate to MediaDownloadService
-import { ToastService } from '../../../core/toast.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
+import { PhotoLoadService, PHOTO_PLACEHOLDER_ICON } from '../../../core/photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
+import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
 import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
 import { WorkspacePaneShellComponent } from '../workspace-pane/workspace-pane-shell.component';
 import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card/thumbnail-card.component';
-import { SettingsPaneService } from '../../../core/settings-pane.service';
+import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 import {
@@ -104,7 +104,7 @@ import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
-import { MediaLocationUpdateService } from '../../../core/media-location-update.service';
+import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
 import { getLaneForJob } from '../../upload/upload-phase.helpers';
 import {

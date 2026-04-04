@@ -1,4 +1,4 @@
-import type { GeocodingService } from '../geocoding.service';
+import type { GeocodingService } from '../geocoding/geocoding.service';
 import type { SupabaseService } from '../supabase/supabase.service';
 
 export async function resolveUploadAddress(args: {

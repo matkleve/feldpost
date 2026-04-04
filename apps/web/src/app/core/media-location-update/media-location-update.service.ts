@@ -3,7 +3,7 @@ import {
   GeocodingService,
   type ForwardGeocodeResult,
   type ReverseGeocodeResult,
-} from '../geocoding.service';
+} from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
 export interface MediaLocationUpdateResult {

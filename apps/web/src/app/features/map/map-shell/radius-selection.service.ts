@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
-import type { WorkspaceImage } from '../../../core/workspace-view.types';
+import type { WorkspaceImage } from '../../../core/workspace-view/workspace-view.types';
 
 interface RadiusMarkerState {
   lat: number;

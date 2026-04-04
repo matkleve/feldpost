@@ -25,7 +25,7 @@ import type {
   MediaPreviewRequest,
   MediaPreviewResult,
 } from './media-download.types';
-import type { WorkspaceMedia } from '../workspace-view.types';
+import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 
 export type {
   DownloadBlobResult,
