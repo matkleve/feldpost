@@ -68,7 +68,7 @@ Reference workflow and checklist:
 - Avoid browser-native UI primitives (`window.prompt`, `window.confirm`, native context UI) for product flows when a shared component exists
 - When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
 - Use service-module symmetry for new/refactored services:
-  - Docs: `docs/element-specs/[service-name]/`
+  - Docs: `docs/specs/service/[service-name]/`
   - Code: `apps/web/src/app/core/[service-name]/`
   - Required files per module: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
   - Keep one central `types.ts` per module; do not split into nested sub-service type files
@@ -175,7 +175,7 @@ Example:
 
 - **RLS is the security boundary** — frontend is untrusted; Row-Level Security enforces all data access
 - **Adapter pattern** — never call Leaflet, Supabase, or Nominatim directly from components; use `MapAdapter`, `GeocodingAdapter`, `SupabaseService`
-- **Element specs are contracts** — implement features from `docs/element-specs/[element].md`; spec governance itself lives in `docs/element-specs/README.md`
+- **Element specs are contracts** — implement features from `docs/specs/...`; spec governance itself lives in `docs/specs/README.md`
 - **Glossary is canonical** — use exact names from `docs/glossary.md`
 
 ## Component Structure Rules (Hard Blockers)
@@ -317,13 +317,13 @@ Any implementation that deviates from this contract is a blocker.
 ## Document Authority
 
 - **Project rules and invariants**: `AGENTS.md`
-- **Spec system, structure contract, split policy, and index**: `docs/element-specs/README.md`
+- **Spec system, structure contract, split policy, and index**: `docs/specs/README.md`
 - **Spec writing template**: `docs/agent-workflows/element-spec-format.md`
 - **Post-implementation verification**: `docs/agent-workflows/implementation-checklist.md`
 
 ## Required Feature Workflow
 
-1. Read the target element spec: `docs/element-specs/[element].md`
+1. Read the target element spec: `docs/specs/...`
 2. Read the implementation blueprint if it exists: `docs/implementation-blueprints/[element].md`
 3. Read additional design docs only if the spec or blueprint does not answer the question
 4. Reuse shared UI and adapter abstractions before introducing new structure
@@ -331,7 +331,7 @@ Any implementation that deviates from this contract is a blocker.
 
 ## Component Spec Coverage (Mandatory)
 
-- Every production component must have its own dedicated element spec in `docs/element-specs/`.
+- Every production component must have its own dedicated element spec in `docs/specs/component/` or `docs/specs/ui/`.
 - Parent specs may define shared contracts, but domain and shared components still require child specs for their own behavior, state, wiring, and acceptance criteria.
 - Do not collapse multiple non-trivial component contracts into one monolithic spec when child-spec split is possible.
 - Before implementing or refactoring a component, create or update that component's dedicated spec first.
@@ -349,7 +349,7 @@ Non-negotiable rules: `docs/design/constitution.md`
 
 ## Settings Overlay Convention
 
-For any feature that introduces user-configurable behavior, add an optional `## Settings` section to that feature's element spec in `docs/element-specs/`. Use concise bullets in the form `- **Section**: what it configures`. The settings inventory is centralized in `docs/settings-registry.md` and must stay in sync with all spec `## Settings` sections via `node scripts/lint-specs.mjs`. When adding a new configurable feature, update the spec first and then run the linter (or `--fix`) to refresh/validate the registry.
+For any feature that introduces user-configurable behavior, add an optional `## Settings` section to that feature's element spec in `docs/specs/`. Use concise bullets in the form `- **Section**: what it configures`. The settings inventory is centralized in `docs/settings-registry.md` and must stay in sync with all spec `## Settings` sections via `node scripts/lint-specs.mjs`. When adding a new configurable feature, update the spec first and then run the linter (or `--fix`) to refresh/validate the registry.
 
 ## Mandatory i18n Workflow
 
@@ -397,7 +397,20 @@ Translation data in DB (`app_texts` + `app_text_translations`) is part of the fe
 
 - Every stateful component must segment state logic in `*.component.ts`, `*.component.html`, and `*.component.scss` with explicit English comment blocks.
 - Each state comment must start with `Stable state:` and describe the rendered visual behavior briefly.
-- Every state comment block must include a spec reference line (`@see docs/element-specs/...`).
+- Every state comment block must include a spec reference line (`@see docs/specs/...`).
+
+## Spec Folder Taxonomy (Mandatory)
+
+Use the following top-level structure in `docs/specs/`:
+
+- `ui/` = feature-level UI contracts (for example map/workspace/media-detail systems)
+- `component/` = reusable UI building blocks and local component contracts
+- `service/` = service-module contracts mirrored to `apps/web/src/app/core/`
+- `system/` = cross-cutting behavior systems and orchestration matrices
+- `page/` = route/page-level contracts
+
+Authoring and governance rules belong in AGENTS/instructions. `docs/specs/README.md` remains primarily an index and navigation aid.
+
 - In TypeScript: place state comment blocks above the enum/state contract and derived state helpers.
 - In HTML: place state comment blocks immediately before each state branch/region.
 - In SCSS: place state comment blocks immediately above each state selector block.

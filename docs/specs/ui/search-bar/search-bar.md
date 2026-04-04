@@ -1,6 +1,6 @@
 # Search Bar
 
-> **Blueprint:** [implementation-blueprints/search-bar.md](../../implementation-blueprints/search-bar.md)
+> **Blueprint:** [implementation-blueprints/search-bar.md](../../../implementation-blueprints/search-bar.md)
 
 ## What It Is
 
@@ -279,7 +279,7 @@ sequenceDiagram
 
 ## Use Cases
 
-> **Full use cases:** [use-cases/search-bar.md](../../use-cases/search-bar.md) � 18 scenarios (UC-1 through UC-18) with 50+ edge cases.
+> **Full use cases:** [use-cases/search-bar.md](../../../use-cases/search-bar.md) � 18 scenarios (UC-1 through UC-18) with 50+ edge cases.
 
 The actions table is derived from these use cases. Deep query behavior and ranking details are split into the child specs to keep this parent contract concise.
 

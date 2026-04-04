@@ -217,7 +217,7 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `map-shell.md` — Map Shell (top-level host)
 - ✅ `map-zone.md` — Map Zone (flex container for map + floating controls)
 - ✅ `sidebar.md` — Sidebar navigation rail
-- ✅ `workspace/workspace-pane.md` — Right-side collapsible panel with group tabs
+- ✅ `ui/workspace/workspace-pane.md` — Right-side collapsible panel with group tabs
 - ✅ `drag-divider.md` — Drag Divider (resizable map/workspace split)
 
 ### Search
@@ -252,8 +252,8 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `media-item-quiet-actions.md` — Media quiet-actions subcomponent contract (active)
 - ✅ `project-item.md` — Project domain item contract (active)
 - ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
-- ✅ `workspace/workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
-- ✅ `workspace/workspace-view-system.md` — Workspace View System (data pipeline architecture)
+- ✅ `ui/workspace/workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
+- ✅ `ui/workspace/workspace-view-system.md` — Workspace View System (data pipeline architecture)
 
 ### Panels & Detail
 

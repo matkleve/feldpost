@@ -1,7 +1,7 @@
 # Workspace Actions Bar
 
-> **Blueprint:** [implementation-blueprints/workspace-actions-bar.md](../../implementation-blueprints/workspace-actions-bar.md)
-> **Use cases:** [use-cases/workspace-export.md](../../use-cases/workspace-export.md)
+> **Blueprint:** [implementation-blueprints/workspace-actions-bar.md](../../../implementation-blueprints/workspace-actions-bar.md)
+> **Use cases:** [use-cases/workspace-export.md](../../../use-cases/workspace-export.md)
 
 ## What It Is
 

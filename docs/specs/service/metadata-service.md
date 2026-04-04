@@ -17,24 +17,24 @@ This is a service contract without direct UI rendering. In product behavior it a
 
 ## Actions
 
-| # | Trigger | System Response | Contract Method |
-| --- | --- | --- | --- |
-| 1 | App or consumer requests metadata field catalog | Returns built-in + custom metadata fields as one merged catalog | allMetadataFields() |
-| 2 | Consumer needs sortable fields | Returns only sortable fields | sortableMetadataFields() |
-| 3 | Consumer needs groupable fields | Returns only groupable fields | groupableMetadataFields() |
-| 4 | Consumer needs filterable fields | Returns only filterable fields | filterableMetadataFields() |
-| 5 | Consumer needs searchable fields | Returns only searchable fields | searchableMetadataFields() |
-| 6 | Metadata keys loaded from DB | Maps DB keys to field definitions and updates custom field state | setMetadataFieldsFromKeys(keys) |
-| 7 | Consumer requests metadata key refresh | Fetches metadata keys and updates custom metadata fields | refreshMetadataFields() |
-| 8 | Consumer requests sortable value for media + field | Resolves built-in value or custom parsed value | getSortableValue(media, fieldId) |
-| 9 | Consumer requests grouping label | Resolves built-in grouping labels or custom fallback labels | getGroupingLabel(media, fieldId) |
-| 10 | Consumer requests filter value | Resolves built-in/custom value as filter string | getFilterValue(media, fieldId) |
-| 11 | Media-detail flow loads values by lookup ids | Loads media links + metadata values and returns lookupId keyed metadata map | loadMetadataValuesByLookupIds(lookupIds) |
-| 12 | Media-detail flow loads entries for one item | Loads metadata entries for a media item | loadMetadataEntriesForMediaItem(mediaItemId) |
-| 13 | UI needs org key-name suggestions | Returns ordered key names for organization | listMetadataKeyNamesForOrganization(organizationId) |
-| 14 | User saves metadata value on existing key | Upserts metadata value for resolved media item and key | saveMetadataValueByLookupId(lookupId, metadataKeyId, valueText) |
-| 15 | User adds metadata with key name | Finds or creates metadata key, then upserts metadata value | addMetadataValueByLookupId(lookupId, organizationId, keyName, valueText) |
-| 16 | User removes metadata value | Deletes metadata value for resolved media item and key | removeMetadataValueByLookupId(lookupId, metadataKeyId) |
+| #   | Trigger                                            | System Response                                                             | Contract Method                                                          |
+| --- | -------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1   | App or consumer requests metadata field catalog    | Returns built-in + custom metadata fields as one merged catalog             | allMetadataFields()                                                      |
+| 2   | Consumer needs sortable fields                     | Returns only sortable fields                                                | sortableMetadataFields()                                                 |
+| 3   | Consumer needs groupable fields                    | Returns only groupable fields                                               | groupableMetadataFields()                                                |
+| 4   | Consumer needs filterable fields                   | Returns only filterable fields                                              | filterableMetadataFields()                                               |
+| 5   | Consumer needs searchable fields                   | Returns only searchable fields                                              | searchableMetadataFields()                                               |
+| 6   | Metadata keys loaded from DB                       | Maps DB keys to field definitions and updates custom field state            | setMetadataFieldsFromKeys(keys)                                          |
+| 7   | Consumer requests metadata key refresh             | Fetches metadata keys and updates custom metadata fields                    | refreshMetadataFields()                                                  |
+| 8   | Consumer requests sortable value for media + field | Resolves built-in value or custom parsed value                              | getSortableValue(media, fieldId)                                         |
+| 9   | Consumer requests grouping label                   | Resolves built-in grouping labels or custom fallback labels                 | getGroupingLabel(media, fieldId)                                         |
+| 10  | Consumer requests filter value                     | Resolves built-in/custom value as filter string                             | getFilterValue(media, fieldId)                                           |
+| 11  | Media-detail flow loads values by lookup ids       | Loads media links + metadata values and returns lookupId keyed metadata map | loadMetadataValuesByLookupIds(lookupIds)                                 |
+| 12  | Media-detail flow loads entries for one item       | Loads metadata entries for a media item                                     | loadMetadataEntriesForMediaItem(mediaItemId)                             |
+| 13  | UI needs org key-name suggestions                  | Returns ordered key names for organization                                  | listMetadataKeyNamesForOrganization(organizationId)                      |
+| 14  | User saves metadata value on existing key          | Upserts metadata value for resolved media item and key                      | saveMetadataValueByLookupId(lookupId, metadataKeyId, valueText)          |
+| 15  | User adds metadata with key name                   | Finds or creates metadata key, then upserts metadata value                  | addMetadataValueByLookupId(lookupId, organizationId, keyName, valueText) |
+| 16  | User removes metadata value                        | Deletes metadata value for resolved media item and key                      | removeMetadataValueByLookupId(lookupId, metadataKeyId)                   |
 
 ## Component Hierarchy
 
@@ -63,35 +63,35 @@ flowchart LR
   S --> UI
 ```
 
-| Source | Table / Layer | Fields | Operation |
-| --- | --- | --- | --- |
-| Built-in fields | built-in-metadata-fields.adapter.ts | fixed field ids, icons, value resolvers, grouping resolvers | read |
-| Custom field keys | metadata_keys | id, key_name, key_type | select |
-| Media value links | media_items | id, source_image_id | select |
-| Metadata values | media_metadata | media_item_id, metadata_key_id, value_text | select/upsert/delete |
+| Source            | Table / Layer                       | Fields                                                      | Operation            |
+| ----------------- | ----------------------------------- | ----------------------------------------------------------- | -------------------- |
+| Built-in fields   | built-in-metadata-fields.adapter.ts | fixed field ids, icons, value resolvers, grouping resolvers | read                 |
+| Custom field keys | metadata_keys                       | id, key_name, key_type                                      | select               |
+| Media value links | media_items                         | id, source_image_id                                         | select               |
+| Metadata values   | media_metadata                      | media_item_id, metadata_key_id, value_text                  | select/upsert/delete |
 
 ## State
 
-| Name | Type | Default | Controls |
-| --- | --- | --- | --- |
-| customMetadataFields | signal<MetadataFieldDefinition[]> | [] | runtime custom field catalog |
-| allMetadataFields | computed<MetadataFieldDefinition[]> | built-ins + custom | merged metadata field catalog |
-| sortableMetadataFields | computed<MetadataFieldDefinition[]> | derived | sortable subset |
-| groupableMetadataFields | computed<MetadataFieldDefinition[]> | derived | groupable subset |
-| filterableMetadataFields | computed<MetadataFieldDefinition[]> | derived | filterable subset |
-| searchableMetadataFields | computed<MetadataFieldDefinition[]> | derived | searchable subset |
+| Name                     | Type                                | Default            | Controls                      |
+| ------------------------ | ----------------------------------- | ------------------ | ----------------------------- |
+| customMetadataFields     | signal<MetadataFieldDefinition[]>   | []                 | runtime custom field catalog  |
+| allMetadataFields        | computed<MetadataFieldDefinition[]> | built-ins + custom | merged metadata field catalog |
+| sortableMetadataFields   | computed<MetadataFieldDefinition[]> | derived            | sortable subset               |
+| groupableMetadataFields  | computed<MetadataFieldDefinition[]> | derived            | groupable subset              |
+| filterableMetadataFields | computed<MetadataFieldDefinition[]> | derived            | filterable subset             |
+| searchableMetadataFields | computed<MetadataFieldDefinition[]> | derived            | searchable subset             |
 
 ## File Map
 
-| File | Purpose |
-| --- | --- |
-| apps/web/src/app/core/metadata/metadata.service.ts | Facade and orchestration |
-| apps/web/src/app/core/metadata/metadata.types.ts | Shared metadata contracts |
-| apps/web/src/app/core/metadata/metadata.helpers.ts | Pure mapping and aggregation helpers |
+| File                                                                        | Purpose                                  |
+| --------------------------------------------------------------------------- | ---------------------------------------- |
+| apps/web/src/app/core/metadata/metadata.service.ts                          | Facade and orchestration                 |
+| apps/web/src/app/core/metadata/metadata.types.ts                            | Shared metadata contracts                |
+| apps/web/src/app/core/metadata/metadata.helpers.ts                          | Pure mapping and aggregation helpers     |
 | apps/web/src/app/core/metadata/adapters/built-in-metadata-fields.adapter.ts | Built-in field definitions and resolvers |
-| apps/web/src/app/core/metadata/adapters/supabase-metadata.adapter.ts | Supabase access adapter |
-| apps/web/src/app/core/metadata/README.md | Module index |
-| docs/specs/services/metadata-service.md | Canonical metadata service contract |
+| apps/web/src/app/core/metadata/adapters/supabase-metadata.adapter.ts        | Supabase access adapter                  |
+| apps/web/src/app/core/metadata/README.md                                    | Module index                             |
+| docs/specs/service/metadata-service.md                                      | Canonical metadata service contract      |
 
 ## Wiring
 

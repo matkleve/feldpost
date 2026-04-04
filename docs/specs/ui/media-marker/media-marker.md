@@ -1,6 +1,6 @@
 # Media Marker
 
-> **Blueprint:** [implementation-blueprints/media-marker.md](../../implementation-blueprints/media-marker.md)
+> **Blueprint:** [implementation-blueprints/media-marker.md](../../../implementation-blueprints/media-marker.md)
 > **Media loading runtime:** `apps/web/src/app/core/photo-load.service.ts`
 
 ## What It Is
@@ -55,7 +55,7 @@ PhotoMarker                                      ← Leaflet DivIcon, custom HTM
 
 ## Thumbnail Loading & Placeholders
 
-> **Full use cases:** [use-cases/media-loading.md](../../use-cases/media-loading.md)
+> **Full use cases:** [use-cases/media-loading.md](../../../use-cases/media-loading.md)
 
 Single-image markers at near zoom (≥ 16) display a real photo thumbnail inside the marker body. Thumbnails are **lazy-loaded** via `PhotoLoadService` — only fetched for visible markers in the current viewport. The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` which returns a Supabase Storage signed URL with server-side image transformation (`80 × 80 px`, `cover` mode, auto-WebP). The service handles caching, staleness (50 min threshold), and re-signing automatically. When no real file exists in storage (seed data, deleted files), `photoLoad.getLoadState()` returns `'error'` and the marker renders the canonical `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` — no broken `<img>` icon ever appears.
 This marker cache is shared with Workspace Pane detail and `/media` consumers by media identity, so already loaded media can be reused immediately across surfaces.

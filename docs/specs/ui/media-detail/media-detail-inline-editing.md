@@ -1,7 +1,7 @@
 # Image Detail — Inline Editing
 
 > **Parent spec:** [image-detail-view](media-detail-view.md)
-> **Editing use cases:** [use-cases/image-editing.md](../../use-cases/image-editing.md)
+> **Editing use cases:** [use-cases/image-editing.md](../../../use-cases/image-editing.md)
 
 ## What It Is
 

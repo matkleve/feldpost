@@ -42,7 +42,7 @@ docs/               → Element specs, design tokens, glossary
 
 For every new service and service refactor, use mirrored doc/code structure:
 
-- Docs: `docs/element-specs/[service-name]/`
+- Docs: `docs/specs/service/[service-name]/`
 - Code: `apps/web/src/app/core/[service-name]/`
 
 Within each service module, use this required file layout:
@@ -85,7 +85,7 @@ For every UI text introduced or changed in components/templates:
 
 When user feedback changes feature behavior or UX expectations:
 
-- Update the relevant `docs/element-specs/*.md` spec entries first in the same session.
+- Update the relevant `docs/specs/**/*.md` spec entries first in the same session.
 - Reflect the change in Actions, Wiring/Data sections, and Acceptance Criteria as needed.
 - Keep implementation and spec synchronized; do not ship behavior changes without matching spec updates.
 

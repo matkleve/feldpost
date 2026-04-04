@@ -1,7 +1,7 @@
 ---
 name: "Element Specs"
-description: "Use when creating or editing element specification documents in docs/element-specs/."
-applyTo: "docs/element-specs/**"
+description: "Use when creating or editing element specification documents in docs/specs/."
+applyTo: "docs/specs/**"
 ---
 
 # Element Spec Conventions

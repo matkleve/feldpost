@@ -1,6 +1,6 @@
 # Search Tuning Settings
 
-> **Formula reference:** [search-algorithm-addresses-and-places.md](../../search-algorithm-addresses-and-places.md)
+> **Formula reference:** [search-algorithm-addresses-and-places.md](../../../search-algorithm-addresses-and-places.md)
 
 ## What It Is
 

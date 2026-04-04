@@ -2,7 +2,7 @@
 
 > **Parent spec:** [search-bar](search-bar.md)
 > **Data/service contract:** [search-bar-data-and-service](search-bar-data-and-service.md)
-> **Use cases:** [use-cases/search-bar.md](../../use-cases/search-bar.md)
+> **Use cases:** [use-cases/search-bar.md](../../../use-cases/search-bar.md)
 
 ## What It Is
 

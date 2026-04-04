@@ -3,8 +3,8 @@
 > **Parent spec:** [media-detail-view](media-detail-view.md)
 > **Architecture parent:** [media-download-service](../media-download/media-download-service.md)
 > **Media loading service (runtime class):** `apps/web/src/app/core/photo-load.service.ts`
-> **Media loading use cases:** [use-cases/media-loading.md](../../use-cases/media-loading.md)
-> **Media editing use cases:** [use-cases/image-editing.md](../../use-cases/image-editing.md) (IE-10)
+> **Media loading use cases:** [use-cases/media-loading.md](../../../use-cases/media-loading.md)
+> **Media editing use cases:** [use-cases/image-editing.md](../../../use-cases/image-editing.md) (IE-10)
 
 ## What It Is
 
@@ -286,7 +286,7 @@ sequenceDiagram
     end
 ```
 
-> See [PL-7 / PL-8](../../use-cases/media-loading.md#pl-7-replace-photo--loading-state-reset) for detailed sequence diagrams.
+> See [PL-7 / PL-8](../../../use-cases/media-loading.md#pl-7-replace-photo--loading-state-reset) for detailed sequence diagrams.
 
 ## MediaViewer Sizing
 

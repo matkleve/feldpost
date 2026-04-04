@@ -1,6 +1,6 @@
 # Media Marker Context Menu
 
-> **Use cases:** [use-cases/media-marker-context-menu.md](../../use-cases/media-marker-context-menu.md)
+> **Use cases:** [use-cases/media-marker-context-menu.md](../../../use-cases/media-marker-context-menu.md)
 > **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
 
 ## What It Is
@@ -120,7 +120,7 @@ flowchart LR
 | `apps/web/src/app/core/map/map-adapter.ts`                         | Add marker-context intent event contract                 |
 | `apps/web/src/app/core/map/leaflet-map.adapter.ts`                 | Emit normalized marker secondary-click/long-press events |
 | `docs/element-specs/media-marker/media-marker.md`                  | Cross-reference marker menu behavior from marker spec    |
-| `docs/element-specs/component/map-context-menu.md`                           | Define precedence between map and marker context menus   |
+| `docs/element-specs/component/map-context-menu.md`                 | Define precedence between map and marker context menus   |
 
 ## Wiring
 

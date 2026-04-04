@@ -1,8 +1,8 @@
 # Media Detail — Actions & Marker Sync
 
 > **Parent spec:** [media-detail-view](media-detail-view.md)
-> **Upload manager use cases:** [use-cases/upload-manager.md](../../use-cases/upload-manager.md)
-> **Map shell use cases:** [use-cases/map-shell.md](../../use-cases/map-shell.md)
+> **Upload manager use cases:** [use-cases/upload-manager.md](../../../use-cases/upload-manager.md)
+> **Map shell use cases:** [use-cases/map-shell.md](../../../use-cases/map-shell.md)
 
 ## What It Is
 

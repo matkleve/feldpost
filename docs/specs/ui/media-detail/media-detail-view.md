@@ -1,8 +1,8 @@
 # Media Detail View
 
-> **Blueprint:** [implementation-blueprints/media-detail-view.md](../../implementation-blueprints/media-detail-view.md)
-> **Media loading use cases:** [use-cases/media-loading.md](../../use-cases/media-loading.md)
-> **Media editing use cases:** [use-cases/image-editing.md](../../use-cases/image-editing.md)
+> **Blueprint:** [implementation-blueprints/media-detail-view.md](../../../implementation-blueprints/media-detail-view.md)
+> **Media loading use cases:** [use-cases/media-loading.md](../../../use-cases/media-loading.md)
+> **Media editing use cases:** [use-cases/image-editing.md](../../../use-cases/image-editing.md)
 
 ## What It Is
 
@@ -13,12 +13,12 @@ It inherits the global media-delivery cache contract: the same media identity us
 
 Feature-specific behavior is owned by these child specs:
 
-| Child Spec                                                    | Covers                                                |
-| ------------------------------------------------------------- | ----------------------------------------------------- |
-| [media-detail-media-viewer](media-detail-media-viewer.md)     | Progressive loading, lightbox, replace/upload media   |
-| [media-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows   |
-| [metadata-service](../services/metadata-service.md)                    | Metadata field/value service contract and CRUD surface |
-| [media-detail-actions](media-detail-actions.md)               | Actions section, delete, marker sync, correction mode |
+| Child Spec                                                    | Covers                                                 |
+| ------------------------------------------------------------- | ------------------------------------------------------ |
+| [media-detail-media-viewer](media-detail-media-viewer.md)     | Progressive loading, lightbox, replace/upload media    |
+| [media-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows    |
+| [metadata-service](../../service/metadata-service.md)         | Metadata field/value service contract and CRUD surface |
+| [media-detail-actions](media-detail-actions.md)               | Actions section, delete, marker sync, correction mode  |
 
 The parent element coordinates shared state and section visibility only. Field-level editing, project membership management, location editing, media interactions, metadata service integration, and action-specific flows belong to the child specs above.
 

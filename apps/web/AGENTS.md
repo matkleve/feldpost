@@ -27,7 +27,7 @@ src/app/
 - Never call Leaflet or Supabase directly — use service abstractions
 - All DB types from Supabase-generated types — no `any`
 - Service-module symmetry is mandatory for new/refactored services:
-  - Docs in `docs/element-specs/[service-name]/`
+  - Docs in `docs/specs/service/[service-name]/`
   - Code in `src/app/core/[service-name]/`
   - Required module files: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
   - Keep one shared `types.ts` per module and keep facade orchestration slim
@@ -35,7 +35,7 @@ src/app/
   - Move replaced code snapshots only as a last resort, using dated refactor snapshot folders and `.legacy.ts` suffix
   - Do not reference archived files/specs from active specs, blueprints, or implementation docs
 - Match the component hierarchy in the element spec exactly
-- Every production component must have its own dedicated spec in `docs/element-specs/` (parent specs can reference child specs, but not replace them)
+- Every production component must have its own dedicated spec in `docs/specs/component/` or `docs/specs/ui/` (parent specs can reference child specs, but not replace them)
 - Use glossary names from `docs/glossary.md`
 - Floating/overlay elements go in Map Zone, not outside Map Shell
 - Prefer shared standardized UI components in `src/app/shared/` before implementing feature-local duplicates
@@ -53,7 +53,7 @@ src/app/
 ## Stable State Comments (Required)
 
 - For every stateful component, `*.component.ts`, `*.component.html`, and `*.component.scss` must include explicit English `Stable state:` comment blocks.
-- Each stable-state comment block must include a matching element-spec reference using `@see docs/element-specs/...`.
+- Each stable-state comment block must include a matching element-spec reference using `@see docs/specs/...`.
 
 ## Build & Test
 
