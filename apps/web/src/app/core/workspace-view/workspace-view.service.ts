@@ -8,7 +8,7 @@ import type {
   WorkspaceImage,
   GroupedSection,
   SortConfig,
-  PropertyRef,
+  MetadataFieldRef,
   ThumbnailSizePreset,
 } from './workspace-view.types';
 
@@ -29,7 +29,7 @@ export class WorkspaceViewService {
   readonly rawImages = signal<WorkspaceImage[]>([]);
   readonly selectedProjectIds = signal<Set<string>>(new Set());
   readonly activeSorts = signal<SortConfig[]>(DEFAULT_SORTS);
-  readonly activeGroupings = signal<PropertyRef[]>([]);
+  readonly activeGroupings = signal<MetadataFieldRef[]>([]);
   readonly thumbnailSizePreset = signal<ThumbnailSizePreset>(this.readThumbnailSizePreset());
   readonly collapsedGroups = signal<Set<string>>(new Set());
   readonly isLoading = signal(false);
@@ -503,11 +503,6 @@ export class WorkspaceViewService {
     await this.metadata.refreshMetadataFields();
   }
 
-  /** @deprecated Kept temporarily for callsites still using old naming. */
-  async loadCustomProperties(): Promise<void> {
-    await this.loadMetadataFields();
-  }
-
   private getSortValue(img: WorkspaceImage, key: string): string | number | null {
     return this.metadata.getSortableValue(img, key);
   }
@@ -536,7 +531,7 @@ export class WorkspaceViewService {
 
   private buildGroups(
     images: WorkspaceImage[],
-    groupings: PropertyRef[],
+    groupings: MetadataFieldRef[],
     level: number,
   ): GroupedSection[] {
     if (groupings.length === 0) {

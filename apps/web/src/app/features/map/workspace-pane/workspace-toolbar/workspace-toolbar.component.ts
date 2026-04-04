@@ -11,7 +11,7 @@ import { FilterService } from '../../../../core/filter/filter.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MetadataService } from '../../../../core/metadata/metadata.service';
 import type {
-  PropertyRef,
+  MetadataFieldRef,
   SortConfig,
   ThumbnailSizePreset,
 } from '../../../../core/workspace-view/workspace-view.types';
@@ -128,7 +128,7 @@ export class WorkspaceToolbarComponent {
     this.activeGroupings.set(active);
     // Push to WorkspaceViewService
     this.viewService.activeGroupings.set(
-      active.map((g) => ({ id: g.id, label: g.label, icon: g.icon }) as PropertyRef),
+      active.map((g) => ({ id: g.id, label: g.label, icon: g.icon }) as MetadataFieldRef),
     );
   }
 

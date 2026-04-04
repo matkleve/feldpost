@@ -1,7 +1,7 @@
 ﻿import { TestBed } from '@angular/core/testing';
-import { FilterService } from './filter/filter.service';
-import { MetadataService } from './metadata/metadata.service';
-import type { FilterRule, WorkspaceImage } from './workspace-view/workspace-view.types';
+import { FilterService } from './filter.service';
+import { MetadataService } from '../metadata/metadata.service';
+import type { FilterRule, WorkspaceImage } from '../workspace-view/workspace-view.types';
 
 function makeImage(overrides: Partial<WorkspaceImage> = {}): WorkspaceImage {
   return {
@@ -17,10 +17,10 @@ function makeImage(overrides: Partial<WorkspaceImage> = {}): WorkspaceImage {
     direction: null,
     exifLatitude: 47.3769,
     exifLongitude: 8.5417,
-    addressLabel: 'BurgstraÃŸe 7, 8001 ZÃ¼rich',
-    city: 'ZÃ¼rich',
+    addressLabel: 'Burgstrasse 7, 8001 Zurich',
+    city: 'Zurich',
     district: 'Altstadt',
-    street: 'BurgstraÃŸe 7',
+    street: 'Burgstrasse 7',
     country: 'Switzerland',
     userName: 'Max Mustermann',
     ...overrides,
@@ -71,7 +71,7 @@ describe('FilterService', () => {
     it('updateRule patches a rule', () => {
       service.addRule();
       const id = service.rules()[0].id;
-      service.updateRule(id, { property: 'city', operator: 'contains', value: 'ZÃ¼rich' });
+      service.updateRule(id, { property: 'city', operator: 'contains', value: 'Zurich' });
       expect(service.rules()[0].property).toBe('city');
       expect(service.rules()[0].operator).toBe('contains');
     });
@@ -96,22 +96,22 @@ describe('FilterService', () => {
 
   describe('text operators', () => {
     it('"contains" matches substring', () => {
-      const img = makeImage({ city: 'ZÃ¼rich' });
-      const rule = makeRule({ property: 'city', operator: 'contains', value: 'Ã¼ri' });
+      const img = makeImage({ city: 'Zurich' });
+      const rule = makeRule({ property: 'city', operator: 'contains', value: 'uri' });
       expect(service.matchesClientSide(img, [rule])).toBe(true);
     });
 
     it('"contains" is case-insensitive', () => {
-      const img = makeImage({ city: 'ZÃ¼rich' });
-      const rule = makeRule({ property: 'city', operator: 'contains', value: 'ZÃœRICH' });
+      const img = makeImage({ city: 'Zurich' });
+      const rule = makeRule({ property: 'city', operator: 'contains', value: 'ZURICH' });
       expect(service.matchesClientSide(img, [rule])).toBe(true);
     });
 
     it('"is" checks exact match (case-insensitive)', () => {
-      const img = makeImage({ city: 'ZÃ¼rich' });
+      const img = makeImage({ city: 'Zurich' });
       expect(
         service.matchesClientSide(img, [
-          makeRule({ property: 'city', operator: 'is', value: 'zÃ¼rich' }),
+          makeRule({ property: 'city', operator: 'is', value: 'zurich' }),
         ]),
       ).toBe(true);
       expect(
@@ -122,7 +122,7 @@ describe('FilterService', () => {
     });
 
     it('"is not" checks inequality', () => {
-      const img = makeImage({ city: 'ZÃ¼rich' });
+      const img = makeImage({ city: 'Zurich' });
       const rule = makeRule({ property: 'city', operator: 'is not', value: 'Bern' });
       expect(service.matchesClientSide(img, [rule])).toBe(true);
     });
@@ -147,8 +147,8 @@ describe('FilterService', () => {
       expect(service.matchesClientSide(imgWithFang('43'), [rule])).toBe(false);
     });
 
-    it('"â‰ " matches unequal numbers', () => {
-      const rule = makeRule({ property: 'fang', operator: 'â‰ ', value: '42' });
+    it('"not equal" matches unequal numbers', () => {
+      const rule = makeRule({ property: 'fang', operator: '\u2260', value: '42' });
       expect(service.matchesClientSide(imgWithFang('43'), [rule])).toBe(true);
       expect(service.matchesClientSide(imgWithFang('42'), [rule])).toBe(false);
     });
@@ -166,15 +166,15 @@ describe('FilterService', () => {
       expect(service.matchesClientSide(imgWithFang('10'), [rule])).toBe(false);
     });
 
-    it('"â‰¥" matches greater-or-equal', () => {
-      const rule = makeRule({ property: 'fang', operator: 'â‰¥', value: '10' });
+    it('"greater-or-equal" matches greater-or-equal', () => {
+      const rule = makeRule({ property: 'fang', operator: '\u2265', value: '10' });
       expect(service.matchesClientSide(imgWithFang('10'), [rule])).toBe(true);
       expect(service.matchesClientSide(imgWithFang('11'), [rule])).toBe(true);
       expect(service.matchesClientSide(imgWithFang('9'), [rule])).toBe(false);
     });
 
-    it('"â‰¤" matches less-or-equal', () => {
-      const rule = makeRule({ property: 'fang', operator: 'â‰¤', value: '10' });
+    it('"less-or-equal" matches less-or-equal', () => {
+      const rule = makeRule({ property: 'fang', operator: '\u2264', value: '10' });
       expect(service.matchesClientSide(imgWithFang('10'), [rule])).toBe(true);
       expect(service.matchesClientSide(imgWithFang('9'), [rule])).toBe(true);
       expect(service.matchesClientSide(imgWithFang('11'), [rule])).toBe(false);
@@ -212,9 +212,9 @@ describe('FilterService', () => {
       expect(service.matchesClientSide(img, [rule])).toBe(true);
     });
 
-    it('null field passes "â‰ " when value is non-empty', () => {
+    it('null field passes "not equal" when value is non-empty', () => {
       const img = makeImage({ city: null });
-      const rule = makeRule({ property: 'city', operator: 'â‰ ', value: '10' });
+      const rule = makeRule({ property: 'city', operator: '\u2260', value: '10' });
       expect(service.matchesClientSide(img, [rule])).toBe(true);
     });
   });
@@ -223,14 +223,14 @@ describe('FilterService', () => {
 
   describe('conjunction logic', () => {
     it('AND: both rules must pass', () => {
-      const img = makeImage({ city: 'ZÃ¼rich', country: 'Switzerland' });
+      const img = makeImage({ city: 'Zurich', country: 'Switzerland' });
       const rules: FilterRule[] = [
         makeRule({
           id: 'r1',
           conjunction: 'where',
           property: 'city',
           operator: 'is',
-          value: 'ZÃ¼rich',
+          value: 'Zurich',
         }),
         makeRule({
           id: 'r2',
@@ -244,14 +244,14 @@ describe('FilterService', () => {
     });
 
     it('AND: fails when one rule fails', () => {
-      const img = makeImage({ city: 'ZÃ¼rich', country: 'Switzerland' });
+      const img = makeImage({ city: 'Zurich', country: 'Switzerland' });
       const rules: FilterRule[] = [
         makeRule({
           id: 'r1',
           conjunction: 'where',
           property: 'city',
           operator: 'is',
-          value: 'ZÃ¼rich',
+          value: 'Zurich',
         }),
         makeRule({
           id: 'r2',
@@ -265,7 +265,7 @@ describe('FilterService', () => {
     });
 
     it('OR: passes when at least one rule passes', () => {
-      const img = makeImage({ city: 'ZÃ¼rich' });
+      const img = makeImage({ city: 'Zurich' });
       const rules: FilterRule[] = [
         makeRule({
           id: 'r1',
@@ -279,7 +279,7 @@ describe('FilterService', () => {
           conjunction: 'or',
           property: 'city',
           operator: 'is',
-          value: 'ZÃ¼rich',
+          value: 'Zurich',
         }),
       ];
       expect(service.matchesClientSide(img, rules)).toBe(true);
@@ -290,10 +290,10 @@ describe('FilterService', () => {
       expect(service.matchesClientSide(img, [])).toBe(true);
     });
 
-    it('incomplete rules (no property) pass', () => {
+    it('incomplete rules (no property) fail', () => {
       const img = makeImage();
       const rule = makeRule({ property: '', operator: 'contains', value: 'test' });
-      expect(service.matchesClientSide(img, [rule])).toBe(true);
+      expect(service.matchesClientSide(img, [rule])).toBe(false);
     });
   });
 });

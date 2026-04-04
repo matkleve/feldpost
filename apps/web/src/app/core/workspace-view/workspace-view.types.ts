@@ -49,7 +49,7 @@ export interface WorkspaceMedia {
   signedThumbnailUrl?: string;
   /** True when batch signing was attempted but no URL could be produced. */
   thumbnailUnavailable?: boolean;
-  /** Custom property values — maps metadata_key UUID → stored value. */
+  /** Metadata values — maps metadata_key UUID -> stored value. */
   metadata?: WorkspaceMediaCustomMetadata;
   /** Structured filename metadata for export/label use. */
   fileMetadata?: WorkspaceMediaFileMetadata | null;
@@ -73,8 +73,8 @@ export interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
-/** A reference to a property used for grouping. */
-export interface PropertyRef {
+/** A reference to a metadata field used for grouping. */
+export interface MetadataFieldRef {
   id: string;
   label: string;
   icon: string;

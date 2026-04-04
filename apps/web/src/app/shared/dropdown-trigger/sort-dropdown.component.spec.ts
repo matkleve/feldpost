@@ -3,12 +3,12 @@ import { signal } from '@angular/core';
 import { SortDropdownComponent } from './sort-dropdown.component';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import { MetadataService } from '../../core/metadata/metadata.service';
-import type { SortConfig, PropertyRef } from '../../core/workspace-view/workspace-view.types';
+import type { SortConfig, MetadataFieldRef } from '../../core/workspace-view/workspace-view.types';
 
 function buildFakeViewService() {
   return {
     activeSorts: signal<SortConfig[]>([{ key: 'date-captured', direction: 'desc' as const }]),
-    activeGroupings: signal<PropertyRef[]>([]),
+    activeGroupings: signal<MetadataFieldRef[]>([]),
     effectiveSorts: signal<SortConfig[]>([{ key: 'date-captured', direction: 'desc' as const }]),
   };
 }

@@ -9,12 +9,12 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { WorkspaceViewService } from './workspace-view/workspace-view.service';
-import { SupabaseService } from './supabase/supabase.service';
-import { FilterService } from './filter/filter.service';
-import { GeocodingService } from './geocoding/geocoding.service';
-import { MetadataService } from './metadata/metadata.service';
-import type { WorkspaceImage } from './workspace-view/workspace-view.types';
+import { WorkspaceViewService } from './workspace-view.service';
+import { SupabaseService } from '../supabase/supabase.service';
+import { FilterService } from '../filter/filter.service';
+import { GeocodingService } from '../geocoding/geocoding.service';
+import { MetadataService } from '../metadata/metadata.service';
+import type { WorkspaceImage } from './workspace-view.types';
 
 // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -207,7 +207,7 @@ describe('WorkspaceViewService â€” address resolution', () => {
       (c: string[]) => c[0] === 'bulk_update_media_addresses',
     )!;
     expect(rpcCall[1].p_media_item_ids).toEqual(expect.arrayContaining(['img-1', 'img-2']));
-    expect(rpcCall[1].p_address_label).toBe('Burgstra\u00dfe 7, 8001 Z\u00fcrich, Switzerland');
+    expect(rpcCall[1].p_address_label).toBe(ZURICH_RESULT.addressLabel);
   });
 
   it('patches the local rawImages signal with resolved address', async () => {
@@ -522,7 +522,7 @@ describe('WorkspaceViewService â€” sort + grouping sync', () => {
 // â”€â”€ Numeric sorting (custom number properties) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 describe('WorkspaceViewService â€” numeric sorting', () => {
-  it('sorts number-type custom properties numerically, not lexicographically', () => {
+  it('sorts number-type metadata fields numerically, not lexicographically', () => {
     const { service } = setup();
     const registry = TestBed.inject(MetadataService);
 
@@ -542,7 +542,7 @@ describe('WorkspaceViewService â€” numeric sorting', () => {
     expect(sorted.map((i) => i.id)).toEqual(['d', 'b', 'c', 'a']);
   });
 
-  it('sorts number-type custom properties descending', () => {
+  it('sorts number-type metadata fields descending', () => {
     const { service } = setup();
     const registry = TestBed.inject(MetadataService);
 
@@ -580,7 +580,7 @@ describe('WorkspaceViewService â€” numeric sorting', () => {
     expect(sorted[2].id).toBe('b'); // null â†’ end
   });
 
-  it('groups by number-type custom property', () => {
+  it('groups by number-type metadata field', () => {
     const { service } = setup();
     const registry = TestBed.inject(MetadataService);
 
@@ -643,24 +643,24 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     const registry = TestBed.inject(MetadataService);
 
     // Before loading: only built-in properties
-    const builtInCount = registry.allProperties().length;
-    expect(registry.allProperties().every((p) => p.builtIn)).toBe(true);
+    const builtInCount = registry.allMetadataFields().length;
+    expect(registry.allMetadataFields().every((p) => p.builtIn)).toBe(true);
 
-    // Load custom properties (the method under test)
-    await service.loadCustomProperties();
+    // Load metadata fields (the method under test)
+    await service.loadMetadataFields();
 
-    // After loading: custom properties appear in the registry
-    expect(registry.allProperties().length).toBe(builtInCount + 2);
-    expect(registry.allProperties().some((p) => p.label === 'Bauphase')).toBe(true);
-    expect(registry.allProperties().some((p) => p.label === 'Fang')).toBe(true);
+    // After loading: metadata fields appear in the registry
+    expect(registry.allMetadataFields().length).toBe(builtInCount + 2);
+    expect(registry.allMetadataFields().some((p) => p.label === 'Bauphase')).toBe(true);
+    expect(registry.allMetadataFields().some((p) => p.label === 'Fang')).toBe(true);
 
-    // Custom properties show up in all dropdown lists
-    expect(registry.sortableProperties().some((p) => p.label === 'Bauphase')).toBe(true);
-    expect(registry.groupableProperties().some((p) => p.label === 'Fang')).toBe(true);
-    expect(registry.filterableProperties().some((p) => p.label === 'Bauphase')).toBe(true);
+    // Metadata fields show up in all dropdown lists
+    expect(registry.sortableMetadataFields().some((p) => p.label === 'Bauphase')).toBe(true);
+    expect(registry.groupableMetadataFields().some((p) => p.label === 'Fang')).toBe(true);
+    expect(registry.filterableMetadataFields().some((p) => p.label === 'Bauphase')).toBe(true);
   });
 
-  it('custom properties are not marked as builtIn after loading', async () => {
+  it('metadata fields are not marked as builtIn after loading', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-floor', key_name: 'Floor' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -692,9 +692,9 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     const service = TestBed.inject(WorkspaceViewService);
     const registry = TestBed.inject(MetadataService);
 
-    await service.loadCustomProperties();
+    await service.loadMetadataFields();
 
-    const floorProp = registry.getProperty('uuid-floor');
+    const floorProp = registry.getMetadataField('uuid-floor');
     expect(floorProp).toBeDefined();
     expect(floorProp!.builtIn).toBe(false);
     expect(floorProp!.label).toBe('Floor');
@@ -730,14 +730,14 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
 
     const service = TestBed.inject(WorkspaceViewService);
     const registry = TestBed.inject(MetadataService);
-    const before = registry.allProperties().length;
+    const before = registry.allMetadataFields().length;
 
-    await service.loadCustomProperties();
+    await service.loadMetadataFields();
 
-    expect(registry.allProperties().length).toBe(before);
+    expect(registry.allMetadataFields().length).toBe(before);
   });
 
-  it('end-to-end: load custom property â†’ add metadata to image â†’ group by it', async () => {
+  it('end-to-end: load metadata field â†’ add metadata to image â†’ group by it', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-bauphase', key_name: 'Bauphase' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -769,9 +769,9 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     const service = TestBed.inject(WorkspaceViewService);
     const registry = TestBed.inject(MetadataService);
 
-    // Step 1: Load custom properties from DB
-    await service.loadCustomProperties();
-    expect(registry.groupableProperties().some((p) => p.label === 'Bauphase')).toBe(true);
+    // Step 1: Load metadata fields from DB
+    await service.loadMetadataFields();
+    expect(registry.groupableMetadataFields().some((p) => p.label === 'Bauphase')).toBe(true);
 
     // Step 2: Add images with metadata values
     const images = [
@@ -796,7 +796,7 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     expect(rohbau.images.length).toBe(2);
   });
 
-  it('end-to-end: load custom property â†’ add metadata â†’ sort numerically', async () => {
+  it('end-to-end: load metadata field â†’ add metadata â†’ sort numerically', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-fang', key_name: 'Fang' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -828,9 +828,9 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     const service = TestBed.inject(WorkspaceViewService);
     const registry = TestBed.inject(MetadataService);
 
-    // Step 1: Load custom properties â€” Fang defaults to 'text' type from DB
-    await service.loadCustomProperties();
-    expect(registry.sortableProperties().some((p) => p.label === 'Fang')).toBe(true);
+    // Step 1: Load metadata fields â€” Fang defaults to 'text' type from DB
+    await service.loadMetadataFields();
+    expect(registry.sortableMetadataFields().some((p) => p.label === 'Fang')).toBe(true);
 
     // Step 2: Add images with numeric metadata
     const images = [
@@ -849,7 +849,7 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     expect(sorted.map((i) => i.id)).toEqual(['a', 'c', 'b']);
   });
 
-  it('end-to-end: load custom property â†’ add metadata â†’ filter by it', async () => {
+  it('end-to-end: load metadata field â†’ add metadata â†’ filter by it', async () => {
     const fakeMetadataKeys = [{ id: 'uuid-bauphase', key_name: 'Bauphase' }];
     const fakeSupabase = buildFakeSupabase();
     fakeSupabase.client.from.mockImplementation((table: string) => {
@@ -883,9 +883,9 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     const registry = TestBed.inject(MetadataService);
     const filterService = TestBed.inject(FilterService);
 
-    // Step 1: Load custom properties
-    await service.loadCustomProperties();
-    expect(registry.filterableProperties().some((p) => p.label === 'Bauphase')).toBe(true);
+    // Step 1: Load metadata fields
+    await service.loadMetadataFields();
+    expect(registry.filterableMetadataFields().some((p) => p.label === 'Bauphase')).toBe(true);
 
     // Step 2: Add images with metadata
     const images = [
@@ -911,4 +911,5 @@ describe('WorkspaceViewService â€” loadCustomProperties integration', () =>
     expect(allImages.every((img) => img.metadata?.['uuid-bauphase'] === 'Rohbau')).toBe(true);
   });
 });
+
 
