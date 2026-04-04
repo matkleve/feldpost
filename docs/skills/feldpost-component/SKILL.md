@@ -256,6 +256,27 @@ No implementation starts without this table.
 
 ---
 
+## Geometry Dependency Contract (Required per Component)
+
+Every component spec must declare its geometry dependency contract before any implementation starts. The contract answers who owns width and who owns height.
+
+Declare it as a table with three columns: Dimension, Owner, Mechanism.
+
+Ownership types:
+
+- self-contained: component sets its own size independently
+- parent-dictated: component fills space provided by parent, never declares own size
+- child-driven: component size is determined by a child via CSS custom property injection
+
+Rules:
+
+- A component may never set both width and height explicitly if one of them is child-driven.
+- Child-driven geometry must always flow via a CSS custom property on the child host; never via `@Output()`, never via `ElementRef` measurement fed back as `@Input()`.
+- The geometry dependency chain must be traceable from the outermost layout owner to the innermost content element without ambiguity.
+- Any component where height is child-driven must document the exact CSS custom property name and fallback value.
+
+---
+
 ## 5. CSS Layer Architecture
 
 Component-local first migration rule:
@@ -381,6 +402,12 @@ Do not create one-off component-local treatments for shared semantic states.
 - [ ] Ownership triad table completed before HTML/CSS
 - [ ] Exceptions documented with explicit reason
 - [ ] Exactly one stacking-context owner per component
+
+### Geometry Dependency
+
+- [ ] Geometry Dependency Contract declared in spec before any HTML or CSS written
+- [ ] If height is child-driven: CSS custom property name and fallback documented
+- [ ] No component sets explicit height and reads child-driven height simultaneously
 
 ### HTML
 

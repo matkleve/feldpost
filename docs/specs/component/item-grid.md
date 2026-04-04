@@ -165,7 +165,7 @@ The loading visual standard for Item Grid surfaces is a pulse placeholder layer.
 ### State-Frame Geometry Ownership (Mandatory)
 
 - `ItemStateFrameComponent` is a neutral state/interaction wrapper and must not own domain thumbnail border/radius framing for media tiles.
-- Media tile border and corner radius belong to `MediaItemRenderSurfaceComponent` slot geometry only.
+- Media tile border and corner radius belong to the media render geometry owner (`MediaDisplayComponent` viewport / active media frame owner) only.
 - Outer frame styling on wrappers is allowed only when the wrapper is also the visible tile owner for that domain.
 
 ### Media Contract Rebuild Rule (Mandatory)
@@ -273,6 +273,27 @@ export const ITEM_VISUAL_STATE_TRANSITIONS: Record<
 - Parent call-site migration required: yes (`MediaContentComponent`, `/projects` item-grid consumers, and any state-frame bindings in domain items).
 
 ## Visual Behavior Contract
+
+### Geometry Ownership Vocabulary (Media Path)
+
+- Constraint Owner: parent layout (`ItemGrid`) defines width/height limits for the slot.
+- Effective Render Owner: media renderer (`MediaDisplayComponent`) resolves the used media box inside those limits via intrinsic ratio.
+- Domain visuals in `MediaItemComponent` (selected ring, upload overlay, quiet actions) must align to the effective rendered box.
+- `icon-only` media outcome keeps the effective box square (`1/1`) and domain visuals must stay square-aligned.
+
+### CSS Variable Ownership & Dependency Matrix (Media Path)
+
+| CSS Variable                                               | Set By                                                               | Consumed By                                 | Dependency Type               | Why                                                                               |
+| ---------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------- |
+| `--media-item-max-width` / `--media-item-max-height`       | `ItemGrid` slot/layout contract                                      | `MediaItem` and forwarded child constraints | parent-dependent              | Slot geometry limits belong to layout, not domain render internals.               |
+| `--media-display-max-width` / `--media-display-max-height` | `MediaDisplayComponent` host inputs (forwarded from parent contract) | `MediaDisplayComponent` host sizing rules   | parent-derived child contract | Child consumes parent constraints without taking over constraint ownership.       |
+| `--media-aspect-ratio`                                     | `MediaDisplayComponent` (hint/metadata)                              | `MediaDisplayComponent` host aspect-ratio   | child-owned intrinsic shape   | Intrinsic ratio shapes used box inside constraints and may change over lifecycle. |
+| `--media-item-selected-ring-color`                         | global tokens/theme                                                  | `MediaItem` selected visuals                | global-dependent              | Selection semantics remain system-consistent across domains.                      |
+
+Child dependency rule:
+
+- `MediaItem` must not compute parent slot size from child CSS variables.
+- `MediaItem` must visually conform to the child effective rendered box in normal layout flow.
 
 ### Ownership Matrix
 
@@ -563,4 +584,3 @@ Example:
 
 - `// Renders unified loading state for all item types`
 - `// @see item-grid.md#state`
-

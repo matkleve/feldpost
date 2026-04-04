@@ -1,0 +1,150 @@
+@layer components {
+  :host {
+    --media-display-max-width: 100%;
+    --media-display-max-height: 100%;
+    --media-aspect-ratio: 1 / 1;
+
+    display: block;
+    position: relative;
+    inline-size: min(100%, var(--media-display-max-width, 100%));
+    max-inline-size: var(--media-display-max-width, 100%);
+    max-block-size: var(--media-display-max-height, 100%);
+    aspect-ratio: var(--media-aspect-ratio, 1 / 1);
+    transition: aspect-ratio var(--transition-geometry);
+    overflow: hidden;
+  }
+
+  .media-display__viewport {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .media-display__layer {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fade-out);
+  }
+
+  .media-display__image {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+    object-position: top center;
+    display: block;
+  }
+
+  .media-display__layer--loading {
+    background: color-mix(in srgb, var(--color-bg-base) 12%, transparent);
+  }
+
+  .media-display__layer--warm-preview {
+    filter: blur(8px);
+  }
+
+  .media-display__layer--icon-only,
+  .media-display__layer--error,
+  .media-display__layer--no-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .media-display__layer--icon-only {
+    background: color-mix(in srgb, var(--color-bg-surface) 92%, var(--color-bg-base));
+    color: var(--color-text-secondary);
+  }
+
+  .media-display__icon {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .media-display__layer--error {
+    background: color-mix(in srgb, var(--color-bg-base) 65%, transparent);
+  }
+
+  .media-display__retry {
+    pointer-events: auto;
+    min-block-size: 2.75rem;
+    padding-inline: var(--spacing-3);
+    padding-block: var(--spacing-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .media-display__layer--no-media {
+    background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-bg-base));
+  }
+}
+
+@layer states {
+  /* Stable state: loading */
+  /* @see docs/specs/component/media-display.md#state-rendering-matrix */
+  [data-state='loading'] .media-display__layer--loading {
+    opacity: 1;
+    pointer-events: none;
+    animation: media-display-pulse var(--transition-emphasis) ease-in-out infinite;
+  }
+
+  /* Stable state: warm-preview */
+  /* @see docs/specs/component/media-display.md#state-rendering-matrix */
+  [data-state='warm-preview'] .media-display__layer--warm-preview {
+    opacity: 1;
+    transition: opacity var(--transition-fade-in);
+  }
+
+  /* Stable state: loaded */
+  /* @see docs/specs/component/media-display.md#state-rendering-matrix */
+  [data-state='loaded'] .media-display__layer--loaded {
+    opacity: 1;
+    pointer-events: auto;
+    transition:
+      opacity var(--transition-fade-in),
+      opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  }
+
+  [data-state='loaded'] .media-display__layer--warm-preview {
+    opacity: 0;
+    transition: opacity var(--transition-fade-out);
+  }
+
+  /* Stable state: icon-only */
+  /* @see docs/specs/component/media-display.md#state-rendering-matrix */
+  [data-state='icon-only'] .media-display__layer--icon-only {
+    opacity: 1;
+    transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  }
+
+  /* Stable state: error */
+  /* @see docs/specs/component/media-display.md#state-rendering-matrix */
+  [data-state='error'] .media-display__layer--error {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  }
+
+  /* Stable state: no-media */
+  /* @see docs/specs/component/media-display.md#state-rendering-matrix */
+  [data-state='no-media'] .media-display__layer--no-media {
+    opacity: 1;
+    transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
+  }
+}
+
+@keyframes media-display-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}

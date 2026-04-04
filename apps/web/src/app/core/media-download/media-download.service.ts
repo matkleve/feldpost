@@ -25,7 +25,6 @@ import {
   tierToPhotoSize,
 } from './media-download.helpers';
 import type {
-  BatchCompleteEvent,
   DownloadBlobResult,
   ExportProgressEvent,
   ExportResult,
@@ -35,8 +34,6 @@ import type {
   PhotoLoadState,
   PhotoSize,
   SignedUrlResult,
-  StateChangedEvent,
-  UrlChangedEvent,
 } from './media-download.types';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 

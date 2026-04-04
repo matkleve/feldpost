@@ -2,448 +2,252 @@
 
 ## What It Is
 
-Media Item is the domain-specific item contract for rendering a single media entity inside Item Grid surfaces. It owns media preview state transitions, mode-specific aspect behavior, upload overlays, and action affordances for the `ws_grid_thumbnail` context. Media delivery (tier choice + URL fallback + signed URL load-state) is consumed through the shared media-download-service contract so map, workspace, media page, and detail remain consistent.
+Media Item is the grid-item interaction contract for one media entity in Item Grid surfaces. It owns grid-level visuals and interactions (selection emphasis, upload overlay, quiet actions) and delegates all media download and rendering lifecycle responsibilities to `MediaDisplayComponent`.
 
 ## What It Looks Like
 
-The component renders a plain square media slot and keeps layout stable across all render states.
-The slot is the only owner of thumbnail border and radius styling (no outer frame styling on the state wrapper), and media is rendered with native aspect ratio using `object-fit: contain` inside that square. Initial loading uses a neutral gray placeholder surface (no spinner, no camera/image icon). If a lower tier is already cached from another surface (for example map marker/detail), the component may show that cached bitmap as a soft blurred preview while the requested tier loads in memory. Border/radius/hover affordances, quiet-action corners, and file-type chip placement are anchored to the rendered media frame inside the square slot, not to the full tile bounds. Quiet actions are hidden at rest and reveal on hover/focus in 80ms: select in the upper-left and map (icon-only) in the upper-right. Both quiet actions use the shared primitive small button style; select is circular and map has visible background. During loading, a known ratio must already be applied; if no ratio is available yet, fallback is the square slot from the active grid mode. Visual tokens come from shared color, spacing, and radius custom properties; accessibility-sensitive dimensions use `rem`.
+The component renders one stable item shell with media content in the base layer, upload overlay above it, and quiet actions on top. Selection emphasis is applied around the media frame and never around the full tile wrapper. Upload state is visible as a dedicated overlay layer and does not interfere with media loading visuals. Quiet actions stay hidden at rest and reveal on hover/focus with keyboard-accessible controls. Media loading, warm preview, sharp render, error rendering, and no-media rendering are not visualized by this component directly.
 
 ## Where It Lives
 
-- Parent spec: `docs/element-specs/component/item-grid.md`
-- Delivery policy owner: `docs/element-specs/media-download/media-download-service.md`
-- Child component root: `apps/web/src/app/features/media/media-item.component.ts`
-- Child specs:
-  - `docs/element-specs/component/media-item-upload-overlay.md`
-  - `docs/element-specs/component/media-item-quiet-actions.md`
-  - `docs/element-specs/component/item-state-frame.md`
-- Route consumers:
-  - `/media`
-  - Workspace pane selected-items grid on `/map` via `ItemGridComponent`
-- Trigger: projected media-domain item inside `ItemGridComponent`
+- Spec location: `docs/specs/component/media-item.md`
+- Parent spec: `docs/specs/component/item-grid.md`
+- Media renderer dependency: `docs/specs/component/media-display.md`
+- Upload overlay dependency: `docs/specs/component/media-item-upload-overlay.md`
+- Quiet-actions dependency: `docs/specs/component/media-item-quiet-actions.md`
+- Service contract reference: `docs/specs/service/media-download-service/media-download-service.md`
+- Runtime location: `apps/web/src/app/features/media/media-item.component.ts`
 
 ## Actions & Interactions
 
-| #   | User Action / System Trigger                                  | System Response                                                                                                                                                            | Trigger                                     |
-| --- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| 1   | Item is instantiated in loading state                         | Render neutral gray placeholder layer; no spinner and no media glyph/icon; keep known slot ratio if available, else fallback to mode square                                | `loading=true`                              |
-| 2   | Asset resolves successfully                                   | Decode image off-screen/in memory, then dissolve from placeholder (or warm blurred preview) to sharp content with no layout shift                                          | `renderState='content'`                     |
-| 3   | Asset load fails                                              | Render deterministic error layer and expose retry path through parent contract                                                                                             | `renderState='error'`                       |
-| 4   | No photo is available                                         | Render deterministic no-media layer (non-error)                                                                                                                            | `renderState='no-media'`                    |
-| 5   | Mode changes to `grid-sm` or `grid-md`                        | Keep square slot geometry and apply tier mapping for compact grid                                                                                                          | `mode` input change                         |
-| 6   | File type is A4-suitable document                             | Apply A4 portrait behavior (`1 / 1.414`) for preview slot independent of grid mode (except row mode override)                                                              | file-type suitability policy                |
-| 7   | File type is not A4-suitable                                  | Apply non-A4 preview behavior using orchestrator type policy                                                                                                               | file-type suitability policy                |
-| 8   | Mode changes to `row`                                         | Derive slot ratio from media metadata and apply fade transition on ratio-relevant source change; if metadata ratio is unavailable, fallback to square until ratio resolves | `mode='row'`                                |
-| 9   | Mode changes to `card`                                        | Use card preview behavior with stable slot frame                                                                                                                           | `mode='card'`                               |
-| 10  | Upload phase/progress is active for this media                | Render upload overlay under quiet actions with progress fill, icon, and label                                                                                              | upload phase update                         |
-| 11  | User hovers/focuses media item                                | Reveal quiet actions in 80ms; keep keyboard access for all exposed controls                                                                                                | hover/focus                                 |
-| 12  | User triggers selection/map action                            | Emit canonical action event for `ws_grid_thumbnail` contract (`select` and map jump)                                                                                       | action click/keyboard                       |
-| 13  | Media item enters visible content/no-media state              | Show file-type chip (icon + text) in lower-right corner of rendered media frame                                                                                            | render layer visible                        |
-| 14  | Slot dimensions change                                        | Convert slot size to `rem`, resolve requested/effective tier via orchestrator                                                                                              | resize observer                             |
-| 15  | User views a video item                                       | Show play-indicator overlay in content state                                                                                                                               | file type is video                          |
-| 16  | `/media` appends large result sets                            | Insert rows progressively in deterministic batches `columns x 3`                                                                                                           | list append/pagination                      |
-| 17  | Same media was already loaded on `/map` or detail             | Reuse cached lower/higher tier immediately, show warm blurred preview when needed, and avoid full cold-start placeholder path                                              | shared photo-load cache hit                 |
-| 18  | Item is document-like and slot size crosses preview threshold | Render generated first-page document thumbnail when available (instead of generic file icon), then upgrade quality via tier policy                                         | `slotShortEdgeRem >= documentPreviewMinRem` |
-
-### State Normalization Decision (Mandatory)
-
-`MediaItemRenderSurfaceComponent` exposes only canonical `renderState` values:
-
-- `loading`
-- `content`
-- `error`
-- `no-media`
-
-Legacy/internal loader statuses may still exist in services, but they must be normalized before render-surface binding.
-
-| Internal loader status | Canonical `renderState` | Notes                                                |
-| ---------------------- | ----------------------- | ---------------------------------------------------- |
-| `placeholder`          | `loading`               | Placeholder is a visual style, not a public state    |
-| `icon-only`            | `content`               | Non-image icon presentation belongs to content layer |
-| `loading`              | `loading`               | Direct mapping                                       |
-| `loaded`               | `content`               | Direct mapping                                       |
-| `error`                | `error`                 | Direct mapping                                       |
-| `no-photo`             | `no-media`              | Explicit non-error no-media contract                 |
-
-### Loading Ownership Decision (Mandatory)
-
-- Media loading visuals are owned by `MediaItemRenderSurfaceComponent`.
-- `ItemStateFrameComponent` remains owner for shared error/empty framing.
-- Double-loading overlays are forbidden: the media item must not render a second spinner/pulse layer above an already active media loading layer.
+| #   | User Action / System Trigger                            | System Response                                                   | Trigger                     |
+| --- | ------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------- |
+| 1   | Item is rendered in grid context                        | Compose `MediaDisplayComponent` + overlay + quiet actions         | component init              |
+| 2   | Parent provides `mediaId`                               | Forward `mediaId` directly to `MediaDisplayComponent`             | input change                |
+| 3   | Parent sets visual state to `selected`                  | Render selected emphasis around media frame                       | `state='selected'`          |
+| 4   | Parent sets visual state to `uploading`                 | Show upload overlay layer                                         | `state='uploading'`         |
+| 5   | Parent sets visual state to `error`                     | Show item-level error treatment for interaction layer             | `state='error'`             |
+| 6   | Parent sets visual state to `idle`                      | Hide selected/upload/error-only treatments                        | `state='idle'`              |
+| 7   | User hovers/focuses item                                | Reveal quiet actions in deterministic tokenized timing            | hover/focus                 |
+| 8   | User activates select/map action                        | Emit canonical item action outputs                                | click/keyboard              |
+| 9   | `MediaDisplayComponent` changes internal download state | Media Item keeps its own state unchanged; no parent wait required | child internal state change |
+| 10  | Upload phase updates                                    | Update overlay content and progress visuals                       | upload stream               |
 
 ## Component Hierarchy
 
 ```text
 MediaItemComponent
-├── ItemStateFrame binding (shared state frame contract)
-│   └── Domain content outlet
-├── MediaItemRenderSurfaceComponent
-│   ├── Slot frame (mode/type-aware ratio)
-│   ├── Layer: loading (neutral gray placeholder, optional warm blurred cached preview)
-│   ├── Layer: content (asset + optional video play indicator)
-│   ├── Layer: error
-│   └── Layer: no-media
+├── MediaDisplayComponent         (owns media rendering + download states)
 ├── MediaItemUploadOverlayComponent
-│   └── Progress fill + icon + label (z-index below quiet actions)
-├── MediaItemQuietActionsComponent
-│   ├── Select action
-│   ├── Map action (icon-only)
-│   └── Keyboard focusable controls
+└── MediaItemQuietActionsComponent
 ```
 
-## Data
+## Geometry Dependency Contract
 
-Media Item does not call Supabase directly. It consumes media data from domain adapters and rendering state from services.
+| Dimension            | Constraint Owner       | Effective Render Owner           | Mechanism                                                                                                                                                                     |
+| -------------------- | ---------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| width                | parent                 | child-coupled within constraints | ItemGrid sets slot width constraint. `MediaDisplayComponent` resolves actual rendered media box inside that slot; MediaItem frame/outline must conform to this rendered box.  |
+| height               | parent                 | child-coupled within constraints | ItemGrid sets slot height or slot aspect policy. `MediaDisplayComponent` applies aspect ratio and resolves used height; MediaItem frame/outline must follow that used height. |
+| intrinsic ratio hint | parent/domain metadata | child renderer                   | Parent may pass optional `aspectRatio` input to `MediaDisplayComponent`; the child uses this hint for internal shape resolution.                                              |
+
+Interpretation rule:
+
+- Parent owns limits (`maxWidth`, `maxHeight`, slot policy).
+- Child owns intrinsic media shaping inside these limits.
+- MediaItem visuals (outline, selected emphasis, overlays) must align to the child's effective rendered box, not to a stale fixed wrapper assumption.
+- If child state is `icon-only`, the rendered box is square (`1/1`) and MediaItem visuals must stay square-aligned.
+
+Geometry chain:
+
+```text
+ItemGrid -> sets slot width + height constraints
+  MediaItem -> fills slot constraints
+    MediaDisplayComponent -> renders media within forwarded constraints
+```
+
+### CSS Variable Ownership & Dependency Matrix
+
+| CSS Variable                                               | Set By                                               | Consumed By                              | Dependency Type                 | Why                                                                                                         |
+| ---------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `--media-item-max-width` (slot contract)                   | parent container (`ItemGrid`)                        | `MediaItem` host/frame sizing            | parent-dependent                | Slot width belongs to layout system, not to media item internals.                                           |
+| `--media-item-max-height` (slot contract)                  | parent container (`ItemGrid`)                        | `MediaItem` host/frame sizing            | parent-dependent                | Slot height belongs to layout system, not to media item internals.                                          |
+| `--media-item-selected-ring-color`                         | design tokens/theme                                  | selected emphasis styles                 | global-dependent                | Selection semantics must stay globally consistent.                                                          |
+| `--media-aspect-ratio`                                     | `MediaDisplayComponent`                              | child host sizing and rendered media box | child-owned (intrinsic shape)   | Ratio comes from media metadata/hint. It shapes the effective box used by the child inside parent limits.   |
+| `--media-display-max-width` / `--media-display-max-height` | `MediaDisplayComponent` host (from forwarded inputs) | child internal host styles               | child-owned (internal to child) | These variables are internal to the renderer and must not be read back by MediaItem for geometry decisions. |
+
+Child dependency note:
+
+- `MediaItem` must not read back child CSS variables to compute parent slot geometry.
+- `MediaItem` must align outline/overlay geometry to the actual rendered child box in normal layout flow.
+- Geometry is therefore two-layered: parent-constrained limits plus child-resolved effective box.
+
+## Data Requirements
+
+Media Item does not call Supabase directly and does not subscribe to media download state for rendering decisions.
 
 ### Data Flow (Mermaid)
 
 ```mermaid
 flowchart TD
-  A[Parent adapter media item] --> B[MediaItemComponent]
-  B --> C[MediaItemRenderSurfaceComponent]
-  B --> D[MediaItemUploadOverlayComponent]
-  B --> E[MediaItemQuietActionsComponent]
-  B --> F[PhotoLoadService]
-  B --> G[MediaOrchestratorService]
-  B --> H[UploadManagerService]
-  G --> C
-  F --> C
-  H --> D
+  A[Parent grid adapter] --> B[MediaItemComponent]
+  B --> C[mediaId]
+  B --> D[state: MediaItemState]
+  B --> E[item + mode + actionContextId]
+  C --> F[MediaDisplayComponent]
+  F --> G[MediaDownloadService.getState(mediaId)]
+  D --> H[MediaItem visual gates]
+  H --> I[Selected emphasis]
+  H --> J[Upload overlay visibility]
+  H --> K[Quiet actions reveal gate]
 ```
 
-| Field                  | Source                                     | Type                                                       | Purpose                                                |
-| ---------------------- | ------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------ |
-| `itemId`               | parent adapter                             | `string`                                                   | Stable identity for events and state lookup            |
-| `mediaType`            | orchestrator file-type resolution          | `'image' \| 'video' \| 'document' \| 'audio' \| 'other'`   | Drives icon, overlays, and ratio behavior              |
-| `renderState`          | media state mapping                        | `'loading' \| 'content' \| 'error' \| 'no-media'`          | Selects active render layer                            |
-| `thumbnailUrl`         | `PhotoLoadService`                         | `string \| null`                                           | Loaded preview asset URL                               |
-| `warmPreviewUrl`       | `PhotoLoadService` cache lookup            | `string \| null`                                           | Immediately reusable lower/higher tier hint            |
-| `documentThumbnailUrl` | `PhotoLoadService` / preview path resolver | `string \| null`                                           | Generated first-page thumbnail for document-like files |
-| `photoLoadState`       | `PhotoLoadService`                         | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | Canonical load semantics                               |
-| `slotWidthRem`         | resize measurement                         | `number \| null`                                           | Tier selection input                                   |
-| `slotHeightRem`        | resize measurement                         | `number \| null`                                           | Tier selection input                                   |
-| `requestedTier`        | mode mapping                               | `MediaTier`                                                | Requested preview quality                              |
-| `effectiveTier`        | `MediaOrchestratorService`                 | `MediaTier`                                                | Resolved tier after clamping/fallback                  |
-| `uploadOverlay`        | `UploadManagerService`                     | `UploadOverlayState \| null`                               | Upload phase/progress layer                            |
-| `actions`              | action-context resolver                    | `ReadonlyArray<ActionId>`                                  | Visible/enabled quiet actions                          |
-| `gridColumns`          | parent grid resolver                       | `number`                                                   | Progressive append calculation                         |
-| `batchInsertSize`      | parent progressive renderer                | `number`                                                   | Deterministic `columns x 3` batch                      |
+| Field             | Source                                | Type                                                     | Purpose                                            |
+| ----------------- | ------------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| `mediaId`         | parent adapter                        | `string`                                                 | Identity forwarded to `MediaDisplayComponent`      |
+| `state`           | parent interaction/state orchestrator | `MediaItemState`                                         | Single visual-state driver for item-level behavior |
+| `item`            | parent adapter                        | `MediaItemViewModel`                                     | Domain data for labels/actions context             |
+| `mode`            | parent container                      | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | Slot context forwarded to child components         |
+| `actionContextId` | action resolver                       | `string`                                                 | Resolves quiet-actions set                         |
+| `uploadOverlay`   | upload manager bridge                 | `UploadOverlayState \| null`                             | Upload progress/status visualization               |
 
 ## State
 
-| Name                      | TypeScript Type                                          | Default     | What it controls                                                 |
-| ------------------------- | -------------------------------------------------------- | ----------- | ---------------------------------------------------------------- |
-| `mode`                    | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | `'grid-md'` | Visual mode mapping                                              |
-| `renderState`             | `'loading' \| 'content' \| 'error' \| 'no-media'`        | `'loading'` | Active media layer                                               |
-| `warmPreviewVisible`      | `boolean`                                                | `false`     | Whether blurred cached tier is currently shown                   |
-| `documentPreviewEligible` | `boolean`                                                | `false`     | Whether slot size and filetype allow first-page document preview |
-| `isVideo`                 | `boolean`                                                | `false`     | Play-indicator visibility                                        |
-| `slotRatio`               | `number \| null`                                         | `null`      | Mode/type-aware slot ratio                                       |
-| `slotWidthRem`            | `number \| null`                                         | `null`      | Tier selection input                                             |
-| `slotHeightRem`           | `number \| null`                                         | `null`      | Tier selection input                                             |
-| `requestedTier`           | `MediaTier`                                              | `'small'`   | Requested quality                                                |
-| `effectiveTier`           | `MediaTier`                                              | `'small'`   | Resolved quality                                                 |
-| `uploadOverlay`           | `UploadOverlayState \| null`                             | `null`      | Upload progress/state layer                                      |
-| `quietActionsVisible`     | `boolean`                                                | `false`     | Hover/focus action reveal                                        |
-| `batchInsertSize`         | `number \| null`                                         | `null`      | Progressive append batch size                                    |
+### Public Inputs
 
-### Aspect-Ratio Behavior by Mode
+| Input             | Type                                                     | Purpose                                         |
+| ----------------- | -------------------------------------------------------- | ----------------------------------------------- |
+| `mediaId`         | `string`                                                 | Identity forwarded to `MediaDisplayComponent`   |
+| `state`           | `MediaItemState`                                         | Single visual driver for grid-level item states |
+| `item`            | `MediaItemViewModel`                                     | Domain payload for item metadata and actions    |
+| `mode`            | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | Layout/slot context                             |
+| `actionContextId` | `string`                                                 | Action-context resolution                       |
 
-| Mode      | Ratio contract                                                                  |
-| --------- | ------------------------------------------------------------------------------- |
-| `grid-sm` | Square slot (`1 / 1`, default about `8rem` x `8rem`, approx. `128px` x `128px`) |
-| `grid-md` | Square slot (`1 / 1`)                                                           |
-| `grid-lg` | Tier-driven large preview behavior from orchestrator/type policy                |
-| `row`     | Dynamic ratio from media metadata (source dimensions), transitioned by fade     |
-| `card`    | Stable framed card preview slot with metadata region below                      |
-
-### Document Preview Suitability Contract (Mandatory)
-
-A4 portrait behavior is controlled by file-type suitability, not by grid mode.
-
-- A4-suitable types: PDF and document-like office formats whose natural preview expectation is portrait-page reading.
-- Non A4-suitable types: spreadsheets, presentations, and media-native formats.
-- Row mode keeps row-ratio behavior as highest priority; when row metadata ratio is known, it overrides A4 suitability.
-
-### Document Thumbnail Generation Contract (Mandatory)
-
-When document-like uploads provide a generated first-page thumbnail, media item renderers must prefer that thumbnail over icon-only fallback once slot size is large enough.
-
-- Threshold gate: first-page document thumbnail rendering activates at `documentPreviewMinRem` (default `12rem`, about `192px` short edge).
-- Small tiles remain icon-only for performance and scanability.
-- If generated thumbnail is missing or failed, fallback remains deterministic icon/no-media behavior.
-- Generated first-page thumbnails follow the same shared cache namespace and tier-upgrade contract as image thumbnails.
-
-### Ratio Fallback Contract (Mandatory)
-
-For all modes, including loading state:
-
-- Preferred source: explicit media metadata ratio (`width/height`).
-- Secondary source: file-type suitability policy ratio (for example A4-suitable document type).
-- Final fallback: square slot (`1 / 1`) from the active grid mode.
-
-This guarantees no geometry jump from loading to content.
-
-## State Machine
-
-FSM scope rule:
-
-- Required because this component has programmatic state (`loading`, `content`, `error`, `no-media`, upload, selection).
-- CSS pseudo-classes alone cannot represent media delivery, upload, and normalization transitions.
+All boolean visual-state inputs are forbidden.
 
 ### State Enum
 
-`MediaItemState` is the single public visual-state input for `MediaItemComponent`.
-
-```ts
-export type MediaItemState =
-  | "empty"
-  | "loading"
-  | "loading-warm-preview"
-  | "content"
-  | "error"
-  | "no-media"
-  | "uploading"
-  | "selected";
+```typescript
+export type MediaItemState = "idle" | "selected" | "uploading" | "error";
 ```
 
 ### Transition Map
 
-```ts
+```typescript
 export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
   {
-    empty: ["loading", "no-media"],
-    loading: ["loading-warm-preview", "content", "error", "no-media"],
-    "loading-warm-preview": ["content", "error", "no-media"],
-    content: ["uploading", "selected", "loading", "error", "no-media"],
-    uploading: ["content", "selected", "error"],
-    selected: ["content", "uploading", "error"],
-    error: ["loading", "no-media"],
-    "no-media": ["loading", "error"],
+    idle: ["selected", "uploading", "error"],
+    selected: ["idle", "uploading", "error"],
+    uploading: ["idle", "selected", "error"],
+    error: ["idle", "uploading"],
   };
 ```
 
+### State Scope Clarification
+
+- `MediaItemState` covers only grid-item-level states.
+- Media download states (`loading`, `warm-preview`, `loaded`, `error`, `no-media`) are fully owned by `MediaDisplayComponent`.
+- `MediaItemComponent` does not coordinate, await, or proxy media download state transitions.
+
 ### Transition Guard Contract
 
-- Every state change must pass through a guard function.
-- Unlisted transitions are rejected and keep current state.
-- The component root is bound with one visual driver: `[attr.data-state]="state()"`.
-- Template and SCSS may not consume boolean visual flags as primary visual drivers.
-- Parent/child coordination required: quiet-actions and upload-overlay presentation must follow parent media-item state readiness.
-
-### Transition Choreography Table (Required Before CSS)
-
-| from -> to                        | step | element              | property       | timing token                 | delay                            |
-| --------------------------------- | ---- | -------------------- | -------------- | ---------------------------- | -------------------------------- |
-| `loading -> loading-warm-preview` | 1    | render surface       | opacity        | `var(--transition-fade-in)`  | `0ms`                            |
-| `loading-warm-preview -> content` | 1    | warm preview layer   | opacity        | `var(--transition-fade-out)` | `0ms`                            |
-| `loading-warm-preview -> content` | 2    | content asset        | opacity        | `var(--transition-fade-in)`  | `var(--transition-reveal-delay)` |
-| `content -> selected`             | 1    | media frame emphasis | outline/filter | `var(--transition-emphasis)` | `0ms`                            |
-| `content -> uploading`            | 1    | upload overlay       | opacity        | `var(--transition-fade-in)`  | `0ms`                            |
-
-## Boolean Input Migration Required
-
-- Migration required: yes.
-- Current public visual-state inputs are split across booleans (`loading`, `error`, `empty`, `selected`, `disabled`).
-- Target contract is one enum state input (`state: MediaItemState`) plus non-visual data inputs.
-- All parent bindings must migrate in the same pass; boolean visual-state inputs must be removed after cutover.
-- Parent call-site migration required: yes (`MediaContentComponent` and any additional item-grid consumers binding `app-media-item`).
+- Every transition must pass through map validation.
+- Root binds one visual driver: `[attr.data-state]="state()"`.
+- Template and SCSS may not use boolean visual-state flags as primary state drivers.
 
 ## Visual Behavior Contract
 
 ### Ownership Matrix
 
-| Behavior             | Visual Geometry Owner                           | Stacking Context Owner             | Interaction Hit-Area Owner                   | Selector(s)                                                          | Layer (z-index/token)        | Test Oracle                                                        |
-| -------------------- | ----------------------------------------------- | ---------------------------------- | -------------------------------------------- | -------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------ |
-| Content media frame  | `.media-item-render-surface__media-frame`       | `app-media-item:host`              | `.media-item__open`                          | `.media-item__preview` and `.media-item-render-surface__media-frame` | layer/content (0)            | rendered media frame defines visible thumbnail bounds              |
-| Loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__slot` | none (passive state)                         | `.media-item-render-surface__fallback--loading`                      | layer/content (0)            | loading placeholder stays inside slot bounds and matches mode size |
-| Upload overlay       | media frame bounds                              | `app-media-item:host`              | none (passive overlay)                       | `.media-item__upload-overlay`                                        | layer/upload (1)             | upload overlay covers frame bounds and remains below quiet actions |
-| Selected emphasis    | `.media-item-render-surface__media-frame`       | `app-media-item:host`              | `.media-item__open` and quiet-action buttons | `.media-item-render-surface__media-frame--selected`                  | layer/selected (frame-level) | selected ring appears only around media frame, never full tile     |
-| Quiet actions reveal | quiet action controls                           | `app-media-item:host`              | `.media-item-quiet-actions__button*`         | `.media-item__quiet-actions`                                         | layer/actions (3)            | hover/focus reveals action controls in frame corners               |
+| Behavior             | Visual Geometry Owner         | Stacking Context Owner | Interaction Hit-Area Owner           | Selector(s)                    | Layer (z-index/token) | Test Oracle                                                   |
+| -------------------- | ----------------------------- | ---------------------- | ------------------------------------ | ------------------------------ | --------------------- | ------------------------------------------------------------- |
+| Selected emphasis    | `.media-item__frame`          | `app-media-item:host`  | `.media-item__open`                  | `.media-item__frame--selected` | layer/selected (2)    | Emphasis stays on media frame only                            |
+| Upload overlay       | `.media-item__upload-overlay` | `app-media-item:host`  | none (passive)                       | `.media-item__upload-overlay`  | layer/upload (3)      | Upload layer sits above media content and below quiet actions |
+| Quiet actions reveal | `.media-item__quiet-actions`  | `app-media-item:host`  | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Controls reveal deterministically on hover/focus              |
 
 ### Ownership Triad Declaration
 
-| Behavior             | Geometry Owner                                  | State Owner                                         | Visual Owner                                        | Same element?                                                                          |
-| -------------------- | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | ✅                                                                                     |
-| Upload overlay       | `.media-item__upload-overlay`                   | `.media-item__upload-overlay`                       | `.media-item__upload-overlay`                       | ✅                                                                                     |
-| Selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                                                                                     |
-| Quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | ⚠️ exception — reveal is intentionally controlled by parent hover/focus/selected state |
+| Behavior             | Geometry Owner                | State Owner                          | Visual Owner                   | Same element?                                                     |
+| -------------------- | ----------------------------- | ------------------------------------ | ------------------------------ | ----------------------------------------------------------------- |
+| Selected emphasis    | `.media-item__frame`          | `.media-item__frame--selected`       | `.media-item__frame--selected` | yes                                                               |
+| Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                               |
+| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item` (host data-state gate) | `.media-item__quiet-actions`   | exception: reveal is gated by host state while visuals stay local |
 
 ### Stacking Context
 
-- `app-media-item` `:host` is the sole stacking-context owner for domain overlays.
-- `app-item-state-frame` is a transparent state wrapper and must not create a competing stacking context.
-- `app-media-item-upload-overlay` and `app-media-item-quiet-actions` are absolute host-child overlays using `inset: 0`.
-- Selected visual emphasis is rendered by the visual geometry owner (`.media-item-render-surface__media-frame`), not by tile-level wrapper shadow.
+- `app-media-item:host` is the sole stacking-context owner.
+- `MediaDisplayComponent` is rendered as base content layer.
+- Upload overlay and quiet actions are absolute overlays anchored to host.
 
-### Layer Order (z-index)
+### Layer Order
 
-| Layer          | z-index              | Element                                             |
-| -------------- | -------------------- | --------------------------------------------------- |
-| Content layer  | 0                    | `.media-item__preview` / rendered media content     |
-| Upload overlay | 1                    | `.media-item__upload-overlay`                       |
-| Selected ring  | frame-level emphasis | `.media-item-render-surface__media-frame--selected` |
-| Quiet actions  | 3                    | `.media-item__quiet-actions`                        |
+| Layer             | z-index | Element                        |
+| ----------------- | ------- | ------------------------------ |
+| Media content     | 1       | `MediaDisplayComponent`        |
+| Selected emphasis | 2       | `.media-item__frame--selected` |
+| Upload overlay    | 3       | `.media-item__upload-overlay`  |
+| Quiet actions     | 4       | `.media-item__quiet-actions`   |
 
-No additional undeclared z-index values are permitted for media-item visual layers.
+## Boolean Input Migration Required
 
-### State Ownership
-
-| Visual state             | Owner element                                       | Behavior contract                                      |
-| ------------------------ | --------------------------------------------------- | ------------------------------------------------------ |
-| Loading pulse            | `.media-item-render-surface__fallback--loading`     | Media loading placeholder state                        |
-| Error surface            | `app-item-state-frame` error layer                  | Shared retry-capable error state                       |
-| Empty/no-content surface | `app-item-state-frame` empty layer                  | Shared empty state                                     |
-| Selected ring            | `.media-item-render-surface__media-frame--selected` | Domain selected emphasis aligned to media frame bounds |
-| Hover/focus reveal       | `app-media-item-quiet-actions`                      | Quiet actions fade in/out in 80ms                      |
-
-### Pseudo-CSS Contract
-
-```css
-:host {
-  display: block;
-  position: relative; /* sole stacking context owner */
-}
-
-.media-item__preview {
-  position: relative;
-  z-index: 0;
-}
-
-.media-item__upload-overlay,
-.media-item__quiet-actions,
-.media-item__open {
-  position: absolute;
-  inset: 0;
-}
-
-.media-item__upload-overlay {
-  z-index: 1;
-}
-.media-item__quiet-actions {
-  z-index: 3;
-}
-
-.media-item-render-surface__media-frame--selected {
-  outline: 2px solid var(--color-clay);
-  filter: drop-shadow(
-    0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent)
-  );
-}
-
-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: top center;
-}
-```
+- Migration required: yes.
+- Current/legacy boolean visual-state inputs (`loading`, `error`, `empty`, `selected`, `disabled`) are removed from the public component API.
+- Target input contract:
+  - `mediaId: string`
+  - `state: MediaItemState`
+  - non-visual data inputs (`item`, `mode`, `actionContextId`)
+- Parent call sites must migrate in one cutover pass to avoid mixed state models.
 
 ## File Map
 
-| File                                                                       | Purpose                                    |
-| -------------------------------------------------------------------------- | ------------------------------------------ |
-| `apps/web/src/app/features/media/media-item.component.ts`                  | Media item orchestration and state mapping |
-| `apps/web/src/app/features/media/media-item.component.html`                | Media item composition template            |
-| `apps/web/src/app/features/media/media-item.component.scss`                | Media item domain styling                  |
-| `apps/web/src/app/features/media/media-item-render-surface.component.ts`   | Render-surface state presentation logic    |
-| `apps/web/src/app/features/media/media-item-render-surface.component.html` | Loading/content/error/no-media layers      |
-| `apps/web/src/app/features/media/media-item-render-surface.component.scss` | Render-surface visuals and ratio behavior  |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.ts`   | Upload overlay state presenter             |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.html` | Upload overlay template                    |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.scss` | Upload overlay visuals and z-order         |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.ts`    | Quiet actions presenter and outputs        |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.html`  | Quiet actions controls                     |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.scss`  | Quiet actions reveal and focus styles      |
-| `apps/web/src/app/features/media/media-item-slot.utils.ts`                 | Slot measurement and tier utility helpers  |
-| `apps/web/src/app/features/media/media-item-upload.utils.ts`               | Upload overlay mapping helpers             |
+| File                                                                     | Purpose                                                          |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `apps/web/src/app/features/media/media-item.component.ts`                | Item-level state orchestration and event outputs                 |
+| `apps/web/src/app/features/media/media-item.component.html`              | Composition of media display + overlays + actions                |
+| `apps/web/src/app/features/media/media-item.component.scss`              | Item-level visual layering and interaction styles                |
+| `apps/web/src/app/shared/media-display/media-display.component.ts`       | Delegated media rendering and download-state ownership           |
+| `apps/web/src/app/features/media/media-item-upload-overlay.component.ts` | Upload overlay presentation                                      |
+| `apps/web/src/app/features/media/media-item-quiet-actions.component.ts`  | Quiet actions presentation and outputs                           |
+| `apps/web/src/app/features/media/media-item-render-surface.component.ts` | Open question: remove entirely or keep as thin slot wrapper only |
 
 ## Wiring
 
-### Injected Services
+### Parent/Child Coordination Contract
 
-- `PhotoLoadService`: load-state and signed URL source
-- `MediaOrchestratorService`: requested/effective tier resolution and type policy
-- `UploadManagerService`: upload overlay phase/progress source
-- `I18nService`: labels and localized metadata formatting
+- `MediaItemComponent` provides identity and context to `MediaDisplayComponent` (`mediaId`, `mode`, optional aspect hint pass-through).
+- `MediaItemComponent` does not wait for child download states before applying its own grid-level state changes.
+- Child media lifecycle and parent item lifecycle are parallel and independent.
 
-### Inputs / Outputs
-
-- Inputs:
-  - `itemId`, `mode`, `loading`, `error`, `empty`, `selected`, `disabled`, `actionContextId`
-  - `item` (domain media record)
-- Outputs:
-  - `selectedChange`
-  - `opened`
-  - `retryRequested`
-  - `contextActionRequested`
-
-### Subscriptions
-
-- `PhotoLoadService` load-state updates for active `itemId`
-- Upload job stream mapping to `uploadOverlay`
-- `ResizeObserver` for slot width/height in `rem`
-- Progressive append scheduler for `/media` rows (`columns x 3` batches)
-
-### Supabase Calls
-
-- None direct in component
-- Delegated through domain/orchestration services
-
-### Wiring Flow (Mermaid)
+### Wiring Sequence (Mermaid)
 
 ```mermaid
 sequenceDiagram
-  participant P as Parent Surface
+  participant P as Parent Grid Surface
   participant M as MediaItemComponent
-  participant R as MediaItemRenderSurfaceComponent
-  participant O as MediaItemUploadOverlayComponent
-  participant Q as MediaItemQuietActionsComponent
-  participant PL as PhotoLoadService
-  participant MO as MediaOrchestratorService
-  participant UM as UploadManagerService
+  participant D as MediaDisplayComponent
+  participant S as MediaDownloadService
 
-  P->>M: bind item + mode + state contract
-  M->>MO: resolve requested/effective tier from slot rem
-  MO-->>M: effective tier + type policy
-  M->>PL: read load state and preview URL
-  PL-->>R: loading/content/error/no-media input data
-  M->>UM: map upload job to overlay state
-  UM-->>O: progress + phase + label
-  Q-->>M: select/context action events
-  M-->>P: emit canonical item outputs
+  P->>M: bind mediaId + state + item + mode + actionContextId
+  M->>D: forward mediaId + mode (+ aspectRatio hint optional)
+  D->>S: getState(mediaId)
+  P->>M: update state (idle/selected/uploading/error)
+  M->>M: update overlays/emphasis/actions immediately
+  S-->>D: loading/warm-preview/loaded/error/no-media
+  D->>D: render media lifecycle internally
+  Note over M,D: Parent item state never waits for child download state.
 ```
 
 ## Acceptance Criteria
 
-- [ ] Render state chain is exactly `loading -> content | error | no-media` and all four states have deterministic visuals.
-- [ ] Legacy/internal statuses (`placeholder`, `icon-only`, `loaded`, `no-photo`) are normalized to canonical render states before render-surface binding.
-- [ ] Loading state uses neutral gray placeholder surface with no spinner and no loading icon.
-- [ ] Media loading visual ownership is singular: render-surface owns loading visuals; shared state frame does not duplicate a second loading overlay for media items.
-- [ ] `grid-sm` and `grid-md` use square media slot behavior.
-- [ ] Media tile border/radius styling is owned by the media slot container, not by outer state-frame wrapper geometry.
-- [ ] A4 portrait ratio is applied by file-type suitability policy, independent of grid mode (row ratio override allowed).
-- [ ] `row` mode derives ratio from media metadata and fades on ratio-relevant source changes.
-- [ ] Loading state uses known ratio when available; otherwise fallback ratio is square (`1 / 1`) until metadata ratio resolves.
-- [ ] Asset transition is decode-first and dissolve-based (placeholder/warm preview -> sharp image), not top-to-bottom visual fill.
-- [ ] If a cached lower/higher tier exists from map/workspace/detail, media grid uses it immediately as warm preview before requested tier resolves.
-- [ ] `card` mode keeps stable framed preview behavior.
-- [ ] Document-like media with generated first-page thumbnail renders that thumbnail when slot short edge is at least `12rem`; otherwise icon fallback remains valid.
-- [ ] Video content state shows play-indicator overlay.
-- [ ] File-type chip (icon + text) is anchored lower-right in rendered media frame bounds.
-- [ ] Upload overlay appears below quiet actions and keeps correct z-order.
-- [ ] Quiet actions reveal in 80ms on hover/focus and are fully keyboard accessible (select top-left, map top-right icon-only).
-- [ ] Select and map quiet actions use shared primitive small button styling.
-- [ ] Select quiet action is circular; map quiet action has visible background surface.
-- [ ] Quiet actions are anchored to rendered media frame corners, not full square-tile corners.
-- [ ] Requested/effective tier is resolved from `slotWidthRem`/`slotHeightRem` through orchestrator only.
-- [ ] `/media` progressive insertion uses deterministic batch size `columns x 3`.
-- [ ] File map and wiring match the defined sub-components and service ownership exactly.
-- [ ] Workspace pane selected-items uses this Media Item contract through `ItemGridComponent`, not legacy thumbnail-grid runtime wiring.
-- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
-- [ ] Visual output is driven by one enum state input and `[attr.data-state]`; boolean visual-state inputs are removed.
-- [ ] Transition choreography is tokenized (`var(--transition-*)`) with no magic-number timing values.
-- [ ] `npm run lint` and `ng build` are clean for the migration scope.
-
+- [ ] `MediaItemComponent` uses `MediaDisplayComponent` for all media rendering.
+- [ ] Media download states are not represented in `MediaItemState`.
+- [ ] `MediaItemState` contains only `idle`, `selected`, `uploading`, `error`.
+- [ ] `MediaItemComponent` exposes no boolean visual-state inputs.
+- [ ] Public input contract includes `mediaId`, `state`, and non-visual data (`item`, `mode`, `actionContextId`).
+- [ ] Selected emphasis is rendered around media frame only.
+- [ ] Upload overlay z-order is above media content and below quiet actions.
+- [ ] Quiet actions reveal remains deterministic and keyboard accessible.
+- [ ] `MediaItemComponent` does not proxy or await `MediaDisplayComponent` internal states.
+- [ ] `MediaItemRenderSurfaceComponent` is either removed or reduced to a thin slot wrapper with no render-state logic.
+- [ ] No media render-state logic remains in `MediaItemComponent`.
+- [ ] `ng build` is clean after migration.
+- [ ] `npm run lint` is clean after migration.
