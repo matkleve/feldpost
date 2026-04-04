@@ -167,8 +167,8 @@ stateDiagram-v2
 | 12   | Switches segmented control to Issues                                               | Lane list filters to problematic jobs                                                                          | `selectedLane = 'issues'`                                  |
 | 13   | Clicks map-marker icon in Issues row (`missing_data`)                              | Emits placement request to map shell                                                                           | `placementRequested.emit(jobId)`                           |
 | 14   | Clicks row in Issues lane (`missing_data`)                                         | Enters placement mode from map shell                                                                           | `placementRequested.emit(jobId)`                           |
-| 15   | Clicks row in Uploaded lane with coords                                            | Requests map zoom to uploaded media location                                                                   | `zoomToLocationRequested.emit({ imageId, lat, lng })`      |
-| 15a  | Opens uploaded row action menu                                                     | Shows follow-up actions based on saved media state and workflow capability                                     | derived from `imageId`, `projectId`, coords, feature flags |
+| 15   | Clicks row in Uploaded lane with coords                                            | Requests map zoom to uploaded media location                                                                   | `zoomToLocationRequested.emit({ mediaId, lat, lng })`      |
+| 15a  | Opens uploaded row action menu                                                     | Shows follow-up actions based on saved media state and workflow capability                                     | derived from `mediaId`, `projectId`, coords, feature flags |
 | 15b  | Job has EXIF and textual address mismatch (>15m)                                   | Row remains uploaded but carries mismatch indicator for detail follow-up                                       | location reconciliation state                              |
 | 15c  | Duplicate hash issue row shows secondary GPS button                                | Clicking button opens/focuses the already placed existing media                                                | duplicate target image reference                           |
 | 15d  | Duplicate hash issue detected                                                      | Opens duplicate-resolution modal with `use existing`, `upload anyway`, `reject`                                | Optional apply-to-batch checkbox                           |
@@ -283,16 +283,16 @@ All row actions MUST be declared in a registry and filtered by lane/state/capabi
 | ------------------------- | ---------------------------------------------- | ------------- | -------------------------------------------- | ------------------------------------------------ | ------------------------------------ | ---------------------------------------- |
 | `view_file_details`       | `View file details`                            | `primary`     | `uploading`                                  | all non-terminal upload phases                   | none                                 | info/details drawer                      |
 | `cancel_upload`           | `Cancel upload`                                | `destructive` | `uploading`                                  | active or queued                                 | none                                 | cancel pipeline job                      |
-| `change_location_map`     | `Add GPS` / `Change GPS`                       | `edit`        | `uploaded`                                   | persisted                                        | `imageId`                            | map-pick and persist location            |
-| `change_location_address` | `Add address` / `Change address`               | `edit`        | `uploaded`                                   | persisted                                        | `imageId`                            | open address finder and persist          |
-| `open_in_media`           | `Open in /media`                               | `primary`     | `uploaded`                                   | persisted                                        | `imageId`                            | navigate to media focus                  |
+| `change_location_map`     | `Add GPS` / `Change GPS`                       | `edit`        | `uploaded`                                   | persisted                                        | `mediaId`                            | map-pick and persist location            |
+| `change_location_address` | `Add address` / `Change address`               | `edit`        | `uploaded`                                   | persisted                                        | `mediaId`                            | open address finder and persist          |
+| `open_in_media`           | `Open in /media`                               | `primary`     | `uploaded`                                   | persisted                                        | `mediaId`                            | navigate to media focus                  |
 | `assign_to_project`       | `Assign project`                               | `primary`     | `uploaded`, `issues` (`document_unresolved`) | for uploaded and unresolved-document resolution  | shared project selector available    | open shared project selector primitive   |
 | `open_project`            | `Open project`                                 | `primary`     | `uploaded`                                   | persisted                                        | one or more bound projects           | direct navigation or project subdropdown |
 | `toggle_priority`         | `Prioritize`                                   | `primary`     | `uploaded`                                   | persisted                                        | priority workflow capability enabled | toggle priority state                    |
-| `download`                | `Download`                                     | `primary`     | `uploaded`                                   | persisted                                        | `imageId` and `storagePath`          | force attachment download                |
+| `download`                | `Download`                                     | `primary`     | `uploaded`                                   | persisted                                        | `mediaId` and `storagePath`          | force attachment download                |
 | `remove_from_project`     | `Remove from project` / `Remove from projects` | `destructive` | `uploaded`                                   | persisted                                        | one or more bound projects           | open remove-membership flow              |
-| `delete_media`            | `Delete media`                                 | `destructive` | `uploaded`                                   | persisted                                        | `imageId`                            | delete persisted media                   |
-| `open_existing_media`     | `Open existing media`                          | `primary`     | `issues`                                     | `duplicate_photo`                                | `existingImageId`                    | navigate to existing media               |
+| `delete_media`            | `Delete media`                                 | `destructive` | `uploaded`                                   | persisted                                        | `mediaId`                            | delete persisted media                   |
+| `open_existing_media`     | `Open existing media`                          | `primary`     | `issues`                                     | `duplicate_photo`                                | `existingMediaId`                    | navigate to existing media               |
 | `upload_anyway`           | `Upload anyway`                                | `primary`     | `issues`                                     | `duplicate_photo`                                | none                                 | force duplicate upload flow              |
 | `add_gps_issue`           | `Add GPS`                                      | `edit`        | `issues`                                     | `missing_gps`, `document_unresolved`             | map-pick capability                  | placement workflow                       |
 | `change_address_issue`    | `Add address` / `Change address`               | `edit`        | `issues`                                     | `missing_gps`, `document_unresolved`             | none                                 | address finder workflow                  |
@@ -320,7 +320,7 @@ sequenceDiagram
     Manager-->>Panel: phase=queued/uploading + statusLabel updates
     Panel-->>Item: row state updates (spinner visible)
   else action = Place on map
-    Panel->>Map: locationMapPickRequested(imageId)
+    Panel->>Map: locationMapPickRequested(mediaId)
     User->>Map: Click map location
     Map-->>Panel: imageUploaded(id, lat, lng)
     Panel-->>Item: statusLabel + lane updates
@@ -425,13 +425,13 @@ sequenceDiagram
 
   User->>Row: Context menu > Change location
   alt Add/Change GPS
-    Row->>Panel: change_location_map(imageId)
-    Panel->>Map: locationMapPickRequested(imageId)
+    Row->>Panel: change_location_map(mediaId)
+    Panel->>Map: locationMapPickRequested(mediaId)
     User->>Map: Click map
     Map->>DB: persist(latitude, longitude, address)
     Map-->>Panel: imageUploaded(id, lat, lng)
   else Add/Change address
-    Row->>Panel: change_location_address(imageId)
+    Row->>Panel: change_location_address(mediaId)
     User->>Panel: Types search text
     Panel-->>User: Suggestions under input
     User->>Panel: Hover Suggestion
@@ -571,7 +571,7 @@ sequenceDiagram
     Panel->>Manager: placeJob(jobId, coords)
   else uploaded item with coords
     User->>Panel: Click row
-    Panel-->>Map: zoomToLocationRequested({imageId,lat,lng})
+    Panel-->>Map: zoomToLocationRequested({mediaId,lat,lng})
   end
   Manager-->>Map: imageUploaded event
 ```

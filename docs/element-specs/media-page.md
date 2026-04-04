@@ -90,7 +90,7 @@ AppShell (top-level, persistent across routes)
 | 3    | Uses Sorting operator (newest/oldest/name)         | Grid re-sorts within groups                                                                     | Reactive recompute                    |
 | 4    | Uses Filter operator (project/date/tag/media-type) | Grid hides non-matching items                                                                   | Cascading filter logic                |
 | 5    | Clicks thumbnail in grid                           | Opens media detail view (modal overlay)                                                         | Same detail component as workspace    |
-| 6    | Closes detail                                      | Returns to grid, clears `detailImageId`                                                         | Grid state preserved                  |
+| 6    | Closes detail                                      | Returns to grid, clears `detailMediaId`                                                         | Grid state preserved                  |
 | 7    | Hovers thumbnail                                   | Shows optional linked-hover underlay                                                            | Same pattern as workspace hover       |
 | 8    | Selects one or more thumbnails                     | Selected count updates in workspace pane header                                                 | Affects "Selected Items" tab content  |
 | 8a   | Media was already loaded on `/map` or detail       | Grid tile uses warm cached preview (blurred) and dissolves to requested sharp tier when ready   | Shared media cache contract           |
@@ -196,8 +196,8 @@ flowchart LR
 | `groupedAndSorted` | `Signal<ImageGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted            |
 | `cachedMediaItems` | `Signal<Image[]>`                                   | `[]`       | Route-stable cached snapshot for instant restore |
 | `cacheWarm`        | `Signal<boolean>`                                   | `false`    | Whether first paint came from cache              |
-| `hoveredImageId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
-| `detailImageId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |
+| `hoveredMediaId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
+| `detailMediaId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |
 
 **Cross-route contracts:**
 
@@ -213,7 +213,7 @@ flowchart LR
 | ------------------ | ------------------------------ | ------------------ | ----------------------------------------------- |
 | `activeTab`        | `'selected-items' \| 'upload'` | `'selected-items'` | Which workspace pane tab is shown               |
 | `isOpen`           | `boolean`                      | `true`             | Pane visibility; same close button as existing  |
-| `detailImageId`    | `string \| null`               | `null`             | If set, detail modal opens on any tab/page      |
+| `detailMediaId`    | `string \| null`               | `null`             | If set, detail modal opens on any tab/page      |
 | `width`            | `number`                       | `320`              | Desktop pane width (unchanged)                  |
 | `selectedMediaIds` | `Set<string>`                  | empty set          | Current selection from active page's media grid |
 

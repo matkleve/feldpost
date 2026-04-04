@@ -77,7 +77,7 @@ sequenceDiagram
 	participant D as Supabase
 
 	U->>C: Save date
-	C->>W: updateCapturedDate(imageId, value)
+	C->>W: updateCapturedDate(mediaId, value)
 	W->>D: update images set captured_at
 	D-->>W: ok
 	W-->>C: updated image

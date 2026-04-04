@@ -28,7 +28,7 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 ## Where It Lives
 
 - **Parent**: `WorkspacePaneComponent` content area
-- **Appears when**: Workspace Pane is open AND `activeTabId === 'selection'` AND `detailImageId === null`
+- **Appears when**: Workspace Pane is open AND `activeTabId === 'selection'` AND `detailMediaId === null`
 - **Replaced by**: `ImageDetailView` when a thumbnail is clicked (detail view replaces grid)
 
 ## Actions
@@ -42,8 +42,8 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 | 5   | Clicks "Sort" toolbar button             | Sort dropdown opens — pick property + direction, images re-sort instantly                                | `activeSort` changed         |
 | 6   | Clicks "Projects" toolbar button         | Projects dropdown opens — check/uncheck projects, images filter by project instantly                     | `selectedProjectIds` changed |
 | 7   | Scrolls the thumbnail grid               | Virtual scroll loads more rows, batch-signs thumbnail URLs for newly-visible cards                       | Viewport update              |
-| 8   | Clicks a thumbnail card                  | Image Detail View replaces grid, full-res image loads                                                    | `detailImageId` set          |
-| 9   | Clicks back arrow in detail view         | Returns to grid, scroll position and all toolbar state preserved                                         | `detailImageId` cleared      |
+| 8   | Clicks a thumbnail card                  | Image Detail View replaces grid, full-res image loads                                                    | `detailMediaId` set          |
+| 9   | Clicks back arrow in detail view         | Returns to grid, scroll position and all toolbar state preserved                                         | `detailMediaId` cleared      |
 | 10  | Clicks collapse toggle on a group header | Group's thumbnails collapse/expand                                                                       | Group collapsed state        |
 | 11  | Clicks "+" in Group Tab Bar              | Saves current Active Selection images as a new named group                                               | New tab created              |
 | 12  | New cluster/radius selection on map      | Replaces current Active Selection images, resets to unfiltered state                                     | `rawImages` replaced         |
@@ -292,7 +292,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Click["User clicks a photo marker"] --> GetState["Read markerState\n(count, lat, lng, imageId)"]
+    Click["User clicks a photo marker"] --> GetState["Read markerState\n(count, lat, lng, mediaId)"]
     GetState --> OpenPane["Open workspace pane\nsetSelectedMarker()"]
     OpenPane --> LoadRPC["loadClusterImages(lat, lng, zoom)\nvia cluster_images RPC"]
     LoadRPC --> Skeleton["Show skeleton loading cards"]
@@ -302,7 +302,7 @@ flowchart TD
     RPCResult -->|"rows = 0"| NoPhotos["Show 'No photos at this location'\nplaceholder with hint"]
     RPCResult -->|"error"| NoPhotos
 
-    GetState --> IsSingle{count === 1\n& imageId?}
+    GetState --> IsSingle{count === 1\n& mediaId?}
     IsSingle -->|"yes"| DetailView["Also open detail view\n(grid populated in background\nfor back-navigation)"]
     IsSingle -->|"no"| GridOnly["Grid view only"]
 
@@ -343,7 +343,7 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- `ActiveSelectionView` is the default content area inside `WorkspacePaneComponent` when `activeTabId === 'selection'` and `detailImageId === null`
+- `ActiveSelectionView` is the default content area inside `WorkspacePaneComponent` when `activeTabId === 'selection'` and `detailMediaId === null`
 - Inject `WorkspaceViewService` — the single source of truth for pipeline state
 - Inject `FilterService` — manages filter rules, exposes predicates to `WorkspaceViewService`
 - Toolbar dropdowns are standalone components rendered conditionally within `WorkspaceToolbar`

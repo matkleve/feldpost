@@ -294,7 +294,7 @@ sequenceDiagram
     PP->>PP: gray out already-assigned properties
 
     U->>PP: click "Floor"
-    PP->>MS: addPropertyToImage(imageId, keyId)
+    PP->>MS: addPropertyToImage(mediaId, keyId)
     MS->>DB: INSERT INTO image_metadata (image_id, metadata_key_id, value_text) VALUES (?, ?, '')
     DB-->>MS: success
     MS-->>IDV: image metadata refreshed
@@ -302,7 +302,7 @@ sequenceDiagram
 
     U->>IDV: click "Floor" value → edit
     U->>IDV: type "3" → blur
-    IDV->>MS: updatePropertyValue(imageId, keyId, '3')
+    IDV->>MS: updatePropertyValue(mediaId, keyId, '3')
     MS->>DB: UPDATE image_metadata SET value_text = '3'
 ```
 

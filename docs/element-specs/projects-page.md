@@ -196,7 +196,7 @@ Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 | `pendingProjectId`            | `string \| null`                             | `null`                   | Target project for the pending destructive action             |
 | `pendingActionBusy`           | `boolean`                                    | `false`                  | Prevents duplicate archive/restore/delete submissions         |
 | `coloringProjectId`           | `string \| null`                             | `null`                   | Color picker visibility target                                |
-| `detailImageId`               | `string \| null`                             | `null`                   | Selected image inside the project-scoped workspace            |
+| `detailMediaId`               | `string \| null`                             | `null`                   | Selected image inside the project-scoped workspace            |
 | `activeGroupings`             | `GroupingProperty[]`                         | `[]`                     | Grouping hierarchy for list/card rendering                    |
 | `collapsedGroupIds`           | `Set<string>`                                | `new Set()`              | Collapsed grouped sections                                    |
 | `activeProjectSorts`          | `SortConfig[]`                               | `[]`                     | Explicit project-level sort criteria                          |

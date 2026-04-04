@@ -95,7 +95,7 @@ stateDiagram-v2
     end note
 ```
 
-> **Replace / Attach shortcut:** When `imageReplaced$` or `imageAttached$` fires, `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)`, which injects the blob URL into the service cache at all sizes (including `'marker'`). The Map Shell reads the URL from the service cache and rebuilds the DivIcon immediately. The marker skips the loading/placeholder cycle because the blob URL is available at build time — `buildPhotoMarkerHtml()` emits an `<img>` tag directly. On the next viewport query, normal `photoLoad.getSignedUrl()` re-signs from storage, `photoLoad.revokeLocalUrl()` frees the blob, and the signed URL takes over. See [PL-7 / PL-8](../use-cases/photo-loading.md#pl-7-replace-photo--loading-state-reset) for full interaction diagrams.
+> **Replace / Attach shortcut:** When `imageReplaced$` or `imageAttached$` fires, `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)`, which injects the blob URL into the service cache at all sizes (including `'marker'`). The Map Shell reads the URL from the service cache and rebuilds the DivIcon immediately. The marker skips the loading/placeholder cycle because the blob URL is available at build time — `buildPhotoMarkerHtml()` emits an `<img>` tag directly. On the next viewport query, normal `photoLoad.getSignedUrl()` re-signs from storage, `photoLoad.revokeLocalUrl()` frees the blob, and the signed URL takes over. See [PL-7 / PL-8](../use-cases/photo-loading.md#pl-7-replace-photo--loading-state-reset) for full interaction diagrams.
 
 ### Placeholder Design
 
@@ -282,11 +282,11 @@ sequenceDiagram
   participant Shell as MapShellComponent
   participant Marker as L.Marker (Leaflet)
 
-  Manager->>PhotoLoad: setLocalUrl(imageId, blobUrl)
+  Manager->>PhotoLoad: setLocalUrl(mediaId, blobUrl)
   PhotoLoad->>PhotoLoad: Cache blobUrl for all sizes (incl. 'marker'), loadState → 'loaded'
-  Manager->>Shell: imageReplaced$ {imageId, newStoragePath}
-  Shell->>Shell: Look up marker by imageId in markersByImageId map
-  Shell->>PhotoLoad: Read cached URL for imageId + 'marker' size
+  Manager->>Shell: imageReplaced$ {mediaId, newStoragePath}
+  Shell->>Shell: Look up marker by mediaId in markersByMediaId map
+  Shell->>PhotoLoad: Read cached URL for mediaId + 'marker' size
   Shell->>Shell: Rebuild DivIcon HTML via buildPhotoMarkerHtml() with blobUrl
   Shell->>Marker: marker.setIcon(newDivIcon)
   Note over Marker: Marker instantly shows the new photo
@@ -302,11 +302,11 @@ sequenceDiagram
   participant Shell as MapShellComponent
   participant Marker as L.Marker (Leaflet)
 
-  Manager->>PhotoLoad: setLocalUrl(imageId, blobUrl)
+  Manager->>PhotoLoad: setLocalUrl(mediaId, blobUrl)
   PhotoLoad->>PhotoLoad: Cache blobUrl for all sizes (incl. 'marker'), loadState → 'loaded'
-  Manager->>Shell: imageAttached$ {imageId, newStoragePath, coords}
-  Shell->>Shell: Look up marker by imageId in markersByImageId map
-  Shell->>PhotoLoad: Read cached URL for imageId + 'marker' size
+  Manager->>Shell: imageAttached$ {mediaId, newStoragePath, coords}
+  Shell->>Shell: Look up marker by mediaId in markersByMediaId map
+  Shell->>PhotoLoad: Read cached URL for mediaId + 'marker' size
   Shell->>Shell: Rebuild DivIcon HTML: placeholder → real thumbnail
   Shell->>Marker: marker.setIcon(newDivIcon)
   Note over Marker: Marker switches from PHOTO_PLACEHOLDER_ICON to photo thumbnail
@@ -321,7 +321,7 @@ Markers are keyed by coordinate-based `markerKey` (from `toMarkerKey()`). When c
 3. If the new key collides with an existing marker (another image at the same rounded location), merge into a cluster.
 4. Otherwise, insert the marker under the new key.
 
-The Map Shell also maintains a **secondary index** `markersByImageId: Map<string, L.Marker>` for O(1) lookups when handling detail view events. This index is populated during marker creation and cleaned up during marker removal.
+The Map Shell also maintains a **secondary index** `markersByMediaId: Map<string, L.Marker>` for O(1) lookups when handling detail view events. This index is populated during marker creation and cleaned up during marker removal.
 
 ## Performance Rules
 
@@ -390,9 +390,9 @@ sequenceDiagram
 - If the exact image marker is unavailable due to clustering, spotlight falls back to the nearest eligible cluster marker.
 - Cross-surface hover-link wiring is bidirectional: Workspace Pane hover highlights marker; map marker hover highlights the matching workspace item.
 - Hover direction cones are driven by CSS `:hover` on desktop. Touch long-press direction cones require a Leaflet pointer-event listener (~500 ms threshold) that toggles a `data-long-pressed` attribute or class.
-- The Map Shell subscribes to `UploadManagerService.imageReplaced$` to update marker thumbnails when a photo is replaced in the detail view. On event, it looks up the marker via `markersByImageId`, reads the blob URL from `PhotoLoadService` cache, rebuilds the DivIcon, and calls `marker.setIcon()`.
+- The Map Shell subscribes to `UploadManagerService.imageReplaced$` to update marker thumbnails when a photo is replaced in the detail view. On event, it looks up the marker via `markersByMediaId`, reads the blob URL from `PhotoLoadService` cache, rebuilds the DivIcon, and calls `marker.setIcon()`.
 - The Map Shell subscribes to `UploadManagerService.imageAttached$` to update markers when a photo is attached to a photoless row. Same lookup and rebuild flow as `imageReplaced$`, reading the blob URL from `PhotoLoadService`.
-- The Map Shell maintains a `markersByImageId` secondary index (`Map<string, L.Marker>`) for O(1) lookups when applying upload manager events. This index is populated during marker creation and cleaned up during marker removal.
+- The Map Shell maintains a `markersByMediaId` secondary index (`Map<string, L.Marker>`) for O(1) lookups when applying upload manager events. This index is populated during marker creation and cleaned up during marker removal.
 
 ## Acceptance Criteria
 
@@ -484,7 +484,7 @@ sequenceDiagram
 
 ### Reactive Updates from Upload Manager
 
-- [x] `markersByImageId` secondary index maintained for O(1) marker lookups by image UUID
+- [x] `markersByMediaId` secondary index maintained for O(1) marker lookups by image UUID
 - [x] `MapShellComponent` subscribes to `UploadManagerService.imageReplaced$` — reads blob URL from `PhotoLoadService` cache, rebuilds marker DivIcon on photo replace
 - [x] `MapShellComponent` subscribes to `UploadManagerService.imageAttached$` — reads blob URL from `PhotoLoadService` cache, updates marker from placeholder to real thumbnail on photo attach
 - [x] Marker thumbnail uses blob URL from `PhotoLoadService` for instant display (no signed-URL delay); replaced by signed URL on next `photoLoad.getSignedUrl()` call

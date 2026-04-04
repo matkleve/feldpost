@@ -43,6 +43,7 @@
   - Primary table: `media_items` (replaces legacy `images`).
   - Legacy archive: `source_image_id` column in `media_items` stores references to old `public.images` for backward compatibility during transition.
   - Key fields: `id`, `user_id`, `storage_path`, `media_bucket_name`, `latitude`, `longitude`, `geog`, `captured_at`, (optional) direction/bearing, project reference, metadata.
+  - Identifier naming contract: use `mediaId` / `mediaIds` in specs and application contracts. `imageId` / `imageIds` are legacy compatibility names only.
 
 - **Viewport**  
   The rectangular area of the map currently visible to the user.

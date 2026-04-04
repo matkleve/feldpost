@@ -80,7 +80,7 @@ flowchart LR
 | `gpsLocating`           | `boolean`                                                                    | `false` | GPS spinner state while awaiting fix                                       |
 | `gpsTrackingActive`     | `boolean`                                                                    | `false` | GPS toggle active state and periodic refresh loop                          |
 | `userPosition`          | `[number, number] \| null`                                                   | `null`  | Latest known user coordinates                                              |
-| `pendingZoomHighlight`  | `{ imageId: string; lat: number; lng: number; requestedAt: number } \| null` | `null`  | Pending spotlight request until viewport markers are loaded and reconciled |
+| `pendingZoomHighlight`  | `{ mediaId: string; lat: number; lng: number; requestedAt: number } \| null` | `null`  | Pending spotlight request until viewport markers are loaded and reconciled |
 
 ## File Map
 

@@ -125,8 +125,8 @@ sequenceDiagram
 | ------------------- | ------------------------------------------------------- | ------- | ---------------------------------------- |
 | `selectedProjectId` | `string \| null`                                        | `null`  | Active project scope                     |
 | `workspacePaneOpen` | `boolean`                                               | `false` | Workspace visibility                     |
-| `selectedImageId`   | `string \| null`                                        | `null`  | Active image details                     |
-| `mapFocusPayload`   | `{ imageId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus      |
+| `selectedMediaId`   | `string \| null`                                        | `null`  | Active image details                     |
+| `mapFocusPayload`   | `{ mediaId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus      |
 | `isProjectFullView` | `boolean`                                               | `false` | Right→left full-width workspace mode     |
 | `restorePaneWidth`  | `number \| null`                                        | `null`  | Width to restore after leaving full view |
 

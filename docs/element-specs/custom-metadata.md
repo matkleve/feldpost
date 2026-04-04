@@ -79,7 +79,7 @@ flowchart LR
 ```sql
 SELECT metadata_key_id, value_text, metadata_keys(key_name)
 FROM image_metadata
-WHERE image_id = :imageId
+WHERE image_id = :mediaId
 ```
 
 ### Query: Load org metadata keys (for autocomplete)
@@ -95,7 +95,7 @@ ORDER BY key_name
 
 ```sql
 INSERT INTO image_metadata (image_id, metadata_key_id, value_text)
-VALUES (:imageId, :keyId, :value)
+VALUES (:mediaId, :keyId, :value)
 ON CONFLICT (image_id, metadata_key_id)
 DO UPDATE SET value_text = EXCLUDED.value_text
 ```

@@ -77,6 +77,13 @@ Rules:
 - Place any additional sections only **after** core sections, unless they are explicitly declared as a pre-core exception (for example `Child Specs` in split parent specs).
 - This repository has no canonical reference spec file; the contract above is the canonical source.
 
+### Identifier Naming Contract
+
+- Use `media` as the canonical domain term for persisted items and service payloads.
+- Use `mediaId` / `mediaIds` for identifier fields in specs, diagrams, state tables, and acceptance criteria.
+- Do not introduce new `imageId` / `imageIds` contracts in specs.
+- Legacy runtime APIs that still expose `imageId` naming must be documented explicitly as compatibility aliases, with `mediaId` listed as the primary contract.
+
 ### Optional Sections (Type-Specific)
 
 Use optional sections when they materially improve implementation clarity.

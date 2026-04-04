@@ -27,11 +27,11 @@ A rounded-corner media surface (`--radius-lg`) centered with side margins (`--sp
 | 1   | Clicks media preview                                    | Opens full-screen lightbox overlay (dark backdrop, `rgba(0,0,0,0.9)`). Media preview at `95vw / 95vh`, `object-fit: contain`. Close button (X) top-right.                                   | Lightbox opens                  |
 | 2   | Clicks lightbox backdrop / X                            | Closes lightbox                                                                                                                                                                             | Lightbox closes                 |
 | 3   | Presses Escape in lightbox                              | Closes lightbox                                                                                                                                                                             | Lightbox closes                 |
-| 4   | Clicks replace-media button                             | Opens file picker; delegates to `uploadManager.replaceFile(imageId, file)`                                                                                                                  | `replacing` → true              |
-| 5   | Replace upload succeeds                                 | `imageReplaced$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → all surfaces see new media instantly → service re-signs on next access                    | `replacing` → false             |
+| 4   | Clicks replace-media button                             | Opens file picker; delegates to `uploadManager.replaceFile(mediaId, file)`                                                                                                                  | `replacing` → true              |
+| 5   | Replace upload succeeds                                 | `imageReplaced$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)` → all surfaces see new media instantly → service re-signs on next access                    | `replacing` → false             |
 | 6   | Replace upload fails                                    | Inline error below media surface; no DB/storage changes                                                                                                                                     | `replaceError` set              |
-| 7   | Clicks upload button (no media)                         | Opens file picker; delegates to `uploadManager.attachFile(imageId, file)`                                                                                                                   | Attach pipeline starts          |
-| 8   | Attach upload succeeds                                  | `imageAttached$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → switches from upload placeholder to media display                                         | Media display shown             |
+| 7   | Clicks upload button (no media)                         | Opens file picker; delegates to `uploadManager.attachFile(mediaId, file)`                                                                                                                   | Attach pipeline starts          |
+| 8   | Attach upload succeeds                                  | `imageAttached$` fires → `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)` → switches from upload placeholder to media display                                         | Media display shown             |
 | 9   | Right-clicks detail thumbnail                           | Opens the same detail context action menu as the header 3-dot trigger                                                                                                                       | Detail context menu             |
 | 10  | Same media was loaded by marker or `/media`             | Detail viewer reuses cached URL tier immediately (warm preview or sharp), then upgrades in background when needed                                                                           | Shared `PhotoLoadService` cache |
 | 11  | Opens document detail with generated first-page preview | Viewer requests signed preview URL from `document_preview_path` through `PhotoLoadService`, shows preview when available, then keeps cache/tier-upgrade behavior consistent across surfaces | Document preview pipeline       |
@@ -52,7 +52,7 @@ MediaViewer                                ← object-fit: contain, background: 
 
 ## State Machine
 
-Load-state tracking is delegated to `PhotoLoadService`. The component reads `photoLoad.getLoadState(imageId, size)` signals and maps them to visual tiers.
+Load-state tracking is delegated to `PhotoLoadService`. The component reads `photoLoad.getLoadState(mediaId, size)` signals and maps them to visual tiers.
 
 ```mermaid
 stateDiagram-v2
@@ -119,8 +119,8 @@ Three-tier strategy to show content as fast as possible, fully delegated to `Pho
 
 Adaptive tier policy: the component measures the active viewer slot, converts dimensions to `rem`, and forwards them to `MediaOrchestratorService.selectRequestedTierForSlot(...)` to derive the requested tier for this render cycle. Service logic remains UI-agnostic and must not access DOM directly.
 
-1. **Check** → `photoLoad.getLoadState(imageId, 'thumb')` returns `'no-photo'` → skip to upload prompt
-2. **Warm cache lookup** → `photoLoad.getBestCachedUrl(imageId, requestedTier)`; if found, render immediately as warm preview
+1. **Check** → `photoLoad.getLoadState(mediaId, 'thumb')` returns `'no-photo'` → skip to upload prompt
+2. **Warm cache lookup** → `photoLoad.getBestCachedUrl(mediaId, requestedTier)`; if found, render immediately as warm preview
 3. **View opens with media and no cache hit** → neutral CSS placeholder shown (no network)
 4. **Tier 2** → `photoLoad.getSignedUrl(thumbPath, 'thumb')` → service returns cached or freshly signed URL
 5. Thumbnail `<img>` loads → replaces placeholder with slight blur filter
@@ -195,10 +195,10 @@ The component never calls Supabase Storage directly. All signing is delegated to
 
 When `imageReplaced$` fires:
 
-1. `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → blob URL injected into service cache at all sizes → all surfaces see the new media instantly (~0ms)
-2. Component reads `photoLoad.getLoadState(imageId, 'thumb')` / `photoLoad.getLoadState(imageId, 'full')` — both show `'loaded'` (blob URL)
-3. On next access, `photoLoad.invalidate(imageId)` clears blob → service re-signs Tier 2 and Tier 3 from new `storagePath`
-4. `photoLoad.revokeLocalUrl(imageId)` frees the `ObjectURL` memory
+1. `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)` → blob URL injected into service cache at all sizes → all surfaces see the new media instantly (~0ms)
+2. Component reads `photoLoad.getLoadState(mediaId, 'thumb')` / `photoLoad.getLoadState(mediaId, 'full')` — both show `'loaded'` (blob URL)
+3. On next access, `photoLoad.invalidate(mediaId)` clears blob → service re-signs Tier 2 and Tier 3 from new `storagePath`
+4. `photoLoad.revokeLocalUrl(mediaId)` frees the `ObjectURL` memory
 5. Seamless transition — no visible flash between blob and signed URL
 
 ```mermaid
@@ -220,17 +220,17 @@ sequenceDiagram
         Viewer->>Picker: Open native file picker
         User->>Picker: Select file
         Picker-->>Viewer: File selected
-        Viewer->>Manager: replaceFile(imageId, file)
+        Viewer->>Manager: replaceFile(mediaId, file)
         Note over Viewer: replacing = true
         Manager->>Storage: Upload new file
         alt Upload succeeds
-            Manager->>PhotoLoad: setLocalUrl(imageId, blobUrl)
+            Manager->>PhotoLoad: setLocalUrl(mediaId, blobUrl)
             PhotoLoad->>PhotoLoad: Cache blobUrl for all sizes, loadState → 'loaded'
             Note over Viewer: All surfaces see new media instantly (~0ms)
-            Manager-->>Viewer: imageReplaced$ {imageId, newStoragePath}
+            Manager-->>Viewer: imageReplaced$ {mediaId, newStoragePath}
             Note over Viewer: replacing = false
             Note over PhotoLoad: Next getSignedUrl() call:
-            PhotoLoad->>PhotoLoad: revokeLocalUrl(imageId)
+            PhotoLoad->>PhotoLoad: revokeLocalUrl(mediaId)
             PhotoLoad->>Storage: createSignedUrl(newStoragePath, 3600, {transform: 256×256})
             Storage-->>PhotoLoad: tier2Url (cached)
             PhotoLoad->>Storage: createSignedUrl(newStoragePath, 3600)
@@ -248,7 +248,7 @@ sequenceDiagram
 
 When `imageAttached$` fires:
 
-1. `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → blob URL injected at all sizes, `loadState` → `'loaded'`
+1. `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)` → blob URL injected at all sizes, `loadState` → `'loaded'`
 2. Component detects state transition from `'no-photo'` → `'loaded'` → switches from upload prompt to media display
 3. All surfaces see the new media instantly via the service's shared cache
 4. On next access, service re-signs from new `storagePath` and calls `revokeLocalUrl()` to free memory
@@ -265,16 +265,16 @@ sequenceDiagram
     Note over Viewer: photoLoad.getLoadState(id, 'thumb') = 'no-photo' → showing UploadPrompt
     User->>Viewer: Click upload button on placeholder
     Viewer->>Upload: validateFile(file)
-    Viewer->>Manager: attachFile(imageId, file)
+    Viewer->>Manager: attachFile(mediaId, file)
     Manager->>Storage: Upload file + update row
     alt Attach succeeds
-        Manager->>PhotoLoad: setLocalUrl(imageId, blobUrl)
+        Manager->>PhotoLoad: setLocalUrl(mediaId, blobUrl)
         PhotoLoad->>PhotoLoad: Cache blobUrl for all sizes, loadState → 'loaded'
-        Manager-->>Viewer: imageAttached$ {imageId, newStoragePath}
+        Manager-->>Viewer: imageAttached$ {mediaId, newStoragePath}
         Note over Viewer: loadState signal transitions 'no-photo' → 'loaded'
         Note over Viewer: Upload placeholder vanishes, real media preview appears (~0ms)
         Note over PhotoLoad: Next getSignedUrl() call:
-        PhotoLoad->>PhotoLoad: revokeLocalUrl(imageId)
+        PhotoLoad->>PhotoLoad: revokeLocalUrl(mediaId)
         PhotoLoad->>Storage: createSignedUrl(newStoragePath, 3600, {transform: 256×256})
         Storage-->>PhotoLoad: tier2Url (cached)
         PhotoLoad->>Storage: createSignedUrl(newStoragePath, 3600)
@@ -326,8 +326,8 @@ stateDiagram-v2
 
 | Name                      | Type                     | Default | Controls                                                                           |
 | ------------------------- | ------------------------ | ------- | ---------------------------------------------------------------------------------- |
-| `thumbState`              | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(imageId, 'thumb')` — drives placeholder/thumb    |
-| `fullState`               | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(imageId, 'full')` — drives full-res crossfade    |
+| `thumbState`              | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(mediaId, 'thumb')` — drives placeholder/thumb    |
+| `fullState`               | `Signal<PhotoLoadState>` | —       | Read from `photoLoad.getLoadState(mediaId, 'full')` — drives full-res crossfade    |
 | `lightboxOpen`            | `boolean`                | `false` | Whether lightbox overlay is visible                                                |
 | `replacing`               | `boolean`                | `false` | Whether a replace operation is in progress                                         |
 | `replaceError`            | `string \| null`         | `null`  | Error message if replace failed                                                    |
@@ -350,7 +350,7 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Injects `PhotoLoadService` — calls `getSignedUrl(path, 'thumb')`, `getSignedUrl(path, 'full')`, `preload(url)`, and reads `getLoadState(imageId, size)` signals. **Does not call Supabase Storage directly.**
+- Injects `PhotoLoadService` — calls `getSignedUrl(path, 'thumb')`, `getSignedUrl(path, 'full')`, `preload(url)`, and reads `getLoadState(mediaId, size)` signals. **Does not call Supabase Storage directly.**
 - For document-like media with generated first-page preview, resolves `document_preview_path` first and signs through the same `PhotoLoadService` tier/cache flow used by other media paths.
 - Uses `PHOTO_NO_PHOTO_ICON` as canonical error/no-media visual and may use `PHOTO_PLACEHOLDER_ICON` as optional loading glyph; neutral media placeholder remains valid baseline.
 - Injects `UploadManagerService` — calls `replaceFile()` or `attachFile()`. Does **not** manage upload lifecycle directly.
@@ -366,7 +366,7 @@ sequenceDiagram
 - [x] Tier 2 thumbnail obtained via `photoLoad.getSignedUrl(thumbPath, 'thumb')` with `{ width: 256, height: 256, resize: 'cover' }` transform
 - [x] Tier 3 full-res obtained via `photoLoad.getSignedUrl(storagePath, 'full')` with no transform
 - [x] Full-res preloaded via `photoLoad.preload(fullUrl)` before crossfade
-- [x] Component reads `photoLoad.getLoadState(imageId, 'thumb')` and `photoLoad.getLoadState(imageId, 'full')` signals — no local `thumbLoaded` / `fullResLoaded` booleans
+- [x] Component reads `photoLoad.getLoadState(mediaId, 'thumb')` and `photoLoad.getLoadState(mediaId, 'full')` signals — no local `thumbLoaded` / `fullResLoaded` booleans
 - [ ] Cache namespace is shared with map markers and `/media` items so the same media identity resolves to the same cached URL set across surfaces.
 - [ ] For document-like media with `document_preview_path`, signed URL generation and load-state resolution use the same `PhotoLoadService` flow (tier, cache, staleness, re-signing).
 - [x] When `storage_path IS NULL`: `photoLoad.getLoadState()` returns `'no-photo'` → upload prompt shown immediately, no signed URL requests
@@ -389,10 +389,10 @@ sequenceDiagram
 
 - [x] Edit icon overlay on hero media preview opens file picker
 - [x] File validated before upload (size + MIME type via `UploadService.validateFile()`)
-- [x] Delegates to `UploadManagerService.replaceFile(imageId, file)` — does not manage upload lifecycle directly
+- [x] Delegates to `UploadManagerService.replaceFile(mediaId, file)` — does not manage upload lifecycle directly
 - [x] Spinner/progress shown by reading job state from `uploadManager.jobs()` signal
-- [x] On `imageReplaced$`: `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → all surfaces update instantly
-- [x] On `imageAttached$`: `UploadManagerService` calls `photoLoad.setLocalUrl(imageId, blobUrl)` → component transitions from upload prompt to media preview
+- [x] On `imageReplaced$`: `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)` → all surfaces update instantly
+- [x] On `imageAttached$`: `UploadManagerService` calls `photoLoad.setLocalUrl(mediaId, blobUrl)` → component transitions from upload prompt to media preview
 - [x] `localObjectUrl` freed via `photoLoad.revokeLocalUrl()` after signed URL takes over — no memory leaks
 - [x] Upload survives component destruction (user can navigate away mid-replace)
 

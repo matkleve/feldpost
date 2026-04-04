@@ -99,7 +99,7 @@ flowchart LR
 | `anchorLatLng`       | Marker coordinates                        | `{ lat: number; lng: number }`        |
 | `anchorScreen`       | Marker container point                    | `{ x: number; y: number }`            |
 | `clusterSourceCells` | Cluster merge metadata (if cluster)       | `Array<{ lat: number; lng: number }>` |
-| `imageIds`           | Single marker id or cluster lookup result | `string[]`                            |
+| `mediaIds`           | Single marker id or cluster lookup result | `string[]`                            |
 
 ## State
 

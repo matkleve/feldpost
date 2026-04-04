@@ -144,11 +144,11 @@ sequenceDiagram
     WVS->>WVS: apply filters → sort → group
     WVS->>WP: emit grouped image sections
     WP->>WP: render group headings + thumbnail grid
-    alt count === 1 && imageId
-        MS->>MS: openDetailView(imageId)
+    alt count === 1 && mediaId
+        MS->>MS: openDetailView(mediaId)
         Note right of MS: Grid is populated in background<br/>for back-navigation
     else count > 1 (cluster)
-        MS->>MS: detailImageId.set(null)
+        MS->>MS: detailMediaId.set(null)
         Note right of MS: Clear any open detail view<br/>so thumbnail grid renders
     end
 ```
@@ -379,11 +379,11 @@ classDiagram
     class MetadataService {
         +orgProperties: Signal~MetadataKeyWithType[]~
         +getOrgProperties(): Promise~MetadataKey[]~
-        +getImageProperties(imageId): Promise~ImageMetadata[]~
+        +getImageProperties(mediaId): Promise~ImageMetadata[]~
         +createProperty(name, type): Promise~MetadataKey~
         +deleteProperty(keyId): Promise~void~
-        +setPropertyValue(imageId, keyId, value): Promise~void~
-        +removePropertyValue(imageId, keyId): Promise~void~
+        +setPropertyValue(mediaId, keyId, value): Promise~void~
+        +removePropertyValue(mediaId, keyId): Promise~void~
     }
 
     WorkspaceViewService --> FilterService : reads filters
@@ -419,7 +419,7 @@ flowchart TD
     ClickMarker -->|"count>1"| ClusterFlow["Load images + Clear Detail"]
     LoadAndDetail --> ReFilter --> ReSort --> ReGroup --> ReRender
     LoadAndDetail --> OpenDetail
-    ClusterFlow --> ClearDetail["detailImageId.set(null)"]
+    ClusterFlow --> ClearDetail["detailMediaId.set(null)"]
     ClusterFlow --> ReFilter
     ClearDetail --> ReRender
 

@@ -27,8 +27,8 @@ The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or 
 
 | #       | User Action                                              | System Response                                                                                                                                                         | Triggers                                                 |
 | ------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| 1       | Clicks a single photo marker on map                      | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                                                          | `workspacePaneOpen` → true, `detailImageId` set          |
-| 1b      | Clicks a cluster marker on map                           | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailImageId` → null)                                  | `workspacePaneOpen` → true, `detailImageId` → null       |
+| 1       | Clicks a single photo marker on map                      | Workspace pane opens with image detail view for that photo; thumbnail grid loads in background                                                                          | `workspacePaneOpen` → true, `detailMediaId` set          |
+| 1b      | Clicks a cluster marker on map                           | Workspace pane opens showing thumbnail grid with all images in the cluster; any open detail view is dismissed (`detailMediaId` → null)                                  | `workspacePaneOpen` → true, `detailMediaId` → null       |
 | **NEW** | **Clicks "Upload" tab button**                           | **Tab switches to Upload; UploadPanelComponent fully visible; all upload jobs/lanes visible**                                                                           | **`activeTab` → `'upload'`**                             |
 | **NEW** | **Clicks "Selected Items" tab button**                   | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
 | **NEW** | **Navigates from /map → /media**                         | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
@@ -51,8 +51,8 @@ The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or 
 | 10      | Selects one or more media items                          | Workspace Export Bar animates in at pane bottom                                                                                                                         | `selectedMediaIds.size > 0`                              |
 | 11      | Clears last selected item                                | Workspace Export Bar animates out                                                                                                                                       | `selectedMediaIds.size === 0`                            |
 | 12      | Uses export bar actions                                  | Opens curation/share/download flows for selected media                                                                                                                  | Workspace export wiring                                  |
-| 15      | Hovers media item in workspace list/grid                 | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer                                     | `hoveredWorkspaceImageId`                                |
-| 16      | Hovers marker on map                                     | Matching workspace media item receives linked-hover highlight state                                                                                                     | `hoveredMarkerImageId` / cluster hover payload           |
+| 15      | Hovers media item in workspace list/grid                 | Matching map marker receives linked-hover highlight; if marker is already selected, linked-hover is applied as extra emphasis layer                                     | `hoveredWorkspaceMediaId`                                |
+| 16      | Hovers marker on map                                     | Matching workspace media item receives linked-hover highlight state                                                                                                     | `hoveredMarkerMediaId` / cluster hover payload           |
 | 17      | Leaves hover (either side)                               | Linked-hover highlight is removed on both sides; persistent selection state remains unchanged                                                                           | hover clear events                                       |
 
 ### Interaction Flowchart
@@ -112,7 +112,7 @@ WorkspacePane                              ← `.ui-container` right panel rende
           └── ClearSelectionAction
 
 [In both tabs]
-├── [detailImageId set] MediaDetailViewComponent (overlay on top, full-pane modal)
+├── [detailMediaId set] MediaDetailViewComponent (overlay on top, full-pane modal)
 └── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (slot-based footer)
 ```
 
@@ -150,16 +150,16 @@ flowchart LR
 | `isOpen`                  | `boolean`                                 | `true`             | Pane visibility in parent shell (now defaults to open since it's persistent)                                     |
 | `activeTab`               | `'selected-items' \| 'upload'`            | `'selected-items'` | NEW: Which tab is currently visible (persists within session)                                                    |
 | `width`                   | `number`                                  | `320`              | Desktop pane width in parent shell                                                                               |
-| `detailImageId`           | `string \| null`                          | `null`             | If set, show detail view instead of grid                                                                         |
-| `activeClusterImageIds`   | `string[] \| null`                        | `null`             | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
+| `detailMediaId`           | `string \| null`                          | `null`             | If set, show detail view instead of grid                                                                         |
+| `activeClusterMediaIds`   | `string[] \| null`                        | `null`             | When set, Active Selection tab is populated with these cluster image IDs; cleared on pane close or new selection |
 | `mobileSnapPoint`         | `'minimized' \| 'half' \| 'full'`         | `'minimized'`      | Planned mobile bottom-sheet position                                                                             |
 | `isFullscreen`            | `boolean`                                 | `false`            | Planned fullscreen workspace mode                                                                                |
 | `restoreWidth`            | `number \| null`                          | `null`             | Planned restore width after fullscreen                                                                           |
 | `restoreSnapPoint`        | `'minimized' \| 'half' \| 'full' \| null` | `null`             | Planned restore snap point after fullscreen                                                                      |
 | `selectedMediaIds`        | `Set<string>`                             | empty set          | Current media selection that drives Workspace Export Bar visibility and actions                                  |
 | `selectedUploadJobIds`    | `Set<string>`                             | empty set          | Upload-tab multi-selection state for workspace-only bulk actions                                                 |
-| `hoveredWorkspaceImageId` | `string \| null`                          | `null`             | Current workspace item under pointer for map-linked hover highlight                                              |
-| `hoveredMarkerImageId`    | `string \| null`                          | `null`             | Current map marker image reference mirrored into workspace linked-hover                                          |
+| `hoveredWorkspaceMediaId` | `string \| null`                          | `null`             | Current workspace item under pointer for map-linked hover highlight                                              |
+| `hoveredMarkerMediaId`    | `string \| null`                          | `null`             | Current map marker image reference mirrored into workspace linked-hover                                          |
 | `hoveredMarkerClusterKey` | `string \| null`                          | `null`             | Current hovered cluster marker key used to highlight all matching workspace items                                |
 
 ## Module Interfaces (Schnittstellen)
@@ -255,12 +255,12 @@ sequenceDiagram
   participant Markers as PhotoMarker Layer
 
   User->>Pane: Hover workspace item
-  Pane-->>Shell: hoverWorkspaceImage(imageId)
+  Pane-->>Shell: hoverWorkspaceImage(mediaId)
   Shell->>Markers: apply linked-hover marker class
 
   User->>Markers: Hover marker
-  Markers-->>Shell: markerHover(imageId or clusterKey)
-  Shell-->>Pane: set hoveredMarkerImageId/clusterKey
+  Markers-->>Shell: markerHover(mediaId or clusterKey)
+  Shell-->>Pane: set hoveredMarkerMediaId/clusterKey
   Pane->>Pane: render linked-hover item state
 
   User->>Pane: Pointer leave
@@ -321,7 +321,7 @@ sequenceDiagram
 - [ ] Active Selection tab shows all images that belong to the clicked cluster
 - [ ] Pane header shows image count when cluster content is loaded (e.g., "12 photos")
 - [x] Map does NOT zoom or re-center when a cluster is clicked
-- [x] Closing the pane clears `activeClusterImageIds`
+- [x] Closing the pane clears `activeClusterMediaIds`
 - [ ] Thumbnails for large clusters (> 50 images) load progressively as the user scrolls
 - [ ] Single source of truth for tab state (`activeTab`) with no duplicate state key
 - [ ] In/out contracts documented for route context provider and pane host

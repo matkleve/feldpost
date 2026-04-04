@@ -53,7 +53,7 @@ Uploaded-lane 3-dot actions are conditional and MUST NOT render before required 
 
 ```mermaid
 flowchart TD
-  A[Uploaded row candidate] --> B{imageId present?}
+  A[Uploaded row candidate] --> B{mediaId present?}
   B -->|no| Z[Hide all persisted follow-up actions]
   B -->|yes| C[Show Open in /media]
   C --> D[Show Prioritize]
@@ -67,10 +67,10 @@ flowchart TD
 
 | Action           | Required data to render   |
 | ---------------- | ------------------------- |
-| `Open in /media` | `imageId`                 |
-| `Prioritize`     | `imageId`                 |
-| `Download`       | `imageId` + `storagePath` |
-| `Open project`   | `imageId` + `projectId`   |
+| `Open in /media` | `mediaId`                 |
+| `Prioritize`     | `mediaId`                 |
+| `Download`       | `mediaId` + `storagePath` |
+| `Open project`   | `mediaId` + `projectId`   |
 
 If required data is missing or unresolved, the action is hidden until the persistence layer confirms readiness.
 
@@ -231,7 +231,7 @@ sequenceDiagram
 - [x] FIFO queue: first file submitted is first to upload
 - [x] `missing_data` jobs do not consume concurrency slots
 - [x] Job state is reactive (Angular signals) — any component can bind to `jobs()`
-- [x] `imageUploaded$` fires with coords + imageId when a job completes
+- [x] `imageUploaded$` fires with coords + mediaId when a job completes
 - [x] `uploadFailed$` fires when a critical phase fails
 - [x] Failed jobs can be retried via `retryJob()`
 - [x] Completed/failed jobs can be dismissed individually or in bulk

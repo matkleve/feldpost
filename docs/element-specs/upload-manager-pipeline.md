@@ -63,8 +63,8 @@ Upload Manager Pipeline
   ├── Submission Entry Points
   │   ├── submit(files) ← standard multi-file entry
   │   ├── submitFolder(dirHandle) ← folder import entry
-  │   ├── replaceFile(imageId, file) ← replace existing photo
-  │   └── attachFile(imageId, file) ← attach to photoless row
+  │   ├── replaceFile(mediaId, file) ← replace existing photo
+  │   └── attachFile(mediaId, file) ← attach to photoless row
   ├── Processing Stages
   │   ├── Validation / EXIF
   │   ├── Hashing / Dedup
@@ -375,8 +375,8 @@ flowchart TD
 | `job.contentHash`            | `string \| undefined`                                                                                                                    | `undefined`   | Dedup identity for resume-safe uploads                                       |
 | `job.duplicateState`         | `'none' \| 'duplicate_issue' \| 'resolved'`                                                                                              | `'none'`      | Duplicate detection + modal lifecycle                                        |
 | `job.duplicateDecision`      | `'use_existing' \| 'upload_anyway' \| 'reject' \| undefined`                                                                             | `undefined`   | Final duplicate decision per job                                             |
-| `job.duplicateTargetImageId` | `string \| undefined`                                                                                                                    | `undefined`   | Existing image selected via duplicate flow                                   |
-| `job.existingImageId`        | `string \| undefined`                                                                                                                    | `undefined`   | Existing image match selected via `use_existing` decision                    |
+| `job.duplicateTargetMediaId` | `string \| undefined`                                                                                                                    | `undefined`   | Existing image selected via duplicate flow                                   |
+| `job.existingMediaId`        | `string \| undefined`                                                                                                                    | `undefined`   | Existing image match selected via `use_existing` decision                    |
 | `job.issueKind`              | `'duplicate_photo' \| 'missing_gps' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| undefined` | `undefined`   | UI-level issue semantics separate duplicate, GPS, and document-location gaps |
 | `job.availableActions`       | `UploadItemAction[]`                                                                                                                     | `[]`          | Uploaded and issue row actions derived after state settle                    |
 | `job.conflictCandidate`      | `ConflictCandidate \| undefined`                                                                                                         | `undefined`   | Existing photoless row candidate                                             |
@@ -434,7 +434,7 @@ flowchart TD
 
 ### Inputs / Outputs
 
-- **Inputs**: `File[]`, `FileSystemDirectoryHandle`, `imageId`, conflict-resolution choice
+- **Inputs**: `File[]`, `FileSystemDirectoryHandle`, `mediaId`, conflict-resolution choice
 - **Outputs**: `batchId`, `jobId`, and event streams on `UploadManagerService`
 
 ### Subscriptions
