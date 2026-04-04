@@ -70,11 +70,12 @@ Reference workflow and checklist:
 - Use service-module symmetry for new/refactored services:
   - Docs: `docs/element-specs/[service-name]/`
   - Code: `apps/web/src/app/core/[service-name]/`
-   - Required files per module: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
+  - Required files per module: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
   - Keep one central `types.ts` per module; do not split into nested sub-service type files
   - Keep facade slim and delegate heavy logic to local `adapters/`
   - Forbid global adapter folders like `apps/web/src/app/core/adapters/`
-  - Archive replaced code to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/` as `.legacy.ts`
+  - Archive replaced code only as a last resort, using dated refactor snapshot folders and `.legacy.ts` suffix
+  - Do not reference archived files/specs from active specs, blueprints, or implementation docs
 - For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`).
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting

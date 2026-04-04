@@ -66,4 +66,4 @@ Load this file for every visual or product implementation task. These rules are 
 - `docs/design/layout.md` — breakpoint behavior, panel dimensions, and responsive layout.
 - `docs/design/motion.md` — animation timing and transition rules.
 - `docs/design/components/*.md` — task-specific component contracts.
-- `docs/archive/reference-products.md` — human reading only; do not load in agentic coding sessions.
+- Historical reference products can be reviewed manually as last-resort context; do not load archived docs in agentic coding sessions.

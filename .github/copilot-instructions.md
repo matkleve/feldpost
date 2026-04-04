@@ -60,8 +60,9 @@ Adapters must stay local to their owning service module.
 When replacing old code during symmetry refactors:
 
 - Never hard-delete immediately.
-- Move snapshots to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/`.
+- Move snapshots only as a last resort, using dated refactor snapshot folders.
 - Use `.legacy.ts` filenames to avoid import conflicts.
+- Do not reference archived files or archived specs from active specs/blueprints/implementation docs.
 
 Scalable Symmetry rule:
 

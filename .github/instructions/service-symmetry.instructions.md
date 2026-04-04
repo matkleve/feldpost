@@ -35,5 +35,6 @@ For every new service module and every service refactor:
 When old code is replaced by a symmetry module:
 
 - Never hard-delete immediately.
-- Move legacy snapshots to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/`.
+- Move legacy snapshots only as a last resort, using dated refactor snapshot folders.
 - Use `.legacy.ts` suffix for archived TypeScript files.
+- Do not reference archived files/specs from active specs, blueprints, or implementation docs.

@@ -222,7 +222,6 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `media-item-quiet-actions.md` — Media quiet-actions subcomponent contract (active)
 - ✅ `project-item.md` — Project domain item contract (active)
 - ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
-- Archived legacy `thumbnail-card.md` — see `docs/archive/element-specs-legacy/thumbnail-card.md`
 - ✅ `workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
 - ✅ `workspace-view-system.md` — Workspace View System (data pipeline architecture)
 
@@ -236,7 +235,6 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
   - ✅ `media-detail-media-viewer.md` — Media Viewer (progressive loading, lightbox, replace/upload)
   - ✅ `media-detail-inline-editing.md` — Inline Editing (property rows, address search)
   - ✅ `media-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
-  - Archived legacy `media-detail-photo-viewer.md` — see `docs/archive/element-specs-legacy/media-detail-photo-viewer.md`
 - ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)
 - ✅ `grouping-dropdown.md` — Grouping Dropdown (thumbnail group-by)
 - ✅ `card-variant-system.md` — Cross-feature card variant contract (`row`, `small`, `medium`, `large`) for media/project cards
@@ -263,9 +261,6 @@ Order: grouped by UI layer from shell foundations through pages and cross-cuttin
 - ✅ `language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
 - ✅ `account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
 - ✅ `media-download-service.md` — Global media loading/download/export contract (tier/fallback/url/cache/error)
-- Archived legacy `media-delivery-orchestrator.md` — see `docs/archive/element-specs-legacy/media-delivery-orchestrator.md`
-- Archived legacy `photo-load-service.md` — see `docs/archive/element-specs-legacy/photo-load-service.md`
-- Archived legacy `media-renderer-system.md` — see `docs/archive/element-specs-legacy/media-renderer-system.md`
 
 ### Planned / Missing Specs
 

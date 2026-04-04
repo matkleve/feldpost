@@ -73,18 +73,18 @@ sequenceDiagram
 
 ## File Map
 
-| File                                                                                | Purpose                               |
-| ----------------------------------------------------------------------------------- | ------------------------------------- |
-| `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract          |
-| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | New adapter file                      |
-| `supabase/functions/media-export-zip/index.ts`                                      | Edge function implementation target   |
-| `apps/web/src/app/core/zip-export/zip-export.service.ts`                            | Legacy client ZIP path (now archived) |
+| File                                                                                | Purpose                             |
+| ----------------------------------------------------------------------------------- | ----------------------------------- |
+| `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract        |
+| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | New adapter file                    |
+| `supabase/functions/media-export-zip/index.ts`                                      | Edge function implementation target |
+| `apps/web/src/app/core/zip-export/zip-export.service.ts`                            | Previous client ZIP path (retired)  |
 
 ## Wiring
 
 - Facade delegates all ZIP execution to this adapter.
 - No ZIP assembly logic remains in UI components.
-- Legacy `ZipExportService` compatibility wrapper has been removed after consumer migration.
+- Previous `ZipExportService` compatibility wrapper has been removed after consumer migration.
 
 ## Acceptance Criteria
 

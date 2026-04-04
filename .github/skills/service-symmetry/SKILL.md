@@ -26,9 +26,10 @@ Use this skill when creating or refactoring services.
 
 3. Archive replaced code:
 
-- Move to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/`
+- Move only as a last resort into dated refactor snapshot folders
 - Keep `.legacy.ts` suffix
 - Never hard-delete immediately
+- Do not reference archived files/specs from active specs, blueprints, or implementation docs
 
 ## Scalable Symmetry Rules
 

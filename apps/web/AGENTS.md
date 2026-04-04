@@ -32,7 +32,8 @@ src/app/
   - Required module files: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
   - Keep one shared `types.ts` per module and keep facade orchestration slim
   - Do not create global adapter folders like `src/app/core/adapters/`
-  - Move replaced code snapshots to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/` and keep `.legacy.ts` suffix
+  - Move replaced code snapshots only as a last resort, using dated refactor snapshot folders and `.legacy.ts` suffix
+  - Do not reference archived files/specs from active specs, blueprints, or implementation docs
 - Match the component hierarchy in the element spec exactly
 - Every production component must have its own dedicated spec in `docs/element-specs/` (parent specs can reference child specs, but not replace them)
 - Use glossary names from `docs/glossary.md`
