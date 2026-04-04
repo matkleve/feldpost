@@ -180,6 +180,17 @@ Stateful component root must bind one visual state attribute:
 
 State selectors in SCSS read this attribute.
 
+### Universal Media Boundary Rule
+
+`app-universal-media` remains a shared rendering adapter with a structured `MediaRenderState` input.
+
+Required handling at callsites:
+
+- Keep feature component public visual API as one local enum state input.
+- Map local enum states to `MediaRenderState` in a computed adapter mapping.
+- Do not pass multiple boolean visual-state flags to emulate state at the boundary.
+- Document mapping with `Stable state:` comment blocks and `@see docs/element-specs/...` references.
+
 ### Stable State Comment Segmentation (Non-Negotiable)
 
 Every stateful component must segment state logic in TypeScript, template, and SCSS with explicit English comment blocks.

@@ -6,7 +6,7 @@ import {
   UiButtonSizeSmDirective,
 } from '../../shared/ui-primitives/ui-primitives.directive';
 
-// Stable states: interactive-unselected, interactive-selected,
+// Stable state: interactive-unselected, interactive-selected,
 // interactive-map-disabled, interactive-selected-map-disabled, disabled.
 // @see docs/element-specs/media-item-quiet-actions.md#state-machine
 export type MediaItemQuietActionsState =

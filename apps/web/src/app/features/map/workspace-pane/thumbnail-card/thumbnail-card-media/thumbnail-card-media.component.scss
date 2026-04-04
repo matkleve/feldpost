@@ -58,10 +58,14 @@ app-universal-media {
 }
   */
 
+// Stable state: linked-hover adds relationship emphasis ring.
+// @see docs/element-specs/thumbnail-grid.md#state
 :host-context(.thumbnail-card--linked-hover) {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
 }
 
+// Stable state: selected + linked-hover composes selection shadow and linked-hover ring.
+// @see docs/element-specs/thumbnail-grid.md#state
 :host-context(.thumbnail-card--selected.thumbnail-card--linked-hover) {
   box-shadow:
     var(--shadow-md),

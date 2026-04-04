@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   DestroyRef,
   ElementRef,
@@ -9,11 +8,15 @@ import {
   output,
   signal,
 } from '@angular/core';
+import type { AfterViewInit } from '@angular/core';
 import type { ThumbnailSizePreset, WorkspaceImage } from '../../../../core/workspace-view.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MediaOrchestratorService } from '../../../../core/media/media-orchestrator.service';
 import type { MediaTier } from '../../../../core/media/media-renderer.types';
-import { ThumbnailCardMediaComponent } from './thumbnail-card-media/thumbnail-card-media.component';
+import {
+  ThumbnailCardMediaComponent,
+  type ThumbnailCardMediaState,
+} from './thumbnail-card-media/thumbnail-card-media.component';
 
 export interface ThumbnailCardInteraction {
   imageId: string;
@@ -49,9 +52,7 @@ export interface ThumbnailCardContextMenuEvent {
     >
       <app-thumbnail-card-media
         [image]="image()"
-        [imgLoading]="imgLoading()"
-        [isLoading]="isLoading()"
-        [imageReady]="imageReady()"
+        [state]="mediaState()"
         [requestedTier]="requestedTier()"
         [slotWidthRem]="slotWidthRem()"
         [slotHeightRem]="slotHeightRem()"
@@ -164,14 +165,28 @@ export class ThumbnailCardComponent implements AfterViewInit {
 
   readonly imgLoading = signal(true);
   readonly imgErrored = signal(false);
-  readonly isLoading = computed(
-    () =>
-      (!this.image().signedThumbnailUrl && !this.image().thumbnailUnavailable) ||
-      (!!this.image().signedThumbnailUrl && this.imgLoading() && !this.imgErrored()),
-  );
-  readonly imageReady = computed(
-    () => !!this.image().signedThumbnailUrl && !this.imgLoading() && !this.imgErrored(),
-  );
+
+  // Stable state: loading while thumbnail is unresolved or currently decoding;
+  // loaded when signed thumbnail is ready and image decode completed; icon-only as fallback.
+  // @see docs/element-specs/thumbnail-grid.md#state
+  readonly mediaState = computed<ThumbnailCardMediaState>(() => {
+    const image = this.image();
+    const hasSignedThumbnail = !!image.signedThumbnailUrl;
+    const thumbnailUnavailable = !!image.thumbnailUnavailable;
+
+    if (
+      (!hasSignedThumbnail && !thumbnailUnavailable) ||
+      (hasSignedThumbnail && this.imgLoading() && !this.imgErrored())
+    ) {
+      return 'loading';
+    }
+
+    if (hasSignedThumbnail && !this.imgLoading() && !this.imgErrored()) {
+      return 'loaded';
+    }
+
+    return 'icon-only';
+  });
   readonly slotWidthRem = signal<number | null>(null);
   readonly slotHeightRem = signal<number | null>(null);
   readonly requestedTier = computed<MediaTier>(() =>

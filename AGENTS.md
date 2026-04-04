@@ -377,6 +377,13 @@ Translation data in DB (`app_texts` + `app_text_translations`) is part of the fe
 - Stateful component roots must expose one visual state driver attribute: `[attr.data-state]`.
 - Parent components must pass one state value instead of coordinating multiple visual-state flags.
 
+### Universal Media Boundary Contract
+
+- `app-universal-media` is the shared rendering adapter boundary and keeps its structured `MediaRenderState` object contract.
+- Feature components still expose a single local enum visual-state API and map that enum to `MediaRenderState` at the adapter boundary.
+- Do not reintroduce multiple boolean visual-state inputs at callsites to feed `app-universal-media`.
+- Stable-state comments must document both local enum states and the mapping to `MediaRenderState` with spec references.
+
 ### Stable State Comment Segmentation (Mandatory)
 
 - Every stateful component must segment state logic in `*.component.ts`, `*.component.html`, and `*.component.scss` with explicit English comment blocks.
