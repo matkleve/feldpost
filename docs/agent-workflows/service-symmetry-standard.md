@@ -12,6 +12,7 @@ Keep service architecture mirrored and predictable by coupling spec and code mod
 ## Required Module Layout
 
 - `[service-name].service.ts` (facade)
+- `[service-name].service.spec.ts` (co-located facade unit tests)
 - `[service-name].types.ts` (central module contracts)
 - `[service-name].helpers.ts` (pure helper logic)
 - `adapters/` (technical adapters)

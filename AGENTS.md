@@ -70,7 +70,7 @@ Reference workflow and checklist:
 - Use service-module symmetry for new/refactored services:
   - Docs: `docs/element-specs/[service-name]/`
   - Code: `apps/web/src/app/core/[service-name]/`
-  - Required files per module: `[service-name].service.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
+   - Required files per module: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
   - Keep one central `types.ts` per module; do not split into nested sub-service type files
   - Keep facade slim and delegate heavy logic to local `adapters/`
   - Forbid global adapter folders like `apps/web/src/app/core/adapters/`

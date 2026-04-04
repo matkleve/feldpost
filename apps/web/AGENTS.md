@@ -29,7 +29,7 @@ src/app/
 - Service-module symmetry is mandatory for new/refactored services:
   - Docs in `docs/element-specs/[service-name]/`
   - Code in `src/app/core/[service-name]/`
-  - Required module files: `[service-name].service.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
+  - Required module files: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
   - Keep one shared `types.ts` per module and keep facade orchestration slim
   - Do not create global adapter folders like `src/app/core/adapters/`
   - Move replaced code snapshots to `docs/archive/code-legacy/[YYYY-MM-DD]-[refactor-name]/` and keep `.legacy.ts` suffix

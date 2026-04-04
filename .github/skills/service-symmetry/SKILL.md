@@ -18,6 +18,7 @@ Use this skill when creating or refactoring services.
 2. Required files inside code module:
 
 - `[service-name].service.ts`
+- `[service-name].service.spec.ts`
 - `[service-name].types.ts`
 - `[service-name].helpers.ts`
 - `adapters/`

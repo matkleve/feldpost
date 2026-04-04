@@ -48,6 +48,7 @@ For every new service and service refactor, use mirrored doc/code structure:
 Within each service module, use this required file layout:
 
 - `[service-name].service.ts` (facade, single UI entrypoint)
+- `[service-name].service.spec.ts` (co-located facade unit tests)
 - `[service-name].types.ts` (all shared module interfaces/enums)
 - `[service-name].helpers.ts` (pure helpers and mappers)
 - `adapters/` (technical implementations only)

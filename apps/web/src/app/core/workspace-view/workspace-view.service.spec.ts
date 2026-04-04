@@ -9,12 +9,12 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { WorkspaceViewService } from './workspace-view.service';
+import { WorkspaceViewService } from './workspace-view/workspace-view.service';
 import { SupabaseService } from './supabase/supabase.service';
-import { FilterService } from './filter.service';
-import { GeocodingService } from './geocoding.service';
-import { PropertyRegistryService } from './property-registry.service';
-import type { WorkspaceImage } from './workspace-view.types';
+import { FilterService } from './filter/filter.service';
+import { GeocodingService } from './geocoding/geocoding.service';
+import { PropertyRegistryService } from './property-registry/property-registry.service';
+import type { WorkspaceImage } from './workspace-view/workspace-view.types';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

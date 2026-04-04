@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { FilenameParserService } from './filename-parser.service';
-import { LocationPathParserService } from './location-path-parser.service';
+import { FilenameParserService } from './filename-parser/filename-parser.service';
+import { LocationPathParserService } from './location-path-parser/location-path-parser.service';
 import { UploadLocationConfigService } from './upload/upload-location-config.service';
 
 describe('FilenameParserService', () => {

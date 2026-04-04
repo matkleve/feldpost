@@ -3,7 +3,7 @@ import {
   PhotoLoadService,
   PHOTO_PLACEHOLDER_ICON,
   PHOTO_NO_PHOTO_ICON,
-} from './photo-load.service'; // TODO: Migrate to MediaDownloadService
+} from './photo-load/photo-load.service'; // TODO: Migrate to MediaDownloadService
 import { SupabaseService } from './supabase/supabase.service';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

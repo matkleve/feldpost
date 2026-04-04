@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { PropertyRegistryService } from './property-registry.service';
-import type { WorkspaceImage } from './workspace-view.types';
+import { PropertyRegistryService } from './property-registry/property-registry.service';
+import type { WorkspaceImage } from './workspace-view/workspace-view.types';
 
 function makeImage(overrides: Partial<WorkspaceImage> = {}): WorkspaceImage {
   return {

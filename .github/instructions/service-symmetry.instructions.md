@@ -1,7 +1,7 @@
 ---
 name: "Service Symmetry"
-description: "Use when creating or refactoring services to enforce mirrored docs/code module structure, local adapters, and legacy archive protocol."
-applyTo: "**/*.service.ts"
+description: "Use when creating or refactoring services or service tests to enforce mirrored docs/code module structure, local adapters, colocated tests, and legacy archive protocol."
+applyTo: "**/*.{service.ts,service.spec.ts}"
 ---
 
 # Service Symmetry Standard
@@ -13,6 +13,7 @@ For every new service module and every service refactor:
   - `apps/web/src/app/core/[service-name]/`
 - Required module files:
   - `[service-name].service.ts` (facade, single UI entrypoint)
+  - `[service-name].service.spec.ts` (co-located facade unit tests)
   - `[service-name].types.ts` (shared interfaces/enums)
   - `[service-name].helpers.ts` (pure helpers/mappers)
   - `adapters/` (technical integrations/implementations)

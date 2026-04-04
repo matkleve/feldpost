@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { WorkspaceSelectionService } from './workspace-selection.service';
+import { WorkspaceSelectionService } from './workspace-selection/workspace-selection.service';
 
 describe('WorkspaceSelectionService', () => {
   function setup(): WorkspaceSelectionService {

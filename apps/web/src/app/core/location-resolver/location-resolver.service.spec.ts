@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { LocationResolverService } from './location-resolver.service';
-import { GeocodingService } from './geocoding.service';
+import { LocationResolverService } from './location-resolver/location-resolver.service';
+import { GeocodingService } from './geocoding/geocoding.service';
 import { SupabaseService } from './supabase/supabase.service';
 import { AuthService } from './auth/auth.service';
-import type { WorkspaceImage } from './workspace-view.types';
+import type { WorkspaceImage } from './workspace-view/workspace-view.types';
 
 describe('LocationResolverService', () => {
   it('keeps on-demand resolution non-blocking when persist address RPC fails', async () => {

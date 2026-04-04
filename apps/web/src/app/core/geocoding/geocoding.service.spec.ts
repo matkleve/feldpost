@@ -8,7 +8,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { GeocodingService, type ReverseGeocodeResult } from './geocoding.service';
+import { GeocodingService, type ReverseGeocodeResult } from './geocoding/geocoding.service';
 import { SupabaseService } from './supabase/supabase.service';
 import {
   DEFAULT_UPLOAD_LOCATION_CONFIG,
