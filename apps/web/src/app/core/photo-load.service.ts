@@ -30,6 +30,9 @@ const SIGN_EXPIRY_SECONDS = 3600;
 const SIGN_BUCKETS: ReadonlyArray<'media' | 'images'> = ['media', 'images'];
 
 @Injectable({ providedIn: 'root' })
+/**
+ * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
+ */
 export class PhotoLoadService {
   private readonly supabase = inject(SupabaseService);
 
@@ -47,6 +50,7 @@ export class PhotoLoadService {
   /**
    * Returns a readonly signal tracking the current PhotoLoadState for an image+size pair.
    * Creates the signal on first access (default: 'idle').
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   getLoadState(imageId: string, size: PhotoSize): WritableSignal<PhotoLoadState> {
     const key = this.cacheKey(imageId, size);
@@ -61,6 +65,7 @@ export class PhotoLoadService {
   /**
    * Get a signed URL for a single image at a given size.
    * Uses cache when valid, otherwise signs via Supabase Storage.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   async getSignedUrl(
     storagePath: string,
@@ -98,6 +103,7 @@ export class PhotoLoadService {
   /**
    * Batch-sign URLs for multiple images at a given size.
    * Uses createSignedUrls for items with thumbnailPath, individual signing with transform for others.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   async batchSign(
     items: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
@@ -187,6 +193,7 @@ export class PhotoLoadService {
   /**
    * Preload an image URL by forcing the browser to download it.
    * Resolves true if the image loads, false on error.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   preload(url: string): Promise<boolean> {
     return new Promise((resolve) => {
@@ -197,7 +204,10 @@ export class PhotoLoadService {
     });
   }
 
-  /** Clear all cached URLs for an image (all sizes); next getSignedUrl will re-sign. */
+  /**
+   * Clear all cached URLs for an image (all sizes); next getSignedUrl will re-sign.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
+   */
   invalidate(imageId: string): void {
     for (const size of ['marker', 'thumb', 'full'] as PhotoSize[]) {
       const key = this.cacheKey(imageId, size);
@@ -208,6 +218,7 @@ export class PhotoLoadService {
   /**
    * Clear entries older than maxAgeMs.
    * Local blob URLs (isLocal: true) are never cleared by staleness.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   invalidateStale(maxAgeMs: number = STALE_THRESHOLD_MS): number {
     const now = Date.now();
@@ -224,6 +235,7 @@ export class PhotoLoadService {
   /**
    * Inject a local ObjectURL (from upload) into the cache at all sizes.
    * Loads in ~0ms, no network request.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   setLocalUrl(imageId: string, blobUrl: string): void {
     for (const size of ['marker', 'thumb', 'full'] as PhotoSize[]) {
@@ -232,7 +244,10 @@ export class PhotoLoadService {
     }
   }
 
-  /** Mark an image as having no photo (storage_path is null). Sets all sizes to 'no-photo'. */
+  /**
+   * Mark an image as having no photo (storage_path is null). Sets all sizes to 'no-photo'.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
+   */
   markNoPhoto(imageId: string): void {
     for (const size of ['marker', 'thumb', 'full'] as PhotoSize[]) {
       this.setLoadState(imageId, size, 'no-photo');
@@ -242,6 +257,7 @@ export class PhotoLoadService {
   /**
    * Revoke the cached blob URL and clear the cache entry.
    * Next access will re-sign from storage.
+   * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
    */
   revokeLocalUrl(imageId: string): void {
     for (const size of ['marker', 'thumb', 'full'] as PhotoSize[]) {

@@ -1,6 +1,6 @@
 # Upload Panel
 
-> **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [upload-manager](upload-manager.md), [file-type-chips](file-type-chips.md), [action-context-matrix](action-context-matrix.md)
+> **Related specs:** [media-download-service](media-download/media-download-service.md), [upload-manager](upload-manager.md), [file-type-chips](file-type-chips.md), [action-context-matrix](action-context-matrix.md)
 
 ## What It Is
 

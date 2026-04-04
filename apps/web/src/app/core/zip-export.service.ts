@@ -19,9 +19,13 @@ export interface ZipExportContext {
 }
 
 @Injectable({ providedIn: 'root' })
+/**
+ * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
+ */
 export class ZipExportService {
   private readonly supabase = inject(SupabaseService);
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   buildDefaultTitle(context: ZipExportContext): string {
     const date = this.formatDate(context.now ?? new Date());
     if (context.selectedProjectName) {
@@ -30,6 +34,7 @@ export class ZipExportService {
     return `workspace-selection-${date}`;
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   async exportSelectionAsZip(
     mediaItems: WorkspaceMedia[],
     title: string,

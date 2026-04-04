@@ -28,24 +28,32 @@ const CONTEXT_MIN_TIER: Readonly<Record<MediaContext, MediaTier>> = {
 };
 
 @Injectable({ providedIn: 'root' })
+/**
+ * @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md.
+ */
 export class MediaOrchestratorService {
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   resolveFileType(identity: MediaFileIdentity): FileTypeDefinition {
     return resolveFileType(identity);
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   resolveBadge(identity: MediaFileIdentity): string | null {
     return fileTypeBadge(identity);
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   resolveIcon(identity: MediaFileIdentity): string {
     const definition = this.resolveFileType(identity);
     return definition.category === 'unknown' ? 'description' : definition.icon;
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   fallbackChainForTier(tier: MediaTier): readonly MediaTier[] {
     return FALLBACK_CHAIN_BY_TIER[tier];
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   selectRequestedTierForSlot(input: MediaTierSelectionInput): MediaTier {
     const slotShortEdgeRem = this.shortEdge(input.slotWidthRem, input.slotHeightRem);
     if (slotShortEdgeRem == null) {
@@ -56,6 +64,7 @@ export class MediaOrchestratorService {
     return this.lowerTier(adaptiveTier, input.requestedTier);
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   resolveBestAvailableTier(
     requestedTier: MediaTier,
     availableTiers: readonly MediaTier[],
@@ -74,18 +83,22 @@ export class MediaOrchestratorService {
     return requestedTier;
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   placeholderState(): MediaRenderState {
     return { status: 'placeholder' };
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   iconOnlyState(): MediaRenderState {
     return { status: 'icon-only' };
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   loadingState(progress?: number): MediaRenderState {
     return progress == null ? { status: 'loading' } : { status: 'loading', progress };
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   loadedState(
     url: string,
     resolvedTier: MediaTier,
@@ -101,6 +114,7 @@ export class MediaOrchestratorService {
     };
   }
 
+  /** @deprecated Use MediaDownloadService instead. Tracking migration in media-download-service.md. */
   errorState(reason: string): MediaRenderState {
     return { status: 'error', reason };
   }

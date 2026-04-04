@@ -1,6 +1,6 @@
 # Upload Manager
 
-> **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [upload-panel](upload-panel.md), [photo-load-service](photo-load-service.md)
+> **Related specs:** [media-download-service](media-download/media-download-service.md), [upload-panel](upload-panel.md)
 
 ## What It Is
 

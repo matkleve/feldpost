@@ -1,6 +1,6 @@
 # File-Type Chips (Upload Area Feature)
 
-> **Architecture parent:** [media-delivery-orchestrator](media-delivery-orchestrator.md)
+> **Architecture parent:** [media-download-service](media-download/media-download-service.md)
 
 ## What It Is
 

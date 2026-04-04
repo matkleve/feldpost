@@ -1,7 +1,7 @@
 # Thumbnail Grid — Implementation Blueprint
 
 > **Spec**: [element-specs/thumbnail-grid.md](../element-specs/thumbnail-grid.md)
-> **Also covers**: [element-specs/media-item.md](../element-specs/media-item.md), [archived thumbnail-card spec](../archive/element-specs-legacy/2026-04-02-item-grid-consolidation/thumbnail-card.md)
+> **Also covers**: [element-specs/media-item.md](../element-specs/media-item.md), [archived thumbnail-card spec](../archive/element-specs-legacy/thumbnail-card.md)
 > **Status**: Not implemented. Requires SelectionService, GroupService, and virtual scrolling setup.
 
 ## Existing Infrastructure

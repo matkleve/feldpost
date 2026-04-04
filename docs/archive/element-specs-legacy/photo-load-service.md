@@ -1,11 +1,15 @@
-# Photo Load Service
+# DEPRECATED - Photo Load Service
+
+> Status: DEPRECATED (archived)
+> Replacement: `docs/element-specs/media-download/media-download-service.md`
+> Adapter split: `docs/element-specs/media-download/adapters/`
 
 > **Related specs:** [media-delivery-orchestrator](media-delivery-orchestrator.md), [item-grid](item-grid.md), [media-item](media-item.md), [photo-marker](photo-marker.md), [media-detail-media-viewer](media-detail-media-viewer.md), [image-detail-view](media-detail-view.md)
 > **Use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 
 ## What It Is
 
-A centralized Angular service that owns all media signed-URL generation, caching, preloading, and loading-state management. Every surface that displays media (map markers, thumbnail cards, detail view, lightbox) uses this service instead of calling Supabase Storage directly. It replaces the scattered signing logic currently duplicated across `WorkspaceViewService`, `MapShellComponent`, and `MediaDetailViewComponent`.
+A centralized Angular service that owns all photo signed-URL generation, caching, preloading, and loading-state management. Every surface that displays a photo (map markers, thumbnail cards, detail view, lightbox) uses this service instead of calling Supabase Storage directly. It replaces the scattered signing logic currently duplicated across `WorkspaceViewService`, `MapShellComponent`, and `MediaDetailViewComponent`.
 The service scope now covers media previews beyond photos as well (for example generated first-page document thumbnails), while preserving existing API compatibility.
 
 ## What It Looks Like
@@ -14,12 +18,9 @@ Not a visual element — this is a headless service. However, it standardizes th
 
 - **`idle`** — no URL requested yet; consumer shows nothing or a static placeholder
 - **`loading`** — signed URL requested or `<img>` downloading; consumer shows neutral gray placeholder (icon-free baseline, 1200-1400ms soft pulse optional)
-- **`cached-low-res`** — low-tier media is available from cache and rendered as warm preview while higher tier resolves
-- **`cached-high-res`** — requested or effective high-tier media is available and rendered as the final sharp state
-- **`error`** — signing or download failed; consumer shows static no-media icon (crossed-out image, 0.55 opacity)
-- **`no-media`** — `storage_path IS NULL`; consumer shows upload prompt or permanent no-media icon immediately (no loading phase)
-
-Compatibility note: runtime internals may still expose `loaded`/`no-photo` as legacy values. Consumer specs must normalize these to `cached-low-res`/`cached-high-res` and `no-media` before rendering.
+- **`loaded`** — image ready to display; consumer dissolves from gray/warm-preview to sharp image (decode-first, no top-to-bottom visual fill)
+- **`error`** — signing or download failed; consumer shows static no-photo icon (crossed-out image, 0.55 opacity)
+- **`no-photo`** — `storage_path IS NULL`; consumer shows upload prompt or permanent no-photo icon immediately (no loading phase)
 
 The service provides canonical assets for no-photo/error visuals and supports warm cached preview reuse so every consumer can render identical transition behavior.
 
@@ -31,23 +32,20 @@ stateDiagram-v2
 
     state hasPhoto <<choice>>
     idle --> hasPhoto : getSignedUrl() / batchSign()
-    hasPhoto --> no_media : storage_path IS NULL
+    hasPhoto --> no_photo : storage_path IS NULL
     hasPhoto --> loading : storage_path exists
 
-    loading --> cached_low_res : low-tier URL received + preload succeeds
-    cached_low_res --> cached_high_res : high-tier URL received + preload succeeds
-    loading --> cached_high_res : high-tier URL received directly
+    loading --> loaded : signed URL received + preload succeeds
     loading --> error : signing fails or preload onerror
 
-    error --> loading : invalidate() -> re-sign
-    cached_low_res --> loading : invalidate() -> re-sign
-    cached_high_res --> loading : invalidate() -> re-sign
+    error --> loading : invalidate() → re-sign
+    loaded --> loading : invalidate() → re-sign
 
-    no_media --> loading : setLocalUrl() (imageAttached$)
-    cached_high_res --> cached_high_res : setLocalUrl() (replaces URL in-place)
-    loading --> cached_high_res : setLocalUrl() (blob loads ~0ms)
+    no_photo --> loading : setLocalUrl() (imageAttached$)
+    loaded --> loaded : setLocalUrl() (replaces URL in-place)
+    loading --> loaded : setLocalUrl() (blob loads ~0ms)
 
-    cached_high_res --> idle : revokeLocalUrl() (cache cleared)
+    loaded --> idle : revokeLocalUrl() (cache cleared)
 ```
 
 ## Where It Lives
@@ -249,9 +247,9 @@ flowchart TB
 - [x] `getSignedUrl('path', 'full')` returns a signed URL with no transform
 - [x] Repeated calls for the same path+size within the staleness window return the cached URL without a new Supabase request
 - [x] `batchSign()` uses `createSignedUrls` (batch) for items with `thumbnailPath`, individual `createSignedUrl` with transform for others
-- [x] `getLoadState(imageId, size)` returns a signal that transitions: `idle` -> `loading` -> `cached-low-res` or `cached-high-res` or `error`
+- [x] `getLoadState(imageId, size)` returns a signal that transitions: `idle` → `loading` → `loaded` or `error`
 - [ ] Default loading placeholder contract is neutral gray and icon-free for media-grid cold start.
-- [x] When `storage_path` is null, `getLoadState` returns a signal with value `no-media` immediately — no network request
+- [x] When `storage_path` is null, `getLoadState` returns a signal with value `no-photo` immediately — no network request
 - [x] `preload(url)` resolves `true` when the image loads, `false` on error
 - [ ] Decode-first transition contract is available so consumers can dissolve to sharp image without top-to-bottom fill artifacts.
 - [x] `invalidate(imageId)` clears all size variants; next call re-signs
@@ -260,7 +258,7 @@ flowchart TB
 - [x] `revokeLocalUrl(imageId)` calls `URL.revokeObjectURL` and clears the cache entry
 - [ ] Cache survives route switches; navigation between `/map` and `/media` reuses already loaded URLs when still valid.
 - [ ] Service can return warm cached tier for immediate preview while requested tier resolves.
-- [ ] `PHOTO_NO_PHOTO_ICON` remains canonical for error/no-media surfaces; `PHOTO_PLACEHOLDER_ICON` is optional and not required for `/media` cold-start loading.
+- [ ] `PHOTO_NO_PHOTO_ICON` remains canonical for error/no-photo surfaces; `PHOTO_PLACEHOLDER_ICON` is optional and not required for `/media` cold-start loading.
 - [ ] Generated first-page document thumbnail paths are treated as first-class media sources in the same signing/cache/state flow.
 - [x] After integration, no component calls `supabase.client.storage.from('images').createSignedUrl` directly — all go through `PhotoLoadService`
 - [x] `urlChanged$` emits `{ imageId, size, url }` whenever a signed URL or local blob is cached

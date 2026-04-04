@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Media Item is the domain-specific item contract for rendering a single media entity inside Item Grid surfaces. It owns media preview state transitions, mode-specific aspect behavior, upload overlays, and action affordances for the `ws_grid_thumbnail` context. Media delivery (tier choice + URL fallback + signed URL load-state) is consumed through the shared media-delivery service contract so map, workspace, media page, and detail remain consistent.
+Media Item is the domain-specific item contract for rendering a single media entity inside Item Grid surfaces. It owns media preview state transitions, mode-specific aspect behavior, upload overlays, and action affordances for the `ws_grid_thumbnail` context. Media delivery (tier choice + URL fallback + signed URL load-state) is consumed through the shared media-download-service contract so map, workspace, media page, and detail remain consistent.
 
 ## What It Looks Like
 
@@ -12,7 +12,7 @@ The slot is the only owner of thumbnail border and radius styling (no outer fram
 ## Where It Lives
 
 - Parent spec: `docs/element-specs/item-grid.md`
-- Delivery policy owner: `docs/element-specs/media-delivery-orchestrator.md`
+- Delivery policy owner: `docs/element-specs/media-download/media-download-service.md`
 - Child component root: `apps/web/src/app/features/media/media-item.component.ts`
 - Child specs:
   - `docs/element-specs/media-item-upload-overlay.md`

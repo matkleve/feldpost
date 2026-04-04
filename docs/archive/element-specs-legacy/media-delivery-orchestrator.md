@@ -1,4 +1,8 @@
-# Media Delivery Orchestrator
+# DEPRECATED - Media Delivery Orchestrator
+
+> Status: DEPRECATED (archived)
+> Replacement: `docs/element-specs/media-download/media-download-service.md`
+> Adapter split: `docs/element-specs/media-download/adapters/`
 
 > Related specs: [item-grid](item-grid.md), [media-item](media-item.md), [media-detail-view](media-detail-view.md), [action-context-matrix](action-context-matrix.md)
 

@@ -1,7 +1,7 @@
 # Photo Marker
 
 > **Blueprint:** [implementation-blueprints/photo-marker.md](../implementation-blueprints/photo-marker.md)
-> **Photo loading service:** [photo-load-service](photo-load-service.md)
+> **Media loading runtime:** `apps/web/src/app/core/photo-load.service.ts`
 
 ## What It Is
 

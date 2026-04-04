@@ -204,6 +204,12 @@
   - Defined in architecture.md §6.
   - Ensures the Angular application never calls Leaflet APIs directly, making it swappable.
 
+- **Media Download Service**  
+  Canonical headless media retrieval boundary for preview/download/export flows.
+  - Unifies signed URL loading, tier fallback, cache reuse, binary download, and ZIP export orchestration.
+  - Active contract: `docs/element-specs/media-download/media-download-service.md`.
+  - Runtime currently composes `PhotoLoadService`, `MediaOrchestratorService`, and `ZipExportService` until facade consolidation lands.
+
 - **AddressResolverService**  
   An Angular service (`providedIn: 'root'`) that resolves address queries to a ranked list of geographic candidates.
   - Queries the Feldpost database first (DB-first ranking), then calls `GeocodingAdapter` for external results.
