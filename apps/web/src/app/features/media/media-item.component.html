@@ -3,11 +3,7 @@
 <app-item-state-frame
   [itemId]="itemId()"
   [mode]="activeMode()"
-  [loading]="false"
-  [error]="error()"
-  [empty]="empty()"
-  [selected]="selected()"
-  [disabled]="disabled()"
+  [state]="state()"
   [loadingLabel]="loadingLabel()"
   [errorLabel]="errorLabel()"
   [emptyLabel]="emptyLabel()"
@@ -27,10 +23,9 @@
       <app-media-item-render-surface
         class="media-item__preview"
         [slotMode]="activeMode()"
-        [renderState]="mediaRenderState()"
+        [state]="renderSurfaceState()"
         [isImage]="canRenderImage()"
         [isDocument]="fileType().category === 'document'"
-        [selected]="selected()"
         [thumbnailUrl]="thumbnailUrl()"
         [icon]="mediaIcon()"
         [altText]="titleText()"
@@ -53,9 +48,7 @@
       <!-- @see docs/element-specs/media-item.md#visual-behavior-contract -->
       <app-media-item-quiet-actions
         class="media-item__quiet-actions"
-        [selected]="selected()"
-        [disabled]="disabled()"
-        [mapDisabled]="!hasMapLocation()"
+        [state]="quietActionsState()"
         [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
         [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
         (selectRequested)="onSelectRequested()"

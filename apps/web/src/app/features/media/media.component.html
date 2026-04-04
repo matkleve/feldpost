@@ -14,7 +14,7 @@
         [title]="t('media.page.title', 'Media')"
         [mediaCount]="mediaItems().length"
         [totalCount]="mediaTotalCount()"
-        [loading]="loading()"
+        [state]="headerState()"
       />
 
       <!-- Hosts right-aligned card-variant switch used to drive item-grid mode mapping. -->
@@ -35,8 +35,7 @@
       <!-- Renders media content state machine and forwards item/retry events to page controller. -->
       <!-- @see docs/element-specs/item-grid.md#wiring -->
       <app-media-content
-        [loading]="loading()"
-        [error]="!!loadError()"
+        [state]="contentState()"
         [items]="mediaItems()"
         [emptyReason]="emptyReason()"
         [cardVariant]="cardVariant()"

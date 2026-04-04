@@ -1,6 +1,7 @@
 import { Directive, computed, input, output } from '@angular/core';
 
 export type ItemDisplayMode = 'grid-sm' | 'grid-md' | 'grid-lg' | 'row' | 'card';
+export type ItemVisualState = 'content' | 'loading' | 'error' | 'empty' | 'selected' | 'disabled';
 
 export type ItemContextActionEvent = {
   itemId: string;
@@ -12,12 +13,14 @@ export type ItemContextActionEvent = {
 export abstract class ItemComponent {
   readonly itemId = input.required<string>();
   readonly mode = input<ItemDisplayMode>('grid-md');
-  readonly loading = input(false);
-  readonly error = input(false);
-  readonly empty = input(false);
-  readonly selected = input(false);
-  readonly disabled = input(false);
+  readonly state = input<ItemVisualState>('content');
   readonly actionContextId = input<string | null>(null);
+
+  readonly loading = computed(() => this.state() === 'loading');
+  readonly error = computed(() => this.state() === 'error');
+  readonly empty = computed(() => this.state() === 'empty');
+  readonly selected = computed(() => this.state() === 'selected');
+  readonly disabled = computed(() => this.state() === 'disabled');
 
   readonly selectedChange = output<boolean>();
   readonly opened = output<string>();

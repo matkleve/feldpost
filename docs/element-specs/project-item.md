@@ -109,6 +109,101 @@ flowchart TD
 | `grid-lg` | Expanded card with full metadata region and action affordances |
 | `card`    | Presentation-first card variant for mixed surfaces             |
 
+## State Machine
+
+FSM scope rule:
+
+- Required because this component has programmatic state (`status`, selection, loading/error/empty gating, disabled/action availability).
+- CSS pseudo-classes alone cannot represent project action and status transitions.
+
+### State Enum
+
+```ts
+export type ProjectItemState =
+  | "content-active"
+  | "content-archived"
+  | "loading"
+  | "error"
+  | "empty"
+  | "selected-active"
+  | "selected-archived"
+  | "disabled";
+```
+
+### Transition Map
+
+```ts
+export const PROJECT_ITEM_TRANSITIONS: Record<
+  ProjectItemState,
+  ProjectItemState[]
+> = {
+  "content-active": [
+    "selected-active",
+    "loading",
+    "error",
+    "disabled",
+    "content-archived",
+  ],
+  "content-archived": [
+    "selected-archived",
+    "loading",
+    "error",
+    "disabled",
+    "content-active",
+  ],
+  loading: ["content-active", "content-archived", "error", "empty", "disabled"],
+  error: ["loading", "content-active", "content-archived", "disabled"],
+  empty: ["loading", "content-active", "content-archived", "disabled"],
+  "selected-active": [
+    "content-active",
+    "disabled",
+    "error",
+    "loading",
+    "content-archived",
+  ],
+  "selected-archived": [
+    "content-archived",
+    "disabled",
+    "error",
+    "loading",
+    "content-active",
+  ],
+  disabled: [
+    "content-active",
+    "content-archived",
+    "selected-active",
+    "selected-archived",
+    "loading",
+    "error",
+    "empty",
+  ],
+};
+```
+
+### Transition Guard Contract
+
+- Project item state transitions pass through a guard function.
+- Unlisted transitions are rejected.
+- Root visual driver is `[attr.data-state]`.
+- Parent/child coordination required: parent project surfaces must provide one `ProjectItemState` input and migrate away from boolean visual-state inputs.
+
+### Transition Choreography Table (Required Before CSS)
+
+| from -> to                            | step | element                    | property                    | timing token                 | delay                            |
+| ------------------------------------- | ---- | -------------------------- | --------------------------- | ---------------------------- | -------------------------------- |
+| `loading -> content-*`                | 1    | loading layer              | opacity                     | `var(--transition-fade-out)` | `0ms`                            |
+| `loading -> content-*`                | 2    | project frame              | opacity                     | `var(--transition-fade-in)`  | `var(--transition-reveal-delay)` |
+| `content-* -> selected-*`             | 1    | project frame emphasis     | outline/background emphasis | `var(--transition-emphasis)` | `0ms`                            |
+| `content-active <-> content-archived` | 1    | status badge/action region | color/opacity               | `var(--transition-fade-in)`  | `0ms`                            |
+| `content-* -> disabled`               | 1    | frame root                 | opacity                     | `var(--transition-emphasis)` | `0ms`                            |
+
+## Boolean Input Migration Required
+
+- Migration required: yes.
+- Current public visual-state inputs are split booleans (`loading`, `error`, `empty`, `selected`, `disabled`).
+- Target contract is one enum input (`state: ProjectItemState`) plus non-visual project payload fields.
+- Parent call-site migration required: yes (`/projects` item-grid consumers and project selection surfaces binding `app-project-item`).
+
 ## File Map
 
 | File                                                             | Purpose                                     |
@@ -196,3 +291,7 @@ sequenceDiagram
 - [ ] Component performs no direct Supabase calls.
 - [ ] Inputs/outputs remain aligned with ItemComponent mandatory contract.
 - [ ] File map and wiring cover all required project-item implementation files.
+- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
+- [ ] Visual output is driven by one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed.
+- [ ] Transition choreography uses tokenized timings (`var(--transition-*)`) and no magic numbers.
+- [ ] `npm run lint` and `ng build` are clean for the migration scope.

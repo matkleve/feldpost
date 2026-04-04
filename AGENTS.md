@@ -366,3 +366,91 @@ Translation data in DB (`app_texts` + `app_text_translations`) is part of the fe
 ```
 
 ```
+
+## UI State Machine Contract
+
+- FSM is required whenever a component has programmatic state — state that cannot be expressed purely through CSS pseudo-classes (`:hover`, `:focus`, `:disabled`, `:checked`).
+- CSS pseudo-classes are browser-native interaction states and are not FSM states.
+- Any component with programmatic state must expose a single typed state enum as its visual API.
+- Public boolean inputs that represent visual state are forbidden.
+- State transitions must be validated by a transition guard function backed by an explicit transition map.
+- Stateful component roots must expose one visual state driver attribute: `[attr.data-state]`.
+- Parent components must pass one state value instead of coordinating multiple visual-state flags.
+
+### Stable State Comment Segmentation (Mandatory)
+
+- Every stateful component must segment state logic in `*.component.ts`, `*.component.html`, and `*.component.scss` with explicit English comment blocks.
+- Each state comment must start with `Stable state:` and describe the rendered visual behavior briefly.
+- Every state comment block must include a spec reference line (`@see docs/element-specs/...`).
+- In TypeScript: place state comment blocks above the enum/state contract and derived state helpers.
+- In HTML: place state comment blocks immediately before each state branch/region.
+- In SCSS: place state comment blocks immediately above each state selector block.
+
+### When FSM is required
+
+Does NOT need FSM:
+
+- Components whose only state changes are CSS pseudo-classes (`:hover`, `:focus`, `:disabled`, `:checked`).
+
+Needs FSM:
+
+- Any component where JavaScript tracks or switches a condition.
+- Programmatic examples include: open/closed, loading/loaded/error, selected, uploading, expanded, results/no-results, filled, searching.
+- A searchbar has programmatic state.
+- A button with a loading spinner has programmatic state.
+- An icon alone does not.
+
+## Transition & Animation Contract
+
+- Components with programmatic state must define an explicit transition map.
+- Every stateful component spec must include a transition choreography table before SCSS work starts.
+- All transition and animation timings must come from token variables.
+- Forbidden patterns:
+  - `transition: all ...`
+  - hardcoded duration/easing magic numbers
+  - unscoped animation not tied to state selectors
+
+## CSS Layer Architecture
+
+- Component-local layering is mandatory for refactored components:
+  - `@layer components` for geometry, layout, and default visuals
+  - `@layer states` for state-driven visuals only
+- State selectors may not change geometry (`width`, `height`, `aspect-ratio`, layout geometry).
+- Geometry must be stable in the components layer.
+- Geometry changes are allowed only through data binding values (for example CSS custom properties), not through state selector toggles.
+
+## Visual State Consistency
+
+- `docs/design/state-visuals.md` is the source of truth for canonical state visuals.
+- Before implementing a state treatment, check for canonical treatment in that file.
+- If canonical treatment is missing, define it in design docs first and then implement.
+- Per-component ad-hoc treatments for shared semantic states are forbidden.
+
+## Component Implementation Order
+
+Follow this sequence for every stateful component:
+
+1. Create or update the element spec and complete ownership triad table.
+2. Define the state enum, transition map, and transition guard contract.
+3. Add the choreography table and timing-token mapping in the spec.
+4. Implement component API with a single enum state input and `[attr.data-state]` on root.
+5. Implement HTML structure using the two-geometry-owner rule.
+6. Implement SCSS in `@layer components` and `@layer states`.
+7. Run gates: lint, build, and design-system checks.
+
+No HTML/CSS implementation starts before steps 1-3 are complete.
+
+## ESLint / Stylelint Gates
+
+### Required rules
+
+1. No public boolean input for visual state on stateful components.
+2. Stateful component root must bind `[attr.data-state]`.
+3. State selectors must not own geometry properties.
+4. No magic-number timing values in transitions/animations.
+
+### Rule ownership and location
+
+- ESLint custom gate rules live in `apps/web/eslint.config.mjs`.
+- Stylelint custom gate rules live in `apps/web/stylelint.config.cjs` (create this file when stylelint gates are introduced if it does not exist yet).
+- Rule names and severities must be documented in the same file where they are registered.

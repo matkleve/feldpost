@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   DestroyRef,
   ElementRef,
@@ -9,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import type { AfterViewInit } from '@angular/core';
 import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import { MediaErrorComponent } from './media-error.component';
@@ -20,6 +20,8 @@ import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame
 import type { ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { MEDIA_ITEM_ACTION_CONTEXT, MediaItemComponent } from './media-item.component';
 import { MediaItemRenderSurfaceComponent } from './media-item-render-surface.component';
+
+export type MediaContentState = 'loading' | 'error' | 'ready';
 
 @Component({
   selector: 'app-media-content',
@@ -44,8 +46,7 @@ export class MediaContentComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private resizeObserver: ResizeObserver | null = null;
 
-  readonly loading = input.required<boolean>();
-  readonly error = input.required<boolean>();
+  readonly state = input.required<MediaContentState>();
   readonly items = input.required<ImageRecord[]>();
   readonly emptyReason = input<'auth-required' | 'no-results'>('no-results');
   readonly cardVariant = input<CardVariant>('medium');

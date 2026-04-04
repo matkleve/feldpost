@@ -209,6 +209,69 @@ The loading visual standard for Item Grid surfaces is a pulse placeholder layer.
   - `MediaItemUploadOverlayComponent` (features/media): upload progress overlay layer
   - `MediaItemQuietActionsComponent` (features/media): hover/focus action affordances and action triggers
 
+## State Machine
+
+FSM scope rule for this spec family:
+
+- FSM is required whenever a component has programmatic state (not expressible by CSS pseudo-classes only).
+- CSS pseudo-classes are not FSM states.
+
+### State Enum
+
+`ItemComponent` public visual API must migrate to one enum state input.
+
+```ts
+export type ItemVisualState =
+  | "content"
+  | "loading"
+  | "error"
+  | "empty"
+  | "selected"
+  | "disabled";
+```
+
+### Transition Map
+
+```ts
+export const ITEM_VISUAL_STATE_TRANSITIONS: Record<
+  ItemVisualState,
+  ItemVisualState[]
+> = {
+  content: ["loading", "error", "empty", "selected", "disabled"],
+  loading: ["content", "error", "empty", "disabled"],
+  error: ["loading", "content", "disabled"],
+  empty: ["loading", "content", "disabled"],
+  selected: ["content", "loading", "error", "disabled"],
+  disabled: ["content", "loading", "error", "empty", "selected"],
+};
+```
+
+### Transition Guard Contract
+
+- Item-grid domain items must transition through guard-validated maps.
+- Unlisted transitions are rejected.
+- Stateful component roots bind one visual driver attribute: `[attr.data-state]`.
+- Visual output may not be coordinated by multiple public boolean inputs.
+- Parent/child coordination is required where child overlays depend on stable parent geometry or parent state gates.
+
+### Transition Choreography Table (Required Before CSS)
+
+| from -> to            | step | element               | property         | timing token                 | delay |
+| --------------------- | ---- | --------------------- | ---------------- | ---------------------------- | ----- |
+| `content -> loading`  | 1    | loading layer         | opacity          | `var(--transition-fade-in)`  | `0ms` |
+| `content -> error`    | 1    | error layer           | opacity          | `var(--transition-fade-in)`  | `0ms` |
+| `content -> empty`    | 1    | empty layer           | opacity          | `var(--transition-fade-in)`  | `0ms` |
+| `loading -> content`  | 1    | loading layer         | opacity          | `var(--transition-fade-out)` | `0ms` |
+| `content -> selected` | 1    | selected visual owner | emphasis visuals | `var(--transition-emphasis)` | `0ms` |
+
+## Boolean Input Migration Required
+
+- Migration required: yes.
+- Current base contract is boolean-driven (`loading`, `error`, `empty`, `selected`, `disabled`).
+- Target base contract is a single enum visual-state input plus non-visual data inputs.
+- All domain-item call sites must migrate in one pass per feature cutover, then boolean visual-state inputs are removed.
+- Parent call-site migration required: yes (`MediaContentComponent`, `/projects` item-grid consumers, and any state-frame bindings in domain items).
+
 ## Visual Behavior Contract
 
 ### Ownership Matrix
@@ -484,6 +547,10 @@ sequenceDiagram
 - [ ] Workspace pane selected-items cutover is executed in one migration step without a long-lived intermediate top-level `app-thumbnail-grid` runtime.
 - [x] Each migrated surface has exactly one runtime grid/card path (item-grid system); replaced legacy files are archived under `apps/web/src/app/archive/item-grid-legacy/`.
 - [ ] Cross-surface cache reuse avoids forced cold-loading when media was already fetched in map/workspace/detail flows.
+- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
+- [ ] Stateful item components use one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed from public APIs.
+- [ ] Transition choreography is tokenized (`var(--transition-*)`) with no magic-number timing values.
+- [ ] `npm run lint` and `ng build` are clean for the migration scope.
 
 ## Comment Convention
 

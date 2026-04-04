@@ -64,6 +64,72 @@ flowchart TD
 | `disabled`    | `boolean`       | `false` | global action lock         |
 | `mapDisabled` | `boolean`       | `false` | map action availability    |
 
+## State Machine
+
+FSM scope rule:
+
+- Required because this component has programmatic reveal/selection/disabled state.
+- CSS pseudo-classes alone cannot represent action enablement and selected-state transitions.
+
+### State Enum
+
+```ts
+export type MediaItemQuietActionsState =
+  | "hidden"
+  | "revealing"
+  | "visible-unselected"
+  | "visible-selected"
+  | "visible-disabled"
+  | "leaving";
+```
+
+### Transition Map
+
+```ts
+export const MEDIA_ITEM_QUIET_ACTIONS_TRANSITIONS: Record<
+  MediaItemQuietActionsState,
+  MediaItemQuietActionsState[]
+> = {
+  hidden: ["revealing"],
+  revealing: [
+    "visible-unselected",
+    "visible-selected",
+    "visible-disabled",
+    "leaving",
+  ],
+  "visible-unselected": ["visible-selected", "visible-disabled", "leaving"],
+  "visible-selected": ["visible-unselected", "visible-disabled", "leaving"],
+  "visible-disabled": ["visible-unselected", "visible-selected", "leaving"],
+  leaving: ["hidden"],
+};
+```
+
+### Transition Guard Contract
+
+- Quiet actions transition through a guarded transition map.
+- Unlisted transitions are rejected.
+- Root visual driver is `[attr.data-state]`.
+- Template and SCSS must not use boolean visual-state flags as primary visual driver.
+- Parent/child coordination required: parent media item controls reveal gates and must synchronize quiet-actions state transitions.
+
+### Transition Choreography Table (Required Before CSS)
+
+| from -> to                        | step | element       | property                | timing token                 | delay |
+| --------------------------------- | ---- | ------------- | ----------------------- | ---------------------------- | ----- |
+| `hidden -> revealing`             | 1    | actions host  | opacity                 | `var(--transition-fade-in)`  | `0ms` |
+| `hidden -> revealing`             | 2    | actions host  | transform               | `var(--transition-emphasis)` | `0ms` |
+| `revealing -> visible-unselected` | 1    | actions host  | opacity                 | `var(--transition-fade-in)`  | `0ms` |
+| `revealing -> visible-selected`   | 1    | select button | border-color/background | `var(--transition-emphasis)` | `0ms` |
+| `visible-* -> leaving`            | 1    | actions host  | opacity                 | `var(--transition-fade-out)` | `0ms` |
+
+## Boolean Input Migration Required
+
+- Migration required: yes.
+- Current public visual-state inputs are boolean (`selected`, `disabled`, `mapDisabled`).
+- Target contract is one enum state input (`state: MediaItemQuietActionsState`) plus non-visual labels and action outputs.
+- Parent bindings must migrate in the same pass; boolean visual-state inputs must be removed after cutover.
+- Parent call-site migration required: yes (`MediaItemComponent` template bindings to `app-media-item-quiet-actions`).
+
 ## File Map
 
 | File                                                                      | Purpose                                    |
@@ -119,6 +185,10 @@ sequenceDiagram
 - [ ] Map action emits only when component and map action are enabled.
 - [ ] Focus-visible ring is present for keyboard navigation.
 - [ ] Select active style is applied when `selected=true`.
+- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
+- [ ] Visual output is driven by one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed.
+- [ ] Transition choreography uses tokenized timings (`var(--transition-*)`) and no magic numbers.
+- [ ] `npm run lint` and `ng build` are clean for the migration scope.
 
 ## Visual Behavior Contract
 

@@ -21,9 +21,11 @@ import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame
 import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
 import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
+import type { MediaItemQuietActionsState } from './media-item-quiet-actions.component';
 import {
   MediaItemRenderSurfaceComponent,
   type MediaItemRenderState,
+  type MediaItemRenderSurfaceState,
 } from './media-item-render-surface.component';
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
@@ -141,6 +143,30 @@ export class MediaItemComponent extends ItemComponent implements OnChanges, Afte
   readonly mediaRenderState = computed<MediaItemRenderState>(() =>
     normalizeMediaItemRenderState(this.legacyMediaRenderState()),
   );
+  readonly renderSurfaceState = computed<MediaItemRenderSurfaceState>(() => {
+    const state = this.mediaRenderState();
+    if (state === 'content' && this.selected()) {
+      return 'content-selected';
+    }
+    return state;
+  });
+  readonly quietActionsState = computed<MediaItemQuietActionsState>(() => {
+    if (this.disabled()) {
+      return 'disabled';
+    }
+    const selected = this.selected();
+    const hasMapLocation = this.hasMapLocation();
+    if (selected && !hasMapLocation) {
+      return 'interactive-selected-map-disabled';
+    }
+    if (selected) {
+      return 'interactive-selected';
+    }
+    if (!hasMapLocation) {
+      return 'interactive-map-disabled';
+    }
+    return 'interactive-unselected';
+  });
   readonly uploadOverlay = computed<UploadOverlayState | null>(() =>
     resolveMediaItemUploadOverlay(this.uploadManager.jobs(), this.item()),
   );

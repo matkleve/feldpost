@@ -1,7 +1,7 @@
 <!-- Hosts the /media content state machine that switches between loading, error, empty, and loaded grid branches. -->
 <!-- @see docs/element-specs/item-grid.md#state -->
 <section class="media-content">
-  @if (loading()) {
+  @if (state() === 'loading') {
     <!-- Renders layout shell for loading placeholders using the currently resolved item display mode. -->
     <!-- @see docs/element-specs/item-grid.md#actions -->
     <app-item-grid [mode]="itemMode()">
@@ -11,15 +11,15 @@
         <app-item-state-frame
           [itemId]="'media-loading-' + placeholderId"
           [mode]="itemMode()"
-          [disabled]="true"
+          [state]="'disabled'"
         >
           <!-- Renders canonical media loading surface inside each placeholder cell. -->
           <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
-          <app-media-item-render-surface [slotMode]="itemMode()" [renderState]="'loading'" />
+          <app-media-item-render-surface [slotMode]="itemMode()" [state]="'loading'" />
         </app-item-state-frame>
       }
     </app-item-grid>
-  } @else if (error()) {
+  } @else if (state() === 'error') {
     <!-- Renders media error state branch when page-level load failed. -->
     <!-- @see docs/element-specs/item-grid.md#state -->
     <app-media-error (retry)="retry.emit()" />
@@ -38,7 +38,7 @@
           [itemId]="item.id"
           [item]="item"
           [mode]="itemMode()"
-          [selected]="isSelected(item.id)"
+          [state]="isSelected(item.id) ? 'selected' : 'content'"
           [actionContextId]="mediaItemActionContext"
           (opened)="itemClicked.emit($event)"
           (selectedChange)="onSelectionToggled(item.id)"

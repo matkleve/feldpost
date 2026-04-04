@@ -13,6 +13,8 @@
   transition: var(--interactive-transition-standard);
 }
 
+// Stable state: disabled.
+// @see docs/element-specs/item-state-frame.md#state-machine
 // Applies shared disabled-state dimming and interaction lock.
 // @see docs/element-specs/item-grid.md#state
 .item-state-frame--disabled {
@@ -41,6 +43,8 @@
   color: var(--color-text-secondary);
 }
 
+// Stable state: loading.
+// @see docs/element-specs/item-state-frame.md#state-machine
 // Renders pulse placeholder geometry used as shared loading indicator.
 // @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory
 .item-state-frame__pulse-placeholder {
@@ -51,12 +55,16 @@
   animation: item-state-frame-pulse 1200ms ease-in-out infinite;
 }
 
+// Stable state: error.
+// @see docs/element-specs/item-state-frame.md#state-machine
 // Applies destructive color semantics for shared error layer.
 // @see docs/element-specs/item-grid.md#state
 .item-state-frame__state-layer--error {
   color: var(--color-danger);
 }
 
+// Stable state: empty.
+// @see docs/element-specs/item-state-frame.md#state-machine
 // Applies neutral text semantics for shared empty layer.
 // @see docs/element-specs/item-grid.md#state
 .item-state-frame__state-layer--empty {

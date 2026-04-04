@@ -1,6 +1,10 @@
 <!-- Wraps projected domain content with shared loading, error, empty, selected, and disabled state handling. -->
 <!-- @see docs/element-specs/item-grid.md#state -->
-<article class="item-state-frame" [class.item-state-frame--disabled]="disabled()">
+<article
+  class="item-state-frame"
+  [attr.data-state]="state()"
+  [class.item-state-frame--disabled]="disabled()"
+>
   <!-- Hosts projected domain content and toggles aria-hidden while a shared state layer is active. -->
   <!-- @see docs/element-specs/item-grid.md#base-class-contract-mandatory-for-all-domain-items -->
   <div class="item-state-frame__content" [attr.aria-hidden]="hideProjectedContent()">
@@ -9,6 +13,8 @@
     <ng-content />
   </div>
 
+  <!-- Stable state: loading. -->
+  <!-- @see docs/element-specs/item-state-frame.md#state-machine -->
   @if (showLoadingState()) {
     <!-- Renders the shared loading layer when canonical loading state is active. -->
     <!-- @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory -->
@@ -23,6 +29,8 @@
     </div>
   }
 
+  <!-- Stable state: error. -->
+  <!-- @see docs/element-specs/item-state-frame.md#state-machine -->
   @if (showErrorState()) {
     <!-- Renders the shared error layer with retry affordance when canonical error state is active. -->
     <!-- @see docs/element-specs/item-grid.md#state -->
@@ -38,6 +46,8 @@
     </div>
   }
 
+  <!-- Stable state: empty. -->
+  <!-- @see docs/element-specs/item-state-frame.md#state-machine -->
   @if (showEmptyState()) {
     <!-- Renders the shared empty layer when item has no renderable content. -->
     <!-- @see docs/element-specs/item-grid.md#state -->

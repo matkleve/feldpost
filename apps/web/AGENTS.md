@@ -42,6 +42,11 @@ src/app/
 - No overlay/state implementation is allowed without explicit selector-level ownership mapping.
 - Follow root governance in `AGENTS.md` section `Visual Behavior Contract (Mandatory per Component Spec)`.
 
+## Stable State Comments (Required)
+
+- For every stateful component, `*.component.ts`, `*.component.html`, and `*.component.scss` must include explicit English `Stable state:` comment blocks.
+- Each stable-state comment block must include a matching element-spec reference using `@see docs/element-specs/...`.
+
 ## Build & Test
 
 - `npm run build` — production build

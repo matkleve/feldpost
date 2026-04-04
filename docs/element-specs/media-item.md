@@ -6,7 +6,8 @@ Media Item is the domain-specific item contract for rendering a single media ent
 
 ## What It Looks Like
 
-The component renders a plain square media slot and keeps layout stable across all render states. The slot is the only owner of thumbnail border and radius styling (no outer frame styling on the state wrapper), and media is rendered with native aspect ratio using `object-fit: contain` inside that square. Initial loading uses a neutral gray placeholder surface (no spinner, no camera/image icon). If a lower tier is already cached from another surface (for example map marker/detail), the component may show that cached bitmap as a soft blurred preview while the requested tier loads in memory. Border/radius/hover affordances, quiet-action corners, and file-type chip placement are anchored to the rendered media frame inside the square slot, not to the full tile bounds. Quiet actions are hidden at rest and reveal on hover/focus in 80ms: select in the upper-left and map (icon-only) in the upper-right. Both quiet actions use the shared primitive small button style; select is circular and map has visible background. During loading, a known ratio must already be applied; if no ratio is available yet, fallback is the square slot from the active grid mode. Visual tokens come from shared color, spacing, and radius custom properties; accessibility-sensitive dimensions use `rem`.
+The component renders a plain square media slot and keeps layout stable across all render states.
+The slot is the only owner of thumbnail border and radius styling (no outer frame styling on the state wrapper), and media is rendered with native aspect ratio using `object-fit: contain` inside that square. Initial loading uses a neutral gray placeholder surface (no spinner, no camera/image icon). If a lower tier is already cached from another surface (for example map marker/detail), the component may show that cached bitmap as a soft blurred preview while the requested tier loads in memory. Border/radius/hover affordances, quiet-action corners, and file-type chip placement are anchored to the rendered media frame inside the square slot, not to the full tile bounds. Quiet actions are hidden at rest and reveal on hover/focus in 80ms: select in the upper-left and map (icon-only) in the upper-right. Both quiet actions use the shared primitive small button style; select is circular and map has visible background. During loading, a known ratio must already be applied; if no ratio is available yet, fallback is the square slot from the active grid mode. Visual tokens come from shared color, spacing, and radius custom properties; accessibility-sensitive dimensions use `rem`.
 
 ## Where It Lives
 
@@ -183,6 +184,71 @@ For all modes, including loading state:
 - Final fallback: square slot (`1 / 1`) from the active grid mode.
 
 This guarantees no geometry jump from loading to content.
+
+## State Machine
+
+FSM scope rule:
+
+- Required because this component has programmatic state (`loading`, `content`, `error`, `no-media`, upload, selection).
+- CSS pseudo-classes alone cannot represent media delivery, upload, and normalization transitions.
+
+### State Enum
+
+`MediaItemState` is the single public visual-state input for `MediaItemComponent`.
+
+```ts
+export type MediaItemState =
+  | "empty"
+  | "loading"
+  | "loading-warm-preview"
+  | "content"
+  | "error"
+  | "no-media"
+  | "uploading"
+  | "selected";
+```
+
+### Transition Map
+
+```ts
+export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
+  {
+    empty: ["loading", "no-media"],
+    loading: ["loading-warm-preview", "content", "error", "no-media"],
+    "loading-warm-preview": ["content", "error", "no-media"],
+    content: ["uploading", "selected", "loading", "error", "no-media"],
+    uploading: ["content", "selected", "error"],
+    selected: ["content", "uploading", "error"],
+    error: ["loading", "no-media"],
+    "no-media": ["loading", "error"],
+  };
+```
+
+### Transition Guard Contract
+
+- Every state change must pass through a guard function.
+- Unlisted transitions are rejected and keep current state.
+- The component root is bound with one visual driver: `[attr.data-state]="state()"`.
+- Template and SCSS may not consume boolean visual flags as primary visual drivers.
+- Parent/child coordination required: quiet-actions and upload-overlay presentation must follow parent media-item state readiness.
+
+### Transition Choreography Table (Required Before CSS)
+
+| from -> to                        | step | element              | property       | timing token                 | delay                            |
+| --------------------------------- | ---- | -------------------- | -------------- | ---------------------------- | -------------------------------- |
+| `loading -> loading-warm-preview` | 1    | render surface       | opacity        | `var(--transition-fade-in)`  | `0ms`                            |
+| `loading-warm-preview -> content` | 1    | warm preview layer   | opacity        | `var(--transition-fade-out)` | `0ms`                            |
+| `loading-warm-preview -> content` | 2    | content asset        | opacity        | `var(--transition-fade-in)`  | `var(--transition-reveal-delay)` |
+| `content -> selected`             | 1    | media frame emphasis | outline/filter | `var(--transition-emphasis)` | `0ms`                            |
+| `content -> uploading`            | 1    | upload overlay       | opacity        | `var(--transition-fade-in)`  | `0ms`                            |
+
+## Boolean Input Migration Required
+
+- Migration required: yes.
+- Current public visual-state inputs are split across booleans (`loading`, `error`, `empty`, `selected`, `disabled`).
+- Target contract is one enum state input (`state: MediaItemState`) plus non-visual data inputs.
+- All parent bindings must migrate in the same pass; boolean visual-state inputs must be removed after cutover.
+- Parent call-site migration required: yes (`MediaContentComponent` and any additional item-grid consumers binding `app-media-item`).
 
 ## Visual Behavior Contract
 
@@ -376,3 +442,7 @@ sequenceDiagram
 - [ ] `/media` progressive insertion uses deterministic batch size `columns x 3`.
 - [ ] File map and wiring match the defined sub-components and service ownership exactly.
 - [ ] Workspace pane selected-items uses this Media Item contract through `ItemGridComponent`, not legacy thumbnail-grid runtime wiring.
+- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
+- [ ] Visual output is driven by one enum state input and `[attr.data-state]`; boolean visual-state inputs are removed.
+- [ ] Transition choreography is tokenized (`var(--transition-*)`) with no magic-number timing values.
+- [ ] `npm run lint` and `ng build` are clean for the migration scope.

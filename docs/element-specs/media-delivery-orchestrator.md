@@ -105,6 +105,11 @@ flowchart TD
 | `documentPreviewMinRem` | `number`                                                   | `12`                | Minimum slot short edge to render first-page document thumbnail |
 | `photoLoadState`        | `'idle' \| 'loading' \| 'loaded' \| 'error' \| 'no-photo'` | `'idle'`            | Consumer-facing load semantics                                  |
 
+## State Machine — not required
+
+This spec defines a headless service contract, not a visual component contract.
+Component-level FSM rules (state enum input, `[attr.data-state]`, ownership triad) are applied in consumer component specs.
+
 ## File Map
 
 | File                                                                          | Purpose                                           |

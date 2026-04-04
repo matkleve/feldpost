@@ -3,7 +3,10 @@ import type { MediaTier } from '../../core/media/media-renderer.types';
 import { PHOTO_NO_PHOTO_ICON, PHOTO_PLACEHOLDER_ICON } from '../../core/photo-load.service';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 
+// Stable states: loading, content, content-selected, error, no-media.
+// @see docs/element-specs/media-item.md#state-machine
 export type MediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
+export type MediaItemRenderSurfaceState = MediaItemRenderState | 'content-selected';
 
 @Component({
   selector: 'app-media-item-render-surface',
@@ -14,8 +17,7 @@ export type MediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
 })
 export class MediaItemRenderSurfaceComponent {
   readonly slotMode = input<'grid-sm' | 'grid-md' | 'grid-lg' | 'row' | 'card'>('grid-md');
-  readonly renderState = input<MediaItemRenderState>('loading');
-  readonly selected = input(false);
+  readonly state = input<MediaItemRenderSurfaceState>('loading');
   readonly isImage = input(true);
   readonly isDocument = input(false);
   readonly thumbnailUrl = input('');
@@ -28,6 +30,13 @@ export class MediaItemRenderSurfaceComponent {
   readonly fileTypeIcon = input('image');
   readonly fileTypeText = input('');
   readonly fileTypeChipVariant = input<ChipVariant>('default');
+
+  // Stable state normalization: content-selected uses content rendering plus selected visual emphasis in SCSS.
+  // @see docs/element-specs/media-item.md#visual-behavior-contract
+  readonly renderLayerState = computed<MediaItemRenderState>(() => {
+    const state = this.state();
+    return state === 'content-selected' ? 'content' : state;
+  });
 
   readonly loadedAssetRatio = signal<number | null>(null);
   readonly mediaFrameRatio = computed(() => {

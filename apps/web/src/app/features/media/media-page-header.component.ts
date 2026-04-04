@@ -7,6 +7,8 @@ import { Component, input, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 
+export type MediaPageHeaderState = 'loading' | 'ready';
+
 @Component({
   selector: 'app-media-page-header',
   standalone: true,
@@ -26,7 +28,7 @@ export class MediaPageHeaderComponent {
   readonly title = input('Media');
   readonly mediaCount = input<number | null>(null);
   readonly totalCount = input<number | null>(null);
-  readonly loading = input(false);
+  readonly state = input<MediaPageHeaderState>('ready');
 
   showLoadedOfTotal(): boolean {
     const total = this.totalCount();

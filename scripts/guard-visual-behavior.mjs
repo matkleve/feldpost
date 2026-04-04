@@ -140,20 +140,51 @@ function main() {
   expectContains(
     "apps/web/src/app/features/media/media-item-render-surface.component.ts",
     renderSurfaceTs,
+    "readonly state = input<MediaItemRenderSurfaceState>('loading');",
+    "Render surface must expose enum state input.",
+  );
+  expectNotContains(
+    "apps/web/src/app/features/media/media-item-render-surface.component.ts",
+    renderSurfaceTs,
     "readonly selected = input(false);",
-    "Render surface must expose selected input.",
+    "Render surface must not expose legacy selected boolean input.",
   );
   expectContains(
     "apps/web/src/app/features/media/media-item-render-surface.component.html",
     renderSurfaceHtml,
+    '[attr.data-state]="state()"',
+    "Render surface root must expose data-state visual driver.",
+  );
+  expectNotContains(
+    "apps/web/src/app/features/media/media-item-render-surface.component.html",
+    renderSurfaceHtml,
     '[class.media-item-render-surface__media-frame--selected]="selected()"',
-    "Render surface media frame must receive selected class binding.",
+    "Render surface must not use legacy selected class binding.",
   );
   expectSelector(
     "apps/web/src/app/features/media/media-item-render-surface.component.scss",
     renderSurfaceScss,
-    ".media-item-render-surface__media-frame--selected",
-    "Missing selected frame style selector.",
+    "[data-state='content-selected'] .media-item-render-surface__media-frame",
+    "Missing data-state based selected frame style selector.",
+  );
+
+  expectContains(
+    "apps/web/src/app/features/media/media-item.component.html",
+    mediaItemHtml,
+    '[state]="renderSurfaceState()"',
+    "Media item must pass enum render-surface state.",
+  );
+  expectContains(
+    "apps/web/src/app/features/media/media-item.component.html",
+    mediaItemHtml,
+    '[state]="quietActionsState()"',
+    "Media item must pass enum quiet-actions state.",
+  );
+  expectContains(
+    "apps/web/src/app/features/media/media-item.component.html",
+    mediaItemHtml,
+    '[state]="state()"',
+    "Media item must pass enum state to item-state-frame.",
   );
 
   expectNotContains(

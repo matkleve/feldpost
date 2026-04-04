@@ -20,7 +20,7 @@
   <!-- Renders loading/count summary text including loaded-of-total fallback logic. -->
   <!-- @see docs/element-specs/item-grid.md#data -->
   <p class="media-page-header__count">
-    @if (loading()) {
+    @if (state() === 'loading') {
       {{ t('common.loading', 'Loading media...') }}
     } @else if (showLoadedOfTotal()) {
       {{ loadedOfTotalLabel() }}

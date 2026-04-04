@@ -60,6 +60,62 @@ flowchart TD
 | `overlay`         | `UploadOverlayState \| null` | `null`  | whether overlay is rendered    |
 | `progressPercent` | `number`                     | `0`     | progress fill width percentage |
 
+## State Machine
+
+FSM scope rule:
+
+- Required because this component has programmatic overlay visibility/progress state.
+- CSS pseudo-classes alone cannot represent upload phase/progress transitions.
+
+### State Enum
+
+```ts
+export type MediaItemUploadOverlayState =
+  | "hidden"
+  | "entering"
+  | "visible"
+  | "updating-progress"
+  | "leaving";
+```
+
+### Transition Map
+
+```ts
+export const MEDIA_ITEM_UPLOAD_OVERLAY_TRANSITIONS: Record<
+  MediaItemUploadOverlayState,
+  MediaItemUploadOverlayState[]
+> = {
+  hidden: ["entering"],
+  entering: ["visible", "leaving"],
+  visible: ["updating-progress", "leaving"],
+  "updating-progress": ["visible", "leaving"],
+  leaving: ["hidden"],
+};
+```
+
+### Transition Guard Contract
+
+- Overlay state transitions must pass through a transition guard.
+- Unlisted transitions are rejected.
+- Root visual driver is `[attr.data-state]`.
+- Parent/child coordination required: parent media item must gate overlay state from upload lifecycle updates.
+
+### Transition Choreography Table (Required Before CSS)
+
+| from -> to                     | step | element           | property    | timing token                 | delay |
+| ------------------------------ | ---- | ----------------- | ----------- | ---------------------------- | ----- |
+| `hidden -> entering`           | 1    | overlay container | opacity     | `var(--transition-fade-in)`  | `0ms` |
+| `entering -> visible`          | 1    | overlay container | opacity     | `var(--transition-fade-in)`  | `0ms` |
+| `visible -> updating-progress` | 1    | progress fill     | inline-size | `var(--transition-geometry)` | `0ms` |
+| `visible -> leaving`           | 1    | overlay container | opacity     | `var(--transition-fade-out)` | `0ms` |
+| `leaving -> hidden`            | 1    | overlay container | opacity     | `var(--transition-fade-out)` | `0ms` |
+
+## Boolean Input Migration Required
+
+- Migration required: no.
+- Component already consumes one structured visual payload (`overlay`) rather than multiple public boolean visual-state inputs.
+- Parent call-site migration required: no additional boolean migration at this child boundary (already structured payload).
+
 ## File Map
 
 | File                                                                       | Purpose                                      |
@@ -107,6 +163,10 @@ sequenceDiagram
 - [ ] Progress fill width is clamped to `0..100`.
 - [ ] Overlay remains passive (`pointer-events: none`).
 - [ ] Overlay stays below quiet actions in z-order.
+- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
+- [ ] Root visual output is driven by one enum state input with `[attr.data-state]`.
+- [ ] Transition choreography uses tokenized timings (`var(--transition-*)`) and no magic numbers.
+- [ ] `npm run lint` and `ng build` are clean for the migration scope.
 
 ## Visual Behavior Contract
 

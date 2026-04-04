@@ -68,6 +68,81 @@ flowchart TD
 | `showLoadingState`     | `boolean`       | `false` | loading-layer visibility          |
 | `hideProjectedContent` | `boolean`       | `false` | aria-hidden for projected content |
 
+## State Machine
+
+FSM scope rule:
+
+- Required because this component has programmatic states (`loading`, `error`, `empty`, disabled variants).
+- CSS pseudo-classes alone cannot represent shared state-priority resolution.
+
+### State Enum
+
+```ts
+export type ItemStateFrameState =
+  | "content"
+  | "loading"
+  | "error"
+  | "empty"
+  | "disabled-content"
+  | "disabled-loading"
+  | "disabled-error"
+  | "disabled-empty";
+```
+
+### Transition Map
+
+```ts
+export const ITEM_STATE_FRAME_TRANSITIONS: Record<
+  ItemStateFrameState,
+  ItemStateFrameState[]
+> = {
+  content: ["loading", "error", "empty", "disabled-content"],
+  loading: ["content", "error", "empty", "disabled-loading"],
+  error: ["loading", "content", "disabled-error"],
+  empty: ["loading", "content", "disabled-empty"],
+  "disabled-content": [
+    "content",
+    "disabled-loading",
+    "disabled-error",
+    "disabled-empty",
+  ],
+  "disabled-loading": [
+    "loading",
+    "disabled-content",
+    "disabled-error",
+    "disabled-empty",
+  ],
+  "disabled-error": ["error", "disabled-loading", "disabled-content"],
+  "disabled-empty": ["empty", "disabled-loading", "disabled-content"],
+};
+```
+
+### Transition Guard Contract
+
+- Shared state-frame transitions must pass through a transition guard.
+- Unlisted transitions are rejected.
+- Root visual driver is `[attr.data-state]`.
+- Shared state visuals are resolved from one enum state input, not parallel public booleans.
+- Parent/child coordination required: parent domain items must pass a single state enum so shared-state priority remains deterministic.
+
+### Transition Choreography Table (Required Before CSS)
+
+| from -> to           | step | element       | property | timing token                 | delay |
+| -------------------- | ---- | ------------- | -------- | ---------------------------- | ----- |
+| `content -> loading` | 1    | loading layer | opacity  | `var(--transition-fade-in)`  | `0ms` |
+| `content -> error`   | 1    | error layer   | opacity  | `var(--transition-fade-in)`  | `0ms` |
+| `content -> empty`   | 1    | empty layer   | opacity  | `var(--transition-fade-in)`  | `0ms` |
+| `loading -> content` | 1    | loading layer | opacity  | `var(--transition-fade-out)` | `0ms` |
+| `* -> disabled-*`    | 1    | frame root    | opacity  | `var(--transition-emphasis)` | `0ms` |
+
+## Boolean Input Migration Required
+
+- Migration required: yes.
+- Current public visual-state inputs are split booleans (`loading`, `error`, `empty`, `disabled`).
+- Target contract is one enum state input (`state: ItemStateFrameState`) plus non-visual labels and retry output.
+- Parent bindings must migrate in the same pass; boolean visual-state inputs must be removed after cutover.
+- Parent call-site migration required: yes (`MediaItemComponent` and all future `ItemComponent` subclasses binding `app-item-state-frame`).
+
 ## File Map
 
 | File                                                                | Purpose                                      |
@@ -120,6 +195,10 @@ sequenceDiagram
 - [ ] ItemStateFrame does not own selected ring visuals.
 - [ ] Retry emits `retryRequested` with bound item id.
 - [ ] Disabled state applies shared dimming and interaction lock.
+- [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
+- [ ] Visual output is driven by one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed.
+- [ ] Transition choreography uses tokenized timings (`var(--transition-*)`) and no magic numbers.
+- [ ] `npm run lint` and `ng build` are clean for the migration scope.
 
 ## Visual Behavior Contract
 

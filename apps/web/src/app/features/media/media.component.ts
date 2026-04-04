@@ -11,8 +11,8 @@ import type { OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { auditTime, merge } from 'rxjs';
 import { VStackComponent } from '../../shared/containers';
-import { MediaPageHeaderComponent } from './media-page-header.component';
-import { MediaContentComponent } from './media-content.component';
+import { MediaPageHeaderComponent, type MediaPageHeaderState } from './media-page-header.component';
+import { MediaContentComponent, type MediaContentState } from './media-content.component';
 import { CardVariantSwitchComponent } from '../../shared/ui-primitives/card-variant-switch.component';
 import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
 import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
@@ -78,6 +78,18 @@ export class MediaComponent implements OnDestroy {
     }
 
     return this.mediaItems().length < total;
+  });
+  readonly headerState = computed<MediaPageHeaderState>(() =>
+    this.loading() ? 'loading' : 'ready',
+  );
+  readonly contentState = computed<MediaContentState>(() => {
+    if (this.loading()) {
+      return 'loading';
+    }
+    if (this.loadError()) {
+      return 'error';
+    }
+    return 'ready';
   });
 
   constructor() {
