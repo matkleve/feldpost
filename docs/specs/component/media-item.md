@@ -251,3 +251,45 @@ sequenceDiagram
 - [ ] No media render-state logic remains in `MediaItemComponent`.
 - [ ] `ng build` is clean after migration.
 - [ ] `npm run lint` is clean after migration.
+
+## Ratio Binding Addendum (2026-04-05)
+
+### Decision
+
+- `MediaItemComponent` stays an interaction-shell component.
+- Media render lifecycle remains exclusively inside `MediaDisplayComponent`.
+- `MediaItemState` remains limited to item-level interaction states (`idle`, `selected`, `uploading`, `error`).
+- New media lifecycle states (`loading`, `loaded`, etc.) are explicitly forbidden in `MediaItemState`.
+
+### Parent-Driven Ratio Binding Contract
+
+| Concern                    | Owner                      | Rule                                                                                                          |
+| -------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Slot constraints           | Parent grid/layout         | Defines `maxWidth` and `maxHeight` limits for the item shell.                                                 |
+| Interaction shell geometry | `MediaItemComponent` frame | Selection ring, hover/click hit areas, quiet actions align to the parent-owned frame.                         |
+| Media intrinsic rendering  | `MediaDisplayComponent`    | Renders media inside forwarded constraints and ratio hint.                                                    |
+| Ratio hint propagation     | Parent/domain projection   | Parent passes `aspectRatio` hint into `MediaDisplayComponent`; no child-to-parent geometry callback required. |
+
+Mandatory rule:
+
+- `MediaItemComponent` must not read back child CSS variables to compute shell geometry.
+
+### Critical Analysis
+
+- The previous dual-constraint wording can be interpreted as circular ownership if not made explicit.
+- The corrected interpretation is: parent owns constraints, child owns intrinsic rendering, and parent interaction shell follows a parent-owned ratio policy.
+- This avoids introducing an upward geometry event channel and keeps the interaction contract deterministic.
+
+### Plan Delta (In-Place Only)
+
+1. Tighten `Geometry Dependency Contract` wording to remove ambiguous "child-coupled" interpretation.
+2. Keep `MediaItemComponent` free of media loading/loaded state transitions.
+3. Keep selection, quiet actions, and upload overlays bound to the shell frame only.
+4. Align acceptance checks to verify shell-to-media fit for portrait and landscape outcomes.
+
+### Added Verification Cases
+
+- Landscape media: shell width reaches slot limit while height shrinks to ratio.
+- Portrait media: shell height reaches slot limit while width shrinks to ratio.
+- `icon-only` media: shell remains square-aligned with rendered media box.
+- Hover/select/click hit areas remain bound to visible media frame after ratio change.

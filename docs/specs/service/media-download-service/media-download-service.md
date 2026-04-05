@@ -387,3 +387,53 @@ MediaDownloadService is a pure facade. It must contain orchestration and contrac
 - [x] Legacy archived `photo-load-service.md` remains archived and is treated as historical reference only.
 - [x] Active docs no longer point to `media-delivery-orchestrator.md` as canonical parent.
 - [x] Spec and implementation blueprints reference this contract as active replacement.
+
+## Ratio Binding Stream Addendum (2026-04-05)
+
+### Decision
+
+- This service remains the authoritative source for media delivery progression used by `MediaDisplayComponent`.
+- Cache-hit optimization must not bypass deterministic stream ordering expected by render-state choreography.
+
+### Deterministic Display Stream Ordering
+
+For every new `mediaId` handoff:
+
+1. Emit `loading-surface-visible` first.
+2. Continue with one of the allowed paths:
+
+- Contain: `ratio-known-contain -> media-ready -> content-fade-in -> content-visible`
+- Cover: `media-ready -> content-fade-in -> content-visible`
+
+3. Cached paths may shorten network latency but must preserve ordering semantics.
+
+Forbidden shortcuts:
+
+- `idle -> content-visible`
+- `loading-surface-visible -> content-visible`
+- `ratio-known-contain -> content-visible`
+
+### Media-Type Branch Contract
+
+| Branch                                | Small area                | Large area                          | Required behavior                                          |
+| ------------------------------------- | ------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| image/video                           | Lower tier bitmap allowed | Higher tier bitmap requested        | No geometry jump, deterministic fade sequence              |
+| document-like (`pdf`, `ppt`, similar) | icon-only representation  | first-page thumbnail representation | Deterministic branch selection, no unstable fallback loops |
+
+### Resize and Tier Reconciliation Rule
+
+- Slot-size driven tier recalculation must be allowed after initial non-idle states.
+- Re-request gating may not be restricted to initial `idle` only when a higher suitable tier is required by new slot dimensions.
+
+### Parent-Child Contract Alignment
+
+- This service feeds render progression to `MediaDisplayComponent` only.
+- `MediaItemComponent` remains an interaction-shell observer and does not own media lifecycle states.
+- Ratio binding remains parent-driven at shell level and service-driven at render lifecycle level.
+
+### Plan Delta (In-Place Only)
+
+1. Update stream types and mappings to support the deterministic ordering above.
+2. Update `getState` emission policy to preserve loading-first ordering for cache-hit and uncached paths.
+3. Tighten document-like versus image/video branch behavior under small and large slot sizes.
+4. Add verification steps for contain/cover uncached/cached paths plus image/doc small/large outcomes.
