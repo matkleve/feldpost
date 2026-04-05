@@ -11,7 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import type { PhotoLoadState } from '../../../../core/media-download/media-download.types';
+import type { MediaLoadState } from '../../../../core/media-download/media-download.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-lightbox.component';
 import { UniversalMediaComponent } from '../../../../shared/media/universal-media.component';
@@ -22,7 +22,7 @@ import {
   UiIconButtonGhostDirective,
 } from '../../../../shared/ui-primitives/ui-primitives.directive';
 @Component({
-  selector: 'app-media-detail-photo-viewer',
+  selector: 'app-media-detail-media-viewer',
   standalone: true,
   imports: [
     PhotoLightboxComponent,
@@ -31,10 +31,10 @@ import {
     UiButtonDirective,
     UiButtonPrimaryDirective,
   ],
-  templateUrl: './media-detail-photo-viewer.component.html',
-  styleUrl: './media-detail-photo-viewer.component.scss',
+  templateUrl: './media-detail-media-viewer.component.html',
+  styleUrl: './media-detail-media-viewer.component.scss',
 })
-export class MediaDetailPhotoViewerComponent implements AfterViewInit {
+export class MediaDetailMediaViewerComponent implements AfterViewInit {
   private readonly i18nService = inject(I18nService);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
@@ -44,8 +44,8 @@ export class MediaDetailPhotoViewerComponent implements AfterViewInit {
   readonly canOpenLightbox = input(false);
   readonly imageReady = input(false);
   readonly isImageLoading = input(false);
-  readonly thumbState = input<PhotoLoadState>('idle');
-  readonly fullState = input<PhotoLoadState>('idle');
+  readonly thumbState = input<MediaLoadState>('idle');
+  readonly fullState = input<MediaLoadState>('idle');
   readonly thumbnailUrl = input<string | null>(null);
   readonly fullResUrl = input<string | null>(null);
   readonly fullResPreloaded = input(false);
@@ -108,7 +108,7 @@ export class MediaDetailPhotoViewerComponent implements AfterViewInit {
     const title = this.displayTitle().trim();
     return title.length > 0
       ? title
-      : this.t('workspace.imageDetail.photoPreview.alt', 'Photo preview');
+      : this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview');
   });
 
   readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');

@@ -40,6 +40,22 @@ export interface MediaPreviewResult {
   errorCode?: MediaDeliveryErrorCode;
 }
 
+export type MediaDisplayStreamState =
+  | 'loading'
+  | 'warm-preview'
+  | 'loaded'
+  | 'icon-only'
+  | 'error'
+  | 'no-media';
+
+export interface MediaDisplayDeliveryState {
+  state: MediaDisplayStreamState;
+  resolvedUrl?: string | null;
+  warmPreviewUrl?: string | null;
+  metadataAspectRatio?: number | null;
+  icon?: string | null;
+}
+
 export type DownloadBlobResult =
   | { ok: true; blob: Blob }
   | { ok: false; errorCode: MediaDeliveryErrorCode; message: string };
@@ -68,10 +84,9 @@ export interface ExportResult {
   message?: string;
 }
 
-// Legacy photo-load contracts kept temporarily for migration compatibility.
-export type PhotoLoadState = 'idle' | 'loading' | 'loaded' | 'error' | 'no-photo';
+export type MediaLoadState = 'idle' | 'loading' | 'loaded' | 'error' | 'no-media';
 
-export type PhotoSize = 'marker' | 'thumb' | 'full';
+export type MediaSize = 'marker' | 'thumb' | 'full';
 
 export interface CacheEntry {
   url: string;
@@ -86,23 +101,17 @@ export interface SignedUrlResult {
 
 export interface UrlChangedEvent {
   mediaId: string;
-  /** @deprecated Use mediaId. */
-  imageId?: string;
-  size: PhotoSize;
+  size: MediaSize;
   url: string;
 }
 
 export interface StateChangedEvent {
   mediaId: string;
-  /** @deprecated Use mediaId. */
-  imageId?: string;
-  size: PhotoSize;
-  state: PhotoLoadState;
+  size: MediaSize;
+  state: MediaLoadState;
 }
 
 export interface BatchCompleteEvent {
   mediaIds: string[];
-  /** @deprecated Use mediaIds. */
-  imageIds?: string[];
-  size: PhotoSize;
+  size: MediaSize;
 }

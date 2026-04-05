@@ -16,7 +16,7 @@
       [class.detail-image-wrap--static]="!canOpenLightbox()"
       [class.detail-image-wrap--thumb-preview]="usesThumbnailPreview()"
       [attr.aria-label]="
-        t('workspace.imageDetail.action.viewFullSize.aria', 'View full-size photo')
+        t('workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media')
       "
       (click)="openLightbox()"
       (contextmenu)="requestContextMenu($event)"
@@ -36,8 +36,8 @@
       uiIconButtonGhost
       class="detail-image-edit-btn"
       type="button"
-      [attr.aria-label]="t('workspace.imageDetail.action.replacePhoto.aria', 'Replace photo')"
-      [attr.title]="t('workspace.imageDetail.action.replacePhoto.title', 'Replace photo')"
+      [attr.aria-label]="t('workspace.imageDetail.action.replaceMedia.aria', 'Replace media')"
+      [attr.title]="t('workspace.imageDetail.action.replaceMedia.title', 'Replace media')"
       [disabled]="replacing()"
       (click)="triggerFileInput()"
     >
@@ -57,7 +57,7 @@
     <div class="detail-upload-prompt__placeholder">
       <span class="detail-upload-prompt__icon" aria-hidden="true"></span>
       <span class="detail-upload-prompt__text">{{
-        t('workspace.imageDetail.noPhotoAttached', 'No photo attached')
+        t('workspace.imageDetail.noMediaAttached', 'No media attached')
       }}</span>
     </div>
     <button
@@ -71,7 +71,7 @@
       @if (replacing()) {
         <span class="detail-upload-prompt__spinner" aria-hidden="true"></span>
       }
-      {{ t('workspace.imageDetail.action.uploadPhoto', 'Upload photo') }}
+      {{ t('workspace.imageDetail.action.uploadMedia', 'Upload media') }}
     </button>
     @if (replaceError()) {
       <div class="detail-replace-error" role="alert">{{ replaceError() }}</div>

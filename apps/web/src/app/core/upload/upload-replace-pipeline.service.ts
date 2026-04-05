@@ -41,7 +41,7 @@ export class UploadReplacePipelineService {
   private readonly uploadService = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
-  private readonly photoLoad = inject(MediaDownloadService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly jobState = inject(UploadJobStateService);
   private readonly queue = inject(UploadQueueService);
   private readonly storage = inject(UploadStorageService);
@@ -228,7 +228,7 @@ export class UploadReplacePipelineService {
     }
 
     if (finalJob.thumbnailUrl) {
-      this.photoLoad.setLocalUrl(targetMediaItemId, finalJob.thumbnailUrl);
+      this.mediaDownloadService.setLocalUrl(targetMediaItemId, finalJob.thumbnailUrl);
     }
 
     ctx.emitImageReplaced({

@@ -105,8 +105,8 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
     listMetadataKeyNamesForOrganization: vi.fn(async () => ['Phase']),
   } as any;
 
-  const photoLoad = {
-    markNoPhoto: vi.fn(),
+  const mediaDownloadService = {
+    markNoMedia: vi.fn(),
     getSignedUrl: vi.fn(async (_path: string, size: string) => ({
       url: size === 'thumb' ? 'thumb-url' : 'full-url',
     })),
@@ -118,7 +118,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   } as any;
 
   const facade = new ImageDetailDataFacade({
-    services: { supabase, metadata: metadataService, photoLoad, projectMemberships },
+    services: { supabase, metadata: metadataService, mediaDownloadService, projectMemberships },
     signals: {
       image,
       metadata,
@@ -140,7 +140,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   return {
     facade,
     signals: { image, metadata, loading, error, fullResPreloaded, fullResUrl, thumbnailUrl },
-    deps: { metadataService, photoLoad, projectMemberships },
+    deps: { metadataService, mediaDownloadService, projectMemberships },
   };
 }
 
@@ -160,7 +160,7 @@ describe('ImageDetailDataFacade', () => {
 
     await facade.loadImage('img-1', new AbortController().signal);
 
-    expect(deps.photoLoad.markNoPhoto).toHaveBeenCalledWith('img-1');
-    expect(deps.photoLoad.getSignedUrl).not.toHaveBeenCalled();
+    expect(deps.mediaDownloadService.markNoMedia).toHaveBeenCalledWith('img-1');
+    expect(deps.mediaDownloadService.getSignedUrl).not.toHaveBeenCalled();
   });
 });

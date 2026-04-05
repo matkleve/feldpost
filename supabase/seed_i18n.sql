@@ -11101,14 +11101,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0421.workspace_imagedetail_action_delete', 'workspace.imageDetail.action.delete', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0421.workspace_imagedetail_action_delete', 'Delete media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-inline-section/media-detail-inline-section.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.imageDetail.action.delete', 'published'
+select t.id, 'en', 'Delete media', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
@@ -11116,7 +11116,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.imageDetail.action.delete', 'published'
+select t.id, 'de', 'Medium loeschen', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
@@ -11124,7 +11124,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.imageDetail.action.delete', 'published'
+select t.id, 'it', 'Elimina media', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0421.workspace_imagedetail_action_delete'
 on conflict (app_text_id, lang) do update set
@@ -11132,32 +11132,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0422.workspace_imagedetail_action_uploadphoto', 'workspace.imageDetail.action.uploadPhoto', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0422.workspace_imagedetail_action_uploadmedia', 'Upload media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.imageDetail.action.uploadPhoto', 'published'
+select t.id, 'en', 'Upload media', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadphoto'
+where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadmedia'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.imageDetail.action.uploadPhoto', 'published'
+select t.id, 'de', 'Medium hochladen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadphoto'
+where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadmedia'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.imageDetail.action.uploadPhoto', 'published'
+select t.id, 'it', 'Carica media', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadphoto'
+where t.organization_id is null and t.key = 'auto.0422.workspace_imagedetail_action_uploadmedia'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -11256,14 +11256,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0426.workspace_imagedetail_deletedialog_message', 'workspace.imageDetail.deleteDialog.message', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:message')
+values (null, 'auto.0426.workspace_imagedetail_deletedialog_message', 'This will permanently remove the media item and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html bound-attr:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.imageDetail.deleteDialog.message', 'published'
+select t.id, 'en', 'This will permanently remove the media item and all its metadata. This cannot be undone.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
@@ -11271,7 +11271,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.imageDetail.deleteDialog.message', 'published'
+select t.id, 'de', 'Das Medium und alle Metadaten werden dauerhaft entfernt. Dieser Vorgang kann nicht rueckgaengig gemacht werden.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
@@ -11279,7 +11279,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.imageDetail.deleteDialog.message', 'published'
+select t.id, 'it', 'Questa operazione rimuovera definitivamente il media e tutti i suoi metadati. Non puo essere annullata.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0426.workspace_imagedetail_deletedialog_message'
 on conflict (app_text_id, lang) do update set
@@ -11287,14 +11287,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0427.workspace_imagedetail_deletedialog_title', 'workspace.imageDetail.deleteDialog.title', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:title')
+values (null, 'auto.0427.workspace_imagedetail_deletedialog_title', 'Delete this media?', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.imageDetail.deleteDialog.title', 'published'
+select t.id, 'en', 'Delete this media?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
@@ -11302,7 +11302,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.imageDetail.deleteDialog.title', 'published'
+select t.id, 'de', 'Dieses Medium loeschen?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
@@ -11310,7 +11310,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.imageDetail.deleteDialog.title', 'published'
+select t.id, 'it', 'Eliminare questo media?', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'auto.0427.workspace_imagedetail_deletedialog_title'
 on conflict (app_text_id, lang) do update set
@@ -11659,32 +11659,218 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0439.workspace_imagedetail_nophotoattached', 'workspace.imageDetail.noPhotoAttached', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0439.workspace_imagedetail_nomediaattached', 'No media attached', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'workspace.imageDetail.noPhotoAttached', 'published'
+select t.id, 'en', 'No media attached', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nophotoattached'
+where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nomediaattached'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'workspace.imageDetail.noPhotoAttached', 'published'
+select t.id, 'de', 'Kein Medium angehaengt', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nophotoattached'
+where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nomediaattached'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'workspace.imageDetail.noPhotoAttached', 'published'
+select t.id, 'it', 'Nessun media allegato', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nophotoattached'
+where t.organization_id is null and t.key = 'auto.0439.workspace_imagedetail_nomediaattached'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'View full-size media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.viewFullSizeMedia.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium in voller Groesse anzeigen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.viewFullSizeMedia.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Visualizza media a dimensione intera', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.viewFullSizeMedia.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.mediaPreview.alt', 'Media preview', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.ts computed fallback alt')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media preview', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.mediaPreview.alt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medienvorschau', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.mediaPreview.alt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Anteprima media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.mediaPreview.alt'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.replaceMedia.aria', 'Replace media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Replace media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.replaceMedia.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium ersetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.replaceMedia.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sostituisci media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.replaceMedia.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.replaceMedia.title', 'Replace media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Replace media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.replaceMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium ersetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.replaceMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sostituisci media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.replaceMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.mediaReplaced', 'Media replaced', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-events.helper.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media replaced', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.mediaReplaced'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium ersetzt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.mediaReplaced'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media sostituito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.mediaReplaced'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.mediaAttached', 'Media attached', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-events.helper.ts ts-prop:message')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media attached', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.mediaAttached'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medium angehaengt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.mediaAttached'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media allegato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.mediaAttached'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

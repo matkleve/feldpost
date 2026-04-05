@@ -1126,7 +1126,7 @@ function setupReplace() {
     forward: vi.fn().mockResolvedValue(null),
     reverse: vi.fn().mockResolvedValue(null),
   };
-  const fakePhotoLoad = {
+  const fakeMediaDownloadService = {
     getLoadState: vi.fn().mockImplementation(() => signal<'idle' | 'loaded'>('loaded')),
     getSignedUrl: vi.fn().mockResolvedValue({
       url: 'https://example.com/signed-new',
@@ -1134,7 +1134,7 @@ function setupReplace() {
     }),
     preload: vi.fn().mockResolvedValue(true),
     invalidate: vi.fn(),
-    markNoPhoto: vi.fn(),
+    markNoMedia: vi.fn(),
   };
 
   TestBed.configureTestingModule({
@@ -1146,7 +1146,7 @@ function setupReplace() {
       { provide: UploadService, useValue: fakeUpload },
       { provide: UploadManagerService, useValue: fakeUploadManager },
       { provide: WorkspaceViewService, useValue: fakeWorkspaceView },
-      { provide: MediaDownloadService, useValue: fakePhotoLoad },
+      { provide: MediaDownloadService, useValue: fakeMediaDownloadService },
     ],
   });
 

@@ -1,21 +1,18 @@
 import type { Observable } from 'rxjs';
-import type { PhotoLoadState } from '../../core/media-download/media-download.types';
+import type {
+  MediaDisplayDeliveryState,
+  MediaLoadState,
+} from '../../core/media-download/media-download.types';
 import type { MediaDisplayState } from './media-display-state';
 
-export interface MediaDisplayDeliveryState {
-  state: Exclude<MediaDisplayState, 'empty'>;
-  resolvedUrl?: string | null;
-  warmPreviewUrl?: string | null;
-  metadataAspectRatio?: number | null;
-  icon?: string | null;
-}
+export type { MediaDisplayDeliveryState };
 
 export interface MediaDownloadStateStreamApi {
   getState?: (mediaId: string, slotSizeRem: number) => Observable<MediaDisplayDeliveryState>;
 }
 
 export function mapLegacyLoadState(
-  loadState: PhotoLoadState,
+  loadState: MediaLoadState,
   hasResolvedUrl: boolean,
 ): Exclude<MediaDisplayState, 'empty' | 'warm-preview' | 'icon-only'> {
   switch (loadState) {
@@ -25,7 +22,7 @@ export function mapLegacyLoadState(
       return hasResolvedUrl ? 'loaded' : 'loading';
     case 'error':
       return 'error';
-    case 'no-photo':
+    case 'no-media':
       return 'no-media';
     case 'idle':
     default:

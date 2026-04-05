@@ -38,7 +38,7 @@ interface ImageDetailDataFacadeDeps {
   services: {
     supabase: SupabaseService;
     metadata: MetadataService;
-    photoLoad: MediaDownloadService;
+    mediaDownloadService: MediaDownloadService;
     projectMemberships: ImageDetailProjectMembershipHelper;
   };
   signals: {
@@ -83,7 +83,7 @@ export class ImageDetailDataFacade {
     if (image.storage_path) {
       void this.loadSignedUrls(image, abortSignal);
     } else {
-      this.deps.services.photoLoad.markNoPhoto(image.id);
+      this.deps.services.mediaDownloadService.markNoMedia(image.id);
     }
 
     await this.deps.services.projectMemberships.loadProjectMemberships(id, image.project_id);
@@ -107,10 +107,10 @@ export class ImageDetailDataFacade {
 
     const [thumbResult, fullResult] = await Promise.all([
       thumbPath
-        ? this.deps.services.photoLoad.getSignedUrl(thumbPath, 'thumb', img.id)
+        ? this.deps.services.mediaDownloadService.getSignedUrl(thumbPath, 'thumb', img.id)
         : Promise.resolve({ url: null }),
       fullPath
-        ? this.deps.services.photoLoad.getSignedUrl(fullPath, 'full', img.id)
+        ? this.deps.services.mediaDownloadService.getSignedUrl(fullPath, 'full', img.id)
         : Promise.resolve({ url: null }),
     ]);
 
@@ -121,7 +121,7 @@ export class ImageDetailDataFacade {
 
     const shouldPreloadFull = this.shouldPreloadFull(this.deps.computed.detailTier());
     if (isImageAsset && fullResult.url && shouldPreloadFull) {
-      const preloaded = await this.deps.services.photoLoad.preload(fullResult.url);
+      const preloaded = await this.deps.services.mediaDownloadService.preload(fullResult.url);
       if (!abortSignal.aborted) {
         this.deps.signals.fullResPreloaded.set(preloaded);
       }

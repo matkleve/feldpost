@@ -6,8 +6,8 @@ import type {
 import type {
   MediaDeliveryErrorCode,
   MediaDeliveryItemState,
-  PhotoLoadState,
-  PhotoSize,
+  MediaLoadState,
+  MediaSize,
 } from './media-download.types';
 
 export const PIXELS_PER_REM = 16;
@@ -66,7 +66,7 @@ export function desiredSizeToTier(desiredSize: 'marker' | 'thumb' | 'detail' | '
   }
 }
 
-export function tierToPhotoSize(tier: MediaTier): PhotoSize {
+export function tierToMediaSize(tier: MediaTier): MediaSize {
   switch (tier) {
     case 'inline':
       return 'marker';
@@ -85,7 +85,7 @@ export function readyStateForTier(tier: MediaTier): MediaDeliveryItemState {
   return tier === 'large' || tier === 'full' ? 'ready-high-res' : 'ready-low-res';
 }
 
-export function mapLegacyState(state: PhotoLoadState, tier: MediaTier): MediaDeliveryItemState {
+export function mapLegacyState(state: MediaLoadState, tier: MediaTier): MediaDeliveryItemState {
   switch (state) {
     case 'loading':
       return 'signing';
@@ -93,7 +93,7 @@ export function mapLegacyState(state: PhotoLoadState, tier: MediaTier): MediaDel
       return readyStateForTier(tier);
     case 'error':
       return 'error';
-    case 'no-photo':
+    case 'no-media':
       return 'no-media';
     case 'idle':
     default:

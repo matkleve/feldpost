@@ -9,12 +9,12 @@ export type MediaDisplayState =
 
 export const MEDIA_DISPLAY_TRANSITIONS: Record<MediaDisplayState, MediaDisplayState[]> = {
   empty: ['loading', 'no-media'],
-  loading: ['warm-preview', 'loaded', 'icon-only', 'error', 'no-media'],
-  'warm-preview': ['loaded', 'error', 'no-media'],
-  loaded: ['loading', 'icon-only', 'error', 'no-media'],
-  'icon-only': ['loading', 'no-media'],
-  error: ['loading', 'no-media'],
-  'no-media': ['loading', 'error'],
+  loading: ['empty', 'warm-preview', 'loaded', 'icon-only', 'error', 'no-media'],
+  'warm-preview': ['empty', 'loaded', 'error', 'no-media'],
+  loaded: ['empty', 'loading', 'icon-only', 'error', 'no-media'],
+  'icon-only': ['empty', 'loading', 'no-media'],
+  error: ['empty', 'loading', 'no-media'],
+  'no-media': ['empty', 'loading', 'error'],
 };
 
 export function transitionMediaDisplayState(

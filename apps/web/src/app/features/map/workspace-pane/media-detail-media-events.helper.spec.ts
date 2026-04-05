@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailPhotoEventsHelper } from './media-detail-photo-events.helper';
+import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
 import type { ImageRecord } from './media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
@@ -26,15 +26,15 @@ const MOCK_IMAGE: ImageRecord = {
   location_unresolved: false,
 };
 
-describe('ImageDetailPhotoEventsHelper', () => {
+describe('MediaDetailMediaEventsHelper', () => {
   it('updates image state and reloads URLs after replace', async () => {
     const image = signal<ImageRecord | null>({ ...MOCK_IMAGE });
     const reloadSignedUrlsForCurrentMedia = vi.fn(async () => {});
     const invalidate = vi.fn();
     const batchSignThumbnails = vi.fn(async () => {});
-    const helper = new ImageDetailPhotoEventsHelper({
+    const helper = new MediaDetailMediaEventsHelper({
       services: {
-        photoLoad: { invalidate } as any,
+        mediaDownloadService: { invalidate } as any,
         workspaceView: {
           rawImages: signal([{ id: 'img-1', storagePath: 'images/old.jpg' }]),
           batchSignThumbnails,

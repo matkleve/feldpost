@@ -54,7 +54,7 @@
     />
 
     <div class="detail-scroll">
-      <app-media-detail-photo-viewer
+      <app-media-detail-media-viewer
         [hasPhoto]="hasPhoto()"
         [canOpenLightbox]="canOpenLightbox()"
         [imageReady]="imageReady()"
@@ -132,11 +132,11 @@
 
 @if (showDeleteConfirm()) {
   <app-confirm-dialog
-    [title]="t('workspace.imageDetail.deleteDialog.title', 'Delete this image?')"
+    [title]="t('workspace.imageDetail.deleteDialog.title', 'Delete this media?')"
     [message]="
       t(
         'workspace.imageDetail.deleteDialog.message',
-        'This will permanently remove the image and all its metadata. This cannot be undone.'
+        'This will permanently remove the media item and all its metadata. This cannot be undone.'
       )
     "
     [confirmLabel]="t('workspace.imageDetail.deleteDialog.confirm', 'Delete')"

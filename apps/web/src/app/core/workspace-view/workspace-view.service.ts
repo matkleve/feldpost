@@ -22,7 +22,7 @@ export class WorkspaceViewService {
   private readonly filterService = inject(FilterService);
   private readonly locationResolver = inject(LocationResolverService);
   private readonly metadata = inject(MetadataService);
-  private readonly photoLoad = inject(MediaDownloadService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
 
   // Ã¢â€â‚¬Ã¢â€â‚¬ Input signals Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
@@ -437,10 +437,10 @@ export class WorkspaceViewService {
     const unsigned = images.filter((img) => !img.signedThumbnailUrl && !img.thumbnailUnavailable);
     if (unsigned.length === 0) return;
 
-    // Mark images with no storage path and no thumbnail as 'no-photo'
+    // Mark media items with no storage path and no thumbnail as no-media.
     const noPhoto = unsigned.filter((img) => !img.storagePath && !img.thumbnailPath);
     for (const img of noPhoto) {
-      this.photoLoad.markNoPhoto(img.id);
+      this.mediaDownloadService.markNoMedia(img.id);
     }
 
     const items = unsigned
@@ -451,7 +451,7 @@ export class WorkspaceViewService {
         thumbnailPath: img.thumbnailPath,
       }));
 
-    const results = await this.photoLoad.batchSign(items, 'thumb');
+    const results = await this.mediaDownloadService.batchSign(items, 'thumb');
     const attemptedIds = new Set(unsigned.map((img) => img.id));
 
     // Update signal: apply URLs or mark unavailable.

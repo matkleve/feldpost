@@ -51,10 +51,10 @@ export function finalizeAttachCompletion(args: FinalizeAttachCompletionArgs): vo
   });
 
   if (finalJob.thumbnailUrl) {
-    log('[attach-pipeline] setting local URL for photoLoad');
+    log('[attach-pipeline] setting local URL for mediaDownloadService');
     setLocalUrl(finalJob.targetImageId!, finalJob.thumbnailUrl);
   } else {
-    warn('[attach-pipeline] no thumbnailUrl to set in photoLoad');
+    warn('[attach-pipeline] no thumbnailUrl to set in mediaDownloadService');
   }
 
   const attachedEvent = {

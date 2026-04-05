@@ -15,11 +15,7 @@ import type { Subscription } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
-import {
-  type MediaDisplayDeliveryState,
-  type MediaDownloadStateStreamApi,
-  mapLegacyLoadState,
-} from './media-display.helpers';
+import { type MediaDisplayDeliveryState } from './media-display.helpers';
 
 const DEFAULT_ROOT_FONT_SIZE_PX = 16;
 const SLOT_SIZE_REM_EPSILON = 0.05;
@@ -39,9 +35,9 @@ export class MediaDisplayComponent implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly i18nService = inject(I18nService);
-  private readonly stateApi = this.mediaDownloadService as unknown as MediaDownloadStateStreamApi;
 
   private resizeObserver: ResizeObserver | null = null;
+  private lastRequestIdentity = '';
 
   readonly mediaId: InputSignal<string> = input.required<string>();
   readonly maxWidth: InputSignal<string> = input('100%');
@@ -57,7 +53,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly metadataAspectRatio = signal<number | null>(null);
 
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
-  readonly alt = computed(() => this.t('workspace.imageDetail.photoPreview.alt', 'Photo preview'));
+  readonly alt = computed(() => this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview'));
   readonly retryLabel = computed(() => this.t('media.page.retry', 'Retry'));
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
@@ -76,34 +72,33 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     effect((onCleanup) => {
       const id = this.mediaId().trim();
-      this.refreshNonce();
+      const refresh = this.refreshNonce();
+      const requestIdentity = `${id}:${refresh}`;
 
       if (!id) {
         this.resolvedUrl.set('');
         this.warmPreviewUrl.set('');
-        this.metadataAspectRatio.set(null);
+        this.resetAspectRatio();
+        this.lastRequestIdentity = '';
         this.goTo('empty');
         return;
       }
 
-      const getState = this.stateApi.getState;
-      this.goTo('loading');
-      if (typeof getState !== 'function') {
-        const loadState = this.mediaDownloadService.getLoadState(id, 'thumb');
-        const cachedUrl = this.mediaDownloadService.getCachedUrl(id, 'thumb');
-        const hasResolvedUrl = typeof cachedUrl === 'string' && cachedUrl.length > 0;
-        if (hasResolvedUrl) {
-          this.resolvedUrl.set(cachedUrl as string);
-        }
-        this.goTo(mapLegacyLoadState(loadState(), hasResolvedUrl));
-        return;
+      if (this.lastRequestIdentity !== requestIdentity) {
+        this.resolvedUrl.set('');
+        this.warmPreviewUrl.set('');
+        this.resetAspectRatio();
+        this.lastRequestIdentity = requestIdentity;
       }
 
+      this.goTo('loading');
       const slot = this.slotSizeRem();
 
-      const subscription: Subscription = getState(id, slot).subscribe((delivery) => {
-        this.handleDelivery(delivery);
-      });
+      const subscription: Subscription = this.mediaDownloadService
+        .getState(id, slot)
+        .subscribe((delivery) => {
+          this.handleDelivery(delivery);
+        });
 
       onCleanup(() => subscription.unsubscribe());
     });
@@ -134,6 +129,10 @@ export class MediaDisplayComponent implements AfterViewInit {
   }
 
   onRetry(): void {
+    const id = this.mediaId().trim();
+    if (id) {
+      this.mediaDownloadService.invalidate(id);
+    }
     this.refreshNonce.update((value) => value + 1);
   }
 
@@ -212,6 +211,16 @@ export class MediaDisplayComponent implements AfterViewInit {
   private applyAspectRatio(ratio: number): void {
     this.metadataAspectRatio.set(ratio);
     this.hostEl.nativeElement.style.setProperty('--media-aspect-ratio', String(ratio));
+  }
+
+  private resetAspectRatio(): void {
+    this.metadataAspectRatio.set(null);
+    const hintedRatio = this.aspectRatio();
+    if (hintedRatio != null && hintedRatio > 0) {
+      this.applyAspectRatio(hintedRatio);
+      return;
+    }
+    this.hostEl.nativeElement.style.removeProperty('--media-aspect-ratio');
   }
 
   private goTo(next: MediaDisplayState): void {

@@ -143,7 +143,7 @@ export class MediaItemComponent extends ItemComponent implements OnChanges {
     const preferredPath = record.thumbnail_path ?? record.storage_path;
     if (!preferredPath || !this.isLikelyImagePath(preferredPath)) {
       if (!preferredPath) {
-        this.mediaDownloadService.markNoPhoto(record.id);
+        this.mediaDownloadService.markNoMedia(record.id);
       }
       return;
     }

@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import type { MediaTier } from '../../core/media/media-renderer.types';
-import { PHOTO_NO_PHOTO_ICON, PHOTO_PLACEHOLDER_ICON } from '../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
+import {
+  MEDIA_NO_MEDIA_ICON,
+  MEDIA_PLACEHOLDER_ICON,
+} from '../../core/media-download/media-download.service';
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 
 // Stable states: loading, content, content-selected, error, no-media.
@@ -72,8 +75,8 @@ export class MediaItemRenderSurfaceComponent {
     return ratio >= 1 ? base / ratio : base;
   });
 
-  readonly placeholderIconUrl = PHOTO_PLACEHOLDER_ICON;
-  readonly noPhotoIconUrl = PHOTO_NO_PHOTO_ICON;
+  readonly placeholderIconUrl = MEDIA_PLACEHOLDER_ICON;
+  readonly noPhotoIconUrl = MEDIA_NO_MEDIA_ICON;
 
   constructor() {
     effect(

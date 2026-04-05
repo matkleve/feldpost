@@ -49,7 +49,7 @@ import { WorkspaceViewService } from '../../../core/workspace-view/workspace-vie
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import {
   MediaDownloadService,
-  PHOTO_PLACEHOLDER_ICON,
+  MEDIA_PLACEHOLDER_ICON,
 } from '../../../core/media-download/media-download.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
@@ -220,13 +220,13 @@ export class MapShellComponent implements OnDestroy {
   private static readonly WORKSPACE_PANE_MAX_WIDTH = 640;
   private static readonly MAP_SAFE_MIN_WIDTH = 320;
 
-  readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
+  readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
   private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
-  private readonly photoLoadService = inject(MediaDownloadService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
@@ -3778,7 +3778,7 @@ export class MapShellComponent implements OnDestroy {
     const bounds = this.map.getBounds();
     const staleThreshold = 50 * 60 * 1000; // 50 minutes
 
-    this.photoLoadService.invalidateStale(staleThreshold);
+    this.mediaDownloadService.invalidateStale(staleThreshold);
 
     for (const [key, state] of this.uploadedPhotoMarkers) {
       if (!this.isSingleMarkerInBounds(state, bounds)) continue;
@@ -3844,10 +3844,13 @@ export class MapShellComponent implements OnDestroy {
     state.thumbnailLoading = true;
     this.refreshPhotoMarker(key);
 
-    const result = await this.photoLoadService.getSignedUrl(state.thumbnailSourcePath, 'marker');
+    const result = await this.mediaDownloadService.getSignedUrl(
+      state.thumbnailSourcePath,
+      'marker',
+    );
 
     if (result.url) {
-      const loaded = await this.photoLoadService.preload(result.url);
+      const loaded = await this.mediaDownloadService.preload(result.url);
       state.thumbnailLoading = false;
       if (loaded) {
         state.thumbnailUrl = result.url;

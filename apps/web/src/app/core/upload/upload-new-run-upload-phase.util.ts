@@ -22,7 +22,7 @@ type RunNewUploadPhaseArgs = {
   uploadService: UploadService;
   supabaseClient: SupabaseService['client'];
   enrich: UploadEnrichmentService;
-  photoLoad: MediaDownloadService;
+  mediaDownloadService: MediaDownloadService;
   getUserId: () => string | undefined;
 };
 
@@ -39,7 +39,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     uploadService,
     supabaseClient,
     enrich,
-    photoLoad,
+    mediaDownloadService,
     getUserId,
   } = args;
 
@@ -83,7 +83,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
       enrich.enrichWithForwardGeocode(imageId, titleAddress),
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
     mismatchToleranceMeters: 15,
-    setLocalUrl: (imageId, localUrl) => photoLoad.setLocalUrl(imageId, localUrl),
+    setLocalUrl: (imageId, localUrl) => mediaDownloadService.setLocalUrl(imageId, localUrl),
     emitImageUploaded: (event) => ctx.emitImageUploaded(event),
   });
 }

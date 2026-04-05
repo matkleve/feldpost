@@ -10,9 +10,9 @@ import { ImageRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 
-interface ImageDetailPhotoEventsHelperDeps {
+interface MediaDetailMediaEventsHelperDeps {
   services: {
-    photoLoad: MediaDownloadService;
+    mediaDownloadService: MediaDownloadService;
     workspaceView: WorkspaceViewService;
     toastService: ToastService;
   };
@@ -27,8 +27,8 @@ interface ImageDetailPhotoEventsHelperDeps {
   };
 }
 
-export class ImageDetailPhotoEventsHelper {
-  constructor(private readonly deps: ImageDetailPhotoEventsHelperDeps) {}
+export class MediaDetailMediaEventsHelper {
+  constructor(private readonly deps: MediaDetailMediaEventsHelperDeps) {}
 
   async handleImageReplaced(event: ImageReplacedEvent): Promise<void> {
     console.log('[detail-view] handleImageReplaced received:', event);
@@ -39,7 +39,7 @@ export class ImageDetailPhotoEventsHelper {
     this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.activeJobId.set(null);
 
-    this.deps.services.photoLoad.invalidate(event.imageId);
+    this.deps.services.mediaDownloadService.invalidate(event.imageId);
     await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
@@ -48,7 +48,7 @@ export class ImageDetailPhotoEventsHelper {
 
     this.updateGridCache(event.imageId, event.newStoragePath);
     this.deps.services.toastService.show({
-      message: this.deps.callbacks.t('workspace.imageDetail.toast.photoReplaced', 'Photo replaced'),
+      message: this.deps.callbacks.t('workspace.imageDetail.toast.mediaReplaced', 'Media replaced'),
       type: 'success',
     });
   }
@@ -63,7 +63,7 @@ export class ImageDetailPhotoEventsHelper {
     this.deps.signals.fullResPreloaded.set(false);
     this.deps.signals.activeJobId.set(null);
 
-    this.deps.services.photoLoad.invalidate(event.imageId);
+    this.deps.services.mediaDownloadService.invalidate(event.imageId);
     await this.deps.callbacks.reloadSignedUrlsForCurrentMedia();
 
     if (event.localObjectUrl) {
@@ -72,7 +72,7 @@ export class ImageDetailPhotoEventsHelper {
 
     this.updateGridCache(event.imageId, event.newStoragePath);
     this.deps.services.toastService.show({
-      message: this.deps.callbacks.t('workspace.imageDetail.toast.photoAttached', 'Photo attached'),
+      message: this.deps.callbacks.t('workspace.imageDetail.toast.mediaAttached', 'Media attached'),
       type: 'success',
     });
   }

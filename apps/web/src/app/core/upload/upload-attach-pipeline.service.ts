@@ -52,7 +52,7 @@ export class UploadAttachPipelineService {
   private readonly uploadService = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
-  private readonly photoLoad = inject(MediaDownloadService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly jobState = inject(UploadJobStateService);
   private readonly queue = inject(UploadQueueService);
   private readonly storage = inject(UploadStorageService);
@@ -117,7 +117,7 @@ export class UploadAttachPipelineService {
       markDone: () => this.queue.markDone(jobId),
       findJob: () => this.jobState.findJob(jobId),
       isCancelled: () => this.isCancelled(jobId),
-      setLocalUrl: (imageId, localUrl) => this.photoLoad.setLocalUrl(imageId, localUrl),
+      setLocalUrl: (imageId, localUrl) => this.mediaDownloadService.setLocalUrl(imageId, localUrl),
       emitImageAttached: (event) => ctx.emitImageAttached(event),
       emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
       drainQueue: () => ctx.drainQueue(),

@@ -58,7 +58,7 @@ export class UploadNewPipelineService {
   private readonly conflictService = inject(UploadConflictService);
   private readonly enrichment = inject(UploadEnrichmentService);
   private readonly locationConfig = inject(UploadLocationConfigService);
-  private readonly photoLoad = inject(MediaDownloadService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly attachPipeline = inject(UploadAttachPipelineService);
   private readonly supabase = inject(SupabaseService);
 
@@ -113,7 +113,7 @@ export class UploadNewPipelineService {
       uploadService: this.uploadService,
       supabaseClient: this.supabase.client,
       enrich: this.enrichment,
-      photoLoad: this.photoLoad,
+      mediaDownloadService: this.mediaDownloadService,
       getUserId: () => this.auth.user()?.id,
     });
   }

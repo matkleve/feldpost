@@ -4,15 +4,15 @@ import { Subject } from 'rxjs';
 import type {
   BatchCompleteEvent,
   CacheEntry,
-  PhotoLoadState,
-  PhotoSize,
+  MediaLoadState,
+  MediaSize,
   SignedUrlResult,
   StateChangedEvent,
   UrlChangedEvent,
 } from '../media-download.types';
 import { SupabaseStorageAdapter } from './supabase-storage.adapter';
 
-const TRANSFORMS: Record<PhotoSize, { width: number; height: number; resize: 'cover' } | null> = {
+const TRANSFORMS: Record<MediaSize, { width: number; height: number; resize: 'cover' } | null> = {
   marker: { width: 80, height: 80, resize: 'cover' },
   thumb: { width: 256, height: 256, resize: 'cover' },
   full: null,
@@ -20,39 +20,39 @@ const TRANSFORMS: Record<PhotoSize, { width: number; height: number; resize: 'co
 
 const STALE_THRESHOLD_MS = 3_000_000; // 50 minutes
 const SIGN_EXPIRY_SECONDS = 3600;
-const SIZES: readonly PhotoSize[] = ['marker', 'thumb', 'full'];
+const SIZES: readonly MediaSize[] = ['marker', 'thumb', 'full'];
 
 @Injectable({ providedIn: 'root' })
 export class SignedUrlCacheAdapter {
   private readonly storage = inject(SupabaseStorageAdapter);
 
   private readonly cache = new Map<string, CacheEntry>();
-  private readonly loadStates = new Map<string, WritableSignal<PhotoLoadState>>();
+  private readonly loadStates = new Map<string, WritableSignal<MediaLoadState>>();
 
   readonly urlChanged$ = new Subject<UrlChangedEvent>();
   readonly stateChanged$ = new Subject<StateChangedEvent>();
   readonly batchComplete$ = new Subject<BatchCompleteEvent>();
 
-  getLoadState(imageId: string, size: PhotoSize): WritableSignal<PhotoLoadState> {
-    const key = this.cacheKey(imageId, size);
+  getLoadState(mediaId: string, size: MediaSize): WritableSignal<MediaLoadState> {
+    const key = this.cacheKey(mediaId, size);
     let state = this.loadStates.get(key);
     if (!state) {
-      state = signal<PhotoLoadState>('idle');
+      state = signal<MediaLoadState>('idle');
       this.loadStates.set(key, state);
     }
     return state;
   }
 
-  getCachedUrl(imageId: string, size: PhotoSize): string | null {
-    return this.cache.get(this.cacheKey(imageId, size))?.url ?? null;
+  getCachedUrl(mediaId: string, size: MediaSize): string | null {
+    return this.cache.get(this.cacheKey(mediaId, size))?.url ?? null;
   }
 
   async getSignedUrl(
     storagePath: string,
-    size: PhotoSize,
-    imageId?: string,
+    size: MediaSize,
+    mediaId?: string,
   ): Promise<SignedUrlResult> {
-    const id = imageId ?? storagePath;
+    const id = mediaId ?? storagePath;
     const cached = this.cache.get(this.cacheKey(id, size));
     if (cached && !this.isStale(cached)) return { url: cached.url, error: null };
 
@@ -80,7 +80,7 @@ export class SignedUrlCacheAdapter {
 
   async batchSign(
     items: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
-    size: PhotoSize,
+    size: MediaSize,
   ): Promise<Map<string, SignedUrlResult>> {
     const results = new Map<string, SignedUrlResult>();
     const pending = this.collectPendingItems(items, size, results);
@@ -90,7 +90,7 @@ export class SignedUrlCacheAdapter {
     this.markMissingAsError(pending, size, results);
 
     const mediaIds = items.map((item) => item.id);
-    this.batchComplete$.next({ mediaIds, imageIds: mediaIds, size });
+    this.batchComplete$.next({ mediaIds, size });
     return results;
   }
 
@@ -103,8 +103,17 @@ export class SignedUrlCacheAdapter {
     });
   }
 
-  invalidate(imageId: string): void {
-    for (const size of SIZES) this.cache.delete(this.cacheKey(imageId, size));
+  invalidate(mediaId: string): void {
+    for (const size of SIZES) {
+      const key = this.cacheKey(mediaId, size);
+      this.cache.delete(key);
+
+      const state = this.loadStates.get(key);
+      if (state) {
+        state.set('idle');
+        this.stateChanged$.next({ mediaId, size, state: 'idle' });
+      }
+    }
   }
 
   invalidateStale(maxAgeMs: number = STALE_THRESHOLD_MS): number {
@@ -119,20 +128,20 @@ export class SignedUrlCacheAdapter {
     return cleared;
   }
 
-  setLocalUrl(imageId: string, blobUrl: string): void {
+  setLocalUrl(mediaId: string, blobUrl: string): void {
     for (const size of SIZES) {
-      this.setCacheEntry(imageId, size, { url: blobUrl, signedAt: Date.now(), isLocal: true });
-      this.setLoadState(imageId, size, 'loaded');
+      this.setCacheEntry(mediaId, size, { url: blobUrl, signedAt: Date.now(), isLocal: true });
+      this.setLoadState(mediaId, size, 'loaded');
     }
   }
 
-  markNoPhoto(imageId: string): void {
-    for (const size of SIZES) this.setLoadState(imageId, size, 'no-photo');
+  markNoMedia(mediaId: string): void {
+    for (const size of SIZES) this.setLoadState(mediaId, size, 'no-media');
   }
 
-  revokeLocalUrl(imageId: string): void {
+  revokeLocalUrl(mediaId: string): void {
     for (const size of SIZES) {
-      const key = this.cacheKey(imageId, size);
+      const key = this.cacheKey(mediaId, size);
       const entry = this.cache.get(key);
       if (entry?.isLocal) URL.revokeObjectURL(entry.url);
       this.cache.delete(key);
@@ -140,14 +149,14 @@ export class SignedUrlCacheAdapter {
       const state = this.loadStates.get(key);
       if (state) {
         state.set('idle');
-        this.stateChanged$.next({ mediaId: imageId, imageId, size, state: 'idle' });
+        this.stateChanged$.next({ mediaId, size, state: 'idle' });
       }
     }
   }
 
   private collectPendingItems(
     items: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
-    size: PhotoSize,
+    size: MediaSize,
     results: Map<string, SignedUrlResult>,
   ): Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }> {
     const pending: Array<{
@@ -169,7 +178,7 @@ export class SignedUrlCacheAdapter {
 
   private async signThumbnailBatch(
     pending: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
-    size: PhotoSize,
+    size: MediaSize,
     results: Map<string, SignedUrlResult>,
   ): Promise<void> {
     const withThumb = pending.filter((item) => item.thumbnailPath);
@@ -181,17 +190,17 @@ export class SignedUrlCacheAdapter {
 
     for (const path of paths) {
       const signedUrl = signedMap.get(path);
-      const imageId = pathToId.get(path);
-      if (!signedUrl || !imageId) continue;
-      this.setCacheEntry(imageId, size, { url: signedUrl, signedAt: Date.now(), isLocal: false });
-      this.setLoadState(imageId, size, 'loaded');
-      results.set(imageId, { url: signedUrl, error: null });
+      const mediaId = pathToId.get(path);
+      if (!signedUrl || !mediaId) continue;
+      this.setCacheEntry(mediaId, size, { url: signedUrl, signedAt: Date.now(), isLocal: false });
+      this.setLoadState(mediaId, size, 'loaded');
+      results.set(mediaId, { url: signedUrl, error: null });
     }
   }
 
   private async signOriginalBatch(
     pending: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
-    size: PhotoSize,
+    size: MediaSize,
     results: Map<string, SignedUrlResult>,
   ): Promise<void> {
     const withoutThumb = pending.filter((item) => !item.thumbnailPath && item.storagePath);
@@ -228,7 +237,7 @@ export class SignedUrlCacheAdapter {
 
   private markMissingAsError(
     pending: Array<{ id: string; storagePath: string | null; thumbnailPath?: string | null }>,
-    size: PhotoSize,
+    size: MediaSize,
     results: Map<string, SignedUrlResult>,
   ): void {
     for (const item of pending) {
@@ -238,21 +247,21 @@ export class SignedUrlCacheAdapter {
     }
   }
 
-  private cacheKey(imageId: string, size: PhotoSize): string {
-    return `${imageId}:${size}`;
+  private cacheKey(mediaId: string, size: MediaSize): string {
+    return `${mediaId}:${size}`;
   }
 
   private isStale(entry: CacheEntry): boolean {
     return !entry.isLocal && Date.now() - entry.signedAt > STALE_THRESHOLD_MS;
   }
 
-  private setCacheEntry(imageId: string, size: PhotoSize, entry: CacheEntry): void {
-    this.cache.set(this.cacheKey(imageId, size), entry);
-    this.urlChanged$.next({ mediaId: imageId, imageId, size, url: entry.url });
+  private setCacheEntry(mediaId: string, size: MediaSize, entry: CacheEntry): void {
+    this.cache.set(this.cacheKey(mediaId, size), entry);
+    this.urlChanged$.next({ mediaId, size, url: entry.url });
   }
 
-  private setLoadState(imageId: string, size: PhotoSize, newState: PhotoLoadState): void {
-    this.getLoadState(imageId, size).set(newState);
-    this.stateChanged$.next({ mediaId: imageId, imageId, size, state: newState });
+  private setLoadState(mediaId: string, size: MediaSize, newState: MediaLoadState): void {
+    this.getLoadState(mediaId, size).set(newState);
+    this.stateChanged$.next({ mediaId, size, state: newState });
   }
 }

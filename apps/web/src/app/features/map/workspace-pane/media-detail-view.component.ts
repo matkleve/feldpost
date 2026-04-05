@@ -25,12 +25,12 @@ import {
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import {
-  PHOTO_NO_PHOTO_ICON,
-  PHOTO_PLACEHOLDER_ICON,
+  MEDIA_NO_MEDIA_ICON,
+  MEDIA_PLACEHOLDER_ICON,
   MediaDownloadService,
 } from '../../../core/media-download/media-download.service';
 import type { MediaTier } from '../../../core/media/media-renderer.types';
-import type { PhotoLoadState } from '../../../core/media-download/media-download.types';
+import type { MediaLoadState } from '../../../core/media-download/media-download.types';
 import { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import {
   DetailEditingField,
@@ -57,13 +57,13 @@ import {
   resolveProjectName,
 } from './media-detail-view.utils';
 import { ImageDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
-import { MediaDetailPhotoViewerComponent } from './media-detail-photo-viewer/media-detail-photo-viewer.component';
+import { MediaDetailMediaViewerComponent } from './media-detail-media-viewer/media-detail-media-viewer.component';
 import { ImageDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import { ImageDetailDataFacade } from './media-detail-data.facade';
 import { ImageDetailMetadataHelper } from './media-detail-metadata.helper';
 import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
-import { ImageDetailPhotoEventsHelper } from './media-detail-photo-events.helper';
+import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
 import { ImageDetailUploadHelper } from './media-detail-upload.helper';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
 import { ActionEngineService } from '../../action-system/action-engine.service';
@@ -86,7 +86,7 @@ export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
     MetadataSectionComponent,
     DetailActionsComponent,
     ImageDetailHeaderComponent,
-    MediaDetailPhotoViewerComponent,
+    MediaDetailMediaViewerComponent,
     ImageDetailInlineSectionComponent,
   ],
   templateUrl: './media-detail-view.component.html',
@@ -100,15 +100,15 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
-  readonly placeholderIconUrl = `url("${PHOTO_PLACEHOLDER_ICON}")`;
-  readonly noPhotoIconUrl = `url("${PHOTO_NO_PHOTO_ICON}")`;
+  readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
+  readonly noPhotoIconUrl = `url("${MEDIA_NO_MEDIA_ICON}")`;
 
   private readonly supabaseService = inject(SupabaseService);
   private readonly metadataService = inject(MetadataService);
   private readonly uploadService = inject(UploadService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly workspaceView = inject(WorkspaceViewService);
-  private readonly photoLoad = inject(MediaDownloadService);
+  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly mediaOrchestrator = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly projectsService = inject(ProjectsService);
@@ -160,14 +160,14 @@ export class MediaDetailViewComponent implements OnDestroy {
   private abortController: AbortController | null = null;
   private lastAddressSearchRequestId = 0;
 
-  readonly thumbState = computed<PhotoLoadState>(() => {
+  readonly thumbState = computed<MediaLoadState>(() => {
     const id = this.mediaId();
-    return id ? this.photoLoad.getLoadState(id, 'thumb')() : 'idle';
+    return id ? this.mediaDownloadService.getLoadState(id, 'thumb')() : 'idle';
   });
 
-  readonly fullState = computed<PhotoLoadState>(() => {
+  readonly fullState = computed<MediaLoadState>(() => {
     const id = this.mediaId();
-    return id ? this.photoLoad.getLoadState(id, 'full')() : 'idle';
+    return id ? this.mediaDownloadService.getLoadState(id, 'full')() : 'idle';
   });
 
   readonly image = this.media;
@@ -249,7 +249,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly isMediaLoading = computed(() => {
     const thumb = this.thumbState();
     const full = this.fullState();
-    if (thumb === 'no-photo') return false;
+    if (thumb === 'no-media') return false;
     if (thumb === 'error' && full === 'error') return false;
     if (thumb === 'loaded' || this.fullResPreloaded()) return false;
     return true;
@@ -328,7 +328,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     services: {
       supabase: this.supabaseService,
       metadata: this.metadataService,
-      photoLoad: this.photoLoad,
+      mediaDownloadService: this.mediaDownloadService,
       projectMemberships: this.projectMembershipHelper,
     },
     signals: {
@@ -378,9 +378,9 @@ export class MediaDetailViewComponent implements OnDestroy {
     },
   });
 
-  private readonly photoEventsHelper = new ImageDetailPhotoEventsHelper({
+  private readonly mediaEventsHelper = new MediaDetailMediaEventsHelper({
     services: {
-      photoLoad: this.photoLoad,
+      mediaDownloadService: this.mediaDownloadService,
       workspaceView: this.workspaceView,
       toastService: this.toastService,
     },
@@ -729,11 +729,11 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   private async handleImageReplaced(event: ImageReplacedEvent): Promise<void> {
-    await this.photoEventsHelper.handleImageReplaced(event);
+    await this.mediaEventsHelper.handleImageReplaced(event);
   }
 
   private async handleImageAttached(event: ImageAttachedEvent): Promise<void> {
-    await this.photoEventsHelper.handleImageAttached(event);
+    await this.mediaEventsHelper.handleImageAttached(event);
   }
 
   private async openInMedia(): Promise<void> {
