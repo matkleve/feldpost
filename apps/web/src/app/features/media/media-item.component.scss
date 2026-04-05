@@ -1,5 +1,5 @@
 // Declares media-item host as the sole stacking-context owner for domain overlays.
-// @see docs/element-specs/media-item.md#visual-behavior-contract
+// @see docs/specs/component/media-item.md#visual-behavior-contract
 :host {
   position: relative;
   display: block;
@@ -9,13 +9,37 @@
 }
 
 // Styles media domain content surface inside the shared state frame.
-// @see docs/element-specs/media-item.md#component-hierarchy
+// @see docs/specs/component/media-item.md#component-hierarchy
 .media-item {
+  position: relative;
+  display: block;
   min-height: 0;
 }
 
+// Defines frame geometry owner that conforms to child effective rendered box.
+// @see docs/specs/component/media-item.md#geometry-dependency-contract
+.media-item__frame {
+  position: relative;
+  display: block;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+}
+
+// Applies selected emphasis on frame geometry only.
+// @see docs/specs/component/media-item.md#visual-behavior-contract
+.media-item__frame--selected {
+  outline: 2px solid var(--media-item-selected-ring-color, var(--color-clay));
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent));
+}
+
+// Keeps media display as base visual layer in normal flow.
+// @see docs/specs/component/media-item.md#component-hierarchy
+.media-item__preview {
+  display: block;
+}
+
 // Styles the primary media item interaction button and keeps content semantics local.
-// @see docs/element-specs/media-item.md#what-it-looks-like
+// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item__open {
   border: 0;
   background: transparent;
@@ -23,23 +47,23 @@
   cursor: pointer;
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 // Positions upload overlay component above preview but below quiet actions.
-// @see docs/element-specs/media-item.md#acceptance-criteria
+// @see docs/specs/component/media-item.md#acceptance-criteria
 .media-item__upload-overlay {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
 }
 
 // Positions quiet-actions overlay and defines hidden-at-rest behavior.
-// @see docs/element-specs/media-item.md#what-it-looks-like
+// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item__quiet-actions {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 4;
   opacity: 0;
   transform: translateY(-2px);
   pointer-events: none;
@@ -49,17 +73,17 @@
 }
 
 // Reveals quiet actions on hover, focus-within, and selected states without layout shift.
-// @see docs/element-specs/media-item.md#actions--interactions
+// @see docs/specs/component/media-item.md#actions--interactions
 .media-item:hover .media-item__quiet-actions,
 .media-item:focus-within .media-item__quiet-actions,
-.media-item--selected .media-item__quiet-actions {
+.media-item__frame--selected .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
 // Styles keyboard focus visibility for primary open action.
-// @see docs/element-specs/media-item.md#actions--interactions
+// @see docs/specs/component/media-item.md#actions--interactions
 .media-item__open:focus-visible {
   outline: 2px solid var(--color-clay);
   outline-offset: 2px;

@@ -8,26 +8,21 @@ import {
   inject,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import type { AfterViewInit, InputSignal } from '@angular/core';
-import type { Observable, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
+import {
+  type MediaDisplayDeliveryState,
+  type MediaDownloadStateStreamApi,
+  mapLegacyLoadState,
+} from './media-display.helpers';
 
 const DEFAULT_ROOT_FONT_SIZE_PX = 16;
-
-interface MediaDisplayDeliveryState {
-  state: Exclude<MediaDisplayState, 'empty'>;
-  resolvedUrl?: string | null;
-  warmPreviewUrl?: string | null;
-  metadataAspectRatio?: number | null;
-  icon?: string | null;
-}
-
-interface MediaDownloadStateStreamApi {
-  getState?: (mediaId: string, slotSizeRem: number) => Observable<MediaDisplayDeliveryState>;
-}
+const SLOT_SIZE_REM_EPSILON = 0.05;
 
 @Component({
   selector: 'app-media-display',
@@ -52,9 +47,6 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
-
-  // Stable state: single visual driver bound to host data-state.
-  // @see docs/specs/component/media-display.md#state
   readonly state = signal<MediaDisplayState>('empty');
   readonly slotSizeRem = signal(1);
   readonly refreshNonce = signal(0);
@@ -67,6 +59,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly alt = computed(() => this.t('workspace.imageDetail.photoPreview.alt', 'Photo preview'));
   readonly retryLabel = computed(() => this.t('media.page.retry', 'Retry'));
+  readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
   constructor() {
     effect(() => {
@@ -83,10 +76,12 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     effect((onCleanup) => {
       const id = this.mediaId().trim();
-      const slot = this.slotSizeRem();
       this.refreshNonce();
 
       if (!id) {
+        this.resolvedUrl.set('');
+        this.warmPreviewUrl.set('');
+        this.metadataAspectRatio.set(null);
         this.goTo('empty');
         return;
       }
@@ -94,9 +89,17 @@ export class MediaDisplayComponent implements AfterViewInit {
       const getState = this.stateApi.getState;
       this.goTo('loading');
       if (typeof getState !== 'function') {
-        this.goTo('error');
+        const loadState = this.mediaDownloadService.getLoadState(id, 'thumb');
+        const cachedUrl = this.mediaDownloadService.getCachedUrl(id, 'thumb');
+        const hasResolvedUrl = typeof cachedUrl === 'string' && cachedUrl.length > 0;
+        if (hasResolvedUrl) {
+          this.resolvedUrl.set(cachedUrl as string);
+        }
+        this.goTo(mapLegacyLoadState(loadState(), hasResolvedUrl));
         return;
       }
+
+      const slot = this.slotSizeRem();
 
       const subscription: Subscription = getState(id, slot).subscribe((delivery) => {
         this.handleDelivery(delivery);
@@ -115,8 +118,6 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.setupResizeObserver();
   }
 
-  // Stable state transition exit: transient visuals are cleaned up by transitionend, never timers.
-  // @see docs/specs/component/media-display.md#transition-guard-contract
   onLayerTransitionEnd(event: TransitionEvent, layer: 'warm-preview' | 'loaded'): void {
     if (event.propertyName !== 'opacity') {
       return;
@@ -149,7 +150,11 @@ export class MediaDisplayComponent implements AfterViewInit {
 
       const shortEdgePx = Math.min(entry.contentRect.width, entry.contentRect.height);
       const rootFontSize = this.readRootFontSize();
-      this.slotSizeRem.set(shortEdgePx > 0 ? shortEdgePx / rootFontSize : 1);
+      const next = shortEdgePx > 0 ? shortEdgePx / rootFontSize : 1;
+      if (Math.abs(this.slotSizeRem() - next) < SLOT_SIZE_REM_EPSILON) {
+        return;
+      }
+      this.slotSizeRem.set(next);
     });
 
     ro.observe(this.hostEl.nativeElement);
@@ -193,6 +198,14 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
+    if (
+      delivery.state === 'icon-only' &&
+      delivery.metadataAspectRatio == null &&
+      this.aspectRatio() == null
+    ) {
+      this.applyAspectRatio(1);
+    }
+
     this.goTo(delivery.state);
   }
 
@@ -202,10 +215,7 @@ export class MediaDisplayComponent implements AfterViewInit {
   }
 
   private goTo(next: MediaDisplayState): void {
-    const current = this.state();
-
-    // Stable state guard: warm-preview requires a known ratio.
-    // @see docs/specs/component/media-display.md#transition-guard-contract
+    const current = untracked(() => this.state());
     if (current === 'loading' && next === 'warm-preview' && this.metadataAspectRatio() == null) {
       return;
     }

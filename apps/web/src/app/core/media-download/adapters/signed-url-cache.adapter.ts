@@ -43,6 +43,10 @@ export class SignedUrlCacheAdapter {
     return state;
   }
 
+  getCachedUrl(imageId: string, size: PhotoSize): string | null {
+    return this.cache.get(this.cacheKey(imageId, size))?.url ?? null;
+  }
+
   async getSignedUrl(
     storagePath: string,
     size: PhotoSize,

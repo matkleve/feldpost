@@ -1,46 +1,47 @@
-<div class="media-display__viewport">
-  <!-- Stable state: loading -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
-  <div class="media-display__layer media-display__layer--loading" aria-hidden="true"></div>
+<!-- Stable state: loading -->
+<!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+<div class="media-display__layer media-display__layer--loading" aria-hidden="true"></div>
 
-  <!-- Stable state: warm-preview (intermediate) -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
-  <div
-    class="media-display__layer media-display__layer--warm-preview"
-    aria-hidden="true"
-    (transitionend)="onLayerTransitionEnd($event, 'warm-preview')"
-  >
-    @if (warmPreviewUrl()) {
-      <img class="media-display__image" [src]="warmPreviewUrl()" alt="" aria-hidden="true" />
-    }
-  </div>
+<!-- Stable state: warm-preview (intermediate) -->
+<!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+<div
+  class="media-display__layer media-display__layer--warm-preview"
+  aria-hidden="true"
+  (transitionend)="onLayerTransitionEnd($event, 'warm-preview')"
+>
+  @if (warmPreviewUrl()) {
+    <img class="media-display__image" [src]="warmPreviewUrl()" alt="" aria-hidden="true" />
+  }
+</div>
 
-  <!-- Stable state: loaded -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
-  <div
-    class="media-display__layer media-display__layer--loaded"
-    (transitionend)="onLayerTransitionEnd($event, 'loaded')"
-  >
-    @if (resolvedUrl()) {
-      <img class="media-display__image" [src]="resolvedUrl()" [alt]="alt()" />
-    }
-  </div>
+<!-- Stable state: loaded -->
+<!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+<div
+  class="media-display__layer media-display__layer--loaded"
+  (transitionend)="onLayerTransitionEnd($event, 'loaded')"
+>
+  @if (resolvedUrl()) {
+    <img class="media-display__image" [src]="resolvedUrl()" [alt]="alt()" />
+  }
+</div>
 
-  <!-- Stable state: icon-only -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
-  <div class="media-display__layer media-display__layer--icon-only" aria-hidden="true">
-    <span class="material-icons media-display__icon">{{ icon() }}</span>
-  </div>
+<!-- Stable state: icon-only -->
+<!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+<div class="media-display__layer media-display__layer--icon-only" aria-hidden="true">
+  <span class="material-icons media-display__icon">{{ icon() }}</span>
+</div>
 
-  <!-- Stable state: error -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
-  <div class="media-display__layer media-display__layer--error">
-    <button class="media-display__retry" type="button" (click)="onRetry()">
-      {{ retryLabel() }}
-    </button>
-  </div>
+<!-- Stable state: error -->
+<!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+<div class="media-display__layer media-display__layer--error">
+  <button class="media-display__retry" type="button" (click)="onRetry()">
+    {{ retryLabel() }}
+  </button>
+</div>
 
-  <!-- Stable state: no-media -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
-  <div class="media-display__layer media-display__layer--no-media" aria-hidden="true"></div>
+<!-- Stable state: no-media -->
+<!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+<div class="media-display__layer media-display__layer--no-media" aria-hidden="true">
+  <span class="material-icons media-display__icon" aria-hidden="true">hide_image</span>
+  <span class="media-display__no-media-label">{{ noMediaLabel() }}</span>
 </div>

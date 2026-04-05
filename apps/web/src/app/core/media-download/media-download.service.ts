@@ -129,6 +129,10 @@ export class MediaDownloadService {
     return this.signedUrlCache.getLoadState(mediaId, size);
   }
 
+  getCachedUrl(mediaId: string, size: PhotoSize): string | null {
+    return this.signedUrlCache.getCachedUrl(mediaId, size);
+  }
+
   async getSignedUrl(
     storagePath: string,
     size: PhotoSize,
