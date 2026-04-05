@@ -6,11 +6,15 @@
 ## What It Is
 
 Media Download Service is the unified facade contract for all media retrieval concerns: signed URL loading, high/low-resolution tier selection, cache reuse, preloading, binary download, edge-orchestrated ZIP export, and canonical error signaling.
-It consolidates responsibilities currently split across `PhotoLoadService`, `MediaOrchestratorService`, `ZipExportService`, and direct download helper methods so every media consumer follows one deterministic pipeline, while adapter implementation details are delegated to dedicated adapter specs.
+Adapter implementation details are delegated to dedicated adapter specs.
 
 ## What It Looks Like
 
-This is not a visual component. Its visible impact is consistency across map marker previews, workspace thumbnails, media detail hero, `/media` cards, upload replacement previews, and ZIP export flow. The same media can appear instantly as a warm cached preview on one surface after it was loaded on another surface, then upgrade in place to the requested tier without layout shift. Error handling is uniform: missing path resolves to no-media, signing/fetch failures resolve to explicit error states, and export errors expose retry-safe outcomes. High-resolution fetch is always demand-driven and never blocks first render when a lower cached tier exists.
+This is not a visual component. Its visible impact is consistency across map marker previews, workspace thumbnails, media detail hero, `/media` Items, upload replacement previews, and export/download flow.
+
+The same media can appear instantly as a warm cached preview on one surface after it was loaded on another surface, then upgrade in place to the requested tier without layout shift.
+
+Error handling is uniform: missing path resolves to no-media, signing/fetch failures resolve to explicit error states, and export errors expose retry-safe outcomes. High-resolution fetch is always demand-driven and never blocks first render when a lower cached tier exists.
 
 ## Where It Lives
 
@@ -41,13 +45,13 @@ This is not a visual component. Its visible impact is consistency across map mar
 | Existing spec                                                  | Covered concern                                                 | Target adapter or facade ownership            | Decision                                     |
 | -------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
 | `docs/element-specs/component/item-grid.md`                    | Cross-surface preview consistency and tier/fallback consumption | Facade + Tier Resolver                        | Keep, reference new parent                   |
-| `docs/element-specs/component/media-item.md`                             | `/media` preview state mapping and tier usage                   | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/element-specs/component/media-item.md`                   | `/media` preview state mapping and tier usage                   | Facade + Signed URL Cache                     | Keep, reference new parent                   |
 | `docs/element-specs/media-detail/media-detail-media-viewer.md` | Detail progressive loading and shared cache contract            | Facade + Signed URL Cache                     | Keep, reference new parent                   |
 | `docs/element-specs/media-marker/media-marker.md`              | Marker preview loading runtime dependency                       | Facade + Signed URL Cache                     | Keep, point to runtime file/service boundary |
 | `docs/element-specs/workspace/workspace-actions-bar.md`        | Export trigger behavior and UX expectations                     | Facade + Edge Export Orchestrator             | Keep, consume edge export contract           |
 | `docs/element-specs/upload-manager/upload-manager.md`          | Upload attach/replace blob bridge into media retrieval          | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/element-specs/component/upload-panel.md`                           | Upload area file actions and integration context                | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/element-specs/component/file-type-chips.md`                        | Upload area architecture parent linkage                         | Facade                                        | Keep, reference new parent                   |
+| `docs/element-specs/component/upload-panel.md`                 | Upload area file actions and integration context                | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/element-specs/component/file-type-chips.md`              | Upload area architecture parent linkage                         | Facade                                        | Keep, reference new parent                   |
 | `media-delivery-orchestrator (legacy spec)`                    | Legacy combined tier+delivery policy contract                   | Replaced by facade + adapter split            | Archived as deprecated                       |
 | `photo-load-service (legacy spec)`                             | Legacy signed URL/cache headless contract                       | Replaced by signed-url-cache adapter contract | Archived as deprecated                       |
 
