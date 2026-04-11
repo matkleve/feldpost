@@ -70,7 +70,7 @@ MapContextMenuHost (inside MapShellComponent)
 flowchart LR
   U[User secondary-clicks map] --> MZ[Map Zone Gesture Layer]
   MZ --> D{Target under pointer}
-  D -->|marker| PM[Photo Marker Context Menu]
+  D -->|marker| PM[Media Marker Context Menu]
   D -->|inside active radius| RCM[Radius Context Menu]
   D -->|outside active radius| RC[Close active radius]
   D -->|empty map no active radius| G{Gesture outcome}
@@ -134,8 +134,8 @@ No direct Supabase query is required to open the menu. Actions may trigger exist
 | `apps/web/src/app/core/map/map-adapter.ts`                         | Add context-click/long-press event contract                  |
 | `apps/web/src/app/core/map/leaflet-map.adapter.ts`                 | Emit normalized map context events + target hit metadata     |
 | `docs/element-specs/media-marker-draft-flow.md`                    | Define draft lifecycle from create action to persist/remove  |
-| `docs/element-specs/component/map-zone.md`                                   | Cross-reference gesture precedence (menu vs radius drag)     |
-| `docs/element-specs/component/radius-selection.md`                           | Clarify drag-threshold behavior when secondary press is used |
+| `docs/element-specs/component/map-zone.md`                         | Cross-reference gesture precedence (menu vs radius drag)     |
+| `docs/element-specs/component/radius-selection.md`                 | Clarify drag-threshold behavior when secondary press is used |
 
 ## Wiring
 
@@ -227,6 +227,6 @@ sequenceDiagram
 - [ ] `GPS kopieren` copies coordinates and shows success feedback.
 - [ ] `In Google Maps oeffnen` opens external map at clicked coordinates.
 - [ ] Clicking outside, backdrop tap, and Escape close the menu.
-- [ ] Right-click on a photo marker opens marker context menu only (no double menu).
+- [ ] Right-click on a media marker opens marker context menu only (no double menu).
 - [ ] Near top/right/bottom/left edges and corners, app menu remains fully visible via viewport clamping.
 - [ ] Native browser menu placement is not overridden by app-specific placement rules.

@@ -9,7 +9,7 @@ The top-level full-screen host component for the map page. It's the main screen 
 - Interaction scenarios: [use-cases/map-shell.md](../use-cases/map-shell.md)
 - Implementation blueprint: [implementation-blueprints/map-shell.md](../implementation-blueprints/map-shell.md)
 - Child specs: [workspace-pane](../workspace/workspace-pane.md), [drag-divider](../component/drag-divider.md), [search-bar](../search-bar/search-bar.md), [upload-button-zone](../component/upload-button-zone.md), [media-marker](../media-marker/media-marker.md)
-- Product use cases: UC1 (Technician on Site — view nearby history), UC2 (Clerk Preparing a Quote — evidence gathering), UC3 (Upload and Correct a New Image)
+- Product use cases: UC1 (Technician on Site — view nearby history), UC2 (Clerk Preparing a Quote — evidence gathering), UC3 (Upload and Correct a New Media Item)
 
 ## What It Looks Like
 
@@ -23,18 +23,18 @@ Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remai
 
 ## Actions
 
-| #   | User Action                             | System Response                                                                                                           | Triggers                                                                                  |
-| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 1   | Navigates to `/` (authenticated)        | Renders full map shell with sidebar, map, floating controls                                                               | Map init via `MapAdapter`                                                                 |
-| 2   | Resizes browser window                  | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet                   | Responsive breakpoint                                                                     |
-| 3   | Opens workspace pane                    | Drag Divider appears, map zone shrinks via clip-path reveal                                                               | Workspace Pane slides in; see [workspace-pane spec](../workspace/workspace-pane.md) §1/1b |
-| 4   | Enters placement mode                   | Map Container gets crosshair cursor, Placement Banner appears                                                             | `placementActive` signal                                                                  |
-| 5   | Requests pin-drop from search bar       | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")                          | `searchPlacementActive` signal                                                            |
-| 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                     | `workspacePaneOpen` → false; see [workspace-pane spec](../workspace/workspace-pane.md) §3 |
-| 7   | Clicks empty map area                   | Deselects the active marker (selection highlight clears); workspace pane stays open                                       | `selectedMarkerKey` → null                                                                |
-| 8   | GPS geolocation resolves during startup | Stores/updates user position and marker without forced recenter                                                           | startup geolocation flow                                                                  |
-| 9   | GPS toggle is active                    | Runs periodic GPS refresh (~60s) and keeps user marker above photo markers                                                | `gpsTrackingActive` signal + Leaflet z-index offset                                       |
-| 10  | Clicks `Zoom to location` in detail     | Centers map to image coords at detail zoom (without fly animation) and applies marker/cluster spotlight when render-ready | `onZoomToLocation` deferred spotlight flow                                                |
+| #   | User Action                             | System Response                                                                                                                | Triggers                                                                                  |
+| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| 1   | Navigates to `/` (authenticated)        | Renders full map shell with sidebar, map, floating controls                                                                    | Map init via `MapAdapter`                                                                 |
+| 2   | Resizes browser window                  | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet                        | Responsive breakpoint                                                                     |
+| 3   | Opens workspace pane                    | Drag Divider appears, map zone shrinks via clip-path reveal                                                                    | Workspace Pane slides in; see [workspace-pane spec](../workspace/workspace-pane.md) §1/1b |
+| 4   | Enters placement mode                   | Map Container gets crosshair cursor, Placement Banner appears                                                                  | `placementActive` signal                                                                  |
+| 5   | Requests pin-drop from search bar       | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")                               | `searchPlacementActive` signal                                                            |
+| 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                          | `workspacePaneOpen` → false; see [workspace-pane spec](../workspace/workspace-pane.md) §3 |
+| 7   | Clicks empty map area                   | Deselects the active marker (selection highlight clears); workspace pane stays open                                            | `selectedMarkerKey` → null                                                                |
+| 8   | GPS geolocation resolves during startup | Stores/updates user position and marker without forced recenter                                                                | startup geolocation flow                                                                  |
+| 9   | GPS toggle is active                    | Runs periodic GPS refresh (~60s) and keeps user marker above media markers                                                     | `gpsTrackingActive` signal + Leaflet z-index offset                                       |
+| 10  | Clicks `Zoom to location` in detail     | Centers map to media coordinates at detail zoom (without fly animation) and applies marker/cluster spotlight when render-ready | `onZoomToLocation` deferred spotlight flow                                                |
 
 ## Component Hierarchy
 
@@ -121,7 +121,7 @@ sequenceDiagram
 - [ ] Floating controls (search, upload, GPS) don't overlap each other
 - [ ] Startup geolocation does not auto-zoom to user location
 - [ ] GPS recenter is only triggered by explicit GPS button activation
-- [ ] User location marker is rendered above photo markers
+- [ ] User location marker is rendered above media markers
 - [ ] Workspace pane slides in from right without pushing sidebar
 - [ ] Placement mode adds crosshair cursor to map
 - [ ] Workspace pane has a close button that hides the pane

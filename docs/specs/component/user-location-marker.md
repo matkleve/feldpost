@@ -6,7 +6,7 @@ A small blue dot on the map showing where the user is currently located, based o
 
 ## What It Looks Like
 
-18px circle in `--color-primary`, 3px white border, subtle outer glow (box-shadow). No tail, no label. Sits at the user's GPS coordinates. Much smaller than photo markers so it doesn't compete visually.
+18px circle in `--color-primary`, 3px white border, subtle outer glow (box-shadow). No tail, no label. Sits at the user's GPS coordinates. Much smaller than media markers so it doesn't compete visually.
 
 ## Where It Lives
 
@@ -69,6 +69,6 @@ sequenceDiagram
 
 - [ ] 18px diameter, blue, white border, outer glow
 - [ ] Appears only after successful GPS fix
-- [ ] Does not obscure nearby photo markers
+- [ ] Does not obscure nearby media markers
 - [ ] Updates position if Geolocation watch is active
 - [ ] Disappears when user navigates away from map page

@@ -127,7 +127,7 @@ sequenceDiagram
 - Password change can require re-auth nonce when secure password change is active
 - Password reset uses recovery flow (`resetPasswordForEmail` then `updateUser`)
 - 2FA setup uses TOTP enroll + verify and surfaces assurance level
-- Delete account cascades via DB triggers (profiles, images, group memberships)
+- Delete account cascades via DB triggers (profiles, media items, group memberships)
 - After deletion, `AuthService.signOut()` → redirect to `/login`
 
 ## Acceptance Criteria

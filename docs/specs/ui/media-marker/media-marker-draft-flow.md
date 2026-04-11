@@ -8,7 +8,7 @@ If no media is uploaded and the draft session is dismissed (for example by left-
 
 ## What It Looks Like
 
-The draft marker uses the same marker geometry as Photo Marker but with a draft visual state (muted body, subtle dashed outline, and optional plus badge) so it is clearly temporary. When selected, Workspace Pane opens in the same shell as standard marker flows (`.ui-container`, `--color-bg-surface`) and lands in an upload-ready state.
+The draft marker uses the same marker geometry as Media Marker but with a draft visual state (muted body, subtle dashed outline, and optional plus badge) so it is clearly temporary. When selected, Workspace Pane opens in the same shell as standard marker flows (`.ui-container`, `--color-bg-surface`) and lands in an upload-ready state.
 
 The upload intake uses existing Upload Panel visual language and supports all currently allowed media types (photo, video, PDF, and office documents). While upload count is zero, the marker keeps draft styling. After first successful upload, draft styling is removed and the marker becomes a persistent media marker.
 

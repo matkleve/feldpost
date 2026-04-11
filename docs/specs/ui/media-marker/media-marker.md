@@ -374,7 +374,7 @@ sequenceDiagram
   end
   U->>MA: Secondary click on marker
   MA->>MS: markerContextIntent(payload)
-  MS-->>MS: open Photo Marker Context Menu flow
+  MS-->>MS: open Media Marker Context Menu flow
 ```
 
 - The Map Shell creates Leaflet markers and delegates DivIcon HTML generation to `marker-factory.ts`.

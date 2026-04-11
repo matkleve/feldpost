@@ -30,24 +30,24 @@ Actions use **`dd-item`** button styling — not bordered outline buttons. Each 
 
 ## Actions
 
-| #   | User Action                        | System Response                                                       | Triggers            |
-| --- | ---------------------------------- | --------------------------------------------------------------------- | ------------------- |
-| 1   | Clicks "Open details"              | Keeps detail view open and confirms current context                   | Info toast          |
-| 2   | Clicks "Zoom to location"          | Pans & zooms map to photo's coordinates, highlights marker with pulse | Map flyTo + marker  |
-| 3   | Clicks "Assign project"            | Opens project membership picker (multi-select)                        | Project memberships |
-| 4   | Clicks "Copy coordinates"          | Copies coordinates to clipboard, shows toast confirmation             | Clipboard + toast   |
-| 5   | Clicks "Copy address"              | Copies resolved detail address text to clipboard                      | Clipboard + toast   |
-| 6   | Clicks "Open in Google Maps"       | Opens a new browser tab with marker coordinates                       | Browser navigation  |
-| 7   | Clicks "Change location (map)"     | Starts map-pick relocation flow in map shell                          | Map pick mode       |
-| 8   | Clicks "Change location (address)" | Opens address-search inline editing in detail section                 | Inline address edit |
-| 9   | Clicks "Remove from project"       | Removes media from assigned projects                                  | Project memberships |
-| 10  | Clicks "Delete media"              | Shows delete confirmation dialog                                      | `showDeleteConfirm` |
-| 11  | Confirms delete                    | Deletes media from DB and storage, returns to grid                    | Supabase delete     |
-| 12  | Cancels delete                     | Dismisses dialog                                                      | Dialog dismissed    |
+| #   | User Action                        | System Response                                                     | Triggers            |
+| --- | ---------------------------------- | ------------------------------------------------------------------- | ------------------- |
+| 1   | Clicks "Open details"              | Keeps detail view open and confirms current context                 | Info toast          |
+| 2   | Clicks "Zoom to location"          | Pans & zooms map to media coordinates, highlights marker with pulse | Map flyTo + marker  |
+| 3   | Clicks "Assign project"            | Opens project membership picker (multi-select)                      | Project memberships |
+| 4   | Clicks "Copy coordinates"          | Copies coordinates to clipboard, shows toast confirmation           | Clipboard + toast   |
+| 5   | Clicks "Copy address"              | Copies resolved detail address text to clipboard                    | Clipboard + toast   |
+| 6   | Clicks "Open in Google Maps"       | Opens a new browser tab with marker coordinates                     | Browser navigation  |
+| 7   | Clicks "Change location (map)"     | Starts map-pick relocation flow in map shell                        | Map pick mode       |
+| 8   | Clicks "Change location (address)" | Opens address-search inline editing in detail section               | Inline address edit |
+| 9   | Clicks "Remove from project"       | Removes media from assigned projects                                | Project memberships |
+| 10  | Clicks "Delete media"              | Shows delete confirmation dialog                                    | `showDeleteConfirm` |
+| 11  | Confirms delete                    | Deletes media from DB and storage, returns to grid                  | Supabase delete     |
+| 12  | Cancels delete                     | Dismisses dialog                                                    | Dialog dismissed    |
 
 ## Marker Sync — Live Updates
 
-When the user makes changes in the detail view, the corresponding **photo marker on the map must update** without a full viewport refresh:
+When the user makes changes in the detail view, the corresponding **media marker on the map must update** without a full viewport refresh:
 
 | Change Type                | Channel                                  | Marker Effect                                        |
 | -------------------------- | ---------------------------------------- | ---------------------------------------------------- |
@@ -120,7 +120,7 @@ flowchart TD
 - [x] Hover uses warm clay tint matching all dropdown items
 - [x] Delete action uses `dd-item--danger` style (red icon + label)
 - [x] `dd-divider` separates destructive actions from normal ones
-- [x] Zoom to location pans & zooms map to photo coordinates (flyTo, zoom 18)
+- [x] Zoom to location pans & zooms map to media coordinates (flyTo, zoom 18)
 - [x] Zoom to location highlights the target marker with a pulse animation
 - [x] Zoom to location is disabled when media has no coordinates
 - [x] Detail 3-dot menu exposes the full single-marker action contract

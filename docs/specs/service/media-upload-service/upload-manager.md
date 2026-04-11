@@ -18,7 +18,7 @@ This parent spec owns the top-level contract. Deep pipeline behavior is split in
 
 ## What It Looks Like
 
-The Upload Manager is mostly invisible UI infrastructure, but it surfaces as consistent upload state across the app: upload rows progress through explicit phases, global progress can be shown from any route, and image detail actions can continue after navigation. Jobs expose stable phase labels and progress percentages, with non-blocking enrichment phases for reverse and forward geocoding. Conflict resolution states are modeled as explicit paused phases instead of silent failures. When folder or file titles contain addresses, textual location is reconciled with EXIF data without ever discarding EXIF coordinates.
+The Upload Manager is mostly invisible UI infrastructure, but it surfaces as consistent upload state across the app: upload rows progress through explicit phases, global progress can be shown from any route, and media detail actions can continue after navigation. Jobs expose stable phase labels and progress percentages, with non-blocking enrichment phases for reverse and forward geocoding. Conflict resolution states are modeled as explicit paused phases instead of silent failures. When folder or file titles contain addresses, textual location is reconciled with EXIF data without ever discarding EXIF coordinates.
 
 Canonical document/office upload catalog for this manager contract is: `DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`.
 
@@ -26,7 +26,7 @@ Canonical document/office upload catalog for this manager contract is: `DOC`, `D
 
 - Service: `UploadManagerService` at `core/upload/upload-manager.service.ts`
 - Scope: `providedIn: 'root'` singleton, survives routing
-- Consumers: Upload panel, image detail flows, folder import flows, and global progress UI
+- Consumers: Upload panel, media detail flows, folder import flows, and global progress UI
 
 ## Actions
 
@@ -102,7 +102,7 @@ flowchart TD
   P -->|new| N[UploadNewPipelineService]
   P -->|replace| R[UploadReplacePipelineService]
   P -->|attach| A[UploadAttachPipelineService]
-  N --> S[(Supabase Storage plus images table)]
+  N --> S[(Supabase Storage plus media_items table)]
   R --> S
   A --> S
   N --> E[Event streams]
@@ -160,7 +160,7 @@ flowchart LR
 | `core/upload/upload-batch.service.ts`                          | Batch lifecycle and progress computation                                     |
 | `core/upload/upload-queue.service.ts`                          | Running-slot tracking and concurrency guard                                  |
 | `core/upload/upload-new-pipeline.service.ts`                   | New upload path including missing-data and conflict branching                |
-| `core/upload/upload-replace-pipeline.service.ts`               | Replace existing image path                                                  |
+| `core/upload/upload-replace-pipeline.service.ts`               | Replace existing media path                                                  |
 | `core/upload/upload-attach-pipeline.service.ts`                | Attach media to photoless row path                                           |
 | `core/content-hash.util.ts`                                    | `computeContentHash()` — SHA-256 from file head + EXIF                       |
 | `core/upload/upload.service.ts`                                | Per-file storage/DB operations and EXIF handling                             |
@@ -206,18 +206,18 @@ sequenceDiagram
 | Event               | Consumer               | Reaction                                                                    |
 | ------------------- | ---------------------- | --------------------------------------------------------------------------- |
 | `imageUploaded$`    | `MapShellComponent`    | Adds optimistic marker to the map                                           |
-| `imageUploaded$`    | `ThumbnailGrid`        | Refreshes grid if the uploaded image belongs to the active group            |
+| `imageUploaded$`    | `ThumbnailGrid`        | Refreshes grid if the uploaded media item belongs to the active group       |
 | `imageReplaced$`    | `MapShellComponent`    | Rebuilds marker DivIcon with the replacement thumbnail                      |
 | `imageReplaced$`    | `ThumbnailCard`        | Resets thumbnail loading cycle to the new local object URL                  |
-| `imageReplaced$`    | `ImageDetailView`      | Refreshes signed URLs and hero image                                        |
+| `imageReplaced$`    | `ImageDetailView`      | Refreshes signed URLs and hero media preview                                |
 | `imageAttached$`    | `MapShellComponent`    | Updates a formerly photoless marker with thumbnail content                  |
 | `imageAttached$`    | `ThumbnailCard`        | Replaces no-photo state with uploaded thumbnail                             |
-| `imageAttached$`    | `ImageDetailView`      | Switches from upload prompt to photo display                                |
+| `imageAttached$`    | `ImageDetailView`      | Switches from upload prompt to media display                                |
 | `uploadFailed$`     | `MapShellComponent`    | Shows toast notification                                                    |
 | `uploadSkipped$`    | `UploadPanelComponent` | Shows skip reason (`duplicate_reject`, `already_uploaded`, `policy_denied`) |
 | `locationConflict$` | `UploadPanelComponent` | Shows conflict resolution popup                                             |
 | `jobPhaseChanged$`  | `UploadPanelComponent` | Updates per-file status label and icon                                      |
-| `jobPhaseChanged$`  | `PhotoMarker`          | Shows or hides pending indicator on markers                                 |
+| `jobPhaseChanged$`  | `MediaMarker`          | Shows or hides pending indicator on markers                                 |
 | `jobPhaseChanged$`  | `ThumbnailCard`        | Shows or hides uploading overlay                                            |
 | `batchProgress$`    | `UploadPanelComponent` | Updates the batch progress bar                                              |
 | `batchProgress$`    | `UploadButtonZone`     | Shows progress ring or badge on the upload button                           |

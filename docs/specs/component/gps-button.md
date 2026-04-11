@@ -12,7 +12,7 @@ User marker visual contract:
 
 - Fresh fix: orange for 1 second
 - Stable tracking: blue
-- Layering: user marker renders above photo markers
+- Layering: user marker renders above media markers
 
 Search marker visual contract:
 
@@ -167,4 +167,4 @@ sequenceDiagram
 - [x] Icon color is orange while active or seeking and black when inactive
 - [x] User marker flashes orange for 1 second on each successful fix, then becomes blue
 - [x] Search marker remains orange at all times
-- [x] User marker renders above photo markers
+- [x] User marker renders above media markers

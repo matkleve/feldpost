@@ -52,7 +52,7 @@ flowchart LR
   MA --> TP2[(Satellite Tile Provider)]
   MA --> GR[Gesture Router]
   GR --> MCM[Map Context Menu]
-  GR --> PMCM[Photo Marker Context Menu]
+  GR --> PMCM[Media Marker Context Menu]
   GR --> RS[Radius Selection]
   UI --> LS[(Local Persistence)]
   LS --> UI
