@@ -1,20 +1,30 @@
 export type MediaDisplayState =
-  | 'empty'
-  | 'loading'
-  | 'warm-preview'
-  | 'loaded'
+  | 'idle'
+  | 'loading-surface-visible'
+  | 'ratio-known-contain'
+  | 'media-ready'
+  | 'content-fade-in'
+  | 'content-visible'
   | 'icon-only'
   | 'error'
   | 'no-media';
 
 export const MEDIA_DISPLAY_TRANSITIONS: Record<MediaDisplayState, MediaDisplayState[]> = {
-  empty: ['loading', 'no-media'],
-  loading: ['empty', 'warm-preview', 'loaded', 'icon-only', 'error', 'no-media'],
-  'warm-preview': ['empty', 'loaded', 'error', 'no-media'],
-  loaded: ['empty', 'loading', 'icon-only', 'error', 'no-media'],
-  'icon-only': ['empty', 'loading', 'no-media'],
-  error: ['empty', 'loading', 'no-media'],
-  'no-media': ['empty', 'loading', 'error'],
+  idle: ['loading-surface-visible'],
+  'loading-surface-visible': [
+    'ratio-known-contain',
+    'media-ready',
+    'icon-only',
+    'error',
+    'no-media',
+  ],
+  'ratio-known-contain': ['media-ready', 'error', 'no-media'],
+  'media-ready': ['content-fade-in', 'icon-only', 'error', 'no-media'],
+  'content-fade-in': ['content-visible', 'icon-only', 'error', 'no-media'],
+  'content-visible': ['loading-surface-visible', 'icon-only', 'error', 'no-media'],
+  'icon-only': ['loading-surface-visible', 'no-media'],
+  error: ['loading-surface-visible', 'no-media'],
+  'no-media': ['loading-surface-visible', 'error'],
 };
 
 export function transitionMediaDisplayState(

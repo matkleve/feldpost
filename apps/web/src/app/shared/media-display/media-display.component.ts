@@ -43,18 +43,16 @@ export class MediaDisplayComponent implements AfterViewInit {
   readonly maxWidth: InputSignal<string> = input('100%');
   readonly maxHeight: InputSignal<string> = input('100%');
   readonly aspectRatio: InputSignal<number | null> = input<number | null>(null);
-  readonly state = signal<MediaDisplayState>('empty');
+  readonly state = signal<MediaDisplayState>('idle');
   readonly slotSizeRem = signal(1);
-  readonly refreshNonce = signal(0);
 
   readonly resolvedUrl = signal('');
-  readonly warmPreviewUrl = signal('');
+  readonly stagedContentUrl = signal('');
   readonly icon = signal('insert_drive_file');
   readonly metadataAspectRatio = signal<number | null>(null);
 
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   readonly alt = computed(() => this.t('workspace.imageDetail.mediaPreview.alt', 'Media preview'));
-  readonly retryLabel = computed(() => this.t('media.page.retry', 'Retry'));
   readonly noMediaLabel = computed(() => this.t('media.page.empty', 'No media found'));
 
   constructor() {
@@ -72,26 +70,25 @@ export class MediaDisplayComponent implements AfterViewInit {
 
     effect((onCleanup) => {
       const id = this.mediaId().trim();
-      const refresh = this.refreshNonce();
-      const requestIdentity = `${id}:${refresh}`;
+      const requestIdentity = id;
 
       if (!id) {
         this.resolvedUrl.set('');
-        this.warmPreviewUrl.set('');
+        this.stagedContentUrl.set('');
         this.resetAspectRatio();
         this.lastRequestIdentity = '';
-        this.goTo('empty');
+        this.goTo('idle');
         return;
       }
 
       if (this.lastRequestIdentity !== requestIdentity) {
         this.resolvedUrl.set('');
-        this.warmPreviewUrl.set('');
+        this.stagedContentUrl.set('');
         this.resetAspectRatio();
         this.lastRequestIdentity = requestIdentity;
       }
 
-      this.goTo('loading');
+      this.goTo('loading-surface-visible');
       const slot = this.slotSizeRem();
 
       const subscription: Subscription = this.mediaDownloadService
@@ -113,27 +110,19 @@ export class MediaDisplayComponent implements AfterViewInit {
     this.setupResizeObserver();
   }
 
-  onLayerTransitionEnd(event: TransitionEvent, layer: 'warm-preview' | 'loaded'): void {
+  onLayerTransitionEnd(event: TransitionEvent, layer: 'staged-content' | 'content'): void {
     if (event.propertyName !== 'opacity') {
       return;
     }
 
-    if (layer === 'warm-preview' && this.state() === 'loaded') {
-      this.warmPreviewUrl.set('');
+    if (layer === 'content' && this.state() === 'content-fade-in') {
+      this.goTo('content-visible');
       return;
     }
 
-    if (layer === 'loaded' && this.state() === 'icon-only') {
-      this.resolvedUrl.set('');
+    if (layer === 'staged-content' && this.state() === 'content-visible') {
+      this.stagedContentUrl.set('');
     }
-  }
-
-  onRetry(): void {
-    const id = this.mediaId().trim();
-    if (id) {
-      this.mediaDownloadService.invalidate(id);
-    }
-    this.refreshNonce.update((value) => value + 1);
   }
 
   private setupResizeObserver(): void {
@@ -178,7 +167,7 @@ export class MediaDisplayComponent implements AfterViewInit {
     }
 
     if (delivery.warmPreviewUrl) {
-      this.warmPreviewUrl.set(delivery.warmPreviewUrl);
+      this.stagedContentUrl.set(delivery.warmPreviewUrl);
     }
 
     if (delivery.resolvedUrl) {
@@ -189,23 +178,56 @@ export class MediaDisplayComponent implements AfterViewInit {
       this.icon.set(delivery.icon);
     }
 
-    if (delivery.state === 'warm-preview') {
-      if (delivery.metadataAspectRatio == null) {
+    switch (delivery.state) {
+      case 'loading':
+      case 'warm-preview': {
+        this.goTo('loading-surface-visible');
         return;
       }
-      this.goTo('warm-preview');
-      return;
+      case 'loaded': {
+        if (this.state() === 'loading-surface-visible' && this.hasKnownAspectRatio()) {
+          this.goTo('ratio-known-contain');
+        }
+
+        if (this.state() === 'ratio-known-contain' || this.state() === 'loading-surface-visible') {
+          this.goTo('media-ready');
+        }
+
+        if (this.state() === 'media-ready') {
+          this.goTo('content-fade-in');
+        }
+
+        return;
+      }
+      case 'icon-only': {
+        if (delivery.metadataAspectRatio == null && this.aspectRatio() == null) {
+          this.applyAspectRatio(1);
+        }
+        this.goTo('icon-only');
+        return;
+      }
+      case 'error': {
+        this.goTo('error');
+        return;
+      }
+      case 'no-media': {
+        this.goTo('no-media');
+        return;
+      }
+      default: {
+        return;
+      }
+    }
+  }
+
+  private hasKnownAspectRatio(): boolean {
+    const metadataRatio = this.metadataAspectRatio();
+    if (metadataRatio != null && metadataRatio > 0) {
+      return true;
     }
 
-    if (
-      delivery.state === 'icon-only' &&
-      delivery.metadataAspectRatio == null &&
-      this.aspectRatio() == null
-    ) {
-      this.applyAspectRatio(1);
-    }
-
-    this.goTo(delivery.state);
+    const hintedRatio = this.aspectRatio();
+    return hintedRatio != null && hintedRatio > 0;
   }
 
   private applyAspectRatio(ratio: number): void {
@@ -225,9 +247,6 @@ export class MediaDisplayComponent implements AfterViewInit {
 
   private goTo(next: MediaDisplayState): void {
     const current = untracked(() => this.state());
-    if (current === 'loading' && next === 'warm-preview' && this.metadataAspectRatio() == null) {
-      return;
-    }
 
     const target = transitionMediaDisplayState(current, next);
     if (target !== current) {

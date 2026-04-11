@@ -14,18 +14,21 @@ export interface MediaDownloadStateStreamApi {
 export function mapLegacyLoadState(
   loadState: MediaLoadState,
   hasResolvedUrl: boolean,
-): Exclude<MediaDisplayState, 'empty' | 'warm-preview' | 'icon-only'> {
+): Exclude<
+  MediaDisplayState,
+  'idle' | 'ratio-known-contain' | 'media-ready' | 'content-fade-in' | 'icon-only'
+> {
   switch (loadState) {
     case 'loading':
-      return 'loading';
+      return 'loading-surface-visible';
     case 'loaded':
-      return hasResolvedUrl ? 'loaded' : 'loading';
+      return hasResolvedUrl ? 'content-visible' : 'loading-surface-visible';
     case 'error':
       return 'error';
     case 'no-media':
       return 'no-media';
     case 'idle':
     default:
-      return hasResolvedUrl ? 'loaded' : 'loading';
+      return hasResolvedUrl ? 'content-visible' : 'loading-surface-visible';
   }
 }

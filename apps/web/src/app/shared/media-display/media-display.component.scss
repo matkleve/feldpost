@@ -29,11 +29,11 @@
   display: block;
 }
 
-.media-display__layer--loading {
+.media-display__layer--loading-surface {
   background: color-mix(in srgb, var(--color-bg-base) 12%, transparent);
 }
 
-.media-display__layer--warm-preview {
+.media-display__layer--staged-content {
   filter: blur(8px);
 }
 
@@ -59,19 +59,6 @@
   background: color-mix(in srgb, var(--color-bg-base) 65%, transparent);
 }
 
-.media-display__retry {
-  pointer-events: auto;
-  min-block-size: 2.75rem;
-  padding-inline: var(--spacing-3);
-  padding-block: var(--spacing-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
-  color: var(--color-text-primary);
-  font: inherit;
-  cursor: pointer;
-}
-
 .media-display__layer--no-media {
   flex-direction: column;
   gap: var(--spacing-2);
@@ -84,30 +71,34 @@
   text-align: center;
 }
 
-/* Stable state: loading */
+/* Stable state: loading-surface-visible */
 /* @see docs/specs/component/media-display.md#state-rendering-matrix */
-[data-state='loading'] .media-display__layer--loading {
+[data-state='loading-surface-visible'] .media-display__layer--loading-surface,
+[data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
   pointer-events: none;
   animation: media-display-pulse var(--transition-emphasis) ease-in-out infinite;
 }
 
-/* Stable state: warm-preview */
+/* Stable state: media-ready (staged content) */
 /* @see docs/specs/component/media-display.md#state-rendering-matrix */
-[data-state='warm-preview'] .media-display__layer--warm-preview {
+[data-state='media-ready'] .media-display__layer--staged-content,
+[data-state='content-fade-in'] .media-display__layer--staged-content,
+[data-state='content-visible'] .media-display__layer--staged-content {
   opacity: 1;
   transition: opacity var(--transition-fade-in);
 }
 
-/* Stable state: loaded */
+/* Stable state: content-fade-in/content-visible */
 /* @see docs/specs/component/media-display.md#state-rendering-matrix */
-[data-state='loaded'] .media-display__layer--loaded {
+[data-state='content-fade-in'] .media-display__layer--content,
+[data-state='content-visible'] .media-display__layer--content {
   opacity: 1;
   pointer-events: auto;
   transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
 }
 
-[data-state='loaded'] .media-display__layer--warm-preview {
+[data-state='content-visible'] .media-display__layer--staged-content {
   opacity: 0;
   transition: opacity var(--transition-fade-out);
 }
@@ -123,13 +114,11 @@
 /* @see docs/specs/component/media-display.md#state-rendering-matrix */
 [data-state='error'] .media-display__layer--error {
   opacity: 1;
-  pointer-events: auto;
   transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
 }
 
 /* Stable state: no-media */
 /* @see docs/specs/component/media-display.md#state-rendering-matrix */
-[data-state='empty'] .media-display__layer--no-media,
 [data-state='no-media'] .media-display__layer--no-media {
   opacity: 1;
   transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);

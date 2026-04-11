@@ -38,7 +38,7 @@
           [itemId]="item.id"
           [item]="item"
           [mode]="itemMode()"
-          [state]="isSelected(item.id) ? 'selected' : 'content'"
+          [state]="isSelected(item.id) ? 'selected' : 'idle'"
           [actionContextId]="mediaItemActionContext"
           (opened)="itemClicked.emit($event)"
           (selectedChange)="onSelectionToggled(item.id)"
