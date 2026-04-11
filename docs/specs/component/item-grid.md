@@ -68,7 +68,7 @@ ItemGridSystem
 │   │   ├── Delivery states: idle/loading-surface-visible/ratio-known-contain/media-ready/content-fade-in/content-visible/icon-only/error/no-media
 │   │   ├── Contain path includes ratio-known-contain
 │   │   ├── Cover path skips ratio-known-contain
-│   │   └── MediaItemUploadOverlayComponent (features/media)
+│   ├── MediaItemUploadOverlayComponent (features/media)
 │   └── MediaItemQuietActionsComponent (features/media; ws_grid_thumbnail actions)
 ├── DocumentItemComponent (extends ItemComponent)
 │   └── filetype-suitability contract: A4 behavior for eligible document-like previews
@@ -112,8 +112,7 @@ flowchart TD
 | `selected`        | Selection service / parent state   | `boolean`                                                | Selected state propagation for domain-owned emphasis                                                |
 | `actionContextId` | Domain adapter                     | `string`                                                 | Binds item action menus to matrix contract                                                          |
 | `mediaLoadState`  | `MediaDownloadService`             | `MediaDisplayDeliveryState`                              | Canonical media delivery state vocabulary (defined in media-display + media-download-service specs) |
-| `slotWidthRem`    | Media item measurement             | `number \| null`                                         | Adaptive tier selection input                                                                       |
-| `slotHeightRem`   | Media item measurement             | `number \| null`                                         | Adaptive tier selection input                                                                       |
+| `slotSizeRem`     | Media item measurement             | `number \| null`                                         | Short-edge size in rem for tier selection                                                           |
 | `requestedTier`   | media request policy               | `MediaTier`                                              | Target render tier before service reconciliation                                                    |
 | `effectiveTier`   | `MediaDownloadService`             | `MediaTier`                                              | Actual tier after slot-aware reconciliation                                                         |
 | `uploadOverlay`   | `UploadManagerService` bridge      | `UploadOverlayState \| null`                             | Upload progress and status layer                                                                    |
@@ -329,12 +328,12 @@ Child dependency rule:
 
 ### Layer Order (z-index)
 
-| Layer                     | z-index                      | Owner                                               |
-| ------------------------- | ---------------------------- | --------------------------------------------------- |
-| Content (image/icon/text) | 0                            | Domain render surface content node                  |
-| Upload overlay            | 1                            | Domain item upload overlay                          |
-| Selected emphasis         | content/geometry owner layer | Domain visual geometry owner (frame-level selector) |
-| Quiet actions             | 3                            | Domain item quiet actions                           |
+| Layer             | z-index | Owner                                               |
+| ----------------- | ------- | --------------------------------------------------- |
+| Media content     | 1       | Domain render surface content node                  |
+| Selected emphasis | 2       | Domain visual geometry owner (frame-level selector) |
+| Upload overlay    | 3       | Domain item upload overlay                          |
+| Quiet actions     | 4       | Domain item quiet actions                           |
 
 No undeclared z-index values are allowed in domain item components.
 

@@ -121,6 +121,7 @@ flowchart TD
 | `item`            | `MediaItemViewModel`                                     | Domain payload for item metadata and actions    |
 | `mode`            | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | Layout/slot context                             |
 | `actionContextId` | `string`                                                 | Action-context resolution                       |
+| `uploadOverlay`   | `UploadOverlayState \| null`                             | Upload progress/status visualization            |
 
 All boolean visual-state inputs are forbidden.
 
@@ -228,7 +229,7 @@ sequenceDiagram
   participant S as MediaDownloadService
 
   P->>M: bind mediaId + state + item + mode + actionContextId
-  M->>D: forward mediaId + mode (+ aspectRatio hint optional)
+  M->>D: forward mediaId (+ aspectRatio hint optional)
   D->>S: getState(mediaId, slotSizeRem)
   P->>M: update state (idle/selected/uploading/error)
   M->>M: update overlays/emphasis/actions immediately
