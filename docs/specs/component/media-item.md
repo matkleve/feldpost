@@ -6,7 +6,7 @@ Media Item is the grid-item interaction contract for one media entity in Item Gr
 
 ## What It Looks Like
 
-The component renders one stable item shell with media content in the base layer, upload overlay above it, and quiet actions on top. Selection emphasis is applied around the media frame and never around the full tile wrapper. Upload state is visible as a dedicated overlay layer and does not interfere with media loading visuals. Quiet actions stay hidden at rest and reveal on hover/focus with keyboard-accessible controls. Media loading, warm preview, sharp render, error rendering, and no-media rendering are not visualized by this component directly.
+The component renders one stable item shell with media content in the base layer, upload overlay above it, and quiet actions on top. Selection emphasis is applied around the media frame and never around the full tile wrapper. Upload state is visible as a dedicated overlay layer and does not interfere with media loading visuals. Quiet actions stay hidden at rest and reveal on hover/focus with keyboard-accessible controls. Media delivery FSM details are not visualized by this component directly and remain delegated to the media renderer/service chain (`MediaDisplayComponent` + `MediaDownloadService`).
 
 ## Where It Lives
 
@@ -30,7 +30,7 @@ The component renders one stable item shell with media content in the base layer
 | 6   | Parent sets visual state to `idle`                      | Hide selected/upload/error-only treatments                        | `state='idle'`              |
 | 7   | User hovers/focuses item                                | Reveal quiet actions in deterministic tokenized timing            | hover/focus                 |
 | 8   | User activates select/map action                        | Emit canonical item action outputs                                | click/keyboard              |
-| 9   | `MediaDisplayComponent` changes internal download state | Media Item keeps its own state unchanged; no parent wait required | child internal state change |
+| 9   | `MediaDisplayComponent` changes internal delivery state | Media Item keeps its own state unchanged; no parent wait required | child internal state change |
 | 10  | Upload phase updates                                    | Update overlay content and progress visuals                       | upload stream               |
 
 ## Component Hierarchy
@@ -94,7 +94,7 @@ flowchart TD
   B --> D[state: MediaItemState]
   B --> E[item + mode + actionContextId]
   C --> F[MediaDisplayComponent]
-  F --> G[MediaDownloadService.getState(mediaId)]
+  F --> G[MediaDownloadService.getState(mediaId, slotSizeRem)]
   D --> H[MediaItem visual gates]
   H --> I[Selected emphasis]
   H --> J[Upload overlay visibility]
@@ -145,8 +145,9 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 ### State Scope Clarification
 
 - `MediaItemState` covers only grid-item-level states.
-- Media download states (`loading`, `warm-preview`, `loaded`, `error`, `no-media`) are fully owned by `MediaDisplayComponent`.
+- Media delivery state progression is orchestrated by `MediaDownloadService` and rendered by `MediaDisplayComponent` according to their canonical specs.
 - `MediaItemComponent` does not coordinate, await, or proxy media download state transitions.
+- Retry behavior for media delivery stays in `MediaDownloadService` and/or parent shells. `MediaItemComponent` remains interaction-shell only.
 
 ### Transition Guard Contract
 
@@ -228,12 +229,12 @@ sequenceDiagram
 
   P->>M: bind mediaId + state + item + mode + actionContextId
   M->>D: forward mediaId + mode (+ aspectRatio hint optional)
-  D->>S: getState(mediaId)
+  D->>S: getState(mediaId, slotSizeRem)
   P->>M: update state (idle/selected/uploading/error)
   M->>M: update overlays/emphasis/actions immediately
-  S-->>D: loading/warm-preview/loaded/error/no-media
+  S-->>D: delivery state progression per MediaDisplay/MediaDownloadService contract
   D->>D: render media lifecycle internally
-  Note over M,D: Parent item state never waits for child download state.
+  Note over M,D: Parent item state never waits for child delivery state. Retry ownership stays outside MediaItem.
 ```
 
 ## Acceptance Criteria
@@ -259,7 +260,7 @@ sequenceDiagram
 - `MediaItemComponent` stays an interaction-shell component.
 - Media render lifecycle remains exclusively inside `MediaDisplayComponent`.
 - `MediaItemState` remains limited to item-level interaction states (`idle`, `selected`, `uploading`, `error`).
-- New media lifecycle states (`loading`, `loaded`, etc.) are explicitly forbidden in `MediaItemState`.
+- New media lifecycle states from the MediaDisplay delivery FSM are explicitly forbidden in `MediaItemState`.
 
 ### Parent-Driven Ratio Binding Contract
 
@@ -283,7 +284,7 @@ Mandatory rule:
 ### Plan Delta (In-Place Only)
 
 1. Tighten `Geometry Dependency Contract` wording to remove ambiguous "child-coupled" interpretation.
-2. Keep `MediaItemComponent` free of media loading/loaded state transitions.
+2. Keep `MediaItemComponent` free of media delivery-state transitions defined by the MediaDisplay contract.
 3. Keep selection, quiet actions, and upload overlays bound to the shell frame only.
 4. Align acceptance checks to verify shell-to-media fit for portrait and landscape outcomes.
 

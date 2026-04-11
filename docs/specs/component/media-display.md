@@ -76,17 +76,17 @@ flowchart TD
   I --> M
 ```
 
-| Field                 | Source                 | Type                                                                                                                                                    | Purpose                                                           |
-| --------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `mediaId`             | parent                 | `string`                                                                                                                                                | Primary identity for media state subscription                     |
-| `maxWidth`            | parent                 | `string`                                                                                                                                                | Maximum allowed inline size as CSS value (`rem`, `%`, `vw`, etc.) |
-| `maxHeight`           | parent                 | `string`                                                                                                                                                | Maximum allowed block size as CSS value (`rem`, `%`, `vh`, etc.)  |
-| `aspectRatio`         | parent hint            | `number \| null`                                                                                                                                        | Optional ratio hint before service metadata arrives               |
-| `slotSizeRem`         | internal measurement   | `number`                                                                                                                                                | Host short-edge size in `rem` used for service tier resolution    |
-| `deliveryState`       | `MediaDownloadService` | `'loading-surface-visible' \| 'ratio-known-contain' \| 'media-ready' \| 'content-fade-in' \| 'content-visible' \| 'icon-only' \| 'error' \| 'no-media'` | Service-to-render delivery semantics                              |
-| `resolvedUrl`         | `MediaDownloadService` | `string \| null`                                                                                                                                        | Active sharp tier URL                                             |
-| `stagedContentUrl`    | `MediaDownloadService` | `string \| null`                                                                                                                                        | Cached or staged content URL used before final reveal             |
-| `metadataAspectRatio` | `MediaDownloadService` | `number \| null`                                                                                                                                        | Authoritative ratio from media metadata                           |
+| Field                 | Source                                         | Type                                                                                                                                                    | Purpose                                                                       |
+| --------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `mediaId`             | parent                                         | `string`                                                                                                                                                | Primary identity for media state subscription                                 |
+| `maxWidth`            | parent                                         | `string`                                                                                                                                                | Maximum allowed inline size as CSS value (`rem`, `%`, `vw`, etc.)             |
+| `maxHeight`           | parent                                         | `string`                                                                                                                                                | Maximum allowed block size as CSS value (`rem`, `%`, `vh`, etc.)              |
+| `aspectRatio`         | parent hint                                    | `number \| null`                                                                                                                                        | Optional ratio hint before service metadata arrives                           |
+| `slotSizeRem`         | internal measurement                           | `number`                                                                                                                                                | Host short-edge size in `rem` used for service tier resolution                |
+| `deliveryState`       | `MediaDownloadService` + renderer choreography | `'loading-surface-visible' \| 'ratio-known-contain' \| 'media-ready' \| 'content-fade-in' \| 'content-visible' \| 'icon-only' \| 'error' \| 'no-media'` | Canonical delivery vocabulary across service handoff and renderer transitions |
+| `resolvedUrl`         | `MediaDownloadService`                         | `string \| null`                                                                                                                                        | Active sharp tier URL                                                         |
+| `stagedContentUrl`    | `MediaDownloadService`                         | `string \| null`                                                                                                                                        | Cached or staged content URL used before final reveal                         |
+| `metadataAspectRatio` | `MediaDownloadService`                         | `number \| null`                                                                                                                                        | Authoritative ratio from media metadata                                       |
 
 ## Tier Resolution Contract
 
@@ -363,10 +363,8 @@ sequenceDiagram
   end
   S-->>D: media-ready
   D->>D: transition to media-ready
-  S-->>D: content-fade-in
-  D->>D: transition to content-fade-in
-  S-->>D: content-visible
-  D->>D: transition to content-visible
+  D->>D: transition to content-fade-in (transition choreography)
+  D->>D: transition to content-visible (transitionend)
   alt document-like small outcome
     S-->>D: icon-only
     D->>D: transition * -> icon-only
