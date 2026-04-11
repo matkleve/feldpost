@@ -1,23 +1,15 @@
 // Declares host as state-frame wrapper without grid geometry ownership.
 // @see docs/element-specs/item-grid.md#scss-responsibilities
 :host {
-  display: block;
+  display: contents;
   min-height: 0;
-}
-
-// Defines shared state-frame visual surface used by all domain items.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
-.item-state-frame {
-  display: grid;
-  min-height: 0;
-  transition: var(--interactive-transition-standard);
 }
 
 // Stable state: disabled.
 // @see docs/element-specs/item-state-frame.md#state-machine
 // Applies shared disabled-state dimming and interaction lock.
 // @see docs/element-specs/item-grid.md#state
-.item-state-frame--disabled {
+:host(.item-state-frame--disabled) .item-state-frame__content {
   opacity: 0.6;
   pointer-events: none;
 }
@@ -25,13 +17,14 @@
 // Hosts projected domain content region below state overlays.
 // @see docs/element-specs/item-grid.md#component-hierarchy
 .item-state-frame__content {
-  grid-area: 1 / 1;
+  min-height: 0;
 }
 
 // Defines common overlay layer for loading, error, and empty states.
 // @see docs/element-specs/item-grid.md#state
 .item-state-frame__state-layer {
-  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
   z-index: 1;
   display: flex;
   align-items: center;

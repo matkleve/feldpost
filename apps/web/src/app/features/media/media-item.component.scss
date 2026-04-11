@@ -1,41 +1,45 @@
 // Declares media-item host as the sole stacking-context owner for domain overlays.
 // @see docs/specs/component/media-item.md#visual-behavior-contract
 :host {
+  isolation: isolate;
   position: relative;
   display: block;
-  width: fit-content;
-  margin-inline: auto;
+  inline-size: 100%;
+  aspect-ratio: 1 / 1;
   min-height: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-// Styles media domain content surface inside the shared state frame.
+// Styles media domain content surface through host semantic class bindings.
 // @see docs/specs/component/media-item.md#component-hierarchy
 .media-item {
-  position: relative;
-  display: block;
   min-height: 0;
 }
 
 // Defines frame geometry owner that conforms to child effective rendered box.
 // @see docs/specs/component/media-item.md#geometry-dependency-contract
 .media-item__frame {
-  position: relative;
-  display: block;
-  inline-size: fit-content;
-  max-inline-size: 100%;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 // Applies selected emphasis on frame geometry only.
 // @see docs/specs/component/media-item.md#visual-behavior-contract
 .media-item__frame--selected {
-  outline: 2px solid var(--media-item-selected-ring-color, var(--color-clay));
-  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent));
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 2px var(--media-item-selected-ring-color, var(--color-clay)),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--media-item-selected-ring-color, var(--color-clay)) 32%, transparent);
 }
 
 // Keeps media display as base visual layer in normal flow.
 // @see docs/specs/component/media-item.md#component-hierarchy
 .media-item__preview {
-  display: block;
+  display: contents;
 }
 
 // Styles the primary media item interaction button and keeps content semantics local.
@@ -47,7 +51,7 @@
   cursor: pointer;
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 1;
 }
 
 // Positions upload overlay component above preview but below quiet actions.
@@ -68,18 +72,21 @@
   transform: translateY(-2px);
   pointer-events: none;
   transition:
-    opacity 80ms ease,
-    transform 80ms ease;
+    opacity var(--transition-fade-out),
+    transform var(--transition-fade-out);
 }
 
 // Reveals quiet actions on hover, focus-within, and selected states without layout shift.
 // @see docs/specs/component/media-item.md#actions--interactions
 .media-item:hover .media-item__quiet-actions,
 .media-item:focus-within .media-item__quiet-actions,
-.media-item__frame--selected .media-item__quiet-actions {
+:host([data-state='selected']) .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+  transition:
+    opacity var(--transition-fade-in),
+    transform var(--transition-fade-in);
 }
 
 // Styles keyboard focus visibility for primary open action.

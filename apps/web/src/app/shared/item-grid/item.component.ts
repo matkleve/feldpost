@@ -9,7 +9,13 @@ export type ItemContextActionEvent = {
   contextId: string | null;
 };
 
-@Directive()
+@Directive({
+  host: {
+    '[attr.data-state]': 'state()',
+    'style.display': 'block',
+    'style.position': 'relative',
+  },
+})
 export abstract class ItemComponent {
   readonly itemId = input.required<string>();
   readonly mode = input<ItemDisplayMode>('grid-md');

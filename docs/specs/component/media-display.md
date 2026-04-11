@@ -320,6 +320,15 @@ No triad divergence is required for this component.
 - Filetype icon assets (owned by the shared icon system)
 - Explicit height assignment on the host (height is derived from width multiplied by aspect ratio)
 
+### Spacing & Framing Ownership
+
+- `MediaDisplayComponent` is a render slot and must not own framing geometry semantics.
+- Forbidden ownership in `MediaDisplayComponent`:
+  - `border-radius`
+  - `padding`, `margin`, `border`
+  - `overflow: hidden` for border-radius clipping
+- Framing and clipping are container-owned and must be applied by the consuming host (for example media item, map marker, detail view).
+
 ## File Map
 
 | File                                                                 | Purpose                                               |

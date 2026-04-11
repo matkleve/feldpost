@@ -27,10 +27,20 @@ export const MEDIA_DISPLAY_TRANSITIONS: Record<MediaDisplayState, MediaDisplaySt
   'no-media': ['loading-surface-visible', 'error'],
 };
 
+const FORBIDDEN_SHORTCUTS = new Set<string>([
+  'idle->content-visible',
+  'loading-surface-visible->content-visible',
+  'ratio-known-contain->content-visible',
+]);
+
 export function transitionMediaDisplayState(
   current: MediaDisplayState,
   next: MediaDisplayState,
 ): MediaDisplayState {
+  if (FORBIDDEN_SHORTCUTS.has(current + '->' + next)) {
+    return current;
+  }
+
   if (MEDIA_DISPLAY_TRANSITIONS[current].includes(next)) {
     return next;
   }

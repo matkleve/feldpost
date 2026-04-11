@@ -65,6 +65,16 @@ ItemGrid -> sets slot width + height constraints
     MediaDisplayComponent -> renders media within forwarded constraints
 ```
 
+### Spacing & Framing Ownership
+
+`MediaItemComponent :host` owns external framing and clipping for this surface.
+
+- Host-owned framing properties:
+  - `border-radius`
+  - `overflow: hidden` (for clipping to host radius)
+  - outer `padding` and `margin`
+- `MediaDisplayComponent` remains render-slot-only and must not take over host framing ownership.
+
 ### CSS Variable Ownership & Dependency Matrix
 
 | CSS Variable                                               | Set By                                               | Consumed By                              | Dependency Type                 | Why                                                                                                         |

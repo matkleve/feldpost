@@ -11,7 +11,6 @@ import {
   untracked,
 } from '@angular/core';
 import type { AfterViewInit, InputSignal } from '@angular/core';
-import type { Subscription } from 'rxjs';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { type MediaDisplayState, transitionMediaDisplayState } from './media-display-state';
@@ -91,13 +90,15 @@ export class MediaDisplayComponent implements AfterViewInit {
       this.goTo('loading-surface-visible');
       const slot = this.slotSizeRem();
 
-      const subscription: Subscription = this.mediaDownloadService
+      // TODO: migrate to signal-based when MediaDownloadService
+      // is refactored off Observable
+      const deliveryStreamSubscription = this.mediaDownloadService
         .getState(id, slot)
         .subscribe((delivery) => {
           this.handleDelivery(delivery);
         });
 
-      onCleanup(() => subscription.unsubscribe());
+      onCleanup(() => deliveryStreamSubscription.unsubscribe());
     });
 
     this.destroyRef.onDestroy(() => {
@@ -130,6 +131,13 @@ export class MediaDisplayComponent implements AfterViewInit {
       return;
     }
 
+    const viewportElement = this.hostEl.nativeElement.querySelector(
+      '.media-display__viewport',
+    ) as HTMLElement | null;
+    if (!viewportElement) {
+      return;
+    }
+
     const ro = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) {
@@ -145,7 +153,7 @@ export class MediaDisplayComponent implements AfterViewInit {
       this.slotSizeRem.set(next);
     });
 
-    ro.observe(this.hostEl.nativeElement);
+    ro.observe(viewportElement);
     this.resizeObserver = ro;
   }
 
@@ -185,7 +193,9 @@ export class MediaDisplayComponent implements AfterViewInit {
         return;
       }
       case 'loaded': {
-        if (this.state() === 'loading-surface-visible' && this.hasKnownAspectRatio()) {
+        const currentState = this.state();
+
+        if (currentState === 'loading-surface-visible' && this.hasKnownAspectRatio()) {
           this.goTo('ratio-known-contain');
         }
 

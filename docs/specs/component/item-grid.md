@@ -405,6 +405,10 @@ img {
 - Explicitly forbidden: setting the same dimension in multiple component layers.
   - No duplicate `width` / `height` / `max-height` ownership across grid, state-frame, and domain item styles.
   - Each dimension is defined exactly once, at the semantically owning layer.
+- ItemGrid must not set spacing or framing on projected domain children.
+  - `gap` and column definitions are ItemGrid-owned.
+  - Projected-child `padding`/`margin` ownership stays with the domain item host.
+  - `border-radius` and `overflow` ownership stays with the domain item host.
 
 ### SCSS Comment Rule
 

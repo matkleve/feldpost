@@ -1,15 +1,3 @@
-<!-- Renders the layout-only grid shell and applies mode classes from ItemGrid input state. -->
-<!-- @see docs/element-specs/item-grid.md#component-hierarchy -->
-<section
-  class="item-grid"
-  [class.item-grid--grid-sm]="mode() === 'grid-sm'"
-  [class.item-grid--grid-md]="mode() === 'grid-md'"
-  [class.item-grid--grid-lg]="mode() === 'grid-lg'"
-  [class.item-grid--row]="mode() === 'row'"
-  [class.item-grid--card]="mode() === 'card'"
-  [attr.role]="role()"
->
-  <!-- Projects domain item components into the layout shell without adding domain logic. -->
-  <!-- @see docs/element-specs/item-grid.md#actions -->
-  <ng-content />
-</section>
+<!-- Projects domain item components into the host-owned layout shell without adding domain logic. -->
+<!-- @see docs/element-specs/item-grid.md#actions -->
+<ng-content />

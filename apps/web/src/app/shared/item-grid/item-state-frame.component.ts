@@ -7,6 +7,10 @@ import type { ItemDisplayMode, ItemVisualState } from './item.component';
   templateUrl: './item-state-frame.component.html',
   styleUrl: './item-state-frame.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[attr.data-state]': 'state()',
+    '[class.item-state-frame--disabled]': 'disabled()',
+  },
 })
 export class ItemStateFrameComponent {
   readonly itemId = input.required<string>();

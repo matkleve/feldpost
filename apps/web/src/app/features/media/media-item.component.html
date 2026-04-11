@@ -1,64 +1,41 @@
-<!-- Applies shared item-state contract wrapper around the media-domain item surface. -->
-<!-- @see docs/element-specs/item-grid.md#component-hierarchy -->
-<app-item-state-frame
-  [itemId]="itemId()"
-  [mode]="activeMode()"
-  [state]="frameState()"
-  [loadingLabel]="loadingLabel()"
-  [errorLabel]="errorLabel()"
-  [emptyLabel]="emptyLabel()"
-  [retryLabel]="t('media.page.retry', 'Retry')"
-  (retryRequested)="onRetryRequested($event)"
->
-  @if (item()) {
-    <!-- Hosts media-item domain surface with mode modifiers and context-menu wiring. -->
-    <!-- @see docs/specs/component/media-item.md#component-hierarchy -->
-    <article
-      class="media-item"
-      [class.media-item--selected]="selected()"
-      (contextmenu)="onContextMenu($event)"
-    >
-      <!-- Stable geometry owner for selected emphasis and overlays. -->
-      <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
-      <div class="media-item__frame" [class.media-item__frame--selected]="selected()">
-        <!-- Delegates media rendering lifecycle to shared media display. -->
-        <!-- @see docs/specs/component/media-item.md#component-hierarchy -->
-        <app-media-display
-          class="media-item__preview"
-          [mediaId]="mediaIdentity()"
-          [maxWidth]="mediaDisplayMaxWidth()"
-          [maxHeight]="mediaDisplayMaxHeight()"
-          [aspectRatio]="mediaDisplayAspectRatio()"
-        />
+@if (item()) {
+  <!-- Delegates media rendering lifecycle to shared media display. -->
+  <!-- @see docs/specs/component/media-item.md#component-hierarchy -->
+  <app-media-display class="media-item__preview" [mediaId]="mediaIdentity()" />
 
-        <!-- Renders upload overlay as host-aligned absolute layer below selected and quiet-action layers. -->
-        <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
-        @if (uploadOverlay(); as overlay) {
-          <app-media-item-upload-overlay class="media-item__upload-overlay" [overlay]="overlay" />
-        }
+  <!-- Renders selected emphasis around media frame only, above media content. -->
+  <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
+  <div
+    class="media-item__frame"
+    [class.media-item__frame--selected]="selected()"
+    aria-hidden="true"
+  ></div>
 
-        <!-- Renders quiet actions as the top-most overlay layer for hover/focus interactions. -->
-        <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
-        <app-media-item-quiet-actions
-          class="media-item__quiet-actions"
-          [state]="quietActionsState()"
-          [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
-          [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
-          (selectRequested)="onSelectRequested()"
-          (mapRequested)="onMapActionRequested()"
-        />
-
-        <!-- Defines primary open action region as sibling overlay so quiet-action buttons remain valid. -->
-        <!-- @see docs/specs/component/media-item.md#actions--interactions -->
-        <button
-          type="button"
-          class="media-item__open"
-          [attr.aria-label]="
-            t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') + ' ' + titleText()
-          "
-          (click)="onOpenClick($event)"
-        ></button>
-      </div>
-    </article>
+  <!-- Renders upload overlay as host-aligned absolute layer below quiet actions. -->
+  <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
+  @if (uploadOverlay(); as overlay) {
+    <app-media-item-upload-overlay class="media-item__upload-overlay" [overlay]="overlay" />
   }
-</app-item-state-frame>
+
+  <!-- Renders quiet actions as the top-most overlay layer for hover/focus interactions. -->
+  <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
+  <app-media-item-quiet-actions
+    class="media-item__quiet-actions"
+    [state]="quietActionsState()"
+    [selectLabel]="t('workspace.thumbnailCard.action.toggleSelection', 'Toggle selection')"
+    [mapLabel]="t('workspace.thumbnailCard.action.jumpToLocation', 'Jump to location')"
+    (selectRequested)="onSelectRequested()"
+    (mapRequested)="onMapActionRequested()"
+  />
+
+  <!-- Defines primary open action region so quiet-action buttons remain reachable above it. -->
+  <!-- @see docs/specs/component/media-item.md#actions--interactions -->
+  <button
+    type="button"
+    class="media-item__open"
+    [attr.aria-label]="
+      t('workspace.thumbnailCard.action.viewImagePrefix', 'View image') + ' ' + titleText()
+    "
+    (click)="onOpenClick($event)"
+  ></button>
+}
