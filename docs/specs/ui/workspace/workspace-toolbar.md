@@ -11,7 +11,7 @@ A single horizontal row of four ghost buttons: **Grouping**, **Filter**, **Sort*
 ## Where It Lives
 
 - **Parent**: `WorkspacePaneComponent` — above the content area
-- **Always visible** when Workspace Pane is open and not in Image Detail View
+- **Always visible** when Workspace Pane is open and not in Media Detail View
 
 ## Actions
 
@@ -137,7 +137,7 @@ flowchart TB
     SortDD -->|sort$| WVS
     ProjectDD -->|project$| WVS
 
-    WVS -->|images grouped + sorted| Content
+    WVS -->|media items grouped + sorted| Content
     FS -->|active filters| WVS
 ```
 

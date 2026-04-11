@@ -57,7 +57,7 @@ PhotoMarker                                      ← Leaflet DivIcon, custom HTM
 
 > **Full use cases:** [use-cases/media-loading.md](../../../use-cases/media-loading.md)
 
-Single-image markers at near zoom (≥ 16) display a real photo thumbnail inside the marker body. Thumbnails are **lazy-loaded** via `PhotoLoadService` — only fetched for visible markers in the current viewport. The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` which returns a Supabase Storage signed URL with server-side image transformation (`80 × 80 px`, `cover` mode, auto-WebP). The service handles caching, staleness (50 min threshold), and re-signing automatically. When no real file exists in storage (seed data, deleted files), `photoLoad.getLoadState()` returns `'error'` and the marker renders the canonical `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` — no broken `<img>` icon ever appears.
+Single-item markers at near zoom (≥ 16) display a real media thumbnail inside the marker body. Thumbnails are **lazy-loaded** via `PhotoLoadService` — only fetched for visible markers in the current viewport. The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` which returns a Supabase Storage signed URL with server-side image transformation (`80 × 80 px`, `cover` mode, auto-WebP). The service handles caching, staleness (50 min threshold), and re-signing automatically. When no real file exists in storage (seed data, deleted files), `photoLoad.getLoadState()` returns `'error'` and the marker renders the canonical `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` — no broken `<img>` icon ever appears.
 This marker cache is shared with Workspace Pane detail and `/media` consumers by media identity, so already loaded media can be reused immediately across surfaces.
 
 ### Loading States
@@ -115,15 +115,15 @@ The Map Shell never calls Supabase Storage directly for marker thumbnails. All s
 
 ## Data
 
-| Field           | Source                                           | Type                          |
-| --------------- | ------------------------------------------------ | ----------------------------- |
-| Image data      | Viewport query via `SupabaseService`             | `Image[]` from `images` table |
-| Cluster groups  | Server-side `ST_SnapToGrid` (zoom ≤ 14)          | `{ lat, lng, count }[]`       |
-| Thumbnails      | `PhotoLoadService` signed URLs (80×80 transform) | `string` (URL)                |
-| Placeholder     | CSS-only, no data source                         | —                             |
-| Selection state | Map/workspace selection service or shell state   | `string[]` / marker key state |
-| Bearing data    | EXIF-derived `direction` column                  | `number \| null`              |
-| Corrected flag  | `latitude`/`longitude` ≠ EXIF originals          | `boolean`                     |
+| Field           | Source                                           | Type                               |
+| --------------- | ------------------------------------------------ | ---------------------------------- |
+| Image data      | Viewport query via `SupabaseService`             | `Image[]` from `media_items` table |
+| Cluster groups  | Server-side `ST_SnapToGrid` (zoom ≤ 14)          | `{ lat, lng, count }[]`            |
+| Thumbnails      | `PhotoLoadService` signed URLs (80×80 transform) | `string` (URL)                     |
+| Placeholder     | CSS-only, no data source                         | —                                  |
+| Selection state | Map/workspace selection service or shell state   | `string[]` / marker key state      |
+| Bearing data    | EXIF-derived `direction` column                  | `number \| null`                   |
+| Corrected flag  | `latitude`/`longitude` ≠ EXIF originals          | `boolean`                          |
 
 ## State
 
@@ -253,16 +253,16 @@ When the user zooms past the cluster's grid threshold, the cluster must split in
 
 Cluster click **never zooms**. Regardless of zoom level or cluster size, clicking a cluster always opens the Workspace Pane with the cluster's images pre-loaded into the Active Selection tab.
 
-| Cluster State               | Click Result                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------------- |
-| Any cluster                 | Fetch all image IDs in the cluster cell, populate Active Selection, open Workspace Pane |
-| Large cluster (> 50 images) | Show count badge in pane header; thumbnails load progressively as the pane scrolls      |
+| Cluster State                    | Click Result                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| Any cluster                      | Fetch all media IDs in the cluster cell, populate Active Selection, open Workspace Pane |
+| Large cluster (> 50 media items) | Show count badge in pane header; thumbnails load progressively as the pane scrolls      |
 
 The map does **not** zoom or re-center on cluster click. The map stays at its current view, preserving the user's spatial context.
 
 ## Reactive Updates from Upload Manager
 
-When the user replaces a photo or attaches a photo to a photoless row through the **Image Detail View**, the `UploadManagerService` handles the upload pipeline and emits events on success. The `MapShellComponent` subscribes to these events and applies marker changes without a full viewport refresh.
+When the user replaces media or attaches media to a photoless row through the **Media Detail View**, the `UploadManagerService` handles the upload pipeline and emits events on success. The `MapShellComponent` subscribes to these events and applies marker changes without a full viewport refresh.
 
 ### Update Types
 
@@ -381,13 +381,13 @@ sequenceDiagram
 - Marker sizing variables are declared in `styles.scss` so marker geometry derives from shared design tokens instead of hardcoded body sizes.
 - The Map Shell listens to `moveend`, debounces 300 ms, then issues a viewport query. On response, it reconciles the marker set (add/remove/update) rather than rebuilding all markers.
 - Freshly uploaded markers from `ImageUploadedEvent` are placed optimistically and reconciled on the next viewport query.
-- **All thumbnail signing is delegated to `PhotoLoadService`.** The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` for individual markers and `photoLoad.batchSign(items, 'marker')` for batch operations. It calls `photoLoad.invalidateStale(STALE_THRESHOLD_MS)` on `moveend` before re-signing visible markers. The Map Shell **does not** call `supabase.client.storage.from('images').createSignedUrl` directly, manage per-marker URL caches, or track URL age. The service handles caching, staleness, and re-signing.
+- **All thumbnail signing is delegated to `PhotoLoadService`.** The Map Shell calls `photoLoad.getSignedUrl(path, 'marker')` for individual markers and `photoLoad.batchSign(items, 'marker')` for batch operations. It calls `photoLoad.invalidateStale(STALE_THRESHOLD_MS)` on `moveend` before re-signing visible markers. The Map Shell **does not** call `supabase.client.storage.from('media').createSignedUrl` directly, manage per-marker URL caches, or track URL age. The service handles caching, staleness, and re-signing.
 - Placeholder icons use `PHOTO_PLACEHOLDER_ICON` from `PhotoLoadService` for consistent visuals across all surfaces.
 - The Map Shell passes `corrected` and `uploading` flags to `buildPhotoMarkerHtml()` when building or refreshing marker icons. `corrected` is derived from comparing current coordinates to EXIF originals. `uploading` is set during the upload lifecycle and cleared on completion or error.
 - The Map Shell includes the `direction` column in the initial-load and viewport queries so that bearing-based direction cones render for all markers, not only freshly uploaded ones.
-- Marker click handling opens the Workspace Pane for both single markers and cluster markers. Single marker click selects one image; cluster marker click fetches all image IDs for the cluster cell, populates Active Selection with those IDs, and signals the Workspace Pane to open. The map never zooms or re-centers on cluster click.
-- Zoom-to-location intent from Image Detail View recenters map at detail zoom and starts a deferred spotlight. Spotlight starts only when marker DOM is render-ready; pending requests are re-flushed after viewport marker reconciliation.
-- If the exact image marker is unavailable due to clustering, spotlight falls back to the nearest eligible cluster marker.
+- Marker click handling opens the Workspace Pane for both single markers and cluster markers. Single marker click selects one media item; cluster marker click fetches all media IDs for the cluster cell, populates Active Selection with those IDs, and signals the Workspace Pane to open. The map never zooms or re-centers on cluster click.
+- Zoom-to-location intent from Media Detail View recenters map at detail zoom and starts a deferred spotlight. Spotlight starts only when marker DOM is render-ready; pending requests are re-flushed after viewport marker reconciliation.
+- If the exact media marker is unavailable due to clustering, spotlight falls back to the nearest eligible cluster marker.
 - Cross-surface hover-link wiring is bidirectional: Workspace Pane hover highlights marker; map marker hover highlights the matching workspace item.
 - Hover direction cones are driven by CSS `:hover` on desktop. Touch long-press direction cones require a Leaflet pointer-event listener (~500 ms threshold) that toggles a `data-long-pressed` attribute or class.
 - The Map Shell subscribes to `UploadManagerService.imageReplaced$` to update marker thumbnails when a photo is replaced in the detail view. On event, it looks up the marker via `markersByMediaId`, reads the blob URL from `PhotoLoadService` cache, rebuilds the DivIcon, and calls `marker.setIcon()`.

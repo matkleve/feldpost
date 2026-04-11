@@ -234,8 +234,8 @@ export interface SearchQueryContextV2 {
 
 ## File Map
 
-| File                                                | Purpose                                                 |
-| --------------------------------------------------- | ------------------------------------------------------- |
+| File                                                           | Purpose                                                 |
+| -------------------------------------------------------------- | ------------------------------------------------------- |
 | `docs/element-specs/search-bar/search-bar-data-and-service.md` | Data and service contract for v2 personalized geosearch |
 
 ## Wiring
@@ -260,7 +260,7 @@ None.
 
 ### Supabase Calls
 
-- `images` table: address candidate retrieval.
+- `media_items` table: address candidate retrieval.
 - `projects` and `saved_groups`: content candidate retrieval.
 - Edge function `geocode`: forward geocoder retrieval with bias params.
 - Supabase Auth: `refreshSession()` on first geocoder `401`, then single retry.

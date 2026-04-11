@@ -107,7 +107,7 @@ Where `GroupingProperty` = `{ id: string; label: string; icon: string }`.
 - Receives `activeGroupings` and `availableProperties` as inputs from `WorkspaceToolbarComponent`
 - Emits `{ active, available }` through `groupingsChanged`
 - `WorkspaceToolbarComponent` maps active rows into `WorkspaceViewService.activeGroupings`
-- `WorkspaceViewService` re-groups the image list and emits grouped sections to the content area
+- `WorkspaceViewService` re-groups the media item list and emits grouped sections to the content area
 
 ## Acceptance Criteria
 
@@ -189,7 +189,7 @@ flowchart TD
     Reorder --> Emit
     MultiDrag --> Emit
 
-    Emit --> WVS["WorkspaceViewService\nre-groups images"]
+    Emit --> WVS["WorkspaceViewService\nre-groups media items"]
     WVS --> Content["Workspace Content\nre-renders with group headings"]
 ```
 
@@ -197,7 +197,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    subgraph Input["Flat Image List"]
+    subgraph Input["Flat Media List"]
         I1["img: Zürich, Beton"]
         I2["img: Zürich, Holz"]
         I3["img: Wien, Beton"]
@@ -221,7 +221,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    subgraph Input["Flat Image List"]
+    subgraph Input["Flat Media List"]
         I1["img: Zürich, Beton, ProjectA"]
         I2["img: Zürich, Holz, ProjectA"]
         I3["img: Wien, Beton, ProjectB"]
@@ -309,7 +309,7 @@ sequenceDiagram
     CDK->>DD: cdkDropListDropped(event)
     DD->>DD: transferArrayItem(active → available)
     DD->>WVS: groupingsChanged([City, Material] → [City])
-    WVS->>WVS: re-group image list
+    WVS->>WVS: re-group media item list
     WVS->>WP: emit grouped sections
     WP->>WP: re-render headings + thumbnail grid
 ```
@@ -337,7 +337,7 @@ sequenceDiagram
     DD->>DD: transferArrayItem for each selected row
     DD->>DD: selectedRows.clear()
     DD->>WVS: groupingsChanged(updated list)
-    WVS->>WVS: re-group image list
+    WVS->>WVS: re-group media item list
 ```
 
 ## Grouping Dropdown — State Machine

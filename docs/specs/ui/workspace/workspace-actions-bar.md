@@ -109,7 +109,7 @@ WorkspacePane
 flowchart LR
   UI[WorkspaceExportBar UI] --> WS[WorkspaceSelectionService]
   UI --> MB[MediaBulkActionsService]
-  MB --> DBI[(images, image_projects)]
+  MB --> DBI[(media_items, media_projects)]
   WS --> SS[ShareSetService]
   SS --> DB[(share_sets, share_set_items)]
   WS --> ZE[MediaDownloadService]
@@ -126,7 +126,7 @@ flowchart LR
 | --------------------- | ------------------------------------------- | --------------- | ---------------------------------------------------------- |
 | Selected IDs          | `WorkspaceSelectionService`                 | `Set<string>`   | Canonical identity source for export actions               |
 | Selection scope IDs   | `WorkspaceViewService.groupedSections()`    | `string[]`      | Used by `Select all` for current filtered/grouped scope    |
-| Project membership    | `MediaBulkActionsService.bulkAddToProject`  | mutation result | Upserts selected IDs into `image_projects` for a project   |
+| Project membership    | `MediaBulkActionsService.bulkAddToProject`  | mutation result | Upserts selected IDs into `media_projects` for a project   |
 | Address field update  | `MediaBulkActionsService.bulkChangeAddress` | mutation result | Updates selected media address fields in one batch         |
 | Bulk delete mutation  | `MediaBulkActionsService.bulkDeleteMedia`   | mutation result | Deletes selected media records with storage cleanup        |
 | Share token           | `ShareSetService`                           | `string`        | URL-safe token, high entropy, deterministic mapping policy |
@@ -162,10 +162,10 @@ CREATE INDEX idx_share_sets_lookup_active
 -- share_set_items: explicit ordered membership for deterministic rendering
 CREATE TABLE public.share_set_items (
   share_set_id uuid NOT NULL REFERENCES public.share_sets(id) ON DELETE CASCADE,
-  image_id uuid NOT NULL REFERENCES public.images(id) ON DELETE CASCADE,
+  media_item_id uuid NOT NULL REFERENCES public.media_items(id) ON DELETE CASCADE,
   item_order int NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (share_set_id, image_id)
+  PRIMARY KEY (share_set_id, media_item_id)
 );
 
 CREATE INDEX idx_share_set_items_share_order
@@ -265,7 +265,7 @@ CREATE POLICY share_set_items_write_owner_or_admin
 -- 3) upsert ordered members in share_set_items
 
 -- resolve_share_set(p_token text)
--- returns: share_set_id, image_id, item_order
+-- returns: share_set_id, media_item_id, item_order
 -- behavior:
 -- 1) hash incoming token and look up token_hash
 -- 2) enforce org, revoked_at, expires_at checks
@@ -277,7 +277,7 @@ CREATE POLICY share_set_items_write_owner_or_admin
 ```mermaid
 erDiagram
   share_sets ||--o{ share_set_items : contains
-  images ||--o{ share_set_items : referenced
+  media_items ||--o{ share_set_items : referenced
 
   share_sets {
     uuid id PK
@@ -291,7 +291,7 @@ erDiagram
 
   share_set_items {
     uuid share_set_id FK
-    uuid image_id FK
+    uuid media_item_id FK
     int item_order
     timestamptz created_at
   }
@@ -405,6 +405,6 @@ sequenceDiagram
 - [x] Share URL access is denied outside organization boundaries via RLS/policy checks.
 - [ ] Download dialog pre-fills title with project name when single-project scope is detected.
 - [ ] Download dialog pre-fills `bestLabel + date` for ad-hoc or mixed-project selections.
-- [x] ZIP export includes mixed media (images, PDFs, supported files) and starts a browser download.
+- [x] ZIP export includes mixed media items (photos, PDFs, and supported files) and starts a browser download.
 - [x] Copy link uses Clipboard API in secure contexts and shows success/error feedback.
 - [x] Native share action uses Web Share API only when feature support and activation constraints are met.

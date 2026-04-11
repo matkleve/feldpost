@@ -95,11 +95,11 @@ $$;
 
 ### 2.2 Roles
 
-| Role           | Capabilities                                                                      |
-| -------------- | --------------------------------------------------------------------------------- |
-| **admin**      | Full CRUD on all org data; manage users and roles; delete org resources.          |
-| **technician** | Upload images; edit own images (metadata, coordinates); create/manage own groups. |
-| **viewer**     | Read-only access to all org images, projects, and groups. No uploads, no edits.   |
+| Role           | Capabilities                                                                    |
+| -------------- | ------------------------------------------------------------------------------- |
+| **admin**      | Full CRUD on all org data; manage users and roles; delete org resources.        |
+| **technician** | Upload media; edit own media (metadata, coordinates); create/manage own groups. |
+| **viewer**     | Read-only access to all org media, projects, and groups. No uploads, no edits.  |
 
 The `viewer` role enables the Clerk persona (UC2) to browse and quote without risking data modification.
 
@@ -114,16 +114,16 @@ The `viewer` role enables the Clerk persona (UC2) to browse and quote without ri
 
 All policies below assume the `user_org_id()` helper from §2.1.
 
-### 3.1 Images Table
+### 3.1 Media Items Table
 
-| Operation  | Policy                                                                                                                             |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **SELECT** | `organization_id = user_org_id()` — all org members (including viewer) can read.                                                   |
-| **INSERT** | `user_id = auth.uid() AND organization_id = user_org_id()` — user owns the row; org must match. Viewers are blocked by role check. |
-| **UPDATE** | `(user_id = auth.uid() OR is_admin()) AND organization_id = user_org_id()` — owner or admin within the same org.                   |
-| **DELETE** | Same as UPDATE.                                                                                                                    |
+| Operation  | Policy                                                                                                                                   |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **SELECT** | `organization_id = user_org_id()` — all org members (including viewer) can read.                                                         |
+| **INSERT** | `created_by = auth.uid() AND organization_id = user_org_id()` — creator owns the row; org must match. Viewers are blocked by role check. |
+| **UPDATE** | `(created_by = auth.uid() OR is_admin()) AND organization_id = user_org_id()` — creator or admin within the same org.                    |
+| **DELETE** | Same as UPDATE.                                                                                                                          |
 
-Note: `images.organization_id` is denormalized from `profiles.organization_id` for RLS performance (avoids join on every SELECT). A trigger keeps them in sync.
+Note: `media_items.organization_id` is denormalized from `profiles.organization_id` for RLS performance (avoids join on every SELECT).
 
 ### 3.2 Profiles Table
 
@@ -150,7 +150,7 @@ Note: `images.organization_id` is denormalized from `profiles.organization_id` f
 
 - `projects`: SELECT by org members (`organization_id = user_org_id()`). INSERT/UPDATE/DELETE by owner or admin.
 - `metadata_keys`: scoped to `organization_id`. Readable by all org members. Writable by creator or admin.
-- `image_metadata`: inherits visibility/write permissions from the parent image.
+- `media_metadata`: inherits visibility/write permissions from the parent media item.
 
 ### 3.6 Saved Groups
 
@@ -165,8 +165,8 @@ Note: `images.organization_id` is denormalized from `profiles.organization_id` f
 ### 3.7 Coordinate Corrections
 
 - `coordinate_corrections`:
-  - **INSERT**: Any org member can log a correction for an image within the org.
-  - **SELECT**: Readable by the image owner and admins (audit trail).
+  - **INSERT**: Any org member can log a correction for a media item within the org.
+  - **SELECT**: Readable by the media owner and admins (audit trail).
   - **UPDATE / DELETE**: Not allowed (append-only audit log).
 
 ### 3.8 Share Sets (Export Links)
@@ -218,7 +218,7 @@ as $$
 $$;
 ```
 
-Viewers are blocked from INSERT/UPDATE/DELETE on `images`, `projects`, and `metadata_keys` by adding `AND NOT is_viewer()` to write policies.
+Viewers are blocked from INSERT/UPDATE/DELETE on `media_items`, `media_projects`, `media_metadata`, `projects`, and `metadata_keys` by adding `AND NOT is_viewer()` to write policies.
 
 ---
 
@@ -228,7 +228,7 @@ Viewers are blocked from INSERT/UPDATE/DELETE on `images`, `projects`, and `meta
 
 ```mermaid
 flowchart TD
-    subgraph Bucket["Supabase Storage: images/ (private)"]
+    subgraph Bucket["Supabase Storage: media/ (private, primary)"]
         direction TB
         ORG["{org_id}/"] --> USR["{user_id}/"]
         USR --> ORIG["{uuid}.jpg\n(original, compressed)"]
@@ -250,12 +250,13 @@ flowchart TD
     Policies --> Access
 ```
 
-- Images are stored in Supabase Storage in a private bucket named `images`.
+- Media files are stored in Supabase Storage in a private bucket named `media`.
+- Compatibility reads may still fallback to bucket `images` during transition phases.
 
 ### 4.1 Bucket Structure
 
 ```
-images/
+media/
   {org_id}/
     {user_id}/
       {uuid}.jpg          ← original (compressed)
@@ -281,7 +282,7 @@ Path segments use UUIDs only — no user-visible names, no sequential IDs.
 ### 4.4 Upload Constraints
 
 - Maximum file size: **25 MB** (enforced by Supabase Storage config).
-- Allowed MIME types: `image/jpeg`, `image/png`, `image/heic`, `image/heif`, `image/webp`.
+- Allowed MIME types include images, videos, and documents (for example `image/jpeg`, `video/mp4`, `application/pdf`).
 - HEIC/HEIF files are converted to JPEG client-side before upload (see architecture.md §5).
 
 ### 4.5 CORS Configuration

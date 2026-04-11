@@ -73,7 +73,7 @@ Upload Manager Pipeline
   ├── Persistence Contracts
   │   ├── `dedup_hashes`
   │   ├── duplicate-resolution decision state
-  │   └── `images` conflict lookup
+  │   └── `media_items` conflict lookup
   └── Output Events
       ├── batch progress / batch complete
       ├── upload skipped / upload failed
@@ -293,26 +293,26 @@ flowchart TD
   AA --> AB[Emit image and batch events]
 ```
 
-| Field / Artifact       | Source                                | Type                                                                                                                                | Notes                                                                                                                                             |
-| ---------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Folder batch status    | `UploadBatchService`                  | `UploadBatch`                                                                                                                       | Starts as `scanning`, then transitions to `uploading`                                                                                             |
-| Folder address hint    | Folder name parser                    | `string \| null`                                                                                                                    | Batch default address for jobs without file-level hint                                                                                            |
-| File title address     | Filename parser                       | `string \| null`                                                                                                                    | Overrides folder address hint                                                                                                                     |
-| Title geocode          | `GeocodingService.forward()`          | `ExifCoords \| null`                                                                                                                | Used for source reconciliation                                                                                                                    |
-| EXIF/title distance    | Haversine compare                     | `number \| null`                                                                                                                    | Mismatch if `distanceMeters > 15`                                                                                                                 |
-| Location sources       | Upload persistence (`images/media`)   | structured fields                                                                                                                   | Keeps EXIF and text-derived coordinates separately                                                                                                |
-| Address disambiguation | `LocationPathParserService` ranking   | `{ algorithm, probability, candidates }`                                                                                            | Used for ambiguous city assignment                                                                                                                |
-| Address notes          | Parser residual fragments             | `string[]`                                                                                                                          | Preserved on job + media metadata                                                                                                                 |
-| Content hash           | `core/content-hash.util.ts`           | `string`                                                                                                                            | SHA-256 from file head + EXIF-derived metadata                                                                                                    |
-| Dedup lookup result    | `check_dedup_hashes` RPC              | `{ content_hash, image_id }[]`                                                                                                      | Used for single and batch duplicate checks                                                                                                        |
-| Dedupe scope           | Media type gate                       | `'image'`                                                                                                                           | Videos and documents (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`) are excluded from hash dedupe |
-| Duplicate decision     | Duplicate-resolution modal            | `'use_existing' \| 'upload_anyway' \| 'reject'`                                                                                     | Can be batch-applied                                                                                                                              |
-| Duplicate apply mode   | Modal checkbox                        | `boolean`                                                                                                                           | Apply chosen decision to all matching jobs in batch                                                                                               |
-| Issue kind             | Upload lane presenter                 | `'duplicate_photo' \| 'missing_gps' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` | Drives lane placement and row actions                                                                                                             |
-| Uploaded actions       | Upload row presenter                  | `UploadItemAction[]`                                                                                                                | Available only after saved media exists                                                                                                           |
-| Conflict candidate     | `images` table lookup                 | `ConflictCandidate`                                                                                                                 | Photoless row near upload coords/address                                                                                                          |
-| Replace event          | `UploadManagerService.imageReplaced$` | `ImageReplacedEvent`                                                                                                                | Drives map/detail/card refresh                                                                                                                    |
-| Attach event           | `UploadManagerService.imageAttached$` | `ImageAttachedEvent`                                                                                                                | Upgrades photoless surfaces to media surfaces                                                                                                     |
+| Field / Artifact       | Source                                               | Type                                                                                                                                | Notes                                                                                                                                             |
+| ---------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Folder batch status    | `UploadBatchService`                                 | `UploadBatch`                                                                                                                       | Starts as `scanning`, then transitions to `uploading`                                                                                             |
+| Folder address hint    | Folder name parser                                   | `string \| null`                                                                                                                    | Batch default address for jobs without file-level hint                                                                                            |
+| File title address     | Filename parser                                      | `string \| null`                                                                                                                    | Overrides folder address hint                                                                                                                     |
+| Title geocode          | `GeocodingService.forward()`                         | `ExifCoords \| null`                                                                                                                | Used for source reconciliation                                                                                                                    |
+| EXIF/title distance    | Haversine compare                                    | `number \| null`                                                                                                                    | Mismatch if `distanceMeters > 15`                                                                                                                 |
+| Location sources       | Upload persistence (`media_items` + `media` storage) | structured fields                                                                                                                   | Keeps EXIF and text-derived coordinates separately                                                                                                |
+| Address disambiguation | `LocationPathParserService` ranking                  | `{ algorithm, probability, candidates }`                                                                                            | Used for ambiguous city assignment                                                                                                                |
+| Address notes          | Parser residual fragments                            | `string[]`                                                                                                                          | Preserved on job + media metadata                                                                                                                 |
+| Content hash           | `core/content-hash.util.ts`                          | `string`                                                                                                                            | SHA-256 from file head + EXIF-derived metadata                                                                                                    |
+| Dedup lookup result    | `check_dedup_hashes` RPC                             | `{ content_hash, media_item_id }[]`                                                                                                 | Used for single and batch duplicate checks                                                                                                        |
+| Dedupe scope           | Media type gate                                      | `'image'`                                                                                                                           | Videos and documents (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`) are excluded from hash dedupe |
+| Duplicate decision     | Duplicate-resolution modal                           | `'use_existing' \| 'upload_anyway' \| 'reject'`                                                                                     | Can be batch-applied                                                                                                                              |
+| Duplicate apply mode   | Modal checkbox                                       | `boolean`                                                                                                                           | Apply chosen decision to all matching jobs in batch                                                                                               |
+| Issue kind             | Upload lane presenter                                | `'duplicate_photo' \| 'missing_gps' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` | Drives lane placement and row actions                                                                                                             |
+| Uploaded actions       | Upload row presenter                                 | `UploadItemAction[]`                                                                                                                | Available only after saved media exists                                                                                                           |
+| Conflict candidate     | `media_items` table lookup                           | `ConflictCandidate`                                                                                                                 | Photoless row near upload coords/address                                                                                                          |
+| Replace event          | `UploadManagerService.imageReplaced$`                | `ImageReplacedEvent`                                                                                                                | Drives map/detail/card refresh                                                                                                                    |
+| Attach event           | `UploadManagerService.imageAttached$`                | `ImageAttachedEvent`                                                                                                                | Upgrades photoless surfaces to media surfaces                                                                                                     |
 
 ### Issue Kind Option Contract
 
@@ -385,36 +385,36 @@ flowchart TD
 
 ## File Map
 
-| File                                                      | Purpose                                          |
-| --------------------------------------------------------- | ------------------------------------------------ |
-| **Specs**                                                 |                                                  |
-| `docs/element-specs/upload-manager/upload-manager.md`                    | Parent contract                                  |
-| `docs/element-specs/upload-manager/upload-manager-pipeline.md`           | Child spec for deep operational behavior         |
-| `docs/element-specs/location-path-parser/location-path-parser.md`              | Address extraction from path hierarchy           |
-| `docs/element-specs/folder-scan/folder-scan.md`                       | Folder scanning and per-file aggregation         |
-| `docs/element-specs/filename-parser/filename-parser.md`                   | Per-file metadata extraction (address, date)     |
-| `docs/implementation-blueprints/upload-manager.md`        | Blueprint for implementation-level rollout notes |
-| **Services**                                              |                                                  |
-| `core/upload/upload-manager.service.ts`                   | Batch submission, queue draining, event fan-out  |
-| `core/upload/upload-new-pipeline.service.ts`              | New-upload path                                  |
-| `core/upload/folder-scan.service.ts`                      | Folder scan + folder-address-hint extraction     |
-| `core/filename-parser.service.ts`                         | File-level metadata (address, date) extraction   |
-| `core/location-path-parser.service.ts`                    | Address component parsing and validation         |
-| `core/geocoding.service.ts`                               | Forward geocoding for text-derived coordinates   |
-| `core/upload/upload-replace-pipeline.service.ts`          | Replace path                                     |
-| `core/upload/upload-attach-pipeline.service.ts`           | Attach path                                      |
-| `core/upload/upload-queue.service.ts`                     | Concurrency and running-slot management          |
-| `core/upload/upload-job-state.service.ts`                 | Job phase state and phase-change events          |
-| **Utilities & Constants**                                 |                                                  |
-| `core/location-path-parser/city-registry.const.ts`        | City whitelist lookup table                      |
-| `core/location-path-parser/postal-code-patterns.const.ts` | Country-specific postal code regexes             |
-| `core/location-path-parser/street-keywords.const.ts`      | Street type keywords (Gasse, Str., etc.)         |
-| `core/filename-parser/date-patterns.const.ts`             | ISO, timestamp, German date format regexes       |
-| `core/filename-parser/metadata-keywords.const.ts`         | DRAFT, THUMB, TEMP metadata keyword set          |
-| `core/location-path-parser.util.ts`                       | Shared validation utilities                      |
-| `core/filename-parser.util.ts`                            | Filename normalization utilities                 |
-| `features/upload/upload-duplicate-resolution-modal/*`     | Duplicate decision modal with batch-apply option |
-| `core/content-hash.util.ts`                               | Content hash generation                          |
+| File                                                              | Purpose                                          |
+| ----------------------------------------------------------------- | ------------------------------------------------ |
+| **Specs**                                                         |                                                  |
+| `docs/element-specs/upload-manager/upload-manager.md`             | Parent contract                                  |
+| `docs/element-specs/upload-manager/upload-manager-pipeline.md`    | Child spec for deep operational behavior         |
+| `docs/element-specs/location-path-parser/location-path-parser.md` | Address extraction from path hierarchy           |
+| `docs/element-specs/folder-scan/folder-scan.md`                   | Folder scanning and per-file aggregation         |
+| `docs/element-specs/filename-parser/filename-parser.md`           | Per-file metadata extraction (address, date)     |
+| `docs/implementation-blueprints/upload-manager.md`                | Blueprint for implementation-level rollout notes |
+| **Services**                                                      |                                                  |
+| `core/upload/upload-manager.service.ts`                           | Batch submission, queue draining, event fan-out  |
+| `core/upload/upload-new-pipeline.service.ts`                      | New-upload path                                  |
+| `core/upload/folder-scan.service.ts`                              | Folder scan + folder-address-hint extraction     |
+| `core/filename-parser.service.ts`                                 | File-level metadata (address, date) extraction   |
+| `core/location-path-parser.service.ts`                            | Address component parsing and validation         |
+| `core/geocoding.service.ts`                                       | Forward geocoding for text-derived coordinates   |
+| `core/upload/upload-replace-pipeline.service.ts`                  | Replace path                                     |
+| `core/upload/upload-attach-pipeline.service.ts`                   | Attach path                                      |
+| `core/upload/upload-queue.service.ts`                             | Concurrency and running-slot management          |
+| `core/upload/upload-job-state.service.ts`                         | Job phase state and phase-change events          |
+| **Utilities & Constants**                                         |                                                  |
+| `core/location-path-parser/city-registry.const.ts`                | City whitelist lookup table                      |
+| `core/location-path-parser/postal-code-patterns.const.ts`         | Country-specific postal code regexes             |
+| `core/location-path-parser/street-keywords.const.ts`              | Street type keywords (Gasse, Str., etc.)         |
+| `core/filename-parser/date-patterns.const.ts`                     | ISO, timestamp, German date format regexes       |
+| `core/filename-parser/metadata-keywords.const.ts`                 | DRAFT, THUMB, TEMP metadata keyword set          |
+| `core/location-path-parser.util.ts`                               | Shared validation utilities                      |
+| `core/filename-parser.util.ts`                                    | Filename normalization utilities                 |
+| `features/upload/upload-duplicate-resolution-modal/*`             | Duplicate decision modal with batch-apply option |
+| `core/content-hash.util.ts`                                       | Content hash generation                          |
 
 ## Wiring
 

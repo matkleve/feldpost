@@ -2,15 +2,15 @@
 
 > **Spec type:** System architecture (cross-cutting). This is NOT a standard element spec — it describes the data-flow and service orchestration across multiple components. For the standard element spec sections, see [workspace-pane.md](workspace-pane.md), [workspace-toolbar.md](workspace-toolbar.md), and [thumbnail-grid.md](thumbnail-grid.md).
 
-This document describes the complete data flow and component interaction for the Workspace Pane's view system: how images are loaded, grouped, sorted, filtered, and displayed. It covers the cluster-click flow, the toolbar controls, and the `WorkspaceViewService` that orchestrates everything.
+This document describes the complete data flow and component interaction for the Workspace Pane's view system: how media items are loaded, grouped, sorted, filtered, and displayed. It covers the cluster-click flow, the toolbar controls, and the `WorkspaceViewService` that orchestrates everything.
 
 ## What It Is
 
-The Workspace View System is the orchestration layer that transforms raw image data into the rendered workspace content model (sections, groups, and ordered thumbnails). It coordinates map-originated image loading with toolbar-driven grouping, sorting, and filtering.
+The Workspace View System is the orchestration layer that transforms raw media data into the rendered workspace content model (sections, groups, and ordered thumbnails). It coordinates map-originated media loading with toolbar-driven grouping, sorting, and filtering.
 
 ## What It Looks Like
 
-Users experience this system as a responsive workspace pane that immediately opens with image content after marker interactions. Group headers, thumbnail sections, and detail-view transitions reflect a deterministic pipeline: load raw images, apply filters, apply sort, apply grouping, then render. Toolbar controls update the same underlying model, so visible content stays consistent across single-photo and cluster flows.
+Users experience this system as a responsive workspace pane that immediately opens with media content after marker interactions. Group headers, thumbnail sections, and detail-view transitions reflect a deterministic pipeline: load raw media items, apply filters, apply sort, apply grouping, then render. Toolbar controls update the same underlying model, so visible content stays consistent across single-item and cluster flows.
 
 ## Where It Lives
 
@@ -23,10 +23,10 @@ Users experience this system as a responsive workspace pane that immediately ope
 
 | #   | Trigger                    | System Response                                                      | Notes                             |
 | --- | -------------------------- | -------------------------------------------------------------------- | --------------------------------- |
-| 1   | User clicks marker/cluster | Loads cluster images via RPC and sets raw image list                 | Single and cluster share pipeline |
+| 1   | User clicks marker/cluster | Loads cluster media via RPC and sets raw media list                  | Single and cluster share pipeline |
 | 2   | Raw list updates           | Applies filter, sort, and grouping pipeline                          | Deterministic order               |
 | 3   | Toolbar control changes    | Recomputes output sections without reloading unchanged raw data      | Reactive updates                  |
-| 4   | Single image click path    | Opens detail view and still maintains grid state for back navigation | No state loss                     |
+| 4   | Single media click path    | Opens detail view and still maintains grid state for back navigation | No state loss                     |
 | 5   | Cluster path               | Clears detail selection and renders grouped thumbnail content        | Grid-first display                |
 
 ## Component Hierarchy
@@ -44,7 +44,7 @@ MapShellComponent
 │       ├── GroupHeader(s)
 │       └── ThumbnailGrid
 └── WorkspaceViewService (orchestration)
-    ├── Raw image state
+    ├── Raw media state
     ├── FilterService integration
     ├── Sorting stage
     └── Grouping stage
@@ -52,15 +52,15 @@ MapShellComponent
 
 ## Data
 
-| Source                           | Contract                                                           | Operation                          |
-| -------------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
-| Cluster/single marker result set | `cluster_images` RPC payload (`images` rows; compatibility naming) | Load raw workspace media list      |
-| Filter state                     | `FilterService` active filters + project selection                 | Transform pipeline stage           |
-| Sort state                       | Toolbar sort configuration                                         | Transform pipeline stage           |
-| Grouping state                   | Toolbar grouping configuration                                     | Transform pipeline stage           |
-| Output model                     | `groupedSections` view model                                       | Emit to workspace content renderer |
+| Source                           | Contract                                                                 | Operation                          |
+| -------------------------------- | ------------------------------------------------------------------------ | ---------------------------------- |
+| Cluster/single marker result set | `cluster_images` RPC payload (`media_items` rows + compatibility fields) | Load raw workspace media list      |
+| Filter state                     | `FilterService` active filters + project selection                       | Transform pipeline stage           |
+| Sort state                       | Toolbar sort configuration                                               | Transform pipeline stage           |
+| Grouping state                   | Toolbar grouping configuration                                           | Transform pipeline stage           |
+| Output model                     | `groupedSections` view model                                             | Emit to workspace content renderer |
 
-Compatibility note: storage/query layers may still use `image*` naming while UI/domain contracts should prefer `media` terminology.
+Compatibility note: `image_id` remains a compatibility field in some RPCs; canonical persistence identity is `media_item_id`.
 
 ## State
 
@@ -111,7 +111,7 @@ Compatibility note: storage/query layers may still use `image*` naming while UI/
 - [ ] Marker and cluster interactions always produce a valid workspace content model.
 - [ ] Pipeline order remains filter -> sort -> group before render.
 - [ ] Toolbar changes update workspace output consistently without full app reload.
-- [ ] Single-image and cluster flows preserve deterministic behavior across back-navigation.
+- [ ] Single-item and cluster flows preserve deterministic behavior across back-navigation.
 
 ---
 
@@ -128,16 +128,16 @@ flowchart TB
     MarkerClick["Marker Click\n(single or cluster)"]
     MapZone -->|"handlePhotoMarkerClick(key)"| MarkerClick
 
-    MarkerClick -->|"single (count=1)"| SingleFlow["Load Cluster Images\n+ Open Detail View"]
-    MarkerClick -->|"cluster (count>1)"| ClusterLoad["Load Cluster Images"]
+    MarkerClick -->|"single (count=1)"| SingleFlow["Load Cluster Media\n+ Open Detail View"]
+    MarkerClick -->|"cluster (count>1)"| ClusterLoad["Load Cluster Media"]
 
-    SingleFlow -->|"query images in grid cell"| Supa["Supabase RPC\ncluster_images(lat, lng, zoom)"]
-    ClusterLoad -->|"query images in grid cell"| Supa
-    Supa -->|"image list"| WVS["WorkspaceViewService"]
+    SingleFlow -->|"query media in grid cell"| Supa["Supabase RPC\ncluster_images(lat, lng, zoom)"]
+    ClusterLoad -->|"query media in grid cell"| Supa
+    Supa -->|"media list"| WVS["WorkspaceViewService"]
 
     subgraph WVS_Inner["WorkspaceViewService"]
         direction TB
-        Raw["Raw Image List"]
+        Raw["Raw Media List"]
         Filter["Apply Filters\n(FilterService)"]
         Sort["Apply Sort"]
         Group["Apply Grouping"]
@@ -179,7 +179,7 @@ flowchart TB
 
 ### Solution: RPC `cluster_images`
 
-A Supabase RPC that fetches all images within a specific grid cell. Takes the cluster's displayed coordinates (AVG) and zoom level, internally re-snaps them to the grid, and returns individual images with metadata.
+A Supabase RPC that fetches all media rows within a specific grid cell. It takes the cluster's displayed coordinates (AVG) and zoom level, re-snaps them to the grid, and returns compatibility `image_id` plus canonical `media_item_id`.
 
 ```mermaid
 sequenceDiagram
@@ -198,7 +198,7 @@ sequenceDiagram
     Supa-->>MS: [{id, thumbnail_path, captured_at, project_ids, ...}, ...]
     MS->>WVS: loadClusterImages() → rawImages.set(images)
     WVS->>WVS: apply filters → sort → group
-    WVS->>WP: emit grouped image sections
+    WVS->>WP: emit grouped media sections
     WP->>WP: render group headings + thumbnail grid
     alt count === 1 && mediaId
         MS->>MS: openDetailView(mediaId)
@@ -212,102 +212,69 @@ sequenceDiagram
 ### New RPC: `cluster_images`
 
 ```sql
--- Returns all individual images that belong to a specific cluster grid cell.
--- Re-snaps incoming AVG coordinates to the grid before comparing.
 CREATE OR REPLACE FUNCTION public.cluster_images(
   p_cluster_lat numeric,
   p_cluster_lng numeric,
-  p_zoom        int
+  p_zoom integer
 )
-RETURNS TABLE (
-  image_id       uuid,
-  latitude       numeric,
-  longitude      numeric,
+RETURNS TABLE(
+  image_id uuid,
+  media_item_id uuid,
+  latitude numeric,
+  longitude numeric,
   thumbnail_path text,
-  storage_path   text,
-  captured_at    timestamptz,
-  created_at     timestamptz,
-    project_ids    uuid[],
-    project_names  text[],
-  direction      numeric,
-  exif_latitude  numeric,
+  storage_path text,
+  captured_at timestamptz,
+  created_at timestamptz,
+  project_id uuid,
+  project_name text,
+  project_ids uuid[],
+  project_names text[],
+  direction numeric,
+  exif_latitude numeric,
   exif_longitude numeric,
-  address_label  text,
-  city           text,
-  district       text,
-  street         text,
-  country        text,
-  user_name      text
+  address_label text,
+  city text,
+  district text,
+  street text,
+  country text,
+  user_name text
 )
-LANGUAGE sql STABLE SECURITY DEFINER
-SET search_path = public
 AS $$
-  WITH grid AS (
-    SELECT
-      CASE
-        WHEN p_zoom >= 19 THEN 0::numeric
-        ELSE (80.0 * 360.0) / (256.0 * power(2, p_zoom))
-      END AS cell_size
-  ),
-  -- Re-snap AVG coords from viewport_markers back to the grid cell.
-  snapped_input AS (
-    SELECT
-      CASE WHEN g.cell_size > 0
-        THEN ROUND(p_cluster_lat / g.cell_size) * g.cell_size
-        ELSE p_cluster_lat
-      END AS snap_lat,
-      CASE WHEN g.cell_size > 0
-        THEN ROUND(p_cluster_lng / g.cell_size) * g.cell_size
-        ELSE p_cluster_lng
-      END AS snap_lng
-    FROM grid g
-  )
   SELECT
-    i.id            AS image_id,
-    i.latitude,
-    i.longitude,
-    i.thumbnail_path,
-    i.storage_path,
-    i.captured_at,
-    i.created_at,
-    COALESCE(ip.project_ids, '{}'::uuid[]) AS project_ids,
-    COALESCE(ip.project_names, '{}'::text[]) AS project_names,
-    i.direction,
-    i.exif_latitude,
-    i.exif_longitude,
-    i.address_label,
-    i.city,
-    i.district,
-    i.street,
-    i.country,
-    pr.full_name    AS user_name
-  FROM public.images i
-  CROSS JOIN grid g
-  CROSS JOIN snapped_input si
-    LEFT JOIN LATERAL (
-        SELECT
-            array_agg(p.id ORDER BY p.name) AS project_ids,
-            array_agg(p.name ORDER BY p.name) AS project_names
-        FROM public.image_projects ip
-        JOIN public.projects p ON p.id = ip.project_id
-        WHERE ip.image_id = i.id
-    ) ip ON TRUE
-  LEFT JOIN public.profiles pr ON pr.id = i.user_id
-  WHERE i.organization_id = public.user_org_id()
-    AND i.latitude  IS NOT NULL
-    AND i.longitude IS NOT NULL
-    AND (
-      (g.cell_size > 0 AND
-       ROUND(i.latitude  / g.cell_size) * g.cell_size = si.snap_lat AND
-       ROUND(i.longitude / g.cell_size) * g.cell_size = si.snap_lng)
-      OR
-      (g.cell_size = 0 AND
-       ROUND(i.latitude, 7) = p_cluster_lat AND
-       ROUND(i.longitude, 7) = p_cluster_lng)
-    )
-  ORDER BY COALESCE(i.captured_at, i.created_at) DESC
-  LIMIT 500;
-$$;
+    COALESCE(m.source_image_id, m.id) AS image_id,
+    m.id AS media_item_id,
+    m.latitude,
+    m.longitude,
+    m.thumbnail_path,
+    m.storage_path,
+    m.captured_at,
+    m.created_at,
+    mp.project_ids[1] AS project_id,
+    mp.project_names[1] AS project_name,
+    COALESCE(mp.project_ids, '{}'::uuid[]) AS project_ids,
+    COALESCE(mp.project_names, '{}'::text[]) AS project_names,
+    NULL::numeric AS direction,
+    m.exif_latitude,
+    m.exif_longitude,
+    m.address_label,
+    m.city,
+    m.district,
+    m.street,
+    m.country,
+    pr.full_name AS user_name
+  FROM public.media_items m
+  LEFT JOIN LATERAL (
+    SELECT
+      array_agg(p.id ORDER BY p.name) AS project_ids,
+      array_agg(p.name ORDER BY p.name) AS project_names
+    FROM public.media_projects mp
+    JOIN public.projects p ON p.id = mp.project_id
+    WHERE mp.media_item_id = m.id
+  ) mp ON TRUE
+  LEFT JOIN public.profiles pr ON pr.id = m.created_by
+  WHERE m.organization_id = public.user_org_id();
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
 ```
 
 ---
@@ -354,7 +321,7 @@ flowchart LR
 
 1. **Signals, not RxJS**: The entire pipeline uses Angular computed signals. When any input changes, the pipeline re-evaluates. This is efficient because Angular only recomputes what changed.
 
-2. **Client-side grouping, not server-side**: Images are loaded once (from cluster query or viewport query), then grouped/sorted/filtered in-memory. This avoids redundant server round-trips when the user drags properties up/down in the Grouping dropdown.
+2. **Client-side grouping, not server-side**: Media items are loaded once (from cluster query or viewport query), then grouped/sorted/filtered in-memory. This avoids redundant server round-trips when the user drags properties up/down in the Grouping dropdown.
 
 3. **Group headings are virtual**: They're data structures, not DOM elements. The thumbnail grid uses virtual scrolling and renders headings as part of the scroll stream.
 
@@ -365,9 +332,9 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph WVS["WorkspaceViewService Output"]
-        GS1["GroupedSection: Zürich (4 images)"]
-        GS2["GroupedSection: Wien (3 images)"]
-        GS3["GroupedSection: No City (1 image)"]
+        GS1["GroupedSection: Zürich (4 media items)"]
+        GS2["GroupedSection: Wien (3 media items)"]
+        GS3["GroupedSection: No City (1 media item)"]
     end
 
     subgraph Render["Workspace Content Rendering"]
@@ -391,7 +358,7 @@ flowchart TD
 GroupHeader                                ← sticky within scroll container
 ├── CollapseToggle (▼/▶)                   ← rotates 90° on collapse
 ├── GroupName                              ← e.g., "Zürich"
-├── ImageCount                             ← e.g., "4 photos", --text-caption
+├── ImageCount                             ← e.g., "4 media items", --text-caption
 └── .ui-spacer
 ```
 
@@ -463,7 +430,7 @@ flowchart TD
     end
 
     subgraph Effects["System Effects"]
-        LoadImages["Load images\n(cluster_images RPC)"]
+        LoadImages["Load media\n(cluster_images RPC)"]
         ReGroup["Re-group\n(client-side)"]
         ReSort["Re-sort\n(client-side)"]
         ReFilter["Re-filter\n(client-side)"]
@@ -471,8 +438,8 @@ flowchart TD
         OpenDetail["Open Detail View"]
     end
 
-    ClickMarker -->|"count=1"| LoadAndDetail["Load images + Open Detail"]
-    ClickMarker -->|"count>1"| ClusterFlow["Load images + Clear Detail"]
+    ClickMarker -->|"count=1"| LoadAndDetail["Load media + Open Detail"]
+    ClickMarker -->|"count>1"| ClusterFlow["Load media + Clear Detail"]
     LoadAndDetail --> ReFilter --> ReSort --> ReGroup --> ReRender
     LoadAndDetail --> OpenDetail
     ClusterFlow --> ClearDetail["detailMediaId.set(null)"]
@@ -509,13 +476,13 @@ flowchart TD
 | `features/map/workspace-pane/filter-rule-row.component.ts`             | Single filter rule row              | filter-dropdown.md   |
 | `features/map/workspace-pane/projects-dropdown.component.ts/html/scss` | Projects checklist dropdown         | projects-dropdown.md |
 | `features/map/workspace-pane/group-header.component.ts`                | Collapsible group heading           | (this doc)           |
-| `features/map/workspace-pane/property-picker.component.ts`             | Floating property picker            | metadata-service.md |
-| `features/settings/property-manager/property-manager.component.*`      | Settings page property CRUD         | metadata-service.md |
-| `core/workspace-view.service.ts`                                       | Image pipeline: filter→sort→group   | (this doc)           |
+| `features/map/workspace-pane/property-picker.component.ts`             | Floating property picker            | metadata-service.md  |
+| `features/settings/property-manager/property-manager.component.*`      | Settings page property CRUD         | metadata-service.md  |
+| `core/workspace-view.service.ts`                                       | Media pipeline: filter→sort→group   | (this doc)           |
 | `core/filter.service.ts`                                               | Filter rule state + query building  | filter-dropdown.md   |
-| `core/metadata.service.ts`                                             | Property CRUD + value management    | metadata-service.md |
-| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                     | New RPC for cluster image loading   | (this doc)           |
-| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | metadata-service.md |
+| `core/metadata.service.ts`                                             | Property CRUD + value management    | metadata-service.md  |
+| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                     | New RPC for cluster media loading   | (this doc)           |
+| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | metadata-service.md  |
 
 ---
 
@@ -534,7 +501,7 @@ gantt
     FilterService                     :a4, 1, 2
 
     section Workspace Pane
-    Cluster click → load images       :crit, b1, 2, 3
+    Cluster click → load media        :crit, b1, 2, 3
     WorkspaceToolbar (4 buttons)      :b2, 2, 3
     ThumbnailGrid + ThumbnailCard     :b3, 3, 4
     GroupHeader (collapsible)          :b4, 4, 5
@@ -555,7 +522,7 @@ gantt
 
 1. `cluster_images` RPC migration
 2. `WorkspaceViewService`, `FilterService`, `MetadataService`
-3. Wire cluster click → load images → display in workspace
+3. Wire cluster click → load media → display in workspace
 
 ### Phase 2 — Workspace Pane
 
@@ -574,4 +541,4 @@ gantt
 
 11. DB migration for `value_type` + `chip_options`
 12. `PropertyManager` in Settings page
-13. `PropertyPicker` in Image Detail View
+13. `PropertyPicker` in Media Detail View

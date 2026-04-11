@@ -4,7 +4,7 @@
 
 ## What It Is
 
-A horizontal row of tabs inside the Workspace Pane. Each tab represents a group of images. The first tab is always Active Selection (ephemeral, current map selections). Remaining tabs are user-created named groups. A "+" button at the end creates new groups.
+A horizontal row of tabs inside the Workspace Pane. Each tab represents a group of media items. The first tab is always Active Selection (ephemeral, current map selections). Remaining tabs are user-created named groups. A "+" button at the end creates new groups.
 
 ## What It Looks Like
 
@@ -17,14 +17,14 @@ Scrollable horizontal row, compact tab height (28px). Tabs are pills: `--color-b
 
 ## Actions
 
-| #   | User Action              | System Response                                   | Triggers              |
-| --- | ------------------------ | ------------------------------------------------- | --------------------- |
-| 1   | Clicks a tab             | Content area switches to that group's thumbnails  | `activeTabId` changes |
-| 2   | Clicks "+" button        | Creates a new empty named group, prompts for name | New tab appears       |
-| 3   | Long-presses a named tab | Opens context menu: Rename, Delete                | Context menu          |
-| 4   | Selects "Rename"         | Tab label becomes editable inline input           | Focus on input        |
-| 5   | Selects "Delete"         | Confirmation prompt, then removes group           | Tab removed           |
-| 6   | Scrolls horizontally     | Reveals overflow tabs                             | Native scroll         |
+| #   | User Action              | System Response                                        | Triggers              |
+| --- | ------------------------ | ------------------------------------------------------ | --------------------- |
+| 1   | Clicks a tab             | Content area switches to that group's media thumbnails | `activeTabId` changes |
+| 2   | Clicks "+" button        | Creates a new empty named group, prompts for name      | New tab appears       |
+| 3   | Long-presses a named tab | Opens context menu: Rename, Delete                     | Context menu          |
+| 4   | Selects "Rename"         | Tab label becomes editable inline input                | Focus on input        |
+| 5   | Selects "Delete"         | Confirmation prompt, then removes group                | Tab removed           |
+| 6   | Scrolls horizontally     | Reveals overflow tabs                                  | Native scroll         |
 
 ## Component Hierarchy
 
@@ -48,10 +48,10 @@ flowchart LR
   S --> UI
 ```
 
-| Field            | Source                                        | Type           |
-| ---------------- | --------------------------------------------- | -------------- |
-| Saved groups     | `supabase.from('saved_groups').select(...)`   | `SavedGroup[]` |
-| Selection images | In-memory (Active Selection is not persisted) | `Image[]`      |
+| Field                 | Source                                        | Type               |
+| --------------------- | --------------------------------------------- | ------------------ |
+| Saved groups          | `supabase.from('saved_groups').select(...)`   | `SavedGroup[]`     |
+| Selection media items | In-memory (Active Selection is not persisted) | `WorkspaceMedia[]` |
 
 ## State
 

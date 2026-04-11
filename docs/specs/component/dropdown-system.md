@@ -92,7 +92,7 @@ Every floating menu surface in Feldpost and which `dd-*` pieces it uses:
 | 2   | **Grouping Dropdown**         | —      | ✅    | ✅             | ✅       | ✅   | —          | —     | Drop zones, selected state, CDK drag, clear button |
 | 3   | **Projects Dropdown**         | ✅     | ✅    | —              | —        | —    | ✅         | —     | Checkbox column, count trailing, "All" separator   |
 | 4   | **Filter Dropdown**           | —      | —     | —              | —        | —    | ✅         | ✅    | Notion-style filter rules (form rows)              |
-| 5   | **Image Detail Context Menu** | —      | ✅    | —              | —        | —    | —          | —     | Danger item, positioning                           |
+| 5   | **Media Detail Context Menu** | —      | ✅    | —              | —        | —    | —          | —     | Danger item, positioning                           |
 | 6   | **Search Bar Dropdown**       | —      | —     | —              | —        | —    | —          | —     | Separate system (`.ui-item` grid, taller rows)     |
 | 7   | **Metadata Key Suggestion**   | —      | ✅    | —              | —        | —    | —          | —     | Type badge trailing, create action (future)        |
 
@@ -130,7 +130,7 @@ Global dd-* classes (styles.scss)
 ├── grouping-dropdown      ← items with drag handles, section labels, dividers
 ├── projects-dropdown      ← search, items with checkboxes, action row
 ├── filter-dropdown        ← empty state, action row (rules are form-specific)
-├── image-detail context   ← items container, danger item
+├── media-detail context   ← items container, danger item
 └── [future] any new menu  ← pick and compose from dd-* classes
 ```
 
@@ -146,7 +146,7 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 
 | File                                                                                              | Purpose                                                   |
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `docs/element-specs/component/dropdown-system.md`                                                           | Shared dropdown visual contract                           |
+| `docs/element-specs/component/dropdown-system.md`                                                 | Shared dropdown visual contract                           |
 | `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
@@ -180,6 +180,6 @@ None - delegated to consumer feature services.
 - [x] Grouping dropdown uses global `dd-*` classes, SCSS only has drop zones + CDK + selected
 - [x] Projects dropdown uses global `dd-*` classes, SCSS only has checkbox + count + "All" separator
 - [x] Filter dropdown uses `dd-empty` and `dd-action-row`, form rules stay component-specific
-- [x] Image detail context menu uses `dd-items` and `dd-item`/`dd-item--danger`
+- [x] Media detail context menu uses `dd-items` and `dd-item`/`dd-item--danger`
 - [x] Danger items preserve `--color-danger` on both label and icon
 - [ ] Metadata Key Suggestion dropdown uses `dd-item` + type badge (future)

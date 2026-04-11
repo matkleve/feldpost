@@ -153,10 +153,10 @@ WorkspacePaneComponent (seitenübergreifend)
 
 | Source                      | Fields Needed                                                        | Purpose                                      |
 | --------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
-| `images` table              | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
+| `media_items` table         | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
 | `MediaPageCacheService`     | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
 | `PhotoLoadService`          | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
-| `saved_groups` table        | id, name, org_id, member images                                      | Group filter options (Phase 2)               |
+| `saved_groups` table        | id, name, org_id, member media items                                 | Group filter options (Phase 2)               |
 | `UploadManagerService`      | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data              |
 | `WorkspaceViewService`      | getGroupedAndFiltered() logic (reuse)                                | Grouping/filtering/sorting                   |
 | `WorkspaceSelectionService` | selectedMediaIds, toggleSelection()                                  | Selection state for "Selected Items" tab     |
@@ -192,9 +192,9 @@ flowchart LR
 | `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | How grid is organized into sections              |
 | `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | Grid sort order                                  |
 | `activeFilters`    | `FilterSpec[]`                                      | `[]`       | Applied filter chips (projects, date ranges)     |
-| `filteredImages`   | `Signal<Image[]>`                                   | `[]`       | Computed: media matching active filters          |
-| `groupedAndSorted` | `Signal<ImageGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted            |
-| `cachedMediaItems` | `Signal<Image[]>`                                   | `[]`       | Route-stable cached snapshot for instant restore |
+| `filteredImages`   | `Signal<WorkspaceMedia[]>`                          | `[]`       | Computed: media items matching active filters    |
+| `groupedAndSorted` | `Signal<MediaGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted            |
+| `cachedMediaItems` | `Signal<WorkspaceMedia[]>`                          | `[]`       | Route-stable cached snapshot for instant restore |
 | `cacheWarm`        | `Signal<boolean>`                                   | `false`    | Whether first paint came from cache              |
 | `hoveredMediaId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
 | `detailMediaId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |

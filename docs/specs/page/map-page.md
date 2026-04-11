@@ -23,18 +23,18 @@ Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remai
 
 ## Actions
 
-| #   | User Action                             | System Response                                                                                                           | Triggers                                                                     |
-| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 1   | Navigates to `/` (authenticated)        | Renders full map shell with sidebar, map, floating controls                                                               | Map init via `MapAdapter`                                                    |
-| 2   | Resizes browser window                  | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet                   | Responsive breakpoint                                                        |
+| #   | User Action                             | System Response                                                                                                           | Triggers                                                                                  |
+| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 1   | Navigates to `/` (authenticated)        | Renders full map shell with sidebar, map, floating controls                                                               | Map init via `MapAdapter`                                                                 |
+| 2   | Resizes browser window                  | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet                   | Responsive breakpoint                                                                     |
 | 3   | Opens workspace pane                    | Drag Divider appears, map zone shrinks via clip-path reveal                                                               | Workspace Pane slides in; see [workspace-pane spec](../workspace/workspace-pane.md) §1/1b |
-| 4   | Enters placement mode                   | Map Container gets crosshair cursor, Placement Banner appears                                                             | `placementActive` signal                                                     |
-| 5   | Requests pin-drop from search bar       | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")                          | `searchPlacementActive` signal                                               |
+| 4   | Enters placement mode                   | Map Container gets crosshair cursor, Placement Banner appears                                                             | `placementActive` signal                                                                  |
+| 5   | Requests pin-drop from search bar       | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")                          | `searchPlacementActive` signal                                                            |
 | 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                     | `workspacePaneOpen` → false; see [workspace-pane spec](../workspace/workspace-pane.md) §3 |
-| 7   | Clicks empty map area                   | Deselects the active marker (selection highlight clears); workspace pane stays open                                       | `selectedMarkerKey` → null                                                   |
-| 8   | GPS geolocation resolves during startup | Stores/updates user position and marker without forced recenter                                                           | startup geolocation flow                                                     |
-| 9   | GPS toggle is active                    | Runs periodic GPS refresh (~60s) and keeps user marker above photo markers                                                | `gpsTrackingActive` signal + Leaflet z-index offset                          |
-| 10  | Clicks `Zoom to location` in detail     | Centers map to image coords at detail zoom (without fly animation) and applies marker/cluster spotlight when render-ready | `onZoomToLocation` deferred spotlight flow                                   |
+| 7   | Clicks empty map area                   | Deselects the active marker (selection highlight clears); workspace pane stays open                                       | `selectedMarkerKey` → null                                                                |
+| 8   | GPS geolocation resolves during startup | Stores/updates user position and marker without forced recenter                                                           | startup geolocation flow                                                                  |
+| 9   | GPS toggle is active                    | Runs periodic GPS refresh (~60s) and keeps user marker above photo markers                                                | `gpsTrackingActive` signal + Leaflet z-index offset                                       |
+| 10  | Clicks `Zoom to location` in detail     | Centers map to image coords at detail zoom (without fly animation) and applies marker/cluster spotlight when render-ready | `onZoomToLocation` deferred spotlight flow                                                |
 
 ## Component Hierarchy
 
@@ -64,10 +64,10 @@ flowchart LR
   S --> UI
 ```
 
-| Field            | Source                                                   | Type            |
-| ---------------- | -------------------------------------------------------- | --------------- |
-| Viewport markers | `supabase.rpc('viewport_markers', { bounds, zoom })`     | `ViewportRow[]` |
-| User images      | `supabase.from('images').select('*').eq('user_id', uid)` | `ImageRecord[]` |
+| Field            | Source                                                           | Type            |
+| ---------------- | ---------------------------------------------------------------- | --------------- |
+| Viewport markers | `supabase.rpc('viewport_markers', { bounds, zoom })`             | `ViewportRow[]` |
+| User media       | `supabase.from('media_items').select('*').eq('created_by', uid)` | `MediaRecord[]` |
 
 ## State
 

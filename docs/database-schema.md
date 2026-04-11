@@ -249,7 +249,7 @@ Columns:
 
 Notes:
 
-- Projects are grouping entities connected to images via `image_projects` (many-to-many).
+- Projects are grouping entities connected to media via `media_projects` (many-to-many).
 - Projects are scoped to an organization. Users can only see projects in their own organization.
 - `created_by` uses ON DELETE SET NULL (not RESTRICT) so that user deletion is not blocked by project ownership. The project survives; authorship becomes unknown.
 - Access to projects is controlled by RLS (see `security-boundaries.md`).
@@ -267,7 +267,7 @@ Table: `media_items`
 Columns:
 
 - `id` (uuid, primary key, default `gen_random_uuid()`)
-- `user_id` (uuid, not null, references `auth.users(id)` ON DELETE CASCADE)
+- `created_by` (uuid, references `profiles(id)` ON DELETE SET NULL)
 - `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
 - `storage_path` (text, nullable) — relative path in Supabase Storage (e.g., `{org_id}/{user_id}/{uuid}.jpg`). NULL for photoless datapoints (rows created via folder import or manual address entry that have no photo yet). Not a full URL. URLs are generated at runtime (signed or public).
 - `thumbnail_path` (text, not null) — relative path to the 128×128 JPEG thumbnail in Supabase Storage.
@@ -280,12 +280,12 @@ Columns:
 - `captured_at` (timestamptz, nullable) — capture time from EXIF when available
 - `created_at` (timestamptz, not null, default `now()`) — upload/record creation time
 - `updated_at` (timestamptz, not null, default `now()`)
-- `address_label` (text, nullable) — human-readable address string for this image (e.g., "Burgstraße 7, 8001 Zürich"). Populated on upload from user input, filename resolution, or reverse geocoding. Used by `AddressResolverService` for DB-first autocomplete ranking. NULL for images imported before this column was introduced.
+- `address_label` (text, nullable) — human-readable address string for this media item (e.g., "Burgstraße 7, 8001 Zürich"). Populated on upload from user input, filename resolution, or reverse geocoding.
 - `city` (text, nullable) — structured city name from reverse geocoding (e.g., "Wien"). Used for grouping by city.
 - `district` (text, nullable) — structured district/suburb name from reverse geocoding (e.g., "Donaustadt"). Used for grouping by district.
 - `street` (text, nullable) — structured street name from reverse geocoding (e.g., "Seestadt-Straße"). Used for grouping by street.
 - `country` (text, nullable) — structured country name from reverse geocoding (e.g., "Austria"). Used for grouping by country.
-- `location_unresolved` (boolean, nullable, default FALSE) — TRUE for images imported via `FolderImportAdapter` that were skipped during the review phase without a resolved location. Images with `location_unresolved = TRUE` are excluded from all viewport queries and do not appear on the map. See `folder-import.md` §6.
+- `location_unresolved` (boolean, nullable, default FALSE) — TRUE for media items imported via `FolderImportAdapter` that were skipped during the review phase without a resolved location.
 
 **CHECK Constraints**
 
@@ -301,8 +301,8 @@ CHECK (direction IS NULL OR direction BETWEEN 0 AND 360)
 
 ```mermaid
 flowchart LR
-    A[INSERT or UPDATE<br>latitude / longitude] --> B[trg_images_geog<br>BEFORE trigger]
-    B --> C[update_image_geog]
+    A[INSERT or UPDATE<br>latitude / longitude] --> B[trg_media_items_geog<br>BEFORE trigger]
+    B --> C[sync_media_item_geog]
     C --> D["SET geog = ST_SetSRID(<br>ST_MakePoint(lng, lat), 4326)<br>::geography"]
     C --> E["SET updated_at = now()"]
     D --> F[Row written to disk]
@@ -312,7 +312,7 @@ flowchart LR
 The `geog` column is maintained by a trigger that fires on INSERT and UPDATE of `latitude` or `longitude`:
 
 ```sql
-CREATE OR REPLACE FUNCTION update_image_geog() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION sync_media_item_geog() RETURNS trigger AS $$
 BEGIN
   NEW.geog := ST_SetSRID(ST_MakePoint(NEW.longitude, NEW.latitude), 4326)::geography;
   NEW.updated_at := now();
@@ -320,44 +320,44 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_images_geog
-  BEFORE INSERT OR UPDATE OF latitude, longitude ON images
-  FOR EACH ROW EXECUTE FUNCTION update_image_geog();
+CREATE TRIGGER trg_media_items_geog
+    BEFORE INSERT OR UPDATE OF latitude, longitude ON media_items
+    FOR EACH ROW EXECUTE FUNCTION sync_media_item_geog();
 ```
 
 **Invariants**
 
-- Every image has valid spatial (lat/lng) and temporal context (`captured_at` or `created_at`).
-- Ownership is enforced via `user_id` and organization-scoped RLS.
+- Every media item has valid spatial (lat/lng) and temporal context (`captured_at` or `created_at`).
+- Ownership is enforced via `created_by` and organization-scoped RLS.
 - EXIF and corrected coordinates are never conflated; if both exist, corrected coordinates are used for spatial queries.
 - `organization_id` is denormalized from the user's profile for efficient RLS checks (avoids a join on every query).
 
 ---
 
-## 7a. Image Projects Join Table
+## 7a. Media Projects Join Table
 
-Table: `image_projects`
+Table: `media_projects`
 
 Purpose:
 
-- Model many-to-many membership between images and projects.
-- Allow one image to appear in multiple projects.
+- Model many-to-many membership between media items and projects.
+- Allow one media item to appear in multiple projects.
 
 Columns:
 
-- `image_id` (uuid, not null, references `images(id)` ON DELETE CASCADE)
+- `media_item_id` (uuid, not null, references `media_items(id)` ON DELETE CASCADE)
 - `project_id` (uuid, not null, references `projects(id)` ON DELETE CASCADE)
 - `created_at` (timestamptz, not null, default `now()`)
 
 Primary Key:
 
-- (`image_id`, `project_id`)
+- (`media_item_id`, `project_id`)
 
 Invariants:
 
 - Duplicate memberships are prevented by the composite primary key.
-- Cross-organization links are rejected by trigger/RLS policy (`images.organization_id` must equal `projects.organization_id`).
-- Deleting an image or project removes only membership links, not the surviving parent rows.
+- Cross-organization links are rejected by trigger/RLS policy (`media_items.organization_id` must equal `projects.organization_id`).
+- Deleting a media item or project removes only membership links, not the surviving parent rows.
 
 ---
 
@@ -379,18 +379,18 @@ Uniqueness (enforced, not optional):
 
 Note: `created_by` uses ON DELETE SET NULL (not RESTRICT) so user deletion is not blocked.
 
-Table: `image_metadata`
+Table: `media_metadata`
 
 Columns:
 
-- `image_id` (uuid, references `images(id)` ON DELETE CASCADE)
+- `media_item_id` (uuid, references `media_items(id)` ON DELETE CASCADE)
 - `metadata_key_id` (uuid, references `metadata_keys(id)` ON DELETE CASCADE)
 - `value_text` (text, not null)
 - `created_at` (timestamptz default `now()`)
 
 Primary Key:
 
-- (`image_id`, `metadata_key_id`)
+- (`media_item_id`, `metadata_key_id`)
 
 ---
 
@@ -402,26 +402,26 @@ Feldpost uses **PostGIS** with GiST indexes as the MVP default for spatial queri
 
 **Spatial (PostGIS):**
 
-- `CREATE INDEX idx_images_geog ON images USING GIST (geog);` — enables efficient bounding-box (`&&`) and distance (`ST_DWithin`, `<->`) queries. Replaces the btree on `(latitude, longitude)`.
+- `CREATE INDEX idx_media_items_geog ON media_items USING GIST (geog);` — enables efficient bounding-box (`&&`) and distance (`ST_DWithin`, `<->`) queries.
 
 **Temporal:**
 
-- `CREATE INDEX idx_images_created_at ON images (created_at DESC);` — timeline filtering and sorting.
-- `CREATE INDEX idx_images_captured_at ON images (captured_at DESC NULLS LAST);` — EXIF timestamp filtering. `NULLS LAST` ensures images without `captured_at` don't dominate the index.
+- `CREATE INDEX idx_media_items_created_at ON media_items (created_at DESC);` — timeline filtering and sorting.
+- `CREATE INDEX idx_media_items_captured_at ON media_items (captured_at DESC NULLS LAST);` — EXIF timestamp filtering.
 
 **Ownership and Organization:**
 
-- `CREATE INDEX idx_images_user_id ON images (user_id);` — RLS policy checks (`user_id = auth.uid()`).
-- `CREATE INDEX idx_images_org_id ON images (organization_id);` — organization-scoped queries.
+- `CREATE INDEX idx_media_items_created_by ON media_items (created_by);` — owner/admin checks.
+- `CREATE INDEX idx_media_items_org_id ON media_items (organization_id);` — organization-scoped queries.
 
 **Project Memberships:**
 
-- `CREATE INDEX idx_image_projects_project_image ON image_projects (project_id, image_id);` — project filter and grouped counts.
-- `CREATE INDEX idx_image_projects_image_project ON image_projects (image_id, project_id);` — fast membership lookup for detail/workspace rows.
+- `CREATE INDEX idx_media_projects_project_media ON media_projects (project_id, media_item_id);` — project filter and grouped counts.
+- `CREATE INDEX idx_media_projects_media_project ON media_projects (media_item_id, project_id);` — fast membership lookup for detail/workspace rows.
 
 **Metadata:**
 
-- `CREATE INDEX idx_image_metadata_key_value ON image_metadata (metadata_key_id, value_text);` — key/value filtering.
+- `CREATE INDEX idx_media_metadata_key_value ON media_metadata (metadata_key_id, value_text);` — key/value filtering.
 
 **Roles (RLS):**
 
@@ -447,9 +447,9 @@ Subabase supports PostGIS out of the box via `CREATE EXTENSION postgis`.
 
 ---
 
-## 10. Saved Groups Tables
+## 10. Saved Groups Tables (Legacy — Removed)
 
-Table: `saved_groups`
+Table: `saved_groups` (removed on 2026-03-27)
 
 Purpose: User-created named collections of images for workflow organization (see `architecture.md` §11).
 
@@ -462,12 +462,12 @@ Columns:
 - `created_at` (timestamptz, not null, default `now()`)
 - `updated_at` (timestamptz, not null, default `now()`)
 
-Table: `saved_group_images`
+Table: `saved_group_images` (removed on 2026-03-27)
 
 Columns:
 
 - `group_id` (uuid, not null, references `saved_groups(id)` ON DELETE CASCADE)
-- `image_id` (uuid, not null, references `images(id)` ON DELETE CASCADE)
+- `image_id` (legacy field; table removed)
 - `added_at` (timestamptz, not null, default `now()`)
 
 Primary Key: (`group_id`, `image_id`)
@@ -512,11 +512,11 @@ Purpose: Ordered membership mapping between a share set and its media items.
 Columns:
 
 - `share_set_id` (uuid, not null, references `share_sets(id)` ON DELETE CASCADE)
-- `image_id` (uuid, not null, references `images(id)` ON DELETE CASCADE)
+- `media_item_id` (uuid, not null, references `media_items(id)` ON DELETE CASCADE)
 - `item_order` (int, not null) — deterministic display/export order.
 - `created_at` (timestamptz, not null, default `now()`)
 
-Primary Key: (`share_set_id`, `image_id`)
+Primary Key: (`share_set_id`, `media_item_id`)
 
 Index:
 
@@ -538,7 +538,7 @@ Purpose: Audit trail for marker corrections. Tracks who moved a marker, when, an
 Columns:
 
 - `id` (uuid, primary key, default `gen_random_uuid()`)
-- `image_id` (uuid, not null, references `images(id)` ON DELETE CASCADE)
+- `media_item_id` (uuid, not null, references `media_items(id)` ON DELETE CASCADE)
 - `corrected_by` (uuid, not null, references `auth.users(id)` ON DELETE CASCADE)
 - `previous_latitude` (numeric(9,6), not null)
 - `previous_longitude` (numeric(9,6), not null)
@@ -546,7 +546,7 @@ Columns:
 - `new_longitude` (numeric(9,6), not null)
 - `corrected_at` (timestamptz, not null, default `now()`)
 
-This table is append-only. A trigger on `images` captures the previous effective coordinates before an update to `latitude`/`longitude`.
+This table is append-only and references canonical media rows.
 
 ---
 
@@ -559,62 +559,56 @@ flowchart TD
     subgraph "DELETE auth.users"
         U[auth.users] -->|CASCADE| P[profiles]
         U -->|CASCADE| UR[user_roles]
-        U -->|CASCADE| I[images]
-        U -->|CASCADE| SG[saved_groups]
+        U -->|SET NULL| MI[media_items.created_by]
         U -->|SET NULL| SS[share_sets.created_by]
         U -->|CASCADE| CC[coordinate_corrections]
         U -->|SET NULL| PR[projects.created_by]
         U -->|SET NULL| MK[metadata_keys.created_by]
-        I -->|CASCADE| IM[image_metadata]
-        I -->|CASCADE| CC2[coordinate_corrections]
-        I -->|CASCADE| SGI[saved_group_images]
-        I -->|CASCADE| SSI[share_set_items]
-        SG -->|CASCADE| SGI2[saved_group_images]
+        MI -->|CASCADE| MM[media_metadata]
+        MI -->|CASCADE| MP[media_projects]
+        MI -->|CASCADE| SSI[share_set_items]
         SS -->|CASCADE| SSI2[share_set_items]
     end
 
     subgraph "DELETE organizations"
         O[organizations] -->|CASCADE| PR2[projects]
-        O -->|CASCADE| I2[images]
+        O -->|CASCADE| MI2[media_items]
         O -->|CASCADE| SS2[share_sets]
         O -->|CASCADE| MK2[metadata_keys]
         O -.->|RESTRICT| P2[profiles — blocked if members exist]
     end
 
     subgraph "DELETE projects"
-        PRD[projects] -->|CASCADE| IP1[image_projects.project_id]
+        PRD[projects] -->|CASCADE| MP1[media_projects.project_id]
     end
 
     subgraph "DELETE metadata_keys"
-        MKD[metadata_keys] -->|CASCADE| IM2[image_metadata]
+        MKD[metadata_keys] -->|CASCADE| MM2[media_metadata]
     end
 ```
 
-| Parent Table    | Child Table              | FK Column         | On Delete | Rationale                                     |
-| --------------- | ------------------------ | ----------------- | --------- | --------------------------------------------- |
-| `auth.users`    | `profiles`               | `id`              | CASCADE   | Profile is meaningless without user           |
-| `auth.users`    | `user_roles`             | `user_id`         | CASCADE   | Roles are user-scoped                         |
-| `auth.users`    | `images`                 | `user_id`         | CASCADE   | User's images are removed on account deletion |
-| `auth.users`    | `saved_groups`           | `user_id`         | CASCADE   | Groups are personal                           |
-| `auth.users`    | `coordinate_corrections` | `corrected_by`    | CASCADE   | Audit trail tied to user                      |
-| `auth.users`    | `projects`               | `created_by`      | SET NULL  | Project survives; authorship becomes unknown  |
-| `auth.users`    | `metadata_keys`          | `created_by`      | SET NULL  | Key survives; creator becomes unknown         |
-| `auth.users`    | `share_sets`             | `created_by`      | SET NULL  | Shared set survives user deletion             |
-| `organizations` | `profiles`               | `organization_id` | RESTRICT  | Cannot delete org with active users           |
-| `organizations` | `projects`               | `organization_id` | CASCADE   | Org deletion removes all projects             |
-| `organizations` | `images`                 | `organization_id` | CASCADE   | Org deletion removes all images               |
-| `organizations` | `share_sets`             | `organization_id` | CASCADE   | Org deletion removes all shared export sets   |
-| `organizations` | `metadata_keys`          | `organization_id` | CASCADE   | Org deletion removes all metadata keys        |
-| `roles`         | `user_roles`             | `role_id`         | CASCADE   | Removing a role unassigns it                  |
-| `images`        | `image_projects`         | `image_id`        | CASCADE   | Deleting image removes memberships            |
-| `projects`      | `image_projects`         | `project_id`      | CASCADE   | Deleting project removes memberships          |
-| `images`        | `image_metadata`         | `image_id`        | CASCADE   | Metadata is image-scoped                      |
-| `images`        | `coordinate_corrections` | `image_id`        | CASCADE   | History is image-scoped                       |
-| `images`        | `saved_group_images`     | `image_id`        | CASCADE   | Deleting image removes it from groups         |
-| `saved_groups`  | `saved_group_images`     | `group_id`        | CASCADE   | Deleting group removes memberships            |
-| `images`        | `share_set_items`        | `image_id`        | CASCADE   | Deleting image removes it from shared sets    |
-| `share_sets`    | `share_set_items`        | `share_set_id`    | CASCADE   | Deleting/revoking set removes memberships     |
-| `metadata_keys` | `image_metadata`         | `metadata_key_id` | CASCADE   | Removing a key removes all values             |
+| Parent Table    | Child Table              | FK Column         | On Delete | Rationale                                       |
+| --------------- | ------------------------ | ----------------- | --------- | ----------------------------------------------- |
+| `auth.users`    | `profiles`               | `id`              | CASCADE   | Profile is meaningless without user             |
+| `auth.users`    | `user_roles`             | `user_id`         | CASCADE   | Roles are user-scoped                           |
+| `auth.users`    | `media_items`            | `created_by`      | SET NULL  | Media survives user deletion; ownership cleared |
+| `auth.users`    | `coordinate_corrections` | `corrected_by`    | CASCADE   | Audit trail tied to user                        |
+| `auth.users`    | `projects`               | `created_by`      | SET NULL  | Project survives; authorship becomes unknown    |
+| `auth.users`    | `metadata_keys`          | `created_by`      | SET NULL  | Key survives; creator becomes unknown           |
+| `auth.users`    | `share_sets`             | `created_by`      | SET NULL  | Shared set survives user deletion               |
+| `organizations` | `profiles`               | `organization_id` | RESTRICT  | Cannot delete org with active users             |
+| `organizations` | `projects`               | `organization_id` | CASCADE   | Org deletion removes all projects               |
+| `organizations` | `media_items`            | `organization_id` | CASCADE   | Org deletion removes all media items            |
+| `organizations` | `share_sets`             | `organization_id` | CASCADE   | Org deletion removes all shared export sets     |
+| `organizations` | `metadata_keys`          | `organization_id` | CASCADE   | Org deletion removes all metadata keys          |
+| `roles`         | `user_roles`             | `role_id`         | CASCADE   | Removing a role unassigns it                    |
+| `media_items`   | `media_projects`         | `media_item_id`   | CASCADE   | Deleting media removes project memberships      |
+| `projects`      | `media_projects`         | `project_id`      | CASCADE   | Deleting project removes media memberships      |
+| `media_items`   | `media_metadata`         | `media_item_id`   | CASCADE   | Metadata is media-scoped                        |
+| `media_items`   | `coordinate_corrections` | `media_item_id`   | CASCADE   | History is media-scoped                         |
+| `media_items`   | `share_set_items`        | `media_item_id`   | CASCADE   | Deleting media removes it from shared sets      |
+| `share_sets`    | `share_set_items`        | `share_set_id`    | CASCADE   | Deleting/revoking set removes memberships       |
+| `metadata_keys` | `media_metadata`         | `metadata_key_id` | CASCADE   | Removing a key removes all values               |
 
 **Key design decisions:**
 

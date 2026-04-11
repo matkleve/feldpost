@@ -2,7 +2,7 @@
 
 ## What It Is
 
-The Captured Date Editor is the inline date-editing control used in Image Detail View for a photo's `captured_at` value. It allows quick correction when EXIF timestamps are missing or inaccurate.
+The Captured Date Editor is the inline date-editing control used in Media Detail View for a media item's `captured_at` value. It allows quick correction when EXIF timestamps are missing or inaccurate.
 
 ## What It Looks Like
 
@@ -12,7 +12,7 @@ The control renders as a compact `.ui-item` row with a date value label and an e
 
 - Route: `/`
 - Parent: `MediaDetailViewComponent` metadata area
-- Appears when: Image Detail View is open and metadata rows are rendered
+- Appears when: Media Detail View is open and metadata rows are rendered
 
 ## Actions
 
@@ -20,14 +20,14 @@ The control renders as a compact `.ui-item` row with a date value label and an e
 | --- | ------------------------ | ------------------------------------------ | ---------------------------------------------- |
 | 1   | Clicks captured date row | Row enters edit mode                       | Prefills input from `captured_at` when present |
 | 2   | Changes date value       | Local draft state updates                  | No DB write yet                                |
-| 3   | Clicks Save              | Persists `captured_at` and exits edit mode | Emits image update event                       |
+| 3   | Clicks Save              | Persists `captured_at` and exits edit mode | Emits media item update event                  |
 | 4   | Clicks Cancel            | Discards draft and exits edit mode         | No DB write                                    |
 | 5   | Clears value then saves  | Persists `captured_at = null`              | Row returns to muted empty-state label         |
 
 ## Component Hierarchy
 
 ```
-ImageDetailView
+MediaDetailView
 └── CapturedDateEditorRow
 		├── ReadModeLabel
 		├── EditModeInput[type=date]
@@ -41,15 +41,15 @@ ImageDetailView
 ```mermaid
 flowchart LR
 	UI[CapturedDateEditorRow] --> S[WorkspaceViewService]
-	S --> DB[(images.captured_at)]
+	S --> DB[(media_items.captured_at)]
 	DB --> S
 	S --> UI
 ```
 
-| Field         | Source               | Type                  |
-| ------------- | -------------------- | --------------------- |
-| Captured date | `images.captured_at` | `timestamptz \| null` |
-| Image id      | `WorkspaceImage.id`  | `uuid`                |
+| Field         | Source                    | Type                  |
+| ------------- | ------------------------- | --------------------- |
+| Captured date | `media_items.captured_at` | `timestamptz \| null` |
+| Media item id | `WorkspaceImage.id`       | `uuid`                |
 
 ## State
 
@@ -63,7 +63,7 @@ flowchart LR
 
 | File                                                                            | Purpose                       |
 | ------------------------------------------------------------------------------- | ----------------------------- |
-| `docs/element-specs/component/captured-date-editor.md`                                    | Captured Date Editor contract |
+| `docs/element-specs/component/captured-date-editor.md`                          | Captured Date Editor contract |
 | `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`   | Inline edit logic host        |
 | `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html` | Captured date row markup      |
 
@@ -78,9 +78,9 @@ sequenceDiagram
 
 	U->>C: Save date
 	C->>W: updateCapturedDate(mediaId, value)
-	W->>D: update images set captured_at
+	W->>D: update media_items set captured_at
 	D-->>W: ok
-	W-->>C: updated image
+	W-->>C: updated media item
 	C-->>U: Exit edit mode
 ```
 

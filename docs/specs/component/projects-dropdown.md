@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A dropdown for scoping the workspace view to one or more projects. Contains a search input at the top and a checklist of projects below. Checking projects filters the workspace to show only images with membership in those projects. Unchecking all shows all images (no project filter).
+A dropdown for scoping the workspace view to one or more projects. Contains a search input at the top and a checklist of projects below. Checking projects filters the workspace to show only media items with membership in those projects. Unchecking all shows all media items (no project filter).
 
 ## What It Looks Like
 
@@ -10,7 +10,7 @@ Floating dropdown anchored below the "Projects" toolbar button. Width: 15rem (24
 
 - **Search input** at top: compact, placeholder "Search projects…", `--text-small`.
 - **"All projects" row**: first row, toggles all on/off. When all are checked, this shows a filled checkbox. When some are checked, it shows an indeterminate (–) checkbox.
-- **Project rows**: each is a `.ui-item` with a checkbox, project name, and image count badge. Checked projects have `--color-primary` checkbox fill.
+- **Project rows**: each is a `.ui-item` with a checkbox, project name, and media count badge. Checked projects have `--color-primary` checkbox fill.
 - **Bottom**: "+ New project" ghost button to create a project inline.
 
 ## Where It Lives
@@ -55,10 +55,10 @@ flowchart LR
   S --> UI
 ```
 
-| Field        | Source                                                                                                          | Type                  |
-| ------------ | --------------------------------------------------------------------------------------------------------------- | --------------------- |
-| Projects     | `supabase.from('projects').select('id, name').eq('organization_id', org)`                                       | `Project[]`           |
-| Image counts | `supabase.from('image_projects').select('project_id, count').group('project_id')` or derived from loaded images | `Map<string, number>` |
+| Field        | Source                                                                                                               | Type                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Projects     | `supabase.from('projects').select('id, name').eq('organization_id', org)`                                            | `Project[]`           |
+| Media counts | `supabase.from('media_projects').select('project_id, count').group('project_id')` or derived from loaded media items | `Map<string, number>` |
 
 ## State
 
@@ -80,14 +80,14 @@ flowchart LR
 ## Wiring
 
 - Rendered inside `WorkspaceToolbarComponent` via `@if (activeDropdown() === 'projects')`
-- `selectedProjectIds` is passed to `WorkspaceViewService` which filters images
+- `selectedProjectIds` is passed to `WorkspaceViewService` which filters media items
 - Also informs `FilterService` (project filter is equivalent to a filter rule)
-- Image counts are derived from the currently-loaded image set (no extra query)
+- Media counts are derived from the currently-loaded media-item set (no extra query)
 
 ## Acceptance Criteria
 
 - [x] Search input at top filters projects by name
-- [x] Each project row has a checkbox, name, and image count
+- [x] Each project row has a checkbox, name, and media count
 - [x] "All projects" row with tri-state checkbox (all/some/none)
 - [ ] Checking/unchecking updates workspace view immediately
 - [ ] "+ New project" creates a project with inline name entry
@@ -117,16 +117,16 @@ sequenceDiagram
 
     U->>PD: check "Zürich-Nord"
     PD->>WVS: projectFilterChanged(Set['zurich-nord-id'])
-    WVS->>WVS: filter images where EXISTS image_projects membership in set
-    WVS->>WP: emit filtered images
+    WVS->>WVS: filter media items where EXISTS media_projects membership in set
+    WVS->>WP: emit filtered media items
 
     U->>PD: check "Wien-Süd" (second project)
     PD->>WVS: projectFilterChanged(Set['zurich-nord-id', 'wien-sud-id'])
-    WVS->>WP: emit filtered images (both projects)
+    WVS->>WP: emit filtered media items (both projects)
 
     U->>PD: click "All projects" (tri-state → all)
     PD->>WVS: projectFilterChanged(empty set = no filter)
-    WVS->>WP: emit all images
+    WVS->>WP: emit all media items
 ```
 
 ## Create New Project Flow
@@ -162,7 +162,7 @@ stateDiagram-v2
     }
 
     state NoneSelected {
-        [*]: No projects checked\n"All projects" unchecked\nToolbar dot visible (clay)\nWorkspace shows no images
+        [*]: No projects checked\n"All projects" unchecked\nToolbar dot visible (clay)\nWorkspace shows no media items
     }
 
     state Searching {
@@ -223,10 +223,10 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
     state "Row Idle (Checked)" as IdleChecked {
-        [*]: checkbox filled\ntext-primary\nimage count visible
+        [*]: checkbox filled\ntext-primary\nmedia count visible
     }
     state "Row Idle (Unchecked)" as IdleUnchecked {
-        [*]: checkbox empty\ntext-secondary\nimage count dimmed
+        [*]: checkbox empty\ntext-secondary\nmedia count dimmed
     }
     state "Row Hover" as Hover {
         [*]: bg clay 8%\ncursor pointer\nrow highlighted

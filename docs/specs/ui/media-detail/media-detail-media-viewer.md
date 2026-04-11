@@ -362,7 +362,7 @@ sequenceDiagram
 
 ### PhotoLoadService Integration
 
-- [x] All signed-URL generation delegated to `PhotoLoadService` — component never calls `supabase.client.storage.from('images').createSignedUrl` directly
+- [x] All signed-URL generation delegated to `PhotoLoadService` — component never calls `supabase.client.storage.from('media').createSignedUrl` directly
 - [x] Tier 2 thumbnail obtained via `photoLoad.getSignedUrl(thumbPath, 'thumb')` with `{ width: 256, height: 256, resize: 'cover' }` transform
 - [x] Tier 3 full-res obtained via `photoLoad.getSignedUrl(storagePath, 'full')` with no transform
 - [x] Full-res preloaded via `photoLoad.preload(fullUrl)` before crossfade

@@ -4,11 +4,11 @@
 
 ## What It Is
 
-A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. Grouping/filtering/sorting on this page uses a project-level operator profile (not the image-level workspace operator profile).
+A dedicated management page for organization projects. It lets users create, rename, archive, color-tag, and open projects while preserving map-first workflows. Grouping/filtering/sorting on this page uses a project-level operator profile (not the media-level workspace operator profile).
 
 ## What It Looks Like
 
-Full-width page with a single top header row. The header places a primary `New project` button on the left and the page title `Projects` on the right, aligned on the same horizontal line. Directly below sits one toolbar row that contains the existing project operators: status scope (`All`, `Active`, `Archived`), grouping, filter, sort, and the view-mode switch for rows vs. cards. The center content rail is horizontally centered and constrained to a narrow maximum width of 25rem (400px) so project controls and lists stay focused in a compact management column. Each project item shows name, color chip, status, image counts, last activity, and action buttons; cards use stable action zones so active and archived projects expose different actions without shifting layout.
+Full-width page with a single top header row. The header places a primary `New project` button on the left and the page title `Projects` on the right, aligned on the same horizontal line. Directly below sits one toolbar row that contains the existing project operators: status scope (`All`, `Active`, `Archived`), grouping, filter, sort, and the view-mode switch for rows vs. cards. The center content rail is horizontally centered and constrained to a narrow maximum width of 25rem (400px) so project controls and lists stay focused in a compact management column. Each project item shows name, color chip, status, media counts, last activity, and action buttons; cards use stable action zones so active and archived projects expose different actions without shifting layout.
 
 ## Where It Lives
 
@@ -21,7 +21,7 @@ Full-width page with a single top header row. The header places a primary `New p
 
 | #   | User Action                            | System Response                                                                                                      | Triggers                         |
 | --- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| 1   | Navigates to `/projects`               | Loads organization projects, image counts, and summary metadata                                                      | Supabase query                   |
+| 1   | Navigates to `/projects`               | Loads organization projects, media counts, and summary metadata                                                      | Supabase query                   |
 | 2   | Clicks `New project`                   | Inserts draft project, opens workspace pane, and focuses title text input in pane header                             | Supabase insert                  |
 | 3   | Presses Enter in workspace title input | Persists new name, exits title edit mode, and updates the project label in list/cards                                | Supabase update                  |
 | 4   | Uses status filter                     | Restricts visible projects to `All`, `Active`, or `Archived`                                                         | `statusFilter` state             |
@@ -37,7 +37,7 @@ Full-width page with a single top header row. The header places a primary `New p
 | 14  | Clicks `Archive` on an active card     | Asks confirmation, then archives project                                                                             | Supabase update                  |
 | 15  | Clicks `Restore` on an archived card   | Asks confirmation, then restores the project to Active                                                               | Supabase update                  |
 | 16  | Clicks `Delete` on an archived card    | Asks confirmation, then permanently deletes the archived project for the organization                                | Supabase delete                  |
-| 17  | Clicks map button in image details     | Navigates to `/map` and zooms to the selected image location                                                         | Router + map focus payload       |
+| 17  | Clicks map button in media details     | Navigates to `/map` and zooms to the selected media location                                                         | Router + map focus payload       |
 
 ### Interaction Flowchart
 
@@ -58,8 +58,8 @@ flowchart TD
 	K -- Archived --> M[Show Restore button + Delete button]
 	I --> N[Open workspace pane on row click]
 	J --> N
-	N --> O{Image details map action}
-	O -- Clicked --> P[Navigate to /map and zoom to image]
+  N --> O{Media details map action}
+  O -- Clicked --> P[Navigate to /map and zoom to media item]
 ```
 
 ### View Mode State
@@ -105,7 +105,7 @@ ProjectsPage                                ← route root, full width
 │   │   │       ├── ProjectStatusDot           ← active/archived state
 │   │   │       ├── ProjectName (.ui-item-label) ← static by default, inline editable via row Rename action
 │   │   │       ├── MatchingCountMeta          ← "5 results" for current search query
-│   │   │       ├── ImageCountMeta             ← total photos
+│   │   │       ├── MediaCountMeta             ← total media items
 │   │   │       ├── LastActivityMeta           ← relative date
 │   │   │       ├── ProjectColorChipButton     ← larger token chip, hover palette affordance, click opens picker
 │   │   │       └── RowActions                 ← Rename, Archive
@@ -120,8 +120,8 @@ ProjectsPage                                ← route root, full width
 │           ├── [status=archived] RestoreButton ← removes project from Archived after confirmation
 │           └── [status=archived] DeleteButton ← permanently deletes archived project after confirmation
 ├── [projectSelected] WorkspacePaneComponent    ← in-page details surface, no route change
-│   ├── ProjectScopedPhotoGrid                  ← selected project photos
-│   └── ImageDetailView                          ← includes MapButton to `/map`
+│   ├── ProjectScopedMediaGrid                  ← selected project media
+│   └── MediaDetailView                          ← includes MapButton to `/map`
 │   └── WorkspacePaneTitleBinding                ← shows selected project name
 │   └── WorkspacePaneTitleInput                  ← focused edit mode after New project
 ├── [loading] ProjectsLoadingState           ← skeleton rows
@@ -146,18 +146,18 @@ flowchart LR
   R --> UI
 ```
 
-| Field                          | Source                                                                                                        | Type                            |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Projects                       | `ProjectsService.loadProjects()` → `projects` joined/aggregated with project activity and membership metadata | `ProjectListItem[]`             |
-| Draft project                  | `ProjectsService.createDraftProject()`                                                                        | `ProjectListItem \| null`       |
-| Rename/archive/restore/delete  | `ProjectsService.renameProject()`, `archiveProject()`, `restoreProject()`, `deleteProject()`                  | `Promise<boolean>`              |
-| Project color                  | `ProjectsService.setProjectColor()`                                                                           | `Promise<boolean>`              |
-| Project-scoped workspace media | `ProjectsService.loadProjectWorkspaceImages(projectId)`                                                       | `ProjectScopedWorkspaceImage[]` |
-| Primary city                   | Derived in `ProjectsService` from the most frequent `images.city` per project (tie-break: lexicographic)      | `string \| null`                |
-| Primary district               | Derived in `ProjectsService` from the most frequent `images.district` per project (tie-break: lexicographic)  | `string \| null`                |
-| View preference                | `localStorage['feldpost-projects-view-mode']` via component persistence helper                                | `'list' \| 'cards'`             |
-| Route-scoped project open      | `ActivatedRoute.snapshot.paramMap.get('projectId')`                                                           | `string \| null`                |
-| Filter rules                   | `FilterService.rules()` restricted to the projects operator profile                                           | `FilterRule[]`                  |
+| Field                          | Source                                                                                                            | Type                            |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Projects                       | `ProjectsService.loadProjects()` → `projects` joined/aggregated with project activity and membership metadata     | `ProjectListItem[]`             |
+| Draft project                  | `ProjectsService.createDraftProject()`                                                                            | `ProjectListItem \| null`       |
+| Rename/archive/restore/delete  | `ProjectsService.renameProject()`, `archiveProject()`, `restoreProject()`, `deleteProject()`                      | `Promise<boolean>`              |
+| Project color                  | `ProjectsService.setProjectColor()`                                                                               | `Promise<boolean>`              |
+| Project-scoped workspace media | `ProjectsService.loadProjectWorkspaceImages(projectId)`                                                           | `ProjectScopedWorkspaceImage[]` |
+| Primary city                   | Derived in `ProjectsService` from the most frequent `media_items.city` per project (tie-break: lexicographic)     | `string \| null`                |
+| Primary district               | Derived in `ProjectsService` from the most frequent `media_items.district` per project (tie-break: lexicographic) | `string \| null`                |
+| View preference                | `localStorage['feldpost-projects-view-mode']` via component persistence helper                                    | `'list' \| 'cards'`             |
+| Route-scoped project open      | `ActivatedRoute.snapshot.paramMap.get('projectId')`                                                               | `string \| null`                |
+| Filter rules                   | `FilterService.rules()` restricted to the projects operator profile                                               | `FilterRule[]`                  |
 
 `color_key` accepts semantic keys (`clay`, `accent`, `success`, `warning`) and temporary generated brand-hue keys in the format `brand-hue-###` (0-359) used by the one-click random color action.
 This page must keep Supabase access behind `ProjectsService`; the component contract must describe service calls, not introduce ad-hoc client queries.
@@ -175,7 +175,7 @@ flowchart LR
 	E --> F
 ```
 
-Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`) are not valid operator options in Projects mode.
+Media-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`) are not valid operator options in Projects mode.
 
 ## State
 
@@ -196,7 +196,7 @@ Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 | `pendingProjectId`            | `string \| null`                             | `null`                   | Target project for the pending destructive action             |
 | `pendingActionBusy`           | `boolean`                                    | `false`                  | Prevents duplicate archive/restore/delete submissions         |
 | `coloringProjectId`           | `string \| null`                             | `null`                   | Color picker visibility target                                |
-| `detailMediaId`               | `string \| null`                             | `null`                   | Selected image inside the project-scoped workspace            |
+| `detailMediaId`               | `string \| null`                             | `null`                   | Selected media item inside the project-scoped workspace       |
 | `activeGroupings`             | `GroupingProperty[]`                         | `[]`                     | Grouping hierarchy for list/card rendering                    |
 | `collapsedGroupIds`           | `Set<string>`                                | `new Set()`              | Collapsed grouped sections                                    |
 | `activeProjectSorts`          | `SortConfig[]`                               | `[]`                     | Explicit project-level sort criteria                          |
@@ -224,8 +224,8 @@ Image-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 - `ProjectsService` — owns all project and project-scoped media reads/writes.
 - `ToastService` — shows create/archive/restore/delete failure and success feedback.
 - `FilterService` — stores project-mode filter rules and exposes the active ruleset.
-- `WorkspaceViewService` — coordinates project-scoped workspace content and image-detail context.
-- `Router` — navigates to `/map` for image handoff and keeps project route state in sync.
+- `WorkspaceViewService` — coordinates project-scoped workspace content and media-detail context.
+- `Router` — navigates to `/map` for media handoff and keeps project route state in sync.
 - `ActivatedRoute` — reads optional `projectId` route parameter for direct-open behavior.
 
 ### Inputs / Outputs
@@ -273,19 +273,19 @@ sequenceDiagram
     C-->>U: Preserve current UI state and show error toast
   end
 
-  U->>C: Open project workspace or image detail
+  U->>C: Open project workspace or media detail
   C->>WVS: apply project-scoped workspace context
-  U->>C: Click map action in image details
+  U->>C: Click map action in media details
   C->>R: navigate(['/map'], focus payload)
 ```
 
 - Add route `{ path: 'projects', component: ProjectsPageComponent }` in app routes.
 - Support direct-open route state for a selected project (`/projects/:projectId` or equivalent route param binding) when the router configuration provides it.
 - Add sidebar entry that navigates to `/projects`.
-- Projects mode must provide a dedicated project-level operator profile for Grouping/Filter/Sort, instead of exposing the full workspace image-property registry.
+- Projects mode must provide a dedicated project-level operator profile for Grouping/Filter/Sort, instead of exposing the full workspace media-property registry.
 - Grouping in list mode must render explicit group headers and grouped rows/cards; reordering groupings must re-render sections immediately.
 - On row open action, set selected project and open the in-page workspace pane; do not change route.
-- Reuse existing image-details map action to navigate to `/map` with selected image id/coordinates so map zoom/focus can be applied.
+- Reuse existing media-details map action to navigate to `/map` with selected media id/coordinates so map zoom/focus can be applied.
 - Keep `Projects Dropdown` behavior consistent with this page by sharing the same source-of-truth project scope state.
 - Constrain the central project content area to max-width 25rem (400px) and center it in the available viewport.
 - Do not add direct Supabase client calls to `ProjectsPageComponent`; keep the security/data contract behind `ProjectsService`.
@@ -318,12 +318,12 @@ sequenceDiagram
 - [x] Center content rail is horizontally centered and capped at max-width 25rem (400px).
 - [x] Mobile layout is single-column with accessible touch targets.
 - [ ] Grouping/Filter/Sort dropdowns in Projects mode expose project-level fields only.
-- [ ] Image-level-only fields (`date-captured`, `distance`, `project`) are not shown in Projects operator menus.
+- [ ] Media-level-only fields (`date-captured`, `distance`, `project`) are not shown in Projects operator menus.
 - [ ] Grouping in list mode renders explicit group headers and grouped project sections.
 - [ ] Primary district and primary city semantics are deterministic (most-frequent value, tie-break lexicographically).
 - [x] [PPW-1] Selecting a project opens the workspace pane in place while remaining on `/projects`.
-- [x] [PPW-2] Selecting a project-scoped thumbnail opens image details for that scoped image.
-- [x] [PPW-3] Using the image-details map action navigates to `/map` and focuses the exact selected photo location.
+- [x] [PPW-2] Selecting a project-scoped thumbnail opens media details for that scoped media item.
+- [x] [PPW-3] Using the media-details map action navigates to `/map` and focuses the exact selected media location.
 - [x] [PPW-4] Closing the workspace pane preserves Projects page search/filter/view mode state.
 - [ ] [PPW-5] Re-opening the same project restores prior project-scoped browsing context (including prior subview and scroll position).
 

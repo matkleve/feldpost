@@ -4,11 +4,11 @@
 
 ## What It Is
 
-A project-scoped workspace detail mode inside the Projects Page. It opens when a project is selected and reuses the existing workspace/image-detail experience to browse only that project's media while remaining on `/projects`.
+A project-scoped workspace detail mode inside the Projects Page. It opens when a project is selected and reuses the existing workspace/media-detail experience to browse only that project's media while remaining on `/projects`.
 
 ## What It Looks Like
 
-The layout is projects-first: project list/cards remain the primary surface and a workspace pane opens with the selected project context. The pane shows project-scoped media in the existing grid/collection presentation and can open image details inline. No embedded map is shown in this view; map handoff is provided by the image-details map action, which opens `/map` and zooms to the selected image location.
+The layout is projects-first: project list/cards remain the primary surface and a workspace pane opens with the selected project context. The pane shows project-scoped media in the existing grid/collection presentation and can open media details inline. No embedded map is shown in this view; map handoff is provided by the media-details map action, which opens `/map` and zooms to the selected media location.
 
 A dedicated Project Full View action expands the workspace pane from right to left across the full content width. In this mode, the projects list surface is visually de-emphasized so the workspace becomes the primary canvas.
 
@@ -25,8 +25,8 @@ A dedicated Project Full View action expands the workspace pane from right to le
 | 1   | Opens `/projects`                        | Loads projects list/cards and related metadata                                              | Router + projects data service          |
 | 2   | Clicks a project row/card                | Sets selected project and opens workspace pane scoped to that project                       | `selectedProjectId` + pane state        |
 | 3   | Clicks "Open in workspace"               | Opens the same project-scoped workspace pane (no route change)                              | Shared open action                      |
-| 4   | Clicks a thumbnail in the workspace pane | Opens image details for the selected item                                                   | Existing image detail state             |
-| 5   | Clicks map button in image details       | Navigates to `/map` and centers/zooms to selected image location                            | Router + map focus payload              |
+| 4   | Clicks a thumbnail in the workspace pane | Opens media details for the selected item                                                   | Existing media detail state             |
+| 5   | Clicks map button in media details       | Navigates to `/map` and centers/zooms to selected media location                            | Router + map focus payload              |
 | 6   | Closes workspace pane                    | Returns to projects list/cards context while preserving search/filter/view mode             | Pane close action                       |
 | 7   | Clicks Project Full View toggle          | Expands workspace pane right→left to full content width and hides list emphasis             | `isProjectFullView` → true              |
 | 8   | Presses Esc or clicks exit full view     | Restores split layout with previous pane width and list context                             | `isProjectFullView` → false             |
@@ -44,9 +44,9 @@ flowchart TD
     E -- No --> G[Keep split list + pane layout]
     F --> H{Media selected?}
     G --> H
-    H -- Yes --> I[Open image details]
+    H -- Yes --> I[Open media details]
     I --> J[Click map button]
-    J --> K[Navigate to /map and zoom to image]
+    J --> K[Navigate to /map and zoom to media]
     H -- No --> L[Continue browsing project media]
 ```
 
@@ -72,8 +72,8 @@ ProjectsPage (host route)
     |   +-- FullViewToggle
     |   +-- CloseButton
     +-- MediaGrid / CollectionThumbnails (reused)
-    +-- ImageDetailView (reused)
-        +-- MapButton → navigate `/map` and focus selected image
+    +-- MediaDetailView (reused)
+      +-- MapButton → navigate `/map` and focus selected media item
 ```
 
 ## Data Requirements
@@ -115,8 +115,8 @@ sequenceDiagram
 | Field                   | Source                                                            | Type                 |
 | ----------------------- | ----------------------------------------------------------------- | -------------------- |
 | Active project          | Selected project from projects list/cards + projects table        | `string` / `Project` |
-| Project-scoped media    | Existing workspace pipeline filtered by project ID                | `Image[]`            |
-| Selected image location | Existing image record geo fields used by image-details map action | `LatLng \| null`     |
+| Project-scoped media    | Existing workspace pipeline filtered by project ID                | `WorkspaceMedia[]`   |
+| Selected media location | Existing media record geo fields used by media-details map action | `LatLng \| null`     |
 | Generated previews      | `media_items.thumbnail_path` / `media_items.poster_path`          | `string \| null`     |
 
 ## State
@@ -125,7 +125,7 @@ sequenceDiagram
 | ------------------- | ------------------------------------------------------- | ------- | ---------------------------------------- |
 | `selectedProjectId` | `string \| null`                                        | `null`  | Active project scope                     |
 | `workspacePaneOpen` | `boolean`                                               | `false` | Workspace visibility                     |
-| `selectedMediaId`   | `string \| null`                                        | `null`  | Active image details                     |
+| `selectedMediaId`   | `string \| null`                                        | `null`  | Active media details                     |
 | `mapFocusPayload`   | `{ mediaId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus      |
 | `isProjectFullView` | `boolean`                                               | `false` | Right→left full-width workspace mode     |
 | `restorePaneWidth`  | `number \| null`                                        | `null`  | Width to restore after leaving full view |
@@ -162,15 +162,15 @@ sequenceDiagram
 
 - Keep route as `{ path: 'projects', component: ProjectsPageComponent }`.
 - On project open action, set selected project scope in page/workspace state without route transition.
-- Reuse existing Workspace Pane and Image Details components for project-scoped media browsing.
-- Wire image-details map action to navigate to `/map` with selected image coordinates and id so map can zoom/focus the target image.
+- Reuse existing Workspace Pane and Media Details components for project-scoped media browsing.
+- Wire media-details map action to navigate to `/map` with selected media coordinates and id so map can zoom/focus the target media item.
 
 ## Acceptance Criteria
 
 - [ ] [PPW-1] Clicking a project in `/projects` opens project details in the workspace pane without leaving `/projects`.
-- [ ] Existing workspace grid/collection and image details components are reused (no duplicate implementations).
-- [ ] [PPW-2] Workspace content is filtered to selected project media and thumbnail selection opens image details for that scoped item.
-- [ ] [PPW-3] Image details map button navigates to `/map` and zooms/focuses the exact selected photo location.
+- [ ] Existing workspace grid/collection and media details components are reused (no duplicate implementations).
+- [ ] [PPW-2] Workspace content is filtered to selected project media and thumbnail selection opens media details for that scoped item.
+- [ ] [PPW-3] Media details map button navigates to `/map` and zooms/focuses the exact selected media location.
 - [ ] [PPW-4] Closing the workspace pane preserves prior projects-page search/filter/view-mode state.
 - [ ] [PPW-5] Re-opening the same project restores prior project-scoped browsing context (including prior subview and scroll position).
 - [ ] Project Full View toggle expands workspace pane right→left to full content width and hides list emphasis while active.

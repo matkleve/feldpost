@@ -1,11 +1,11 @@
-# Image Detail — Inline Editing
+# Media Detail — Inline Editing
 
-> **Parent spec:** [image-detail-view](media-detail-view.md)
-> **Editing use cases:** [use-cases/image-editing.md](../../../use-cases/image-editing.md)
+> **Parent spec:** [media-detail-view](media-detail-view.md)
+> **Editing use cases:** [use-cases/media-editing](../../../use-cases/image-editing.md)
 
 ## What It Is
 
-The inline editing system for image properties in the Image Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup, read-only location evidence breakdown (active coordinates, address-derived coordinates, EXIF coordinates), and parser notes for unresolved address fragments so no location information is lost.
+The inline editing system for media-item properties in the Media Detail View. Covers the click-to-edit pattern for address label (title), captured date, project memberships, and address components (street, city, district, country). Also includes the address search bar for geocoded address lookup, read-only location evidence breakdown (active coordinates, address-derived coordinates, EXIF coordinates), and parser notes for unresolved address fragments so no location information is lost.
 
 ## What It Looks Like
 
@@ -16,20 +16,20 @@ Read-only rows (Location, Uploaded, coordinate evidence) display with `--color-t
 ## Where It Lives
 
 - **Parent**: `MediaDetailViewComponent` — DetailsSection and LocationSection
-- **Appears when**: Image detail view is open and image data is loaded
+- **Appears when**: Media detail view is open and media-item data is loaded
 
 ## Actions
 
 | #   | User Action                                        | System Response                                                                              | Triggers                         |
 | --- | -------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------- |
 | 1   | Clicks address label (title)                       | Title becomes an inline text input                                                           | `editingField` → `address_label` |
-| 2   | Presses Enter or blurs title input                 | Saves updated address_label to `images` table                                                | Supabase update                  |
+| 2   | Presses Enter or blurs title input                 | Saves updated address_label to `media_items` table                                           | Supabase update                  |
 | 3   | Clicks captured date value                         | Date becomes a `datetime-local` input                                                        | `editingField` → `captured_at`   |
-| 4   | Picks new date/time, blurs                         | Saves updated captured_at to `images` table                                                  | Supabase update                  |
+| 4   | Picks new date/time, blurs                         | Saves updated captured_at to `media_items` table                                             | Supabase update                  |
 | 5   | Clicks project value                               | Value becomes a multi-select checklist with org projects                                     | `editingField` → `project_ids`   |
-| 6   | Checks/unchecks projects                           | Upserts/deletes memberships in `image_projects`                                              | Supabase write batch             |
+| 6   | Checks/unchecks projects                           | Upserts/deletes memberships in `media_projects`                                              | Supabase write batch             |
 | 7   | Clicks street/city/district/country value          | Value becomes an inline text input                                                           | `editingField` → field name      |
-| 8   | Presses Enter or blurs address input               | Saves updated address component to `images` table                                            | Supabase update                  |
+| 8   | Presses Enter or blurs address input               | Saves updated address component to `media_items` table                                       | Supabase update                  |
 | 9   | Presses Escape during any edit                     | Cancels edit, restores original value, no DB write                                           | `editingField` → null            |
 | 10  | Opens location section for mixed-source media      | Sees separate rows for active coordinates, address-derived coordinates, and EXIF coordinates | location evidence model          |
 | 11  | EXIF and address-derived coordinates differ (>15m) | Shows mismatch badge with distance and keeps both sources visible                            | reconciliation metadata          |
@@ -47,15 +47,15 @@ All editable fields follow the same interaction pattern:
 
 ### Editable Fields Map
 
-| Field         | Input Type       | DB Table         | DB Column                | Validation        |
-| ------------- | ---------------- | ---------------- | ------------------------ | ----------------- |
-| Address label | `text`           | `images`         | `address_label`          | Max 500 chars     |
-| Captured date | `datetime-local` | `images`         | `captured_at`            | Valid ISO date    |
-| Projects      | `multi-select`   | `image_projects` | `(image_id, project_id)` | Valid project IDs |
-| Street        | `text`           | `images`         | `street`                 | Max 200 chars     |
-| City          | `text`           | `images`         | `city`                   | Max 200 chars     |
-| District      | `text`           | `images`         | `district`               | Max 200 chars     |
-| Country       | `text`           | `images`         | `country`                | Max 200 chars     |
+| Field         | Input Type       | DB Table         | DB Column                     | Validation        |
+| ------------- | ---------------- | ---------------- | ----------------------------- | ----------------- |
+| Address label | `text`           | `media_items`    | `address_label`               | Max 500 chars     |
+| Captured date | `datetime-local` | `media_items`    | `captured_at`                 | Valid ISO date    |
+| Projects      | `multi-select`   | `media_projects` | `(media_item_id, project_id)` | Valid project IDs |
+| Street        | `text`           | `media_items`    | `street`                      | Max 200 chars     |
+| City          | `text`           | `media_items`    | `city`                        | Max 200 chars     |
+| District      | `text`           | `media_items`    | `district`                    | Max 200 chars     |
+| Country       | `text`           | `media_items`    | `country`                     | Max 200 chars     |
 
 ### Property Row Icon Mapping
 
@@ -119,10 +119,10 @@ LocationSection                        ← dd-section-label "Location"
 
 ## Acceptance Criteria
 
-- [ ] **Address label**: click title → inline text input → save on Enter/blur → updates `images.address_label`
-- [ ] **Captured date**: click value → `datetime-local` input → save → updates `images.captured_at`
-- [ ] **Projects**: click value → multi-select checklist → save → updates `image_projects` memberships
-- [ ] **Street/City/District/Country**: click value → inline text input → save → updates `images.[field]`
+- [ ] **Address label**: click title → inline text input → save on Enter/blur → updates `media_items.address_label`
+- [ ] **Captured date**: click value → `datetime-local` input → save → updates `media_items.captured_at`
+- [ ] **Projects**: click value → multi-select checklist → save → updates `media_projects` memberships
+- [ ] **Street/City/District/Country**: click value → inline text input → save → updates `media_items.[field]`
 - [ ] Escape key cancels any active edit without saving
 - [ ] Optimistic updates: UI reflects changes immediately, rolls back on error
 - [ ] All editable rows show dashed underline hover affordance

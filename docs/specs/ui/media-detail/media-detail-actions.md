@@ -98,7 +98,7 @@ flowchart TD
 
     C -->|Assign project| F[Open project membership picker]
     F --> F1[User selects one or more projects]
-    F1 --> F2[Upsert/delete links in image_projects]
+    F1 --> F2[Upsert/delete links in media_projects]
 
     C -->|Copy coordinates| G[Write lat,lng to clipboard]
     G --> G1[Show toast confirmation]

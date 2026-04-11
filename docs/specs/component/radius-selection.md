@@ -5,7 +5,7 @@
 
 ## What It Is
 
-A map interaction for selecting a geographic radius. The user right-clicks (desktop) or long-presses (mobile) on the map, then drags outward to draw a circle. The circle defines a spatial filter: "show me images within this radius." Once committed, the radius becomes an active filter with drag handles to resize.
+A map interaction for selecting a geographic radius. The user right-clicks (desktop) or long-presses (mobile) on the map, then drags outward to draw a circle. The circle defines a spatial filter: "show me media items within this radius." Once committed, the radius becomes an active filter with drag handles to resize.
 
 ## What It Looks Like
 

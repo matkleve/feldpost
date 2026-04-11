@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A dropdown for managing the sort order of images in the workspace pane. Supports **multi-sort** — multiple properties can be active simultaneously with priority ordering. Each sort property has a tri-state toggle cycling through ascending → descending → deactivated. When groupings are active, the sort list auto-promotes grouped properties to the top in grouping order, so that groups are also sorted by the same criteria.
+A dropdown for managing the sort order of media items in the workspace pane. Supports **multi-sort** — multiple properties can be active simultaneously with priority ordering. Each sort property has a tri-state toggle cycling through ascending → descending → deactivated. When groupings are active, the sort list auto-promotes grouped properties to the top in grouping order, so that groups are also sorted by the same criteria.
 
 ## What It Looks Like
 
@@ -137,7 +137,7 @@ flowchart LR
 
 - Rendered inside `WorkspaceToolbarComponent` via `@if (activeDropdown() === 'sort')`
 - Emits `sortChanged` to `WorkspaceViewService` with full `SortConfig[]` array
-- `WorkspaceViewService` sorts images using multi-key comparator
+- `WorkspaceViewService` sorts media items using multi-key comparator
 - When groupings are active, group ordering uses the same sort directions
 - `WorkspaceViewService.activeGroupings()` is read to determine which properties appear in the grouping section
 
@@ -221,17 +221,17 @@ sequenceDiagram
     SD->>SD: activeSorts = [{key: 'date-captured', dir: 'desc'}, {key: 'city', dir: 'asc'}]
     SD->>WVS: sortChanged([{key: 'date-captured', dir: 'desc'}, {key: 'city', dir: 'asc'}])
     WVS->>WVS: sort by date-captured desc, then city asc
-    WVS->>WP: emit re-sorted images
+    WVS->>WP: emit re-sorted media items
 
     User->>SD: click toggle on "City" (↑ → ↓)
     SD->>SD: city direction flips to desc
     SD->>WVS: sortChanged([{key: 'date-captured', dir: 'desc'}, {key: 'city', dir: 'desc'}])
-    WVS->>WP: emit re-sorted images
+    WVS->>WP: emit re-sorted media items
 
     User->>SD: click toggle on "City" (↓ → —)
     SD->>SD: city deactivated; activeSorts = [{key: 'date-captured', dir: 'desc'}]
     SD->>WVS: sortChanged([{key: 'date-captured', dir: 'desc'}])
-    WVS->>WP: emit re-sorted images
+    WVS->>WP: emit re-sorted media items
 ```
 
 ## Sort + Grouping Sync
@@ -258,9 +258,9 @@ flowchart TD
 
     GroupingDD -->|"sync grouping order"| SortDD
 
-    subgraph Pipeline["Image Pipeline"]
+    subgraph Pipeline["Media Pipeline"]
         direction LR
-        Raw["Raw images"]
+        Raw["Raw media items"]
         Sorted["Multi-sort:\n1. City ↑\n2. Project ↑\n3. Date captured ↓"]
         Grouped["Group by City → Project\n(groups ordered by sort)"]
         Raw --> Sorted --> Grouped
@@ -340,7 +340,7 @@ flowchart TD
         P2["2. Date captured ↓"]
     end
 
-    subgraph Result["Sorted Image List"]
+    subgraph Result["Sorted Media List"]
         direction TB
         R1["Berlin · 2026-03-07"]
         R2["Berlin · 2026-02-15"]

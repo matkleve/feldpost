@@ -77,7 +77,7 @@ For number-type properties (built-in `distance` and custom number properties), t
 - `=` → exact numeric equality
 - `≠` → not equal
 - `>`, `<`, `≥`, `≤` → numeric comparison
-- Images with no value for the property are excluded by all numeric operators except `is empty`
+- Media items with no value for the property are excluded by all numeric operators except `is empty`
 
 ### Dropdown Max-Height
 
@@ -99,7 +99,7 @@ flowchart LR
 | --------------- | ---------------------------------------------------------------------------------------------- | --------------- |
 | Properties list | Hardcoded built-ins + `metadata_keys` (org-scoped)                                             | `PropertyDef[]` |
 | Project options | `supabase.from('projects').select('id, name').eq('organization_id', org)`                      | `Project[]`     |
-| Metadata values | `supabase.from('image_metadata').select('value_text').eq('metadata_key_id', keyId)` (distinct) | `string[]`      |
+| Metadata values | `supabase.from('media_metadata').select('value_text').eq('metadata_key_id', keyId)` (distinct) | `string[]`      |
 
 ## State
 
@@ -125,7 +125,7 @@ Where `FilterRule` = `{ id: string; conjunction: 'and' | 'or'; property: Propert
 - Rendered inside `WorkspaceToolbarComponent` via `@if (activeDropdown() === 'filter')`
 - `FilterService` holds the active rules and converts them to Supabase query predicates
 - Map viewport query incorporates active filters via `FilterService`
-- `WorkspaceViewService` reads filtered image set from `FilterService`
+- `WorkspaceViewService` reads filtered media-item set from `FilterService`
 - Active Filter Chips (existing spec) reads from the same `FilterService`
 
 ## Acceptance Criteria
@@ -176,7 +176,7 @@ sequenceDiagram
         VQ->>Map: re-query with filter predicates → update markers
     and Update workspace content
         FS->>WVS: filters changed
-        WVS->>WP: emit filtered image list
+        WVS->>WP: emit filtered media-item list
     end
 ```
 
@@ -215,7 +215,7 @@ flowchart TD
     end
 
     subgraph Result["Combined Query"]
-        Q["SELECT * FROM images i\nWHERE i.address_label ILIKE '%Zürich%'\n  AND EXISTS (\n    SELECT 1 FROM image_projects ip\n    WHERE ip.image_id = i.id\n      AND ip.project_id = 'nord-uuid'\n  )\n  AND i.id IN (\n    SELECT image_id FROM image_metadata\n    WHERE key = 'Material'\n      AND value ILIKE '%Beton%'\n  )"]
+        Q["SELECT * FROM media_items m\nWHERE m.address_label ILIKE '%Zürich%'\n  AND EXISTS (\n    SELECT 1 FROM media_projects mp\n    WHERE mp.media_item_id = m.id\n      AND mp.project_id = 'nord-uuid'\n  )\n  AND m.id IN (\n    SELECT media_item_id FROM media_metadata\n    WHERE metadata_key_id = 'material-key-uuid'\n      AND value_text ILIKE '%Beton%'\n  )"]
     end
 
     FilterDropdown --> Result
