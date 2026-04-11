@@ -1,616 +1,302 @@
 # Database Schema Documentation
 
-**Who this is for:** engineers and DBAs working on data modeling, queries, and RLS policies.  
-**What you'll get:** the core tables, relationships, and constraints that support Feldpost invariants.
-
-See also: `architecture.md`, `security-boundaries.md`, `glossary.md`.
-
-Database: PostgreSQL (Supabase) with **PostGIS extension** enabled.
-
-> Migration note (2026-03-27): `public.images`, `public.image_projects`, `public.saved_groups`, and `public.saved_group_images` were removed. Canonical tables are `public.media_items`, `public.media_projects`, and `public.media_metadata`.
-
-### Entity-Relationship Diagram
-
-```mermaid
-erDiagram
-    auth_users ||--|| profiles : "1:1"
-    auth_users ||--o{ user_roles : "has roles"
-    auth_users ||--o{ media_items : "creates"
-    auth_users ||--o{ coordinate_corrections : "corrects"
-    auth_users ||--o{ projects : "created_by (SET NULL)"
-    auth_users ||--o{ metadata_keys : "created_by (SET NULL)"
-
-    organizations ||--o{ profiles : "has members"
-    organizations ||--o{ projects : "scopes"
-    organizations ||--o{ media_items : "scopes"
-    organizations ||--o{ metadata_keys : "scopes"
-
-    roles ||--o{ user_roles : "assigned via"
-
-    projects ||--o{ media_projects : "groups via memberships"
-
-    media_items ||--o{ media_metadata : "has metadata"
-    media_items ||--o{ coordinate_corrections : "has corrections"
-    media_items ||--o{ media_projects : "belongs to projects"
-
-    metadata_keys ||--o{ media_metadata : "defines key"
-
-    auth_users {
-        uuid id PK
-        text email
-        text encrypted_password
-        timestamptz created_at
-    }
-    organizations {
-        uuid id PK
-        text name
-        timestamptz created_at
-        timestamptz updated_at
-    }
-    profiles {
-        uuid id PK_FK
-        text full_name
-        uuid organization_id FK
-        timestamptz created_at
-        timestamptz updated_at
-    }
-    roles {
-        uuid id PK
-        text name UK
-    }
-    user_roles {
-        uuid user_id PK_FK
-        uuid role_id PK_FK
-    }
-    projects {
-        uuid id PK
-        uuid organization_id FK
-        text name
-        uuid created_by FK
-        timestamptz created_at
-        timestamptz updated_at
-    }
-    media_items {
-        uuid id PK
-        uuid created_by FK
-        uuid organization_id FK
-        uuid primary_project_id FK
-        text storage_path
-        text thumbnail_path
-        numeric exif_latitude
-        numeric exif_longitude
-        numeric latitude
-        numeric longitude
-        geography geog
-        text location_status
-        timestamptz captured_at
-        timestamptz created_at
-        uuid source_image_id
-        text address_label
-        text city
-        text district
-        text street
-        text country
-        timestamptz updated_at
-    }
-    media_projects {
-        uuid media_item_id PK_FK
-        uuid project_id PK_FK
-        timestamptz created_at
-    }
-    metadata_keys {
-        uuid id PK
-        text key_name
-        uuid organization_id FK
-        uuid created_by FK
-    }
-    media_metadata {
-        uuid image_id PK_FK
-        uuid metadata_key_id PK_FK
-        text value_text
-    }
-    coordinate_corrections {
-        uuid id PK
-        uuid image_id FK
-        uuid corrected_by FK
-        numeric previous_latitude
-        numeric previous_longitude
-        numeric new_latitude
-        numeric new_longitude
-        timestamptz corrected_at
-    }
-```
-
-Required extensions:
-
-```sql
-CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS pg_trgm;  -- Trigram similarity for AddressResolverService DB-first search
-```
-
----
-
-## 1. Identity Layer
-
-Table: `auth.users` (managed by Supabase)
-
-Fields (simplified):
-
-- `id` (uuid)
-- `email`
-- `encrypted_password`
-- `created_at`
-
-**Rules**
-
-- Application code must **not** modify this table directly.
-- All changes go through Supabase Auth APIs.
-
----
-
-## 2. Organizations Table
-
-Table: `organizations`
-
-Purpose:
-
-- Scope data visibility. All users within the same organization can see each other's images and projects.
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `name` (text, not null)
-- `created_at` (timestamptz, not null, default `now()`)
-- `updated_at` (timestamptz, not null, default `now()`)
-
----
-
-## 3. Profiles Table
-
-Table: `profiles`
-
-Purpose:
-
-- Extend the user with application-specific data.
-
-Columns:
-
-- `id` (uuid, primary key, references `auth.users(id)` ON DELETE CASCADE)
-- `full_name` (text)
-- `organization_id` (uuid, not null, references `organizations(id)` ON DELETE RESTRICT)
-- `created_at` (timestamptz, not null, default `now()`)
-- `updated_at` (timestamptz, not null, default `now()`)
-
-Relationship:
-
-- 1:1 with `auth.users`.
-- Many:1 with `organizations`.
-
-**Invariant**
-
-- Every `auth.users` row must have exactly one `profiles` row (see `user-lifecycle.md`).
-- Every profile must belong to an organization. The registration trigger assigns the organization (provided during signup or defaulted by admin invite).
-
-Note: The `company` column has been replaced by `organization_id` for proper relational scoping. Organization name is stored in `organizations.name`.
-
----
-
-## 4. Roles Table
-
-Table: `roles`
-
-Columns:
-
-- `id` (uuid, primary key)
-- `name` (text, unique, not null)
-
-Example values:
-
-- `admin`
-- `user`
-- `viewer`
-
----
-
-## 5. User Roles Table
-
-Table: `user_roles`
-
-Columns:
-
-- `user_id` (uuid, references `auth.users(id)` ON DELETE CASCADE)
-- `role_id` (uuid, references `roles(id)` ON DELETE CASCADE)
-
-Primary Key:
-
-- (`user_id`, `role_id`)
-
-Supports a many-to-many relationship:
-
-- One user can have multiple roles.
-- One role can belong to many users.
-
-RLS policies (see `security-boundaries.md`) use `user_roles` to determine permissions.
-
----
-
-## 6. Projects Table
-
-Table: `projects`
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
-- `name` (text, not null)
-- `created_by` (uuid, references `auth.users(id)` ON DELETE SET NULL)
-- `created_at` (timestamptz, not null, default `now()`)
-- `updated_at` (timestamptz, not null, default `now()`)
-
-Notes:
-
-- Projects are grouping entities connected to media via `media_projects` (many-to-many).
-- Projects are scoped to an organization. Users can only see projects in their own organization.
-- `created_by` uses ON DELETE SET NULL (not RESTRICT) so that user deletion is not blocked by project ownership. The project survives; authorship becomes unknown.
-- Access to projects is controlled by RLS (see `security-boundaries.md`).
-
----
-
-## 7. Media Items Table (Primary — V2)
-
-Table: `media_items`
-
-> **Migration Status:** The `public.images` table (legacy V1) was officially deprecated and dropped on 2026-03-27 as part of Phase 3 of the media-items migration. All data has been backfilled into `media_items`. RPC functions, RLS policies, and services now query `media_items` as the canonical source. A `source_image_id` column provides backward-compatibility references for legacy archive lookups if needed.
-
-**Canonical table for all photo/media storage and metadata.**
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `created_by` (uuid, references `profiles(id)` ON DELETE SET NULL)
-- `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
-- `storage_path` (text, nullable) — relative path in Supabase Storage (e.g., `{org_id}/{user_id}/{uuid}.jpg`). NULL for photoless datapoints (rows created via folder import or manual address entry that have no photo yet). Not a full URL. URLs are generated at runtime (signed or public).
-- `thumbnail_path` (text, not null) — relative path to the 128×128 JPEG thumbnail in Supabase Storage.
-- `exif_latitude` (numeric(10,7), nullable)
-- `exif_longitude` (numeric(11,7), nullable)
-- `latitude` (numeric(10,7), not null) — effective display coordinate (updated on correction, initially set from EXIF)
-- `longitude` (numeric(11,7), not null) — effective display coordinate
-- `geog` (geography(Point, 4326), not null) — PostGIS geography column, computed from `latitude`/`longitude`. Used for all spatial queries and indexing.
-- `direction` (numeric(5,2), nullable) — camera bearing in degrees (0–360) from EXIF
-- `captured_at` (timestamptz, nullable) — capture time from EXIF when available
-- `created_at` (timestamptz, not null, default `now()`) — upload/record creation time
-- `updated_at` (timestamptz, not null, default `now()`)
-- `address_label` (text, nullable) — human-readable address string for this media item (e.g., "Burgstraße 7, 8001 Zürich"). Populated on upload from user input, filename resolution, or reverse geocoding.
-- `city` (text, nullable) — structured city name from reverse geocoding (e.g., "Wien"). Used for grouping by city.
-- `district` (text, nullable) — structured district/suburb name from reverse geocoding (e.g., "Donaustadt"). Used for grouping by district.
-- `street` (text, nullable) — structured street name from reverse geocoding (e.g., "Seestadt-Straße"). Used for grouping by street.
-- `country` (text, nullable) — structured country name from reverse geocoding (e.g., "Austria"). Used for grouping by country.
-- `location_unresolved` (boolean, nullable, default FALSE) — TRUE for media items imported via `FolderImportAdapter` that were skipped during the review phase without a resolved location.
-
-**CHECK Constraints**
-
-```sql
-CHECK (latitude BETWEEN -90 AND 90)
-CHECK (longitude BETWEEN -180 AND 180)
-CHECK (exif_latitude IS NULL OR exif_latitude BETWEEN -90 AND 90)
-CHECK (exif_longitude IS NULL OR exif_longitude BETWEEN -180 AND 180)
-CHECK (direction IS NULL OR direction BETWEEN 0 AND 360)
-```
-
-**Computed Column / Trigger**
-
-```mermaid
-flowchart LR
-    A[INSERT or UPDATE<br>latitude / longitude] --> B[trg_media_items_geog<br>BEFORE trigger]
-    B --> C[sync_media_item_geog]
-    C --> D["SET geog = ST_SetSRID(<br>ST_MakePoint(lng, lat), 4326)<br>::geography"]
-    C --> E["SET updated_at = now()"]
-    D --> F[Row written to disk]
-    E --> F
-```
-
-The `geog` column is maintained by a trigger that fires on INSERT and UPDATE of `latitude` or `longitude`:
-
-```sql
-CREATE OR REPLACE FUNCTION sync_media_item_geog() RETURNS trigger AS $$
-BEGIN
-  NEW.geog := ST_SetSRID(ST_MakePoint(NEW.longitude, NEW.latitude), 4326)::geography;
-  NEW.updated_at := now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_media_items_geog
-    BEFORE INSERT OR UPDATE OF latitude, longitude ON media_items
-    FOR EACH ROW EXECUTE FUNCTION sync_media_item_geog();
-```
-
-**Invariants**
-
-- Every media item has valid spatial (lat/lng) and temporal context (`captured_at` or `created_at`).
-- Ownership is enforced via `created_by` and organization-scoped RLS.
-- EXIF and corrected coordinates are never conflated; if both exist, corrected coordinates are used for spatial queries.
-- `organization_id` is denormalized from the user's profile for efficient RLS checks (avoids a join on every query).
-
----
-
-## 7a. Media Projects Join Table
-
-Table: `media_projects`
-
-Purpose:
-
-- Model many-to-many membership between media items and projects.
-- Allow one media item to appear in multiple projects.
-
-Columns:
-
-- `media_item_id` (uuid, not null, references `media_items(id)` ON DELETE CASCADE)
-- `project_id` (uuid, not null, references `projects(id)` ON DELETE CASCADE)
-- `created_at` (timestamptz, not null, default `now()`)
-
-Primary Key:
-
-- (`media_item_id`, `project_id`)
-
-Invariants:
-
-- Duplicate memberships are prevented by the composite primary key.
-- Cross-organization links are rejected by trigger/RLS policy (`media_items.organization_id` must equal `projects.organization_id`).
-- Deleting a media item or project removes only membership links, not the surviving parent rows.
-
----
-
-## 8. Metadata Tables
-
-Table: `metadata_keys`
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `key_name` (text, not null)
-- `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
-- `created_by` (uuid, references `auth.users(id)` ON DELETE SET NULL)
-- `created_at` (timestamptz, not null, default `now()`)
-
-Uniqueness (enforced, not optional):
-
-- `UNIQUE (organization_id, key_name)` — prevents duplicate key names within the same organization.
-
-Note: `created_by` uses ON DELETE SET NULL (not RESTRICT) so user deletion is not blocked.
-
-Table: `media_metadata`
-
-Columns:
-
-- `media_item_id` (uuid, references `media_items(id)` ON DELETE CASCADE)
-- `metadata_key_id` (uuid, references `metadata_keys(id)` ON DELETE CASCADE)
-- `value_text` (text, not null)
-- `created_at` (timestamptz default `now()`)
-
-Primary Key:
-
-- (`media_item_id`, `metadata_key_id`)
-
----
-
-## 9. Indexing Strategy (MVP)
-
-Feldpost uses **PostGIS** with GiST indexes as the MVP default for spatial queries.
-
-### Required Indexes
-
-**Spatial (PostGIS):**
-
-- `CREATE INDEX idx_media_items_geog ON media_items USING GIST (geog);` — enables efficient bounding-box (`&&`) and distance (`ST_DWithin`, `<->`) queries.
-
-**Temporal:**
-
-- `CREATE INDEX idx_media_items_created_at ON media_items (created_at DESC);` — timeline filtering and sorting.
-- `CREATE INDEX idx_media_items_captured_at ON media_items (captured_at DESC NULLS LAST);` — EXIF timestamp filtering.
-
-**Ownership and Organization:**
-
-- `CREATE INDEX idx_media_items_created_by ON media_items (created_by);` — owner/admin checks.
-- `CREATE INDEX idx_media_items_org_id ON media_items (organization_id);` — organization-scoped queries.
-
-**Project Memberships:**
-
-- `CREATE INDEX idx_media_projects_project_media ON media_projects (project_id, media_item_id);` — project filter and grouped counts.
-- `CREATE INDEX idx_media_projects_media_project ON media_projects (media_item_id, project_id);` — fast membership lookup for detail/workspace rows.
-
-**Metadata:**
-
-- `CREATE INDEX idx_media_metadata_key_value ON media_metadata (metadata_key_id, value_text);` — key/value filtering.
-
-**Roles (RLS):**
-
-- `CREATE INDEX idx_user_roles_user ON user_roles (user_id);`
-- `CREATE INDEX idx_roles_name ON roles (name);`
-
-**Groups:**
-
-- `CREATE INDEX idx_saved_groups_user ON saved_groups (user_id, tab_order);`
-- `CREATE INDEX idx_saved_group_images_image ON saved_group_images (image_id);`
-
-### Why PostGIS Over Btree for Spatial Queries
-
-A composite btree on `(latitude, longitude)` is a 1D index applied to a 2D problem. It range-scans latitude effectively but filters longitude via sequential scan. At scale (tens of thousands of images in a city), this degrades to near-full-table scans for viewport queries.
-
-The PostGIS GiST index on `geography(Point, 4326)` is a true 2D spatial index that supports:
-
-- Bounding-box intersection (`&&` operator) for viewport queries.
-- Distance queries (`ST_DWithin`, `<->` nearest-neighbor operator).
-- Server-side spatial clustering via `ST_SnapToGrid` or `ST_ClusterDBSCAN`.
-
-Subabase supports PostGIS out of the box via `CREATE EXTENSION postgis`.
-
----
-
-## 10. Saved Groups Tables (Legacy — Removed)
-
-Table: `saved_groups` (removed on 2026-03-27)
-
-Purpose: User-created named collections of images for workflow organization (see `architecture.md` §11).
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `user_id` (uuid, not null, references `auth.users(id)` ON DELETE CASCADE)
-- `name` (text, not null)
-- `tab_order` (int, not null, default 0)
-- `created_at` (timestamptz, not null, default `now()`)
-- `updated_at` (timestamptz, not null, default `now()`)
-
-Table: `saved_group_images` (removed on 2026-03-27)
-
-Columns:
-
-- `group_id` (uuid, not null, references `saved_groups(id)` ON DELETE CASCADE)
-- `image_id` (legacy field; table removed)
-- `added_at` (timestamptz, not null, default `now()`)
-
-Primary Key: (`group_id`, `image_id`)
-
-Constraints:
-
-- Soft limit: 20 groups per user (enforced application-side). Hard limit: 50 (enforced via RPC check on insert).
-- No hard limit on images per group (virtual scrolling handles rendering).
-
-RLS: Users can only access their own groups (see `security-boundaries.md`).
-
----
-
-## 11. Share Set Tables (Export Links)
-
-Table: `share_sets`
-
-Purpose: Persist stable, tokenized media selections for export/share links within an organization scope.
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `organization_id` (uuid, not null, references `organizations(id)` ON DELETE CASCADE)
-- `created_by` (uuid, references `auth.users(id)` ON DELETE SET NULL)
-- `token_hash` (text, not null, unique) — SHA-256 (or equivalent) hash of opaque token; raw token is never stored.
-- `token_prefix` (text, not null) — short diagnostic prefix for support/debug without exposing full token.
-- `fingerprint` (text, not null) — deterministic hash of normalized media ID set for reuse semantics.
-- `expires_at` (timestamptz, nullable) — link validity window end.
-- `revoked_at` (timestamptz, nullable) — immediate invalidation marker.
-- `created_at` (timestamptz, not null, default `now()`)
-
-Indexes / Constraints:
-
-- `UNIQUE (token_hash)`
-- Partial unique index `(organization_id, fingerprint)` where `revoked_at IS NULL` for active-set reuse
-- Lookup index `(organization_id, token_hash)` where `revoked_at IS NULL`
-
-Table: `share_set_items`
-
-Purpose: Ordered membership mapping between a share set and its media items.
-
-Columns:
-
-- `share_set_id` (uuid, not null, references `share_sets(id)` ON DELETE CASCADE)
-- `media_item_id` (uuid, not null, references `media_items(id)` ON DELETE CASCADE)
-- `item_order` (int, not null) — deterministic display/export order.
-- `created_at` (timestamptz, not null, default `now()`)
-
-Primary Key: (`share_set_id`, `media_item_id`)
-
-Index:
-
-- `(share_set_id, item_order)` for ordered resolution
-
-RLS:
-
-- `share_sets`: org-scoped read for authenticated users; creator/admin write controls.
-- `share_set_items`: access inherits from parent `share_sets` policy checks.
-
----
-
-## 12. Coordinate Correction History
-
-Table: `coordinate_corrections`
-
-Purpose: Audit trail for marker corrections. Tracks who moved a marker, when, and from where.
-
-Columns:
-
-- `id` (uuid, primary key, default `gen_random_uuid()`)
-- `media_item_id` (uuid, not null, references `media_items(id)` ON DELETE CASCADE)
-- `corrected_by` (uuid, not null, references `auth.users(id)` ON DELETE CASCADE)
-- `previous_latitude` (numeric(9,6), not null)
-- `previous_longitude` (numeric(9,6), not null)
-- `new_latitude` (numeric(9,6), not null)
-- `new_longitude` (numeric(9,6), not null)
-- `corrected_at` (timestamptz, not null, default `now()`)
-
-This table is append-only and references canonical media rows.
-
----
-
-## 13. Foreign Key Cascade Summary
-
-### Cascade Flow Diagram
-
-```mermaid
-flowchart TD
-    subgraph "DELETE auth.users"
-        U[auth.users] -->|CASCADE| P[profiles]
-        U -->|CASCADE| UR[user_roles]
-        U -->|SET NULL| MI[media_items.created_by]
-        U -->|SET NULL| SS[share_sets.created_by]
-        U -->|CASCADE| CC[coordinate_corrections]
-        U -->|SET NULL| PR[projects.created_by]
-        U -->|SET NULL| MK[metadata_keys.created_by]
-        MI -->|CASCADE| MM[media_metadata]
-        MI -->|CASCADE| MP[media_projects]
-        MI -->|CASCADE| SSI[share_set_items]
-        SS -->|CASCADE| SSI2[share_set_items]
-    end
-
-    subgraph "DELETE organizations"
-        O[organizations] -->|CASCADE| PR2[projects]
-        O -->|CASCADE| MI2[media_items]
-        O -->|CASCADE| SS2[share_sets]
-        O -->|CASCADE| MK2[metadata_keys]
-        O -.->|RESTRICT| P2[profiles — blocked if members exist]
-    end
-
-    subgraph "DELETE projects"
-        PRD[projects] -->|CASCADE| MP1[media_projects.project_id]
-    end
-
-    subgraph "DELETE metadata_keys"
-        MKD[metadata_keys] -->|CASCADE| MM2[media_metadata]
-    end
-```
-
-| Parent Table    | Child Table              | FK Column         | On Delete | Rationale                                       |
-| --------------- | ------------------------ | ----------------- | --------- | ----------------------------------------------- |
-| `auth.users`    | `profiles`               | `id`              | CASCADE   | Profile is meaningless without user             |
-| `auth.users`    | `user_roles`             | `user_id`         | CASCADE   | Roles are user-scoped                           |
-| `auth.users`    | `media_items`            | `created_by`      | SET NULL  | Media survives user deletion; ownership cleared |
-| `auth.users`    | `coordinate_corrections` | `corrected_by`    | CASCADE   | Audit trail tied to user                        |
-| `auth.users`    | `projects`               | `created_by`      | SET NULL  | Project survives; authorship becomes unknown    |
-| `auth.users`    | `metadata_keys`          | `created_by`      | SET NULL  | Key survives; creator becomes unknown           |
-| `auth.users`    | `share_sets`             | `created_by`      | SET NULL  | Shared set survives user deletion               |
-| `organizations` | `profiles`               | `organization_id` | RESTRICT  | Cannot delete org with active users             |
-| `organizations` | `projects`               | `organization_id` | CASCADE   | Org deletion removes all projects               |
-| `organizations` | `media_items`            | `organization_id` | CASCADE   | Org deletion removes all media items            |
-| `organizations` | `share_sets`             | `organization_id` | CASCADE   | Org deletion removes all shared export sets     |
-| `organizations` | `metadata_keys`          | `organization_id` | CASCADE   | Org deletion removes all metadata keys          |
-| `roles`         | `user_roles`             | `role_id`         | CASCADE   | Removing a role unassigns it                    |
-| `media_items`   | `media_projects`         | `media_item_id`   | CASCADE   | Deleting media removes project memberships      |
-| `projects`      | `media_projects`         | `project_id`      | CASCADE   | Deleting project removes media memberships      |
-| `media_items`   | `media_metadata`         | `media_item_id`   | CASCADE   | Metadata is media-scoped                        |
-| `media_items`   | `coordinate_corrections` | `media_item_id`   | CASCADE   | History is media-scoped                         |
-| `media_items`   | `share_set_items`        | `media_item_id`   | CASCADE   | Deleting media removes it from shared sets      |
-| `share_sets`    | `share_set_items`        | `share_set_id`    | CASCADE   | Deleting/revoking set removes memberships       |
-| `metadata_keys` | `media_metadata`         | `metadata_key_id` | CASCADE   | Removing a key removes all values               |
-
-**Key design decisions:**
-
-- `projects.created_by` and `metadata_keys.created_by` use **SET NULL** (not RESTRICT) to ensure user deletion is never blocked by project or metadata key ownership.
-- `organizations` → `profiles` uses **RESTRICT** to prevent accidental organization deletion while users exist.
+This document describes the active Feldpost runtime schema (auth + public) after the media-era cutover.
+
+- Detailed per-column audit (type/null/default/constraints/index/FK/source/gap): `docs/audits/schema-audit-2026-04-11.md`
+- Security model and RLS boundary: `docs/security-boundaries.md`
+- Role behavior: `docs/role-permissions.md`
+
+## Runtime Scope
+
+Active runtime tables covered in this document:
+
+- auth.users
+- public.organizations
+- public.profiles
+- public.roles
+- public.user_roles
+- public.projects
+- public.media_items
+- public.media_projects
+- public.project_sections
+- public.project_section_items
+- public.metadata_keys
+- public.media_metadata
+- public.coordinate_corrections
+- public.dedup_hashes
+- public.share_sets
+- public.share_set_items
+- public.qr_invites
+- public.invite_share_events
+- public.app_texts
+- public.app_text_translations
+- public.storage_cleanup_runs
+
+Legacy image-era tables are removed from runtime schema:
+
+- public.images
+- public.image_projects
+- public.saved_groups
+- public.saved_group_images
+
+## Column Catalog (Full Coverage)
+
+### auth.users
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| email | text | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/invite-only-registration.md |
+
+### public.organizations
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/page/projects-page.md |
+| name | text | not null | docs/specs/page/projects-page.md |
+| created_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+
+### public.profiles
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| organization_id | uuid | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| full_name | text | nullable | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| avatar_url | text | nullable | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/invite-only-registration.md |
+
+### public.roles
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| name | text | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+
+### public.user_roles
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| user_id | uuid | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| role_id | uuid | not null | docs/specs/ui/settings-overlay/invite-only-registration.md |
+
+### public.projects
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/page/projects-page.md |
+| organization_id | uuid | not null | docs/specs/page/projects-page.md |
+| created_by | uuid | nullable | docs/specs/page/projects-page.md |
+| name | text | not null | docs/specs/page/projects-page.md |
+| description | text | nullable | docs/specs/page/projects-page.md |
+| created_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+| archived_at | timestamptz | nullable | docs/specs/page/projects-page.md |
+| color_key | text | not null/default 'clay' | docs/specs/page/projects-page.md |
+
+### public.media_items
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/workspace/workspace-view-system.md; docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| organization_id | uuid | not null | docs/specs/ui/workspace/workspace-view-system.md |
+| created_by | uuid | nullable | docs/specs/ui/workspace/workspace-view-system.md |
+| media_type | text | not null | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| mime_type | text | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| storage_path | text | nullable | docs/specs/ui/media-detail/media-detail-media-viewer.md; docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| thumbnail_path | text | nullable | docs/specs/ui/media-detail/media-detail-media-viewer.md |
+| poster_path | text | nullable | docs/specs/ui/media-detail/media-detail-media-viewer.md |
+| file_name | text | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| file_size_bytes | bigint | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| captured_at | timestamptz | nullable | docs/specs/ui/workspace/workspace-view-system.md |
+| duration_ms | integer | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| page_count | integer | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| exif_latitude | numeric(10,7) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| exif_longitude | numeric(11,7) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| latitude | numeric(10,7) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| longitude | numeric(11,7) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| geog | geography(Point,4326) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| location_status | text | not null | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| gps_assignment_allowed | boolean | not null/default true | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| source_image_id | uuid | nullable | docs/specs/ui/workspace/workspace-view-system.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/workspace/workspace-view-system.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/ui/workspace/workspace-view-system.md |
+| address_label | text | nullable | docs/specs/ui/search-bar/search-bar-data-and-service.md |
+| street | text | nullable | docs/specs/service/workspace-view/workspace-view-system.md |
+| city | text | nullable | docs/specs/service/workspace-view/workspace-view-system.md |
+| district | text | nullable | docs/specs/service/workspace-view/workspace-view-system.md |
+| country | text | nullable | docs/specs/service/workspace-view/workspace-view-system.md |
+
+### public.media_projects
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| media_item_id | uuid | not null | docs/specs/page/projects-page.md; docs/specs/ui/workspace/workspace-actions-bar.md |
+| project_id | uuid | not null | docs/specs/page/projects-page.md; docs/specs/ui/workspace/workspace-actions-bar.md |
+| created_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+
+### public.project_sections
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/page/projects-page.md |
+| organization_id | uuid | not null | docs/specs/page/projects-page.md |
+| project_id | uuid | not null | docs/specs/page/projects-page.md |
+| name | text | not null | docs/specs/page/projects-page.md |
+| sort_order | integer | not null/default 0 | docs/specs/page/projects-page.md |
+| archived_at | timestamptz | nullable | docs/specs/page/projects-page.md |
+| created_by | uuid | nullable | docs/specs/page/projects-page.md |
+| created_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+
+### public.project_section_items
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| section_id | uuid | not null | docs/specs/page/projects-page.md |
+| media_item_id | uuid | not null | docs/specs/page/projects-page.md |
+| sort_order | integer | not null/default 0 | docs/specs/page/projects-page.md |
+| created_at | timestamptz | not null/default now() | docs/specs/page/projects-page.md |
+
+### public.metadata_keys
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/service/metadata-service.md |
+| organization_id | uuid | not null | docs/specs/service/metadata-service.md |
+| created_by | uuid | nullable | docs/specs/service/metadata-service.md |
+| key_name | text | not null | docs/specs/service/metadata-service.md |
+| created_at | timestamptz | not null/default now() | docs/specs/service/metadata-service.md |
+
+### public.media_metadata
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/service/metadata-service.md |
+| media_item_id | uuid | not null | docs/specs/service/metadata-service.md |
+| metadata_key_id | uuid | not null | docs/specs/service/metadata-service.md |
+| value_text | text | not null | docs/specs/service/metadata-service.md |
+| created_at | timestamptz | not null/default now() | docs/specs/service/metadata-service.md |
+
+### public.coordinate_corrections
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/media-marker/media-marker.md |
+| media_item_id | uuid | not null | docs/specs/ui/media-marker/media-marker.md |
+| corrected_by | uuid | nullable | docs/specs/ui/media-marker/media-marker.md |
+| old_latitude | numeric(10,7) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| old_longitude | numeric(11,7) | nullable | docs/specs/ui/media-marker/media-marker.md |
+| new_latitude | numeric(10,7) | not null | docs/specs/ui/media-marker/media-marker.md |
+| new_longitude | numeric(11,7) | not null | docs/specs/ui/media-marker/media-marker.md |
+| corrected_at | timestamptz | not null/default now() | docs/specs/ui/media-marker/media-marker.md |
+
+### public.dedup_hashes
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| user_id | uuid | not null | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| media_item_id | uuid | not null | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| content_hash | text | not null | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| created_at | timestamptz | not null/default now() | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+
+### public.share_sets
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/workspace/workspace-actions-bar.md |
+| organization_id | uuid | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| created_by | uuid | nullable | docs/specs/ui/workspace/workspace-actions-bar.md |
+| token_hash | text | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| token_hash_algo | text | not null/default 'sha256' | docs/specs/ui/workspace/workspace-actions-bar.md |
+| token_prefix | text | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| fingerprint | text | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| expires_at | timestamptz | nullable | docs/specs/ui/workspace/workspace-actions-bar.md |
+| revoked_at | timestamptz | nullable | docs/specs/ui/workspace/workspace-actions-bar.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/workspace/workspace-actions-bar.md |
+
+### public.share_set_items
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| share_set_id | uuid | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| media_item_id | uuid | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| item_order | int | not null | docs/specs/ui/workspace/workspace-actions-bar.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/workspace/workspace-actions-bar.md |
+
+### public.qr_invites
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| organization_id | uuid | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| created_by | uuid | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| target_role | text | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| invite_url | text | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| qr_payload | text | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| token_hash | text | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| status | text | not null/default 'active' | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| expires_at | timestamptz | not null/default now()+7d | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| accepted_at | timestamptz | nullable | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| accepted_user_id | uuid | nullable | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+
+### public.invite_share_events
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| invite_id | uuid | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| actor_user_id | uuid | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| channel | text | not null | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/qr-invite-flow.md |
+
+### public.app_texts
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| organization_id | uuid | nullable | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| key | text | not null | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| source_text | text | not null | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| source_lang | text | not null/default 'en' | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| context | text | nullable | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| created_by | uuid | nullable | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| scope_key | generated text | generated stored | docs/specs/ui/settings-overlay/language-locale-settings.md |
+
+### public.app_text_translations
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| app_text_id | uuid | not null | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| lang | text | not null | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| translated_text | text | not null | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| status | text | not null/default 'published' | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| created_by | uuid | nullable | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| created_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/language-locale-settings.md |
+| updated_at | timestamptz | not null/default now() | docs/specs/ui/settings-overlay/language-locale-settings.md |
+
+### public.storage_cleanup_runs
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| id | bigint identity | not null/generated always | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| started_at | timestamptz | not null/default now() | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| finished_at | timestamptz | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| deleted_count | int | not null/default 0 | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| status | text | not null/default 'started' | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+| error_message | text | nullable | docs/specs/service/media-upload-service/upload-manager-pipeline.md |
+
+## Legacy Contract Notes
+
+- `media_items.source_image_id` remains a compatibility column.
+- RPC payload fields such as `image_id` are still emitted by selected compatibility RPCs and are not treated as blockers.
+- Old image-era table names in archive files are archive-only references and out of runtime scope.

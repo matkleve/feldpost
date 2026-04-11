@@ -95,11 +95,13 @@ $$;
 
 ### 2.2 Roles
 
-| Role           | Capabilities                                                                    |
-| -------------- | ------------------------------------------------------------------------------- |
-| **admin**      | Full CRUD on all org data; manage users and roles; delete org resources.        |
-| **technician** | Upload media; edit own media (metadata, coordinates); create/manage own groups. |
-| **viewer**     | Read-only access to all org media, projects, and groups. No uploads, no edits.  |
+| Role       | Capabilities                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| **admin**  | Full CRUD on org data; manage users and roles; revoke/export resources.                       |
+| **clerk**  | Non-viewer member role for office workflows; can create project and invite artifacts.         |
+| **worker** | Non-viewer member role for field workflows; can upload and mutate own/org media per policies. |
+| **user**   | Baseline non-viewer member role (legacy-compatible).                                          |
+| **viewer** | Read-only access to org-scoped runtime data. No uploads, no write mutations.                  |
 
 The `viewer` role enables the Clerk persona (UC2) to browse and quote without risking data modification.
 
@@ -152,15 +154,15 @@ Note: `media_items.organization_id` is denormalized from `profiles.organization_
 - `metadata_keys`: scoped to `organization_id`. Readable by all org members. Writable by creator or admin.
 - `media_metadata`: inherits visibility/write permissions from the parent media item.
 
-### 3.6 Saved Groups
+### 3.6 Share Set Memberships (Media-Era)
 
-- `saved_groups`:
-  - **SELECT**: `user_id = auth.uid()` — groups are private to the creator. (Future: shared groups via org visibility.)
-  - **INSERT**: `user_id = auth.uid()`.
-  - **UPDATE / DELETE**: `user_id = auth.uid()`.
-- `saved_group_images`:
-  - Inherits access from the parent `saved_groups` row via `group_id`.
-  - INSERT/DELETE allowed only if user owns the group.
+- `share_sets`:
+  - **SELECT**: org-scoped (`organization_id = user_org_id()`), active only (`revoked_at IS NULL`, not expired).
+  - **INSERT**: creator must be `auth.uid()`, org must match, viewer blocked.
+  - **UPDATE / DELETE**: creator or admin, org-scoped.
+- `share_set_items`:
+  - Inherits access from parent `share_sets` constraints.
+  - Write operations require creator/admin rights through the parent set.
 
 ### 3.7 Coordinate Corrections
 

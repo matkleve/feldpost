@@ -144,38 +144,31 @@ Admin role assignment:
 flowchart TD
     DEL["DELETE from auth.users"] --> P["profiles → CASCADE → deleted"]
     DEL --> UR["user_roles → CASCADE → deleted"]
-    DEL --> I["images → CASCADE → deleted"]
-    I --> IM["image_metadata → CASCADE"]
-    I --> CC["coordinate_corrections → CASCADE"]
-    I --> SGI["saved_group_images → CASCADE"]
-    DEL --> SG["saved_groups → CASCADE → deleted"]
-    SG --> SGI2["saved_group_images → CASCADE"]
     DEL --> PR["projects.created_by → SET NULL\n(project survives)"]
     DEL --> MK["metadata_keys.created_by → SET NULL\n(key survives)"]
-    DEL --> CORR["coordinate_corrections.corrected_by\n→ orphaned UUID (audit preserved)"]
-
-    I -->|"Storage cleanup"| STOR["Scheduled job:\ndelete {org_id}/{user_id}/* files"]
+  DEL --> SS["share_sets.created_by → SET NULL\n(set survives)"]
+  P --> MI["media_items.created_by → SET NULL\n(media survives)"]
+  P --> CORR["coordinate_corrections.corrected_by\n→ SET NULL (audit preserved)"]
 ```
 
 When a user is deleted from `auth.users`:
 
-| Table                      | Behavior                                                                    | Rationale                                                           |
-| -------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `profiles`                 | **CASCADE** — row is deleted.                                               | 1:1 with auth.users; no reason to keep.                             |
-| `user_roles`               | **CASCADE** — all role entries for the user are deleted.                    | Roles are meaningless without the user.                             |
-| `images`                   | **CASCADE** — all images owned by the user are deleted.                     | Images are personal uploads.                                        |
-| `image_metadata`           | **CASCADE** (via images) — metadata rows are deleted with the parent image. | Metadata has no meaning without the image.                          |
-| `projects.created_by`      | **SET NULL** — projects remain; `created_by` becomes null.                  | Projects may be shared org resources; don't orphan or destroy them. |
-| `metadata_keys.created_by` | **SET NULL** — keys remain; `created_by` becomes null.                      | Keys may be used by other users' images.                            |
-| `saved_groups`             | **CASCADE** — all groups owned by the user are deleted.                     | Groups are personal collections.                                    |
-| `coordinate_corrections`   | **Preserved** — audit entries remain (corrected_by becomes orphaned UUID).  | Audit logs should not be deleted.                                   |
+| Table                      | Behavior                                                            | Rationale                                                              |
+| -------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `profiles`                 | **CASCADE** — row is deleted.                                       | 1:1 with auth.users; no reason to keep.                                |
+| `user_roles`               | **CASCADE** — all role entries for the user are deleted.            | Roles are meaningless without the user.                                |
+| `media_items.created_by`   | **SET NULL** — media rows survive; ownership field is cleared.      | Media may be referenced by projects/share sets and must remain stable. |
+| `projects.created_by`      | **SET NULL** — projects remain; `created_by` becomes null.          | Projects may be shared org resources; don't orphan or destroy them.    |
+| `metadata_keys.created_by` | **SET NULL** — keys remain; `created_by` becomes null.              | Keys may be used by other users' media items.                          |
+| `share_sets.created_by`    | **SET NULL** — persisted share sets remain valid.                   | Existing export links should not be invalidated by account removal.    |
+| `coordinate_corrections`   | **Preserved** — audit entries remain (`corrected_by` becomes null). | Audit logs should not be deleted.                                      |
 
 ### Storage Cleanup
 
-When images are deleted via CASCADE, the corresponding Storage files (`{org_id}/{user_id}/*`) must also be removed. Options:
+When media items are deleted (for example via explicit lifecycle cleanup), corresponding Storage files should also be removed. Options:
 
-1. **Database trigger on `images` DELETE** — calls a Supabase Edge Function to delete the Storage object.
-2. **Scheduled cleanup job** — periodically scans for Storage objects without a matching `images` row.
+1. **Database trigger on `media_items` DELETE** — calls a Supabase Edge Function to delete the Storage object.
+2. **Scheduled cleanup job** — periodically scans for Storage objects without a matching `media_items` row.
 
 MVP uses option 2 (simpler; avoids trigger-to-HTTP coupling).
 
@@ -187,7 +180,8 @@ MVP uses option 2 (simpler; avoids trigger-to-HTTP coupling).
 
 **Invariants**
 
-- There is no orphaned profile, role, or image data for deleted users.
+- There is no orphaned profile or role data for deleted users.
+- Media ownership fields are nulled safely without deleting shared runtime media rows.
 - Projects and metadata keys survive user deletion (SET NULL on `created_by`).
 - Deletion is initiated only from `auth.users`; other tables do not delete users directly.
 - Storage cleanup may be eventually consistent (a short delay between DB deletion and file removal is acceptable).

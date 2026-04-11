@@ -48,10 +48,10 @@ flowchart LR
   S --> UI
 ```
 
-| Field                 | Source                                        | Type               |
-| --------------------- | --------------------------------------------- | ------------------ |
-| Saved groups          | `supabase.from('saved_groups').select(...)`   | `SavedGroup[]`     |
-| Selection media items | In-memory (Active Selection is not persisted) | `WorkspaceMedia[]` |
+| Field                 | Source                                                   | Type                |
+| --------------------- | -------------------------------------------------------- | ------------------- |
+| Persisted shared sets | `share_sets` + `share_set_items` via service abstraction | `ShareSetSummary[]` |
+| Selection media items | In-memory (Active Selection is not persisted)            | `WorkspaceMedia[]`  |
 
 ## State
 

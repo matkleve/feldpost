@@ -80,12 +80,15 @@ In order (respecting FK dependencies):
 3. `roles`
 4. `user_roles` (FK → profiles, roles)
 5. `projects` (FK → organizations, profiles)
-6. `images` (FK → profiles, projects, organizations) — includes `geog geography(Point, 4326)` column + trigger
-7. `metadata_keys` (FK → organizations, profiles)
-8. `image_metadata` (FK → images, metadata_keys)
-9. `saved_groups` (FK → profiles)
-10. `saved_group_images` (FK → saved_groups, images)
-11. `coordinate_corrections` (FK → images, profiles)
+6. `media_items` (FK → profiles, organizations) — includes `geog geography(Point, 4326)` column + trigger
+7. `media_projects` (FK → media_items, projects)
+8. `project_sections` (FK → projects, organizations, profiles)
+9. `project_section_items` (FK → project_sections, media_items)
+10. `metadata_keys` (FK → organizations, profiles)
+11. `media_metadata` (FK → media_items, metadata_keys)
+12. `share_sets` (FK → organizations, auth.users)
+13. `share_set_items` (FK → share_sets, media_items)
+14. `coordinate_corrections` (FK → media_items, profiles)
 
 See `database-schema.md` for full DDL.
 
@@ -105,12 +108,15 @@ See `user-lifecycle.md` §1.
 ```sql
 -- Enable RLS on every table with user/org-scoped data:
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE media_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE media_projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_sections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_section_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE metadata_keys ENABLE ROW LEVEL SECURITY;
-ALTER TABLE image_metadata ENABLE ROW LEVEL SECURITY;
-ALTER TABLE saved_groups ENABLE ROW LEVEL SECURITY;
-ALTER TABLE saved_group_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE media_metadata ENABLE ROW LEVEL SECURITY;
+ALTER TABLE share_sets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE share_set_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE coordinate_corrections ENABLE ROW LEVEL SECURITY;
 ```
 
@@ -130,10 +136,10 @@ INSERT INTO organizations (name) VALUES ('Default Organization');
 
 In the Supabase dashboard (Storage → New Bucket):
 
-- **Name:** `images`
+- **Name:** `media` (legacy deployments may still include `images` during transition)
 - **Public:** No (private bucket)
 - **File size limit:** 25 MB
-- **Allowed MIME types:** `image/jpeg`, `image/png`, `image/heic`, `image/heif`, `image/webp`
+- **Allowed MIME types:** `image/jpeg`, `image/png`, `image/heic`, `image/heif`, `image/webp`, `video/mp4`, `application/pdf`
 
 Then apply storage policies from `security-boundaries.md` §4.
 
@@ -271,13 +277,13 @@ npm run design-system:check
 - [ ] Registration without invite is rejected.
 - [ ] Registration with valid invite creates both `auth.users` and `profiles` (with invite `organization_id`).
 - [ ] New invited users get role from invite target role.
-- [ ] Upload stores files in `images/{org_id}/{user_id}/{uuid}.jpg`.
+- [ ] Upload stores files in `media/{org_id}/{user_id}/{uuid}.ext`.
 - [ ] Thumbnails are generated and stored at `.../{uuid}_thumb.jpg`.
-- [ ] Image records persist EXIF and corrected coordinate fields separately.
-- [ ] `images.geog` is auto-populated by the trigger from lat/lng.
+- [ ] Media records persist EXIF and corrected coordinate fields separately.
+- [ ] `media_items.geog` is auto-populated by the trigger from lat/lng.
 - [ ] Map requests are viewport-limited (not full-dataset fetches).
 - [ ] Non-admin users cannot see rows from other organizations.
-- [ ] Viewer-role users cannot INSERT/UPDATE/DELETE images.
+- [ ] Viewer-role users cannot INSERT/UPDATE/DELETE media rows.
 - [ ] Signed URLs work for image retrieval (no public bucket access).
 
 ---

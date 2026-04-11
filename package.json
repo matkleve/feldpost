@@ -7,7 +7,13 @@
     "i18n:generate-language": "node scripts/generate-i18n-language.mjs",
     "i18n:validate-language": "node scripts/validate-i18n-language.mjs",
     "i18n:guard": "node scripts/check-i18n-hardcoded-literals.mjs",
-    "i18n:guard:strict": "node scripts/check-i18n-hardcoded-literals.mjs --strict"
+    "i18n:guard:strict": "node scripts/check-i18n-hardcoded-literals.mjs --strict",
+    "supabase:smoke:photoless": "node scripts/validate-supabase-rpc-media-type.mjs",
+    "supabase:smoke:storage-cleanup": "node scripts/validate-supabase-storage-cleanup-api-mode.mjs",
+    "supabase:smoke": "npm run supabase:smoke:photoless && npm run supabase:smoke:storage-cleanup",
+    "supabase:cli:version": "node scripts/run-supabase-cli.mjs --version",
+    "supabase:db:push": "node scripts/run-supabase-cli.mjs db push",
+    "supabase:migration:list": "node scripts/run-supabase-cli.mjs migration list"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

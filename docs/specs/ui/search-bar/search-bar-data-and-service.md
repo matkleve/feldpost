@@ -261,7 +261,7 @@ None.
 ### Supabase Calls
 
 - `media_items` table: address candidate retrieval.
-- `projects` and `saved_groups`: content candidate retrieval.
+- `projects` and share-set membership context (`share_sets`, `share_set_items`): content candidate retrieval.
 - Edge function `geocode`: forward geocoder retrieval with bias params.
 - Supabase Auth: `refreshSession()` on first geocoder `401`, then single retry.
 - Supabase Auth: `signOut()` when retry also returns `401` or refresh fails.

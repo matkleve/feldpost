@@ -151,15 +151,15 @@ WorkspacePaneComponent (seitenübergreifend)
 
 ## Data Requirements
 
-| Source                      | Fields Needed                                                        | Purpose                                      |
-| --------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
-| `media_items` table         | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
-| `MediaPageCacheService`     | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
-| `PhotoLoadService`          | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
-| `saved_groups` table        | id, name, org_id, member media items                                 | Group filter options (Phase 2)               |
-| `UploadManagerService`      | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data              |
-| `WorkspaceViewService`      | getGroupedAndFiltered() logic (reuse)                                | Grouping/filtering/sorting                   |
-| `WorkspaceSelectionService` | selectedMediaIds, toggleSelection()                                  | Selection state for "Selected Items" tab     |
+| Source                                  | Fields Needed                                                        | Purpose                                      |
+| --------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
+| `media_items` table                     | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
+| `MediaPageCacheService`                 | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
+| `PhotoLoadService`                      | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
+| `share_sets` + `share_set_items` tables | share_set_id, fingerprint, ordered media_item_id membership          | Persisted shared selections (media-era)      |
+| `UploadManagerService`                  | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data              |
+| `WorkspaceViewService`                  | getGroupedAndFiltered() logic (reuse)                                | Grouping/filtering/sorting                   |
+| `WorkspaceSelectionService`             | selectedMediaIds, toggleSelection()                                  | Selection state for "Selected Items" tab     |
 
 ### Data Flow
 

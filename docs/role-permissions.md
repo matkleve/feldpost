@@ -55,16 +55,16 @@ Model note:
 - This section combines baseline behavior with explicit per-feature overrides.
 - If a feature override exists, the override is authoritative for that feature.
 
-Images:
+Media items:
 
 - Read: all org members.
-- Insert: non-viewer org member, `user_id` must match authenticated user.
-- Update/Delete: currently org-wide for non-viewers (not owner-only), due to relaxed policy migration.
+- Insert: non-viewer org member, `created_by` must match authenticated user.
+- Update/Delete: owner-or-admin within org (`created_by = auth.uid() OR is_admin()`) and non-viewer.
 
-Image metadata:
+Media metadata:
 
-- Read: org-scoped through parent image.
-- Insert/Update/Delete: non-viewer org members for images in same org.
+- Read: org-scoped through parent media item.
+- Insert/Update/Delete: non-viewer org members for media items in same org.
 
 Metadata keys:
 
@@ -77,7 +77,7 @@ Projects:
 - Read: org members.
 - Insert: non-viewer org members.
 - Update: currently org-wide for non-viewers (relaxed policy).
-- Delete: owner or admin (plus org scope).
+- Delete: archived projects only, non-viewer org members (plus org scope).
 
 Roles/user_roles:
 
@@ -85,7 +85,7 @@ Roles/user_roles:
 - Read own user_roles: self or admin.
 - Assign/revoke roles: admin only.
 
-Storage (`images` bucket):
+Storage (`media` bucket, `images` fallback during transition):
 
 - Upload: non-viewer, must match org/user path.
 - Read: org-scoped.
@@ -102,17 +102,17 @@ Legend: ALLOW, DENY, CONDITIONAL
 
 | Action                   | admin | user        | viewer | Notes                                        |
 | ------------------------ | ----- | ----------- | ------ | -------------------------------------------- |
-| Read images in own org   | ALLOW | ALLOW       | ALLOW  | org-scoped                                   |
-| Upload image             | ALLOW | ALLOW       | DENY   | user_id path and row checks                  |
-| Edit image details       | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers           |
-| Delete image             | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers           |
-| Edit image metadata      | ALLOW | ALLOW       | DENY   | non-viewer org scope                         |
+| Read media in own org    | ALLOW | ALLOW       | ALLOW  | org-scoped                                   |
+| Upload media             | ALLOW | ALLOW       | DENY   | created_by + org checks                      |
+| Edit media details       | ALLOW | CONDITIONAL | DENY   | owner-or-admin, non-viewer                   |
+| Delete media             | ALLOW | CONDITIONAL | DENY   | owner-or-admin, non-viewer                   |
+| Edit media metadata      | ALLOW | ALLOW       | DENY   | non-viewer org scope                         |
 | Create metadata key      | ALLOW | ALLOW       | DENY   | non-viewer org scope                         |
 | Delete metadata key      | ALLOW | CONDITIONAL | DENY   | creator or admin                             |
 | Read projects in own org | ALLOW | ALLOW       | ALLOW  | org-scoped                                   |
 | Create project           | ALLOW | ALLOW       | DENY   | non-viewer                                   |
 | Update project           | ALLOW | ALLOW       | DENY   | currently org-wide for non-viewers           |
-| Delete project           | ALLOW | CONDITIONAL | DENY   | owner or admin                               |
+| Delete project           | ALLOW | CONDITIONAL | DENY   | archived project, non-viewer, same org       |
 | Assign/revoke roles      | ALLOW | DENY        | DENY   | admin-only policy                            |
 | Upload storage object    | ALLOW | ALLOW       | DENY   | path and role checks                         |
 | Delete storage object    | ALLOW | CONDITIONAL | DENY   | owner or admin                               |
@@ -124,17 +124,17 @@ Current effective behavior: clerk and worker generally follow non-viewer `user` 
 
 | Action                   | admin | clerk       | worker      | Notes                              |
 | ------------------------ | ----- | ----------- | ----------- | ---------------------------------- |
-| Read images in own org   | ALLOW | ALLOW       | ALLOW       | org-scoped                         |
-| Upload image             | ALLOW | ALLOW       | ALLOW       | currently same as user             |
-| Edit image details       | ALLOW | ALLOW       | ALLOW       | currently org-wide for non-viewers |
-| Delete image             | ALLOW | ALLOW       | ALLOW       | currently org-wide for non-viewers |
-| Edit image metadata      | ALLOW | ALLOW       | ALLOW       | non-viewer org scope               |
+| Read media in own org    | ALLOW | ALLOW       | ALLOW       | org-scoped                         |
+| Upload media             | ALLOW | ALLOW       | ALLOW       | currently same as user             |
+| Edit media details       | ALLOW | CONDITIONAL | CONDITIONAL | owner-or-admin, non-viewer         |
+| Delete media             | ALLOW | CONDITIONAL | CONDITIONAL | owner-or-admin, non-viewer         |
+| Edit media metadata      | ALLOW | ALLOW       | ALLOW       | non-viewer org scope               |
 | Create metadata key      | ALLOW | ALLOW       | ALLOW       | non-viewer org scope               |
 | Delete metadata key      | ALLOW | CONDITIONAL | CONDITIONAL | creator or admin                   |
 | Read projects in own org | ALLOW | ALLOW       | ALLOW       | org-scoped                         |
 | Create project           | ALLOW | ALLOW       | ALLOW       | non-viewer                         |
 | Update project           | ALLOW | ALLOW       | ALLOW       | currently org-wide for non-viewers |
-| Delete project           | ALLOW | CONDITIONAL | CONDITIONAL | owner or admin                     |
+| Delete project           | ALLOW | CONDITIONAL | CONDITIONAL | archived project, non-viewer       |
 | Assign/revoke roles      | ALLOW | DENY        | DENY        | admin-only policy                  |
 | Upload storage object    | ALLOW | ALLOW       | ALLOW       | path and role checks               |
 | Delete storage object    | ALLOW | CONDITIONAL | CONDITIONAL | owner or admin                     |
