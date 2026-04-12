@@ -1,3 +1,5 @@
+/** IS OUTDATED, USE ITEM GRID, MOVE TO ARCHIVE WHEN NO WHERE IN USE ANYMORE */
+
 import {
   Component,
   ElementRef,
