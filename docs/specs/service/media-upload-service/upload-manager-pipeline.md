@@ -157,21 +157,6 @@ Additional document-preview fields (conceptual contract):
 | `document_preview_path`  | document thumbnail generator    | `string \| null`                   | First-page preview storage path for document-like uploads |
 | `document_preview_state` | generation worker/edge function | `'pending' \| 'ready' \| 'failed'` | Progress state for asynchronous preview generation        |
 
-### Location Status Lifecycle Contract
-
-Canonical status values for persisted media rows:
-
-- `pending`: location resolution is still open.
-- `resolved`: location resolved successfully (terminal success).
-- `unresolvable`: location cannot be resolved by current strategy (terminal failure).
-
-Upload-phase contract:
-
-- New row with unresolved location starts as `pending`.
-- Successful resolution during upload enrichment writes `resolved`.
-- If enrichment reaches final no-result state, write terminal `unresolvable`.
-- Deprecated legacy statuses `gps` | `no_gps` | `unresolved` are read-compatibility only during migration and must not be emitted by new upload writes.
-
 Pseudo-Ablauf:
 
 ```ts

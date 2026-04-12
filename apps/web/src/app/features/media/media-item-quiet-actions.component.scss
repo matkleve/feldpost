@@ -29,10 +29,8 @@
 // @see docs/element-specs/media-item-quiet-actions.md#state-machine
 // Defines active styling for selected-state quiet selection action.
 // @see docs/element-specs/item-grid.md#state
-.media-item-quiet-actions[data-state='interactive-selected']
-  .media-item-quiet-actions__button--select,
-.media-item-quiet-actions[data-state='interactive-selected-map-disabled']
-  .media-item-quiet-actions__button--select {
+:host([data-state='interactive-selected']) .media-item-quiet-actions__button--select,
+:host([data-state='interactive-selected-map-disabled']) .media-item-quiet-actions__button--select {
   border-color: var(--color-clay);
   background: var(--color-clay);
   color: var(--color-bg-surface);

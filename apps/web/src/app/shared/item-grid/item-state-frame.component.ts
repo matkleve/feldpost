@@ -8,6 +8,7 @@ import type { ItemDisplayMode, ItemVisualState } from './item.component';
   styleUrl: './item-state-frame.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    '[class.item-state-frame]': 'true',
     '[attr.data-state]': 'state()',
     '[class.item-state-frame--disabled]': 'disabled()',
   },

@@ -3,8 +3,8 @@
  * Displays all media (images, videos, documents) with grid layout.
  * Workspace pane is mounted globally by AppShell, not here.
  *
- * Layout mirrors projects-page pattern:
- * main > section.content-clamp > header + content
+ * Flat host-owned layout:
+ * app-media host > content-clamp stack > header + content
  */
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import type { OnDestroy } from '@angular/core';
@@ -38,6 +38,9 @@ import { UploadManagerService } from '../../core/upload/upload-manager.service';
   ],
   templateUrl: './media.component.html',
   styleUrl: './media.component.scss',
+  host: {
+    'data-i18n-skip': '',
+  },
 })
 export class MediaComponent implements OnDestroy {
   private static readonly DEFAULT_CONTAINER_WIDTH_PX = 960;

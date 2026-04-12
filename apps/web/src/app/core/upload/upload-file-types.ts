@@ -42,4 +42,4 @@ export const VIDEO_MIME_TYPES: ReadonlySet<string> = new Set([
 ]);
 
 export type MediaType = 'photo' | 'video' | 'document';
-export type LocationStatus = 'gps' | 'no_gps' | 'unresolved';
+export type LocationStatus = 'pending' | 'resolved' | 'unresolvable';

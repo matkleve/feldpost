@@ -22,6 +22,13 @@ import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 
 const BATCH_SIZE = 50;
 
+export type CanonicalLocationStatus = 'pending' | 'resolved' | 'unresolvable';
+
+export interface ResolvePendingMediaItemResult {
+  status: CanonicalLocationStatus;
+  changed: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class LocationResolverService {
   private readonly geocoding = inject(GeocodingService);
@@ -33,6 +40,68 @@ export class LocationResolverService {
 
   /** Whether the background batch is currently running. */
   private backgroundRunning = false;
+
+  normalizeLocationStatus(status: string | null | undefined): CanonicalLocationStatus | null {
+    switch (status) {
+      case 'pending':
+      case 'resolved':
+      case 'unresolvable':
+        return status;
+      case 'gps':
+        return 'resolved';
+      case 'no_gps':
+        return 'pending';
+      case 'unresolved':
+        return 'unresolvable';
+      default:
+        return null;
+    }
+  }
+
+  async resolvePendingMediaItem(mediaItemId: string): Promise<ResolvePendingMediaItemResult> {
+    const { data, error } = await this.supabase.client
+      .from('media_items')
+      .select(
+        'id,source_image_id,location_status,latitude,longitude,address_label,city,district,street,country',
+      )
+      .or(`id.eq.${mediaItemId},source_image_id.eq.${mediaItemId}`)
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data) {
+      return { status: 'unresolvable', changed: false };
+    }
+
+    const row = data as UnresolvedRow & { id?: string | null };
+    const resolvedMediaId = row.id ?? row.media_item_id ?? row.image_id ?? null;
+    if (!resolvedMediaId) {
+      return { status: 'unresolvable', changed: false };
+    }
+
+    const normalizedStatus = this.normalizeLocationStatus(row.location_status);
+    if (normalizedStatus && normalizedStatus !== 'pending') {
+      return { status: normalizedStatus, changed: false };
+    }
+
+    if (this.pending.has(resolvedMediaId)) {
+      return { status: 'pending', changed: false };
+    }
+
+    this.pending.add(resolvedMediaId);
+    try {
+      const resolved = await this.resolveRow(row, resolvedMediaId);
+      if (resolved) {
+        return { status: 'resolved', changed: true };
+      }
+
+      await this.markUnresolvable(resolvedMediaId);
+      return { status: 'unresolvable', changed: true };
+    } catch {
+      return { status: 'pending', changed: false };
+    } finally {
+      this.pending.delete(resolvedMediaId);
+    }
+  }
 
   // ── On-demand resolution (marker click / radius selection) ─────────────
 
@@ -235,7 +304,10 @@ export class LocationResolverService {
     if (hasGps && this.isRowMissingAddress(row)) {
       // Reverse geocode: GPS → address
       const result = await this.geocoding.reverse(row.latitude!, row.longitude!);
-      if (!result) return false;
+      if (!result) {
+        await this.markUnresolvable(mediaItemId);
+        return false;
+      }
 
       await this.persistAddressSingle(mediaItemId, result);
       return true;
@@ -244,7 +316,10 @@ export class LocationResolverService {
     if (!hasGps && hasAddress) {
       // Forward geocode: address → GPS
       const result = await this.geocoding.forward(row.address_label!);
-      if (!result) return false;
+      if (!result) {
+        await this.markUnresolvable(mediaItemId);
+        return false;
+      }
 
       await this.persistGpsAndAddress(mediaItemId, result.lat, result.lng, {
         addressLabel: result.addressLabel,
@@ -259,6 +334,20 @@ export class LocationResolverService {
     }
 
     return false;
+  }
+
+  private async markUnresolvable(mediaItemId: string): Promise<void> {
+    const { error } = await this.supabase.client.rpc('resolve_media_location', {
+      p_media_item_id: mediaItemId,
+      p_location_status: 'unresolvable',
+    });
+
+    if (error) {
+      console.error('[LocationResolver] Failed to mark media item as unresolvable:', {
+        mediaItemId,
+        ...this.describeError(error),
+      });
+    }
   }
 
   private isRowMissingAddress(row: UnresolvedRow): boolean {
@@ -413,6 +502,8 @@ export class LocationResolverService {
 interface UnresolvedRow {
   media_item_id: string | null;
   image_id?: string | null;
+  source_image_id?: string | null;
+  location_status?: string | null;
   latitude: number | null;
   longitude: number | null;
   address_label: string | null;

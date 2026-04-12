@@ -1,6 +1,6 @@
 // Defines vertical stack layout for breadcrumb, title, and count summary.
 // @see docs/element-specs/item-grid.md#wiring
-.media-page-header {
+:host {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);

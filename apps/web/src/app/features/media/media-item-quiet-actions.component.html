@@ -1,45 +1,43 @@
 <!-- Hosts absolute corner actions for media-item hover/focus affordances. -->
 <!-- @see docs/element-specs/media-item.md#component-hierarchy -->
-<div class="media-item-quiet-actions" [attr.data-state]="state()">
-  <!-- Stable states: interactive-unselected | interactive-selected | interactive-map-disabled | interactive-selected-map-disabled | disabled. -->
+<!-- Stable states: interactive-unselected | interactive-selected | interactive-map-disabled | interactive-selected-map-disabled | disabled. -->
+<!-- @see docs/element-specs/media-item-quiet-actions.md#state-machine -->
+<!-- Renders top-left select toggle button for media item selection state. -->
+<!-- @see docs/element-specs/media-item.md#actions--interactions -->
+<button
+  type="button"
+  class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
+  uiButton
+  uiButtonSizeSm
+  uiButtonSecondary
+  uiButtonIconOnly
+  [attr.aria-pressed]="selected()"
+  [attr.aria-label]="selectLabel()"
+  (click)="onSelectClick($event)"
+>
+  <!-- Stable states: interactive-selected | interactive-selected-map-disabled render selected checkmark. -->
   <!-- @see docs/element-specs/media-item-quiet-actions.md#state-machine -->
-  <!-- Renders top-left select toggle button for media item selection state. -->
-  <!-- @see docs/element-specs/media-item.md#actions--interactions -->
-  <button
-    type="button"
-    class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
-    uiButton
-    uiButtonSizeSm
-    uiButtonSecondary
-    uiButtonIconOnly
-    [attr.aria-pressed]="selected()"
-    [attr.aria-label]="selectLabel()"
-    (click)="onSelectClick($event)"
-  >
-    <!-- Stable states: interactive-selected | interactive-selected-map-disabled render selected checkmark. -->
-    <!-- @see docs/element-specs/media-item-quiet-actions.md#state-machine -->
-    @if (selected()) {
-      <!-- Shows check glyph when item is currently selected. -->
-      <!-- @see docs/element-specs/media-item.md#actions--interactions -->
-      <span class="material-icons" aria-hidden="true">check</span>
-    }
-  </button>
+  @if (selected()) {
+    <!-- Shows check glyph when item is currently selected. -->
+    <!-- @see docs/element-specs/media-item.md#actions--interactions -->
+    <span class="material-icons" aria-hidden="true">check</span>
+  }
+</button>
 
-  <!-- Renders top-right map quick action as icon-only control. -->
+<!-- Renders top-right map quick action as icon-only control. -->
+<!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
+<button
+  type="button"
+  class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
+  uiButton
+  uiButtonSizeSm
+  uiButtonSecondary
+  uiButtonIconOnly
+  [disabled]="mapActionDisabled()"
+  [attr.aria-label]="mapLabel()"
+  (click)="onMapClick($event)"
+>
+  <!-- Shows map glyph for jump-to-location quick action. -->
   <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
-  <button
-    type="button"
-    class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
-    uiButton
-    uiButtonSizeSm
-    uiButtonSecondary
-    uiButtonIconOnly
-    [disabled]="mapActionDisabled()"
-    [attr.aria-label]="mapLabel()"
-    (click)="onMapClick($event)"
-  >
-    <!-- Shows map glyph for jump-to-location quick action. -->
-    <!-- @see docs/element-specs/media-item.md#what-it-looks-like -->
-    <span class="material-icons" aria-hidden="true">map</span>
-  </button>
-</div>
+  <span class="material-icons" aria-hidden="true">map</span>
+</button>

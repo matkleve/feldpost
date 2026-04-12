@@ -78,8 +78,8 @@
 
 // Reveals quiet actions on hover, focus-within, and selected states without layout shift.
 // @see docs/specs/component/media-item.md#actions--interactions
-.media-item:hover .media-item__quiet-actions,
-.media-item:focus-within .media-item__quiet-actions,
+:host:hover .media-item__quiet-actions,
+:host:focus-within .media-item__quiet-actions,
 :host([data-state='selected']) .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);

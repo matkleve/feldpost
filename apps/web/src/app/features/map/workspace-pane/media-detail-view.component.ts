@@ -74,6 +74,7 @@ import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
 import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
+import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
@@ -115,6 +116,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly actionEngineService = inject(ActionEngineService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly locationResolverService = inject(LocationResolverService);
   private readonly router = inject(Router);
 
   readonly mediaId = input<string | null>(null);
@@ -159,6 +161,7 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   private abortController: AbortController | null = null;
   private lastAddressSearchRequestId = 0;
+  private readonly pendingLocationRetryAttempted = new Set<string>();
 
   readonly thumbState = computed<MediaLoadState>(() => {
     const id = this.mediaId();
@@ -507,12 +510,18 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.editingField.set(null);
     this.activeJobId.set(null);
     this.replaceError.set(null);
+    this.pendingLocationRetryAttempted.clear();
   }
 
   private async loadMedia(id: string): Promise<void> {
     this.abortController?.abort();
     this.abortController = new AbortController();
     await this.dataFacade.loadImage(id, this.abortController.signal);
+    if (this.abortController.signal.aborted) {
+      return;
+    }
+
+    await this.retryPendingLocationOnceOnOpen(id, this.abortController.signal);
   }
 
   private async reloadSignedUrlsForCurrentMedia(): Promise<void> {
@@ -627,6 +636,9 @@ export class MediaDetailViewComponent implements OnDestroy {
         return;
       case 'assign_to_project':
         this.openProjectPicker();
+        return;
+      case 'resolve_location':
+        void this.resolveLocationFromContextAction();
         return;
       case 'change_location_map':
         this.requestMapLocationPick();
@@ -810,5 +822,84 @@ export class MediaDetailViewComponent implements OnDestroy {
       type: 'info',
       duration: 1800,
     });
+  }
+
+  private async resolveLocationFromContextAction(): Promise<void> {
+    const mediaItemId = this.mediaItemId();
+    if (!mediaItemId) {
+      this.toastService.show({
+        message: this.t(
+          'workspace.mediaDetail.toast.locationResolveMissingMedia',
+          'No media found.',
+        ),
+        type: 'warning',
+        duration: 2200,
+      });
+      return;
+    }
+
+    const result = await this.locationResolverService.resolvePendingMediaItem(mediaItemId);
+    if (result.status === 'resolved') {
+      this.toastService.show({
+        message: this.t('workspace.mediaDetail.toast.locationResolved', 'Location resolved.'),
+        type: 'success',
+        duration: 2200,
+      });
+    } else if (result.status === 'unresolvable') {
+      this.toastService.show({
+        message: this.t(
+          'workspace.mediaDetail.toast.locationUnresolvable',
+          'Location could not be resolved (terminal).',
+        ),
+        type: 'warning',
+        duration: 2400,
+      });
+    } else {
+      this.toastService.show({
+        message: this.t(
+          'workspace.mediaDetail.toast.locationResolveNotPending',
+          'Location is already resolved or not retry-eligible.',
+        ),
+        type: 'info',
+        duration: 2200,
+      });
+    }
+
+    if (!result.changed) {
+      return;
+    }
+
+    const currentMediaId = this.mediaId();
+    if (!currentMediaId) {
+      return;
+    }
+
+    await this.loadMedia(currentMediaId);
+  }
+
+  private async retryPendingLocationOnceOnOpen(id: string, signal: AbortSignal): Promise<void> {
+    const mediaItemId = this.mediaItemId();
+    if (!mediaItemId) {
+      return;
+    }
+
+    const normalizedStatus = this.locationResolverService.normalizeLocationStatus(
+      this.mediaLocationStatus(),
+    );
+    if (normalizedStatus !== 'pending') {
+      return;
+    }
+
+    if (this.pendingLocationRetryAttempted.has(mediaItemId)) {
+      return;
+    }
+
+    this.pendingLocationRetryAttempted.add(mediaItemId);
+    const result = await this.locationResolverService.resolvePendingMediaItem(mediaItemId);
+    if (signal.aborted || !result.changed) {
+      return;
+    }
+
+    await this.dataFacade.loadImage(id, signal);
   }
 }

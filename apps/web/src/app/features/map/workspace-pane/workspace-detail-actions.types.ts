@@ -15,6 +15,7 @@ export type WorkspaceSingleActionId =
   | 'copy_address'
   | 'open_google_maps'
   | 'assign_to_project'
+  | 'resolve_location'
   | 'change_location_map'
   | 'change_location_address'
   | 'copy_gps'

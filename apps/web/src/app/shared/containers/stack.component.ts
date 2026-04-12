@@ -23,15 +23,16 @@ import { Component, input } from '@angular/core';
 @Component({
   selector: 'app-vstack',
   standalone: true,
-  template: `<div class="vstack" [style.--spacing]="'var(--spacing-' + (spacing() || 4) + ')'">
-    <ng-content></ng-content>
-  </div>`,
+  template: `<ng-content />`,
+  host: {
+    '[style.--stack-spacing]': "'var(--spacing-' + (spacing() || 4) + ')'",
+  },
   styles: [
     `
-      .vstack {
+      :host {
         display: flex;
         flex-direction: column;
-        gap: var(--spacing);
+        gap: var(--stack-spacing);
       }
     `,
   ],
@@ -55,20 +56,18 @@ export class VStackComponent {
 @Component({
   selector: 'app-hstack',
   standalone: true,
-  template: `<div
-    class="hstack"
-    [style.--spacing]="'var(--spacing-' + (spacing() || 4) + ')'"
-    [style.--align]="align() || 'stretch'"
-  >
-    <ng-content></ng-content>
-  </div>`,
+  template: `<ng-content />`,
+  host: {
+    '[style.--stack-spacing]': "'var(--spacing-' + (spacing() || 4) + ')'",
+    '[style.--stack-align]': 'align() || "stretch"',
+  },
   styles: [
     `
-      .hstack {
+      :host {
         display: flex;
         flex-direction: row;
-        gap: var(--spacing);
-        align-items: var(--align);
+        gap: var(--stack-spacing);
+        align-items: var(--stack-align);
       }
     `,
   ],

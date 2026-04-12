@@ -36,6 +36,10 @@ export type MediaContentState = 'loading' | 'error' | 'ready';
   ],
   templateUrl: './media-content.component.html',
   styleUrl: './media-content.component.scss',
+  host: {
+    '[class.media-content]': 'true',
+    '(click)': 'onGridSurfaceClick($event)',
+  },
 })
 export class MediaContentComponent implements AfterViewInit {
   private static readonly LOADING_VIEWPORT_MULTIPLIER = 2;
@@ -133,6 +137,23 @@ export class MediaContentComponent implements AfterViewInit {
 
   onSelectionToggled(mediaId: string): void {
     this.workspaceSelectionService.toggle(mediaId, { additive: true });
+  }
+
+  onGridSurfaceClick(event: MouseEvent): void {
+    if (this.state() !== 'ready') {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (target.closest('app-media-item')) {
+      return;
+    }
+
+    this.workspaceSelectionService.clearSelection();
   }
 
   private readonly updateViewportMetrics = (): void => {

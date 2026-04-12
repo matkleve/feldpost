@@ -12,6 +12,10 @@ import {
   imports: [UiButtonDirective, UiButtonSecondaryDirective],
   templateUrl: './media-error.component.html',
   styleUrl: './media-error.component.scss',
+  host: {
+    role: 'alert',
+    '[class.media-error]': 'true',
+  },
 })
 export class MediaErrorComponent {
   private readonly i18nService = inject(I18nService);

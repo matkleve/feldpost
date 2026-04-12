@@ -208,6 +208,7 @@ export function resolveUploadLocationStatus(
   mediaType: MediaType,
   coords?: ExifCoords,
 ): LocationStatus {
-  if (coords) return 'gps';
-  return mediaType === 'document' ? 'no_gps' : 'unresolved';
+  void mediaType;
+  void coords;
+  return 'pending';
 }

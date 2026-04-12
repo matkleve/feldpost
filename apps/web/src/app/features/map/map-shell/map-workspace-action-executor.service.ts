@@ -16,6 +16,7 @@ export interface MarkerActionHandlers {
   zoomHouse: () => void;
   zoomStreet: () => void;
   assignToProject: () => Promise<void> | void;
+  resolveLocation: () => Promise<void> | void;
   changeLocationMap: () => Promise<void> | void;
   changeLocationAddress: () => Promise<void> | void;
   copyAddress: () => Promise<void> | void;
@@ -71,6 +72,9 @@ export class MapWorkspaceActionExecutorService {
         return;
       case 'assign_to_project':
         await handlers.assignToProject();
+        return;
+      case 'resolve_location':
+        await handlers.resolveLocation();
         return;
       case 'change_location_map':
         await handlers.changeLocationMap();

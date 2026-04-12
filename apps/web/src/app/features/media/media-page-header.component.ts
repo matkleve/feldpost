@@ -15,6 +15,9 @@ export type MediaPageHeaderState = 'loading' | 'ready';
   imports: [RouterLink],
   templateUrl: './media-page-header.component.html',
   styleUrl: './media-page-header.component.scss',
+  host: {
+    '[class.media-page-header]': 'true',
+  },
 })
 export class MediaPageHeaderComponent {
   private readonly i18nService = inject(I18nService);

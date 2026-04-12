@@ -56,6 +56,7 @@ export type MarkerMenuActionId =
   | 'zoom_house'
   | 'zoom_street'
   | 'assign_to_project'
+  | 'resolve_location'
   | 'change_location_map'
   | 'change_location_address'
   | 'copy_address'

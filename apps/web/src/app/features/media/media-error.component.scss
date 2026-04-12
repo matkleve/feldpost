@@ -1,6 +1,6 @@
 // Defines error-state card surface for media loading failures.
 // @see docs/element-specs/item-grid.md#state
-.media-error {
+:host {
   border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
   border-radius: var(--container-radius-panel);
   background: color-mix(in srgb, var(--color-bg-surface) 88%, var(--color-warning));

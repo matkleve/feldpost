@@ -112,6 +112,14 @@ export const MARKER_MENU_ACTION_DEFINITIONS: ReadonlyArray<
     visibleWhen: () => true,
   },
   {
+    id: 'resolve_location',
+    section: 'primary',
+    priority: 1,
+    icon: 'travel_explore',
+    fallbackLabel: 'Standort aufloesen',
+    visibleWhen: (context) => context.contextType === 'map_marker',
+  },
+  {
     id: 'change_location_map',
     section: 'primary',
     priority: 1,

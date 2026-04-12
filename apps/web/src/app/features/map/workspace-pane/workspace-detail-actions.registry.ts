@@ -51,6 +51,14 @@ export const WORKSPACE_SINGLE_ACTION_DEFINITIONS: ReadonlyArray<
     visibleWhen: () => true,
   },
   {
+    id: 'resolve_location',
+    section: 'primary',
+    priority: 0,
+    icon: 'travel_explore',
+    fallbackLabel: 'Resolve location',
+    visibleWhen: () => true,
+  },
+  {
     id: 'change_location_map',
     section: 'primary',
     priority: 0,

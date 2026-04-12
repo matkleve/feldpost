@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 import { Injectable, Injector, effect, inject, signal } from '@angular/core';
-import type { EffectRef, WritableSignal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EdgeExportOrchestratorAdapter } from './adapters/edge-export-orchestrator.adapter';
 import type { ZipExportContext } from './adapters/edge-export-orchestrator.adapter';
@@ -74,7 +74,13 @@ export class MediaDownloadService {
   private readonly edgeExport = inject(EdgeExportOrchestratorAdapter);
 
   private readonly stateStore = new Map<string, WritableSignal<MediaDeliveryItemState>>();
-  private readonly stateBridgeEffects = new Map<string, EffectRef>();
+  private readonly stateBridgeEntries = signal<
+    ReadonlyArray<{
+      key: string;
+      tier: MediaTier;
+      legacySignal: WritableSignal<MediaLoadState>;
+    }>
+  >([]);
   private readonly resolvedUrlCache = new Map<string, string>();
   private readonly knownPreviewRequests = new Map<string, MediaPreviewRequest>();
 
@@ -82,6 +88,25 @@ export class MediaDownloadService {
   readonly urlChanged$ = this.signedUrlCache.urlChanged$;
   readonly stateChanged$ = this.signedUrlCache.stateChanged$;
   readonly batchComplete$ = this.signedUrlCache.batchComplete$;
+
+  constructor() {
+    effect(
+      () => {
+        for (const entry of this.stateBridgeEntries()) {
+          const localState = this.stateStore.get(entry.key);
+          if (!localState) {
+            continue;
+          }
+
+          localState.set(mapLegacyState(entry.legacySignal(), entry.tier));
+        }
+      },
+      {
+        injector: this.injector,
+        allowSignalWrites: true,
+      },
+    );
+  }
 
   async resolvePreview(request: MediaPreviewRequest): Promise<MediaPreviewResult> {
     this.knownPreviewRequests.set(request.mediaId, { ...request });
@@ -231,12 +256,7 @@ export class MediaDownloadService {
     const legacySignal = this.signedUrlCache.getLoadState(mediaId, tierToMediaSize(tier));
     const localState = signal<MediaDeliveryItemState>(mapLegacyState(legacySignal(), tier));
     this.stateStore.set(key, localState);
-
-    const bridge = effect(() => localState.set(mapLegacyState(legacySignal(), tier)), {
-      injector: this.injector,
-      allowSignalWrites: true,
-    });
-    this.stateBridgeEffects.set(key, bridge);
+    this.stateBridgeEntries.update((entries) => [...entries, { key, tier, legacySignal }]);
     return localState;
   }
 
@@ -245,13 +265,7 @@ export class MediaDownloadService {
     for (const tier of ALL_MEDIA_TIERS) {
       const key = this.stateKey(mediaId, tier);
       this.resolvedUrlCache.delete(key);
-
-      const bridge = this.stateBridgeEffects.get(key);
-      if (bridge) {
-        bridge.destroy();
-        this.stateBridgeEffects.delete(key);
-      }
-
+      this.stateBridgeEntries.update((entries) => entries.filter((entry) => entry.key !== key));
       this.stateStore.delete(key);
     }
   }
@@ -475,6 +489,10 @@ export class MediaDownloadService {
   private requestPreviewIfKnown(mediaId: string, tier: MediaTier, slotSizeRem: number): void {
     const request = this.knownPreviewRequests.get(mediaId);
     if (!request) {
+      return;
+    }
+
+    if (this.getCachedUrl(mediaId, tierToMediaSize(tier))) {
       return;
     }
 

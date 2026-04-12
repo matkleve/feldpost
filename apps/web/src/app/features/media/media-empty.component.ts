@@ -15,6 +15,9 @@ import {
   imports: [UiButtonDirective, UiButtonSecondaryDirective],
   templateUrl: './media-empty.component.html',
   styleUrl: './media-empty.component.scss',
+  host: {
+    '[class.media-empty]': 'true',
+  },
 })
 export class MediaEmptyComponent {
   readonly reason = input<'auth-required' | 'no-results'>('no-results');

@@ -108,6 +108,7 @@ import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
 import { getLaneForJob } from '../../upload/upload-phase.helpers';
 import {
@@ -259,6 +260,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly locationResolverService = inject(LocationResolverService);
   private readonly actionEngineService = inject(ActionEngineService);
   private readonly mapWorkspaceContextResolverService = inject(MapWorkspaceContextResolverService);
   private readonly mapWorkspaceActionExecutorService = inject(MapWorkspaceActionExecutorService);
@@ -1288,6 +1290,7 @@ export class MapShellComponent implements OnDestroy {
       zoomHouse: () => this.onMarkerContextZoomHouse(),
       zoomStreet: () => this.onMarkerContextZoomStreet(),
       assignToProject: () => this.onMarkerContextAssignToProject(),
+      resolveLocation: () => this.onMarkerContextResolveLocation(),
       changeLocationMap: () => this.onMarkerContextChangeLocationMap(),
       changeLocationAddress: () => this.onMarkerContextChangeLocationAddress(),
       copyAddress: () => this.onMarkerContextCopyAddress(),
@@ -1388,6 +1391,51 @@ export class MapShellComponent implements OnDestroy {
     this.openDetailView(mediaId);
     const currentRequestId = this.detailAddressSearchRequest()?.requestId ?? 0;
     this.detailAddressSearchRequest.set({ mediaId, requestId: currentRequestId + 1 });
+    this.onMapMenuCloseRequested();
+  }
+
+  async onMarkerContextResolveLocation(): Promise<void> {
+    const mediaIds = await this.resolveMarkerContextMediaIds();
+    if (mediaIds.length !== 1) {
+      this.toastService.show({
+        message: 'Standortaufloesung ist nur fuer ein einzelnes Medium verfuegbar.',
+        type: 'warning',
+        dedupe: true,
+      });
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    const result = await this.locationResolverService.resolvePendingMediaItem(mediaIds[0]);
+    if (result.status === 'resolved') {
+      this.toastService.show({
+        message: 'Standort erfolgreich aufgeloest.',
+        type: 'success',
+        dedupe: true,
+      });
+      await this.queryViewportMarkers();
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    if (result.status === 'unresolvable') {
+      this.toastService.show({
+        message: 'Standort konnte nicht aufgeloest werden (terminal).',
+        type: 'warning',
+        dedupe: true,
+      });
+      if (result.changed) {
+        await this.queryViewportMarkers();
+      }
+      this.onMapMenuCloseRequested();
+      return;
+    }
+
+    this.toastService.show({
+      message: 'Standort ist bereits aufgeloest oder nicht retry-faehig.',
+      type: 'info',
+      dedupe: true,
+    });
     this.onMapMenuCloseRequested();
   }
 

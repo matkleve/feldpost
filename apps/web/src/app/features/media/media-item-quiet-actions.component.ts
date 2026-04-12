@@ -27,6 +27,10 @@ export type MediaItemQuietActionsState =
   templateUrl: './media-item-quiet-actions.component.html',
   styleUrl: './media-item-quiet-actions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.media-item-quiet-actions]': 'true',
+    '[attr.data-state]': 'state()',
+  },
 })
 export class MediaItemQuietActionsComponent {
   readonly state = input<MediaItemQuietActionsState>('interactive-unselected');

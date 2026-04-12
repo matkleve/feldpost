@@ -191,7 +191,7 @@ export class ImageDetailFieldsHelper {
       .update({
         latitude: img.exif_latitude,
         longitude: img.exif_longitude,
-        location_status: 'gps',
+        location_status: 'resolved',
       })
       .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
 

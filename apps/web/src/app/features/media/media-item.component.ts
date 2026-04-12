@@ -7,6 +7,7 @@ import type {
   ItemDisplayMode,
 } from '../../shared/item-grid/item.component';
 import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
 import type { MediaItemQuietActionsState } from './media-item-quiet-actions.component';
@@ -30,11 +31,13 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
     '[class.media-item]': 'true',
     '[class.media-item--selected]': 'selected()',
     '(contextmenu)': 'onContextMenu($event)',
+    '(dblclick)': 'onOpenDoubleClick($event)',
   },
 })
 export class MediaItemComponent {
   private readonly i18nService = inject(I18nService);
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
 
   readonly itemId = input.required<string>();
   readonly mode = input<ItemDisplayMode>('grid-md');
@@ -87,11 +90,44 @@ export class MediaItemComponent {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
-  onOpenClick(event: Event): void {
+  onOpenClick(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
     if (this.disabled()) return;
+    if (event.ctrlKey || event.metaKey) {
+      this.selectedChange.emit(!this.selected());
+      return;
+    }
+
+    const currentSelection = this.workspaceSelectionService.selectedMediaIds();
+    const preserveExistingSelection =
+      currentSelection.size > 0 && !currentSelection.has(this.itemId());
+    const selectionSnapshot = preserveExistingSelection ? Array.from(currentSelection) : null;
+
     this.opened.emit(this.itemId());
+
+    if (!selectionSnapshot) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      this.workspaceSelectionService.selectAllInScope(selectionSnapshot);
+    });
+  }
+
+  onOpenDoubleClick(event: MouseEvent): void {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest('.media-item__open')) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.disabled() || !this.selected()) {
+      return;
+    }
+
+    this.selectedChange.emit(false);
   }
 
   onSelectRequested(): void {

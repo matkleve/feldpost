@@ -3,29 +3,7 @@
 :host {
   display: block;
   min-height: 100%;
-}
-
-// Defines page-level media container spacing and minimum height.
-// @see docs/element-specs/item-grid.md#wiring
-.media-page {
-  min-height: 100%;
   padding: var(--spacing-4);
-}
-
-// Defines centered rail layout that contains header, toolbar, and content stack.
-// @see docs/element-specs/item-grid.md#wiring
-.media-rail {
-  width: 100%;
-  margin-inline: auto;
-  display: grid;
-  gap: var(--spacing-4);
-}
-
-// Defines vertical spacing for media content section inside page rail.
-// @see docs/element-specs/item-grid.md#wiring
-.media-content {
-  display: grid;
-  gap: var(--spacing-3);
 }
 
 // Defines full-width toolbar host area for variant switch controls.

@@ -54,7 +54,10 @@ export class UploadEnrichmentService {
   ): Promise<ForwardGeocodeResult | undefined> {
     try {
       const result = await this.geocoding.forward(titleAddress);
-      if (!result) return undefined;
+      if (!result) {
+        await this.markLocationUnresolvable(imageId);
+        return undefined;
+      }
 
       const { error } = await this.supabase.client.rpc('resolve_media_location', {
         p_media_item_id: imageId,
@@ -67,11 +70,14 @@ export class UploadEnrichmentService {
         p_country: result.country,
       });
 
-      if (error) return undefined;
+      if (error) {
+        await this.markLocationUnresolvable(imageId);
+        return undefined;
+      }
 
       return { coords: { lat: result.lat, lng: result.lng } };
     } catch {
-      // Enrichment failure is silent ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â coords remain null.
+      await this.markLocationUnresolvable(imageId);
       return undefined;
     }
   }
@@ -87,5 +93,12 @@ export class UploadEnrichmentService {
     } catch {
       return undefined;
     }
+  }
+
+  private async markLocationUnresolvable(imageId: string): Promise<void> {
+    await this.supabase.client.rpc('resolve_media_location', {
+      p_media_item_id: imageId,
+      p_location_status: 'unresolvable',
+    });
   }
 }

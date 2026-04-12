@@ -21,7 +21,14 @@ interface MediaDetailRow {
   captured_at: string | null;
   created_at: string;
   mime_type: string | null;
-  location_status: 'gps' | 'no_gps' | 'unresolved' | null;
+  location_status:
+    | 'pending'
+    | 'resolved'
+    | 'unresolvable'
+    | 'gps'
+    | 'no_gps'
+    | 'unresolved'
+    | null;
   address_label: string | null;
   street: string | null;
   city: string | null;
@@ -182,6 +189,8 @@ export class ImageDetailDataFacade {
   }
 
   private toImageRecord(media: MediaDetailRow, legacyImageId: string): ImageRecord {
+    const unresolved = media.location_status === 'pending' || media.location_status === 'no_gps';
+
     return {
       id: legacyImageId,
       user_id: media.created_by ?? '',
@@ -202,7 +211,7 @@ export class ImageDetailDataFacade {
       district: media.district,
       country: media.country,
       direction: null,
-      location_unresolved: media.location_status === 'unresolved',
+      location_unresolved: unresolved,
     };
   }
 }

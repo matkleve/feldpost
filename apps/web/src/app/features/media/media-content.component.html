@@ -1,49 +1,47 @@
 <!-- Hosts the /media content state machine that switches between loading, error, empty, and loaded grid branches. -->
 <!-- @see docs/element-specs/item-grid.md#state -->
-<section class="media-content">
-  @if (state() === 'loading') {
-    <!-- Renders layout shell for loading placeholders using the currently resolved item display mode. -->
-    <!-- @see docs/element-specs/item-grid.md#actions -->
-    <app-item-grid [mode]="itemMode()">
-      @for (placeholderId of loadingPlaceholderIds(); track placeholderId) {
-        <!-- Renders shared state-frame placeholder cell per computed loading placeholder id. -->
-        <!-- @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory -->
-        <app-item-state-frame
-          [itemId]="'media-loading-' + placeholderId"
-          [mode]="itemMode()"
-          [state]="'disabled'"
-        >
-          <!-- Renders canonical media loading surface inside each placeholder cell. -->
-          <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
-          <app-media-item-render-surface [slotMode]="itemMode()" [state]="'loading'" />
-        </app-item-state-frame>
-      }
-    </app-item-grid>
-  } @else if (state() === 'error') {
-    <!-- Renders media error state branch when page-level load failed. -->
-    <!-- @see docs/element-specs/item-grid.md#state -->
-    <app-media-error (retry)="retry.emit()" />
-  } @else if (items().length === 0) {
-    <!-- Renders media empty state branch when no items are available. -->
-    <!-- @see docs/element-specs/item-grid.md#state -->
-    <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
-  } @else {
-    <!-- Renders loaded media items in the shared item-grid layout with listbox accessibility role. -->
-    <!-- @see docs/element-specs/item-grid.md#actions -->
-    <app-item-grid [mode]="itemMode()" [role]="'listbox'">
-      @for (item of items(); track item.id) {
-        <!-- Renders one media-domain item component per normalized media record. -->
-        <!-- @see docs/element-specs/item-grid.md#component-hierarchy -->
-        <app-media-item
-          [itemId]="item.id"
-          [item]="item"
-          [mode]="itemMode()"
-          [state]="isSelected(item.id) ? 'selected' : 'idle'"
-          [actionContextId]="mediaItemActionContext"
-          (opened)="itemClicked.emit($event)"
-          (selectedChange)="onSelectionToggled(item.id)"
-        />
-      }
-    </app-item-grid>
-  }
-</section>
+@if (state() === 'loading') {
+  <!-- Renders layout shell for loading placeholders using the currently resolved item display mode. -->
+  <!-- @see docs/element-specs/item-grid.md#actions -->
+  <app-item-grid [mode]="itemMode()">
+    @for (placeholderId of loadingPlaceholderIds(); track placeholderId) {
+      <!-- Renders shared state-frame placeholder cell per computed loading placeholder id. -->
+      <!-- @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory -->
+      <app-item-state-frame
+        [itemId]="'media-loading-' + placeholderId"
+        [mode]="itemMode()"
+        [state]="'disabled'"
+      >
+        <!-- Renders canonical media loading surface inside each placeholder cell. -->
+        <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
+        <app-media-item-render-surface [slotMode]="itemMode()" [state]="'loading'" />
+      </app-item-state-frame>
+    }
+  </app-item-grid>
+} @else if (state() === 'error') {
+  <!-- Renders media error state branch when page-level load failed. -->
+  <!-- @see docs/element-specs/item-grid.md#state -->
+  <app-media-error (retry)="retry.emit()" />
+} @else if (items().length === 0) {
+  <!-- Renders media empty state branch when no items are available. -->
+  <!-- @see docs/element-specs/item-grid.md#state -->
+  <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
+} @else {
+  <!-- Renders loaded media items in the shared item-grid layout with listbox accessibility role. -->
+  <!-- @see docs/element-specs/item-grid.md#actions -->
+  <app-item-grid [mode]="itemMode()" [role]="'listbox'">
+    @for (item of items(); track item.id) {
+      <!-- Renders one media-domain item component per normalized media record. -->
+      <!-- @see docs/element-specs/item-grid.md#component-hierarchy -->
+      <app-media-item
+        [itemId]="item.id"
+        [item]="item"
+        [mode]="itemMode()"
+        [state]="isSelected(item.id) ? 'selected' : 'idle'"
+        [actionContextId]="mediaItemActionContext"
+        (opened)="itemClicked.emit($event)"
+        (selectedChange)="onSelectionToggled(item.id)"
+      />
+    }
+  </app-item-grid>
+}

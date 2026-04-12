@@ -6,7 +6,7 @@
 
 // Defines upload overlay surface for active media upload phases.
 // @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
-.media-item-upload-overlay {
+:host(.media-item-upload-overlay) {
   position: relative;
   display: flex;
   inline-size: 100%;

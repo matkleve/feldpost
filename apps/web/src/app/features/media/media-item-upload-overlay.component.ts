@@ -7,6 +7,10 @@ import type { UploadOverlayState } from '../../core/media/media-renderer.types';
   templateUrl: './media-item-upload-overlay.component.html',
   styleUrl: './media-item-upload-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.media-item-upload-overlay]': 'overlay() !== null',
+    '[attr.aria-hidden]': 'overlay() ? true : null',
+  },
 })
 export class MediaItemUploadOverlayComponent {
   readonly overlay = input<UploadOverlayState | null>(null);

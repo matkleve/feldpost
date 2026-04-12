@@ -624,7 +624,7 @@ interface RawSharedMediaItemRow {
   created_at: string;
   exif_latitude: number | null;
   exif_longitude: number | null;
-  location_status: 'gps' | 'no_gps' | 'unresolved' | null;
+  location_status: 'pending' | 'resolved' | 'unresolvable' | 'gps' | 'no_gps' | 'unresolved' | null;
   created_by: string | null;
 }
 

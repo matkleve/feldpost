@@ -17,6 +17,16 @@ export type MediaItemRenderSurfaceState = MediaItemRenderState | 'content-select
   templateUrl: './media-item-render-surface.component.html',
   styleUrl: './media-item-render-surface.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.media-item-render-surface__slot]': 'true',
+    '[attr.data-state]': 'state()',
+    '[attr.data-tier-requested]': 'requestedTier()',
+    '[attr.data-tier-effective]': 'effectiveTier()',
+    '[attr.data-slot-width-rem]': 'slotWidthRem()',
+    '[attr.data-slot-height-rem]': 'slotHeightRem()',
+    '[style.width.rem]': 'mediaFrameWidthRem()',
+    '[style.height.rem]': 'mediaFrameHeightRem()',
+  },
 })
 export class MediaItemRenderSurfaceComponent {
   readonly slotMode = input<'grid-sm' | 'grid-md' | 'grid-lg' | 'row' | 'card'>('grid-md');

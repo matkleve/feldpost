@@ -14,7 +14,14 @@ interface MediaItemRow {
   exif_longitude: number | null;
   captured_at: string | null;
   created_at: string;
-  location_status: 'gps' | 'no_gps' | 'unresolved' | null;
+  location_status:
+    | 'pending'
+    | 'resolved'
+    | 'unresolvable'
+    | 'gps'
+    | 'no_gps'
+    | 'unresolved'
+    | null;
 }
 
 export interface MediaLoadResult {
@@ -74,6 +81,8 @@ export class MediaQueryService {
   }
 
   private toImageRecord(row: MediaItemRow): ImageRecord {
+    const unresolved = row.location_status === 'pending' || row.location_status === 'no_gps';
+
     return {
       id: row.id,
       user_id: row.created_by ?? '',
@@ -94,7 +103,7 @@ export class MediaQueryService {
       district: null,
       country: null,
       direction: null,
-      location_unresolved: row.location_status === 'unresolved',
+      location_unresolved: unresolved,
     };
   }
 }

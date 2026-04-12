@@ -24,6 +24,7 @@ import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { ShareSetService } from '../../../core/share-set/share-set.service';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
+import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type {
   GroupedSection,
   WorkspaceImage,
@@ -61,6 +62,7 @@ type ThumbnailContextActionId =
   | 'copy_gps'
   | 'open_google_maps'
   | 'assign_to_project'
+  | 'resolve_location'
   | 'change_location_map'
   | 'change_location_address'
   | 'remove_from_project'
@@ -80,6 +82,7 @@ export const WS_GRID_THUMBNAIL_ACTION_IDS: ReadonlyArray<ThumbnailContextActionI
   'copy_gps',
   'open_google_maps',
   'assign_to_project',
+  'resolve_location',
   'change_location_map',
   'change_location_address',
   'remove_from_project',
@@ -159,6 +162,14 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
     labelKey: 'workspace.thumbnailGrid.menu.action.assignToProject',
     fallbackLabel: 'Projekt hinzufuegen...',
     visibleWhen: (context) => context.targetCount > 0,
+  },
+  {
+    id: 'resolve_location',
+    icon: 'travel_explore',
+    section: 'primary',
+    labelKey: 'workspace.thumbnailGrid.menu.action.resolveLocation',
+    fallbackLabel: 'Standort aufloesen',
+    visibleWhen: (context) => context.targetCount === 1,
   },
   {
     id: 'change_location_map',
@@ -460,6 +471,7 @@ export class ThumbnailGridComponent implements OnDestroy {
   private readonly i18nService = inject(I18nService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
+  private readonly locationResolverService = inject(LocationResolverService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
@@ -718,6 +730,9 @@ export class ThumbnailGridComponent implements OnDestroy {
         break;
       case 'assign_to_project':
         await this.openProjectDialog();
+        break;
+      case 'resolve_location':
+        await this.resolvePrimaryLocationStatus();
         break;
       case 'change_location_map':
         this.requestMapLocationPickForPrimaryTarget();
@@ -1044,6 +1059,44 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.locationMapPickRequested.emit({
       mediaId: target.id,
       fileName: target.storagePath || target.id,
+    });
+  }
+
+  private async resolvePrimaryLocationStatus(): Promise<void> {
+    const target = this.primaryTargetImage();
+    if (!target) {
+      return;
+    }
+
+    const result = await this.locationResolverService.resolvePendingMediaItem(target.id);
+    if (result.status === 'resolved') {
+      this.toastService.show({
+        message: this.t('workspace.thumbnailGrid.menu.success.locationResolved', 'Location resolved.'),
+        type: 'success',
+        dedupe: true,
+      });
+      return;
+    }
+
+    if (result.status === 'unresolvable') {
+      this.toastService.show({
+        message: this.t(
+          'workspace.thumbnailGrid.menu.warning.locationUnresolvable',
+          'Location could not be resolved (terminal).',
+        ),
+        type: 'warning',
+        dedupe: true,
+      });
+      return;
+    }
+
+    this.toastService.show({
+      message: this.t(
+        'workspace.thumbnailGrid.menu.info.locationNotPending',
+        'Location is already resolved or not retry-eligible.',
+      ),
+      type: 'info',
+      dedupe: true,
     });
   }
 
