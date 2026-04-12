@@ -336,6 +336,12 @@ export class UploadManagerService {
    * Moves the job back into the upload pipeline (Path A with manual coords).
    */
   placeJob(jobId: string, coords: ExifCoords): void {
+    const job = this.jobState.findJob(jobId);
+    if (job?.phase === 'missing_data' && job.imageId) {
+      void this.resolvePersistedMissingDataLocation(jobId, job.imageId, coords);
+      return;
+    }
+
     placeUploadManagerJob(jobId, coords, this.actionDeps);
   }
 
@@ -346,6 +352,21 @@ export class UploadManagerService {
   selectAddressCandidate(jobId: string, candidate: UploadAddressCandidate): void {
     const job = this.jobState.findJob(jobId);
     if (!job || job.phase !== 'missing_data') {
+      return;
+    }
+
+    if (job.imageId) {
+      this.jobState.updateJob(jobId, {
+        titleAddress: candidate.addressLabel,
+        titleAddressSource: 'file',
+        locationSourceUsed: 'file',
+        issueKind: undefined,
+        addressCandidates: undefined,
+      });
+      void this.resolvePersistedMissingDataLocation(jobId, job.imageId, {
+        lat: candidate.lat,
+        lng: candidate.lng,
+      });
       return;
     }
 
@@ -364,7 +385,76 @@ export class UploadManagerService {
    * Used by document uploads that can proceed as project-bound items.
    */
   assignJobToProject(jobId: string, projectId: string): void {
+    const job = this.jobState.findJob(jobId);
+    if (job?.phase === 'missing_data' && job.imageId) {
+      void this.resolvePersistedMissingDataProject(jobId, job.imageId, projectId);
+      return;
+    }
+
     assignUploadManagerJobToProject(jobId, projectId, this.actionDeps);
+  }
+
+  private async resolvePersistedMissingDataLocation(
+    jobId: string,
+    imageId: string,
+    coords: ExifCoords,
+  ): Promise<void> {
+    const { error } = await this.supabase.client.rpc('resolve_media_location', {
+      p_media_item_id: imageId,
+      p_latitude: coords.lat,
+      p_longitude: coords.lng,
+    });
+
+    if (error) {
+      this.jobState.updateJob(jobId, {
+        phase: 'error',
+        issueKind: 'upload_error',
+        error: error.message,
+        statusLabel: error.message,
+      });
+      return;
+    }
+
+    this.jobState.updateJob(jobId, {
+      phase: 'complete',
+      statusLabel: phaseLabel('complete'),
+      coords,
+      issueKind: undefined,
+      locationSourceUsed: 'exif',
+    });
+    const job = this.jobState.findJob(jobId);
+    if (job) {
+      this.emitBatchProgress(job.batchId);
+    }
+  }
+
+  private async resolvePersistedMissingDataProject(
+    jobId: string,
+    imageId: string,
+    projectId: string,
+  ): Promise<void> {
+    const ok = await this.projects.addMediaToProject(imageId, projectId);
+    if (!ok) {
+      const errorLabel = phaseLabel('error');
+      this.jobState.updateJob(jobId, {
+        phase: 'error',
+        issueKind: 'upload_error',
+        error: errorLabel,
+        statusLabel: errorLabel,
+      });
+      return;
+    }
+
+    this.jobState.updateJob(jobId, {
+      phase: 'complete',
+      statusLabel: phaseLabel('complete'),
+      projectId,
+      issueKind: undefined,
+    });
+    const job = this.jobState.findJob(jobId);
+    if (job) {
+      this.emitBatchProgress(job.batchId);
+    }
   }
 
   /**

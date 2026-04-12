@@ -164,11 +164,25 @@ export class MediaComponent implements OnDestroy {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
+  private debugInteraction(stage: string, extra: Record<string, unknown> = {}): void {
+    console.info('[media-page][interaction]', {
+      stage,
+      mediaCount: this.mediaItems().length,
+      totalCount: this.mediaTotalCount(),
+      cardVariant: this.cardVariant(),
+      loading: this.loading(),
+      loadingMore: this.loadingMore(),
+      selectedIds: Array.from(this.workspaceSelectionService.selectedMediaIds()),
+      timestamp: Date.now(),
+      ...extra,
+    });
+  }
+
   onMediaItemClicked(mediaId: string): void {
-    // Single-select: set as single selected item + open detail view
-    this.workspaceSelectionService.setSingle(mediaId);
-    // Open detail view in workspace pane
+    // Open detail view in workspace pane without mutating selection state.
+    this.debugInteraction('itemClicked.received', { mediaId });
     this.workspacePaneObserver.setDetailImageId(mediaId);
+    this.debugInteraction('workspacePane.setDetailImageId.called', { mediaId });
   }
 
   onRetryLoad(): void {

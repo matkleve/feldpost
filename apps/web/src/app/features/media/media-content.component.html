@@ -39,8 +39,9 @@
         [mode]="itemMode()"
         [state]="isSelected(item.id) ? 'selected' : 'idle'"
         [actionContextId]="mediaItemActionContext"
-        (opened)="itemClicked.emit($event)"
-        (selectedChange)="onSelectionToggled(item.id)"
+        (opened)="onItemOpened($event)"
+        (selectedChange)="onSelectionToggled(item.id, $event)"
+        (contextActionRequested)="onItemContextActionRequested($event)"
       />
     }
   </app-item-grid>

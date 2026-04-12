@@ -1,5 +1,6 @@
-// Declares media-item host as the sole stacking-context owner for domain overlays.
-// @see docs/specs/component/media-item.md#visual-behavior-contract
+/* 1. HOST: Zuständig für das Layout und den äußeren Schatten (Elevation).
+  WICHTIG: Kein overflow: hidden hier, damit der Schatten atmen kann!
+*/
 :host {
   isolation: isolate;
   position: relative;
@@ -8,42 +9,72 @@
   aspect-ratio: 1 / 1;
   min-height: 0;
   border-radius: var(--radius-lg);
-  overflow: hidden;
+
+  /* Sanfte Übergänge für alle Zustände */
+  transition:
+    box-shadow var(--transition-fade-in),
+    transform var(--transition-fade-in);
 }
 
-// Styles media domain content surface through host semantic class bindings.
-// @see docs/specs/component/media-item.md#component-hierarchy
+/* 2. INNERER WRAPPER: Hier schneiden wir den Inhalt (Bild) ab.
+*/
 .media-item {
+  position: relative;
+  inline-size: 100%;
+  aspect-ratio: inherit;
+  border-radius: inherit;
+  overflow: hidden; /* Das Bild wird hier abgerundet */
   min-height: 0;
 }
 
-// Defines frame geometry owner that conforms to child effective rendered box.
-// @see docs/specs/component/media-item.md#geometry-dependency-contract
+/* 3. DER FRAME: Zuständig für die Border-Simulation via Inset-Shadow.
+  Warum? Weil sich ein Schatten (inset) nicht auf das Layout auswirkt.
+*/
 .media-item__frame {
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-}
-
-// Applies selected emphasis on frame geometry only.
-// @see docs/specs/component/media-item.md#visual-behavior-contract
-.media-item__frame--selected {
   z-index: 2;
-  box-shadow:
-    inset 0 0 0 2px var(--media-item-selected-ring-color, var(--color-clay)),
-    inset 0 0 0 1px
-      color-mix(in srgb, var(--media-item-selected-ring-color, var(--color-clay)) 32%, transparent);
+  transition: box-shadow var(--transition-fade-in);
+
+  /* DEFAULT BORDER: 1px, fast transparent */
+  border: 1px color-mix(in srgb, var(--color-clay, #000) 10%, transparent);
+
+  /* DEFAULT SCHATTEN (ganz dezent) */
+  box-shadow: var(--shadow-sm);
 }
 
-// Keeps media display as base visual layer in normal flow.
-// @see docs/specs/component/media-item.md#component-hierarchy
+/* --- LOGIK-KETTE (REIHENFOLGE IST ENTSCHEIDEND!) --- */
+
+/* A: SELEKTIERT (Maus weg) -> Border bleibt 1px, Farbe wird aktiv */
+:host([data-state='selected']) .media-item__frame {
+  box-shadow: var(--shadow-sm);
+
+  border: 1px color-mix(in srgb, var(--color-clay, #000) 100%, transparent);
+}
+
+/* B: HOVER / FOCUS (Egal ob selektiert oder nicht) -> Border wird 2px */
+/* Dieser Selektor steht weiter unten und gewinnt daher bei Hover! */
+:host(:hover) .media-item__frame,
+:host(:focus-within) .media-item__frame {
+  box-shadow: var(--shadow-focus);
+
+  border: var(--border-hover);
+}
+
+/* C: SELEKTIERT + HOVER (Kombinierter Zustand) */
+:host([data-state='selected']:hover) .media-item__frame {
+  box-shadow: var(--shadow-focus);
+  border: var(--border-hover);
+}
+
+/* --- RESTLICHE ELEMENTE --- */
+
 .media-item__preview {
   display: contents;
 }
 
-// Styles the primary media item interaction button and keeps content semantics local.
-// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item__open {
   border: 0;
   background: transparent;
@@ -54,16 +85,17 @@
   z-index: 1;
 }
 
-// Positions upload overlay component above preview but below quiet actions.
-// @see docs/specs/component/media-item.md#acceptance-criteria
+.media-item__open:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 2px;
+}
+
 .media-item__upload-overlay {
   position: absolute;
   inset: 0;
   z-index: 3;
 }
 
-// Positions quiet-actions overlay and defines hidden-at-rest behavior.
-// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item__quiet-actions {
   position: absolute;
   inset: 0;
@@ -76,8 +108,6 @@
     transform var(--transition-fade-out);
 }
 
-// Reveals quiet actions on hover, focus-within, and selected states without layout shift.
-// @see docs/specs/component/media-item.md#actions--interactions
 :host:hover .media-item__quiet-actions,
 :host:focus-within .media-item__quiet-actions,
 :host([data-state='selected']) .media-item__quiet-actions {
@@ -87,11 +117,4 @@
   transition:
     opacity var(--transition-fade-in),
     transform var(--transition-fade-in);
-}
-
-// Styles keyboard focus visibility for primary open action.
-// @see docs/specs/component/media-item.md#actions--interactions
-.media-item__open:focus-visible {
-  outline: 2px solid var(--color-clay);
-  outline-offset: 2px;
 }

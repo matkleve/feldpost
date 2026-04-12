@@ -82,24 +82,37 @@ export function validateUploadFile(file: File): FileValidation {
 
 export async function parseUploadExif(file: File): Promise<ParsedExif> {
   try {
-    const [gps, meta] = await Promise.all([
+    const [gps, rawMeta] = await Promise.all([
       exifr.gps(file),
-      exifr.parse(file, ['DateTimeOriginal', 'GPSImgDirection']),
+      exifr.parse(file),
     ]);
+
+    const meta =
+      rawMeta && typeof rawMeta === 'object' ? (rawMeta as Record<string, unknown>) : undefined;
 
     const coords: ExifCoords | undefined =
       gps?.latitude != null && gps?.longitude != null
         ? { lat: gps.latitude, lng: gps.longitude }
         : undefined;
 
-    const rawDir = meta?.GPSImgDirection;
+    const rawDir = meta?.['GPSImgDirection'];
     const direction: number | undefined =
       typeof rawDir === 'number' && rawDir >= 0 && rawDir <= 360 ? rawDir : undefined;
 
+    const capturedAtValue = meta?.['DateTimeOriginal'];
+    const capturedAt = capturedAtValue instanceof Date ? capturedAtValue : undefined;
+
+    const exifRaw = meta
+      ? (JSON.parse(
+          JSON.stringify(meta, (_key, value) => (value instanceof Date ? value.toISOString() : value)),
+        ) as Record<string, unknown>)
+      : undefined;
+
     return {
       coords,
-      capturedAt: meta?.DateTimeOriginal ?? undefined,
+      capturedAt,
       direction,
+      exifRaw,
     };
   } catch {
     return {};

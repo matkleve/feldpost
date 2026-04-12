@@ -5,7 +5,9 @@ type FinalizeNewUploadPhaseArgs = {
   jobId: string;
   isCancelled: () => boolean;
   findJob: () => UploadJob | undefined;
-  setPhase: (phase: 'resolving_address' | 'resolving_coordinates' | 'complete') => void;
+  setPhase: (
+    phase: 'resolving_address' | 'resolving_coordinates' | 'missing_data' | 'complete',
+  ) => void;
   updateJob: (patch: Partial<UploadJob>) => void;
   markDone: () => void;
   emitBatchProgress: (batchId: string) => void;
@@ -99,6 +101,18 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     );
     if (enrichResult) {
       updateJob({ coords: enrichResult.coords });
+    } else if (updatedJob.locationRequirementMode === 'required') {
+      const mimeType = updatedJob.file.type.toLowerCase();
+      const isDocument = mimeType.startsWith('application/') || mimeType.startsWith('text/');
+      updateJob({
+        issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
+        locationSourceUsed: 'none',
+      });
+      setPhase('missing_data');
+      markDone();
+      emitBatchProgress(updatedJob.batchId);
+      drainQueue();
+      return;
     }
   }
 

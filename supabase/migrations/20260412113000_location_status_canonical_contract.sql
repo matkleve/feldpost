@@ -8,6 +8,12 @@
 -- 4) Keep get_unresolved_media focused on retry-eligible pending rows.
 -- =============================================================================
 
+ALTER TABLE public.media_items
+  DROP CONSTRAINT IF EXISTS chk_media_items_location_status;
+
+ALTER TABLE public.media_items
+  DROP CONSTRAINT IF EXISTS chk_media_items_location_consistency;
+
 UPDATE public.media_items
 SET location_status = CASE location_status
   WHEN 'gps' THEN 'resolved'
@@ -16,12 +22,6 @@ SET location_status = CASE location_status
   ELSE location_status
 END
 WHERE location_status IN ('gps', 'no_gps', 'unresolved');
-
-ALTER TABLE public.media_items
-  DROP CONSTRAINT IF EXISTS chk_media_items_location_status;
-
-ALTER TABLE public.media_items
-  DROP CONSTRAINT IF EXISTS chk_media_items_location_consistency;
 
 ALTER TABLE public.media_items
   ADD CONSTRAINT chk_media_items_location_status

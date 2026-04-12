@@ -17,6 +17,7 @@ import { WorkspaceSelectionService } from '../../core/workspace-selection/worksp
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ItemGridComponent } from '../../shared/item-grid/item-grid.component';
 import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';
+import type { ItemContextActionEvent } from '../../shared/item-grid/item.component';
 import type { ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { MEDIA_ITEM_ACTION_CONTEXT, MediaItemComponent } from './media-item.component';
 import { MediaItemRenderSurfaceComponent } from './media-item-render-surface.component';
@@ -131,29 +132,93 @@ export class MediaContentComponent implements AfterViewInit {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
+  private debugInteraction(stage: string, event: MouseEvent | null, extra: Record<string, unknown> = {}): void {
+    const target = event?.target instanceof Element ? event.target : null;
+    const currentTarget = event?.currentTarget instanceof Element ? event.currentTarget : null;
+
+    console.info('[media-content][interaction]', {
+      stage,
+      contentState: this.state(),
+      itemCount: this.items().length,
+      selectedCount: this.workspaceSelectionService.selectedMediaIds().size,
+      eventType: event?.type ?? null,
+      button: event?.button ?? null,
+      buttons: event?.buttons ?? null,
+      ctrlKey: event?.ctrlKey ?? false,
+      metaKey: event?.metaKey ?? false,
+      shiftKey: event?.shiftKey ?? false,
+      altKey: event?.altKey ?? false,
+      targetTag: target?.tagName ?? null,
+      targetClass: target?.className ?? null,
+      currentTargetTag: currentTarget?.tagName ?? null,
+      currentTargetClass: currentTarget?.className ?? null,
+      timestamp: Date.now(),
+      ...extra,
+    });
+  }
+
+  onItemOpened(mediaId: string): void {
+    this.debugInteraction('item.opened.received', null, { mediaId });
+    this.itemClicked.emit(mediaId);
+  }
+
+  onItemContextActionRequested(event: ItemContextActionEvent): void {
+    this.debugInteraction('item.contextActionRequested.received', null, { event });
+  }
+
   isSelected(mediaId: string): boolean {
     return this.workspaceSelectionService.isSelected(mediaId);
   }
 
-  onSelectionToggled(mediaId: string): void {
-    this.workspaceSelectionService.toggle(mediaId, { additive: true });
+  onSelectionToggled(mediaId: string, selected: boolean): void {
+    this.debugInteraction('selection.toggle.requested', null, {
+      mediaId,
+      selected,
+      selectedBefore: Array.from(this.workspaceSelectionService.selectedMediaIds()),
+    });
+
+    const current = this.workspaceSelectionService.selectedMediaIds();
+    const next = new Set(current);
+
+    if (selected) {
+      next.add(mediaId);
+    } else {
+      next.delete(mediaId);
+    }
+
+    this.workspaceSelectionService.selectAllInScope(Array.from(next));
+
+    this.debugInteraction('selection.toggle.applied', null, {
+      mediaId,
+      selected,
+      selectedAfter: Array.from(this.workspaceSelectionService.selectedMediaIds()),
+    });
   }
 
   onGridSurfaceClick(event: MouseEvent): void {
+    this.debugInteraction('gridSurface.click.received', event);
+
     if (this.state() !== 'ready') {
+      this.debugInteraction('gridSurface.click.ignored.notReady', event);
       return;
     }
 
     const target = event.target;
     if (!(target instanceof Element)) {
+      this.debugInteraction('gridSurface.click.ignored.nonElementTarget', event);
       return;
     }
 
     if (target.closest('app-media-item')) {
+      this.debugInteraction('gridSurface.click.ignored.insideMediaItem', event);
       return;
     }
 
+    this.debugInteraction('gridSurface.click.clearSelection', event, {
+      selectedBefore: Array.from(this.workspaceSelectionService.selectedMediaIds()),
+    });
     this.workspaceSelectionService.clearSelection();
+    this.debugInteraction('gridSurface.click.selectionCleared', event);
   }
 
   private readonly updateViewportMetrics = (): void => {

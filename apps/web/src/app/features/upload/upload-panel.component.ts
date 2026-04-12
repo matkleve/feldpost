@@ -48,6 +48,7 @@ import type {
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
+import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
 export type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
@@ -128,6 +129,15 @@ export class UploadPanelComponent {
   readonly isDragging = this.inputs.isDragging;
   readonly priorityWorkflowEnabled = computed(() => this.embeddedInPane());
   readonly selectedLane = this.signals.selectedLane;
+  readonly locationRequirementMode = this.signals.locationRequirementMode;
+  readonly locationModeHoverPreview = signal(false);
+  readonly displayLocationRequirementMode = computed<UploadLocationRequirementMode>(() => {
+    const current = this.locationRequirementMode();
+    if (!this.locationModeHoverPreview()) {
+      return current;
+    }
+    return current === 'required' ? 'optional' : 'required';
+  });
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
@@ -187,5 +197,21 @@ export class UploadPanelComponent {
       next.delete(jobId);
       return next;
     });
+  }
+
+  onLocationModeHoverChange(hovered: boolean): void {
+    this.locationModeHoverPreview.set(hovered);
+  }
+
+  toggleLocationRequirementMode(): void {
+    const current = this.locationRequirementMode();
+    const next: UploadLocationRequirementMode = current === 'required' ? 'optional' : 'required';
+    this.signals.setLocationRequirementMode(next);
+  }
+
+  locationModeLabel(): string {
+    return this.displayLocationRequirementMode() === 'required'
+      ? this.t('upload.location.mode.required', 'Location required')
+      : this.t('upload.location.mode.optional', 'Location not required');
   }
 }

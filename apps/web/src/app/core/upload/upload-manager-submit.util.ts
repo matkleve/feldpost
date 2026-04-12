@@ -51,7 +51,14 @@ export function submitUploadManagerFiles(
     directorySegments: [],
   }));
 
-  const newJobs = createNewUploadJobs(scannedEntries, batchId, options?.projectId, deps);
+  const newJobs = createNewUploadJobs(
+    scannedEntries,
+    batchId,
+    options?.projectId,
+    deps,
+    undefined,
+    options?.locationRequirementMode,
+  );
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
@@ -124,6 +131,7 @@ export async function submitUploadManagerFolder(
     resolvedProjectId,
     deps,
     folderAddressHint,
+    options?.locationRequirementMode,
   );
 
   deps.addJobs(newJobs);
@@ -175,6 +183,7 @@ function createNewUploadJobs(
   projectId: string | undefined,
   deps: UploadManagerSubmitDeps,
   folderAddressHint?: string,
+  locationRequirementMode?: UploadJob['locationRequirementMode'],
 ): UploadJob[] {
   const locationConfig = deps.getLocationConfig();
 
@@ -208,8 +217,10 @@ function createNewUploadJobs(
       submittedAt: new Date(),
       mode: 'new',
       projectId,
+      relativePath: entry.relativePath,
       titleAddress: perFileFolderHint,
       titleAddressSource: perFileFolderHint ? 'folder' : undefined,
+      locationRequirementMode,
     };
   });
 }

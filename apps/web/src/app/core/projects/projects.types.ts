@@ -9,6 +9,7 @@ export interface ProjectRecord {
   id: string;
   name: string;
   colorKey: ProjectColorKey;
+  locationRequired: boolean;
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;

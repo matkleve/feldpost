@@ -5,6 +5,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { UploadPanelSignalsService } from './upload-panel-signals.service';
 
 interface DirectoryPickerWindow extends Window {
   showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
@@ -13,6 +14,7 @@ interface DirectoryPickerWindow extends Window {
 @Injectable({ providedIn: 'root' })
 export class UploadPanelInputHandlersService {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly uploadSignals = inject(UploadPanelSignalsService);
   private readonly workspaceView = inject(WorkspaceViewService);
 
   readonly isDragging = signal(false);
@@ -35,14 +37,20 @@ export class UploadPanelInputHandlersService {
     this.isDragging.set(false);
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
-      this.uploadManager.submit(Array.from(files), { projectId: this.activeProjectId() });
+      this.uploadManager.submit(Array.from(files), {
+        projectId: this.activeProjectId(),
+        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+      });
     }
   }
 
   onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
+      this.uploadManager.submit(Array.from(input.files), {
+        projectId: this.activeProjectId(),
+        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+      });
       input.value = '';
     }
   }
@@ -50,7 +58,10 @@ export class UploadPanelInputHandlersService {
   onCaptureInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadManager.submit([input.files[0]], { projectId: this.activeProjectId() });
+      this.uploadManager.submit([input.files[0]], {
+        projectId: this.activeProjectId(),
+        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+      });
       input.value = '';
     }
   }
@@ -82,7 +93,10 @@ export class UploadPanelInputHandlersService {
     }
     try {
       const dirHandle = await picker.call(window);
-      await this.uploadManager.submitFolder(dirHandle, { projectId: this.activeProjectId() });
+      await this.uploadManager.submitFolder(dirHandle, {
+        projectId: this.activeProjectId(),
+        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+      });
     } catch {
       // User cancel and permission errors are non-fatal
     }
@@ -91,7 +105,10 @@ export class UploadPanelInputHandlersService {
   onFolderInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.uploadManager.submit(Array.from(input.files), { projectId: this.activeProjectId() });
+      this.uploadManager.submit(Array.from(input.files), {
+        projectId: this.activeProjectId(),
+        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+      });
       input.value = '';
     }
   }

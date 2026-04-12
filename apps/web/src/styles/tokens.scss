@@ -57,6 +57,12 @@
   --shadow-xl: 0 1rem 3rem rgba(15, 14, 12, 0.22), 0 0.375rem 1rem rgba(15, 14, 12, 0.14);
   --shadow-focus: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 15%, transparent);
 
+  // Border variables
+  --border-focus: 0.125rem solid var(--color-primary);
+  --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 80%, transparent);
+  --border-selected: 0.125rem solid var(--color-clay);
+  --border-error: 0.125rem solid var(--color-danger);
+
   // Elevation layers — semantic aliases; every element uses a layer, not a raw shadow.
   // All elements at the same visual plane share the same layer → same shadow.
   --elevation-base: none; // flush with page background
@@ -286,6 +292,12 @@
   --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
   --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
   --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
+  
+  --border-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 20%, transparent);
+  --border-selected: 0.125rem solid var(--color-clay);
+  --border-error: 0.125rem solid var(--color-danger);
+
   --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
 }
 
@@ -374,6 +386,12 @@
     --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
     --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
     --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
+
+    --border-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+    --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 20%, transparent);
+    --border-selected: 0.125rem solid var(--color-clay);
+    --border-error: 0.125rem solid var(--color-danger);
+
     --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
   }
 }

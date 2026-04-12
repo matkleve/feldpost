@@ -153,6 +153,17 @@ export async function routePreparedNewJob(
     return;
   }
 
+  if (job.locationRequirementMode !== 'required') {
+    deps.jobState.updateJob(jobId, {
+      issueKind: undefined,
+      locationSourceUsed: 'none',
+    });
+    const conflicted = await runConflictCheck(deps, jobId, ctx);
+    if (conflicted) return;
+    await runUploadPhase(jobId, undefined, parsedExif, ctx);
+    return;
+  }
+
   deps.jobState.setPhase(jobId, 'missing_data');
   deps.jobState.updateJob(jobId, {
     locationSourceUsed: 'none',

@@ -22198,4 +22198,97 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.required', 'Location required', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:locationRequirementOptions')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location required', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort erforderlich', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione obbligatoria', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.required'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.optional', 'Location not required', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts method:locationModeLabel')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location not required', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.optional'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort nicht erforderlich', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.optional'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione non obbligatoria', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.optional'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.location.mode.ariaLabel', 'Upload location requirement', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html attr:aria-label')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload location requirement', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standortanforderung fuer Upload', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Requisito posizione per caricamento', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.location.mode.ariaLabel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

@@ -126,6 +126,7 @@ export class UploadService {
     parsedExif?: ParsedExif,
     projectId?: string,
     abortSignal?: AbortSignal,
+    relativePath?: string,
   ): Promise<UploadResult> {
     const user = this.auth.user();
     if (!user) {
@@ -203,10 +204,12 @@ export class UploadService {
         mime_type: file.type,
         storage_path: storagePath,
         file_name: file.name,
+        relative_path: relativePath ?? null,
         file_size_bytes: file.size,
         captured_at: capturedAt ?? null,
         exif_latitude: exifCoords?.lat ?? null,
         exif_longitude: exifCoords?.lng ?? null,
+        exif_raw: parsedExif?.exifRaw ?? null,
         latitude: finalCoords?.lat ?? null,
         longitude: finalCoords?.lng ?? null,
         location_status: locationStatus,

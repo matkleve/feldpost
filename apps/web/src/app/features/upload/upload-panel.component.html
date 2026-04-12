@@ -117,6 +117,29 @@
         Take photo
       </button>
     </div>
+    <div
+      class="upload-panel__location-mode-row"
+      (mouseenter)="onLocationModeHoverChange(true)"
+      (mouseleave)="onLocationModeHoverChange(false)"
+    >
+      <button
+        type="button"
+        class="upload-panel__location-mode-toggle"
+        (click)="toggleLocationRequirementMode()"
+        [attr.aria-label]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
+        [attr.title]="locationModeLabel()"
+      >
+        <span class="material-icons" aria-hidden="true">
+          @if (displayLocationRequirementMode() === 'required') {
+            verified_user
+          } @else {
+            gpp_maybe
+          }
+        </span>
+      </button>
+
+      <span class="upload-panel__location-mode-label">{{ locationModeLabel() }}</span>
+    </div>
 
     <input
       #captureInput

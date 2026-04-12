@@ -12,6 +12,8 @@ export interface ParsedExif {
   capturedAt?: Date;
   /** Camera compass direction in degrees (0-360), from GPSImgDirection. */
   direction?: number;
+  /** Full EXIF payload from exifr.parse(file), persisted for immutable raw-data auditing. */
+  exifRaw?: Record<string, unknown>;
 }
 
 /** A successfully completed upload. */

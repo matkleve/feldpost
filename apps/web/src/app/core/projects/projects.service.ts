@@ -12,6 +12,7 @@ interface ProjectRow {
   id: string;
   name: string | null;
   color_key?: string | null;
+  location_required?: boolean | null;
   archived_at?: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -171,6 +172,7 @@ export class ProjectsService {
         id: row.id,
         name: row.name?.trim() || 'Untitled project',
         colorKey: this.normalizeColorKey(row.color_key),
+        locationRequired: !!row.location_required,
         archivedAt,
         createdAt: row.created_at ?? new Date().toISOString(),
         updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
@@ -445,7 +447,7 @@ export class ProjectsService {
   private async fetchProjects(): Promise<ProjectRow[]> {
     const preferredResponse = await this.supabase.client
       .from('projects')
-      .select('id,name,color_key,archived_at,created_at,updated_at')
+      .select('id,name,color_key,location_required,archived_at,created_at,updated_at')
       .order('updated_at', { ascending: false });
 
     if (!preferredResponse.error && Array.isArray(preferredResponse.data)) {
@@ -466,6 +468,7 @@ export class ProjectsService {
     ).map((row) => ({
       ...row,
       color_key: DEFAULT_PROJECT_COLOR,
+      location_required: false,
       archived_at: null,
     }));
   }
@@ -491,6 +494,7 @@ export class ProjectsService {
       id: row.id,
       name: row.name?.trim() || 'Untitled project',
       colorKey: this.normalizeColorKey(row.color_key),
+      locationRequired: !!row.location_required,
       archivedAt: row.archived_at ?? null,
       createdAt: row.created_at ?? new Date().toISOString(),
       updatedAt: row.updated_at ?? row.created_at ?? new Date().toISOString(),
@@ -551,10 +555,11 @@ export class ProjectsService {
       .insert({
         name: 'Untitled project',
         color_key: DEFAULT_PROJECT_COLOR,
+        location_required: false,
         organization_id: context.organizationId,
         created_by: context.userId,
       })
-      .select('id,name,color_key,archived_at,created_at,updated_at')
+      .select('id,name,color_key,location_required,archived_at,created_at,updated_at')
       .single();
 
     if (!preferred.error && preferred.data) {
@@ -579,6 +584,7 @@ export class ProjectsService {
     return {
       ...row,
       color_key: DEFAULT_PROJECT_COLOR,
+      location_required: false,
       archived_at: null,
     };
   }

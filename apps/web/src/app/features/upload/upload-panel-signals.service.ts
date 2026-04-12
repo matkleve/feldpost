@@ -1,5 +1,8 @@
-import { Injectable, inject, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { ProjectsService } from '../../core/projects/projects.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
+import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
 import type { UploadLane } from './upload-phase.helpers';
 import { UploadPanelStateService } from './upload-panel-state.service';
 
@@ -20,7 +23,9 @@ import { UploadPanelStateService } from './upload-panel-state.service';
 @Injectable({ providedIn: 'root' })
 export class UploadPanelSignalsService {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly projects = inject(ProjectsService);
   private readonly state = inject(UploadPanelStateService);
+  private readonly workspaceView = inject(WorkspaceViewService);
 
   // ── Manager state ──────────────────────────────────────────────────────────
 
@@ -41,9 +46,74 @@ export class UploadPanelSignalsService {
   // ── UI State (lane selection) ──────────────────────────────────────────────
 
   readonly selectedLane = signal<UploadLane>('uploading');
+  readonly locationRequirementMode = signal<UploadLocationRequirementMode>('optional');
+
+  private readonly sessionLocationModeOverrides = signal<
+    Map<string, UploadLocationRequirementMode>
+  >(new Map());
 
   // ── Computed (derived state) ───────────────────────────────────────────────
 
   readonly effectiveLane = computed<UploadLane>(() => this.selectedLane());
   readonly laneJobs = computed(() => this.state.laneBuckets()[this.selectedLane()]);
+
+  private readonly activeProjectId = computed<string | undefined>(() => {
+    const selected = this.workspaceView.selectedProjectIds();
+    return selected.size > 0 ? (Array.from(selected.values())[0] ?? undefined) : undefined;
+  });
+
+  constructor() {
+    effect(() => {
+      const activeProjectId = this.activeProjectId();
+      const overrides = this.sessionLocationModeOverrides();
+
+      if (!activeProjectId) {
+        this.locationRequirementMode.set('optional');
+        return;
+      }
+
+      const overridden = overrides.get(activeProjectId);
+      if (overridden) {
+        this.locationRequirementMode.set(overridden);
+        return;
+      }
+
+      void this.applyProjectDefaultLocationMode(activeProjectId);
+    });
+  }
+
+  setLocationRequirementMode(mode: UploadLocationRequirementMode): void {
+    this.locationRequirementMode.set(mode);
+
+    const activeProjectId = this.activeProjectId();
+    if (!activeProjectId) {
+      return;
+    }
+
+    this.sessionLocationModeOverrides.update((current) => {
+      const next = new Map(current);
+      next.set(activeProjectId, mode);
+      return next;
+    });
+  }
+
+  private async applyProjectDefaultLocationMode(projectId: string): Promise<void> {
+    const projects = await this.projects.loadProjects();
+    const project = projects.find((item) => item.id === projectId);
+
+    if (!project) {
+      this.locationRequirementMode.set('optional');
+      return;
+    }
+
+    if (this.activeProjectId() !== projectId) {
+      return;
+    }
+
+    if (this.sessionLocationModeOverrides().has(projectId)) {
+      return;
+    }
+
+    this.locationRequirementMode.set(project.locationRequired ? 'required' : 'optional');
+  }
 }

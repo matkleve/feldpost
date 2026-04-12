@@ -103,7 +103,14 @@ async function runUploadCall(args: {
   jobState.updateJob(job.id, { progress: 0 });
 
   return withTimeout(
-    uploadService.uploadFile(job.file, coords, parsedExif, job.projectId, abortSignal),
+    uploadService.uploadFile(
+      job.file,
+      coords,
+      parsedExif,
+      job.projectId,
+      abortSignal,
+      job.relativePath,
+    ),
     timeoutMs,
     'Upload timed out. Please retry.',
   );
