@@ -32,7 +32,10 @@ import { ChipComponent } from '../../shared/components/chip/chip.component';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectSelectDialogComponent } from '../../shared/project-select-dialog/project-select-dialog.component';
 import { PaneFooterComponent } from '../../shared/pane-footer/pane-footer.component';
-import { SegmentedSwitchComponent } from '../../shared/segmented-switch/segmented-switch.component';
+import {
+  SegmentedSwitchComponent,
+  type SegmentedSwitchOption,
+} from '../../shared/segmented-switch/segmented-switch.component';
 import { DEFAULT_FILE_TYPE_CHIPS } from './upload-panel.constants';
 import { UploadPanelJobActionsService } from './upload-panel-job-actions.service';
 import { UploadPanelBulkActionsService } from './upload-panel-bulk-actions.service';
@@ -130,14 +133,24 @@ export class UploadPanelComponent {
   readonly priorityWorkflowEnabled = computed(() => this.embeddedInPane());
   readonly selectedLane = this.signals.selectedLane;
   readonly locationRequirementMode = this.signals.locationRequirementMode;
-  readonly locationModeHoverPreview = signal(false);
-  readonly displayLocationRequirementMode = computed<UploadLocationRequirementMode>(() => {
-    const current = this.locationRequirementMode();
-    if (!this.locationModeHoverPreview()) {
-      return current;
-    }
-    return current === 'required' ? 'optional' : 'required';
-  });
+  readonly locationModeSwitchOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
+    {
+      id: 'required',
+      type: 'icon-only',
+      icon: 'verified_user',
+      label: this.t('upload.location.mode.required', 'Location required'),
+      title: this.t('upload.location.mode.required', 'Location required'),
+      ariaLabel: this.t('upload.location.mode.required', 'Location required'),
+    },
+    {
+      id: 'optional',
+      type: 'icon-only',
+      icon: 'gpp_maybe',
+      label: this.t('upload.location.mode.optional', 'Location not required'),
+      title: this.t('upload.location.mode.optional', 'Location not required'),
+      ariaLabel: this.t('upload.location.mode.optional', 'Location not required'),
+    },
+  ]);
   readonly effectiveLane = this.signals.effectiveLane;
   readonly laneJobs = this.signals.laneJobs;
   readonly prioritizedUploadedJobIds = signal<Set<string>>(new Set());
@@ -199,18 +212,14 @@ export class UploadPanelComponent {
     });
   }
 
-  onLocationModeHoverChange(hovered: boolean): void {
-    this.locationModeHoverPreview.set(hovered);
-  }
-
-  toggleLocationRequirementMode(): void {
-    const current = this.locationRequirementMode();
-    const next: UploadLocationRequirementMode = current === 'required' ? 'optional' : 'required';
-    this.signals.setLocationRequirementMode(next);
+  onLocationModeValueChange(value: string | null): void {
+    if (value === 'required' || value === 'optional') {
+      this.signals.setLocationRequirementMode(value);
+    }
   }
 
   locationModeLabel(): string {
-    return this.displayLocationRequirementMode() === 'required'
+    return this.locationRequirementMode() === 'required'
       ? this.t('upload.location.mode.required', 'Location required')
       : this.t('upload.location.mode.optional', 'Location not required');
   }

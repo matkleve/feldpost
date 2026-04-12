@@ -27,13 +27,6 @@
     }
   }
 
-  &__header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-1);
-    padding: 0;
-  }
-
   &__area {
     display: flex;
     flex-direction: column;
@@ -149,26 +142,6 @@
     margin-top: var(--spacing-1);
   }
 
-  &__intake-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-2);
-
-    // Hide "Take Photo" on desktop (>=48rem)
-    @media (min-width: 48rem) {
-      .upload-panel__intake-btn--capture {
-        display: none;
-      }
-    }
-
-    // Show both buttons on mobile/tablet (<48rem)
-    @media (max-width: 47.9375rem) {
-      .upload-panel__intake-btn--capture {
-        display: inline-flex;
-      }
-    }
-  }
-
   &__intake-btn {
     &-icon {
       font-size: var(--font-size-base);
@@ -183,14 +156,22 @@
         border-color: var(--color-clay);
         background: color-mix(in srgb, var(--color-clay) 22%, var(--color-bg-surface));
       }
+
+      @media (min-width: 48rem) {
+        display: none;
+      }
+
+      @media (max-width: 47.9375rem) {
+        display: inline-flex;
+      }
     }
   }
 
   &__location-mode-row {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: var(--spacing-2);
-    width: fit-content;
+    width: 100%;
     border-radius: var(--radius-pill);
     padding: var(--spacing-1);
     transition: background-color var(--transition-fade-in);
@@ -200,40 +181,18 @@
     }
   }
 
-  &__location-mode-toggle {
+  &__location-mode-switch {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: 2rem;
-    block-size: 2rem;
-    border: 1px solid color-mix(in srgb, var(--color-border) 72%, var(--color-primary));
-    border-radius: var(--radius-pill);
-    background: var(--color-bg-surface);
-    color: var(--color-primary);
-    cursor: pointer;
-    transition:
-      border-color var(--transition-fade-in),
-      background-color var(--transition-fade-in),
-      color var(--transition-fade-in);
-
-    &:hover,
-    &:focus-visible {
-      border-color: var(--color-primary);
-      background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-surface));
-      outline: none;
-    }
-
-    .material-icons {
-      font-size: var(--font-size-base);
-      line-height: 1;
-    }
+    flex: 0 0 auto;
   }
 
   &__location-mode-label {
+    flex: 1 1 auto;
     font-size: var(--font-size-sm-soft);
     color: var(--color-text-primary);
     line-height: var(--line-height-snug);
     font-weight: var(--font-weight-medium);
+    text-align: right;
     user-select: none;
   }
 

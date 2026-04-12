@@ -55,9 +55,22 @@
   --shadow-md: 0 0.25rem 0.75rem rgba(15, 14, 12, 0.15), 0 0.125rem 0.25rem rgba(15, 14, 12, 0.1);
   --shadow-lg: 0 0.5rem 1.5rem rgba(15, 14, 12, 0.18), 0 0.25rem 0.5rem rgba(15, 14, 12, 0.12);
   --shadow-xl: 0 1rem 3rem rgba(15, 14, 12, 0.22), 0 0.375rem 1rem rgba(15, 14, 12, 0.14);
-  --shadow-focus: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 15%, transparent);
+  --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 15%, transparent);
+
+  // State shadow aliases compose physical elevation with semantic interaction treatment.
+  --shadow-hover: var(--shadow-sm);
+  --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
+  --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
+  --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
+
+  // Border scale (mirrors shadow scale naming for consistent token ergonomics)
+  --border-sm: 0.0625rem solid var(--interactive-border-muted);
+  --border-md: 0.09375rem solid var(--interactive-border-muted);
+  --border-lg: 0.125rem solid var(--interactive-border-muted);
+  --border-xl: 0.1875rem solid var(--interactive-border-muted);
 
   // Border variables
+  --border-default: var(--border-sm);
   --border-focus: 0.125rem solid var(--color-primary);
   --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 80%, transparent);
   --border-selected: 0.125rem solid var(--color-clay);
@@ -215,7 +228,11 @@
   // Shared interactive primitives (single source for hover/focus/motion)
   --interactive-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
   --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  --interactive-focus-ring: 0 0 0 0.125rem color-mix(in srgb, var(--color-clay) 16%, transparent);
+  --interactive-focus-ring: var(--shadow-focus-ring);
+  --interactive-shadow-hover: var(--shadow-hover);
+  --interactive-shadow-focus: var(--shadow-focus);
+  --interactive-shadow-selected: var(--shadow-selected);
+  --interactive-shadow-error: var(--shadow-error);
   --interactive-transition-standard:
     border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
@@ -292,7 +309,19 @@
   --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
   --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
   --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
-  
+
+  --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 25%, transparent);
+  --shadow-hover: var(--shadow-sm);
+  --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
+  --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
+  --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
+
+  --border-sm: 0.0625rem solid var(--interactive-border-muted);
+  --border-md: 0.09375rem solid var(--interactive-border-muted);
+  --border-lg: 0.125rem solid var(--interactive-border-muted);
+  --border-xl: 0.1875rem solid var(--interactive-border-muted);
+
+  --border-default: var(--border-sm);
   --border-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
   --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 20%, transparent);
   --border-selected: 0.125rem solid var(--color-clay);
@@ -387,6 +416,18 @@
     --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
     --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
 
+    --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 25%, transparent);
+    --shadow-hover: var(--shadow-sm);
+    --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
+    --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
+    --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
+
+    --border-sm: 0.0625rem solid var(--interactive-border-muted);
+    --border-md: 0.09375rem solid var(--interactive-border-muted);
+    --border-lg: 0.125rem solid var(--interactive-border-muted);
+    --border-xl: 0.1875rem solid var(--interactive-border-muted);
+
+    --border-default: var(--border-sm);
     --border-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
     --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 20%, transparent);
     --border-selected: 0.125rem solid var(--color-clay);

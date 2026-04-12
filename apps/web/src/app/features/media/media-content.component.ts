@@ -132,7 +132,11 @@ export class MediaContentComponent implements AfterViewInit {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
-  private debugInteraction(stage: string, event: MouseEvent | null, extra: Record<string, unknown> = {}): void {
+  private debugInteraction(
+    stage: string,
+    event: MouseEvent | null,
+    extra: Record<string, unknown> = {},
+  ): void {
     const target = event?.target instanceof Element ? event.target : null;
     const currentTarget = event?.currentTarget instanceof Element ? event.currentTarget : null;
 

@@ -88,7 +88,11 @@ export class MediaItemComponent {
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
   }
 
-  private debugInteraction(stage: string, event: MouseEvent | Event | null, extra: Record<string, unknown> = {}): void {
+  private debugInteraction(
+    stage: string,
+    event: MouseEvent | Event | null,
+    extra: Record<string, unknown> = {},
+  ): void {
     const mouse = event instanceof MouseEvent ? event : null;
     const target = mouse?.target instanceof Element ? mouse.target : null;
     const currentTarget = mouse?.currentTarget instanceof Element ? mouse.currentTarget : null;

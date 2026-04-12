@@ -82,10 +82,7 @@ export function validateUploadFile(file: File): FileValidation {
 
 export async function parseUploadExif(file: File): Promise<ParsedExif> {
   try {
-    const [gps, rawMeta] = await Promise.all([
-      exifr.gps(file),
-      exifr.parse(file),
-    ]);
+    const [gps, rawMeta] = await Promise.all([exifr.gps(file), exifr.parse(file)]);
 
     const meta =
       rawMeta && typeof rawMeta === 'object' ? (rawMeta as Record<string, unknown>) : undefined;
@@ -104,7 +101,9 @@ export async function parseUploadExif(file: File): Promise<ParsedExif> {
 
     const exifRaw = meta
       ? (JSON.parse(
-          JSON.stringify(meta, (_key, value) => (value instanceof Date ? value.toISOString() : value)),
+          JSON.stringify(meta, (_key, value) =>
+            value instanceof Date ? value.toISOString() : value,
+          ),
         ) as Record<string, unknown>)
       : undefined;
 

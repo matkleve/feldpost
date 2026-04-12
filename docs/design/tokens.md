@@ -167,17 +167,34 @@ The UI uses a consistent "friendly but professional" radius system:
 
 ### Physical shadow scale
 
-Four physical shadows plus a focus ring. Components never use these directly — they use the semantic elevation layers below.
+Four physical shadows define elevation only. Components should consume semantic aliases (state shadows and elevation layers) instead of hardcoding physical levels directly.
 
-| Token            | Light mode value                                                      | Purpose                              |
-| ---------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| `--shadow-sm`    | `0 1px 3px rgba(15,14,12,.12), 0 1px 2px rgba(15,14,12,.08)`          | Lightest lift                        |
-| `--shadow-md`    | `0 4px 12px rgba(15,14,12,.15), 0 2px 4px rgba(15,14,12,.10)`         | Standard overlay                     |
-| `--shadow-lg`    | `0 8px 24px rgba(15,14,12,.18), 0 4px 8px rgba(15,14,12,.12)`         | Dropdown/popover                     |
-| `--shadow-xl`    | `0 16px 48px rgba(15,14,12,.22), 0 6px 16px rgba(15,14,12,.14)`       | Modal-level                          |
-| `--shadow-focus` | `0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent)` | Focus ring (semantic, not elevation) |
+| Token                 | Light mode value                                                      | Purpose                              |
+| --------------------- | --------------------------------------------------------------------- | ------------------------------------ |
+| `--shadow-sm`         | `0 1px 3px rgba(15,14,12,.12), 0 1px 2px rgba(15,14,12,.08)`          | Lightest lift                        |
+| `--shadow-md`         | `0 4px 12px rgba(15,14,12,.15), 0 2px 4px rgba(15,14,12,.10)`         | Standard overlay                     |
+| `--shadow-lg`         | `0 8px 24px rgba(15,14,12,.18), 0 4px 8px rgba(15,14,12,.12)`         | Dropdown/popover                     |
+| `--shadow-xl`         | `0 16px 48px rgba(15,14,12,.22), 0 6px 16px rgba(15,14,12,.14)`       | Modal-level                          |
+| `--shadow-focus-ring` | `0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent)` | Ring primitive for focus composition |
 
-In dark mode, `sm` through `xl` are overridden with `rgba(0,0,0,...)` at higher opacity so shadows remain visible against dark surfaces. `--shadow-focus` adapts automatically via `--color-primary`.
+In dark mode, `sm` through `xl` are overridden with `rgba(0,0,0,...)` at higher opacity so shadows remain visible against dark surfaces. `--shadow-focus-ring` adapts automatically via `--color-primary`.
+
+### State shadow aliases (semantic interaction)
+
+State shadows compose from physical elevation plus optional semantic rings.
+
+| Token               | Composition                                       | Purpose                              |
+| ------------------- | ------------------------------------------------- | ------------------------------------ |
+| `--shadow-hover`    | `var(--shadow-sm)`                                | Hover lift without changing geometry |
+| `--shadow-focus`    | `var(--shadow-sm), var(--shadow-focus-ring)`      | Keyboard/mouse focus treatment       |
+| `--shadow-selected` | `var(--shadow-sm), 0 0 0 2px var(--color-clay)`   | Selected-state emphasis              |
+| `--shadow-error`    | `var(--shadow-sm), 0 0 0 2px var(--color-danger)` | Error-state emphasis                 |
+
+Rule: interactive components should prefer semantic state shadows (`--shadow-hover`, `--shadow-focus`, `--shadow-selected`, `--shadow-error`) over raw physical tokens when rendering state changes.
+
+### Default border token
+
+Use `--border-default` as the baseline neutral border (`1px` equivalent) for low-emphasis outlines and resting control borders. State borders (`--border-focus`, `--border-hover`, `--border-selected`, `--border-error`) stay available when a real border is required instead of a state shadow.
 
 ### Elevation layers (semantic)
 

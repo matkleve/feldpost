@@ -27,12 +27,10 @@
     Purpose: Drag-and-drop file selection + folder scanning progress feedback.
     ═══════════════════════════════════════════════════════════════════════════ -->
   <div class="upload-panel__area upload-panel__area--intake">
-    <header class="upload-panel__header">
-      <h3 class="upload-panel__title">Upload files</h3>
-      <p class="upload-panel__subtitle">
-        Add photos, videos, PDFs, and Office files for the active project.
-      </p>
-    </header>
+    <h3 class="upload-panel__title">Upload files</h3>
+    <p class="upload-panel__subtitle">
+      Add photos, videos, PDFs, and Office files for the active project.
+    </p>
 
     @if (scanningLabel(); as label) {
       <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
@@ -79,64 +77,50 @@
       (change)="inputHandlers.onFileInputChange($event); selectedLane.set('uploading')"
     />
 
-    <div class="upload-panel__intake-actions">
-      <button
-        uiButton
-        class="upload-panel__intake-btn upload-panel__intake-btn--folder"
-        type="button"
-        [disabled]="scanning() || !folderImportSupported"
-        [attr.title]="
-          !folderImportSupported
-            ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
-            : null
-        "
-        (click)="inputHandlers.onSelectFolder($event, folderInput)"
-      >
-        <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-        Upload folder
-      </button>
-
-      @if (!folderImportSupported) {
-        <p class="upload-panel__folder-unsupported-hint" role="note">
-          {{
-            t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
-          }}
-        </p>
-      }
-
-      <button
-        uiButton
-        class="upload-panel__intake-btn upload-panel__intake-btn--capture"
-        type="button"
-        [disabled]="scanning()"
-        (click)="inputHandlers.openCapturePicker($event, captureInput)"
-      >
-        <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
-          >photo_camera</span
-        >
-        Take photo
-      </button>
-    </div>
-    <div
-      class="upload-panel__location-mode-row"
-      (mouseenter)="onLocationModeHoverChange(true)"
-      (mouseleave)="onLocationModeHoverChange(false)"
+    <button
+      uiButton
+      class="upload-panel__intake-btn upload-panel__intake-btn--folder"
+      type="button"
+      [disabled]="scanning() || !folderImportSupported"
+      [attr.title]="
+        !folderImportSupported
+          ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
+          : null
+      "
+      (click)="inputHandlers.onSelectFolder($event, folderInput)"
     >
-      <button
-        type="button"
-        class="upload-panel__location-mode-toggle"
-        (click)="toggleLocationRequirementMode()"
-        [attr.aria-label]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
-        [attr.title]="locationModeLabel()"
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
+      Upload folder
+    </button>
+
+    @if (!folderImportSupported) {
+      <p class="upload-panel__folder-unsupported-hint" role="note">
+        {{ t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.') }}
+      </p>
+    }
+
+    <button
+      uiButton
+      class="upload-panel__intake-btn upload-panel__intake-btn--capture"
+      type="button"
+      [disabled]="scanning()"
+      (click)="inputHandlers.openCapturePicker($event, captureInput)"
+    >
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
+        >photo_camera</span
       >
-        <span class="material-icons" aria-hidden="true">
-          @if (displayLocationRequirementMode() === 'required') {
-            verified_user
-          } @else {
-            gpp_maybe
-          }
-        </span>
-      </button>
+      Take photo
+    </button>
+
+    <div class="upload-panel__location-mode-row">
+      <app-segmented-switch
+        class="upload-panel__location-mode-switch"
+        [ariaLabel]="t('upload.location.mode.ariaLabel', 'Upload location requirement')"
+        [options]="locationModeSwitchOptions()"
+        [value]="locationRequirementMode()"
+        [size]="'sm'"
+        (valueChange)="onLocationModeValueChange($event)"
+      ></app-segmented-switch>
 
       <span class="upload-panel__location-mode-label">{{ locationModeLabel() }}</span>
     </div>
