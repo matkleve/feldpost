@@ -62,6 +62,15 @@ MapShellComponent
 
 Compatibility note: `image_id` remains a compatibility field in some RPCs; canonical persistence identity is `media_item_id`.
 
+Location status compatibility note:
+
+- Canonical frontend union for `location_status`: `pending` | `resolved` | `unresolvable`.
+- Transitional normalization for legacy backend values during migration:
+  - `gps` -> `resolved`
+  - `no_gps` -> `pending`
+  - `unresolved` -> `unresolvable`
+- New frontend writes and emitted DTO contracts must use canonical values only.
+
 ## State
 
 | Name               | Type               | Default                | Controls                               |

@@ -91,6 +91,20 @@ MediaDetailView
 | `error`     | `string      | null`   | `null`                                | Error message if loading fails |
 | `paneWidth` | `number`     | `0`     | Width of the workspace pane in pixels |
 
+## Location Status Mapping Contract
+
+- Parent view-model must treat location status with canonical union: `pending` | `resolved` | `unresolvable`.
+- UI mapping contract:
+  - `pending`: retry-capable unresolved state (eligible for one-shot resolve trigger where defined by child action specs).
+  - `resolved`: location complete state.
+  - `unresolvable`: terminal unresolved state; no automatic background retry.
+- Transitional legacy read normalization (deprecated):
+  - `gps` -> `resolved`
+  - `no_gps` -> `pending`
+  - `unresolved` -> `unresolvable`
+
+The parent spec owns the mapping contract only; concrete action semantics remain in child specs (`media-detail-actions`, `media-detail-inline-editing`).
+
 ## File Map
 
 | File                                                                    | Purpose                                                              |

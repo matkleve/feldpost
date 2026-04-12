@@ -297,6 +297,12 @@ This pattern incrementally back-fills address data for all existing images as us
 
 The `UploadService` sets `location_unresolved: true` on insert when GPS coordinates are present. After the DB insert succeeds, it fires a background `GeocodingService.reverse()` call that populates `city`, `district`, `street`, `country`, `address_label` and sets `location_unresolved: false`.
 
+Legacy note:
+
+- The boolean `location_unresolved` wording is deprecated and retained here for historical context.
+- Canonical status contract is now `media_items.location_status` with `pending` | `resolved` | `unresolvable`.
+- During migration, boolean semantics map to canonical statuses via spec-layer normalization.
+
 ---
 
 ## 8. Integration Points
