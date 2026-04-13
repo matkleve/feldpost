@@ -39,7 +39,7 @@ export type MediaContentState = 'loading' | 'error' | 'ready';
   styleUrl: './media-content.component.scss',
   host: {
     '[class.media-content]': 'true',
-    '(click)': 'onGridSurfaceClick($event)',
+    '(document:click)': 'onDocumentClick($event)',
   },
 })
 export class MediaContentComponent implements AfterViewInit {
@@ -199,30 +199,30 @@ export class MediaContentComponent implements AfterViewInit {
     });
   }
 
-  onGridSurfaceClick(event: MouseEvent): void {
-    this.debugInteraction('gridSurface.click.received', event);
+  onDocumentClick(event: MouseEvent): void {
+    this.debugInteraction('document.click.received', event);
 
     if (this.state() !== 'ready') {
-      this.debugInteraction('gridSurface.click.ignored.notReady', event);
+      this.debugInteraction('document.click.ignored.notReady', event);
       return;
     }
 
     const target = event.target;
     if (!(target instanceof Element)) {
-      this.debugInteraction('gridSurface.click.ignored.nonElementTarget', event);
+      this.debugInteraction('document.click.ignored.nonElementTarget', event);
       return;
     }
 
-    if (target.closest('app-media-item')) {
-      this.debugInteraction('gridSurface.click.ignored.insideMediaItem', event);
+    if (target.closest('app-item-grid') || target.closest('app-media-item')) {
+      this.debugInteraction('document.click.ignored.insideGridOrItem', event);
       return;
     }
 
-    this.debugInteraction('gridSurface.click.clearSelection', event, {
+    this.debugInteraction('document.click.clearSelection', event, {
       selectedBefore: Array.from(this.workspaceSelectionService.selectedMediaIds()),
     });
     this.workspaceSelectionService.clearSelection();
-    this.debugInteraction('gridSurface.click.selectionCleared', event);
+    this.debugInteraction('document.click.selectionCleared', event);
   }
 
   private readonly updateViewportMetrics = (): void => {

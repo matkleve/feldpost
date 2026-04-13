@@ -13,7 +13,8 @@
   /* Sanfte Übergänge für alle Zustände */
   transition:
     box-shadow var(--transition-fade-in),
-    transform var(--transition-fade-in);
+    transform var(--transition-fade-in),
+    border var(--transition-fade-in);
 }
 
 /* 2. INNERER WRAPPER: Hier schneiden wir den Inhalt (Bild) ab.
@@ -51,21 +52,14 @@
 :host([data-state='selected']) .media-item__frame {
   box-shadow: var(--shadow-sm);
 
-  border: 1px color-mix(in srgb, var(--color-clay, #000) 100%, transparent);
+  border: var(--border-selected);
 }
 
 /* B: HOVER / FOCUS (Egal ob selektiert oder nicht) -> Border wird 2px */
 /* Dieser Selektor steht weiter unten und gewinnt daher bei Hover! */
-:host(:hover) .media-item__frame,
-:host(:focus-within) .media-item__frame {
-  box-shadow: var(--shadow-focus);
+:host(:hover) .media-item__frame {
+  box-shadow: var(--shadow-md);
 
-  border: var(--border-hover);
-}
-
-/* C: SELEKTIERT + HOVER (Kombinierter Zustand) */
-:host([data-state='selected']:hover) .media-item__frame {
-  box-shadow: var(--shadow-focus);
   border: var(--border-hover);
 }
 
@@ -109,11 +103,17 @@
 }
 
 :host:hover .media-item__quiet-actions,
-:host:focus-within .media-item__quiet-actions,
-:host([data-state='selected']) .media-item__quiet-actions {
+:host:hover .media-item__quiet-actions {
   opacity: 1;
   transform: translateY(0);
-  pointer-events: auto;
+  transition:
+    opacity var(--transition-fade-in),
+    transform var(--transition-fade-in);
+}
+
+:host([data-state='selected']) .media-item__quiet-actions.media-item__quiet-actions--select {
+  opacity: 1;
+  transform: translateY(0);
   transition:
     opacity var(--transition-fade-in),
     transform var(--transition-fade-in);

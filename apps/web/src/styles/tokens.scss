@@ -59,7 +59,7 @@
 
   // State shadow aliases compose physical elevation with semantic interaction treatment.
   --shadow-hover: var(--shadow-sm);
-  --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
+  --shadow-focus: var(--shadow-sm);
   --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
   --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
 
@@ -71,8 +71,8 @@
 
   // Border variables
   --border-default: var(--border-sm);
-  --border-focus: 0.125rem solid var(--color-primary);
-  --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 80%, transparent);
+  --border-focus: 0.25rem solid var(--color-primary);
+  --border-hover: 0.25rem solid color-mix(in srgb, var(--color-clay) 80%, transparent);
   --border-selected: 0.125rem solid var(--color-clay);
   --border-error: 0.125rem solid var(--color-danger);
 

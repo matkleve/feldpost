@@ -196,6 +196,17 @@ Rule: interactive components should prefer semantic state shadows (`--shadow-hov
 
 Use `--border-default` as the baseline neutral border (`1px` equivalent) for low-emphasis outlines and resting control borders. State borders (`--border-focus`, `--border-hover`, `--border-selected`, `--border-error`) stay available when a real border is required instead of a state shadow.
 
+Border scale tokens are available for consistent sizing semantics:
+
+| Token | Meaning |
+| --- | --- |
+| `--border-sm` | thin neutral border (`1px` equivalent) |
+| `--border-md` | medium neutral border (`1.5px` equivalent) |
+| `--border-lg` | emphasized neutral border (`2px` equivalent) |
+| `--border-xl` | strong neutral border (`3px` equivalent) |
+
+`--border-default` maps to `--border-sm`.
+
 ### Elevation layers (semantic)
 
 Every component's `box-shadow` references a semantic `--elevation-*` token. Elements at the **same visual plane share the same layer** — this ensures the sidebar, search bar, upload FAB, GPS button, and map markers all look like they float at the same height.

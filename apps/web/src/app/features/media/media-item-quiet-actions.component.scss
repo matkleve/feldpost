@@ -9,6 +9,7 @@
 .media-item-quiet-actions__button {
   position: absolute;
   inset-block-start: var(--spacing-2);
+  pointer-events: auto;
 }
 
 // Positions selection action in the top-left corner of the media item.
