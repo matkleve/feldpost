@@ -22,22 +22,23 @@
   --color-text-disabled: #a89e95;
 
   // Brand / semantic
-  --color-primary: #cc7a4a;
-  --color-primary-hover: #b8663a;
+  --color-accent-brand: #cc7a4a;
+  --color-accent-brand-hover: #b8663a;
+  --color-primary: var(--color-accent-brand);
+  --color-primary-hover: var(--color-accent-brand-hover);
   --color-success: #16a34a;
   --color-warning: #c2610a;
   --color-danger: #dc2626;
   --color-uploading: #2f6fdb;
   --color-accent: #7c3aed;
-  --filetype-image: var(--color-uploading);
-  --filetype-video: var(--color-accent);
+  --filetype-image: #2f6fdb;
+  --filetype-video: #7c3aed;
   --filetype-document: #4f5d95;
-  --filetype-spreadsheet: var(--color-success);
+  --filetype-spreadsheet: #16a34a;
   --filetype-presentation: #d97706;
   --filetype-office: color-mix(in srgb, var(--color-text-secondary) 92%, black 8%);
-  --color-clay: #cc7a4a; // upload CTA, active selection — used sparingly
   --color-map-user-marker: #2f6fdb;
-  --color-map-search-marker: var(--color-clay);
+  --color-map-search-marker: var(--color-accent-brand);
 
   // Border radius
   --radius-sm: 0.25rem;
@@ -60,7 +61,7 @@
   // State shadow aliases compose physical elevation with semantic interaction treatment.
   --shadow-hover: var(--shadow-sm);
   --shadow-focus: var(--shadow-sm);
-  --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
+  --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-accent-brand);
   --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
 
   // Border scale (mirrors shadow scale naming for consistent token ergonomics)
@@ -71,10 +72,15 @@
 
   // Border variables
   --border-default: var(--border-sm);
-  --border-focus: 0.25rem solid var(--color-primary);
-  --border-hover: 0.25rem solid color-mix(in srgb, var(--color-clay) 80%, transparent);
-  --border-selected: 0.125rem solid var(--color-clay);
+  --border-focus: 0.25rem solid color-mix(in srgb, var(--color-primary) 72%, var(--color-border));
+  --border-hover: 0.1875rem solid
+    color-mix(in srgb, var(--color-accent-brand) 55%, var(--color-border));
+  --border-selected: 0.125rem solid var(--color-accent-brand);
   --border-error: 0.125rem solid var(--color-danger);
+
+  // Interaction outlines avoid metric changes on hover/focus states.
+  --outline-hover: 0.0625rem solid color-mix(in srgb, var(--color-accent-brand) 55%, transparent);
+  --outline-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 72%, transparent);
 
   // Elevation layers — semantic aliases; every element uses a layer, not a raw shadow.
   // All elements at the same visual plane share the same layer → same shadow.
@@ -88,51 +94,34 @@
 
   // Z-index stacking ladder (audit issue #2, #13)
   --z-map: 0;
-  --z-panel: 300;
-  --z-upload-button: 350;
-  --z-dropdown: 400;
-  --z-toast: 450;
+  --z-panel: 100;
+  --z-upload-button: 200;
+  --z-dropdown: 300;
+  --z-toast: 400;
   --z-modal: 500;
 
-  // Spacing scale — 0.25rem base unit (4px @ 16px root)
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-3: 0.75rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.5rem;
-  --spacing-6: 2rem;
-  --spacing-7: 3rem;
-  --spacing-8: 4rem;
+  // Spacing scale — single 4px unit with modular multipliers.
+  --spacing-unit: 0.25rem;
+  --spacing-1: calc(var(--spacing-unit) * 1);
+  --spacing-2: calc(var(--spacing-unit) * 2);
+  --spacing-3: calc(var(--spacing-unit) * 3);
+  --spacing-4: calc(var(--spacing-unit) * 4);
+  --spacing-5: calc(var(--spacing-unit) * 6);
+  --spacing-6: calc(var(--spacing-unit) * 8);
+  --spacing-7: calc(var(--spacing-unit) * 12);
+  --spacing-8: calc(var(--spacing-unit) * 16);
 
-  // Typography scale
-  --font-size-3xs: 0.52rem;
-  --font-size-2xs: 0.56rem;
-  --font-size-caption: 0.625rem;
-  --font-size-label: 0.6875rem;
-  --font-size-label-soft: 0.68rem;
-  --font-size-xs-soft: 0.76rem;
-  --font-size-xs: 0.75rem;
-  --font-size-sm-soft: 0.82rem;
-  --font-size-sm-strong: 0.84rem;
-  --font-size-sm: 0.8125rem;
-  --font-size-md-compact: 0.85rem;
-  --font-size-md: 0.875rem;
-  --font-size-md-soft: 0.9rem;
-  --font-size-md-emphasis: 0.95rem;
-  --font-size-md-plus: 0.9375rem;
-  --font-size-sm-compact: 0.78rem;
-  --font-size-sm-tight: 0.8rem;
-  --font-size-base: 1rem;
-  --font-size-base-strong: 1.05rem;
-  --font-size-base-plus: 1.0625rem;
-  --font-size-base-emphasis: 1.1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-lg-emphasis: 1.2rem;
-  --font-size-xl: 1.25rem;
-  --font-size-5xl: 1.9rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.75rem;
-  --font-size-4xl: 2rem;
+  // Typography scale — unified mathematical scale (ratio 1.13) with 0.75rem minimum.
+  --font-size-ratio: 1.13;
+  --font-size-2xs: 0.75rem;
+  --font-size-xs: calc(var(--font-size-2xs) * var(--font-size-ratio));
+  --font-size-sm: calc(var(--font-size-xs) * var(--font-size-ratio));
+  --font-size-md: calc(var(--font-size-sm) * var(--font-size-ratio));
+  --font-size-lg: calc(var(--font-size-md) * var(--font-size-ratio));
+  --font-size-xl: calc(var(--font-size-lg) * var(--font-size-ratio));
+  --font-size-2xl: calc(var(--font-size-xl) * var(--font-size-ratio));
+  --font-size-3xl: calc(var(--font-size-2xl) * var(--font-size-ratio));
+  --font-size-4xl: calc(var(--font-size-3xl) * var(--font-size-ratio));
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -227,33 +216,56 @@
 
   // Shared interactive primitives (single source for hover/focus/motion)
   --interactive-border-muted: color-mix(in srgb, var(--color-border) 72%, transparent);
-  --interactive-surface-hover: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --interactive-surface-hover: color-mix(in srgb, var(--color-accent-brand) 12%, transparent);
   --interactive-focus-ring: var(--shadow-focus-ring);
-  --interactive-shadow-hover: var(--shadow-hover);
-  --interactive-shadow-focus: var(--shadow-focus);
+  --interactive-shadow-hover:
+    var(--shadow-hover),
+    0 0 0 0.0625rem color-mix(in srgb, var(--color-accent-brand) 45%, transparent);
+  --interactive-shadow-focus: var(--shadow-focus), var(--shadow-focus-ring);
   --interactive-shadow-selected: var(--shadow-selected);
   --interactive-shadow-error: var(--shadow-error);
   --interactive-transition-standard:
     border-color 120ms ease-out, background 120ms ease-out, color 120ms ease-out,
     box-shadow 120ms ease-out;
 
+  /* ── Motion & Micro-interactions ── */
+
+  /* Durations */
+  --motion-duration-fast: 100ms;
+  --motion-duration-base: 200ms;
+  --motion-duration-slow: 300ms;
+
+  /* Easings */
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Semantic Aliases (Das ist das, was du im Code nutzt) */
+  --transition-interactive: var(--motion-duration-fast) var(--motion-ease-out);
+  --transition-panel: var(--motion-duration-base) var(--motion-ease-standard);
+
+  // Compatibility aliases for existing transition tokens in feature styles.
+  --transition-fade-in: var(--transition-interactive);
+  --transition-fade-out: var(--motion-duration-fast) var(--motion-ease-in);
+  --transition-reveal-delay: 60ms;
+
   // Component-role aliases (Theme Contract layer C)
   // Action controls
   --action-bg-default: transparent;
   --action-bg-hover: var(--interactive-surface-hover);
-  --action-bg-active: color-mix(in srgb, var(--color-clay) 12%, transparent);
-  --action-border-default: color-mix(in srgb, var(--color-clay) 35%, var(--color-border));
-  --action-border-active: color-mix(in srgb, var(--color-clay) 45%, var(--color-border));
+  --action-bg-active: color-mix(in srgb, var(--color-accent-brand) 12%, transparent);
+  --action-border-default: color-mix(in srgb, var(--color-accent-brand) 35%, var(--color-border));
+  --action-border-active: color-mix(in srgb, var(--color-accent-brand) 45%, var(--color-border));
   --action-text-default: var(--color-text-secondary);
-  --action-text-active: var(--color-clay);
+  --action-text-active: var(--color-accent-brand);
 
   // Menu and option surfaces
   --menu-surface-bg: var(--color-bg-elevated);
   --menu-surface-border: var(--interactive-border-muted);
-  --menu-item-bg-hover: color-mix(in srgb, var(--color-clay) 8%, transparent);
-  --menu-item-bg-active: color-mix(in srgb, var(--color-clay) 12%, transparent);
+  --menu-item-bg-hover: color-mix(in srgb, var(--color-accent-brand) 8%, transparent);
+  --menu-item-bg-active: color-mix(in srgb, var(--color-accent-brand) 12%, transparent);
   --menu-item-text: var(--color-text-primary);
-  --menu-item-text-active: var(--color-clay);
+  --menu-item-text-active: var(--color-accent-brand);
 
   // Form controls
   --field-bg: var(--color-bg-surface);
@@ -275,8 +287,7 @@
   --state-info-bg: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
-// ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
-[data-theme='dark'] {
+@mixin dark-theme-overrides {
   --color-bg-base: #0f0e0c;
   --color-bg-surface: #1a1917;
   --color-bg-elevated: #252320;
@@ -288,8 +299,10 @@
   --color-text-secondary: #908880;
   --color-text-disabled: #4a4540;
 
-  --color-primary: #d9895a;
-  --color-primary-hover: #e89a6e;
+  --color-accent-brand: #d9895a;
+  --color-accent-brand-hover: #e89a6e;
+  --color-primary: var(--color-accent-brand);
+  --color-primary-hover: var(--color-accent-brand-hover);
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
@@ -300,9 +313,8 @@
   --filetype-spreadsheet: var(--color-success);
   --filetype-presentation: #f59e0b;
   --filetype-office: color-mix(in srgb, var(--color-text-secondary) 90%, white 10%);
-  --color-clay: #d9895a;
   --color-map-user-marker: #60a5fa;
-  --color-map-search-marker: var(--color-clay);
+  --color-map-search-marker: var(--color-accent-brand);
 
   // Shadows — higher opacity so they punch through dark surfaces
   --shadow-sm: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.28), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.18);
@@ -313,7 +325,7 @@
   --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 25%, transparent);
   --shadow-hover: var(--shadow-sm);
   --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
-  --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
+  --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-accent-brand);
   --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
 
   --border-sm: 0.0625rem solid var(--interactive-border-muted);
@@ -322,12 +334,21 @@
   --border-xl: 0.1875rem solid var(--interactive-border-muted);
 
   --border-default: var(--border-sm);
-  --border-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
-  --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 20%, transparent);
-  --border-selected: 0.125rem solid var(--color-clay);
+  --border-focus: 0.25rem solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  --border-hover: 0.1875rem solid
+    color-mix(in srgb, var(--color-accent-brand) 30%, var(--color-border));
+  --border-selected: 0.125rem solid var(--color-accent-brand);
   --border-error: 0.125rem solid var(--color-danger);
 
+  --outline-hover: 0.0625rem solid color-mix(in srgb, var(--color-accent-brand) 35%, transparent);
+  --outline-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+
   --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
+}
+
+// ── Dark-mode tokens — explicit attribute (set by theme script / toggle) ─────
+[data-theme='dark'] {
+  @include dark-theme-overrides;
 }
 
 // Optional custom profile to validate themeability of semantic aliases.
@@ -341,24 +362,26 @@
   --color-text-primary: #2f271f;
   --color-text-secondary: #655749;
   --color-text-disabled: #9e8f80;
-  --color-primary: #a56137;
+  --color-accent-brand: #a56137;
+  --color-accent-brand-hover: #8d4f2a;
+  --color-primary: var(--color-accent-brand);
   --color-primary-hover: #8d4f2a;
-  --color-clay: #a56137;
   --color-map-user-marker: #2f5f89;
+  --color-map-search-marker: var(--color-accent-brand);
 
   --action-bg-hover: color-mix(in srgb, #c59f63 18%, transparent);
-  --action-bg-active: color-mix(in srgb, #a56137 22%, transparent);
-  --action-border-default: color-mix(in srgb, #a56137 36%, var(--color-border));
-  --action-border-active: color-mix(in srgb, #a56137 52%, var(--color-border));
+  --action-bg-active: color-mix(in srgb, var(--color-accent-brand) 22%, transparent);
+  --action-border-default: color-mix(in srgb, var(--color-accent-brand) 36%, var(--color-border));
+  --action-border-active: color-mix(in srgb, var(--color-accent-brand) 52%, var(--color-border));
   --action-text-default: #6b5a47;
-  --action-text-active: #8f522d;
+  --action-text-active: var(--color-accent-brand);
 
   --menu-surface-bg: #fffaf2;
   --menu-surface-border: color-mix(in srgb, #a38d73 44%, transparent);
   --menu-item-bg-hover: color-mix(in srgb, #c59f63 14%, transparent);
-  --menu-item-bg-active: color-mix(in srgb, #a56137 18%, transparent);
+  --menu-item-bg-active: color-mix(in srgb, var(--color-accent-brand) 18%, transparent);
   --menu-item-text: #2f271f;
-  --menu-item-text-active: #8f522d;
+  --menu-item-text-active: var(--color-accent-brand);
 
   --field-bg: #fffdf8;
   --field-border: #b7a48e;
@@ -382,57 +405,32 @@
 // explicitly set a preference in the app.
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-bg-base: #0f0e0c;
-    --color-bg-surface: #1a1917;
-    --color-bg-elevated: #252320;
-
-    --color-border: #2e2b27;
-    --color-border-strong: #3d3830;
-
-    --color-text-primary: #edebe7;
-    --color-text-secondary: #908880;
-    --color-text-disabled: #4a4540;
-
-    --color-primary: #d9895a;
-    --color-primary-hover: #e89a6e;
-    --color-success: #22c55e;
-    --color-warning: #f59e0b;
-    --color-danger: #ef4444;
-    --color-accent: #a78bfa;
-    --filetype-image: #60a5fa;
-    --filetype-video: var(--color-accent);
-    --filetype-document: #a5b4fc;
-    --filetype-spreadsheet: var(--color-success);
-    --filetype-presentation: #f59e0b;
-    --filetype-office: color-mix(in srgb, var(--color-text-secondary) 90%, white 10%);
-    --color-clay: #d9895a;
-    --color-map-user-marker: #60a5fa;
-    --color-map-search-marker: var(--color-clay);
-
-    // Shadows — higher opacity so they punch through dark surfaces
-    --shadow-sm:
-      0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.28), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.18);
-    --shadow-md: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.38), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.22);
-    --shadow-lg: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.48), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.28);
-    --shadow-xl: 0 1rem 3rem rgba(0, 0, 0, 0.56), 0 0.375rem 1rem rgba(0, 0, 0, 0.32);
-
-    --shadow-focus-ring: 0 0 0 0.1875rem color-mix(in srgb, var(--color-primary) 25%, transparent);
-    --shadow-hover: var(--shadow-sm);
-    --shadow-focus: var(--shadow-sm), var(--shadow-focus-ring);
-    --shadow-selected: var(--shadow-sm), 0 0 0 0.125rem var(--color-clay);
-    --shadow-error: var(--shadow-sm), 0 0 0 0.125rem var(--color-danger);
-
-    --border-sm: 0.0625rem solid var(--interactive-border-muted);
-    --border-md: 0.09375rem solid var(--interactive-border-muted);
-    --border-lg: 0.125rem solid var(--interactive-border-muted);
-    --border-xl: 0.1875rem solid var(--interactive-border-muted);
-
-    --border-default: var(--border-sm);
-    --border-focus: 0.125rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
-    --border-hover: 0.125rem solid color-mix(in srgb, var(--color-clay) 20%, transparent);
-    --border-selected: 0.125rem solid var(--color-clay);
-    --border-error: 0.125rem solid var(--color-danger);
-
-    --photo-marker-drop-shadow: 0 0.0625rem 0.25rem rgba(0, 0, 0, 0.65);
+    @include dark-theme-overrides;
   }
+}
+
+/* ── LEGACY MAPPING (DEPRECATED) ── */
+/* WARNING: TEMPORARY BACKWARD-COMPATIBILITY ALIASES ONLY. REMOVE THIS SECTION AFTER DOWNSTREAM TOKEN REFACTOR COMPLETION. */
+:root {
+  --color-clay: var(--color-accent-brand);
+
+  --font-size-3xs: var(--font-size-2xs);
+  --font-size-caption: var(--font-size-2xs);
+  --font-size-label: var(--font-size-2xs);
+  --font-size-label-soft: var(--font-size-2xs);
+  --font-size-xs-soft: var(--font-size-xs);
+  --font-size-sm-soft: var(--font-size-sm);
+  --font-size-sm-strong: var(--font-size-sm);
+  --font-size-sm-compact: var(--font-size-sm);
+  --font-size-sm-tight: var(--font-size-sm);
+  --font-size-md-compact: var(--font-size-md);
+  --font-size-md-soft: var(--font-size-md);
+  --font-size-md-emphasis: var(--font-size-md);
+  --font-size-md-plus: var(--font-size-md);
+  --font-size-base: var(--font-size-md);
+  --font-size-base-strong: var(--font-size-lg);
+  --font-size-base-plus: var(--font-size-lg);
+  --font-size-base-emphasis: var(--font-size-lg);
+  --font-size-lg-emphasis: var(--font-size-lg);
+  --font-size-5xl: var(--font-size-4xl);
 }

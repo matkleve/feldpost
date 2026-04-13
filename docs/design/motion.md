@@ -55,3 +55,25 @@ All motion serves clarity or orientation — no decorative animation.
 Panel and row geometry remain fixed while these transitions run, including container padding, row padding, media-column width, and panel radius.
 
 `prefers-reduced-motion: reduce` disables all transforms and fades, keeping only immediate state changes.
+
+### Media Page Transition Contract
+
+Use this table as the implementation reference for transition usage on the media page.
+
+| Media Area                               | File / Selector                                                                                                                                        | Transition Properties                                     | Required Token                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- | -------------------------------------------------------------- |
+| Media card container                     | `apps/web/src/app/features/media/media-item.component.scss` / `:host`                                                                                  | `box-shadow`, `transform`, `border-color`                 | `var(--transition-interactive)`                                |
+| Media frame emphasis                     | `apps/web/src/app/features/media/media-item.component.scss` / `.media-item__frame`                                                                     | `box-shadow`, `border-color`                              | `var(--transition-interactive)`                                |
+| Quiet actions reveal (hidden -> visible) | `apps/web/src/app/features/media/media-item.component.scss` / `.media-item__quiet-actions`                                                             | `opacity`, `transform`                                    | `var(--transition-fade-in)`                                    |
+| Quiet actions hide (visible -> hidden)   | `apps/web/src/app/features/media/media-item.component.scss` / `.media-item__quiet-actions`                                                             | `opacity`, `transform`                                    | `var(--transition-fade-out)`                                   |
+| Primary open control focus affordance    | `apps/web/src/app/features/media/media-item.component.scss` / `.media-item__open:focus-visible`                                                        | `outline-color`, optional `box-shadow` ring               | `var(--transition-interactive)`                                |
+| Quiet action button state changes        | `apps/web/src/app/features/media/media-item-quiet-actions.component.scss` / `.media-item-quiet-actions__button`                                        | `background-color`, `border-color`, `color`, `box-shadow` | `var(--transition-interactive)`                                |
+| Render-surface selected emphasis         | `apps/web/src/app/features/media/media-item-render-surface.component.scss` / `[data-state='content-selected'] .media-item-render-surface__media-frame` | `outline-color`, `filter`                                 | `var(--transition-interactive)`                                |
+| Header breadcrumb hover                  | `apps/web/src/app/features/media/media-page-header.component.scss` / `.media-page-header__breadcrumb a`                                                | `color`                                                   | `var(--transition-interactive)`                                |
+| Shared media display reveal              | `apps/web/src/app/shared/media-display/media-display.component.scss` / media reveal states                                                             | `opacity`                                                 | `var(--transition-fade-in)` + `var(--transition-reveal-delay)` |
+
+Notes:
+
+- Keep geometry stable while transitions run; animate only visual properties.
+- Prefer `--transition-interactive` for direct user-driven state changes.
+- Use `--transition-panel` only for panel/container-level open-close choreography.

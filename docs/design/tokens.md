@@ -11,24 +11,26 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 ### Semantic token hierarchy
 
-| Token                    | Light value | Dark value | Usage                                                                                  |
-| ------------------------ | ----------- | ---------- | -------------------------------------------------------------------------------------- |
-| `--color-bg-base`        | `#F9F7F4`   | `#0F0E0C`  | Page/app background — warm off-white / warm near-black                                 |
-| `--color-bg-surface`     | `#FFFFFF`   | `#1A1917`  | Panels, sidebar, workspace pane                                                        |
-| `--color-bg-elevated`    | `#FFFFFF`   | `#252320`  | Dropdowns, tooltips, modal overlays                                                    |
-| `--color-bg-map`         | — (tile)    | — (tile)   | Map canvas; tile URL swaps on dark mode                                                |
-| `--color-border`         | `#E8E4DE`   | `#2E2B27`  | Panel borders, dividers — warm-tinted                                                  |
-| `--color-border-strong`  | `#C8C1B8`   | `#3D3830`  | Inputs, focused borders                                                                |
-| `--color-text-primary`   | `#1A1714`   | `#EDEBE7`  | Headlines, body, labels — warm near-black / warm near-white                            |
-| `--color-text-secondary` | `#6B6259`   | `#908880`  | Subtext, timestamps, metadata labels                                                   |
-| `--color-text-disabled`  | `#A89E95`   | `#4A4540`  | Disabled states                                                                        |
-| `--color-primary`        | `#CC7A4A`   | `#D9895A`  | Primary actions, active markers, focus rings                                           |
-| `--color-primary-hover`  | `#B8663A`   | `#E89A6E`  | Hover state for primary                                                                |
-| `--color-success`        | `#16A34A`   | `#22C55E`  | Upload success, confirmed correction                                                   |
-| `--color-warning`        | `#C2610A`   | `#F59E0B`  | Missing GPS, low-confidence EXIF                                                       |
-| `--color-danger`         | `#DC2626`   | `#EF4444`  | Upload error, deletion confirmation                                                    |
-| `--color-accent`         | `#7C3AED`   | `#A78BFA`  | Named group tabs, badge accents                                                        |
-| `--color-clay`           | `#CC7A4A`   | `#D9895A`  | Upload CTA, active selection emphasis — Anthropic-inspired warm accent; used sparingly |
+| Token                        | Light value | Dark value | Usage                                                         |
+| ---------------------------- | ----------- | ---------- | ------------------------------------------------------------- |
+| `--color-bg-base`            | `#F9F7F4`   | `#0F0E0C`  | Page/app background — warm off-white / warm near-black        |
+| `--color-bg-surface`         | `#FFFFFF`   | `#1A1917`  | Panels, sidebar, workspace pane                               |
+| `--color-bg-elevated`        | `#FFFFFF`   | `#252320`  | Dropdowns, tooltips, modal overlays                           |
+| `--color-bg-map`             | — (tile)    | — (tile)   | Map canvas; tile URL swaps on dark mode                       |
+| `--color-border`             | `#E8E4DE`   | `#2E2B27`  | Panel borders, dividers — warm-tinted                         |
+| `--color-border-strong`      | `#C8C1B8`   | `#3D3830`  | Inputs, focused borders                                       |
+| `--color-text-primary`       | `#1A1714`   | `#EDEBE7`  | Headlines, body, labels — warm near-black / warm near-white   |
+| `--color-text-secondary`     | `#6B6259`   | `#908880`  | Subtext, timestamps, metadata labels                          |
+| `--color-text-disabled`      | `#A89E95`   | `#4A4540`  | Disabled states                                               |
+| `--color-primary`            | `#CC7A4A`   | `#D9895A`  | Primary actions, active markers, focus rings                  |
+| `--color-primary-hover`      | `#B8663A`   | `#E89A6E`  | Hover state for primary                                       |
+| `--color-accent-brand`       | `#CC7A4A`   | `#D9895A`  | Canonical warm brand accent for CTA/selection intent          |
+| `--color-accent-brand-hover` | `#B8663A`   | `#E89A6E`  | Hover variant of brand accent                                 |
+| `--color-success`            | `#16A34A`   | `#22C55E`  | Upload success, confirmed correction                          |
+| `--color-warning`            | `#C2610A`   | `#F59E0B`  | Missing GPS, low-confidence EXIF                              |
+| `--color-danger`             | `#DC2626`   | `#EF4444`  | Upload error, deletion confirmation                           |
+| `--color-accent`             | `#7C3AED`   | `#A78BFA`  | Named group tabs, badge accents                               |
+| `--color-clay`               | alias       | alias      | Deprecated compatibility alias -> `var(--color-accent-brand)` |
 
 **Map marker colors (semantic):**
 
@@ -37,7 +39,7 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 | Default        | `--color-primary`                                       | Normal EXIF-placed image           |
 | Corrected      | `--color-accent`                                        | Marker has been manually corrected |
 | Selected       | `#FFFFFF` with primary ring                             | Currently active/selected marker   |
-| Pending upload | `--color-clay`                                          | In upload queue, not yet saved     |
+| Pending upload | `--color-accent-brand`                                  | In upload queue, not yet saved     |
 | Error          | `--color-danger`                                        | Upload failed                      |
 | Cluster        | `--color-bg-elevated` with `--color-text-primary` badge | Aggregated cluster                 |
 
@@ -78,23 +80,36 @@ All text is set in the system sans-serif stack unless the brand acquires a custo
 font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 ```
 
-**Type scale (rem, base 16px):**
+**Type scale (rem, base 16px, ratio 1.13):**
 
-| Role      | Token            | Size             | Weight | Line-height | Usage                                      |
-| --------- | ---------------- | ---------------- | ------ | ----------- | ------------------------------------------ |
-| Display   | `--text-display` | 1.5rem (24px)    | 600    | 1.3         | Panel headings, empty state titles         |
-| Heading 1 | `--text-h1`      | 1.25rem (20px)   | 600    | 1.35        | Group tab names, modal headers             |
-| Heading 2 | `--text-h2`      | 1rem (16px)      | 600    | 1.4         | Section labels, filter group headers       |
-| Body      | `--text-body`    | 0.9375rem (15px) | 400    | 1.55        | Descriptions, metadata values, form labels |
-| Small     | `--text-small`   | 0.8125rem (13px) | 400    | 1.5         | Timestamps, subtitles, secondary labels    |
-| Caption   | `--text-caption` | 0.75rem (12px)   | 400    | 1.4         | Badge text, cluster counts, hints          |
-| Mono / ID | `--text-mono`    | 0.8125rem (13px) | 400    | 1.4         | Coordinates, UUIDs, file names             |
+| Step | Token             | Approx size      | Usage guideline               |
+| ---- | ----------------- | ---------------- | ----------------------------- |
+| 2xs  | `--font-size-2xs` | 0.75rem (12px)   | Caption / dense meta text     |
+| xs   | `--font-size-xs`  | 0.85rem (13.6px) | Secondary labels              |
+| sm   | `--font-size-sm`  | 0.96rem (15.3px) | Compact body text             |
+| md   | `--font-size-md`  | 1.08rem (17.3px) | Default reading/body emphasis |
+| lg   | `--font-size-lg`  | 1.22rem (19.6px) | Section headings              |
+| xl   | `--font-size-xl`  | 1.38rem (22.1px) | Panel headings                |
+| 2xl  | `--font-size-2xl` | 1.56rem (25.0px) | Major titles                  |
+| 3xl  | `--font-size-3xl` | 1.76rem (28.2px) | Hero/state titles             |
+| 4xl  | `--font-size-4xl` | 1.99rem (31.9px) | Display-level emphasis        |
 
 Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is never below 15px.
 
 ## 3.3 Spacing and Grid
 
-Feldpost uses a **0.25rem (4px) base unit** with a Tailwind-standard scale (0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem, 1.5rem, 2rem, 2.5rem, 3rem, 4rem, 5rem, 6rem).
+Feldpost uses a **0.25rem (4px) base unit** with a DRY modular scale driven by `--spacing-unit` and token multipliers.
+
+| Token         | Value                            |
+| ------------- | -------------------------------- |
+| `--spacing-1` | `calc(var(--spacing-unit) * 1)`  |
+| `--spacing-2` | `calc(var(--spacing-unit) * 2)`  |
+| `--spacing-3` | `calc(var(--spacing-unit) * 3)`  |
+| `--spacing-4` | `calc(var(--spacing-unit) * 4)`  |
+| `--spacing-5` | `calc(var(--spacing-unit) * 6)`  |
+| `--spacing-6` | `calc(var(--spacing-unit) * 8)`  |
+| `--spacing-7` | `calc(var(--spacing-unit) * 12)` |
+| `--spacing-8` | `calc(var(--spacing-unit) * 16)` |
 
 Key layout dimensions:
 
@@ -183,18 +198,20 @@ In dark mode, `sm` through `xl` are overridden with `rgba(0,0,0,...)` at higher 
 
 State shadows compose from physical elevation plus optional semantic rings.
 
-| Token               | Composition                                       | Purpose                              |
-| ------------------- | ------------------------------------------------- | ------------------------------------ |
-| `--shadow-hover`    | `var(--shadow-sm)`                                | Hover lift without changing geometry |
-| `--shadow-focus`    | `var(--shadow-sm), var(--shadow-focus-ring)`      | Keyboard/mouse focus treatment       |
-| `--shadow-selected` | `var(--shadow-sm), 0 0 0 2px var(--color-clay)`   | Selected-state emphasis              |
-| `--shadow-error`    | `var(--shadow-sm), 0 0 0 2px var(--color-danger)` | Error-state emphasis                 |
+| Token               | Composition                                             | Purpose                              |
+| ------------------- | ------------------------------------------------------- | ------------------------------------ |
+| `--shadow-hover`    | `var(--shadow-sm)`                                      | Hover lift without changing geometry |
+| `--shadow-focus`    | `var(--shadow-sm), var(--shadow-focus-ring)`            | Keyboard/mouse focus treatment       |
+| `--shadow-selected` | `var(--shadow-sm), 0 0 0 2px var(--color-accent-brand)` | Selected-state emphasis              |
+| `--shadow-error`    | `var(--shadow-sm), 0 0 0 2px var(--color-danger)`       | Error-state emphasis                 |
 
 Rule: interactive components should prefer semantic state shadows (`--shadow-hover`, `--shadow-focus`, `--shadow-selected`, `--shadow-error`) over raw physical tokens when rendering state changes.
 
 ### Default border token
 
 Use `--border-default` as the baseline neutral border (`1px` equivalent) for low-emphasis outlines and resting control borders. State borders (`--border-focus`, `--border-hover`, `--border-selected`, `--border-error`) stay available when a real border is required instead of a state shadow.
+
+Current emphasis ordering: `--border-focus` > `--border-hover` > `--border-selected`.
 
 Border scale tokens are available for consistent sizing semantics:
 
@@ -206,6 +223,19 @@ Border scale tokens are available for consistent sizing semantics:
 | `--border-xl` | strong neutral border (`3px` equivalent)     |
 
 `--border-default` maps to `--border-sm`.
+
+### Z-index ladder
+
+Use semantic z-index tokens only:
+
+| Token               | Value | Layer intent                   |
+| ------------------- | ----- | ------------------------------ |
+| `--z-map`           | `0`   | Base map plane                 |
+| `--z-panel`         | `100` | Panel/rail surfaces            |
+| `--z-upload-button` | `200` | High-priority map CTA controls |
+| `--z-dropdown`      | `300` | Context/dropdown overlays      |
+| `--z-toast`         | `400` | Notifications above dropdowns  |
+| `--z-modal`         | `500` | Modal/dialog top layer         |
 
 ### Elevation layers (semantic)
 
@@ -223,7 +253,28 @@ Every component's `box-shadow` references a semantic `--elevation-*` token. Elem
 
 **Photo marker drop shadow** (`--photo-marker-drop-shadow`) is a separate token: it uses `filter: drop-shadow(...)` so it traces the SVG/image shape rather than the bounding box. Light: `rgba(15,14,12,0.45)`. Dark: `rgba(0,0,0,0.65)`.
 
-## 3.6 Iconography
+## 3.6 Motion and Micro-Interactions
+
+Motion tokens are the source of truth for interaction timing and easing.
+
+| Group          | Token                      | Value                                                     |
+| -------------- | -------------------------- | --------------------------------------------------------- |
+| Duration       | `--motion-duration-fast`   | `100ms`                                                   |
+| Duration       | `--motion-duration-base`   | `200ms`                                                   |
+| Duration       | `--motion-duration-slow`   | `300ms`                                                   |
+| Easing         | `--motion-ease-standard`   | `cubic-bezier(0.4, 0, 0.2, 1)`                            |
+| Easing         | `--motion-ease-in`         | `cubic-bezier(0.4, 0, 1, 1)`                              |
+| Easing         | `--motion-ease-out`        | `cubic-bezier(0, 0, 0.2, 1)`                              |
+| Semantic alias | `--transition-interactive` | `var(--motion-duration-fast) var(--motion-ease-out)`      |
+| Semantic alias | `--transition-panel`       | `var(--motion-duration-base) var(--motion-ease-standard)` |
+
+Compatibility aliases for existing component code:
+
+- `--transition-fade-in: var(--transition-interactive)`
+- `--transition-fade-out: var(--motion-duration-fast) var(--motion-ease-in)`
+- `--transition-reveal-delay: 60ms`
+
+## 3.7 Iconography
 
 Use a single coherent icon set throughout. Standard for this project: **Material Icons / Material Symbols only**. Do not mix icon libraries.
 

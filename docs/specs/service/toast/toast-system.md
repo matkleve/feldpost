@@ -243,7 +243,7 @@ sequenceDiagram
 
 ### Z-index
 
-- Add `--z-toast: 450;` to `styles.scss` z-index ladder (between `--z-dropdown: 400` and `--z-modal: 500`)
+- Add `--z-toast: 400;` to token ladder (between `--z-dropdown: 300` and `--z-modal: 500`)
 - Toast container uses `z-index: var(--z-toast)` — above dropdowns, below modals
 
 ### Consumer wiring (existing files to update)
@@ -285,7 +285,7 @@ The existing `ToastService.show(msg, duration)` signature must be replaced with 
 - [ ] Success toasts use `--color-success` left border
 - [ ] Warning toasts use `--color-warning` left border
 - [ ] Info toasts use `--color-text-secondary` left border
-- [ ] `z-index: var(--z-toast)` (450) — above dropdowns, below modals
+- [ ] `z-index: var(--z-toast)` (400) — above dropdowns, below modals
 - [ ] `MapShellComponent` subscribes to `uploadFailed$` and shows error toast
 - [ ] `MediaDetailViewComponent` subscribes to `uploadFailed$` and shows error toast
 - [ ] `MediaDetailViewComponent` shows success toast on replace/attach complete
