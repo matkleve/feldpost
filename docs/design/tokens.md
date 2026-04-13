@@ -198,12 +198,12 @@ Use `--border-default` as the baseline neutral border (`1px` equivalent) for low
 
 Border scale tokens are available for consistent sizing semantics:
 
-| Token | Meaning |
-| --- | --- |
-| `--border-sm` | thin neutral border (`1px` equivalent) |
-| `--border-md` | medium neutral border (`1.5px` equivalent) |
+| Token         | Meaning                                      |
+| ------------- | -------------------------------------------- |
+| `--border-sm` | thin neutral border (`1px` equivalent)       |
+| `--border-md` | medium neutral border (`1.5px` equivalent)   |
 | `--border-lg` | emphasized neutral border (`2px` equivalent) |
-| `--border-xl` | strong neutral border (`3px` equivalent) |
+| `--border-xl` | strong neutral border (`3px` equivalent)     |
 
 `--border-default` maps to `--border-sm`.
 
