@@ -38,6 +38,10 @@ body {
   color: var(--color-text-primary);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 app-root {
   display: block;
   height: 100%;

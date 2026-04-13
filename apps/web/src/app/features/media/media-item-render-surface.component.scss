@@ -1,9 +1,13 @@
 // Declares the host container for the media render surface component.
 // @see docs/element-specs/item-grid.md#media-domain-sub-component-ownership-mandatory
 :host {
-  // Defines placeholder icon size token for loading and idle layers.
-  // @see docs/element-specs/media-item.md#what-it-looks-like
-  --media-item-render-surface-placeholder-size: 2.2rem;
+  // Defines loading skeleton color token for pulse-only loading layer.
+  // @see docs/specs/component/item-grid.md#pulse-placeholder-contract-mandatory
+  --media-item-render-surface-skeleton-color: color-mix(
+    in srgb,
+    var(--color-bg-base) 14%,
+    var(--color-bg-surface)
+  );
 
   // Defines no-photo icon size token for unavailable media layers.
   // @see docs/element-specs/media-item.md#actions--interactions
@@ -91,7 +95,7 @@
 // Defines loading placeholder layer with pulse animation and centered icon.
 // @see docs/element-specs/media-item.md#acceptance-criteria
 .media-item-render-surface__fallback--loading {
-  background: color-mix(in srgb, var(--color-bg-base) 10%, transparent);
+  background: var(--media-item-render-surface-skeleton-color);
   animation: media-item-render-surface-pulse 1200ms ease-in-out infinite;
 }
 
@@ -110,14 +114,6 @@
 .media-item-render-surface__fallback--icon-only {
   color: var(--color-text-secondary);
   background: color-mix(in srgb, var(--color-bg-base) 6%, transparent);
-}
-
-// Defines placeholder icon dimensions and opacity for idle/loading states.
-// @see docs/element-specs/media-item.md#acceptance-criteria
-.media-item-render-surface__placeholder-icon {
-  width: var(--media-item-render-surface-placeholder-size);
-  height: var(--media-item-render-surface-placeholder-size);
-  opacity: 0.72;
 }
 
 // Defines no-photo icon dimensions and reduced emphasis opacity.

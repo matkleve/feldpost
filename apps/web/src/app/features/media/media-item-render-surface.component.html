@@ -40,16 +40,14 @@
       <!-- @see docs/element-specs/media-item.md#actions--interactions -->
       <img class="media-item-render-surface__no-photo-icon" [src]="noPhotoIconUrl" alt="" />
     </div>
-    <!-- Stable state: loading -> render pulse placeholder with centered icon. -->
+    <!-- Stable state: loading -> render icon-free pulse placeholder block. -->
     <!-- @see docs/element-specs/media-item.md#state-machine -->
   } @else {
-    <!-- Renders loading/default placeholder pulse with centered photo icon (no spinner). -->
+    <!-- Renders loading/default placeholder pulse block (no spinner, no icon). -->
     <!-- @see docs/element-specs/media-item.md#acceptance-criteria -->
-    <div class="media-item-render-surface__fallback media-item-render-surface__fallback--loading">
-      <!-- Shows canonical loading placeholder icon inside pulse layer. -->
-      <!-- @see docs/element-specs/media-item.md#pulse-placeholder-contract-mandatory -->
-      <img class="media-item-render-surface__placeholder-icon" [src]="placeholderIconUrl" alt="" />
-    </div>
+    <div
+      class="media-item-render-surface__fallback media-item-render-surface__fallback--loading"
+    ></div>
   }
 
   <!-- Anchors file-type chip in lower-right corner of rendered media frame. -->
