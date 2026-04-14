@@ -161,6 +161,9 @@ The loading visual standard for Item Grid surfaces is a pulse placeholder layer.
 - Motion: gentle pulse only during `loading`
 - Iconography: default is icon-free neutral placeholder; optional blurred cached bitmap is allowed when available from shared cache
 - Transition: deterministic media progression is defined by MediaDisplay/MediaDownloadService; ItemGrid enforces loading-first visibility and non-shortcut behavior at integration boundaries
+- Replacement: when content arrives, real items replace placeholders in the same slot index and use item entry fade-in
+- Tail behavior: placeholders without a matching real item must fade out and then be removed from DOM
+- Layout stability: scroll containers keep reserved scrollbar space (`scrollbar-gutter: stable`) to prevent horizontal layout shift during loading/content swaps
 
 ### State-Frame Geometry Ownership (Mandatory)
 

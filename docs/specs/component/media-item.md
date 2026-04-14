@@ -7,6 +7,7 @@ Media Item is the grid-item interaction contract for one media entity in Item Gr
 ## What It Looks Like
 
 The component renders one stable item shell with media content in the base layer, upload overlay above it, and quiet actions on top. Selection emphasis is applied around the media frame and never around the full tile wrapper. Upload state is visible as a dedicated overlay layer and does not interfere with media loading visuals. Quiet actions stay hidden at rest and reveal on hover/focus with keyboard-accessible controls. Media delivery FSM details are not visualized by this component directly and remain delegated to the media renderer/service chain (`MediaDisplayComponent` + `MediaDownloadService`).
+When `item` is `null`, the host renders an icon-free skeleton rectangle in the exact media-item geometry and keeps interaction layers disabled.
 
 ## Where It Lives
 

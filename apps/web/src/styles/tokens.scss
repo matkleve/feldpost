@@ -248,6 +248,11 @@
   --transition-fade-in: var(--transition-interactive);
   --transition-fade-out: var(--motion-duration-fast) var(--motion-ease-in);
   --transition-reveal-delay: 60ms;
+  --transition-emphasis: var(--motion-duration-base);
+
+  // Shared loading skeleton tokens.
+  --color-skeleton-surface: color-mix(in srgb, var(--color-bg-base) 12%, transparent);
+  --animation-skeleton-pulse: media-display-pulse var(--transition-emphasis) ease-in-out infinite;
 
   // Component-role aliases (Theme Contract layer C)
   // Action controls

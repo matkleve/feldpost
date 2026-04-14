@@ -47,6 +47,7 @@ export class MediaComponent implements OnDestroy {
   private static readonly GRID_GAP_PX = 12;
   private static readonly ROW_BATCH_MULTIPLIER = 3;
   private static readonly SCROLL_PREFETCH_PX = 600;
+  private static readonly MIN_RESET_LOADING_MS = 220;
 
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   protected readonly workspaceSelectionService = inject(WorkspaceSelectionService);
@@ -58,6 +59,7 @@ export class MediaComponent implements OnDestroy {
 
   readonly loading = signal(false);
   readonly loadingMore = signal(false);
+  readonly initialLoadSettled = signal(false);
   readonly loadError = signal<string | null>(null);
   readonly mediaItems = signal<ImageRecord[]>([]);
   readonly mediaTotalCount = signal<number | null>(null);
@@ -86,6 +88,10 @@ export class MediaComponent implements OnDestroy {
     this.loading() ? 'loading' : 'ready',
   );
   readonly contentState = computed<MediaContentState>(() => {
+    if (!this.initialLoadSettled()) {
+      return 'loading';
+    }
+
     if (this.loading()) {
       return 'loading';
     }
@@ -118,6 +124,7 @@ export class MediaComponent implements OnDestroy {
       }
 
       this.lastResolvedAuthUserId.set(userId);
+      this.initialLoadSettled.set(false);
       this.loadError.set(null);
       this.resetPagination();
       void this.loadMediaPage({ reset: true, includeCount: true });
@@ -131,6 +138,7 @@ export class MediaComponent implements OnDestroy {
     )
       .pipe(auditTime(300), takeUntilDestroyed())
       .subscribe(() => {
+        this.initialLoadSettled.set(false);
         this.loadError.set(null);
         this.resetPagination();
         void this.loadMediaPage({ reset: true, includeCount: true });
@@ -186,6 +194,7 @@ export class MediaComponent implements OnDestroy {
   }
 
   onRetryLoad(): void {
+    this.initialLoadSettled.set(false);
     this.loadError.set(null);
     this.resetPagination();
     void this.loadMediaPage({ reset: true, includeCount: true });
@@ -210,6 +219,8 @@ export class MediaComponent implements OnDestroy {
     if (!options.reset && !this.hasMore()) {
       return;
     }
+
+    const resetLoadStartedAtMs = options.reset ? Date.now() : null;
 
     if (options.reset) {
       this.loading.set(true);
@@ -252,9 +263,48 @@ export class MediaComponent implements OnDestroy {
         this.projectNameById.set(new Map<string, string>());
       }
     } finally {
+      if (resetLoadStartedAtMs !== null) {
+        await this.ensureResetLoadingWindow(resetLoadStartedAtMs);
+        this.initialLoadSettled.set(true);
+      }
+
       this.loading.set(false);
       this.loadingMore.set(false);
+
+      if (options.reset && this.hasMore()) {
+        void this.loadMediaPage({ reset: false, includeCount: false });
+        return;
+      }
+
+      if (this.hasMore() && this.isNearBottomForPrefetch()) {
+        void this.loadMediaPage({ reset: false, includeCount: false });
+      }
     }
+  }
+
+  private async ensureResetLoadingWindow(startedAtMs: number): Promise<void> {
+    const elapsedMs = Date.now() - startedAtMs;
+    const remainingMs = MediaComponent.MIN_RESET_LOADING_MS - elapsedMs;
+
+    if (remainingMs <= 0) {
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, remainingMs);
+    });
+  }
+
+  private isNearBottomForPrefetch(): boolean {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return false;
+    }
+
+    const documentElement = document.documentElement;
+    return (
+      window.scrollY + window.innerHeight >=
+      documentElement.scrollHeight - MediaComponent.SCROLL_PREFETCH_PX
+    );
   }
 
   private resetPagination(): void {

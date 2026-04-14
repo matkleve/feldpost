@@ -3,6 +3,7 @@ import {
   DestroyRef,
   ElementRef,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -16,25 +17,23 @@ import { MediaEmptyComponent } from './media-empty.component';
 import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ItemGridComponent } from '../../shared/item-grid/item-grid.component';
-import { ItemStateFrameComponent } from '../../shared/item-grid/item-state-frame.component';
 import type { ItemContextActionEvent } from '../../shared/item-grid/item.component';
 import type { ItemDisplayMode } from '../../shared/item-grid/item.component';
 import { MEDIA_ITEM_ACTION_CONTEXT, MediaItemComponent } from './media-item.component';
-import { MediaItemRenderSurfaceComponent } from './media-item-render-surface.component';
 
 export type MediaContentState = 'loading' | 'error' | 'ready';
+
+type MediaContentGridSlot = {
+  readonly trackId: string;
+  readonly item: ImageRecord | null;
+  readonly placeholderId: number;
+  readonly exiting: boolean;
+};
 
 @Component({
   selector: 'app-media-content',
   standalone: true,
-  imports: [
-    ItemGridComponent,
-    ItemStateFrameComponent,
-    MediaItemRenderSurfaceComponent,
-    MediaItemComponent,
-    MediaErrorComponent,
-    MediaEmptyComponent,
-  ],
+  imports: [ItemGridComponent, MediaItemComponent, MediaErrorComponent, MediaEmptyComponent],
   templateUrl: './media-content.component.html',
   styleUrl: './media-content.component.scss',
   host: {
@@ -44,12 +43,14 @@ export type MediaContentState = 'loading' | 'error' | 'ready';
 })
 export class MediaContentComponent implements AfterViewInit {
   private static readonly LOADING_VIEWPORT_MULTIPLIER = 2;
+  private static readonly PLACEHOLDER_EXIT_DURATION_MS = 180;
 
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly i18nService = inject(I18nService);
   private readonly hostElement = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
   private resizeObserver: ResizeObserver | null = null;
+  private placeholderExitTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly state = input.required<MediaContentState>();
   readonly items = input.required<ImageRecord[]>();
@@ -88,6 +89,60 @@ export class MediaContentComponent implements AfterViewInit {
   readonly loadingPlaceholderIds = computed(() =>
     Array.from({ length: this.loadingPlaceholderCount() }, (_, index) => index + 1),
   );
+  readonly loadingPlaceholderSnapshotCount = signal(0);
+  readonly placeholderExitActive = signal(false);
+  readonly showGrid = computed(
+    () => this.state() === 'loading' || this.items().length > 0 || this.placeholderExitActive(),
+  );
+  readonly showEmptyState = computed(
+    () => this.state() === 'ready' && this.items().length === 0 && !this.placeholderExitActive(),
+  );
+  readonly gridRole = computed<string | null>(() =>
+    this.state() === 'ready' && this.items().length > 0 ? 'listbox' : null,
+  );
+  readonly gridSlots = computed<MediaContentGridSlot[]>(() => {
+    const state = this.state();
+    if (state === 'error') {
+      return [];
+    }
+
+    if (state === 'loading') {
+      return this.loadingPlaceholderIds().map((placeholderId) => ({
+        trackId: `placeholder-${placeholderId}`,
+        item: null,
+        placeholderId,
+        exiting: false,
+      }));
+    }
+
+    const items = this.items();
+    const includePlaceholderTail =
+      this.placeholderExitActive() && this.loadingPlaceholderSnapshotCount() > items.length;
+    const totalSlots = includePlaceholderTail
+      ? this.loadingPlaceholderSnapshotCount()
+      : items.length;
+
+    return Array.from({ length: totalSlots }, (_, index) => {
+      const item = items[index] ?? null;
+      const placeholderId = index + 1;
+
+      if (item) {
+        return {
+          trackId: `item-${item.id}`,
+          item,
+          placeholderId,
+          exiting: false,
+        };
+      }
+
+      return {
+        trackId: `placeholder-${placeholderId}`,
+        item: null,
+        placeholderId,
+        exiting: includePlaceholderTail,
+      };
+    });
+  });
 
   readonly itemMode = computed<ItemDisplayMode>(() => {
     switch (this.cardVariant()) {
@@ -107,6 +162,40 @@ export class MediaContentComponent implements AfterViewInit {
   readonly itemClicked = output<string>();
   readonly retry = output<void>();
 
+  private readonly loadingTransitionEffect = effect(
+    () => {
+      const state = this.state();
+      const itemCount = this.items().length;
+      const placeholderCount = this.loadingPlaceholderIds().length;
+
+      if (state === 'loading') {
+        this.clearPlaceholderExitTimer();
+        this.placeholderExitActive.set(false);
+        this.loadingPlaceholderSnapshotCount.set(placeholderCount);
+        return;
+      }
+
+      if (state !== 'ready') {
+        this.clearPlaceholderExitTimer();
+        this.placeholderExitActive.set(false);
+        return;
+      }
+
+      const snapshotCount = this.loadingPlaceholderSnapshotCount();
+      if (snapshotCount > itemCount) {
+        if (!this.placeholderExitActive()) {
+          this.placeholderExitActive.set(true);
+          this.schedulePlaceholderExit();
+        }
+        return;
+      }
+
+      this.clearPlaceholderExitTimer();
+      this.placeholderExitActive.set(false);
+    },
+    { allowSignalWrites: true },
+  );
+
   ngAfterViewInit(): void {
     this.updateViewportMetrics();
     if (typeof window !== 'undefined') {
@@ -121,6 +210,7 @@ export class MediaContentComponent implements AfterViewInit {
     this.destroyRef.onDestroy(() => {
       this.resizeObserver?.disconnect();
       this.resizeObserver = null;
+      this.clearPlaceholderExitTimer();
       if (typeof window !== 'undefined') {
         window.removeEventListener('resize', this.updateViewportMetrics);
       }
@@ -234,6 +324,24 @@ export class MediaContentComponent implements AfterViewInit {
       this.viewportHeightPx.set(window.innerHeight);
     }
   };
+
+  private schedulePlaceholderExit(): void {
+    if (this.placeholderExitTimer !== null) {
+      return;
+    }
+
+    this.placeholderExitTimer = setTimeout(() => {
+      this.placeholderExitTimer = null;
+      this.placeholderExitActive.set(false);
+    }, MediaContentComponent.PLACEHOLDER_EXIT_DURATION_MS);
+  }
+
+  private clearPlaceholderExitTimer(): void {
+    if (this.placeholderExitTimer !== null) {
+      clearTimeout(this.placeholderExitTimer);
+      this.placeholderExitTimer = null;
+    }
+  }
 
   private resolveColumnMinPx(mode: ItemDisplayMode): number {
     switch (mode) {

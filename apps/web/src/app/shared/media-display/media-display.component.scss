@@ -34,7 +34,7 @@
 }
 
 .media-display__layer--loading-surface {
-  background: color-mix(in srgb, var(--color-bg-base) 12%, transparent);
+  background: var(--color-skeleton-surface);
 }
 
 .media-display__layer--staged-content {
@@ -81,7 +81,7 @@
 [data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
   pointer-events: none;
-  animation: media-display-pulse var(--transition-emphasis) ease-in-out infinite;
+  animation: var(--animation-skeleton-pulse);
 }
 
 /* Stable state: media-ready (staged content) */

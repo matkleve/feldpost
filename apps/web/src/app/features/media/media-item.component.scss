@@ -15,6 +15,13 @@
     box-shadow var(--transition-fade-in),
     transform var(--transition-fade-in),
     border var(--transition-fade-in);
+  animation: media-item-enter var(--transition-fade-in) ease-out both;
+}
+
+:host([data-has-item='false']) {
+  background: var(--color-skeleton-surface);
+  animation: var(--animation-skeleton-pulse);
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
 }
 
 /* 2. INNERER WRAPPER: Hier schneiden wir den Inhalt (Bild) ab.
@@ -117,4 +124,14 @@
   transition:
     opacity var(--transition-fade-in),
     transform var(--transition-fade-in);
+}
+
+@keyframes media-item-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
