@@ -3,7 +3,7 @@
 **Who this is for:** engineers working on system design, data flows, and performance.  
 **What you’ll get:** a high‑level view of how Feldpost is put together and where responsibilities and invariants sit.
 
-See also: `database-schema.md`, `security-boundaries.md`.
+See also: `architecture/database-schema.md`, `security-boundaries.md`.
 
 ---
 
@@ -422,12 +422,12 @@ interface ImageInputMetadata {
 
 ### Concrete Adapters
 
-| Adapter               | Status   | Description                                                                                                                                                                                                                   |
-| --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LocalUploadAdapter`  | MVP      | Wraps the browser `<input type="file">` API. Ships first.                                                                                                                                                                     |
-| `FolderImportAdapter` | Planned  | Wraps the File System Access API (`showDirectoryPicker()`). Recursively scans a local folder; includes `FilenameLocationParser` for address extraction from paths. Requires a Chromium-based browser. See `folder-import.md`. |
-| `GoogleDriveAdapter`  | Post-MVP | Fetches files via the Google Drive Picker API.                                                                                                                                                                                |
-| _(future)_            | Post-MVP | Any source (Dropbox, FTP, camera API) that implements `ImageInputAdapter`.                                                                                                                                                    |
+| Adapter               | Status   | Description                                                                                                                                                                                                                             |
+| --------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LocalUploadAdapter`  | MVP      | Wraps the browser `<input type="file">` API. Ships first.                                                                                                                                                                               |
+| `FolderImportAdapter` | Planned  | Wraps the File System Access API (`showDirectoryPicker()`). Recursively scans a local folder; includes `FilenameLocationParser` for address extraction from paths. Requires a Chromium-based browser. See `use-cases/folder-import.md`. |
+| `GoogleDriveAdapter`  | Post-MVP | Fetches files via the Google Drive Picker API.                                                                                                                                                                                          |
+| _(future)_            | Post-MVP | Any source (Dropbox, FTP, camera API) that implements `ImageInputAdapter`.                                                                                                                                                              |
 
 ### Invariants
 

@@ -4,7 +4,7 @@ This document describes the active Feldpost runtime schema (auth + public) after
 
 - Detailed per-column audit (type/null/default/constraints/index/FK/source/gap): `docs/audits/schema-audit-2026-04-11.md`
 - Security model and RLS boundary: `docs/security-boundaries.md`
-- Role behavior: `docs/role-permissions.md`
+- Role behavior: `docs/playbooks/security/role-permissions.md`
 
 ## Runtime Scope
 

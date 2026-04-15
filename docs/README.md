@@ -9,7 +9,7 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage)
 
 ### New to Feldpost?
 
-- **[Agent Quick Reference](agent-quick-reference.md)** - Daily work cheat sheet (<30 sec find)
+- **[Agent Quick Reference](agent-workflows/agent-quick-reference.md)** - Daily work cheat sheet (<30 sec find)
 - **[Glossary](glossary.md)** - Canonical terminology (use exact names)
 - **[Project Structure](#project-structure)** - Where files live
 - **[Contributing Guide](../CONTRIBUTING.md)** - Required local checks before PR
@@ -23,9 +23,9 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage)
 
 ### Debugging Issues?
 
-- **[Agent Quick Reference](agent-quick-reference.md#troubleshooting)** - Common fixes
+- **[Agent Quick Reference](agent-workflows/agent-quick-reference.md#troubleshooting)** - Common fixes
 - **[Architecture](architecture.md)** - System design & patterns
-- **[Database Schema](database-schema.md)** - Tables & relationships
+- **[Database Schema](architecture/database-schema.md)** - Tables & relationships
 
 ---
 
@@ -66,7 +66,7 @@ feldpost/
 
 ### **Debug Existing Code**
 
-- [Quick Reference troubleshooting](agent-quick-reference.md#troubleshooting)
+- [Quick Reference troubleshooting](agent-workflows/agent-quick-reference.md#troubleshooting)
 - [Security boundaries](security-boundaries.md) for RLS issues
 - [Architecture patterns](architecture.md) for adapter usage
 
@@ -86,7 +86,7 @@ feldpost/
 
 - [Glossary](glossary.md) - All domain terms
 - [Architecture](architecture.md) - System design
-- [Database Schema](database-schema.md) - Data model
+- [Database Schema](architecture/database-schema.md) - Data model
 - [Security Boundaries](security-boundaries.md) - Access control
 
 ### **Set Up Development**
@@ -96,7 +96,7 @@ npm install
 cd apps/web && ng serve
 ```
 
-See [Agent Quick Reference](agent-quick-reference.md#development-commands) for all commands.
+See [Agent Quick Reference](agent-workflows/agent-quick-reference.md#development-commands) for all commands.
 
 ### **Before Opening a PR**
 
@@ -116,23 +116,23 @@ See [Agent Quick Reference](agent-quick-reference.md#development-commands) for a
 
 ### Design & UX
 
-- **[Design Overview](design.md)** - Design principles
+- **[Design Overview](design/README.md)** - Design principles
 - **[Design Tokens](design/tokens.md)** - CSS variables
 - **[Layout Rules](design/layout.md)** - Layout patterns
 - **[Design Constitution](design/constitution.md)** - Non-negotiable rules
 
 ### Implementation Guides
 
-- **[Agent Quick Reference](agent-quick-reference.md)** - Daily work cheat sheet
+- **[Agent Quick Reference](agent-workflows/agent-quick-reference.md)** - Daily work cheat sheet
 - **[Agent Workflows](agent-workflows/)** - Detailed guides & checklists
 - **[Implementation Blueprints](implementation-blueprints/)** - Service patterns
-- **[Setup Guide](setup-guide.md)** - Environment setup
+- **[Setup Guide](playbooks/setup-guide.md)** - Environment setup
 
 ### Reference
 
-- **[Database Schema](database-schema.md)** - Tables & relationships
+- **[Database Schema](architecture/database-schema.md)** - Tables & relationships
 - **[User Lifecycle](user-lifecycle.md)** - Auth flows
-- **[Role Permissions](role-permissions.md)** - Access control
+- **[Role Permissions](playbooks/security/role-permissions.md)** - Access control
 - **[Settings Registry](settings-registry.md)** - All user settings
 
 ---

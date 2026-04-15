@@ -144,7 +144,7 @@ export class MyService {
 1. Create migration in `supabase/migrations/`
 2. Add RLS policies (security boundary!)
 3. Update TypeScript types if needed
-4. Update `docs/database-schema.md`
+4. Update `docs/architecture/database-schema.md`
 
 ### Fix spec violations
 

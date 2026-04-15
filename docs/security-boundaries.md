@@ -3,7 +3,7 @@
 **Who this is for:** engineers and operators responsible for keeping Feldpost data secure.  
 **What you'll get:** the trust model, RLS boundaries, and storage rules that must never be violated.
 
-See also: `database-schema.md`, `user-lifecycle.md`, `architecture.md`.
+See also: `architecture/database-schema.md`, `user-lifecycle.md`, `architecture.md`.
 
 ---
 
@@ -343,7 +343,7 @@ flowchart TB
 
 - Client-side checks are for UX only.  
   Security and access control must always be implemented and tested at the database/policy level.
-- EXIF GPS coordinates from uploaded images are treated as untrusted input; latitude must be in `[-90, 90]`, longitude in `[-180, 180]` (enforced by CHECK constraints — see database-schema.md).
+- EXIF GPS coordinates from uploaded images are treated as untrusted input; latitude must be in `[-90, 90]`, longitude in `[-180, 180]` (enforced by CHECK constraints — see architecture/database-schema.md).
 
 ---
 
@@ -357,4 +357,4 @@ Before any new table or feature ships:
 4. Storage policies match the bucket path convention `{org_id}/{user_id}/{uuid}`.
 5. No sensitive data is exposed in error messages returned to the client.
 6. Signed URLs are used for all storage access (no public URLs).
-7. Foreign keys with CASCADE or SET NULL are documented in the cascade summary (database-schema.md §12).
+7. Foreign keys with CASCADE or SET NULL are documented in the cascade summary (architecture/database-schema.md §12).

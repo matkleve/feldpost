@@ -24,7 +24,7 @@ argument-hint: "Element name and brief description"
 
 1. Read `docs/design/constitution.md` for non-negotiable design rules
 2. Read related specs in `docs/element-specs/` for consistency
-3. Check `docs/database-schema.md` for available data sources
+3. Check `docs/architecture/database-schema.md` for available data sources
 4. Only load specific design docs (`docs/design/tokens.md`, `docs/design/layout.md`, `docs/design/motion.md`) if you need them for the spec's "What It Looks Like" section — do NOT load them all by default
 5. Check `apps/web/src/styles.scss` for shared primitives (`.ui-container`, `.ui-item`, `.ui-spacer`) the spec should reference
 

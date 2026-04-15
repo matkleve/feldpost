@@ -136,7 +136,7 @@ Goal: prevent more drift while migrations continue.
 
 Deliverables:
 
-1. Treat `docs/design.md` as orchestrator only.
+1. Treat `docs/design/README.md` as orchestrator only.
 2. Treat `docs/design/tokens.md` as the only raw token value source.
 3. Treat `docs/design/token-layers.md` as the only layer/alias/theming architecture source.
 4. Treat `docs/design/components/action-interaction-kernel.md` as the only interaction-policy source.

@@ -27,5 +27,5 @@ applyTo: "**/*.service.ts"
 
 ## References
 
-- Database schema: [docs/database-schema.md](../../docs/database-schema.md)
+- Database schema: [docs/architecture/database-schema.md](../../docs/architecture/database-schema.md)
 - Security boundaries: [docs/security-boundaries.md](../../docs/security-boundaries.md)

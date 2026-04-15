@@ -62,7 +62,7 @@ Keep:
 - Address labels at zoom ≥ 15
 - Motorway and primary road labels at all zoom levels
 
-For MVP: use CartoDB Light (Positron) in light mode — already significantly cleaner than stock OSM. Apply full custom brand tile style post-MVP (see `docs/design.md`, Design Debt item 3).
+For MVP: use CartoDB Light (Positron) in light mode — already significantly cleaner than stock OSM. Apply full custom brand tile style post-MVP (see `docs/design/README.md`, Design Debt item 3).
 
 #### Dark mode tile layers
 

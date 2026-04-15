@@ -114,18 +114,18 @@
   An address or location string extracted from a folder name or filename during folder-based bulk import (e.g., `Burgstraße_7` from a folder path).
   - Extracted by `FilenameLocationParser`.
   - Treated as a primary location source because it represents deliberate human organization, not automatic sensor data.
-  - See `folder-import.md` §4.1.
+  - See `use-cases/folder-import.md` §4.1.
 
 - **Location Resolution (folder import)**  
   The per-image process during `FolderImportAdapter` that combines filename hints and EXIF GPS to produce a confirmed set of coordinates before import.
   - Outcomes: concordant (auto-import), conflict (must be resolved by user), filename-only, EXIF-only, or unresolved (manual review queue).
-  - See `folder-import.md` §4.3.
+  - See `use-cases/folder-import.md` §4.3.
 
 - **Manual Review Queue**  
   A holding area in the folder import review UI for images that could not be automatically resolved to a location.
   - The user can enter an address, use drag-to-map placement, assign a batch location, or skip.
   - Skipped images are stored with `location_unresolved = TRUE` and do not appear on the map.
-  - See `folder-import.md` §5.3.
+  - See `use-cases/folder-import.md` §5.3.
 
 ---
 
@@ -222,13 +222,13 @@
   An `ImageInputAdapter` implementation that wraps the browser File System Access API (`showDirectoryPicker()`).
   - Recursively scans a user-selected folder for images and feeds them into the core ingestion pipeline.
   - Requires a Chromium-based browser (Chrome 86+, Edge 86+).
-  - See `folder-import.md`.
+  - See `use-cases/folder-import.md`.
 
 - **FilenameLocationParser**  
   A pure utility function (no Angular DI dependencies) that extracts address hints from file paths and filenames.
   - Applied during the folder import resolution phase.
   - Normalises German street name variants (`str.` → `Straße`, `Strasse` → `Straße`).
-  - See `folder-import.md` §4.1.
+  - See `use-cases/folder-import.md` §4.1.
 
 - **pg_trgm**  
   PostgreSQL extension providing trigram-based string similarity functions (`similarity()`, `word_similarity()`).

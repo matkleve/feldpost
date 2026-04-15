@@ -2,7 +2,7 @@
  * FilenameParserService — extracts address hints from image filenames.
  *
  * Simplified version of the planned FilenameLocationParser
- * (see folder-import.md §4.1). Rejects camera-generated filenames
+ * (see docs/use-cases/folder-import.md §4.1). Rejects camera-generated filenames
  * and timestamps, then looks for European street-type suffixes.
  *
  * Delegation contract:

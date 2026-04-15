@@ -20,6 +20,6 @@ applyTo: "supabase/migrations/**"
 
 ## References
 
-- Schema: [docs/database-schema.md](../../docs/database-schema.md)
+- Schema: [docs/architecture/database-schema.md](../../docs/architecture/database-schema.md)
 - Security: [docs/security-boundaries.md](../../docs/security-boundaries.md)
 - Existing RLS: [supabase/migrations/20260303000005_rls.sql](../../supabase/migrations/20260303000005_rls.sql)

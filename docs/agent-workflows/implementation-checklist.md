@@ -10,7 +10,7 @@ This file is a verification aid only; project rules live in `AGENTS.md` and spec
 - [ ] All components are standalone (no NgModules)
 - [ ] Files follow naming convention: `kebab-case.component.ts`
 - [ ] Files are in correct directories per project structure
-- [ ] Design pattern source was reviewed (`docs/design/constitution.md`, `docs/design.md`, relevant `docs/design/*` files, and relevant element specs)
+- [ ] Design pattern source was reviewed (`docs/design/constitution.md`, `docs/design/README.md`, relevant `docs/design/*` files, and relevant element specs)
 - [ ] Context7 MCP was consulted for external library API usage
 
 ## Behavior

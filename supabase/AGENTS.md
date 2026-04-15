@@ -22,6 +22,6 @@
 
 ## References
 
-- Schema: `docs/database-schema.md`
+- Schema: `docs/architecture/database-schema.md`
 - Security rules: `docs/security-boundaries.md`
 - RLS policies: `migrations/20260303000005_rls.sql`

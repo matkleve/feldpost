@@ -8,7 +8,7 @@ Audit the current implementation for design and accessibility compliance.
 
 ## Instructions
 
-1. Read `docs/design/constitution.md` and `docs/design.md`
+1. Read `docs/design/constitution.md` and `docs/design/README.md`
 2. Load the relevant task-specific files from `docs/design/` (`tokens.md`, `layout.md`, `motion.md`, `map-system.md`, `components/*.md`)
 3. Read `docs/glossary.md` for canonical element names
 4. For each component in the target area:

@@ -90,7 +90,7 @@ In order (respecting FK dependencies):
 13. `share_set_items` (FK → share_sets, media_items)
 14. `coordinate_corrections` (FK → media_items, profiles)
 
-See `database-schema.md` for full DDL.
+See `../architecture/database-schema.md` for full DDL.
 
 ### 4.3 Create Registration Trigger
 
@@ -120,7 +120,7 @@ ALTER TABLE share_set_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE coordinate_corrections ENABLE ROW LEVEL SECURITY;
 ```
 
-Then apply policies from `security-boundaries.md` §3.
+Then apply policies from `../security-boundaries.md` §3.
 
 ### 4.5 Seed Baseline Data
 
@@ -141,7 +141,7 @@ In the Supabase dashboard (Storage → New Bucket):
 - **File size limit:** 25 MB
 - **Allowed MIME types:** `image/jpeg`, `image/png`, `image/heic`, `image/heif`, `image/webp`, `video/mp4`, `application/pdf`
 
-Then apply storage policies from `security-boundaries.md` §4.
+Then apply storage policies from `../security-boundaries.md` §4.
 
 ---
 

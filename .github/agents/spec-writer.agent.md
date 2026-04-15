@@ -16,7 +16,7 @@ Your job is to create structured element specs that agents can implement precise
 
 1. Understand the feature requirements from the user
 2. Check `docs/glossary.md` for canonical element names — reuse existing, or propose new entries
-3. Read `docs/design/constitution.md` and `docs/design.md`
+3. Read `docs/design/constitution.md` and `docs/design/README.md`
 4. Load the relevant task-specific design files from `docs/design/`
 5. Read `docs/architecture.md` for layer constraints
 6. Review related element specs in `docs/element-specs/` for consistency
@@ -62,6 +62,6 @@ When the user provides one or more existing spec files and describes features to
 
 - DO NOT skip any required section
 - DO NOT write implementation code
-- DO NOT invent data sources — check existing schema in `docs/database-schema.md`
+- DO NOT invent data sources — check existing schema in `docs/architecture/database-schema.md`
 - Keep "What It Is" and "What It Looks Like" short
 - Detail goes in Actions table and Component Hierarchy
