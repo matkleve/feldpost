@@ -18,17 +18,18 @@ The component renders a stable content region with placeholder slots during load
 
 ## Actions & Interactions
 
-| #   | User/System Trigger                                | System Response                                    | Output Contract                                                     |
-| --- | -------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------- |
-| 1   | Input state is loading                             | Render deterministic placeholder slot set          | view enters loading-grid                                            |
-| 2   | Input state is ready with items                    | Render projected media item slots                  | view enters ready-with-items                                        |
-| 3   | Input state is ready with zero items               | Render empty state component                       | view enters ready-empty                                             |
-| 4   | Input state is error                               | Render error state component with retry affordance | view enters error                                                   |
-| 5   | Ready item count smaller than placeholder snapshot | Activate placeholder tail exit transition          | view enters placeholder-tail-exit                                   |
-| 6   | Placeholder exit timer completes                   | Remove tail placeholders                           | transition placeholder-tail-exit to ready-with-items or ready-empty |
-| 7   | User opens media item                              | Emit itemClicked output                            | itemClicked event                                                   |
-| 8   | User toggles item selection                        | Update selection service scope set                 | selection changed                                                   |
-| 9   | User clicks outside grid while ready               | Clear selection                                    | selection cleared                                                   |
+| #   | User/System Trigger                                | System Response                                                 | Output Contract                                                     |
+| --- | -------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1   | Input state is loading                             | Render deterministic placeholder slot set                       | view enters loading-grid                                            |
+| 2   | Input state is ready with items                    | Render projected media item slots                               | view enters ready-with-items                                        |
+| 3   | Input state is ready with zero items               | Render empty state component                                    | view enters ready-empty                                             |
+| 4   | Input state is error                               | Render error state component with retry affordance              | view enters error                                                   |
+| 5   | Ready item count smaller than placeholder snapshot | Activate placeholder tail exit transition                       | view enters placeholder-tail-exit                                   |
+| 6   | Placeholder exit timer completes                   | Remove tail placeholders                                        | transition placeholder-tail-exit to ready-with-items or ready-empty |
+| 7   | User opens media item                              | Emit itemClicked output                                         | itemClicked event                                                   |
+| 8   | User toggles item selection                        | Update selection service scope set                              | selection changed                                                   |
+| 9   | User clicks outside grid while ready               | Clear selection                                                 | selection cleared                                                   |
+| 10  | Coalesced systemic media fault signal is received  | Emit one shell escalation intent for the active cooldown window | systemicFault event                                                 |
 
 ## Component Hierarchy
 
@@ -42,16 +43,17 @@ MediaContentComponent
 
 ## Data Requirements
 
-| Field                           | Source             | Type                        | Purpose                               |
-| ------------------------------- | ------------------ | --------------------------- | ------------------------------------- |
-| state                           | parent media shell | loading or error or ready   | primary render switch                 |
-| items                           | parent media shell | ImageRecord[]               | grid payload                          |
-| emptyReason                     | parent media shell | auth-required or no-results | empty-state message contract          |
-| cardVariant                     | parent media shell | CardVariant                 | item mode mapping                     |
-| loadingPlaceholderCount         | internal computed  | number                      | deterministic placeholder slot volume |
-| loadingPlaceholderSnapshotCount | internal signal    | number                      | tail exit baseline                    |
-| placeholderExitActive           | internal signal    | boolean                     | transitional placeholder tail phase   |
-| gridSlots                       | internal computed  | MediaContentGridSlot[]      | projected slot model                  |
+| Field                           | Source                  | Type                             | Purpose                               |
+| ------------------------------- | ----------------------- | -------------------------------- | ------------------------------------- |
+| state                           | parent media shell      | loading or error or ready        | primary render switch                 |
+| items                           | parent media shell      | ImageRecord[]                    | grid payload                          |
+| emptyReason                     | parent media shell      | auth-required or no-results      | empty-state message contract          |
+| cardVariant                     | parent media shell      | CardVariant                      | item mode mapping                     |
+| loadingPlaceholderCount         | internal computed       | number                           | deterministic placeholder slot volume |
+| loadingPlaceholderSnapshotCount | internal signal         | number                           | tail exit baseline                    |
+| placeholderExitActive           | internal signal         | boolean                          | transitional placeholder tail phase   |
+| gridSlots                       | internal computed       | MediaContentGridSlot[]           | projected slot model                  |
+| systemicFaultIntent             | media delivery boundary | SystemicMediaFaultIntent \| null | storm-safe shell escalation signal    |
 
 ```mermaid
 flowchart TD
@@ -89,6 +91,7 @@ flowchart TD
 ## Wiring
 
 MediaContentComponent consumes parent state inputs and emits user interaction outputs. It does not own route-shell loading policy or MediaDisplay delivery choreography.
+Per-item media delivery failures must not be forwarded upward one-by-one; only coalesced systemic intents from media-delivery boundary are allowed for shell escalation.
 
 ```mermaid
 sequenceDiagram
@@ -101,6 +104,7 @@ sequenceDiagram
   C->>G: project slots as placeholders or media items
   C->>C: run placeholder tail exit when needed
   C->>M: emit itemClicked on open
+  C->>M: emit systemicFault (coalesced, cooldown-gated)
   C->>S: apply selection toggle or clear
 ```
 
@@ -113,5 +117,7 @@ sequenceDiagram
 - [ ] MediaContent FSM does not include MediaDisplay delivery states.
 - [ ] MediaContent FSM does not include upload lane states.
 - [ ] Selection actions are forwarded without redefining item-render delivery lifecycle.
+- [ ] MediaContent forwards at most one systemic fault escalation intent per active cooldown window.
+- [ ] Per-item delivery failures are not bubbled directly to MediaComponent.
 - [ ] ng build is clean for this contract integration.
 - [ ] npm run lint is clean for this contract integration.

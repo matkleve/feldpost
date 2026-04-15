@@ -117,7 +117,7 @@ flowchart TD
 | `mediaId`         | parent adapter                        | `string`                                                 | Identity forwarded to `MediaDisplayComponent`      |
 | `state`           | parent interaction/state orchestrator | `MediaItemState`                                         | Single visual-state driver for item-level behavior |
 | `item`            | parent adapter                        | `MediaItemViewModel`                                     | Domain data for labels/actions context             |
-| `mode`            | parent container                      | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | Slot context forwarded to child components         |
+| `mode`            | parent container                      | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | Slot context for MediaItem-local layout behavior   |
 | `actionContextId` | action resolver                       | `string`                                                 | Resolves quiet-actions set                         |
 | `uploadOverlay`   | upload manager bridge                 | `UploadOverlayState \| null`                             | Upload progress/status visualization               |
 
@@ -177,6 +177,25 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 - Root binds one visual driver: `[attr.data-state]="state()"`.
 - Template and SCSS may not use boolean visual-state flags as primary state drivers.
 
+### Unmount and Garbage-Collection Contract
+
+Lifecycle ownership:
+
+- `MediaItemState` is UI-local and may be destroyed when component instance unmounts (for example virtualization or route teardown).
+- Upload execution must never be owned by `MediaItemComponent`; long-running upload work belongs to `UploadManagerService` before UI state enters `uploading`.
+
+Unmount rules:
+
+- On component destroy, local FSM and local observers are disposed (`ResizeObserver`, local effects, renderer subscriptions tied to the component instance).
+- Unmount must not cancel background upload jobs already registered in `UploadManagerService`.
+- Unmount must not emit per-item critical escalation intents to route shell.
+
+Remount rules:
+
+- On remount, `MediaItemComponent` rehydrates `uploadOverlay` from `UploadManagerService` by stable media identity/job mapping.
+- If an upload is still active, UI state may re-enter `uploading` from service snapshot without replaying user action.
+- Delivery/render state remains delegated and re-established through `MediaDisplayComponent` + `MediaDownloadService`.
+
 ## Visual Behavior Contract
 
 ### Ownership Matrix
@@ -222,21 +241,21 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 
 ## File Map
 
-| File                                                                     | Purpose                                                          |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `apps/web/src/app/features/media/media-item.component.ts`                | Item-level state orchestration and event outputs                 |
-| `apps/web/src/app/features/media/media-item.component.html`              | Composition of media display + overlays + actions                |
-| `apps/web/src/app/features/media/media-item.component.scss`              | Item-level visual layering and interaction styles                |
-| `apps/web/src/app/shared/media-display/media-display.component.ts`       | Delegated media rendering and download-state ownership           |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.ts` | Upload overlay presentation                                      |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.ts`  | Quiet actions presentation and outputs                           |
-| `apps/web/src/app/features/media/media-item-render-surface.component.ts` | Open question: remove entirely or keep as thin slot wrapper only |
+| File                                                                     | Purpose                                                           |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `apps/web/src/app/features/media/media-item.component.ts`                | Item-level state orchestration and event outputs                  |
+| `apps/web/src/app/features/media/media-item.component.html`              | Composition of media display + overlays + actions                 |
+| `apps/web/src/app/features/media/media-item.component.scss`              | Item-level visual layering and interaction styles                 |
+| `apps/web/src/app/shared/media-display/media-display.component.ts`       | Delegated media rendering and download-state ownership            |
+| `apps/web/src/app/features/media/media-item-upload-overlay.component.ts` | Upload overlay presentation                                       |
+| `apps/web/src/app/features/media/media-item-quiet-actions.component.ts`  | Quiet actions presentation and outputs                            |
+| `apps/web/src/app/features/media/media-item-render-surface.component.ts` | Legacy reference only; not part of active runtime render contract |
 
 ## Wiring
 
 ### Parent/Child Coordination Contract
 
-- `MediaItemComponent` provides identity and context to `MediaDisplayComponent` (`mediaId`, `mode`, optional aspect hint pass-through).
+- `MediaItemComponent` provides identity and optional aspect-ratio hint to `MediaDisplayComponent` (`mediaId`, optional `aspectRatio` pass-through).
 - `MediaItemComponent` does not wait for child download states before applying its own grid-level state changes.
 - Child media lifecycle and parent item lifecycle are parallel and independent.
 
@@ -273,6 +292,10 @@ sequenceDiagram
 - [ ] `MediaItemComponent` does not proxy or await `MediaDisplayComponent` internal states.
 - [ ] `MediaItemRenderSurfaceComponent` is either removed or reduced to a thin slot wrapper with no render-state logic.
 - [ ] No media render-state logic remains in `MediaItemComponent`.
+- [ ] Destroying a virtualized `MediaItemComponent` disposes only UI-local FSM state and observers.
+- [ ] Upload jobs continue in `UploadManagerService` after MediaItem unmount.
+- [ ] MediaItem remount rehydrates `uploadOverlay` and can re-enter `uploading` from service state.
+- [ ] MediaItem unmount/remount does not emit per-item critical escalation storms to route shell.
 - [ ] `ng build` is clean after migration.
 - [ ] `npm run lint` is clean after migration.
 

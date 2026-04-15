@@ -18,7 +18,7 @@ The **Media Page** is the canonical `/media` route for browsing all media assets
 
 **Solution:**
 
-1. Create `/media` route with MediaPageComponent
+1. Create `/media` route with MediaComponent
 2. Use same Workspace Pane as other pages (map, projects)
 
 - "Selected Items" tab shows media grid browsed on this page
@@ -34,18 +34,17 @@ The **Media Page** is the canonical `/media` route for browsing all media assets
 
 ```
 AppShell (top-level, persistent across routes)
-├── Header (nav, logo, user menu)
+├── SideMenuComponent (AppShell-owned, rendered independent from MediaComponent)
 ├── Main Content
-│   ├── MediaPageComponent (flex 1)
+│   ├── MediaComponent (flex 1)
 │   │   ├── Breadcrumb: / > Media
 │   │   ├── [Optional] MediaToolbar (grouping/sort/filter)
-│   │   └── MediaGridComponent
-│   │       ├── GroupSectionHeader × N
-│   │       │   └── ItemGridComponent + projected MediaItemComponent × N
-│   │       │       ├── media preview (photo/video tile or doc icon)
-│   │       │       ├── Title + date overlay
-│   │       │       ├── Address chip (optional)
-│   │       │       └── Hover state (linked-hover to workspace)
+│   │   └── MediaContentComponent
+│   │       ├── ItemGridComponent + projected MediaItemComponent × N
+│   │       │   ├── media preview (photo/video tile or doc icon)
+│   │       │   ├── Title + date overlay
+│   │       │   ├── Address chip (optional)
+│   │       │   └── Hover state (linked-hover to workspace)
 │   │       └── No-results placeholder
 │   │
 │   └── WorkspacePaneComponent (right side, always visible unless closed)
@@ -69,10 +68,10 @@ AppShell (top-level, persistent across routes)
 
 ## Where It Lives
 
-- **Route:** `/media` (routed by AppRouter → MediaPageComponent)
+- **Route:** `/media` (routed by AppRouter → MediaComponent)
 - **Parent Container:** `AppShellComponent` main content flex area
 - **Workspace Pane:** Mounted by AppShellComponent (seitenübergreifend, not media-specific)
-- **Trigger:** Navigation from main nav, or view-all-media action
+- **Trigger:** Navigation via AppShell side menu, or view-all-media action
 - **Persistence:** Media page state (filters, sort, group) saved to localStorage; media list snapshots and pagination cursor are cache-retained per user/query (no forced clear on normal revisit); workspace pane state (tab, selection, uploads) is independent
 
 ---
@@ -83,7 +82,7 @@ AppShell (top-level, persistent across routes)
 
 | #    | User Action                                        | System Response                                                                                 | Notes                                 |
 | ---- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------- |
-| 1a   | Navigates to `/media`                              | MediaPageComponent loads, workspace pane shows "Selected Items" tab                             | Filtered to "All media" if no filters |
+| 1a   | Navigates to `/media`                              | MediaComponent loads, workspace pane shows "Selected Items" tab                                 | Filtered to "All media" if no filters |
 | 1a.1 | Navigates to `/media` again (same user/query)      | Previously cached media list is restored immediately; background revalidation updates diff-only | No hard reset/empty flash             |
 | 1b   | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                                              | localStorage or query params          |
 | 2    | Uses Grouping operator (project/date/address)      | Grid reorganizes with section headers (if toolbar shown)                                        | Computed via `WorkspaceViewService`   |
@@ -120,12 +119,12 @@ AppShell (top-level, persistent across routes)
 **STRICT PRIMITIVE REQUIREMENT:** The Media Page and its grid structural components must strictly rely on `.ui-container` and `.ui-item`. Do not create deep nested `div` elements for the grid sections; the group headers and media item tiles should be structurally flat siblings or one-level deep inside a standard container.
 
 ```text
-MediaPageComponent (new route component, flex 1)
+MediaComponent (new route component, flex 1)
 ├── BreadcrumbComponent
 │   └── "/" > "Media" > [Project filter]?
 ├── [Optional] MediaToolbarComponent
 │   ├── Standard dropdown/segmented primitives
-└── MediaGridComponent (new - flat structure using .ui-container/.ui-item equivalents)
+└── MediaContentComponent (new - flat structure using .ui-container/.ui-item equivalents)
     ├── GroupSectionHeader × N (if grouping active)
     │   └── ItemGridComponent + projected MediaItemComponent × N
     │       ├── Media/video/doc preview
@@ -134,7 +133,7 @@ MediaPageComponent (new route component, flex 1)
     │       └── Hover state (linked-hover)
     └── No-results placeholder
 
-[Workspace Pane is mounted by AppShellComponent, not MediaPageComponent]
+[Workspace Pane is mounted by AppShellComponent, not MediaComponent]
 WorkspacePaneComponent (seitenübergreifend)
 ├── PaneHeaderComponent (unchanged)
 ├── TabSelectorComponent (NEW: two-button toggle)
@@ -154,8 +153,8 @@ WorkspacePaneComponent (seitenübergreifend)
 | Source                                  | Fields Needed                                                        | Purpose                                      |
 | --------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
 | `media_items` table                     | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
-| `MediaPageStateService`                 | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
-| `PhotoLoadService`                      | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
+| `MediaPageStateService`                 | cachedItems, nextOffset, totalCount, querySignature, lastSyncedAt    | Restore list on revisit without forced clear |
+| `MediaDownloadService`                  | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
 | `share_sets` + `share_set_items` tables | share_set_id, fingerprint, ordered media_item_id membership          | Persisted shared selections (media-era)      |
 | `UploadManagerService`                  | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data              |
 | `WorkspaceViewService`                  | getGroupedAndFiltered() logic (reuse)                                | Grouping/filtering/sorting                   |
@@ -165,7 +164,7 @@ WorkspacePaneComponent (seitenübergreifend)
 
 ```mermaid
 flowchart LR
-    A["Navigate /media"] --> B["MediaPageComponent"]
+    A["Navigate /media"] --> B["MediaComponent"]
     B --> C["MediaPageStateService cache lookup"]
     C --> D{"Media list cache hit?"}
     D -->|yes| E["Restore cached media list immediately"]
@@ -192,7 +191,7 @@ flowchart LR
 - MediaContent rendering FSM ownership is defined in `docs/specs/component/media-content.md`.
 - This page spec remains route/product contract and must not redefine those component FSM enums.
 
-**MediaPageComponent:**
+**MediaComponent:**
 
 | Name               | Type                                                | Default    | Controls                                         |
 | ------------------ | --------------------------------------------------- | ---------- | ------------------------------------------------ |
@@ -205,7 +204,7 @@ flowchart LR
 | `hoveredMediaId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
 | `detailMediaId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |
 
-Note: cache-warm status is encoded in the MediaComponent FSM boot/hydrate path, not as a separate boolean signal.
+Note: cache-warm status is encoded in the MediaComponent FSM boot/initial-loading path, not as a separate boolean signal.
 
 **Cross-route contracts:**
 
@@ -274,12 +273,12 @@ export interface WorkspacePaneHostPort {
 
 | File                                          | Purpose                                                                   |
 | --------------------------------------------- | ------------------------------------------------------------------------- |
-| `features/media/media-page.component.ts`      | Route component for `/media`                                              |
-| `features/media/media-page.component.html`    | Template: breadcrumb + grid (no pane — pane is in AppShell)               |
-| `features/media/media-page.component.scss`    | Page layout styles                                                        |
-| `features/media/media-grid.component.ts`      | NEW: Responsive ItemGrid-backed media grid with grouping                  |
-| `features/media/media-grid.component.html`    | Grid template with grouping sections                                      |
-| `features/media/media-grid.component.scss`    | Grid layout + responsive columns                                          |
+| `features/media/media.component.ts`           | Route component for `/media`                                              |
+| `features/media/media.component.html`         | Template: breadcrumb + content shell (no pane — pane is in AppShell)      |
+| `features/media/media.component.scss`         | Page layout styles                                                        |
+| `features/media/media-content.component.ts`   | Responsive ItemGrid-backed content renderer with state switching          |
+| `features/media/media-content.component.html` | Content template with grouped sections / empty / error branches           |
+| `features/media/media-content.component.scss` | Content-region layout and transition styles                               |
 | `features/media/media-toolbar.component.ts`   | OPTIONAL Phase 2: Grouping/Sort/Filter operators                          |
 | `features/media/media-toolbar.component.html` | Toolbar template (Phase 2)                                                |
 | `features/media/media-toolbar.component.scss` | Toolbar styles (Phase 2)                                                  |
@@ -296,7 +295,7 @@ export interface WorkspacePaneHostPort {
 | `features/map/workspace-pane/workspace-pane.component.ts`   | Add `activeTab` signal + tab container logic + imports |
 | `features/map/workspace-pane/workspace-pane.component.html` | Add tab selector UI at top before content              |
 | `app-shell.component.ts`                                    | Add `/media` route option (if not already present)     |
-| Routing config                                              | Wire `/media` → MediaPageComponent                     |
+| Routing config                                              | Wire `/media` → MediaComponent                         |
 
 **Reused Components:**
 
@@ -317,7 +316,7 @@ flowchart TD
     A --> C["WorkspacePaneComponent"]
 
     B -->|/map| D["MapShellComponent"]
-    B -->|/media| E["MediaPageComponent"]
+    B -->|/media| E["MediaComponent"]
     B -->|/projects| F["ProjectsPageComponent"]
 
     D --> G["SelectedItemsContextPort(map)"]
@@ -338,15 +337,15 @@ flowchart TD
 sequenceDiagram
     participant Browser
     participant ReflectorRouter as AppRouter
-    participant MediaPage as MediaPageComponent
-    participant MediaGrid as MediaGridComponent
+    participant MediaPage as MediaComponent
+    participant MediaContent as MediaContentComponent
     participant Pane as WorkspacePaneComponent
     participant Upload as UploadManagerService
 
     Browser->>ReflectorRouter: Navigate to /media
     ReflectorRouter->>MediaPage: Route activated
-    MediaPage->>MediaGrid: Render (load media from DB)
-    MediaGrid->>Pane: Workspace pane already mounted by AppShell
+    MediaPage->>MediaContent: Render (load media from DB)
+    MediaContent->>Pane: Workspace pane already mounted by AppShell
     Pane->>Pane: activeTab = 'selected-items'
     Upload-->>Pane: Subscribe to jobs() for Upload tab
 
@@ -365,14 +364,14 @@ sequenceDiagram
 
 **Route & Page:**
 
-- [ ] `/media` route accessible from main navigation
-- [ ] MediaPageComponent renders breadcrumb: "/" > "Media"
+- [ ] `/media` route accessible from AppShell side menu navigation
+- [ ] MediaComponent renders breadcrumb: "/" > "Media"
 - [ ] Page loads all media (photos, videos, documents) from DB
 - [ ] Workspace pane opens by default, "Selected Items" tab active
 
 **Media Grid (MVP - Phase 1):**
 
-- [ ] MediaGridComponent displays media items via ItemGrid in responsive grid (2–4 columns)
+- [ ] MediaContentComponent displays media items via ItemGrid in responsive grid (2–4 columns)
 - [ ] MediaItemComponent is reused as the domain item contract for media tiles
 - [ ] Each card shows media/video/doc preview + title + date overlay + address chip
 - [ ] Clicking card opens detail view (modal overlay)

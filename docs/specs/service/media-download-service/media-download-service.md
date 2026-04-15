@@ -1,6 +1,6 @@
 # Media Download Service
 
-> Related specs: [item-grid](../component/item-grid.md), [media-item](../media-item.md), [media-detail-media-viewer](../media-detail/media-detail-media-viewer.md), [workspace-actions-bar](../workspace/workspace-actions-bar.md), [upload-manager](../upload-manager/upload-manager.md), [action-context-matrix](../action-context-matrix.md)
+> Related specs: [item-grid](../../component/item-grid.md), [media-item](../../component/media-item.md), [media-detail-media-viewer](../../ui/media-detail/media-detail-media-viewer.md), [workspace-actions-bar](../../ui/workspace/workspace-actions-bar.md), [upload-manager](../media-upload-service/upload-manager.md), [action-context-matrix](../../system/action-context-matrix.md)
 > Adapter sub-specs: [tier-resolver.adapter](adapters/tier-resolver.adapter.md), [signed-url-cache.adapter](adapters/signed-url-cache.adapter.md), [edge-export-orchestrator.adapter](adapters/edge-export-orchestrator.adapter.md)
 
 ## What It Is
@@ -99,8 +99,9 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 | 12  | Edge export fails partially                            | Emit partial-failure summary with retryability metadata                                                  | `ExportResult` with failures                  |
 | 13  | Route changes between map/workspace/media/detail       | Keep cache namespace stable, avoid forced cache reset                                                    | route-stable cache                            |
 | 14  | Staleness sweep runs                                   | Remove stale signed URLs, preserve local object URLs                                                     | cleared entry count                           |
-| 15  | Consumer subscribes to item state stream               | Receive deterministic transitions and terminal outcomes                                                  | `MediaDeliveryStateChangedEvent`              |
+| 15  | Consumer reads per-item delivery signal                | Receive deterministic transitions and terminal outcomes via signal state updates                         | `WritableSignal<MediaDisplayDeliveryState>`   |
 | 16  | Consumer re-enters list route with same querySignature | Hydrate from cache first and avoid full list requery; run reconciliation only for stale dimensions       | `CacheHydrationResult`                        |
+| 17  | Burst of retryable network failures across viewport    | Coalesce per-item failures into one systemic escalation intent via threshold + cooldown logic            | `SystemicMediaFaultIntent`                    |
 
 ## Component Hierarchy
 
@@ -124,6 +125,15 @@ MediaDownloadServiceContract
   ├── Edge Function ZIP stream endpoint
   └── Future image proxy URL transformers (Cloudinary/Imgix-compatible)
 ```
+
+### Cache Synchronization Rules
+
+- Tier cache entries (`${mediaId}:${tier}`) own per-tier delivery artifacts (`url`, `signedAt`, `isLocal`).
+- `indexEntries` own list-level reconciliation metadata (`dbUpdatedAt`, `urlExpiresAt`, `removedFlag`) per `querySignature`.
+- Reconciliation source of truth is `indexEntries` for list membership and staleness class; tier cache entries are updated as a consequence of reconciliation outcomes.
+- On `unchanged-url-valid`, list index and tier cache remain unchanged.
+- On `unchanged-url-stale`, update tier cache URL fields and synchronize `indexEntries.urlExpiresAt`.
+- On `changed-content`, replace affected index entry and invalidate or refresh impacted tier cache entries for that `mediaId`.
 
 ## Data Requirements
 
@@ -201,21 +211,23 @@ sequenceDiagram
 
 ### Service Interfaces (Contract)
 
-| Interface                                   | Signature                                                                                                                                                                                                                                     | Purpose                                                                |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `MediaPreviewRequest`                       | `{ mediaId: string; storagePath: string \| null; thumbnailPath?: string \| null; desiredSize?: 'marker' \| 'thumb' \| 'detail' \| 'full'; boxPixels?: { width: number; height: number }; context: 'map' \| 'grid' \| 'upload' \| 'detail'; }` | Single deterministic preview request contract with UI-decoupled sizing |
-| `MediaPreviewResult`                        | `{ url: string \| null; resolvedTier: 'inline' \| 'small' \| 'mid' \| 'mid2' \| 'large' \| 'full' \| null; source: 'cache' \| 'signed' \| 'local' \| 'none'; state: MediaDisplayDeliveryState; errorCode?: MediaDeliveryErrorCode; }`         | Consumer-facing preview outcome                                        |
-| `MediaDownloadService.resolvePreview`       | `(request: MediaPreviewRequest) => Promise<MediaPreviewResult>`                                                                                                                                                                               | Main preview retrieval method                                          |
-| `MediaDownloadService.resolveBatchPreviews` | `(requests: MediaPreviewRequest[]) => Promise<Map<string, MediaPreviewResult>>`                                                                                                                                                               | Batch preload/sign for visible collections                             |
-| `MediaDownloadService.getState`             | `(mediaId: string, slotSizeRem: number) => WritableSignal<MediaDisplayDeliveryState>`                                                                                                                                                         | Per-item delivery state signal API                                     |
-| `MediaDownloadService.invalidate`           | `(mediaId: string) => void`                                                                                                                                                                                                                   | Drop all cached tiers for identity                                     |
-| `MediaDownloadService.invalidateStale`      | `(maxAgeMs?: number) => number`                                                                                                                                                                                                               | Stale sweep policy                                                     |
-| `MediaDownloadService.injectLocalUrl`       | `(mediaId: string, blobUrl: string) => void`                                                                                                                                                                                                  | Attach/replace instant preview path                                    |
-| `MediaDownloadService.revokeLocalUrl`       | `(mediaId: string) => void`                                                                                                                                                                                                                   | Memory-safe blob cleanup                                               |
-| `MediaDownloadService.downloadBlob`         | `(storagePath: string) => Promise<{ ok: true; blob: Blob } \| { ok: false; errorCode: MediaDeliveryErrorCode; message: string }>`                                                                                                             | Single media binary download                                           |
-| `ExportProgressEvent`                       | `{ phase: 'queued' \| 'edge-started' \| 'streaming' \| 'finalizing' \| 'completed' \| 'failed'; bytesStreamed?: number; totalBytesHint?: number; itemsProcessed?: number; itemsTotal?: number; }`                                             | Server-stream status event model                                       |
-| `MediaDownloadService.exportSelection`      | `(items: WorkspaceMedia[], title: string, onProgress?: (event: ExportProgressEvent) => void) => Promise<ExportResult>`                                                                                                                        | ZIP/export orchestration via edge stream                               |
-| `CacheHydrationResult`                      | `{ querySignature: string; hydratedWindows: number; usedIndexEntries: number; skippedFullRequery: boolean; reconciliationStates: Array<'unchanged-url-valid' \| 'unchanged-url-stale' \| 'changed-content' \| 'new' \| 'removed'>; }`         | Route re-entry hydration outcome                                       |
+| Interface                                     | Signature                                                                                                                                                                                                                                     | Purpose                                                                |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `MediaPreviewRequest`                         | `{ mediaId: string; storagePath: string \| null; thumbnailPath?: string \| null; desiredSize?: 'marker' \| 'thumb' \| 'detail' \| 'full'; boxPixels?: { width: number; height: number }; context: 'map' \| 'grid' \| 'upload' \| 'detail'; }` | Single deterministic preview request contract with UI-decoupled sizing |
+| `MediaPreviewResult`                          | `{ url: string \| null; resolvedTier: 'inline' \| 'small' \| 'mid' \| 'mid2' \| 'large' \| 'full' \| null; source: 'cache' \| 'signed' \| 'local' \| 'none'; state: MediaDisplayDeliveryState; errorCode?: MediaDeliveryErrorCode; }`         | Consumer-facing preview outcome                                        |
+| `MediaDownloadService.resolvePreview`         | `(request: MediaPreviewRequest) => Promise<MediaPreviewResult>`                                                                                                                                                                               | Main preview retrieval method                                          |
+| `MediaDownloadService.resolveBatchPreviews`   | `(requests: MediaPreviewRequest[]) => Promise<Map<string, MediaPreviewResult>>`                                                                                                                                                               | Batch preload/sign for visible collections                             |
+| `MediaDownloadService.getState`               | `(mediaId: string, slotSizeRem: number) => WritableSignal<MediaDisplayDeliveryState>`                                                                                                                                                         | Per-item delivery state signal API                                     |
+| `MediaDownloadService.invalidate`             | `(mediaId: string) => void`                                                                                                                                                                                                                   | Drop all cached tiers for identity                                     |
+| `MediaDownloadService.invalidateStale`        | `(maxAgeMs?: number) => number`                                                                                                                                                                                                               | Stale sweep policy                                                     |
+| `MediaDownloadService.injectLocalUrl`         | `(mediaId: string, blobUrl: string) => void`                                                                                                                                                                                                  | Attach/replace instant preview path                                    |
+| `MediaDownloadService.revokeLocalUrl`         | `(mediaId: string) => void`                                                                                                                                                                                                                   | Memory-safe blob cleanup                                               |
+| `MediaDownloadService.downloadBlob`           | `(storagePath: string) => Promise<{ ok: true; blob: Blob } \| { ok: false; errorCode: MediaDeliveryErrorCode; message: string }>`                                                                                                             | Single media binary download                                           |
+| `ExportProgressEvent`                         | `{ phase: 'queued' \| 'edge-started' \| 'streaming' \| 'finalizing' \| 'completed' \| 'failed'; bytesStreamed?: number; totalBytesHint?: number; itemsProcessed?: number; itemsTotal?: number; }`                                             | Server-stream status event model                                       |
+| `MediaDownloadService.exportSelection`        | `(items: WorkspaceMedia[], title: string, onProgress?: (event: ExportProgressEvent) => void) => Promise<ExportResult>`                                                                                                                        | ZIP/export orchestration via edge stream                               |
+| `CacheHydrationResult`                        | `{ querySignature: string; hydratedWindows: number; usedIndexEntries: number; skippedFullRequery: boolean; reconciliationStates: Array<'unchanged-url-valid' \| 'unchanged-url-stale' \| 'changed-content' \| 'new' \| 'removed'>; }`         | Route re-entry hydration outcome                                       |
+| `SystemicMediaFaultIntent`                    | `{ faultClass: 'offline' \| 'network-changed' \| 'transport-burst'; querySignature: string; sampleSize: number; windowMs: number; firstSeenAt: string; lastSeenAt: string; cooldownMs: number; }`                                             | Aggregated upward escalation payload (storm-safe)                      |
+| `MediaDownloadService.getSystemicFaultIntent` | `() => Signal<SystemicMediaFaultIntent \| null>`                                                                                                                                                                                              | Coalesced fault signal for shell-level handling                        |
 
 ### Data Sources and Dependencies
 
@@ -300,6 +312,26 @@ Decision rules:
 | `forbidden`, `not-found`, `auth`         | `false`           | Terminal: enter `error` and stay there until explicit user retry                          |
 | `timeout`, `rate-limited`                | `true`            | Transient: follow `error -> loading-surface-visible` retry loop with bounded retry budget |
 | `sign-failed`, `fetch-failed`, `unknown` | context-dependent | Retryable when classified as transient transport/backend failure                          |
+
+### Systemic Fault Escalation Throttling Contract
+
+Purpose: prevent intent storms when many visible media items fail simultaneously (for example offline transitions or network reconfiguration).
+
+Rules:
+
+- Per-item delivery errors remain local renderer concerns by default and must not be bubbled individually to route shell.
+- A systemic escalation intent is emitted only by `MediaDownloadService` and only when one of these gates passes:
+  - Explicit offline/network-change classification, or
+  - Threshold gate: at least `5` distinct `mediaId` failures within a rolling `1000ms` window for the same `querySignature`.
+- Cooldown gate: after one emitted systemic intent, suppress further intents for the same `faultClass + querySignature` for `3000ms`.
+- Coalescing gate: all failures inside the active window are collapsed into one `SystemicMediaFaultIntent` payload with `sampleSize`.
+- Shell-facing contract: consumers (MediaContent/MediaComponent) must process this as one intent event, not a per-item stream.
+
+Classification notes:
+
+- `offline`: browser offline or transport layer unavailable.
+- `network-changed`: connectivity class changed while active requests were in flight.
+- `transport-burst`: retryable network/server faults crossing threshold without explicit offline signal.
 
 ### State Machine (Mermaid)
 

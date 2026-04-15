@@ -18,18 +18,19 @@ The component renders a page header plus a media content region with stable layo
 
 ## Actions & Interactions
 
-| #   | User/System Trigger                          | System Response                                      | Output Contract                         |
-| --- | -------------------------------------------- | ---------------------------------------------------- | --------------------------------------- |
-| 1   | Route enters /media                          | Initialize shell and begin initial page load         | state enters initial-loading            |
-| 2   | Initial load succeeds                        | Publish ready content state to child                 | state enters ready                      |
-| 3   | Initial load fails                           | Publish error state with retry affordance            | state enters error                      |
-| 4   | User clicks retry                            | Reset pagination and request first batch again       | transition error to initial-loading     |
-| 5   | User scrolls near bottom and hasMore is true | Request next deterministic batch                     | state enters loading-more               |
-| 6   | Append succeeds                              | Merge deduplicated items and return to ready         | transition loading-more to ready        |
-| 7   | Append fails                                 | Keep existing items and raise recoverable page error | transition loading-more to append-error |
-| 8   | Auth/user context changes                    | Reset paging and reload from offset zero             | transition to initial-loading           |
-| 9   | Upload completion signal arrives             | Reset pagination and requery current route list      | transition to revalidating              |
-| 10  | Card variant changed                         | Persist variant setting and re-render child mode     | shell setting updated                   |
+| #   | User/System Trigger                           | System Response                                                 | Output Contract                         |
+| --- | --------------------------------------------- | --------------------------------------------------------------- | --------------------------------------- |
+| 1   | Route enters /media                           | Initialize shell and begin initial page load                    | state enters initial-loading            |
+| 2   | Initial load succeeds                         | Publish ready content state to child                            | state enters ready                      |
+| 3   | Initial load fails                            | Publish error state with retry affordance                       | state enters error                      |
+| 4   | User clicks retry                             | Reset pagination and request first batch again                  | transition error to initial-loading     |
+| 5   | User scrolls near bottom and hasMore is true  | Request next deterministic batch                                | state enters loading-more               |
+| 6   | Append succeeds                               | Merge deduplicated items and return to ready                    | transition loading-more to ready        |
+| 7   | Append fails                                  | Keep existing items and raise recoverable page error            | transition loading-more to append-error |
+| 8   | Auth/user context changes                     | Reset paging and reload from offset zero                        | transition to initial-loading           |
+| 9   | Upload completion signal arrives              | Reset pagination and requery current route list                 | transition to revalidating              |
+| 10  | Card variant changed                          | Persist variant setting and re-render child mode                | shell setting updated                   |
+| 11  | Coalesced systemic media fault intent arrives | Process one guarded shell transition for active cooldown window | transition to revalidating or error     |
 
 ## Component Hierarchy
 
@@ -68,7 +69,8 @@ flowchart TD
   K --> L[Merge refreshed subset into list]
   J --> H[MediaContent input state + items]
   L --> H
-  F --> H
+  F --> M[Query first window from MediaQueryService]
+  M --> H
 ```
 
 ### FSM State Table
@@ -141,6 +143,7 @@ sequenceDiagram
 - [ ] MediaComponent reads `loadedWindows` and `indexEntries` from `MediaPageStateService` before issuing any index query.
 - [ ] On revalidation, only changed/new/url-stale IDs are forwarded to `MediaDownloadService`; unchanged-url-valid IDs are rendered from cache without a delivery call.
 - [ ] MediaComponent does not encode MediaDisplay delivery states in its FSM.
+- [ ] MediaComponent processes only coalesced systemic media fault intents (cooldown-gated), never per-item delivery failure storms.
 - [ ] Upload completion and auth changes trigger reset or revalidation through shell FSM only.
 - [ ] Child MediaContentComponent receives stable state plus data inputs only.
 - [ ] ng build is clean for this contract integration.
