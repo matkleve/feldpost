@@ -6,7 +6,7 @@ Keep service architecture mirrored and predictable by coupling spec and code mod
 
 ## Mandatory Mapping
 
-- Docs: `docs/element-specs/[service-name]/`
+- Docs: `docs/specs/service/[service-name]/`
 - Code: `apps/web/src/app/core/[service-name]/`
 
 ## Required Module Layout
