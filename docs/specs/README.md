@@ -22,7 +22,6 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 
 ## Governance Artifacts
 
-- docs/specs/GOVERNANCE-MATRIX.md
 - docs/specs/GOVERNANCE-MODULE-REGISTRY.json
 - docs/specs/GOVERNANCE-VIOLATIONS.md
 - docs/specs/GOVERNANCE-README-COVERAGE.md
