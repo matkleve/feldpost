@@ -6,7 +6,7 @@ Media Content is the list-rendering state contract for the media route content a
 
 ## What It Looks Like
 
-The component renders a stable content region with placeholder slots during loading. When ready data arrives, placeholders are replaced in-place and optional placeholder tail exit is handled as a short transition phase. Empty and error views are mutually exclusive with grid rendering. Item rendering is delegated to MediaItemComponent in ItemGrid projection. Selection and context actions are forwarded to upstream services without redefining media delivery lifecycle.
+The component renders a stable content region with placeholder slots during loading. When ready data arrives, placeholders are replaced in-place and optional placeholder tail exit is handled as a short transition phase. Empty and error views are mutually exclusive with grid rendering. Item rendering is delegated to MediaItemComponent in ItemGrid projection. Selection and context actions are emitted as typed intents to the parent shell, which owns downstream service writes.
 
 ## Where It Lives
 
@@ -27,9 +27,9 @@ The component renders a stable content region with placeholder slots during load
 | 5   | Ready item count smaller than placeholder snapshot | Activate placeholder tail exit transition                       | view enters placeholder-tail-exit                                   |
 | 6   | Placeholder exit timer completes                   | Remove tail placeholders                                        | transition placeholder-tail-exit to ready-with-items or ready-empty |
 | 7   | User opens media item                              | Emit itemClicked output                                         | itemClicked event                                                   |
-| 8   | User toggles item selection                        | Update selection service scope set                              | selection changed                                                   |
-| 9   | User clicks outside grid while ready               | Clear selection                                                 | selection cleared                                                   |
-| 10  | Coalesced systemic media fault signal is received  | Emit one shell escalation intent for the active cooldown window | systemicFault event                                                 |
+| 8   | User toggles item selection                        | Emit typed selection intent to parent shell                     | `selectionToggleRequested(mediaId)`                                 |
+| 9   | User clicks outside grid while ready               | Emit typed clear-selection intent to parent shell               | `selectionClearRequested()`                                         |
+| 10  | Coalesced systemic media fault signal is received  | Emit one shell escalation intent for the active cooldown window | `systemicFault(intent)`                                             |
 
 ## Component Hierarchy
 
@@ -43,17 +43,29 @@ MediaContentComponent
 
 ## Data Requirements
 
-| Field                           | Source                  | Type                             | Purpose                               |
-| ------------------------------- | ----------------------- | -------------------------------- | ------------------------------------- |
-| state                           | parent media shell      | loading or error or ready        | primary render switch                 |
-| items                           | parent media shell      | ImageRecord[]                    | grid payload                          |
-| emptyReason                     | parent media shell      | auth-required or no-results      | empty-state message contract          |
-| cardVariant                     | parent media shell      | CardVariant                      | item mode mapping                     |
-| loadingPlaceholderCount         | internal computed       | number                           | deterministic placeholder slot volume |
-| loadingPlaceholderSnapshotCount | internal signal         | number                           | tail exit baseline                    |
-| placeholderExitActive           | internal signal         | boolean                          | transitional placeholder tail phase   |
-| gridSlots                       | internal computed       | MediaContentGridSlot[]           | projected slot model                  |
-| systemicFaultIntent             | media delivery boundary | SystemicMediaFaultIntent \| null | storm-safe shell escalation signal    |
+| Field                           | Source                               | Type                             | Purpose                                      |
+| ------------------------------- | ------------------------------------ | -------------------------------- | -------------------------------------------- |
+| state                           | parent media shell                   | loading or error or ready        | primary render switch                        |
+| items                           | parent media shell                   | ImageRecord[]                    | grid payload                                 |
+| emptyReason                     | parent media shell                   | auth-required or no-results      | empty-state message contract                 |
+| cardVariant                     | parent media shell                   | CardVariant                      | item mode mapping                            |
+| loadingPlaceholderCount         | internal computed                    | number                           | deterministic placeholder slot volume        |
+| loadingPlaceholderSnapshotCount | internal signal                      | number                           | tail exit baseline                           |
+| placeholderExitActive           | internal signal                      | boolean                          | transitional placeholder tail phase          |
+| gridSlots                       | internal computed                    | MediaContentGridSlot[]           | projected slot model                         |
+| systemicFaultIntent             | MediaDownloadService boundary signal | SystemicMediaFaultIntent \| null | storm-safe coalesced shell escalation signal |
+
+### Read-only Consumption and Typed Intent Outputs
+
+`MediaContentComponent` consumes lifecycle/operator/derived inputs as read-only values.
+It must not mutate route lifecycle state, operator/query state, or cross-route pane state.
+
+Typed output intents (intent-only child contract):
+
+- `itemClicked(mediaId: string)`
+- `selectionToggleRequested(mediaId: string)`
+- `selectionClearRequested()`
+- `systemicFault(intent: SystemicMediaFaultIntent)`
 
 ```mermaid
 flowchart TD
@@ -90,7 +102,7 @@ flowchart TD
 
 ## Wiring
 
-MediaContentComponent consumes parent state inputs and emits user interaction outputs. It does not own route-shell loading policy or MediaDisplay delivery choreography.
+MediaContentComponent consumes parent state inputs and emits typed user intents only. It does not own route-shell loading policy, operator/query writes, or MediaDisplay delivery choreography.
 Per-item media delivery failures must not be forwarded upward one-by-one; only coalesced systemic intents from media-delivery boundary are allowed for shell escalation.
 
 ```mermaid
@@ -98,14 +110,13 @@ sequenceDiagram
   participant M as MediaComponent
   participant C as MediaContentComponent
   participant G as ItemGrid
-  participant S as WorkspaceSelectionService
 
   M->>C: state + items + cardVariant
   C->>G: project slots as placeholders or media items
   C->>C: run placeholder tail exit when needed
   C->>M: emit itemClicked on open
+  C->>M: emit selectionToggleRequested or selectionClearRequested
   C->>M: emit systemicFault (coalesced, cooldown-gated)
-  C->>S: apply selection toggle or clear
 ```
 
 ## Acceptance Criteria
@@ -121,3 +132,7 @@ sequenceDiagram
 - [ ] Per-item delivery failures are not bubbled directly to MediaComponent.
 - [ ] ng build is clean for this contract integration.
 - [ ] npm run lint is clean for this contract integration.
+- [x] MediaContent consumes lifecycle/operator/derived inputs as read-only values.
+- [x] MediaContent emits typed intents only and does not directly mutate `groupingMode`, `sortMode`, or `activeFilters`.
+- [x] Selection changes are emitted as parent intents (`selectionToggleRequested`, `selectionClearRequested`) and not written directly by the child.
+- [x] Systemic escalation is forwarded only as coalesced intent events; per-item failure storms are forbidden.

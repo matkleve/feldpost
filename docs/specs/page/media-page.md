@@ -80,19 +80,19 @@ AppShell (top-level, persistent across routes)
 
 **Media Grid Tab (Selected Items in Workspace Pane):**
 
-| #    | User Action                                        | System Response                                                                                 | Notes                                 |
-| ---- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------- |
-| 1a   | Navigates to `/media`                              | MediaComponent loads, workspace pane shows "Selected Items" tab                                 | Filtered to "All media" if no filters |
-| 1a.1 | Navigates to `/media` again (same user/query)      | Previously cached media list is restored immediately; background revalidation updates diff-only | No hard reset/empty flash             |
-| 1b   | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                                              | localStorage or query params          |
-| 2    | Uses Grouping operator (project/date/address)      | Grid reorganizes with section headers (if toolbar shown)                                        | Computed via `WorkspaceViewService`   |
-| 3    | Uses Sorting operator (newest/oldest/name)         | Grid re-sorts within groups                                                                     | Reactive recompute                    |
-| 4    | Uses Filter operator (project/date/tag/media-type) | Grid hides non-matching items                                                                   | Cascading filter logic                |
-| 5    | Clicks thumbnail in grid                           | Opens media detail view (modal overlay)                                                         | Same detail component as workspace    |
-| 6    | Closes detail                                      | Returns to grid, clears `detailMediaId`                                                         | Grid state preserved                  |
-| 7    | Hovers thumbnail                                   | Shows optional linked-hover underlay                                                            | Same pattern as workspace hover       |
-| 8    | Selects one or more thumbnails                     | Selected count updates in workspace pane header                                                 | Affects "Selected Items" tab content  |
-| 8a   | Media was already loaded on `/map` or detail       | Grid tile uses warm cached preview (blurred) and dissolves to requested sharp tier when ready   | Shared media cache contract           |
+| #    | User Action                                        | System Response                                                                                                       | Notes                                 |
+| ---- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| 1a   | Navigates to `/media`                              | MediaComponent loads, workspace pane shows "Selected Items" tab                                                       | Filtered to "All media" if no filters |
+| 1a.1 | Navigates to `/media` again (same user/query)      | Previously cached media list is restored immediately; background revalidation updates diff-only                       | No hard reset/empty flash             |
+| 1b   | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                                                                    | localStorage or query params          |
+| 2    | Uses Grouping operator (project/date/address)      | Toolbar emits intent; `MediaComponent.setGroupingMode(...)` updates operator state and grid reorganizes               | Computed via `WorkspaceViewService`   |
+| 3    | Uses Sorting operator (newest/oldest/name)         | Toolbar emits intent; `MediaComponent.setSortMode(...)` updates operator state and grid re-sorts within groups        | Reactive recompute                    |
+| 4    | Uses Filter operator (project/date/tag/media-type) | Toolbar emits intent; `MediaComponent.setActiveFilters(...)` updates operator state and grid hides non-matching items | Cascading filter logic                |
+| 5    | Clicks thumbnail in grid                           | Opens media detail view (modal overlay) via pane host detail contract                                                 | Same detail component as workspace    |
+| 6    | Closes detail                                      | Returns to grid; pane host clears `detailMediaId`                                                                     | Grid state preserved                  |
+| 7    | Hovers thumbnail                                   | Shows optional linked-hover underlay                                                                                  | Same pattern as workspace hover       |
+| 8    | Selects one or more thumbnails                     | Selected count updates in workspace pane header                                                                       | Affects "Selected Items" tab content  |
+| 8a   | Media was already loaded on `/map` or detail       | Grid tile uses warm cached preview (blurred) and dissolves to requested sharp tier when ready                         | Shared media cache contract           |
 
 **Upload Tab (Global, Seitenübergreifend):**
 
@@ -185,44 +185,56 @@ flowchart LR
 
 ## State
 
-### FSM Ownership Mapping
+### Canonical State Taxonomy
 
-- MediaPage route-shell FSM ownership is defined in `docs/specs/component/media.component.md`.
-- MediaContent rendering FSM ownership is defined in `docs/specs/component/media-content.md`.
-- This page spec remains route/product contract and must not redefine those component FSM enums.
+- Lifecycle FSM state:
+  - Route-shell lifecycle state is owned by `MediaComponent` and specified in `docs/specs/component/media.component.md`.
+  - Content-render lifecycle state is owned by `MediaContentComponent` and specified in `docs/specs/component/media-content.md`.
+  - This page contract does not redefine child FSM enums or transitions.
+- Operator/query state:
+  - `groupingMode`, `sortMode`, and `activeFilters` are operator/query fields.
+  - `MediaComponent` is the single writer via explicit command methods (`setGroupingMode`, `setSortMode`, `setActiveFilters`, `clearFilters`).
+  - `MediaToolbar` emits intent-only outputs and never writes operator/query state directly.
+- Derived state:
+  - `filteredImages` and `groupedAndSorted` are read-only computed views derived from operator/query state plus route data.
+  - Derived state is never mutated directly by child components.
 
-**MediaComponent:**
+**MediaComponent operator/query and derived ownership:**
 
-| Name               | Type                                                | Default    | Controls                                         |
-| ------------------ | --------------------------------------------------- | ---------- | ------------------------------------------------ |
-| `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | How grid is organized into sections              |
-| `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | Grid sort order                                  |
-| `activeFilters`    | `FilterSpec[]`                                      | `[]`       | Applied filter chips (projects, date ranges)     |
-| `filteredImages`   | `Signal<WorkspaceMedia[]>`                          | `[]`       | Computed: media items matching active filters    |
-| `groupedAndSorted` | `Signal<MediaGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted            |
-| `cachedMediaItems` | `Signal<WorkspaceMedia[]>`                          | `[]`       | Route-stable cached snapshot for instant restore |
-| `hoveredMediaId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
-| `detailMediaId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |
+| Name               | Type                                                | Default    | Write Owner                                          | Read Consumers                                       |
+| ------------------ | --------------------------------------------------- | ---------- | ---------------------------------------------------- | ---------------------------------------------------- |
+| `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | `MediaComponent` command methods only                | `MediaContentComponent`, analytics/query persistence |
+| `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | `MediaComponent` command methods only                | `MediaContentComponent`, analytics/query persistence |
+| `activeFilters`    | `FilterSpec[]`                                      | `[]`       | `MediaComponent` command methods only                | `MediaContentComponent`, query persistence           |
+| `filteredImages`   | `Signal<WorkspaceMedia[]>`                          | `[]`       | `MediaComponent` computed derivation only (readonly) | `MediaContentComponent`                              |
+| `groupedAndSorted` | `Signal<MediaGroup[]>`                              | `[]`       | `MediaComponent` computed derivation only (readonly) | `MediaContentComponent`                              |
+| `cachedMediaItems` | `Signal<WorkspaceMedia[]>`                          | `[]`       | `MediaComponent` cache hydrate/revalidate pipeline   | `MediaContentComponent`, route re-entry path         |
+| `hoveredMediaId`   | `string \| null`                                    | `null`     | `MediaComponent` pointer/hover handlers              | linked-hover rendering consumers                     |
 
-Note: cache-warm status is encoded in the MediaComponent FSM boot/initial-loading path, not as a separate boolean signal.
+Note: cache-warm status is encoded in the MediaComponent lifecycle FSM (`boot`/`initial-loading`) and not as a separate boolean signal.
 
-**Cross-route contracts:**
+**Cross-route contracts (AppShell-owned pane lifecycle remains unchanged):**
 
-| Name              | Type                             | Default            | Controls                                                    |
-| ----------------- | -------------------------------- | ------------------ | ----------------------------------------------------------- |
-| `activeTabGlobal` | `'selected-items' \| 'upload'`   | `'selected-items'` | Single source of truth for tab restore across route changes |
-| `pageContextKey`  | `'map' \| 'media' \| 'projects'` | `'media'`          | Which selected-items provider should render in pane         |
-| `selectionScope`  | `'media-item-id'`                | `'media-item-id'`  | Canonical ID namespace for selection service integration    |
+| Name              | Type                             | Default            | Write Owner                                  | Controls                                                    |
+| ----------------- | -------------------------------- | ------------------ | -------------------------------------------- | ----------------------------------------------------------- |
+| `activeTabGlobal` | `'selected-items' \| 'upload'`   | `'selected-items'` | Workspace pane host (`AppShell` integration) | Single source of truth for tab restore across route changes |
+| `pageContextKey`  | `'map' \| 'media' \| 'projects'` | `'media'`          | App shell route host                         | Which selected-items provider should render in pane         |
+| `selectionScope`  | `'media-item-id'`                | `'media-item-id'`  | `WorkspaceSelectionService` boundary         | Canonical ID namespace for selection service integration    |
 
 **WorkspacePaneComponent (extended):**
 
-| Name               | Type                           | Default            | Controls                                        |
-| ------------------ | ------------------------------ | ------------------ | ----------------------------------------------- |
-| `activeTab`        | `'selected-items' \| 'upload'` | `'selected-items'` | Which workspace pane tab is shown               |
-| `isOpen`           | `boolean`                      | `true`             | Pane visibility; same close button as existing  |
-| `detailMediaId`    | `string \| null`               | `null`             | If set, detail modal opens on any tab/page      |
-| `width`            | `number`                       | `320`              | Desktop pane width (unchanged)                  |
-| `selectedMediaIds` | `Set<string>`                  | empty set          | Current selection from active page's media grid |
+| Name               | Type                           | Default            | Write Owner                        | Controls                                        |
+| ------------------ | ------------------------------ | ------------------ | ---------------------------------- | ----------------------------------------------- |
+| `activeTab`        | `'selected-items' \| 'upload'` | `'selected-items'` | `WorkspacePaneComponent` host port | Which workspace pane tab is shown               |
+| `isOpen`           | `boolean`                      | `true`             | `WorkspacePaneComponent`           | Pane visibility; same close button as existing  |
+| `detailMediaId`    | `string \| null`               | `null`             | `WorkspacePaneComponent`           | If set, detail modal opens on any tab/page      |
+| `width`            | `number`                       | `320`              | `WorkspacePaneComponent`           | Desktop pane width (unchanged)                  |
+| `selectedMediaIds` | `Set<string>`                  | empty set          | `WorkspaceSelectionService`        | Current selection from active page's media grid |
+
+Forbidden writers in this page contract:
+
+- `MediaToolbar`, `MediaContentComponent`, and `MediaItemComponent` must not directly mutate `groupingMode`, `sortMode`, or `activeFilters`.
+- `MediaItemComponent` must not write route lifecycle or cross-route tab/detail state.
 
 ## Module Interfaces (Schnittstellen)
 
@@ -424,6 +436,14 @@ sequenceDiagram
 - [ ] Global tab persistence uses only `activeTabGlobal` (no per-route duplicate tab state key)
 - [ ] Media page containers and list-like rows use shared layout primitives (`.ui-container`, `.ui-item`) instead of ad-hoc wrappers
 - [ ] Hover/selected visual states never change card/list geometry (no padding/height jitter)
+
+**State Ownership Alignment (Docs Contract):**
+
+- [x] Lifecycle FSM state is separated from operator/query state and derived state in this page contract.
+- [x] `groupingMode`, `sortMode`, and `activeFilters` have one write owner: `MediaComponent` command methods.
+- [x] `MediaToolbar` is intent-only and is a forbidden direct writer for operator/query state.
+- [x] `MediaContentComponent` and `MediaItemComponent` are forbidden direct writers for operator/query state.
+- [x] `detailMediaId` write ownership is singular (`WorkspacePaneComponent`) and not duplicated in `MediaComponent`.
 
 ---
 

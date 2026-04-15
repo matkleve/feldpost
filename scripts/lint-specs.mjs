@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Element Spec Lint — validates markdown specs under docs/element-specs recursively
+ * Element Spec Lint — validates markdown specs under docs/specs recursively
  *
  * Rules:
  *   spec-max-lines        Max total lines per spec (default: 250, warn: 200)
@@ -160,7 +160,7 @@ function renderSettingsRegistry(entries) {
   const lines = [
     "# Settings Registry",
     "",
-    "Generated from all `## Settings` sections in `docs/element-specs/**/*.md` (excluding README and audit docs).",
+    "Generated from all `## Settings` sections in `docs/specs/**/*.md` (excluding README and audit docs).",
     "Do not edit manually; update element specs and run `node scripts/lint-specs.mjs --fix`.",
     "",
     "| Section | Source Spec | What it configures |",
@@ -444,6 +444,21 @@ function collectSpecFiles(specDir) {
   return files.sort();
 }
 
+function resolveDefaultSpecDir(projectRoot) {
+  const preferred = join(projectRoot, "docs", "specs");
+  if (existsSync(preferred)) {
+    return preferred;
+  }
+
+  const legacy = join(projectRoot, "docs", "element-specs");
+  if (existsSync(legacy)) {
+    return legacy;
+  }
+
+  // Keep deterministic behavior even if neither path exists.
+  return preferred;
+}
+
 function main() {
   const config = parseArgs(process.argv);
 
@@ -453,7 +468,7 @@ function main() {
     "$1",
   );
   const projectRoot = resolve(scriptDir, "..");
-  const specDir = config.specDir || join(projectRoot, "docs", "element-specs");
+  const specDir = config.specDir || resolveDefaultSpecDir(projectRoot);
 
   let files;
   try {

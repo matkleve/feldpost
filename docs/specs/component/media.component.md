@@ -18,19 +18,20 @@ The component renders a page header plus a media content region with stable layo
 
 ## Actions & Interactions
 
-| #   | User/System Trigger                           | System Response                                                 | Output Contract                         |
-| --- | --------------------------------------------- | --------------------------------------------------------------- | --------------------------------------- |
-| 1   | Route enters /media                           | Initialize shell and begin initial page load                    | state enters initial-loading            |
-| 2   | Initial load succeeds                         | Publish ready content state to child                            | state enters ready                      |
-| 3   | Initial load fails                            | Publish error state with retry affordance                       | state enters error                      |
-| 4   | User clicks retry                             | Reset pagination and request first batch again                  | transition error to initial-loading     |
-| 5   | User scrolls near bottom and hasMore is true  | Request next deterministic batch                                | state enters loading-more               |
-| 6   | Append succeeds                               | Merge deduplicated items and return to ready                    | transition loading-more to ready        |
-| 7   | Append fails                                  | Keep existing items and raise recoverable page error            | transition loading-more to append-error |
-| 8   | Auth/user context changes                     | Reset paging and reload from offset zero                        | transition to initial-loading           |
-| 9   | Upload completion signal arrives              | Reset pagination and requery current route list                 | transition to revalidating              |
-| 10  | Card variant changed                          | Persist variant setting and re-render child mode                | shell setting updated                   |
-| 11  | Coalesced systemic media fault intent arrives | Process one guarded shell transition for active cooldown window | transition to revalidating or error     |
+| #   | User/System Trigger                           | System Response                                                                                   | Output Contract                         |
+| --- | --------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 1   | Route enters /media                           | Initialize shell and begin initial page load                                                      | state enters initial-loading            |
+| 2   | Initial load succeeds                         | Publish ready content state to child                                                              | state enters ready                      |
+| 3   | Initial load fails                            | Publish error state with retry affordance                                                         | state enters error                      |
+| 4   | User clicks retry                             | Reset pagination and request first batch again                                                    | transition error to initial-loading     |
+| 5   | User scrolls near bottom and hasMore is true  | Request next deterministic batch                                                                  | state enters loading-more               |
+| 6   | Append succeeds                               | Merge deduplicated items and return to ready                                                      | transition loading-more to ready        |
+| 7   | Append fails                                  | Keep existing items and raise recoverable page error                                              | transition loading-more to append-error |
+| 8   | Auth/user context changes                     | Reset paging and reload from offset zero                                                          | transition to initial-loading           |
+| 9   | Upload completion signal arrives              | Reset pagination and requery current route list                                                   | transition to revalidating              |
+| 10  | MediaToolbar emits operator intent            | Apply command-method write (`setGroupingMode`, `setSortMode`, `setActiveFilters`, `clearFilters`) | operator/query state updated            |
+| 11  | Card variant changed                          | Persist variant setting and re-render child mode                                                  | shell setting updated                   |
+| 12  | Coalesced systemic media fault intent arrives | Process one guarded shell transition for active cooldown window                                   | transition to revalidating or error     |
 
 ## Component Hierarchy
 
@@ -85,6 +86,26 @@ flowchart TD
 | error           | Main         | initial load failure             | retry or auth/user change                                      | no media delivery state proxy                     |
 | revalidating    | Transitional | upload/auth driven refresh       | revalidation success to ready or revalidation failure to error | must preserve same querySignature cache namespace |
 
+### Operator/Query and Derived Ownership Contract
+
+Lifecycle note:
+
+- The FSM table above is lifecycle-only (`boot`, `initial-loading`, `ready`, `loading-more`, `append-error`, `error`, `revalidating`).
+- Operator/query fields are deliberately separated from lifecycle transitions.
+
+| Field              | Kind           | Write owner                                 | Read consumers          | Forbidden writers                                             |
+| ------------------ | -------------- | ------------------------------------------- | ----------------------- | ------------------------------------------------------------- |
+| `groupingMode`     | operator/query | `MediaComponent.setGroupingMode(...)` only  | `MediaContentComponent` | `MediaToolbar`, `MediaContentComponent`, `MediaItemComponent` |
+| `sortMode`         | operator/query | `MediaComponent.setSortMode(...)` only      | `MediaContentComponent` | `MediaToolbar`, `MediaContentComponent`, `MediaItemComponent` |
+| `activeFilters`    | operator/query | `MediaComponent.setActiveFilters(...)` only | `MediaContentComponent` | `MediaToolbar`, `MediaContentComponent`, `MediaItemComponent` |
+| `filteredImages`   | derived        | `MediaComponent` computed derivation only   | `MediaContentComponent` | all children and toolbar                                      |
+| `groupedAndSorted` | derived        | `MediaComponent` computed derivation only   | `MediaContentComponent` | all children and toolbar                                      |
+
+Toolbar boundary:
+
+- `MediaToolbar` emits typed intents only (`groupingChanged`, `sortChanged`, `filtersChanged`, `filtersCleared`).
+- `MediaToolbar` never mutates `groupingMode`, `sortMode`, or `activeFilters` directly.
+
 ## File Map
 
 | File                                                 | Purpose                                  |
@@ -97,7 +118,8 @@ flowchart TD
 
 ## Wiring
 
-Media Component owns page-level loading contract and forwards only stable inputs to MediaContentComponent. It does not own MediaItem or MediaDisplay delivery transitions.
+Media Component owns page-level loading contract plus operator/query writes and forwards only stable inputs to MediaContentComponent. It does not own MediaItem or MediaDisplay delivery transitions.
+Children are intent-only and read-only with respect to route lifecycle and operator/query state.
 
 ```mermaid
 sequenceDiagram
@@ -148,3 +170,7 @@ sequenceDiagram
 - [ ] Child MediaContentComponent receives stable state plus data inputs only.
 - [ ] ng build is clean for this contract integration.
 - [ ] npm run lint is clean for this contract integration.
+- [x] Operator/query fields (`groupingMode`, `sortMode`, `activeFilters`) have a single writer: `MediaComponent` command methods.
+- [x] `MediaToolbar` is intent-only and cannot write operator/query state directly.
+- [x] `MediaContentComponent` and `MediaItemComponent` are forbidden direct writers of operator/query state.
+- [x] Derived fields (`filteredImages`, `groupedAndSorted`) are computed and read-only for child consumers.

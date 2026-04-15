@@ -325,7 +325,11 @@ Rules:
   - Threshold gate: at least `5` distinct `mediaId` failures within a rolling `1000ms` window for the same `querySignature`.
 - Cooldown gate: after one emitted systemic intent, suppress further intents for the same `faultClass + querySignature` for `3000ms`.
 - Coalescing gate: all failures inside the active window are collapsed into one `SystemicMediaFaultIntent` payload with `sampleSize`.
-- Shell-facing contract: consumers (MediaContent/MediaComponent) must process this as one intent event, not a per-item stream.
+- Shell-facing chain (mandatory):
+  - `MediaDownloadService` emits coalesced `SystemicMediaFaultIntent` via `getSystemicFaultIntent()`.
+  - `MediaContentComponent` consumes this signal read-only and forwards one typed shell intent per cooldown window.
+  - `MediaComponent` processes only the coalesced shell intent and never a per-item failure stream.
+- Per-item renderer failures must never be escalated to route shell as individual intents.
 
 Classification notes:
 
@@ -440,6 +444,9 @@ MediaDownloadService is a pure facade. It must contain orchestration and contrac
 - [ ] The contract defines missing-path handling as `no-media` without network request.
 - [ ] The contract defines canonical signing failure handling as `error` with mapped `MediaDeliveryErrorCode`.
 - [ ] Retry ownership remains in `MediaDownloadService` and/or parent shells; renderers stay actionless.
+- [x] Systemic escalation is emitted only as coalesced `SystemicMediaFaultIntent` payloads (threshold + cooldown gated).
+- [x] Shell handling path is explicit and storm-safe: service signal -> MediaContent intent -> MediaComponent shell transition.
+- [x] Route shell handling forbids per-item delivery failure storm processing.
 - [ ] `MediaDeliveryErrorCode` includes `isRetryable: boolean` and drives retry behavior.
 - [ ] Terminal errors (`forbidden`, `not-found`, `auth`) enter `error` and do not auto-loop.
 - [ ] Transient errors (`timeout`, `rate-limited`) follow `error -> loading-surface-visible` retry loop with bounded retries.

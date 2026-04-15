@@ -188,6 +188,8 @@ The loading visual standard for Item Grid surfaces is a pulse placeholder layer.
 - Per-surface custom URL/tier strategies are forbidden after migration.
 - Allowed exception: row-mode ratio fallback can be consumer-specific, but URL/tier selection still comes from the shared chain.
 - This contract applies to map markers, workspace selected-items, `/media` grid items, and detail preview surfaces.
+- Item-grid-level components (`ItemGridComponent`, `ItemComponent`, `MediaItemComponent`) are not write owners for route lifecycle state or operator/query state (`groupingMode`, `sortMode`, `activeFilters`).
+- Item-grid-level components are not escalation routers; per-item failures remain local and systemic escalation is handled through `MediaDownloadService` -> `MediaContentComponent` -> route shell.
 
 ### Aspect-Ratio Ownership Contract (Mandatory)
 
@@ -586,6 +588,8 @@ sequenceDiagram
 - [ ] Cross-surface cache reuse avoids forced cold-loading when media was already fetched in map/workspace/detail flows.
 - [ ] Same `querySignature` route re-entry hydrates from cache and does not trigger full list requery.
 - [ ] `querySignature`, `loadedWindows`, and `indexEntries` are defined for media list integration wiring.
+- [x] Item-grid/media-item terminology stays intent-only with respect to route lifecycle and operator/query ownership.
+- [x] Item-grid/media-item surfaces do not process per-item escalation storms; systemic escalation remains coalesced through service/content/shell boundaries.
 - [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
 - [ ] Stateful item components use one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed from public APIs.
 - [ ] Transition choreography is tokenized (`var(--transition-*)`) with no magic-number timing values.

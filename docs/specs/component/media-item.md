@@ -95,6 +95,7 @@ Child dependency note:
 ## Data Requirements
 
 Media Item does not call Supabase directly and does not subscribe to media download state for rendering decisions.
+Media Item is never a write owner for route lifecycle or operator/query state.
 
 ### Data Flow (Mermaid)
 
@@ -168,7 +169,10 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 - `MediaItemState` covers only grid-item-level states.
 - Media delivery state progression is orchestrated by `MediaDownloadService` and rendered by `MediaDisplayComponent` according to their canonical specs.
 - Upload state (`UploadOverlayState`) and media delivery/render state (`MediaDisplayState` / `MediaDisplayDeliveryState`) are orthogonal concerns and must never share enum values or input fields.
+- Route lifecycle state and operator/query state (`groupingMode`, `sortMode`, `activeFilters`) are outside `MediaItemComponent` scope and are read-only at this boundary.
+- `MediaItemComponent` is a forbidden writer for route-shell state, operator/query state, and cross-route pane state.
 - `MediaItemComponent` does not coordinate, await, or proxy media download state transitions.
+- `MediaItemComponent` does not subscribe to or emit `SystemicMediaFaultIntent`; storm-safe escalation routing belongs to service + content + shell boundaries.
 - Retry behavior for media delivery stays in `MediaDownloadService` and/or parent shells. `MediaItemComponent` remains interaction-shell only.
 
 ### Transition Guard Contract
@@ -298,6 +302,9 @@ sequenceDiagram
 - [ ] MediaItem unmount/remount does not emit per-item critical escalation storms to route shell.
 - [ ] `ng build` is clean after migration.
 - [ ] `npm run lint` is clean after migration.
+- [x] `MediaItemComponent` is an interaction-shell only contract and has no direct write access to route lifecycle state.
+- [x] `MediaItemComponent` is a forbidden writer for `groupingMode`, `sortMode`, and `activeFilters`.
+- [x] `MediaItemComponent` does not consume or emit coalesced systemic escalation intents.
 
 ## Ratio Binding Addendum (2026-04-05)
 
