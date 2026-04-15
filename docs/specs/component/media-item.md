@@ -142,6 +142,15 @@ All boolean visual-state inputs are forbidden.
 export type MediaItemState = "idle" | "selected" | "uploading" | "error";
 ```
 
+### FSM State Table
+
+| State       | Class | Entry trigger                                 | Exit trigger                                  | Forbidden coupling                                 |
+| ----------- | ----- | --------------------------------------------- | --------------------------------------------- | -------------------------------------------------- |
+| `idle`      | Main  | default or clear item-level interaction state | selection/upload/error event                  | Must not encode media delivery/render lifecycle    |
+| `selected`  | Main  | parent selection state update                 | deselect/upload/error event                   | Must not wait for media delivery states            |
+| `uploading` | Main  | upload pipeline marks active overlay          | upload completion/error/selection transitions | Must not include MediaDisplay delivery transitions |
+| `error`     | Main  | item-level interaction or upload error state  | reset/retry/upload transitions                | Must not proxy renderer error states               |
+
 ### Transition Map
 
 ```typescript
@@ -158,6 +167,7 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 
 - `MediaItemState` covers only grid-item-level states.
 - Media delivery state progression is orchestrated by `MediaDownloadService` and rendered by `MediaDisplayComponent` according to their canonical specs.
+- Upload state (`UploadOverlayState`) and media delivery/render state (`MediaDisplayState` / `MediaDisplayDeliveryState`) are orthogonal concerns and must never share enum values or input fields.
 - `MediaItemComponent` does not coordinate, await, or proxy media download state transitions.
 - Retry behavior for media delivery stays in `MediaDownloadService` and/or parent shells. `MediaItemComponent` remains interaction-shell only.
 
@@ -179,11 +189,11 @@ export const MEDIA_ITEM_TRANSITIONS: Record<MediaItemState, MediaItemState[]> =
 
 ### Ownership Triad Declaration
 
-| Behavior             | Geometry Owner                | State Owner                          | Visual Owner                   | Same element?                                                     |
-| -------------------- | ----------------------------- | ------------------------------------ | ------------------------------ | ----------------------------------------------------------------- |
-| Selected emphasis    | `.media-item__frame`          | `.media-item__frame--selected`       | `.media-item__frame--selected` | yes                                                               |
-| Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                               |
-| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item` (host data-state gate) | `.media-item__quiet-actions`   | exception: reveal is gated by host state while visuals stay local |
+| Behavior             | Geometry Owner                | State Owner                          | Visual Owner                   | Same element?                                                                  |
+| -------------------- | ----------------------------- | ------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------ |
+| Selected emphasis    | `.media-item__frame`          | `.media-item__frame--selected`       | `.media-item__frame--selected` | yes                                                                            |
+| Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                                            |
+| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item` (host data-state gate) | `.media-item__quiet-actions`   | exception: CSS cascade trigger only — no FSM state crosses component boundary. |
 
 ### Stacking Context
 
@@ -254,6 +264,7 @@ sequenceDiagram
 - [ ] `MediaItemComponent` uses `MediaDisplayComponent` for all media rendering.
 - [ ] Media download states are not represented in `MediaItemState`.
 - [ ] `MediaItemState` contains only `idle`, `selected`, `uploading`, `error`.
+- [ ] Upload state and delivery/render state stay orthogonal and do not share enum values or component inputs.
 - [ ] `MediaItemComponent` exposes no boolean visual-state inputs.
 - [ ] Public input contract includes `mediaId`, `state`, and non-visual data (`item`, `mode`, `actionContextId`).
 - [ ] Selected emphasis is rendered around media frame only.

@@ -15,6 +15,8 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 
 - Shared location: `apps/web/src/app/shared/item-grid/`
 - Child specs:
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
   - `docs/specs/component/media-item.md`
   - `docs/specs/component/project-item.md`
   - `docs/specs/component/item-state-frame.md`
@@ -102,22 +104,32 @@ flowchart TD
   M --> N[action-context-matrix.md ws_grid_thumbnail]
 ```
 
-| Field             | Source                             | Type                                                     | Purpose                                                                                             |
-| ----------------- | ---------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `mode`            | Parent page/workspace container    | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'` | Drives layout mode in ItemGrid                                                                      |
-| `items`           | Domain adapter output              | `ReadonlyArray<ItemViewModel>`                           | Rendered item collection                                                                            |
-| `loading`         | Domain adapter/item async pipeline | `boolean`                                                | Shared loading state in ItemComponent                                                               |
-| `error`           | Domain adapter/item async pipeline | `boolean`                                                | Shared error state in ItemComponent                                                                 |
-| `empty`           | Parent collection state            | `boolean`                                                | Shared empty state signaling                                                                        |
-| `selected`        | Selection service / parent state   | `boolean`                                                | Selected state propagation for domain-owned emphasis                                                |
-| `actionContextId` | Domain adapter                     | `string`                                                 | Binds item action menus to matrix contract                                                          |
-| `mediaLoadState`  | `MediaDownloadService`             | `MediaDisplayDeliveryState`                              | Canonical media delivery state vocabulary (defined in media-display + media-download-service specs) |
-| `slotSizeRem`     | Media item measurement             | `number \| null`                                         | Short-edge size in rem for tier selection                                                           |
-| `requestedTier`   | media request policy               | `MediaTier`                                              | Target render tier before service reconciliation                                                    |
-| `effectiveTier`   | `MediaDownloadService`             | `MediaTier`                                              | Actual tier after slot-aware reconciliation                                                         |
-| `uploadOverlay`   | `UploadManagerService` bridge      | `UploadOverlayState \| null`                             | Upload progress and status layer                                                                    |
-| `gridColumns`     | Grid layout resolver               | `number`                                                 | Current resolved column count                                                                       |
-| `batchInsertSize` | Media list progressive renderer    | `number`                                                 | Deterministic append size (`gridColumns x 3`)                                                       |
+| Field             | Source                             | Type                                                                                                | Purpose                                                                                             |
+| ----------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `mode`            | Parent page/workspace container    | `'grid-sm' \| 'grid-md' \| 'grid-lg' \| 'row' \| 'card'`                                            | Drives layout mode in ItemGrid                                                                      |
+| `items`           | Domain adapter output              | `ReadonlyArray<ItemViewModel>`                                                                      | Rendered item collection                                                                            |
+| `loading`         | Domain adapter/item async pipeline | `boolean`                                                                                           | Shared loading state in ItemComponent                                                               |
+| `error`           | Domain adapter/item async pipeline | `boolean`                                                                                           | Shared error state in ItemComponent                                                                 |
+| `empty`           | Parent collection state            | `boolean`                                                                                           | Shared empty state signaling                                                                        |
+| `selected`        | Selection service / parent state   | `boolean`                                                                                           | Selected state propagation for domain-owned emphasis                                                |
+| `actionContextId` | Domain adapter                     | `string`                                                                                            | Binds item action menus to matrix contract                                                          |
+| `mediaLoadState`  | `MediaDownloadService`             | `MediaDisplayDeliveryState`                                                                         | Canonical media delivery state vocabulary (defined in media-display + media-download-service specs) |
+| `slotSizeRem`     | Media item measurement             | `number \| null`                                                                                    | Short-edge size in rem for tier selection                                                           |
+| `requestedTier`   | media request policy               | `MediaTier`                                                                                         | Target render tier before service reconciliation                                                    |
+| `effectiveTier`   | `MediaDownloadService`             | `MediaTier`                                                                                         | Actual tier after slot-aware reconciliation                                                         |
+| `uploadOverlay`   | `UploadManagerService` bridge      | `UploadOverlayState \| null`                                                                        | Upload progress and status layer                                                                    |
+| `gridColumns`     | Grid layout resolver               | `number`                                                                                            | Current resolved column count                                                                       |
+| `batchInsertSize` | Media list progressive renderer    | `number`                                                                                            | Deterministic append size (`gridColumns x 3`)                                                       |
+| `querySignature`  | Media list query model             | `string`                                                                                            | Stable cache namespace for route re-entry hydration                                                 |
+| `loadedWindows`   | Media list pagination cache        | `Array<{ windowId: string; offset: number; limit: number; mediaIds: string[]; syncedAt: string; }>` | Tracks hydrated windows for active `querySignature`                                                 |
+| `indexEntries`    | Media list cache index             | `Record<string, { mediaId: string; dbUpdatedAt: string; urlExpiresAt: string; }>`                   | Enables dual-staleness reconciliation per item                                                      |
+
+### QuerySignature Route Re-entry Contract
+
+- If route context re-enters with the same `querySignature`, consumers must hydrate from cache-first.
+- Same-signature re-entry must not perform a full list requery.
+- Revalidation for same-signature re-entry is diff-only and uses `dbUpdatedAt` plus `urlExpiresAt` dual-staleness dimensions.
+- `querySignature` ownership stays at media page/content orchestration boundaries and is consumed by ItemGrid integration wiring only.
 
 ## State
 
@@ -221,6 +233,12 @@ FSM scope rule for this spec family:
 - FSM is required whenever a component has programmatic state (not expressible by CSS pseudo-classes only).
 - CSS pseudo-classes are not FSM states.
 
+FSM ownership mapping for media route surfaces:
+
+- MediaPage FSM is defined in `docs/specs/component/media.component.md`.
+- MediaContent FSM is defined in `docs/specs/component/media-content.md`.
+- ItemGrid must consume these contracts without redefining their state enums locally.
+
 ### State Enum
 
 `ItemComponent` public visual API must migrate to one enum state input.
@@ -314,14 +332,14 @@ Child dependency rule:
 
 ### Ownership Triad Declaration
 
-| Behavior                   | Geometry Owner                                  | State Owner                                         | Visual Owner                                        | Same element?                                              |
-| -------------------------- | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- |
-| Shared loading layer       | `.item-state-frame__state-layer--loading`       | `.item-state-frame__state-layer--loading`           | `.item-state-frame__state-layer--loading`           | ✅                                                         |
-| Media loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | ✅                                                         |
-| Shared error layer         | `.item-state-frame__state-layer--error`         | `.item-state-frame__state-layer--error`             | `.item-state-frame__state-layer--error`             | ✅                                                         |
-| Shared empty layer         | `.item-state-frame__state-layer--empty`         | `.item-state-frame__state-layer--empty`             | `.item-state-frame__state-layer--empty`             | ✅                                                         |
-| Media selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                                                         |
-| Media quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | ⚠️ exception — reveal is intentionally parent-state driven |
+| Behavior                   | Geometry Owner                                  | State Owner                                         | Visual Owner                                        | Same element?                                                                      |
+| -------------------------- | ----------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Shared loading layer       | `.item-state-frame__state-layer--loading`       | `.item-state-frame__state-layer--loading`           | `.item-state-frame__state-layer--loading`           | ✅                                                                                 |
+| Media loading fallback     | `.media-item-render-surface__fallback--loading` | `.media-item-render-surface__fallback--loading`     | `.media-item-render-surface__fallback--loading`     | ✅                                                                                 |
+| Shared error layer         | `.item-state-frame__state-layer--error`         | `.item-state-frame__state-layer--error`             | `.item-state-frame__state-layer--error`             | ✅                                                                                 |
+| Shared empty layer         | `.item-state-frame__state-layer--empty`         | `.item-state-frame__state-layer--empty`             | `.item-state-frame__state-layer--empty`             | ✅                                                                                 |
+| Media selected emphasis    | `.media-item-render-surface__media-frame`       | `.media-item-render-surface__media-frame--selected` | `.media-item-render-surface__media-frame--selected` | ✅                                                                                 |
+| Media quiet actions reveal | `.media-item__quiet-actions`                    | `.media-item--selected` (parent state gate)         | `.media-item__quiet-actions`                        | ⚠️ exception — CSS cascade trigger only — no FSM state crosses component boundary. |
 
 ### Stacking Context
 
@@ -578,6 +596,8 @@ sequenceDiagram
 - [ ] Workspace pane selected-items cutover is executed in one migration step without a long-lived intermediate top-level `app-thumbnail-grid` runtime.
 - [x] Each migrated surface has exactly one runtime grid/card path (item-grid system); replaced legacy files are archived under `apps/web/src/app/archive/item-grid-legacy/`.
 - [ ] Cross-surface cache reuse avoids forced cold-loading when media was already fetched in map/workspace/detail flows.
+- [ ] Same `querySignature` route re-entry hydrates from cache and does not trigger full list requery.
+- [ ] `querySignature`, `loadedWindows`, and `indexEntries` are defined for media list integration wiring.
 - [ ] Exactly two geometry owners exist in each render path (outer layout owner and innermost content owner).
 - [ ] Stateful item components use one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed from public APIs.
 - [ ] Transition choreography is tokenized (`var(--transition-*)`) with no magic-number timing values.

@@ -154,7 +154,7 @@ WorkspacePaneComponent (seitenübergreifend)
 | Source                                  | Fields Needed                                                        | Purpose                                      |
 | --------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
 | `media_items` table                     | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
-| `MediaPageCacheService`                 | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
+| `MediaPageStateService`                 | cachedItems, nextOffset, totalCount, queryKey, lastSyncedAt          | Restore list on revisit without forced clear |
 | `PhotoLoadService`                      | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
 | `share_sets` + `share_set_items` tables | share_set_id, fingerprint, ordered media_item_id membership          | Persisted shared selections (media-era)      |
 | `UploadManagerService`                  | jobs(), batches(), activeCount()                                     | Upload tab progress + lane data              |
@@ -166,24 +166,31 @@ WorkspacePaneComponent (seitenübergreifend)
 ```mermaid
 flowchart LR
     A["Navigate /media"] --> B["MediaPageComponent"]
-    B --> C{"Media list cache hit?"}
-    C -->|yes| D["Restore cached media list immediately"]
-    C -->|no| E["Show neutral gray placeholders"]
-    D --> F["Background revalidate query"]
-    E --> F
-    F --> G["Merge fresh diff into grid"]
+    B --> C["MediaPageStateService cache lookup"]
+    C --> D{"Media list cache hit?"}
+    D -->|yes| E["Restore cached media list immediately"]
+    D -->|no| F["Show neutral gray placeholders"]
+    E --> G["MediaPageStateService background revalidate query"]
+    F --> G
+    G --> H["Merge fresh diff into grid"]
 
-    H["UploadManagerService jobs signal"] --> I["WorkspacePaneComponent"]
-    I --> J{"Which tab?"}
-    J -->|Selected Items| K["Show media grid"]
-    J -->|Upload| L["Show UploadPanelComponent"]
-    L --> M["Lane buckets by issue kind + lane semantics"]
-    M --> N["Uploaded actions: assign project, prioritize, open media, download"]
+    I["UploadManagerService jobs signal"] --> J["WorkspacePaneComponent"]
+    J --> K{"Which tab?"}
+    K -->|Selected Items| L["Show media grid"]
+    K -->|Upload| M["Show UploadPanelComponent"]
+    M --> N["Lane buckets by issue kind + lane semantics"]
+    N --> O["Uploaded actions: assign project, prioritize, open media, download"]
 ```
 
 ---
 
 ## State
+
+### FSM Ownership Mapping
+
+- MediaPage route-shell FSM ownership is defined in `docs/specs/component/media.component.md`.
+- MediaContent rendering FSM ownership is defined in `docs/specs/component/media-content.md`.
+- This page spec remains route/product contract and must not redefine those component FSM enums.
 
 **MediaPageComponent:**
 
@@ -195,9 +202,10 @@ flowchart LR
 | `filteredImages`   | `Signal<WorkspaceMedia[]>`                          | `[]`       | Computed: media items matching active filters    |
 | `groupedAndSorted` | `Signal<MediaGroup[]>`                              | `[]`       | Computed: filtered + grouped + sorted            |
 | `cachedMediaItems` | `Signal<WorkspaceMedia[]>`                          | `[]`       | Route-stable cached snapshot for instant restore |
-| `cacheWarm`        | `Signal<boolean>`                                   | `false`    | Whether first paint came from cache              |
 | `hoveredMediaId`   | `string \| null`                                    | `null`     | Current media item tile under pointer            |
 | `detailMediaId`    | `string \| null`                                    | `null`     | If set, detail modal is open                     |
+
+Note: cache-warm status is encoded in the MediaComponent FSM boot/hydrate path, not as a separate boolean signal.
 
 **Cross-route contracts:**
 
@@ -276,7 +284,7 @@ export interface WorkspacePaneHostPort {
 | `features/media/media-toolbar.component.html` | Toolbar template (Phase 2)                                                |
 | `features/media/media-toolbar.component.scss` | Toolbar styles (Phase 2)                                                  |
 | `core/media-view.service.ts`                  | Grouping, filtering, sorting logic (or share with workspace service)      |
-| `core/media-page-cache.service.ts`            | Route-stable media list snapshot cache + background revalidation metadata |
+| `core/media-page-state.service.ts`            | Route-stable media list snapshot cache + background revalidation metadata |
 | `core/workspace-pane-context.port.ts`         | Shared interface contract for selected-items context provider             |
 | `core/workspace-pane-host.port.ts`            | Host contract for tab and context binding                                 |
 | `core/workspace-pane-observer.adapter.ts`     | Observer lifecycle adapter (route, upload, tab persistence)               |

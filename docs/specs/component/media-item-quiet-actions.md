@@ -202,11 +202,11 @@ sequenceDiagram
 
 ### Ownership Triad Declaration
 
-| Behavior            | Geometry Owner                              | State Owner                                                              | Visual Owner                                       | Same element?                                                   |
-| ------------------- | ------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------- |
-| Select active style | `.media-item-quiet-actions__button--select` | `.media-item-quiet-actions__button--select-active`                       | `.media-item-quiet-actions__button--select-active` | ✅                                                              |
-| Focus ring          | `.media-item-quiet-actions__button`         | `.media-item-quiet-actions__button:focus-visible`                        | `.media-item-quiet-actions__button:focus-visible`  | ✅                                                              |
-| Action reveal       | `.media-item__quiet-actions`                | `.media-item--selected` / `:hover` / `:focus-within` (parent state gate) | `.media-item__quiet-actions`                       | ⚠️ exception — reveal is controlled by parent interaction state |
+| Behavior            | Geometry Owner                              | State Owner                                                              | Visual Owner                                       | Same element?                                                                      |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Select active style | `.media-item-quiet-actions__button--select` | `.media-item-quiet-actions__button--select-active`                       | `.media-item-quiet-actions__button--select-active` | ✅                                                                                 |
+| Focus ring          | `.media-item-quiet-actions__button`         | `.media-item-quiet-actions__button:focus-visible`                        | `.media-item-quiet-actions__button:focus-visible`  | ✅                                                                                 |
+| Action reveal       | `.media-item__quiet-actions`                | `.media-item--selected` / `:hover` / `:focus-within` (parent state gate) | `.media-item__quiet-actions`                       | ⚠️ exception — CSS cascade trigger only — no FSM state crosses component boundary. |
 
 ### Stacking Context
 

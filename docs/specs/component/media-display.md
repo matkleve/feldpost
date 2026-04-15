@@ -38,6 +38,7 @@ The component renders one stable media viewport and keeps geometry stable from f
 | 13  | Component host is resized                            | Measure short edge via `ResizeObserver`, convert to `rem`, update `slotSizeRem`, and request deterministic re-evaluation of delivery | resize observer event |
 | 14  | Cached asset is available                            | Preserve deterministic ordering: `loading-surface-visible` remains first; direct shortcuts to `content-visible` are forbidden        | cache hit             |
 | 15  | Reduced motion is requested                          | Use global motion policy; component has no local motion branching                                                                    | global CSS policy     |
+| 16  | Parent re-enters route with unchanged querySignature | Consume cache-hydrated media source and continue deterministic delivery flow; this component must not trigger a full list requery    | route re-entry        |
 
 ## Component Hierarchy
 
@@ -169,6 +170,20 @@ export type MediaDisplayState =
   | "no-media";
 ```
 
+### FSM State Table
+
+| State                     | Class        | Entry trigger                                   | Exit trigger                             | Forbidden coupling                                   |
+| ------------------------- | ------------ | ----------------------------------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| `idle`                    | Main         | no valid `mediaId`                              | valid `mediaId` bind                     | Must not consume upload state                        |
+| `loading-surface-visible` | Main         | `mediaId` handoff or cache-hydrated replay      | service delivery event                   | Must stay independent from item selection/upload FSM |
+| `ratio-known-contain`     | Transitional | contain-path ratio metadata event               | `media-ready` or error/no-media          | Cover path must not enter this state                 |
+| `media-ready`             | Transitional | service marks asset ready                       | `content-fade-in` or icon/error/no-media | Must not be driven by parent booleans                |
+| `content-fade-in`         | Transitional | reveal choreography starts                      | `transitionend` to `content-visible`     | Timers without transition events are forbidden       |
+| `content-visible`         | Main         | reveal transition completed                     | new handoff or service branch change     | Direct shortcuts from loading states are forbidden   |
+| `icon-only`               | Main         | service returns document-like small-slot branch | new handoff or no-media                  | Must not be entered by photo/video branch            |
+| `error`                   | Main         | service error event                             | retry-driven re-entry or no-media        | Retry ownership is external to this renderer         |
+| `no-media`                | Main         | missing-path or explicit no-media signal        | new valid handoff                        | Must stay distinct from error                        |
+
 ### State Classification Matrix
 
 | State                     | Class        | HTML/CSS shape                                                 | Clear-text meaning                             |
@@ -219,6 +234,7 @@ export const MEDIA_DISPLAY_TRANSITIONS: Record<
 - The root host is bound by one visual-state driver only: `[attr.data-state]="state()"`.
 - Template and SCSS are forbidden from using boolean visual-state flags as primary state drivers.
 - Cached paths must preserve deterministic ordering and may not skip `loading-surface-visible`.
+- Upload state and delivery/render state are orthogonal concerns and must never share enum values or component inputs.
 - Forbidden shortcuts: `idle -> content-visible`, `loading-surface-visible -> content-visible`, `ratio-known-contain -> content-visible`.
 - `ratio-known-contain` is contain-path only; cover-path flows must skip this state.
 - Transient-state exits are controlled by `transitionend`, never by `setTimeout` magic numbers.
@@ -402,6 +418,7 @@ sequenceDiagram
 - [ ] `mediaId` changes trigger `loading-surface-visible` and a fresh `MediaDownloadService.getState(mediaId, slotSizeRem)` subscription.
 - [ ] The state model uses `idle`, `loading-surface-visible`, `ratio-known-contain`, `media-ready`, `content-fade-in`, `content-visible`, `icon-only`, `error`, and `no-media`.
 - [ ] Cached paths preserve deterministic ordering and never skip directly to `content-visible`.
+- [ ] Route re-entry with unchanged querySignature consumes cache-hydrated source and does not trigger full list requery from this component boundary.
 - [ ] Forbidden shortcuts are enforced: `idle -> content-visible`, `loading-surface-visible -> content-visible`, `ratio-known-contain -> content-visible`.
 - [ ] Contain path uses `ratio-known-contain` before content reveal.
 - [ ] Cover path skips `ratio-known-contain` and continues via `media-ready`.
@@ -412,6 +429,7 @@ sequenceDiagram
 - [ ] Slot-size threshold changes trigger a fresh service request and smooth transition between tiers/states.
 - [ ] Error rendering in this component has no retry button or other action controls.
 - [ ] Retry behavior is owned by `MediaDownloadService` and/or parent shells.
+- [ ] Upload state is not represented in `MediaDisplayState` and is not accepted as a visual-state input.
 - [ ] No-media is visually distinct from error.
 - [ ] Aspect ratio is stable from first paint via `--media-aspect-ratio` with `1/1` fallback.
 - [ ] The component never owns grid slot geometry, upload overlays, selection, quiet actions, retry action ownership, border, outline, or border-radius.

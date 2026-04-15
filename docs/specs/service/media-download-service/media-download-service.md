@@ -83,23 +83,24 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 
 ## Actions & Interactions
 
-| #   | User/System Trigger                                  | System Response                                                                                          | Output Contract                               |
-| --- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| 1   | Any surface requests media preview by media identity | Resolve desired size input through internal tier policy                                                  | `effectiveTier`                               |
-| 2   | New media handoff starts                             | Emit deterministic loading-first state                                                                   | item state `loading-surface-visible`          |
-| 3   | Contain path resolves authoritative ratio            | Emit ratio lock-in before reveal                                                                         | item state `ratio-known-contain`              |
-| 4   | Cover path resolves media readiness                  | Skip ratio-lock state and continue reveal path                                                           | item state `media-ready`                      |
-| 5   | Asset URL is signed/preloaded and staged             | Emit `media-ready`; renderer advances `content-fade-in` -> `content-visible` via transition choreography | delivery state handoff to renderer            |
-| 6   | Signed URL fetch/preload fails                       | Emit canonical error with reason code                                                                    | item state `error`                            |
-| 7   | Storage path is missing/null                         | Emit no-media immediately, no network call                                                               | item state `no-media`                         |
-| 8   | Media type is image/video                            | Always return bitmap tier path (never icon-only by size alone)                                           | state remains bitmap reveal path              |
-| 9   | Media type is document-like and slot is small        | Emit icon-only branch; larger slots prefer first-page preview                                            | item state `icon-only` or preview reveal path |
-| 10  | User triggers single-file download                   | Resolve signed URL and fetch blob with retry policy                                                      | `DownloadBlobResult`                          |
-| 11  | User triggers ZIP export                             | Send POST to edge export orchestrator and stream ZIP response                                            | `ExportProgressEvent` (stream phases)         |
-| 12  | Edge export fails partially                          | Emit partial-failure summary with retryability metadata                                                  | `ExportResult` with failures                  |
-| 13  | Route changes between map/workspace/media/detail     | Keep cache namespace stable, avoid forced cache reset                                                    | route-stable cache                            |
-| 14  | Staleness sweep runs                                 | Remove stale signed URLs, preserve local object URLs                                                     | cleared entry count                           |
-| 15  | Consumer subscribes to item state stream             | Receive deterministic transitions and terminal outcomes                                                  | `MediaDeliveryStateChangedEvent`              |
+| #   | User/System Trigger                                    | System Response                                                                                          | Output Contract                               |
+| --- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 1   | Any surface requests media preview by media identity   | Resolve desired size input through internal tier policy                                                  | `effectiveTier`                               |
+| 2   | New media handoff starts                               | Emit deterministic loading-first state                                                                   | item state `loading-surface-visible`          |
+| 3   | Contain path resolves authoritative ratio              | Emit ratio lock-in before reveal                                                                         | item state `ratio-known-contain`              |
+| 4   | Cover path resolves media readiness                    | Skip ratio-lock state and continue reveal path                                                           | item state `media-ready`                      |
+| 5   | Asset URL is signed/preloaded and staged               | Emit `media-ready`; renderer advances `content-fade-in` -> `content-visible` via transition choreography | delivery state handoff to renderer            |
+| 6   | Signed URL fetch/preload fails                         | Emit canonical error with reason code                                                                    | item state `error`                            |
+| 7   | Storage path is missing/null                           | Emit no-media immediately, no network call                                                               | item state `no-media`                         |
+| 8   | Media type is image/video                              | Always return bitmap tier path (never icon-only by size alone)                                           | state remains bitmap reveal path              |
+| 9   | Media type is document-like and slot is small          | Emit icon-only branch; larger slots prefer first-page preview                                            | item state `icon-only` or preview reveal path |
+| 10  | User triggers single-file download                     | Resolve signed URL and fetch blob with retry policy                                                      | `DownloadBlobResult`                          |
+| 11  | User triggers ZIP export                               | Send POST to edge export orchestrator and stream ZIP response                                            | `ExportProgressEvent` (stream phases)         |
+| 12  | Edge export fails partially                            | Emit partial-failure summary with retryability metadata                                                  | `ExportResult` with failures                  |
+| 13  | Route changes between map/workspace/media/detail       | Keep cache namespace stable, avoid forced cache reset                                                    | route-stable cache                            |
+| 14  | Staleness sweep runs                                   | Remove stale signed URLs, preserve local object URLs                                                     | cleared entry count                           |
+| 15  | Consumer subscribes to item state stream               | Receive deterministic transitions and terminal outcomes                                                  | `MediaDeliveryStateChangedEvent`              |
+| 16  | Consumer re-enters list route with same querySignature | Hydrate from cache first and avoid full list requery; run reconciliation only for stale dimensions       | `CacheHydrationResult`                        |
 
 ## Component Hierarchy
 
@@ -214,21 +215,62 @@ sequenceDiagram
 | `MediaDownloadService.downloadBlob`         | `(storagePath: string) => Promise<{ ok: true; blob: Blob } \| { ok: false; errorCode: MediaDeliveryErrorCode; message: string }>`                                                                                                             | Single media binary download                                           |
 | `ExportProgressEvent`                       | `{ phase: 'queued' \| 'edge-started' \| 'streaming' \| 'finalizing' \| 'completed' \| 'failed'; bytesStreamed?: number; totalBytesHint?: number; itemsProcessed?: number; itemsTotal?: number; }`                                             | Server-stream status event model                                       |
 | `MediaDownloadService.exportSelection`      | `(items: WorkspaceMedia[], title: string, onProgress?: (event: ExportProgressEvent) => void) => Promise<ExportResult>`                                                                                                                        | ZIP/export orchestration via edge stream                               |
+| `CacheHydrationResult`                      | `{ querySignature: string; hydratedWindows: number; usedIndexEntries: number; skippedFullRequery: boolean; reconciliationStates: Array<'unchanged-url-valid' \| 'unchanged-url-stale' \| 'changed-content' \| 'new' \| 'removed'>; }`         | Route re-entry hydration outcome                                       |
 
 ### Data Sources and Dependencies
 
-| Artifact              | Source                                                  | Type                                             | Purpose                                          |
-| --------------------- | ------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------ |
-| `storage_path`        | `media_items.storage_path`                              | `string \| null`                                 | Original media storage object path               |
-| `thumbnail_path`      | media projection model                                  | `string \| null`                                 | Pre-generated thumbnail path if available        |
-| `desiredSize`         | consumer input                                          | `'marker' \| 'thumb' \| 'detail' \| 'full'`      | UI intent without tier math leakage              |
-| `boxPixels`           | consumer measurement                                    | `{ width: number; height: number } \| undefined` | Optional geometry hint in px for adaptive policy |
-| Signed URL rows       | Supabase Storage `createSignedUrl` / `createSignedUrls` | remote API result                                | Time-limited render/download URL                 |
-| Dynamic transform URL | tier resolver adapter                                   | `string \| null`                                 | Proxy-compatible URL strategy (`?w=...&q=...`)   |
-| Cached entry          | in-memory cache key `${mediaId}:${tier}`                | `{ url; signedAt; isLocal }`                     | Cross-surface reuse and staleness control        |
-| Export selection      | workspace selection service                             | `WorkspaceMedia[]`                               | Export input set                                 |
-| Edge export endpoint  | edge function API                                       | `POST` stream response                           | Server-side ZIP assembly and streaming           |
-| File naming metadata  | media metadata + helper util                            | `string`                                         | ZIP filename normalization                       |
+| Artifact              | Source                                                  | Type                                                                                                                                                                                   | Purpose                                             |
+| --------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `storage_path`        | `media_items.storage_path`                              | `string \| null`                                                                                                                                                                       | Original media storage object path                  |
+| `thumbnail_path`      | media projection model                                  | `string \| null`                                                                                                                                                                       | Pre-generated thumbnail path if available           |
+| `desiredSize`         | consumer input                                          | `'marker' \| 'thumb' \| 'detail' \| 'full'`                                                                                                                                            | UI intent without tier math leakage                 |
+| `boxPixels`           | consumer measurement                                    | `{ width: number; height: number } \| undefined`                                                                                                                                       | Optional geometry hint in px for adaptive policy    |
+| Signed URL rows       | Supabase Storage `createSignedUrl` / `createSignedUrls` | remote API result                                                                                                                                                                      | Time-limited render/download URL                    |
+| Dynamic transform URL | tier resolver adapter                                   | `string \| null`                                                                                                                                                                       | Proxy-compatible URL strategy (`?w=...&q=...`)      |
+| Cached entry          | in-memory cache key `${mediaId}:${tier}`                | `{ url; signedAt; isLocal }`                                                                                                                                                           | Cross-surface reuse and staleness control           |
+| `querySignature`      | list-route query model                                  | `string`                                                                                                                                                                               | Stable namespace key for cache-first route re-entry |
+| `loadedWindows`       | list orchestration cache                                | `Array<{ windowId: string; offset: number; limit: number; mediaIds: string[]; syncedAt: string; }>`                                                                                    | Tracks hydrated list windows per `querySignature`   |
+| `indexEntries`        | list orchestration cache                                | `Record<string, { mediaId: string; dbUpdatedAt: string; urlExpiresAt: string; resolvedUrl: string \| null; resolvedTier: string \| null; lastSeenAt: string; removedFlag: boolean; }>` | Index-level reconciliation source of truth          |
+| Export selection      | workspace selection service                             | `WorkspaceMedia[]`                                                                                                                                                                     | Export input set                                    |
+| Edge export endpoint  | edge function API                                       | `POST` stream response                                                                                                                                                                 | Server-side ZIP assembly and streaming              |
+| File naming metadata  | media metadata + helper util                            | `string`                                                                                                                                                                               | ZIP filename normalization                          |
+
+### Cache Model Contract
+
+| Field            | Type                      | Key/Scope                                          | Mandatory subfields                                                                                  | Ownership                                                    | Update trigger                                              |
+| ---------------- | ------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| `querySignature` | `string`                  | List namespace (`route + filters + sort + search`) | `routeKey`, `filterHash`, `sortKey`, `searchTerm`                                                    | List consumer orchestration + media-download cache boundary  | Route/filter/sort/search change                             |
+| `loadedWindows`  | Array                     | Per `querySignature`                               | `windowId`, `offset`, `limit`, `mediaIds`, `syncedAt`                                                | List consumer orchestration                                  | Pagination append, window refresh, route re-entry hydration |
+| `indexEntries`   | Record keyed by `mediaId` | Per `querySignature`                               | `mediaId`, `dbUpdatedAt`, `urlExpiresAt`, `resolvedUrl`, `resolvedTier`, `lastSeenAt`, `removedFlag` | MediaDownloadService + list consumer reconciliation boundary | Reconciliation cycle, URL refresh, content update           |
+
+Contract invariants:
+
+- Same `querySignature` on route re-entry must hydrate from cache-first and must not trigger a full list requery.
+- Revalidation after hydration is diff-only and must run through reconciliation states.
+- `indexEntries.dbUpdatedAt` and `indexEntries.urlExpiresAt` are mandatory for dual-staleness decisions.
+
+### Dual-Staleness Reconciliation Contract
+
+Staleness is evaluated on two independent dimensions:
+
+- Content staleness: `dbUpdatedAt` mismatch between cache index entry and source projection.
+- URL staleness: `urlExpiresAt` elapsed while content identity remains unchanged.
+
+Decision rules:
+
+- Content stale requires content reconciliation and URL refresh as part of changed-content handling.
+- URL stale without content change requires URL refresh only; no full content list fetch.
+- Both dimensions must be evaluated per entry inside the active `querySignature` namespace.
+
+### Reconciliation State Table
+
+| Reconciliation state  | Predicate                                                                   | Action                                             | Network scope                | Result contract                                                |
+| --------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------- | -------------------------------------------------------------- |
+| `unchanged-url-valid` | `dbUpdatedAt` unchanged and current time less than `urlExpiresAt`           | Reuse cached URL and metadata                      | none                         | Hydrate immediately from cache and keep deterministic ordering |
+| `unchanged-url-stale` | `dbUpdatedAt` unchanged and current time greater or equal to `urlExpiresAt` | Refresh signed URL only                            | URL signing only             | Preserve content identity and update URL fields                |
+| `changed-content`     | `dbUpdatedAt` mismatch                                                      | Replace entry payload and refresh URL              | metadata + URL refresh       | Updated content is reconciled without full list reset          |
+| `new`                 | Entry exists in source but not in cache index                               | Insert new index entry and attach to loaded window | URL signing as needed        | Deterministic insert under current `querySignature`            |
+| `removed`             | Entry exists in cache window but not in source snapshot                     | Mark removed and evict from active window          | none (optional cleanup only) | Deterministic removal without ghost rows                       |
 
 ## State
 
@@ -361,6 +403,8 @@ MediaDownloadService is a pure facade. It must contain orchestration and contrac
 - [ ] ZIP export orchestration is edge-first (POST plus streaming response), not client-side ZIP assembly.
 - [ ] The contract defines deterministic fallback order for all tiers from `full` down to `inline`.
 - [ ] The contract defines route-stable cache behavior and forbids blanket route-change cache resets.
+- [ ] The contract defines querySignature-scoped cache namespaces and cache-first route re-entry behavior.
+- [ ] Re-entry with identical querySignature hydrates from cache and skips full list requery.
 - [ ] The contract defines missing-path handling as `no-media` without network request.
 - [ ] The contract defines canonical signing failure handling as `error` with mapped `MediaDeliveryErrorCode`.
 - [ ] Retry ownership remains in `MediaDownloadService` and/or parent shells; renderers stay actionless.
@@ -373,12 +417,15 @@ MediaDownloadService is a pure facade. It must contain orchestration and contrac
 - [ ] The contract defines background high-tier upgrade without layout ownership changes.
 - [ ] The contract defines local blob injection for attach/replace and explicit local blob revocation.
 - [ ] The contract defines stale sweep semantics and excludes local blob URLs from age-based eviction.
+- [ ] The contract defines dual staleness (`dbUpdatedAt` content staleness and `urlExpiresAt` URL staleness) as independent dimensions.
+- [ ] The contract defines reconciliation outcomes for `unchanged-url-valid`, `unchanged-url-stale`, `changed-content`, `new`, and `removed`.
 - [ ] The contract defines a strict per-media state type (`MediaDisplayDeliveryState`) with explicit values.
 - [ ] The contract defines `MediaDeliveryErrorCode` values and their usage scope.
 - [ ] `MediaPreviewRequest` interface is fully specified and only exposes `desiredSize` and/or `boxPixels` for size intent.
 - [ ] `MediaPreviewResult` interface is fully specified and exposes source + resolved tier + state.
 - [ ] The contract includes a signal-based state API for per-media state observation.
 - [ ] The contract includes batch preview retrieval for list/grid performance.
+- [ ] The contract includes an explicit cache model with `querySignature`, `loadedWindows`, and `indexEntries`.
 - [ ] The contract includes single-file download API and ZIP export API under one boundary.
 - [ ] The contract requires identical bucket fallback order (`media` then `images`) for preview and export retrieval.
 - [ ] `ExportProgressEvent` models edge stream phases (`queued`, `edge-started`, `streaming`, `finalizing`, `completed`, `failed`).
