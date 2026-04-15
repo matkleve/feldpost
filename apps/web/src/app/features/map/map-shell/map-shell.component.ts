@@ -1897,7 +1897,7 @@ export class MapShellComponent implements OnDestroy {
   }): void {
     if (!this.map) return;
 
-    // Spec link: docs/element-specs/media-detail-actions.md -> detail menu supports house/street zoom variants.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail menu supports house/street zoom variants.
     const requestedZoom =
       event.zoomMode === 'house'
         ? MapShellComponent.HOUSE_PROXIMITY_ZOOM

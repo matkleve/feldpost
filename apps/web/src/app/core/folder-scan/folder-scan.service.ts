@@ -21,11 +21,11 @@ export interface FileScanProgress {
 export interface ScannedFileEntry {
   file: File;
   // Workspace-relative path within the selected folder root.
-  // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3/4).
+  // Spec context: docs/specs/service/media-upload-service/upload-manager-pipeline.md (Action 3/4).
   // Used to derive per-file folder hints for mixed directory structures.
   relativePath: string;
   // Folder segments from root to the file's parent directory.
-  // Spec context: docs/element-specs/location-path-parser.md (hierarchical parsing).
+  // Spec context: docs/specs/service/location-path-parser/location-path-parser.md (hierarchical parsing).
   directorySegments: readonly string[];
 }
 

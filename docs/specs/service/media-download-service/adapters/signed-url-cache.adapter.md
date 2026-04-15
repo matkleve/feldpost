@@ -13,7 +13,7 @@ Headless adapter with route-stable cache behavior. It supports warm preview reus
 
 ## Where It Lives
 
-- Spec: `docs/element-specs/media-download/adapters/signed-url-cache.adapter.md`
+- Spec: `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`
 - Initial implementation source: `apps/web/src/app/core/photo-load.service.ts`
 
@@ -71,7 +71,7 @@ flowchart TD
 
 | File                                                                        | Purpose                           |
 | --------------------------------------------------------------------------- | --------------------------------- |
-| `docs/element-specs/media-download/adapters/signed-url-cache.adapter.md`    | Signed URL/cache adapter contract |
+| `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`    | Signed URL/cache adapter contract |
 | `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` | New adapter file                  |
 | `apps/web/src/app/core/photo-load.service.ts`                               | Source logic to migrate           |
 | `apps/web/src/app/core/photo-load.model.ts`                                 | Source types to migrate/alias     |

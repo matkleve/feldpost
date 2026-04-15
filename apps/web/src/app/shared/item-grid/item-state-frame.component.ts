@@ -18,7 +18,7 @@ export class ItemStateFrameComponent {
   readonly mode = input<ItemDisplayMode>('grid-md');
 
   // Stable states: content, loading, error, empty, selected, disabled.
-  // @see docs/element-specs/item-state-frame.md#state-machine
+  // @see docs/specs/component/item-state-frame.md#state-machine
   readonly state = input<ItemVisualState>('content');
 
   readonly loadingLabel = input('Loading item');
@@ -29,21 +29,21 @@ export class ItemStateFrameComponent {
   readonly retryRequested = output<string>();
 
   // Stable state: disabled applies shared interaction lock and dimming.
-  // @see docs/element-specs/item-state-frame.md#state-machine
+  // @see docs/specs/component/item-state-frame.md#state-machine
   readonly disabled = computed(() => this.state() === 'disabled');
 
   // Stable state: error.
-  // @see docs/element-specs/item-state-frame.md#state-machine
+  // @see docs/specs/component/item-state-frame.md#state-machine
   // Applies non-overridable state priority across all item domains.
-  // @see docs/element-specs/item-grid.md#state
+  // @see docs/specs/component/item-grid.md#state
   readonly showErrorState = computed(() => this.state() === 'error');
 
   // Stable state: empty.
-  // @see docs/element-specs/item-state-frame.md#state-machine
+  // @see docs/specs/component/item-state-frame.md#state-machine
   readonly showEmptyState = computed(() => this.state() === 'empty');
 
   // Stable state: loading.
-  // @see docs/element-specs/item-state-frame.md#state-machine
+  // @see docs/specs/component/item-state-frame.md#state-machine
   readonly showLoadingState = computed(() => this.state() === 'loading');
 
   readonly hideProjectedContent = computed(

@@ -236,7 +236,7 @@ export interface SearchQueryContextV2 {
 
 | File                                                           | Purpose                                                 |
 | -------------------------------------------------------------- | ------------------------------------------------------- |
-| `docs/element-specs/search-bar/search-bar-data-and-service.md` | Data and service contract for v2 personalized geosearch |
+| `docs/specs/ui/search-bar/search-bar-data-and-service.md` | Data and service contract for v2 personalized geosearch |
 
 ## Wiring
 

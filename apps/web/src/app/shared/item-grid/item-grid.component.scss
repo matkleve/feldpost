@@ -1,28 +1,28 @@
 // Declares host participation in parent layout flow without owning item geometry.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host {
   // Provides tokenized gap between projected items across all grid modes.
-  // @see docs/element-specs/item-grid.md#scss-responsibilities
+  // @see docs/specs/component/item-grid.md#scss-responsibilities
   --item-grid-gap: var(--spacing-3);
 
   // Defines minimum column width token for compact grid mode.
-  // @see docs/element-specs/item-grid.md#scss-responsibilities
+  // @see docs/specs/component/item-grid.md#scss-responsibilities
   --item-grid-column-min-grid-sm: 8rem;
 
   // Defines minimum column width token for default grid mode.
-  // @see docs/element-specs/item-grid.md#scss-responsibilities
+  // @see docs/specs/component/item-grid.md#scss-responsibilities
   --item-grid-column-min-grid-md: 10rem;
 
   // Defines minimum column width token for spacious grid mode.
-  // @see docs/element-specs/item-grid.md#scss-responsibilities
+  // @see docs/specs/component/item-grid.md#scss-responsibilities
   --item-grid-column-min-grid-lg: 13rem;
 
   // Defines minimum column width token for card mode.
-  // @see docs/element-specs/item-grid.md#scss-responsibilities
+  // @see docs/specs/component/item-grid.md#scss-responsibilities
   --item-grid-column-min-card: 14rem;
 
   // Selects active minimum column token for responsive auto-fill layout.
-  // @see docs/element-specs/item-grid.md#scss-responsibilities
+  // @see docs/specs/component/item-grid.md#scss-responsibilities
   --item-grid-column-min: var(--item-grid-column-min-grid-md);
 
   // Exposes active grid column formula for host-level contract binding.
@@ -37,31 +37,31 @@
 }
 
 // Activates compact column token for grid-sm mode.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host(.item-grid--grid-sm) {
   --item-grid-column-min: var(--item-grid-column-min-grid-sm);
 }
 
 // Activates default column token for grid-md mode.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host(.item-grid--grid-md) {
   --item-grid-column-min: var(--item-grid-column-min-grid-md);
 }
 
 // Activates spacious column token for grid-lg mode.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host(.item-grid--grid-lg) {
   --item-grid-column-min: var(--item-grid-column-min-grid-lg);
 }
 
 // Activates card-mode column token while preserving layout-only ownership.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host(.item-grid--card) {
   --item-grid-column-min: var(--item-grid-column-min-card);
 }
 
 // Switches container flow to vertical stacking for row mode.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host(.item-grid--row) {
   display: flex;
   flex-direction: column;

@@ -37,4 +37,29 @@ Every UI element must have a spec before implementation. Follow the template exa
 - Use `px` only for precision details that should not scale with font size: borders, outlines, shadows, image display sizes, and pixel-resolution thresholds.
 - Use `vh` / `vw` only for viewport-relative layout behavior.
 
+## Governance Operations
+
+- Active references from `docs/element-specs/...` must be normalized to `docs/specs/...`.
+- Deterministic (single-candidate) legacy targets must be updated directly.
+- Multi-target legacy references must follow context routing:
+  - `ui/page/component/system` context -> `docs/specs/ui/...`.
+  - `service/core` context -> `docs/specs/service/...`.
+- No-target legacy references must be marked Deprecated with rationale and proposed direction.
+- Traceability changes must be recorded in `docs/specs/GOVERNANCE-TRACEABILITY-REPORT.json`.
+
+## SPEC GAP Handling
+
+- Blocking SPEC GAP: stop only for the affected module and continue unrelated modules.
+- Non-blocking SPEC GAP: mark and continue.
+- Every SPEC GAP entry must include ambiguity, impacted scope, and proposed resolution direction.
+
+## Governance Artifact Set
+
+- `docs/specs/GOVERNANCE-MATRIX.md`
+- `docs/specs/GOVERNANCE-README-COVERAGE.md`
+- `docs/specs/GOVERNANCE-DUPLICATION-REPORT.md`
+- `docs/specs/GOVERNANCE-VIOLATIONS.md`
+- `docs/specs/GOVERNANCE-MODULE-REGISTRY.json`
+- `docs/specs/GOVERNANCE-TRACEABILITY-REPORT.json`
+
 Full template: [docs/agent-workflows/element-spec-format.md](../../docs/agent-workflows/element-spec-format.md)

@@ -203,7 +203,7 @@ flowchart TD
 
 | File                                                      | Purpose                                                 |
 | --------------------------------------------------------- | ------------------------------------------------------- |
-| `docs/element-specs/location-path-parser/location-path-parser.md`              | Service spec (this document)                            |
+| `docs/specs/service/location-path-parser/location-path-parser.md`              | Service spec (this document)                            |
 | `core/location-path-parser.service.ts`                    | Main service implementation                             |
 | `core/location-path-parser.util.ts`                       | Shared validation utilities and regexes                 |
 | `core/location-path-parser/city-registry.const.ts`        | Hardcoded or imported city lookup table (Austria focus) |

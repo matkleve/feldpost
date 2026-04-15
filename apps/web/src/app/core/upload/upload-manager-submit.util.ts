@@ -76,7 +76,7 @@ export async function submitUploadManagerFolder(
   const label = options?.batchLabel ?? dirHandle.name;
 
   // Root-level fallback hint extracted from the selected folder label.
-  // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3, Action 4).
+  // Spec context: docs/specs/service/media-upload-service/upload-manager-pipeline.md (Action 3, Action 4).
   // File-level and per-segment hints can override this default later.
   const folderAddressHint = deps.extractAddressFromFolderName(label);
 
@@ -112,7 +112,7 @@ export async function submitUploadManagerFolder(
 
   if (scannedEntries.length === 0) {
     // No jobs means no side effects such as project auto-create.
-    // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 2a scoped to uploads).
+    // Spec context: docs/specs/service/media-upload-service/upload-manager-pipeline.md (Action 2a scoped to uploads).
     deps.updateBatch(batchId, { finishedAt: new Date() });
     return batchId;
   }
@@ -192,7 +192,7 @@ function createNewUploadJobs(
     // 1) nearest matching directory segment hint
     // 2) root folder hint fallback
     // File-level title extraction remains authoritative in routing.
-    // Spec context: docs/element-specs/upload-manager-pipeline.md (Action 3/4).
+    // Spec context: docs/specs/service/media-upload-service/upload-manager-pipeline.md (Action 3/4).
     const maxSegments = Math.max(0, Math.floor(locationConfig.maxDirectorySegmentsForHint));
     const boundedSegments =
       maxSegments === 0

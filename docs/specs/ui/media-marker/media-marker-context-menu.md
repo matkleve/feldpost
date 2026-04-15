@@ -119,8 +119,8 @@ flowchart LR
 | `apps/web/src/app/features/map/map-shell/map-shell.component.scss` | Positioning and responsive styles for marker menu        |
 | `apps/web/src/app/core/map/map-adapter.ts`                         | Add marker-context intent event contract                 |
 | `apps/web/src/app/core/map/leaflet-map.adapter.ts`                 | Emit normalized marker secondary-click/long-press events |
-| `docs/element-specs/media-marker/media-marker.md`                  | Cross-reference marker menu behavior from marker spec    |
-| `docs/element-specs/component/map-context-menu.md`                 | Define precedence between map and marker context menus   |
+| `docs/specs/ui/media-marker/media-marker.md`                  | Cross-reference marker menu behavior from marker spec    |
+| `docs/specs/component/map-context-menu.md`                 | Define precedence between map and marker context menus   |
 
 ## Wiring
 

@@ -301,7 +301,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly workspaceSingleActions = computed<
     ReadonlyArray<ResolvedAction<WorkspaceSingleActionId>>
   >(() =>
-    // Spec link: docs/element-specs/media-detail-actions.md -> action surface parity in detail menus.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> action surface parity in detail menus.
     this.actionEngineService.resolveActions(WORKSPACE_SINGLE_ACTION_DEFINITIONS, {
       contextType: ACTION_CONTEXT_IDS.wsFooter,
       hasCoordinates: this.hasCoordinates(),
@@ -571,7 +571,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   zoomToLocation(zoomMode: 'house' | 'street' = 'street'): void {
     const media = this.media();
     if (!media || media.latitude == null || media.longitude == null) return;
-    // Spec link: docs/element-specs/media-detail-actions.md -> separate zoom_house and zoom_street behaviors.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> separate zoom_house and zoom_street behaviors.
     this.zoomToLocationRequested.emit({
       mediaId: media.id,
       lat: media.latitude,
@@ -667,7 +667,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   }
 
   onThumbnailContextRequested(): void {
-    // Spec link: docs/element-specs/media-detail-media-viewer.md -> right-click should open detail context actions.
+    // Spec link: docs/specs/ui/media-detail/media-detail-media-viewer.md -> right-click should open detail context actions.
     this.showContextMenu.set(true);
   }
 
@@ -754,7 +754,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    // Spec link: docs/element-specs/media-detail-actions.md -> action parity with single marker menu.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> action parity with single marker menu.
     this.workspaceSelectionService.setSingle(media.id);
     this.workspacePaneObserver.setDetailImageId(media.id);
     this.workspacePaneObserver.setOpen(true);
@@ -767,7 +767,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    // Spec link: docs/element-specs/media-detail-actions.md -> change-location-map action availability.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> change-location-map action availability.
     this.locationMapPickRequested.emit({
       mediaId: media.id,
       fileName: media.id,
@@ -785,7 +785,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    // Spec link: docs/element-specs/media-detail-actions.md -> copy-address action in detail context menu.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> copy-address action in detail context menu.
     await navigator.clipboard.writeText(address).catch(() => {
       /* clipboard may be unavailable */
     });
@@ -807,13 +807,13 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    // Spec link: docs/element-specs/media-detail-actions.md -> open-google-maps action parity.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> open-google-maps action parity.
     const url = `https://www.google.com/maps?q=${media.latitude},${media.longitude}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   private showAlreadyOpenDetailsInfo(): void {
-    // Spec link: docs/element-specs/media-detail-actions.md -> keep single-marker action parity in detail menu.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> keep single-marker action parity in detail menu.
     this.toastService.show({
       message: this.t(
         'workspace.mediaDetail.toast.detailsAlreadyOpen',

@@ -1,20 +1,20 @@
 // Declares the host container for the media render surface component.
-// @see docs/element-specs/item-grid.md#media-domain-sub-component-ownership-mandatory
+// @see docs/specs/component/item-grid.md#media-domain-sub-component-ownership-mandatory
 :host {
   // Defines no-photo icon size token for unavailable media layers.
-  // @see docs/element-specs/media-item.md#actions--interactions
+  // @see docs/specs/component/media-item.md#actions--interactions
   --media-item-render-surface-no-photo-size: 2.4rem;
 
   // Defines icon-only fallback symbol size token.
-  // @see docs/element-specs/media-item.md#state-normalization-decision-mandatory
+  // @see docs/specs/component/media-item.md#state-normalization-decision-mandatory
   --media-item-render-surface-icon-size: 1.6rem;
 
   // Defines chip corner inset token for lower-right file-type label placement.
-  // @see docs/element-specs/media-item.md#what-it-looks-like
+  // @see docs/specs/component/media-item.md#what-it-looks-like
   --media-item-render-surface-chip-inset: var(--spacing-2);
 
   // Defines chip maximum inline size token to keep chip within square slot bounds.
-  // @see docs/element-specs/media-item.md#what-it-looks-like
+  // @see docs/specs/component/media-item.md#what-it-looks-like
   --media-item-render-surface-chip-max-inline-size: calc(100% - (var(--spacing-2) * 2));
 
   display: block;
@@ -22,7 +22,7 @@
 }
 
 // Defines plain square media slot geometry that hosts all visual state layers.
-// @see docs/element-specs/media-item.md#what-it-looks-like
+// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item-render-surface__slot {
   position: relative;
   display: flex;
@@ -30,7 +30,7 @@
 }
 
 // Defines rendered media-frame geometry where all visual affordances are anchored.
-// @see docs/element-specs/media-item.md#what-it-looks-like
+// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item-render-surface__media-frame {
   position: relative;
   width: 100%;
@@ -42,22 +42,22 @@
 }
 
 // Stable state: content-selected applies emphasis only on the media-frame visual owner.
-// @see docs/element-specs/media-item.md#state-machine
+// @see docs/specs/component/media-item.md#state-machine
 // Renders selected-state ring strictly on media-frame geometry bounds.
-// @see docs/element-specs/media-item.md#visual-behavior-contract
+// @see docs/specs/component/media-item.md#visual-behavior-contract
 [data-state='content-selected'] .media-item-render-surface__media-frame {
   outline: 2px solid var(--color-clay);
   filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color-clay) 32%, transparent));
 }
 
 // Aligns document media-frame to top-center inside square tile.
-// @see docs/element-specs/media-item.md#aspect-ratio-behavior-by-mode
+// @see docs/specs/component/media-item.md#aspect-ratio-behavior-by-mode
 .media-item-render-surface__media-frame--top {
   align-self: flex-start;
 }
 
 // Defines loaded media asset presentation with fit-contain behavior inside the square slot.
-// @see docs/element-specs/media-item.md#what-it-looks-like
+// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item-render-surface__asset {
   display: block;
   width: 100%;
@@ -67,13 +67,13 @@
 }
 
 // Defines top-centered document alignment inside the square tile for A4-like previews.
-// @see docs/element-specs/media-item.md#aspect-ratio-behavior-by-mode
+// @see docs/specs/component/media-item.md#aspect-ratio-behavior-by-mode
 .media-item-render-surface__asset--document {
   object-position: top center;
 }
 
 // Defines one absolute fallback layer for loading, non-image, and no-media states.
-// @see docs/element-specs/media-item.md#component-hierarchy
+// @see docs/specs/component/media-item.md#component-hierarchy
 .media-item-render-surface__fallback {
   position: absolute;
   inset: 0;
@@ -83,33 +83,33 @@
 }
 
 // Stable state: loading renders pulse placeholder and icon.
-// @see docs/element-specs/media-item.md#state-machine
+// @see docs/specs/component/media-item.md#state-machine
 // Defines loading placeholder layer with pulse animation and centered icon.
-// @see docs/element-specs/media-item.md#acceptance-criteria
+// @see docs/specs/component/media-item.md#acceptance-criteria
 .media-item-render-surface__fallback--loading {
   background: var(--color-skeleton-surface);
   animation: var(--animation-skeleton-pulse);
 }
 
 // Stable state: error | no-media renders no-photo fallback tone.
-// @see docs/element-specs/media-item.md#state-machine
+// @see docs/specs/component/media-item.md#state-machine
 // Defines no-photo and error layer tone for unavailable preview states.
-// @see docs/element-specs/media-item.md#actions--interactions
+// @see docs/specs/component/media-item.md#actions--interactions
 .media-item-render-surface__fallback--no-photo {
   background: color-mix(in srgb, var(--color-bg-base) 8%, transparent);
 }
 
 // Stable state: content (non-image) renders deterministic icon-only fallback.
-// @see docs/element-specs/media-item.md#state-machine
+// @see docs/specs/component/media-item.md#state-machine
 // Defines icon-only layer color semantics for non-image media types.
-// @see docs/element-specs/media-item.md#state-normalization-decision-mandatory
+// @see docs/specs/component/media-item.md#state-normalization-decision-mandatory
 .media-item-render-surface__fallback--icon-only {
   color: var(--color-text-secondary);
   background: color-mix(in srgb, var(--color-bg-base) 6%, transparent);
 }
 
 // Defines no-photo icon dimensions and reduced emphasis opacity.
-// @see docs/element-specs/media-item.md#actions--interactions
+// @see docs/specs/component/media-item.md#actions--interactions
 .media-item-render-surface__no-photo-icon {
   width: var(--media-item-render-surface-no-photo-size);
   height: var(--media-item-render-surface-no-photo-size);
@@ -117,14 +117,14 @@
 }
 
 // Defines icon-only glyph size for non-image file previews.
-// @see docs/element-specs/media-item.md#state-normalization-decision-mandatory
+// @see docs/specs/component/media-item.md#state-normalization-decision-mandatory
 .media-item-render-surface__icon {
   font-size: var(--media-item-render-surface-icon-size);
   line-height: 1;
 }
 
 // Anchors the file-type chip directly in the lower-right corner of the square slot.
-// @see docs/element-specs/media-item.md#what-it-looks-like
+// @see docs/specs/component/media-item.md#what-it-looks-like
 .media-item-render-surface__chip {
   position: absolute;
   inset-inline-end: var(--media-item-render-surface-chip-inset);

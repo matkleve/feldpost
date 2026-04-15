@@ -1,5 +1,5 @@
 // Defines media page content stack spacing around item-grid and state sections.
-// @see docs/element-specs/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid.md#scss-responsibilities
 :host {
   display: grid;
   gap: var(--spacing-3);

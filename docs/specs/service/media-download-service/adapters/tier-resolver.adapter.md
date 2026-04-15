@@ -1,4 +1,4 @@
-﻿# Media Download Adapter - Tier Resolver
+# Media Download Adapter - Tier Resolver
 
 > Parent spec: [../media-download-service.md](../media-download-service.md)
 > Related specs: [../../media-item.md](../../media-item.md), [../../component/item-grid.md](../../component/item-grid.md), [../../media-detail/media-detail-media-viewer.md](../../media-detail/media-detail-media-viewer.md)
@@ -13,7 +13,7 @@ Headless adapter. Consumers pass `desiredSize` and optional `boxPixels`; adapter
 
 ## Where It Lives
 
-- Spec: `docs/element-specs/media-download/adapters/tier-resolver.adapter.md`
+- Spec: `docs/specs/service/media-download-service/adapters/tier-resolver.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`
 - Initial implementation source: `apps/web/src/app/core/media/media-orchestrator.service.ts`
 
@@ -74,12 +74,12 @@ flowchart TD
 
 ## File Map
 
-| File                                                                     | Purpose                 |
-| ------------------------------------------------------------------------ | ----------------------- |
-| `docs/element-specs/media-download/adapters/tier-resolver.adapter.md`    | Tier adapter contract   |
-| `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts` | New adapter file        |
-| `apps/web/src/app/core/media/media-orchestrator.service.ts`              | Source logic to migrate |
-| `apps/web/src/app/core/media/media-renderer.types.ts`                    | Shared tier types       |
+| File                                                                          | Purpose                 |
+| ----------------------------------------------------------------------------- | ----------------------- |
+| `docs/specs/service/media-download-service/adapters/tier-resolver.adapter.md` | Tier adapter contract   |
+| `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`      | New adapter file        |
+| `apps/web/src/app/core/media/media-orchestrator.service.ts`                   | Source logic to migrate |
+| `apps/web/src/app/core/media/media-renderer.types.ts`                         | Shared tier types       |
 
 ## Wiring
 

@@ -83,7 +83,7 @@ flowchart TD
 
 | File                                                                         | Purpose                                             |
 | ---------------------------------------------------------------------------- | --------------------------------------------------- |
-| `docs/element-specs/shortcut-reference-settings.md`                          | Contract for settings shortcut reference section    |
+| `docs/specs/ui/settings-overlay/shortcut-reference-settings.md`                          | Contract for settings shortcut reference section    |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.ts`   | Adds section metadata and shortcut category dataset |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.html` | Renders shortcuts section and grouped table UI      |
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` | Styles table layout and status pills                |

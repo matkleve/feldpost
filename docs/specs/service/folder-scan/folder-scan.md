@@ -149,7 +149,7 @@ After scanning, each discovered file becomes an `UploadJob` with structured addr
 
 | File                                             | Purpose                                   |
 | ------------------------------------------------ | ----------------------------------------- |
-| `docs/element-specs/folder-scan/folder-scan.md`              | Service spec (this document)              |
+| `docs/specs/service/folder-scan/folder-scan.md`              | Service spec (this document)              |
 | `core/upload/folder-scan.service.ts`             | Main service implementation               |
 | `core/upload/folder-scan/scan-progress.types.ts` | Type definitions for scan progress events |
 | `core/upload/folder-scan.util.ts`                | Path utilities (relative path calc, etc.) |

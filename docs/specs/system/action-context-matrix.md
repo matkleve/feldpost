@@ -15,7 +15,7 @@ The visual shell is still the shared dropdown/action-sheet shell, but section or
 
 ## Where It Lives
 
-- **Docs location**: `docs/element-specs/action-context-matrix.md`
+- **Docs location**: `docs/specs/system/action-context-matrix.md`
 - **Used by**: map menus, media detail menus, workspace thumbnail actions, workspace footer actions, upload row menus, and `/media` page actions
 - **Trigger**: Any feature work that adds, removes, renames, or reorders actions
 
@@ -198,13 +198,13 @@ flowchart TD
 
 | File                                                           | Purpose                                                                     |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `docs/element-specs/action-context-matrix.md`                  | Canonical cross-context action contract                                     |
-| `docs/element-specs/upload-manager/upload-manager-pipeline.md` | Full upload location-resolution algorithm and upload-internal issue routing |
-| `docs/element-specs/component/upload-panel.md`                           | Upload row consumer of the matrix                                           |
-| `docs/element-specs/map-secondary-click-system.md`             | Map consumer of the matrix                                                  |
-| `docs/element-specs/media-detail/media-detail-actions.md`      | Media detail consumer of the matrix                                         |
-| `docs/element-specs/workspace/workspace-actions-bar.md`        | Workspace footer multi-selection consumer                                   |
-| `docs/element-specs/media-page.md`                             | `/media` page consumer                                                      |
+| `docs/specs/system/action-context-matrix.md`                  | Canonical cross-context action contract                                     |
+| `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Full upload location-resolution algorithm and upload-internal issue routing |
+| `docs/specs/component/upload-panel.md`                           | Upload row consumer of the matrix                                           |
+| `docs/specs/system/map-secondary-click-system.md`             | Map consumer of the matrix                                                  |
+| `docs/specs/ui/media-detail/media-detail-actions.md`      | Media detail consumer of the matrix                                         |
+| `docs/specs/ui/workspace/workspace-actions-bar.md`        | Workspace footer multi-selection consumer                                   |
+| `docs/specs/page/media-page.md`                             | `/media` page consumer                                                      |
 
 ## Wiring
 

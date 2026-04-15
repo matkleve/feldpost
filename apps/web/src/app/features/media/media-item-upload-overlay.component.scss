@@ -1,11 +1,11 @@
 // Declares host participation in media item overlay stacking without owning geometry.
-// @see docs/element-specs/item-grid.md#media-domain-sub-component-ownership-mandatory
+// @see docs/specs/component/item-grid.md#media-domain-sub-component-ownership-mandatory
 :host {
   display: block;
 }
 
 // Defines upload overlay surface for active media upload phases.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/specs/component/item-grid.md#media-contract-rebuild-rule-mandatory
 :host(.media-item-upload-overlay) {
   position: relative;
   display: flex;
@@ -18,7 +18,7 @@
 }
 
 // Defines progress fill bar geometry and accent color.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/specs/component/item-grid.md#media-contract-rebuild-rule-mandatory
 .media-item-upload-overlay__fill {
   position: absolute;
   inset-inline-start: 0;
@@ -28,7 +28,7 @@
 }
 
 // Defines upload status content strip above progress bar.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/specs/component/item-grid.md#media-contract-rebuild-rule-mandatory
 .media-item-upload-overlay__content {
   position: relative;
   z-index: 1;
@@ -42,14 +42,14 @@
 }
 
 // Defines upload icon sizing for overlay status content.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/specs/component/item-grid.md#media-contract-rebuild-rule-mandatory
 .media-item-upload-overlay__icon {
   font-size: 0.875rem;
   line-height: 1;
 }
 
 // Defines truncation-safe upload status label typography.
-// @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory
+// @see docs/specs/component/item-grid.md#media-contract-rebuild-rule-mandatory
 .media-item-upload-overlay__label {
   overflow: hidden;
   white-space: nowrap;

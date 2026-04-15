@@ -143,7 +143,7 @@ flowchart TD
 
 | File                                              | Purpose                                 |
 | ------------------------------------------------- | --------------------------------------- |
-| `docs/element-specs/filename-parser/filename-parser.md`           | Service spec (this document)            |
+| `docs/specs/service/filename-parser/filename-parser.md`           | Service spec (this document)            |
 | `core/filename-parser.service.ts`                 | Main service implementation             |
 | `core/filename-parser/date-patterns.const.ts`     | ISO, timestamp, and German date regexes |
 | `core/filename-parser/metadata-keywords.const.ts` | DRAFT, THUMB, TEMP, and other keywords  |

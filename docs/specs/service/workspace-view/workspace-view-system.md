@@ -86,7 +86,7 @@ Location status compatibility note:
 
 | File                                                                          | Purpose                                    |
 | ----------------------------------------------------------------------------- | ------------------------------------------ |
-| `docs/element-specs/workspace-view-system.md`                                 | System-level orchestration contract        |
+| `docs/specs/service/workspace-view/workspace-view-system.md`                                 | System-level orchestration contract        |
 | `apps/web/src/app/features/map/workspace-pane/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
 | `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Parent host integration with map shell     |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |

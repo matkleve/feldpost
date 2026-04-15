@@ -8,7 +8,7 @@ import {
 
 // Stable state: interactive-unselected, interactive-selected,
 // interactive-map-disabled, interactive-selected-map-disabled, disabled.
-// @see docs/element-specs/media-item-quiet-actions.md#state-machine
+// @see docs/specs/component/media-item-quiet-actions.md#state-machine
 export type MediaItemQuietActionsState =
   | 'interactive-unselected'
   | 'interactive-selected'
@@ -38,7 +38,7 @@ export class MediaItemQuietActionsComponent {
   readonly mapLabel = input('');
 
   // Stable states with active selection visual treatment.
-  // @see docs/element-specs/media-item-quiet-actions.md#state-machine
+  // @see docs/specs/component/media-item-quiet-actions.md#state-machine
   readonly selected = computed(
     () =>
       this.state() === 'interactive-selected' ||
@@ -46,11 +46,11 @@ export class MediaItemQuietActionsComponent {
   );
 
   // Stable state with global interaction lock.
-  // @see docs/element-specs/media-item-quiet-actions.md#state-machine
+  // @see docs/specs/component/media-item-quiet-actions.md#state-machine
   readonly interactionsDisabled = computed(() => this.state() === 'disabled');
 
   // Stable states with map action lock: disabled, interactive-map-disabled, interactive-selected-map-disabled.
-  // @see docs/element-specs/media-item-quiet-actions.md#state-machine
+  // @see docs/specs/component/media-item-quiet-actions.md#state-machine
   readonly mapActionDisabled = computed(
     () =>
       this.interactionsDisabled() ||

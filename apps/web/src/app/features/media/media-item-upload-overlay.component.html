@@ -1,18 +1,18 @@
 @if (overlay()) {
   <!-- Visualizes numeric progress as bottom fill bar width percentage. -->
-  <!-- @see docs/element-specs/item-grid.md#actions -->
+  <!-- @see docs/specs/component/item-grid.md#actions -->
   <div class="media-item-upload-overlay__fill" [style.width.%]="progressPercent()"></div>
 
   <!-- Hosts upload phase icon and optional status label above the progress bar. -->
-  <!-- @see docs/element-specs/item-grid.md#media-contract-rebuild-rule-mandatory -->
+  <!-- @see docs/specs/component/item-grid.md#media-contract-rebuild-rule-mandatory -->
   <div class="media-item-upload-overlay__content">
     <!-- Displays upload glyph for current active upload overlay state. -->
-    <!-- @see docs/element-specs/item-grid.md#actions -->
+    <!-- @see docs/specs/component/item-grid.md#actions -->
     <span class="material-icons media-item-upload-overlay__icon" aria-hidden="true">upload</span>
 
     @if (overlay()?.label; as label) {
       <!-- Shows localized upload phase/status text when label is available. -->
-      <!-- @see docs/element-specs/item-grid.md#actions -->
+      <!-- @see docs/specs/component/item-grid.md#actions -->
       <span class="media-item-upload-overlay__label">{{ label }}</span>
     }
   </div>

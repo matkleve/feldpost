@@ -3,7 +3,7 @@ import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
 export interface WorkspaceSingleActionContext {
   contextType: typeof ACTION_CONTEXT_IDS.wsFooter;
   hasCoordinates: boolean;
-  // Spec link: docs/element-specs/media-detail-actions.md -> address-dependent action enablement.
+  // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> address-dependent action enablement.
   hasAddress: boolean;
 }
 

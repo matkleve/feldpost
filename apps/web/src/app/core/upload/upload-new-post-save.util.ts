@@ -59,8 +59,8 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
 
   // Post-save enrichment policy:
   // Spec context:
-  // - docs/element-specs/upload-manager-pipeline.md (Action 5 and Action 6)
-  // - docs/element-specs/location-path-parser.md (soft mismatch handling)
+  // - docs/specs/service/media-upload-service/upload-manager-pipeline.md (Action 5 and Action 6)
+  // - docs/specs/service/location-path-parser/location-path-parser.md (soft mismatch handling)
   // - If we have GPS coords and no title address, do reverse geocoding (coords -> address).
   // - If we have a title address and no coords, do forward geocoding (address -> coords).
   // - If both are present, keep existing upload result as-is in this phase.

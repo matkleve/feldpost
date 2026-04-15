@@ -1,4 +1,4 @@
-﻿# Project Item
+# Project Item
 
 ## What It Is
 
@@ -10,8 +10,8 @@ The component renders a tokenized project frame with name, counts, status, and a
 
 ## Where It Lives
 
-- Parent spec: `docs/element-specs/component/item-grid.md`
-- Related page contract: `docs/element-specs/projects-page.md`
+- Parent spec: `docs/specs/component/item-grid.md`
+- Related page contract: `docs/specs/page/projects-page.md`
 - Child component root: `apps/web/src/app/features/projects/project-item.component.ts`
 - Route consumers:
   - `/projects`
@@ -273,12 +273,12 @@ sequenceDiagram
 
 ### Ownership Triad Declaration
 
-| Behavior          | Geometry Owner           | State Owner                                                         | Visual Owner                                                        | Same element?                                                                        |
-| ----------------- | ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Project frame     | `.project-item__frame`   | `.project-item__frame`                                              | `.project-item__frame`                                              | âœ…                                                                                   |
-| Selected emphasis | `.project-item__frame`   | `.project-item__frame--selected`                                    | `.project-item__frame--selected`                                    | âœ…                                                                                   |
-| Status badge      | `.project-item__status`  | `.project-item__status--active` / `.project-item__status--archived` | `.project-item__status--active` / `.project-item__status--archived` | âœ…                                                                                   |
-| Action reveal     | `.project-item__actions` | `.project-item--selected` (parent state gate)                       | `.project-item__actions`                                            | âš ï¸ exception â€” reveal can be parent-state driven for stable focus/selection behavior |
+| Behavior          | Geometry Owner           | State Owner                                                         | Visual Owner                                                        | Same element?                                                                             |
+| ----------------- | ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Project frame     | `.project-item__frame`   | `.project-item__frame`                                              | `.project-item__frame`                                              | âœ…                                                                                       |
+| Selected emphasis | `.project-item__frame`   | `.project-item__frame--selected`                                    | `.project-item__frame--selected`                                    | âœ…                                                                                       |
+| Status badge      | `.project-item__status`  | `.project-item__status--active` / `.project-item__status--archived` | `.project-item__status--active` / `.project-item__status--archived` | âœ…                                                                                       |
+| Action reveal     | `.project-item__actions` | `.project-item--selected` (parent state gate)                       | `.project-item__actions`                                            | âš ï¸ exception â€” reveal can be parent-state driven for stable focus/selection behavior |
 
 ## Acceptance Criteria
 
@@ -295,4 +295,3 @@ sequenceDiagram
 - [ ] Visual output is driven by one enum state input with `[attr.data-state]`; boolean visual-state inputs are removed.
 - [ ] Transition choreography uses tokenized timings (`var(--transition-*)`) and no magic numbers.
 - [ ] `npm run lint` and `ng build` are clean for the migration scope.
-

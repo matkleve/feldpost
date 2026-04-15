@@ -1,23 +1,23 @@
 <!-- Renders page-header container for media route title, breadcrumb, and count summary. -->
-<!-- @see docs/element-specs/item-grid.md#wiring -->
+<!-- @see docs/specs/component/item-grid.md#wiring -->
 <!-- Renders breadcrumb navigation context for the current media page location. -->
-<!-- @see docs/element-specs/item-grid.md#wiring -->
+<!-- @see docs/specs/component/item-grid.md#wiring -->
 <nav class="media-page-header__breadcrumb" [attr.aria-label]="t('media.page.title', 'Media')">
   <!-- Provides breadcrumb link back to authenticated app root. -->
-  <!-- @see docs/element-specs/item-grid.md#wiring -->
+  <!-- @see docs/specs/component/item-grid.md#wiring -->
   <a [routerLink]="['/']">{{ t('nav.home', 'Home') }}</a>
   <!-- Displays breadcrumb separator and is hidden from assistive tech. -->
-  <!-- @see docs/element-specs/item-grid.md#wiring -->
+  <!-- @see docs/specs/component/item-grid.md#wiring -->
   <span aria-hidden="true">/</span>
   <!-- Displays current breadcrumb terminal node with media title text. -->
-  <!-- @see docs/element-specs/item-grid.md#wiring -->
+  <!-- @see docs/specs/component/item-grid.md#wiring -->
   <span>{{ title() }}</span>
 </nav>
 <!-- Renders main page heading for the /media route. -->
-<!-- @see docs/element-specs/item-grid.md#wiring -->
+<!-- @see docs/specs/component/item-grid.md#wiring -->
 <h1 class="media-page-header__title">{{ title() }}</h1>
 <!-- Renders loading/count summary text including loaded-of-total fallback logic. -->
-<!-- @see docs/element-specs/item-grid.md#data -->
+<!-- @see docs/specs/component/item-grid.md#data -->
 <p class="media-page-header__count">
   @if (state() === 'loading') {
     {{ t('common.loading', 'Loading media...') }}

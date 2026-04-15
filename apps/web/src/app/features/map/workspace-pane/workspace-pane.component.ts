@@ -107,7 +107,7 @@ export class WorkspacePaneComponent {
     lng: number;
     zoomMode?: 'house' | 'street';
   }): void {
-    // Spec link: docs/element-specs/media-detail-actions.md -> forward zoom mode so house/street actions stay distinct.
+    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> forward zoom mode so house/street actions stay distinct.
     this.zoomToLocationRequested.emit(event);
   }
 

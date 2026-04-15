@@ -4,7 +4,7 @@ import { UniversalMediaComponent } from '../../../../../shared/media/universal-m
 import type { MediaTier } from '../../../../../core/media/media-renderer.types';
 
 // Stable state: loading, loaded, icon-only.
-// @see docs/element-specs/thumbnail-grid.md#state
+// @see docs/element-specs/thumbnail-grid.md#state (Deprecated: no active docs/specs target; proposed direction: docs/specs/component/thumbnail-grid.md or alignment with docs/specs/component/item-grid.md)
 export type ThumbnailCardMediaState = 'loading' | 'loaded' | 'icon-only';
 
 @Component({
@@ -13,7 +13,7 @@ export type ThumbnailCardMediaState = 'loading' | 'loaded' | 'icon-only';
   imports: [UniversalMediaComponent],
   template: `
     <!-- Stable state: loading | loaded | icon-only rendered through universal-media renderState mapping. -->
-    <!-- @see docs/element-specs/thumbnail-grid.md#state -->
+    <!-- @see docs/element-specs/thumbnail-grid.md#state (Deprecated: no active docs/specs target; proposed direction: docs/specs/component/thumbnail-grid.md or alignment with docs/specs/component/item-grid.md) -->
     <app-universal-media
       [fileIdentity]="fileIdentity()"
       [context]="'grid'"
@@ -52,7 +52,7 @@ export class ThumbnailCardMediaComponent {
   });
 
   // Stable state mapping to universal media render contract.
-  // @see docs/element-specs/thumbnail-grid.md#state
+  // @see docs/element-specs/thumbnail-grid.md#state (Deprecated: no active docs/specs target; proposed direction: docs/specs/component/thumbnail-grid.md or alignment with docs/specs/component/item-grid.md)
   readonly renderState = computed(() => {
     const signedThumbnailUrl = this.image().signedThumbnailUrl;
 

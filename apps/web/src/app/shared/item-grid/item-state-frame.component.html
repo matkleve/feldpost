@@ -1,38 +1,38 @@
 <!-- Hosts projected domain content and toggles aria-hidden while a shared state layer is active. -->
-<!-- @see docs/element-specs/item-grid.md#base-class-contract-mandatory-for-all-domain-items -->
+<!-- @see docs/specs/component/item-grid.md#base-class-contract-mandatory-for-all-domain-items -->
 <div class="item-state-frame__content" [attr.aria-hidden]="hideProjectedContent()">
   <!-- Projects domain-owned visuals into the shared state frame container. -->
-  <!-- @see docs/element-specs/item-grid.md#component-hierarchy -->
+  <!-- @see docs/specs/component/item-grid.md#component-hierarchy -->
   <ng-content />
 </div>
 
 <!-- Stable state: loading. -->
-<!-- @see docs/element-specs/item-state-frame.md#state-machine -->
+<!-- @see docs/specs/component/item-state-frame.md#state-machine -->
 @if (showLoadingState()) {
   <!-- Renders the shared loading layer when canonical loading state is active. -->
-  <!-- @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory -->
+  <!-- @see docs/specs/component/item-grid.md#pulse-placeholder-contract-mandatory -->
   <div
     class="item-state-frame__state-layer item-state-frame__state-layer--loading"
     role="status"
     [attr.aria-label]="loadingLabel()"
   >
     <!-- Displays pulse placeholder block inside the shared loading layer. -->
-    <!-- @see docs/element-specs/item-grid.md#pulse-placeholder-contract-mandatory -->
+    <!-- @see docs/specs/component/item-grid.md#pulse-placeholder-contract-mandatory -->
     <span class="item-state-frame__pulse-placeholder" aria-hidden="true"></span>
   </div>
 }
 
 <!-- Stable state: error. -->
-<!-- @see docs/element-specs/item-state-frame.md#state-machine -->
+<!-- @see docs/specs/component/item-state-frame.md#state-machine -->
 @if (showErrorState()) {
   <!-- Renders the shared error layer with retry affordance when canonical error state is active. -->
-  <!-- @see docs/element-specs/item-grid.md#state -->
+  <!-- @see docs/specs/component/item-grid.md#state -->
   <div class="item-state-frame__state-layer item-state-frame__state-layer--error" role="alert">
     <!-- Announces the translated error label for the current item. -->
-    <!-- @see docs/element-specs/item-grid.md#state -->
+    <!-- @see docs/specs/component/item-grid.md#state -->
     <p class="item-state-frame__state-label">{{ errorLabel() }}</p>
     <!-- Triggers retry event so parent/domain component can reload item data. -->
-    <!-- @see docs/element-specs/item-grid.md#actions -->
+    <!-- @see docs/specs/component/item-grid.md#actions -->
     <button type="button" class="item-state-frame__retry" (click)="onRetryClick()">
       {{ retryLabel() }}
     </button>
@@ -40,13 +40,13 @@
 }
 
 <!-- Stable state: empty. -->
-<!-- @see docs/element-specs/item-state-frame.md#state-machine -->
+<!-- @see docs/specs/component/item-state-frame.md#state-machine -->
 @if (showEmptyState()) {
   <!-- Renders the shared empty layer when item has no renderable content. -->
-  <!-- @see docs/element-specs/item-grid.md#state -->
+  <!-- @see docs/specs/component/item-grid.md#state -->
   <div class="item-state-frame__state-layer item-state-frame__state-layer--empty" role="status">
     <!-- Announces empty-state message for screen and visual readers. -->
-    <!-- @see docs/element-specs/item-grid.md#state -->
+    <!-- @see docs/specs/component/item-grid.md#state -->
     <p class="item-state-frame__state-label">{{ emptyLabel() }}</p>
   </div>
 }

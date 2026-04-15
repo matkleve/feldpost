@@ -13,7 +13,7 @@ Headless adapter. Client sends export payload once, edge function resolves binar
 
 ## Where It Lives
 
-- Spec: `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`
+- Spec: `docs/specs/service/media-download-service/adapters/edge-export-orchestrator.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts`
 - Edge target: `supabase/functions/media-export-zip/index.ts`
 
@@ -75,7 +75,7 @@ sequenceDiagram
 
 | File                                                                                | Purpose                             |
 | ----------------------------------------------------------------------------------- | ----------------------------------- |
-| `docs/element-specs/media-download/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract        |
+| `docs/specs/service/media-download-service/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract        |
 | `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | New adapter file                    |
 | `supabase/functions/media-export-zip/index.ts`                                      | Edge function implementation target |
 | `apps/web/src/app/core/zip-export/zip-export.service.ts`                            | Previous client ZIP path (retired)  |

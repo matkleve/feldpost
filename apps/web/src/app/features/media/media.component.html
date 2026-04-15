@@ -1,11 +1,11 @@
 <!-- Renders the /media page content stack in a flat host-owned layout. -->
-<!-- @see docs/element-specs/item-grid.md#data -->
+<!-- @see docs/specs/component/item-grid.md#data -->
 <!-- Stacks header, toolbar, content, and progressive-loading footer with token spacing. -->
-<!-- @see docs/element-specs/item-grid.md#actions -->
+<!-- @see docs/specs/component/item-grid.md#actions -->
 <app-vstack class="content-clamp content-clamp--list" [spacing]="4">
   <!-- Page Header with Breadcrumb -->
   <!-- Renders media title, breadcrumb, and loaded-count summary. -->
-  <!-- @see docs/element-specs/item-grid.md#data -->
+  <!-- @see docs/specs/component/item-grid.md#data -->
   <app-media-page-header
     [title]="t('media.page.title', 'Media')"
     [mediaCount]="mediaItems().length"
@@ -14,10 +14,10 @@
   />
 
   <!-- Hosts right-aligned card-variant switch used to drive item-grid mode mapping. -->
-  <!-- @see docs/element-specs/item-grid.md#actions -->
+  <!-- @see docs/specs/component/item-grid.md#actions -->
   <app-pane-toolbar class="media-toolbar">
     <!-- Renders card-variant segmented control and emits selected variant changes. -->
-    <!-- @see docs/element-specs/item-grid.md#actions -->
+    <!-- @see docs/specs/component/item-grid.md#actions -->
     <app-card-variant-switch
       slot="right"
       [value]="cardVariant()"
@@ -28,7 +28,7 @@
   </app-pane-toolbar>
 
   <!-- Renders media content state machine and forwards item/retry events to page controller. -->
-  <!-- @see docs/element-specs/item-grid.md#wiring -->
+  <!-- @see docs/specs/component/item-grid.md#wiring -->
   <app-media-content
     [state]="contentState()"
     [items]="mediaItems()"
@@ -41,7 +41,7 @@
 
   @if (loadingMore()) {
     <!-- Shows incremental pagination feedback while additional pages are appended. -->
-    <!-- @see docs/element-specs/item-grid.md#actions -->
+    <!-- @see docs/specs/component/item-grid.md#actions -->
     <p class="media-page__loading-more">
       {{ t('media.page.loading.more', 'Loading more media...') }}
     </p>

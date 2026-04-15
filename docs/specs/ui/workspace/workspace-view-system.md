@@ -77,7 +77,7 @@ Compatibility note: `image_id` remains a compatibility field in some RPCs; canon
 
 | File                                                                          | Purpose                                    |
 | ----------------------------------------------------------------------------- | ------------------------------------------ |
-| `docs/element-specs/workspace/workspace-view-system.md`                       | System-level orchestration contract        |
+| `docs/specs/ui/workspace/workspace-view-system.md`                       | System-level orchestration contract        |
 | `apps/web/src/app/features/map/workspace-pane/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
 | `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Parent host integration with map shell     |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |

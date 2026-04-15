@@ -1,5 +1,5 @@
 // Declares host block container for the /media route shell.
-// @see docs/element-specs/item-grid.md#wiring
+// @see docs/specs/component/item-grid.md#wiring
 :host {
   display: block;
   min-height: 100%;
@@ -7,13 +7,13 @@
 }
 
 // Defines full-width toolbar host area for variant switch controls.
-// @see docs/element-specs/item-grid.md#actions
+// @see docs/specs/component/item-grid.md#actions
 .media-toolbar {
   width: 100%;
 }
 
 // Styles loading-more footer text during incremental pagination.
-// @see docs/element-specs/item-grid.md#actions
+// @see docs/specs/component/item-grid.md#actions
 .media-page__loading-more {
   margin: 0;
   color: var(--color-text-secondary);

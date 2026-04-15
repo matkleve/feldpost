@@ -12,8 +12,8 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 
 ## Where It Lives
 
-- **Parent spec**: `docs/element-specs/upload-manager/upload-manager.md`
-- **Child/related specs**: `docs/element-specs/folder-scan/folder-scan.md`, `docs/element-specs/filename-parser/filename-parser.md`, `docs/element-specs/location-path-parser/location-path-parser.md`
+- **Parent spec**: `docs/specs/service/media-upload-service/upload-manager.md`
+- **Child/related specs**: `docs/specs/service/folder-scan/folder-scan.md`, `docs/specs/service/filename-parser/filename-parser.md`, `docs/specs/service/location-path-parser/location-path-parser.md`
 - **Primary implementation**: `core/upload/upload-manager.service.ts` plus pipeline services in `core/upload/` and shared utility services in `core/`
 - **Consumed by**: upload panel, media detail replace/attach flows, map shell, thumbnail views, folder import entry points
 
@@ -388,11 +388,11 @@ flowchart TD
 | File                                                              | Purpose                                          |
 | ----------------------------------------------------------------- | ------------------------------------------------ |
 | **Specs**                                                         |                                                  |
-| `docs/element-specs/upload-manager/upload-manager.md`             | Parent contract                                  |
-| `docs/element-specs/upload-manager/upload-manager-pipeline.md`    | Child spec for deep operational behavior         |
-| `docs/element-specs/location-path-parser/location-path-parser.md` | Address extraction from path hierarchy           |
-| `docs/element-specs/folder-scan/folder-scan.md`                   | Folder scanning and per-file aggregation         |
-| `docs/element-specs/filename-parser/filename-parser.md`           | Per-file metadata extraction (address, date)     |
+| `docs/specs/service/media-upload-service/upload-manager.md`             | Parent contract                                  |
+| `docs/specs/service/media-upload-service/upload-manager-pipeline.md`    | Child spec for deep operational behavior         |
+| `docs/specs/service/location-path-parser/location-path-parser.md` | Address extraction from path hierarchy           |
+| `docs/specs/service/folder-scan/folder-scan.md`                   | Folder scanning and per-file aggregation         |
+| `docs/specs/service/filename-parser/filename-parser.md`           | Per-file metadata extraction (address, date)     |
 | `docs/implementation-blueprints/upload-manager.md`                | Blueprint for implementation-level rollout notes |
 | **Services**                                                      |                                                  |
 | `core/upload/upload-manager.service.ts`                           | Batch submission, queue draining, event fan-out  |

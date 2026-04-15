@@ -157,7 +157,7 @@ flowchart LR
 
 | File                                                         | Purpose                                               |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
-| `docs/element-specs/search-bar/search-bar-query-behavior.md` | Query behavior contract for v2 personalized geosearch |
+| `docs/specs/ui/search-bar/search-bar-query-behavior.md` | Query behavior contract for v2 personalized geosearch |
 
 ## Wiring
 

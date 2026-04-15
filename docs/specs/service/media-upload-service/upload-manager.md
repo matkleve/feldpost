@@ -165,7 +165,7 @@ flowchart LR
 | `core/content-hash.util.ts`                                    | `computeContentHash()` — SHA-256 from file head + EXIF                       |
 | `core/upload/upload.service.ts`                                | Per-file storage/DB operations and EXIF handling                             |
 | `core/geocoding.service.ts`                                    | Reverse/forward geocoding adapter                                            |
-| `docs/element-specs/upload-manager/upload-manager-pipeline.md` | Child spec for pipeline, deduplication, folder upload, and conflict handling |
+| `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for pipeline, deduplication, folder upload, and conflict handling |
 | `features/upload/upload-panel/upload-panel.component.ts`       | Refactor — delegate to UploadManagerService                                  |
 
 ## Wiring

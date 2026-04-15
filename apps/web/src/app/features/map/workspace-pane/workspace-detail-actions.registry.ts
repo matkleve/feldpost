@@ -7,7 +7,7 @@ import type {
 export const WORKSPACE_SINGLE_ACTION_DEFINITIONS: ReadonlyArray<
   ActionDefinition<WorkspaceSingleActionContext, WorkspaceSingleActionId>
 > = [
-  // Spec link: docs/element-specs/media-detail-actions.md -> detail menu must expose single-marker actions.
+  // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail menu must expose single-marker actions.
   {
     id: 'open_details_or_selection',
     section: 'primary',
