@@ -8,23 +8,33 @@
 
 ## What It Is
 
-The **Media Page** is the canonical `/media` route for browsing all media assets with grouping, filtering, and sorting, while AppShell owns pane lifecycle and page components provide selected-items context through explicit interfaces.
+The **Media Page** is the canonical composition contract for the `/media` route.
+It MUST define routing, top-level layout composition, pane integration boundaries, and page-level persistence rules.
+It MUST NOT define child-level rendering details that are owned by component or domain-layer specs.
 
 ---
 
-## Design Philosophy
+## Documentation Phase Boundary
 
-**Problem:** Users need a dedicated, non-spatial view to browse all their media with powerful discovery operators (grouping by project, date, address; sorting; filtering). The map view is spatial-first; media browsing deserves its own page.
+- This refactoring pass MUST modify only the `/media` page specification set:
+  - `docs/specs/page/media-page.md`
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
+  - `docs/specs/component/media-item.md`
+  - `docs/specs/component/media-display.md`
+  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media-page-header.md`
+  - `docs/specs/component/media-toolbar.md`
+- Broader documentation cleanup MUST be deferred to later phases.
 
-**Solution:**
+## Layer Ownership Contract
 
-1. Create `/media` route with MediaComponent
-2. Use same Workspace Pane as other pages (map, projects)
-
-- "Selected Items" tab shows media grid browsed on this page
-- "Upload" tab is seitenübergreifend (persists across page changes)
-
-3. Reuse all existing workspace infrastructure (selection, operators, detail view)
+- The page layer MUST own orchestration, routing, high-level layout composition, and page-level state ownership.
+- The component layer MUST own behavior contracts, FSM transitions, and API/service boundaries.
+- The item/domain layer MUST own tile visuals, local UI states, and atomic data mapping.
+- When page and component specs conflict on a shared boundary, the component spec MUST be authoritative for behavior and the page spec MUST be authoritative for composition.
 
 ---
 
@@ -37,22 +47,16 @@ AppShell (top-level, persistent across routes)
 ├── SideMenuComponent (AppShell-owned, rendered independent from MediaComponent)
 ├── Main Content
 │   ├── MediaComponent (flex 1)
-│   │   ├── Breadcrumb: / > Media
-│   │   ├── [Optional] MediaToolbar (grouping/sort/filter)
+│   │   ├── MediaPageHeaderComponent
+│   │   ├── [Optional] MediaToolbar
 │   │   └── MediaContentComponent
-│   │       ├── ItemGridComponent + projected MediaItemComponent × N
-│   │       │   ├── media preview (photo/video tile or doc icon)
-│   │       │   ├── Title + date overlay
-│   │       │   ├── Address chip (optional)
-│   │       │   └── Hover state (linked-hover to workspace)
-│   │       └── No-results placeholder
 │   │
 │   └── WorkspacePaneComponent (right side, always visible unless closed)
 │       ├── PaneHeaderComponent (title, close button, width control)
-│       ├── TabSelectorComponent ← NEW: "Selected Items" | "Upload"
+│       ├── TabSelectorComponent: "Selected Items" | "Upload"
 │       └── ContentArea @switch(activeTab)
 │           ├── Tab: "Selected Items"
-│           │   └── [ItemGridComponent + projected MediaItemComponent]
+│           │   └── Selected-items provider bound by current route context
 │           └── Tab: "Upload"
 │               └── [UploadPanelComponent 1:1 embed]
 │
@@ -61,8 +65,8 @@ AppShell (top-level, persistent across routes)
 
 **Mobile Layout (Phase 2):**
 
-- Media grid fills viewport
-- Workspace pane becomes bottom sheet (snap points)
+- The media content region MUST fill the available viewport height.
+- Workspace pane behavior SHOULD switch to a bottom-sheet pattern.
 
 ---
 
@@ -78,72 +82,38 @@ AppShell (top-level, persistent across routes)
 
 ## Actions & Interactions
 
-**Media Grid Tab (Selected Items in Workspace Pane):**
+| #  | Trigger | Orchestration Response | Ownership |
+| --- | --- | --- | --- |
+| 1 | Route enters `/media` without persisted tab state | Page composition MUST mount `MediaComponent` and bind `WorkspacePaneComponent` context with default tab `selected-items`. | Page |
+| 2 | Route re-enters `/media` with persisted tab state | Page composition MUST restore the last active tab unless an explicit URL anchor/intent overrides it. | Page |
+| 3 | Explicit URL anchor/intent requests a tab | Page composition MUST prioritize explicit URL anchor/intent over persisted tab state. | Page |
+| 4 | User switches to `upload` tab | Pane host MUST render `UploadPanelComponent` without remounting the route shell. | AppShell + pane host |
+| 5 | User navigates between `/media` and `/map` | Pane host MUST preserve upload continuity and tab state across route transitions. | AppShell + pane host |
+| 6 | User invokes grouping/sorting/filtering via toolbar | Page composition MUST forward intent routing to `MediaComponent` command methods; toolbar MUST remain intent-only. | Page + shell component |
+| 7 | Child emits selection/detail intents | Page composition MUST bind and forward typed intents through selected-items context ports. | Page + pane host |
 
-| #    | User Action                                        | System Response                                                                                                       | Notes                                 |
-| ---- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| 1a   | Navigates to `/media`                              | MediaComponent loads, workspace pane shows "Selected Items" tab                                                       | Filtered to "All media" if no filters |
-| 1a.1 | Navigates to `/media` again (same user/query)      | Previously cached media list is restored immediately; background revalidation updates diff-only                       | No hard reset/empty flash             |
-| 1b   | Workspace applies saved filter state               | Grid re-renders with filtered/sorted/grouped media                                                                    | localStorage or query params          |
-| 2    | Uses Grouping operator (project/date/address)      | Toolbar emits intent; `MediaComponent.setGroupingMode(...)` updates operator state and grid reorganizes               | Computed via `WorkspaceViewService`   |
-| 3    | Uses Sorting operator (newest/oldest/name)         | Toolbar emits intent; `MediaComponent.setSortMode(...)` updates operator state and grid re-sorts within groups        | Reactive recompute                    |
-| 4    | Uses Filter operator (project/date/tag/media-type) | Toolbar emits intent; `MediaComponent.setActiveFilters(...)` updates operator state and grid hides non-matching items | Cascading filter logic                |
-| 5    | Clicks thumbnail in grid                           | Opens media detail view (modal overlay) via pane host detail contract                                                 | Same detail component as workspace    |
-| 6    | Closes detail                                      | Returns to grid; pane host clears `detailMediaId`                                                                     | Grid state preserved                  |
-| 7    | Hovers thumbnail                                   | Shows optional linked-hover underlay                                                                                  | Same pattern as workspace hover       |
-| 8    | Selects one or more thumbnails                     | Selected count updates in workspace pane header                                                                       | Affects "Selected Items" tab content  |
-| 8a   | Media was already loaded on `/map` or detail       | Grid tile uses warm cached preview (blurred) and dissolves to requested sharp tier when ready                         | Shared media cache contract           |
+Page contract note:
 
-**Upload Tab (Global, Seitenübergreifend):**
-
-| #   | User Action                                     | System Response                                                                                | Notes                                                       |
-| --- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| 9a  | Clicks "Upload" tab in workspace                | Tab switches, shows full UploadPanelComponent                                                  | Same as upload on map                                       |
-| 9b  | Drags files onto Drop Zone                      | Creates upload jobs via UploadManagerService                                                   | Queue + progress visible                                    |
-| 10  | Clicks "Select Folder" button                   | Opens folder picker, scans + enqueues                                                          | Folder address hint applied                                 |
-| 11  | Folder name contains address                    | Address becomes default for all files in folder                                                | Folder precedence rule                                      |
-| 12  | Clicks "Uploading" / "Uploaded" / "Issues" lane | Lane list filters to show matching jobs                                                        | 1:1 copy of upload panel                                    |
-| 13  | Duplicate detected                              | Modal appears, user selects use/upload/reject                                                  | Job state resolved                                          |
-| 13a | User opens action menu on uploaded row          | Embedded upload tab exposes saved-media follow-up actions                                      | `Zu Projekt hinzufügen`, `Priorisieren`, `/media`, download |
-| 13b | Uploaded row belongs to a bound project         | `Projekt öffnen` action is available                                                           | Only when project context already exists                    |
-| 13c | Issue row represents missing GPS                | Upload tab exposes placement-oriented actions only                                             | No `Trotzdem hochladen` for GPS issues                      |
-| 13d | Issue row represents duplicate-photo review     | Upload tab exposes `Trotzdem hochladen` and existing-media actions                             | Only for duplicate review                                   |
-| 14  | Switches back to "Selected Items"               | Tab switches, media grid stays in last filter state                                            | Uploads continue in background                              |
-| 15  | Navigates away to `/map`                        | MediaPage unmounts, Map loads; **Workspace pane stays open with Upload tab content preserved** | Uploads never interrupted                                   |
-| 16  | Navigates back from `/map` to `/media`          | MediaPage mounts; pane stays on previously active tab (global restore policy)                  | If tab is `selected-items`, media context is rebound        |
+- Child tile rendering details (for example address chips, overlay typography, per-item hover visuals) MUST be owned by domain/component contracts and MUST NOT be specified in this page spec.
 
 ---
 
 ## Component Hierarchy
 
-**STRICT PRIMITIVE REQUIREMENT:** The Media Page and its grid structural components must strictly rely on `.ui-container` and `.ui-item`. Do not create deep nested `div` elements for the grid sections; the group headers and media item tiles should be structurally flat siblings or one-level deep inside a standard container.
-
 ```text
-MediaComponent (new route component, flex 1)
-├── BreadcrumbComponent
-│   └── "/" > "Media" > [Project filter]?
-├── [Optional] MediaToolbarComponent
-│   ├── Standard dropdown/segmented primitives
-└── MediaContentComponent (new - flat structure using .ui-container/.ui-item equivalents)
-    ├── GroupSectionHeader × N (if grouping active)
-    │   └── ItemGridComponent + projected MediaItemComponent × N
-    │       ├── Media/video/doc preview
-    │       ├── Title + date overlay
-    │       ├── Address chip (optional)
-    │       └── Hover state (linked-hover)
-    └── No-results placeholder
+MediaComponent (route shell)
+├── MediaPageHeaderComponent
+├── [Optional] MediaToolbar
+└── MediaContentComponent
 
 [Workspace Pane is mounted by AppShellComponent, not MediaComponent]
 WorkspacePaneComponent (seitenübergreifend)
-├── PaneHeaderComponent (unchanged)
-├── TabSelectorComponent (NEW: two-button toggle)
-│   ├── "Selected Items" button
-│   └── "Upload" button
+├── PaneHeaderComponent
+├── TabSelectorComponent ("Selected Items" | "Upload")
 └── ContentArea @switch(activeTab)
-    ├── "Selected Items" tab
-    │   └── ItemGridComponent + projected MediaItemComponent (shows current page's selection)
+    ├── "Selected Items" tab (context-bound provider)
     └── "Upload" tab
-        └── UploadPanelComponent (unchanged, 1:1 embed)
+        └── UploadPanelComponent
 ```
 
 ---
@@ -185,33 +155,19 @@ flowchart LR
 
 ## State
 
-### Canonical State Taxonomy
+### Page-Level Ownership (Mandatory)
 
-- Lifecycle FSM state:
-  - Route-shell lifecycle state is owned by `MediaComponent` and specified in `docs/specs/component/media.component.md`.
-  - Content-render lifecycle state is owned by `MediaContentComponent` and specified in `docs/specs/component/media-content.md`.
-  - This page contract does not redefine child FSM enums or transitions.
-- Operator/query state:
-  - `groupingMode`, `sortMode`, and `activeFilters` are operator/query fields.
-  - `MediaComponent` is the single writer via explicit command methods (`setGroupingMode`, `setSortMode`, `setActiveFilters`, `clearFilters`).
-  - `MediaToolbar` emits intent-only outputs and never writes operator/query state directly.
-- Derived state:
-  - `filteredImages` and `groupedAndSorted` are read-only computed views derived from operator/query state plus route data.
-  - Derived state is never mutated directly by child components.
+- This page spec MUST own route composition and cross-route pane orchestration only.
+- Route-shell lifecycle FSM behavior MUST be owned by `docs/specs/component/media.component.md`.
+- Content-render FSM behavior MUST be owned by `docs/specs/component/media-content.md`.
+- Tile visuals and per-item UI mapping MUST be owned by domain-level specs (`MediaItemComponent` and related item contracts).
 
-**MediaComponent operator/query and derived ownership:**
+### Deterministic Tab Entry Policy (Mandatory)
 
-| Name               | Type                                                | Default    | Write Owner                                          | Read Consumers                                       |
-| ------------------ | --------------------------------------------------- | ---------- | ---------------------------------------------------- | ---------------------------------------------------- |
-| `groupingMode`     | `'none' \| 'project' \| 'date' \| 'address'`        | `'none'`   | `MediaComponent` command methods only                | `MediaContentComponent`, analytics/query persistence |
-| `sortMode`         | `'newest' \| 'oldest' \| 'name_asc' \| 'name_desc'` | `'newest'` | `MediaComponent` command methods only                | `MediaContentComponent`, analytics/query persistence |
-| `activeFilters`    | `FilterSpec[]`                                      | `[]`       | `MediaComponent` command methods only                | `MediaContentComponent`, query persistence           |
-| `filteredImages`   | `Signal<WorkspaceMedia[]>`                          | `[]`       | `MediaComponent` computed derivation only (readonly) | `MediaContentComponent`                              |
-| `groupedAndSorted` | `Signal<MediaGroup[]>`                              | `[]`       | `MediaComponent` computed derivation only (readonly) | `MediaContentComponent`                              |
-| `cachedMediaItems` | `Signal<WorkspaceMedia[]>`                          | `[]`       | `MediaComponent` cache hydrate/revalidate pipeline   | `MediaContentComponent`, route re-entry path         |
-| `hoveredMediaId`   | `string \| null`                                    | `null`     | `MediaComponent` pointer/hover handlers              | linked-hover rendering consumers                     |
-
-Note: cache-warm status is encoded in the MediaComponent lifecycle FSM (`boot`/`initial-loading`) and not as a separate boolean signal.
+- On re-entry, the page MUST restore the last active tab unless an explicit URL anchor/intent overrides it.
+- Selection context restore behavior MUST be subordinate to the tab policy above.
+- If the restored/overridden tab is `selected-items`, the route context MUST rebind selected-items provider contracts for `/media`.
+- If the restored/overridden tab is `upload`, upload continuity MUST remain uninterrupted and selected-items context MAY rebind in background.
 
 **Cross-route contracts (AppShell-owned pane lifecycle remains unchanged):**
 
@@ -233,8 +189,8 @@ Note: cache-warm status is encoded in the MediaComponent lifecycle FSM (`boot`/`
 
 Forbidden writers in this page contract:
 
-- `MediaToolbar`, `MediaContentComponent`, and `MediaItemComponent` must not directly mutate `groupingMode`, `sortMode`, or `activeFilters`.
-- `MediaItemComponent` must not write route lifecycle or cross-route tab/detail state.
+- `MediaToolbar`, `MediaContentComponent`, and `MediaItemComponent` MUST NOT directly mutate `groupingMode`, `sortMode`, or `activeFilters`.
+- `MediaItemComponent` MUST NOT write route lifecycle or cross-route tab/detail state.
 
 ## Module Interfaces (Schnittstellen)
 
@@ -262,10 +218,10 @@ export interface WorkspacePaneHostPort {
 
 ### Contract Invariants
 
-- `activeTabGlobal` is the single source of truth across routes; per-page state must not duplicate the tab key.
-- Route transition contract: `unbindContext` runs before `bindContext` when context key changes.
-- Upload tab visibility is globally persistent; selected-items provider is route-scoped and hot-swappable.
-- Naming contract is canonical: `selectedMediaIds` in page, pane, and service interfaces.
+- `activeTabGlobal` is the single source of truth across routes; per-page state MUST NOT duplicate the tab key.
+- Route transition contract: `unbindContext` MUST run before `bindContext` when context key changes.
+- Upload tab visibility MUST remain globally persistent; selected-items provider MUST remain route-scoped and hot-swappable.
+- Naming contract MUST remain canonical: `selectedMediaIds` in page, pane, and service interfaces.
 
 ### Observer/Hooks Contract
 
@@ -374,109 +330,17 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-**Route & Page:**
+- [ ] `/media` route MUST be accessible through AppShell navigation.
+- [ ] Page composition MUST include `MediaComponent` and MUST integrate with `WorkspacePaneComponent` without pane remount on route changes.
+- [ ] Tab persistence MUST follow one deterministic rule: restore last active tab on re-entry unless explicit URL anchor/intent overrides it.
+- [ ] Selection context restore MUST be subordinate to tab persistence and MUST rebind only for `selected-items` context.
+- [ ] Page spec MUST NOT define child tile visual mapping details; those details MUST be referenced through component/domain contracts.
+- [ ] Toolbar contract naming MUST use `MediaToolbar` when referring to the `/media` toolbar boundary.
+- [ ] All enforceable statements in this file MUST use RFC 2119 language (`MUST`, `SHOULD`, `MAY`).
 
-- [ ] `/media` route accessible from AppShell side menu navigation
-- [ ] MediaComponent renders breadcrumb: "/" > "Media"
-- [ ] Page loads all media (photos, videos, documents) from DB
-- [ ] Workspace pane opens by default, "Selected Items" tab active
+## Canonical Name Registry Gate
 
-**Media Grid (MVP - Phase 1):**
-
-- [ ] MediaContentComponent displays media items via ItemGrid in responsive grid (2–4 columns)
-- [ ] MediaItemComponent is reused as the domain item contract for media tiles
-- [ ] Each card shows media/video/doc preview + title + date overlay + address chip
-- [ ] Clicking card opens detail view (modal overlay)
-- [ ] Closing detail returns to grid with state preserved
-- [ ] Hovering card shows optional linked-hover effect
-- [ ] Initial unknown-count loading uses icon-free neutral gray placeholders sized to approximately 3 viewport heights (`columns x rows(3 viewports)`).
-- [ ] Revisiting `/media` with same user/query restores cached list immediately and does not hard-clear grid before revalidation.
-- [ ] If cached media tier exists from `/map` or detail/workspace, tile may render warm blurred preview before dissolving to requested sharp tier.
-
-**Workspace Pane Integration:**
-
-- [ ] Tab selector visible at top of pane (two buttons: "Selected Items" / "Upload")
-- [ ] "Selected Items" tab shows grid of media selected on this page
-- [ ] "Upload" tab shows UploadPanelComponent (same as map view)
-- [ ] Tab state persists globally via `activeTabGlobal` (single source of truth)
-- [ ] Selecting media items in media grid updates "Selected Items" tab count
-- [ ] Selected-items content is provided through `SelectedItemsContextPort` (documented in/out contract)
-- [ ] Route change rebinds selected-items provider via observer hook without remounting pane
-
-**Upload Persistence (Seitenübergreifend):**
-
-- [ ] User can open Upload tab and drag files while on `/media`
-- [ ] Jobs appear in progress board immediately
-- [ ] Navigate to `/map`, workspace pane stays open, Upload tab visible
-- [ ] Navigate back to `/media`, pane still open, "Selected Items" tab active
-- [ ] Uploads continue in background regardless of page navigation
-- [ ] Uploads not cancelled when navigating away
-
-**Mobile (Phase 2):**
-
-- [ ] Workspace pane becomes bottom sheet at <800px viewport
-- [ ] Sheet has snap points (64px, 50vh, 100vh)
-- [ ] Media grid shows 1–2 columns above sheet
-- [ ] All touch targets 44×44px minimum
-
-**Operators (Phase 2):**
-
-- [ ] Grouping operator (project/date/address) reorganizes grid
-- [ ] Sorting operator (newest/oldest/name) re-orders items
-- [ ] Filter operator (project/date/tag/media-type) hides non-matching
-- [ ] Filter state persists to localStorage
-
-**Modularity & Contracts:**
-
-- [ ] No route component directly controls pane lifecycle; all pane open/close ownership is in AppShell host
-- [ ] Module interfaces are documented for pane host and selected-items provider
-- [ ] Observer lifecycle (bind/unbind/subscribe/unsubscribe) is documented with cleanup behavior
-- [ ] Selection naming is canonical (`selectedMediaIds`) across page, pane, and service contracts
-- [ ] Context swap is atomic on route change (`unbindContext` before `bindContext`) with no duplicate observer subscriptions
-- [ ] Global tab persistence uses only `activeTabGlobal` (no per-route duplicate tab state key)
-- [ ] Media page containers and list-like rows use shared layout primitives (`.ui-container`, `.ui-item`) instead of ad-hoc wrappers
-- [ ] Hover/selected visual states never change card/list geometry (no padding/height jitter)
-
-**State Ownership Alignment (Docs Contract):**
-
-- [x] Lifecycle FSM state is separated from operator/query state and derived state in this page contract.
-- [x] `groupingMode`, `sortMode`, and `activeFilters` have one write owner: `MediaComponent` command methods.
-- [x] `MediaToolbar` is intent-only and is a forbidden direct writer for operator/query state.
-- [x] `MediaContentComponent` and `MediaItemComponent` are forbidden direct writers for operator/query state.
-- [x] `detailMediaId` write ownership is singular (`WorkspacePaneComponent`) and not duplicated in `MediaComponent`.
-
----
-
-## Design Details
-
-- **Grid Columns (responsive):** 2 (mobile) → 3 (tablet) → 4 (desktop 1440px+)
-- **Media Item Slot Size:** 128×128px (matches workspace grid default tile)
-- **Group Section Header Font:** Smaller than pane header, muted color token `--color-text-muted`
-- **Pane Width:** Same as map workspace (default 320px, 280–640px range)
-- **Pane Close Button:** Top-right, consistent with map/projects
-- **Tab Selector Style:** Simple segmented control or button toggle at pane top
-
-## Delivery Slices
-
-### MVP Delivery (first implementation wave)
-
-- Route activation for `/media` and page-level media grid render
-- Workspace pane integration through existing AppShell ownership
-- Stable two-tab behavior (`selected-items` / `upload`) with global tab persistence
-- Reuse of existing ItemGrid/MediaItem/detail/upload components and shared primitives (`.ui-container`, `.ui-item`)
-- No early feature-local wrappers or media-page-specific pane forks
-
-### Expansion Delivery (post-MVP)
-
-- Advanced operators (grouping, sorting, filtering)
-- Mobile bottom-sheet behavior and snap-point refinements
-- Progressive loading for very large clusters or group buckets
-- Additional linked-hover polish and non-critical UX refinements
-
----
-
-## Related Specs
-
-- [workspace/workspace-pane.md](workspace/workspace-pane.md) — extended with Upload tab
-- [upload-panel.md](../component/upload-panel.md) — embedded in workspace pane Upload tab (no changes)
-- [media-detail-inline-editing.md](media-detail-inline-editing.md) — detail modal reused on media page
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.

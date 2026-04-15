@@ -2,7 +2,23 @@
 
 ## What It Is
 
-Media Item Quiet Actions is the corner-action presenter for media item selection and map-jump affordances. It is an overlay-layer control surface that reveals via parent hover/focus logic.
+Media Item Quiet Actions is the corner-action presenter for media item selection and map-jump affordances.
+It MUST remain an overlay-layer control surface that reveals via parent hover/focus logic.
+
+## Documentation Phase Boundary
+
+- This refactoring pass MUST modify only the `/media` page specification set:
+  - `docs/specs/page/media-page.md`
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
+  - `docs/specs/component/media-item.md`
+  - `docs/specs/component/media-display.md`
+  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media-page-header.md`
+  - `docs/specs/component/media-toolbar.md`
+- Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
 
@@ -18,11 +34,18 @@ The component exposes two compact icon-only buttons: select (top-left) and map (
 
 | #   | User Action / System Trigger  | System Response                                         | Trigger             |
 | --- | ----------------------------- | ------------------------------------------------------- | ------------------- |
-| 1   | User clicks select action     | Emits `selectRequested` if not disabled                 | select button click |
-| 2   | User clicks map action        | Emits `mapRequested` if not disabled and map is enabled | map button click    |
-| 3   | Item is selected              | Select button receives active selected style            | `selected=true`     |
-| 4   | Map action disabled           | Map button is disabled and non-interactive              | `mapDisabled=true`  |
-| 5   | Keyboard focus enters actions | Focus-visible ring appears on focused button            | keyboard navigation |
+| 1   | User clicks select action     | Component MUST emit `selectRequested` only when action is enabled. | select button click |
+| 2   | User clicks map action        | Component MUST emit `mapRequested` only when action is enabled and map action is available. | map button click    |
+| 3   | Item is selected              | Component MUST render select control with active selected style. | `selected=true`     |
+| 4   | Map action disabled           | Component MUST render map button as disabled and non-interactive. | `mapDisabled=true`  |
+| 5   | Keyboard focus enters actions | Component MUST render focus-visible ring on focused button. | keyboard navigation |
+
+## Normative Boundary Contract
+
+- This file MUST be the single source of truth for `MediaItemQuietActionsComponent` visual/action-surface behavior.
+- `docs/specs/component/media-item.md` MUST remain the single source of truth for item-level orchestration and parent reveal gates.
+- This file MUST NOT own route-shell lifecycle behavior.
+- This file MUST NOT own upload overlay behavior.
 
 ## Component Hierarchy
 
@@ -244,3 +267,10 @@ sequenceDiagram
   inset-inline-end: var(--spacing-2);
 }
 ```
+
+## Canonical Name Registry Gate
+
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.

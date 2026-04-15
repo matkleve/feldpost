@@ -1,4 +1,4 @@
-# Element Spec Format
+# Spec Format
 
 Practical writing and refactoring template for specs in docs/specs/.
 This file is guidance. Governance and mandatory policy are owned by docs/specs/README.md.

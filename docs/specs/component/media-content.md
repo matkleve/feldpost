@@ -2,11 +2,31 @@
 
 ## What It Is
 
-Media Content is the list-rendering state contract for the media route content area. It owns placeholder slot orchestration, empty/error presentation switching, and deterministic projection of media items into ItemGrid.
+Media Content is the list-rendering behavior contract for the `/media` content region.
+It MUST own content-level FSM behavior, placeholder orchestration, empty/error switching, and deterministic projection into `ItemGrid`.
+It MUST NOT own route-shell transitions or cross-route pane orchestration.
+
+## Documentation Phase Boundary
+
+- This refactoring pass MUST modify only the `/media` page specification set:
+  - `docs/specs/page/media-page.md`
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
+  - `docs/specs/component/media-item.md`
+  - `docs/specs/component/media-display.md`
+  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media-page-header.md`
+  - `docs/specs/component/media-toolbar.md`
+- Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
 
-The component renders a stable content region with placeholder slots during loading. When ready data arrives, placeholders are replaced in-place and optional placeholder tail exit is handled as a short transition phase. Empty and error views are mutually exclusive with grid rendering. Item rendering is delegated to MediaItemComponent in ItemGrid projection. Selection and context actions are emitted as typed intents to the parent shell, which owns downstream service writes.
+The component MUST render a stable content region with deterministic loading placeholders.
+When ready data arrives, placeholder replacement MUST be deterministic and placeholder-tail-exit MUST be modeled as an explicit transitional phase.
+Empty and error views MUST remain mutually exclusive with grid rendering.
+Selection and context actions MUST be emitted as typed intents to the parent shell.
 
 ## Where It Lives
 
@@ -30,6 +50,13 @@ The component renders a stable content region with placeholder slots during load
 | 8   | User toggles item selection                        | Emit typed selection intent to parent shell                     | `selectionToggleRequested(mediaId)`                                 |
 | 9   | User clicks outside grid while ready               | Emit typed clear-selection intent to parent shell               | `selectionClearRequested()`                                         |
 | 10  | Coalesced systemic media fault signal is received  | Emit one shell escalation intent for the active cooldown window | `systemicFault(intent)`                                             |
+
+## Normative Boundary Contract
+
+- This file MUST be the single source of truth for `MediaContentComponent` render-state behavior.
+- `docs/specs/component/media.component.md` MUST remain the single source of truth for `/media` shell FSM behavior.
+- This file MUST NOT redefine route-shell state transitions.
+- This file MUST NOT define item/domain tile visual details beyond content-level projection contracts.
 
 ## Component Hierarchy
 
@@ -57,8 +84,8 @@ MediaContentComponent
 
 ### Read-only Consumption and Typed Intent Outputs
 
-`MediaContentComponent` consumes lifecycle/operator/derived inputs as read-only values.
-It must not mutate route lifecycle state, operator/query state, or cross-route pane state.
+`MediaContentComponent` MUST consume lifecycle/operator/derived inputs as read-only values.
+It MUST NOT mutate route lifecycle state, operator/query state, or cross-route pane state.
 
 Typed output intents (intent-only child contract):
 
@@ -66,6 +93,13 @@ Typed output intents (intent-only child contract):
 - `selectionToggleRequested(mediaId: string)`
 - `selectionClearRequested()`
 - `systemicFault(intent: SystemicMediaFaultIntent)`
+
+### MediaToolbar Visual Contract Reference (Owned Spec)
+
+- `docs/specs/component/media-toolbar.md` MUST be the single source of truth for `MediaToolbar` visual and intent behavior.
+- This file MUST reference `MediaToolbar` ownership and MUST NOT duplicate per-control behavior tables owned by the toolbar spec.
+- `MediaToolbar` remains intent-only; `MediaComponent` remains the single writer for `groupingMode`, `sortMode`, and `activeFilters`.
+- Toolbar references for `/media` MUST use `MediaToolbar`; non-canonical aliases such as `PaneToolbar` and `ActionToolbar` MUST NOT be used.
 
 ```mermaid
 flowchart TD
@@ -102,8 +136,9 @@ flowchart TD
 
 ## Wiring
 
-MediaContentComponent consumes parent state inputs and emits typed user intents only. It does not own route-shell loading policy, operator/query writes, or MediaDisplay delivery choreography.
-Per-item media delivery failures must not be forwarded upward one-by-one; only coalesced systemic intents from media-delivery boundary are allowed for shell escalation.
+MediaContentComponent MUST consume parent state inputs and MUST emit typed user intents only.
+MediaContentComponent MUST NOT own route-shell loading policy, operator/query writes, or MediaDisplay delivery choreography.
+Per-item media delivery failures MUST NOT be forwarded upward one-by-one; only coalesced systemic intents from media-delivery boundary are allowed for shell escalation.
 
 ```mermaid
 sequenceDiagram
@@ -136,3 +171,13 @@ sequenceDiagram
 - [x] MediaContent emits typed intents only and does not directly mutate `groupingMode`, `sortMode`, or `activeFilters`.
 - [x] Selection changes are emitted as parent intents (`selectionToggleRequested`, `selectionClearRequested`) and not written directly by the child.
 - [x] Systemic escalation is forwarded only as coalesced intent events; per-item failure storms are forbidden.
+- [ ] This file MUST reference `docs/specs/component/media-toolbar.md` as the owning visual/intent contract for `MediaToolbar`.
+- [ ] This file MUST NOT duplicate per-control toolbar behavior tables owned by the dedicated toolbar spec.
+- [ ] All enforceable statements in this file MUST use RFC 2119 language (`MUST`, `SHOULD`, `MAY`).
+
+## Canonical Name Registry Gate
+
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.

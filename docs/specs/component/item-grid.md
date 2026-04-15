@@ -5,6 +5,12 @@
 Item Grid is the universal layout and item-rendering contract for all Feldpost list and grid surfaces. It defines one shared structure for media, projects, and future domain entities so loading, error, no-media, and selection behavior stay consistent across pages and workspace contexts.
 This system is a full replacement contract: once a surface is migrated, legacy grid/card components for that surface are removed from active wiring and moved to archive for traceability.
 
+## Documentation Phase Boundary
+
+- This refactoring pass MUST modify only the `/media` page specification set.
+- In this shared spec, edits MUST stay limited to media-path ownership, FSM boundary, and naming consistency constraints.
+- Non-media item-grid cleanup MUST be deferred to later phases.
+
 ## What It Looks Like
 
 The system has two architectural layers: a layout-only `ItemGridComponent` and a state-contract `ItemComponent` base class consumed by domain-specific item components. Layout modes are `grid-sm`, `grid-md`, `grid-lg`, `row`, and `card`, with responsive transitions driven only by design tokens and shared primitives. Item content is projected from domain components; grid layout never renders domain text or actions itself. Shared loading is rendered as a pulse placeholder layer (spinner forbidden), while media delivery semantics are owned by `MediaDisplayComponent` + `MediaDownloadService` (see their dedicated specs for canonical FSM details). Item-grid-level invariant: cached media paths must preserve loading-first ordering and may not shortcut directly to final visible content. For grid surfaces, media slot geometry is plain square and media content renders with native ratio via `object-fit: contain`; quick actions reveal select (top-left) and map (top-right icon-only), and file-type chip (icon + text) anchors lower-right. All styles use semantic component class names and component-scoped SCSS files.
@@ -50,6 +56,14 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 | 15  | `/media` receives or appends large result sets                                             | Media list inserts rows progressively with deterministic batch size `columns x 3` to keep interaction fluid                                                                                           | list append / pagination          |
 | 16  | Any media consumer requests preview rendering (`map`, `workspace`, `/media`, `detail`)     | Consumer resolves requested/effective tier and URL fallback through shared media-download-service chain before render binding                                                                         | media render request              |
 | 17  | User changes route between `/map`, workspace detail, and `/media` while viewing same media | Existing cached tiers are reused across surfaces; media flow still starts at `loading-surface-visible` and transitions deterministically without forced cold reload                                   | cross-surface cache reuse         |
+
+## Normative Boundary Contract
+
+- This file MUST be the single source of truth for shared `ItemGridComponent` and `ItemComponent` layout/state-frame contracts.
+- Media route shell lifecycle behavior MUST remain owned by `docs/specs/component/media.component.md`.
+- Media content render lifecycle behavior MUST remain owned by `docs/specs/component/media-content.md`.
+- Media delivery/render lifecycle behavior MUST remain owned by `docs/specs/component/media-display.md`.
+- This file MUST NOT redefine route-shell tab/orchestration ownership.
 
 ## Component Hierarchy
 
@@ -606,3 +620,10 @@ Example:
 
 - `// Renders unified loading state for all item types`
 - `// @see item-grid.md#state`
+
+## Canonical Name Registry Gate
+
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.

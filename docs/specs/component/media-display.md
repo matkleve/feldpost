@@ -2,7 +2,24 @@
 
 ## What It Is
 
-Media Display is the reusable media-rendering contract for Feldpost surfaces. It owns the full media download lifecycle for a single `mediaId` and renders deterministic states (`idle`, `loading-surface-visible`, `ratio-known-contain`, `media-ready`, `content-fade-in`, `content-visible`, `icon-only`, `error`, `no-media`) without any grid or interaction-layer knowledge.
+Media Display is the reusable media-rendering contract for Feldpost surfaces.
+It MUST own the full media download lifecycle for a single `mediaId`.
+It MUST render deterministic states (`idle`, `loading-surface-visible`, `ratio-known-contain`, `media-ready`, `content-fade-in`, `content-visible`, `icon-only`, `error`, `no-media`) without any grid or interaction-layer knowledge.
+
+## Documentation Phase Boundary
+
+- This refactoring pass MUST modify only the `/media` page specification set:
+  - `docs/specs/page/media-page.md`
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
+  - `docs/specs/component/media-item.md`
+  - `docs/specs/component/media-display.md`
+  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media-page-header.md`
+  - `docs/specs/component/media-toolbar.md`
+- Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
 
@@ -23,22 +40,29 @@ The component renders one stable media viewport and keeps geometry stable from f
 
 | #   | System Trigger                                       | System Response                                                                                                                      | Trigger               |
 | --- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
-| 1   | Component instantiates without `mediaId`             | Enter `idle` and render neutral idle shell                                                                                           | `mediaId` missing     |
-| 2   | `mediaId` is provided or changed                     | Enter `loading-surface-visible`, subscribe to `MediaDownloadService.getState(mediaId, slotSizeRem)`                                  | input change          |
-| 3   | Service reports contain path and ratio becomes known | Enter `ratio-known-contain` to stabilize geometry before content reveal                                                              | service state update  |
-| 4   | Service reports media asset readiness                | Enter `media-ready`                                                                                                                  | service state update  |
-| 5   | Transition choreography starts content reveal        | Enter `content-fade-in`                                                                                                              | CSS transition start  |
-| 6   | Content reveal transition completes                  | Enter `content-visible`                                                                                                              | CSS transition event  |
-| 7   | Service reports explicit `no-media` outcome          | Enter `no-media` without error semantics                                                                                             | service state update  |
-| 8   | Service reports explicit `error` outcome             | Enter `error` as render-only surface state                                                                                           | service state update  |
-| 9   | Service reports non-previewable document-like small  | Enter `icon-only` and render icon surface without image request                                                                      | service state update  |
-| 10  | Parent provides `maxWidth` and `maxHeight`           | Apply `--media-display-max-width` and `--media-display-max-height` on host                                                           | input change          |
-| 11  | Parent provides `aspectRatio` hint                   | Apply `--media-aspect-ratio` until metadata ratio is known                                                                           | input change          |
-| 12  | Service publishes metadata ratio                     | Replace or confirm `--media-aspect-ratio` value without layout jump                                                                  | metadata update       |
-| 13  | Component host is resized                            | Measure short edge via `ResizeObserver`, convert to `rem`, update `slotSizeRem`, and request deterministic re-evaluation of delivery | resize observer event |
-| 14  | Cached asset is available                            | Preserve deterministic ordering: `loading-surface-visible` remains first; direct shortcuts to `content-visible` are forbidden        | cache hit             |
-| 15  | Reduced motion is requested                          | Use global motion policy; component has no local motion branching                                                                    | global CSS policy     |
-| 16  | Parent re-enters route with unchanged querySignature | Consume cache-hydrated media source and continue deterministic delivery flow; this component must not trigger a full list requery    | route re-entry        |
+| 1   | Component instantiates without `mediaId`             | Component MUST enter `idle` and MUST render neutral idle shell.                                                                      | `mediaId` missing     |
+| 2   | `mediaId` is provided or changed                     | Component MUST enter `loading-surface-visible` and MUST subscribe to `MediaDownloadService.getState(mediaId, slotSizeRem)`.         | input change          |
+| 3   | Service reports contain path and ratio becomes known | Component MUST enter `ratio-known-contain` to stabilize geometry before content reveal.                                              | service state update  |
+| 4   | Service reports media asset readiness                | Component MUST enter `media-ready`.                                                                                                  | service state update  |
+| 5   | Transition choreography starts content reveal        | Component MUST enter `content-fade-in`.                                                                                              | CSS transition start  |
+| 6   | Content reveal transition completes                  | Component MUST enter `content-visible`.                                                                                              | CSS transition event  |
+| 7   | Service reports explicit `no-media` outcome          | Component MUST enter `no-media` without error semantics.                                                                             | service state update  |
+| 8   | Service reports explicit `error` outcome             | Component MUST enter `error` as render-only surface state.                                                                           | service state update  |
+| 9   | Service reports non-previewable document-like small  | Component MUST enter `icon-only` and MUST render icon surface without image request.                                                 | service state update  |
+| 10  | Parent provides `maxWidth` and `maxHeight`           | Component MUST apply `--media-display-max-width` and `--media-display-max-height` on host.                                          | input change          |
+| 11  | Parent provides `aspectRatio` hint                   | Component MUST apply `--media-aspect-ratio` until metadata ratio is known.                                                          | input change          |
+| 12  | Service publishes metadata ratio                     | Component MUST replace or confirm `--media-aspect-ratio` value without layout jump.                                                 | metadata update       |
+| 13  | Component host is resized                            | Component MUST measure short edge via `ResizeObserver`, convert to `rem`, update `slotSizeRem`, and request deterministic delivery reevaluation. | resize observer event |
+| 14  | Cached asset is available                            | Component MUST preserve deterministic ordering: `loading-surface-visible` remains first; direct shortcuts to `content-visible` are forbidden. | cache hit             |
+| 15  | Reduced motion is requested                          | Component MUST use global motion policy and MUST NOT implement local motion branching.                                               | global CSS policy     |
+| 16  | Parent re-enters route with unchanged querySignature | Component MUST consume cache-hydrated media source and continue deterministic delivery flow; it MUST NOT trigger a full list requery. | route re-entry        |
+
+## Normative Boundary Contract
+
+- This file MUST be the single source of truth for `MediaDisplayComponent` delivery/render state behavior.
+- `docs/specs/component/media-item.md` MUST remain the single source of truth for media-item interaction-shell behavior.
+- This file MUST NOT define route-shell lifecycle behavior.
+- This file MUST NOT define upload-lane state ownership.
 
 ## Component Hierarchy
 
@@ -437,3 +461,10 @@ sequenceDiagram
 - [ ] `prefers-reduced-motion` remains globally owned (no local override logic).
 - [ ] `ng build` is clean after integration.
 - [ ] `npm run lint` is clean after integration.
+
+## Canonical Name Registry Gate
+
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.

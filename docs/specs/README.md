@@ -1,311 +1,134 @@
 # Element Specs
 
-Last updated: 2026-04-04
+Last updated: 2026-04-15
 
-Structured implementation contracts for every UI element in Feldpost.
-These are the **source of truth** that agents implement from.
-This file is the **source of truth for the spec system itself**: structure contract, split policy, lint expectations, and index.
+This README is now Directive-First for documentation architecture refactoring.
+For the targeted media refactoring pass, the rules in this file override older broad guidance to prevent specification drift and scope bleed.
 
-See [agent-workflows/element-spec-format.md](../agent-workflows/element-spec-format.md) for the template.
+## Directive Priority (Normative)
+
+- This document defines the active contract for the targeted media refactoring phase.
+- During this phase, all contributors MUST prioritize this directive over legacy README content patterns.
+- If a requirement is ambiguous, contributors MUST stop and output:
+  - ⚠ SPEC GAP: [describe the ambiguity]
+
+## In-Scope Files (Only)
+
+- [page/media-page.md](page/media-page.md)
+- [component/media.component.md](component/media.component.md)
+- [component/media-content.md](component/media-content.md)
+- [component/media-item.md](component/media-item.md)
+- [component/media-display.md](component/media-display.md)
+- [component/media-item-quiet-actions.md](component/media-item-quiet-actions.md)
+- [component/media-item-upload-overlay.md](component/media-item-upload-overlay.md)
+- [component/item-grid.md](component/item-grid.md) (media-path constraints only)
+- [component/media-page-header.md](component/media-page-header.md)
+- [component/media-toolbar.md](component/media-toolbar.md)
+
+## Documentation Phase Boundary
+
+- This pass MUST edit only the in-scope files listed above.
+- This pass MUST NOT edit implementation code, migrations, or unrelated specs.
+- This pass MUST NOT invent behavior that cannot be traced to an existing parent/child contract.
+- Broader markdown cleanup MUST be deferred to later phases.
+
+## Layer Ownership Contract
+
+- Page Layer MUST own orchestration, routing, high-level layout, and page-level state ownership.
+- Component Layer MUST own behavior contracts, FSM, and API/service boundaries.
+- Item/Domain Layer MUST own tile visuals, local UI states, and atomic data mapping.
+- If Page and Component specs conflict at a shared boundary:
+  - Component-level spec MUST be authoritative for behavior.
+  - Page-level spec MUST be authoritative for composition.
+
+## Core Anti-Drift Law
+
+- Every requirement detail MUST have exactly one owning spec location.
+- Non-normative prose MUST be deleted or converted into enforceable requirements.
+- Enforceable language MUST use MUST, SHOULD, MAY in all caps.
+
+## Mandatory Preflight (Before Edits)
+
+- The editor MUST provide a 3-5 line understanding statement of:
+  - Orchestration Layer
+  - Visual Contract Layer
+- The editor MUST list first refactor targets in this exact order:
+  1. [page/media-page.md](page/media-page.md)
+  2. [component/media.component.md](component/media.component.md)
+  3. [component/media-content.md](component/media-content.md)
+  4. [component/media-item.md](component/media-item.md)
+  5. [component/media-display.md](component/media-display.md)
+  6. [component/media-item-quiet-actions.md](component/media-item-quiet-actions.md)
+  7. [component/media-item-upload-overlay.md](component/media-item-upload-overlay.md)
+  8. [component/item-grid.md](component/item-grid.md)
+  9. [component/media-page-header.md](component/media-page-header.md)
+  10. [component/media-toolbar.md](component/media-toolbar.md)
+- If a target file is missing or ownership is unclear, the editor MUST stop and output exactly:
+  - ⚠ SPEC GAP: [missing file or ambiguous owner]
+
+## Required Audit and Corrections
+
+### A) Naming and Role Drift
+
+- Canonical toolbar name MUST be MediaToolbar.
+- PaneToolbar and ActionToolbar MUST be normalized to MediaToolbar when they represent a toolbar element.
+- Distinct header contracts such as MediaPageHeader MUST NOT be renamed unless registry explicitly marks them as aliases.
+
+### B) Child UI Leakage in Page Spec
+
+- [page/media-page.md](page/media-page.md) MUST NOT own child tile-detail visual mappings such as address chip or title/date overlays.
+- Child visual mappings MUST be replaced by a normative ownership statement that points to the owning item/domain contract.
+
+### C) State-to-UI Mapping in Shell Spec
+
+- [component/media.component.md](component/media.component.md) MUST include a deterministic State-to-UI Mapping Table.
+- The table MUST map shell FSM states, including append-error and revalidating, to MediaContent-facing UI behavior and escalation behavior.
+- The table MUST define Escalation Trigger as the child event intent that forces a parent state transition.
+
+### E) Toolbar Ownership Split
+
+- [component/media-toolbar.md](component/media-toolbar.md) MUST be the authoritative visual and intent contract for MediaToolbar.
+- [component/media-content.md](component/media-content.md) MUST reference toolbar ownership and MUST NOT duplicate per-control behavior tables.
+
+### D) Deterministic Tab Entry Policy
+
+- On re-entry, the page MUST restore the last active tab unless an explicit URL anchor or intent overrides it.
+- Selection context restore behavior MUST be documented as subordinate to that rule.
+
+## Canonical Name Registry Gate
+
+- Every component name used in the edited specs MUST match a canonical glossary or registry entry.
+- If a name is missing in the canonical registry, the editor MUST stop and output exactly:
+  - ⚠ SPEC GAP: [describe the ambiguity]
+
+## Self-Correction Gate (Before Save)
+
+- If a file describes an element it does not own, that detail MUST move to the owner spec and the source spec MUST keep only a reference.
+- If non-canonical component names appear, they MUST be normalized to canonical registry terms.
+- If text is descriptive but enforceable, it MUST be rewritten with MUST, SHOULD, or MAY.
+- If behavior was inferred without contract traceability, it MUST be removed.
+
+## Required Deliverable Structure
+
+- Section 1: Audit Table per file (Issue, Owner Layer, Severity, Action)
+- Section 2: Edited Files Summary with exact headings changed
+- Section 3: State-to-UI Mapping Table added in shell spec
+- Section 4: Contradictions resolved and final deterministic tab policy statement
+- Section 5: Residual gaps listed as SPEC GAP items
+
+Completion condition:
+
+- All edited statements MUST be ownership-consistent.
+- All edited statements MUST be canonical-name consistent.
+- All edited statements MUST be normative-language compliant.
+
+## Permission To Fail (Mandatory)
+
+- If ownership, naming registry, target-file existence, or authoritative owner is ambiguous, contributors MUST NOT guess.
+- Required output in that case:
+  - ⚠ SPEC GAP: [describe the ambiguity]
 
 ## See Also
 
-- [Glossary](../glossary.md)
-- [Design overview](../design.md)
-- [Design layout rules](../design/layout.md)
-- [Design tokens](../design/tokens.md)
-
-## How To Use
-
-### Agent Flow
-
-1. Resolve the target element from the list below (canonical naming from [Glossary](../glossary.md)).
-2. Open the element spec and treat it as implementation contract.
-3. Check `docs/implementation-blueprints/` for service signatures, data-flow diagrams, and query details.
-4. Use the implementation workflow defined in `AGENTS.md`.
-5. Verify the implementation against `docs/agent-workflows/implementation-checklist.md`.
-6. Enforce the **Spec Structure Contract** below; do not model new specs after a "best example" file.
-
-### Product Owner / Human Flow
-
-1. Confirm whether the feature already has a spec in the list below.
-2. If missing, create a new spec with the template in [agent-workflows/element-spec-format.md](../agent-workflows/element-spec-format.md).
-3. Link or request an implementation blueprint when behavior spans multiple services.
-4. Prioritize review/splitting work from the Priority section.
-5. Hand off to agent implementation only after spec acceptance criteria are clear and testable.
-
-## Spec Structure Contract
-
-All specs follow one shared core structure. This is the standard for future specs and for gradual backfills of older specs.
-
-### Core Sections (Required, exact order)
-
-1. `What It Is`
-2. `What It Looks Like`
-3. `Where It Lives`
-4. `Actions`
-5. `Component Hierarchy`
-6. `Data`
-7. `State`
-8. `File Map`
-9. `Wiring`
-   Required sub-sections (in this order):
-   - `### Injected Services` — list every injected service,
-     store, or token with one-line purpose
-   - `### Inputs / Outputs` — all @Input() and @Output()
-     bindings with types
-   - `### Subscriptions` — every Observable or Signal
-     subscription; note where it is torn down
-   - `### Supabase Calls` — list every direct Supabase call
-     with table, operation, and trigger condition; write
-     "None — delegated to [ServiceName]" if calls live in
-     a service instead
-
-   If a sub-section is not applicable, keep the heading and
-   write "None."
-   A sequenceDiagram Mermaid is REQUIRED in the Wiring section
-   whenever there are 2 or more Supabase calls OR the component
-   coordinates across 2 or more services. The diagram must show
-   the full request/response flow including error branches.
-
-10. `Acceptance Criteria`
-
-Rules:
-
-- Every spec must contain all core section headings, in this order.
-- If a core section is not applicable, keep the heading and write `Not applicable — <reason>`.
-- Place any additional sections only **after** core sections, unless they are explicitly declared as a pre-core exception (for example `Child Specs` in split parent specs).
-- This repository has no canonical reference spec file; the contract above is the canonical source.
-
-### Identifier Naming Contract
-
-- Use `media` as the canonical domain term for persisted items and service payloads.
-- Use `mediaId` / `mediaIds` for identifier fields in specs, diagrams, state tables, and acceptance criteria.
-- Do not introduce new `imageId` / `imageIds` contracts in specs.
-- Legacy runtime APIs that still expose `imageId` naming must be documented explicitly as compatibility aliases, with `mediaId` listed as the primary contract.
-
-### Optional Sections (Type-Specific)
-
-Use optional sections when they materially improve implementation clarity.
-
-UI-heavy spec options:
-
-- `Responsive Layout`
-- `Design Tokens`
-- `Accessibility`
-- `Visual States`
-- `Interaction Flow`
-
-Service-heavy spec options:
-
-- `State Machine`
-- `Event Streams`
-- `Supabase Storage Calls`
-- `Cache Lifecycle`
-- `Failure Modes`
-
-Cross-cutting options:
-
-- `Use Cases`
-- `Data Pipeline`
-- `Lifecycle` flows
-- `Child Specs` (split parent specs only)
-- `Settings` (optional section used by configurable features)
-
-`## Settings` convention:
-
-- Use this section to list user-configurable settings exposed by the spec.
-- Recommended bullet format per item: `- **<Section>**: <what it configures>`.
-- Keep it concise and user-facing (for example: Theme, Notifications, Roles & Permissions).
-- When present, entries must be reflected in `docs/settings-registry.md`.
-
-Guidance: prefer one general structure with required core sections plus optional sections, rather than separate templates per element type.
-
-## Spec Symmetry Organization (Core-Aligned)
-
-For service-like domains and complex feature contracts, organize specs with the same mirrored intent used by core service symmetry.
-
-Mandatory mapping:
-
-- Docs: `docs/element-specs/[module-name]/`
-- Code: `apps/web/src/app/core/[module-name]/`
-
-Recommended module layout:
-
-```text
-docs/element-specs/[module-name]/
-  README.md
-  [module-name]-service.md
-  [module-name]-types.md
-  [module-name]-helpers.md
-  adapters/
-    [adapter-name].md
-```
-
-Rules:
-
-- Keep one module entry contract (`[module-name]-service.md`) that maps to the facade service.
-- Keep one central contract file for shared types (`[module-name]-types.md`).
-- Keep one helper contract file for pure helper logic (`[module-name]-helpers.md`).
-- Keep adapter contracts local in `adapters/` and avoid global flat adapter docs folders.
-- Treat module `README.md` as index and migration status source for that module.
-- Do not reference archived specs from active module README or active feature specs.
-
-## Ownership Rules
-
-- `AGENTS.md` owns project-level rules, invariants, and required implementation workflow.
-- `docs/element-specs/README.md` owns spec governance, structure, split policy, and indexing.
-- `docs/agent-workflows/element-spec-format.md` is a writing aid and template, not a second governance source.
-- `docs/agent-workflows/implementation-checklist.md` is a verification aid used after implementation.
-
-### Mermaid Diagram Policy
-
-Use Mermaid when behavior is temporal, stateful, or multi-source. Diagrams are not required for every spec.
-
-Required:
-
-- Include a `stateDiagram-v2` when a spec contains a `State Machine` section.
-- Include a `sequenceDiagram` or `flowchart` when behavior depends on async orchestration (for example phased loading, retries, cancellation, dedup, fallback chains, or multi-service handoffs).
-- Include a `flowchart TD` with decision nodes (`{ }`) when a spec's Actions or State section contains conditional branching logic (for example: permission checks, fallback chains, empty-state decisions, or feature-flag gates). Decision nodes must be labeled with the exact condition as written in the Actions section so agents can map them directly. If the same branching is already captured in a stateDiagram-v2, a separate flowchart is not required.
-- For split specs, require at least one Mermaid diagram in the child spec that owns orchestration/state logic.
-
-Optional:
-
-- Purely visual/static UI specs with straightforward synchronous behavior.
-- Cases where a compact table is clearer than a diagram.
-- Parent specs that delegate complex behavior to child specs; parent may link to the child diagram instead of duplicating it.
-
-Recommended limits and quality bar:
-
-- Default target: 0-2 Mermaid diagrams per spec to avoid noise.
-- Prefer one diagram per concern (state transitions, request pipeline, or lifecycle).
-- Keep labels short and deterministic so reviewers can map diagram nodes to Actions/State terms.
-- If a diagram drifts from the written contract, the written contract (sections + acceptance criteria) remains authoritative until updated.
-
-## Lint & CI
-
-Run `node scripts/lint-specs.mjs` from the project root to validate all specs. Rules:
-
-| Rule                      | Severity   | Threshold | Description                                                                                                             |
-| ------------------------- | ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `spec-max-lines`          | error/warn | 600 / 400 | Max lines per spec. Split oversized specs into parent + child specs with cross-references.                              |
-| `spec-required-sections`  | error      | —         | Every spec must have: What It Is, What It Looks Like, Where It Lives, Actions, Component Hierarchy, Acceptance Criteria |
-| `spec-section-order`      | warning    | —         | Sections should follow the canonical order from the template                                                            |
-| `what-it-is-length`       | warning    | 5 lines   | Keep "What It Is" to 1–2 sentences                                                                                      |
-| `what-it-looks-like-len`  | warning    | 40 lines  | Move visual detail to Actions or child specs                                                                            |
-| `has-acceptance-criteria` | error      | —         | At least one `- [ ]` checkbox in Acceptance Criteria                                                                    |
-| `settings-registry-sync`  | error      | —         | `docs/settings-registry.md` must match all `## Settings` entries found in specs                                         |
-
-Lint is the minimum machine-enforced gate. The **Spec Structure Contract** above is the stricter authoring standard.
-
-Use threshold overrides only for temporary migration/refactor waves where many legacy specs violate limits and you need a tracked, short-lived relaxation in CI:
-
-`node scripts/lint-specs.mjs --max-lines=300 --warn-lines=250`
-
-### Splitting Large Specs
-
-When a spec exceeds the line limit, split it into a **parent spec** (layout, navigation, cross-references) and **child specs** (focused feature areas). The parent keeps the original filename and adds a "Child Specs" section with links.
-
-## Elements (from [Glossary](../glossary.md))
-
-Status: ✅ spec written | 🔲 needs spec
-
-Order: grouped by UI layer from shell foundations through pages and cross-cutting features.
-
-### Shell & Layout
-
-- ✅ `map-shell.md` — Map Shell (top-level host)
-- ✅ `map-zone.md` — Map Zone (flex container for map + floating controls)
-- ✅ `sidebar.md` — Sidebar navigation rail
-- ✅ `ui/workspace/workspace-pane.md` — Right-side collapsible panel with group tabs
-- ✅ `drag-divider.md` — Drag Divider (resizable map/workspace split)
-
-### Search
-
-- ✅ `search-bar/search-bar.md` — Search Bar (multi-intent search surface)
-- ✅ `search-bar/search-bar-query-behavior.md` — Search Bar Query Behavior (formatting, ghost completion, forgiving matching)
-- ✅ `search-bar/search-bar-data-and-service.md` — Search Bar Data and Service (pipeline, ranking, geo-bias, service contract)
-- ✅ `search-bar/search-tuning-settings.md` — Search Tuning Settings (editable filters/weights/penalties preview + persistence contract)
-
-### Map Markers
-
-- ✅ `media-marker/media-marker.md` — Media Marker (square thumbnail marker + cluster)
-- ✅ `media-marker/media-marker-context-menu.md` — Media Marker Context Menu (right-click/long-press marker actions)
-- ✅ `user-location-marker.md` — GPS user location marker
-
-### Upload
-
-- ✅ `upload-button-zone.md` — Upload Button Zone (FAB toggle)
-- ✅ `upload-panel.md` — Upload Panel (drop zone + file list)
-- ✅ `placement-mode.md` — Placement Mode (banner + crosshair)
-- ✅ `upload-manager/upload-manager.md` — Upload Manager (parent service contract)
-  - ✅ `upload-manager/upload-manager-pipeline.md` — Upload Manager Pipeline (folder upload, dedup, conflict handling, replace/attach orchestration)
-
-### Workspace & Groups
-
-- ✅ `active-selection-view.md` — Active Selection View (composed workspace content: toolbar + grid + grouping + filtering)
-- ✅ `group-tab-bar.md` — Group Tab Bar
-- ✅ `component/item-grid.md` — Universal item-grid layout and item contract (active)
-- ✅ `media-item.md` — Media domain item contract (active)
-- ✅ `item-state-frame.md` — Shared loading/error/empty state frame contract (active)
-- ✅ `media-item-upload-overlay.md` — Media upload overlay subcomponent contract (active)
-- ✅ `media-item-quiet-actions.md` — Media quiet-actions subcomponent contract (active)
-- ✅ `project-item.md` — Project domain item contract (active)
-- ✅ `thumbnail-grid.md` — Thumbnail Grid (virtual scrolling gallery)
-- ✅ `ui/workspace/workspace-toolbar.md` — Workspace Toolbar (sort/group/view controls)
-- ✅ `ui/workspace/workspace-view-system.md` — Workspace View System (data pipeline architecture)
-
-### Panels & Detail
-
-- ✅ `component/item-grid-filter-operator.md` — Item Grid Filter Operator (filtering contract)
-- ✅ `filter-dropdown.md` — Filter Dropdown (shared dropdown primitive)
-- ✅ `projects-dropdown.md` — Projects Dropdown (project selection filter)
-- ✅ `active-filter-chips.md` — Active Filter Chips Strip
-- ✅ `media-detail/media-detail-view.md` — Media Detail View (parent: layout, nav, quick info)
-  - ✅ `media-detail/media-detail-media-viewer.md` — Media Viewer (progressive loading, lightbox, replace/upload)
-  - ✅ `media-detail/media-detail-inline-editing.md` — Inline Editing (property rows, address search)
-  - ✅ `media-detail/media-detail-actions.md` — Actions & Marker Sync (correction mode, delete, sync)
-- ✅ `sort-dropdown.md` — Sort Dropdown (thumbnail sort order)
-- ✅ `grouping-dropdown.md` — Grouping Dropdown (thumbnail group-by)
-
-### Controls
-
-- ✅ `gps-button.md` — GPS Button (center on user location)
-- ✅ `theme-toggle.md` — Theme Toggle (light / dark / system)
-- ✅ `radius-selection.md` — Radius Selection (right-click-drag circle)
-- ✅ `map-context-menu.md` — Map Context Menu (short right-click actions on empty map)
-- ✅ `map-secondary-click-system.md` — Secondary-click precedence and unified map/marker/radius context menu system
-- ✅ `media-marker-draft-flow.md` — Media Marker Draft Flow (create from map context menu, persist on upload, remove on empty dismiss)
-
-### Pages
-
-- ✅ `auth-map-background.md` — Auth Map Background (fixed city backdrop for login/register)
-- ✅ `media-page.md` — Media Page
-- ✅ `settings-overlay/settings-page.md` — Settings Page (nested under Settings Overlay)
-- ✅ `settings-overlay/account-page.md` — Account Page (nested under Settings Overlay)
-
-### Features (cross-cutting)
-
-- ✅ `services/metadata-service.md` — Metadata Service (single canonical metadata field/value contract)
-- ✅ `settings-overlay/language-locale-settings.md` — Language & Locale Settings (English/German/Italian switch with catalog+DB+DOM translation flow)
-- ✅ `settings-overlay/account-settings-section.md` — Account Settings Section (identity context + confirmed logout flow in Settings Overlay)
-- ✅ `media-download/media-download-service.md` — Global media loading/download/export contract (tier/fallback/url/cache/error)
-
-### Planned / Missing Specs
-
-- ✅ `qr-invite-flow.md` — QR invite and join flow (invite creation, scan/join, failure states)
-- 🔲 `role-system.md` — Role and permission system UI (owner/admin/member permissions)
-- 🔲 `slash-commands.md` — Slash command palette and action execution UX
-
-## Priority
-
-Priority is review-first, not "all done." Work the queue top-to-bottom unless product direction changes.
-
-### Next Split Candidates
-
-Review lint output and any large specs together; use size as a signal, not the only reason to split.
-
-1. Any spec above 400 lines (warning) should be reviewed for optional split.
-2. Any spec above 600 lines (error) must be split before implementation changes continue.
-3. Split by concern area, then add a `Child Specs` section in the parent with explicit links.
-4. Keep parent specs contractual; move deep orchestration, state-machine detail, and implementation-heavy flows into child specs or blueprints.
+- [../glossary.md](../glossary.md)
+- [../agent-workflows/element-spec-format.md](../agent-workflows/element-spec-format.md)

@@ -2,7 +2,23 @@
 
 ## What It Is
 
-Media Item Upload Overlay is the dedicated overlay presenter for upload phase/progress visuals on a media item. It is a passive layer and never owns selection or quiet-action behavior.
+Media Item Upload Overlay is the dedicated overlay presenter for upload phase/progress visuals on a media item.
+It MUST remain a passive layer and MUST NOT own selection or quiet-action behavior.
+
+## Documentation Phase Boundary
+
+- This refactoring pass MUST modify only the `/media` page specification set:
+  - `docs/specs/page/media-page.md`
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
+  - `docs/specs/component/media-item.md`
+  - `docs/specs/component/media-display.md`
+  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media-page-header.md`
+  - `docs/specs/component/media-toolbar.md`
+- Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
 
@@ -18,10 +34,17 @@ The overlay fills the media frame bounds and displays a subtle tinted surface wh
 
 | #   | User Action / System Trigger | System Response                                 | Trigger                 |
 | --- | ---------------------------- | ----------------------------------------------- | ----------------------- |
-| 1   | Upload overlay state exists  | Upload overlay layer is rendered                | `overlay != null`       |
-| 2   | Progress value changes       | Progress fill width updates to clamped percent  | upload progress updates |
-| 3   | Optional label exists        | Label text is rendered in overlay content strip | `overlay.label` present |
-| 4   | Quiet actions are visible    | Upload overlay remains behind quiet actions     | z-layer contract        |
+| 1   | Upload overlay state exists  | Component MUST render upload overlay layer.     | `overlay != null`       |
+| 2   | Progress value changes       | Component MUST update progress fill width to clamped percent. | upload progress updates |
+| 3   | Optional label exists        | Component MUST render label text in overlay content strip. | `overlay.label` present |
+| 4   | Quiet actions are visible    | Component MUST keep upload overlay behind quiet actions. | z-layer contract        |
+
+## Normative Boundary Contract
+
+- This file MUST be the single source of truth for `MediaItemUploadOverlayComponent` overlay rendering behavior.
+- `docs/specs/component/media-item.md` MUST remain the single source of truth for item-level orchestration.
+- This file MUST NOT define route-shell lifecycle behavior.
+- This file MUST NOT define quiet-actions ownership.
 
 ## Component Hierarchy
 
@@ -221,3 +244,10 @@ sequenceDiagram
   inset-block-end: 0;
 }
 ```
+
+## Canonical Name Registry Gate
+
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.

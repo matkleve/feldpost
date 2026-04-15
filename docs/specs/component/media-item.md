@@ -2,7 +2,24 @@
 
 ## What It Is
 
-Media Item is the grid-item interaction contract for one media entity in Item Grid surfaces. It owns grid-level visuals and interactions (selection emphasis, upload overlay, quiet actions) and delegates all media download and rendering lifecycle responsibilities to `MediaDisplayComponent`.
+Media Item is the grid-item interaction contract for one media entity in Item Grid surfaces.
+It MUST own grid-level visuals and interactions (selection emphasis, upload overlay, quiet actions).
+It MUST delegate all media download and rendering lifecycle responsibilities to `MediaDisplayComponent`.
+
+## Documentation Phase Boundary
+
+- This refactoring pass MUST modify only the `/media` page specification set:
+  - `docs/specs/page/media-page.md`
+  - `docs/specs/component/media.component.md`
+  - `docs/specs/component/media-content.md`
+  - `docs/specs/component/media-item.md`
+  - `docs/specs/component/media-display.md`
+  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media-page-header.md`
+  - `docs/specs/component/media-toolbar.md`
+- Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
 
@@ -23,16 +40,23 @@ When `item` is `null`, the host renders an icon-free skeleton rectangle in the e
 
 | #   | User Action / System Trigger                            | System Response                                                   | Trigger                     |
 | --- | ------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------- |
-| 1   | Item is rendered in grid context                        | Compose `MediaDisplayComponent` + overlay + quiet actions         | component init              |
-| 2   | Parent provides `mediaId`                               | Forward `mediaId` directly to `MediaDisplayComponent`             | input change                |
-| 3   | Parent sets visual state to `selected`                  | Render selected emphasis around media frame                       | `state='selected'`          |
-| 4   | Parent sets visual state to `uploading`                 | Show upload overlay layer                                         | `state='uploading'`         |
-| 5   | Parent sets visual state to `error`                     | Show item-level error treatment for interaction layer             | `state='error'`             |
-| 6   | Parent sets visual state to `idle`                      | Hide selected/upload/error-only treatments                        | `state='idle'`              |
-| 7   | User hovers/focuses item                                | Reveal quiet actions in deterministic tokenized timing            | hover/focus                 |
-| 8   | User activates select/map action                        | Emit canonical item action outputs                                | click/keyboard              |
-| 9   | `MediaDisplayComponent` changes internal delivery state | Media Item keeps its own state unchanged; no parent wait required | child internal state change |
-| 10  | Upload phase updates                                    | Update overlay content and progress visuals                       | upload stream               |
+| 1   | Item is rendered in grid context                        | Component MUST compose `MediaDisplayComponent` + upload overlay + quiet actions. | component init              |
+| 2   | Parent provides `mediaId`                               | Component MUST forward `mediaId` directly to `MediaDisplayComponent`. | input change                |
+| 3   | Parent sets visual state to `selected`                  | Component MUST render selected emphasis around media frame.       | `state='selected'`          |
+| 4   | Parent sets visual state to `uploading`                 | Component MUST show upload overlay layer.                         | `state='uploading'`         |
+| 5   | Parent sets visual state to `error`                     | Component MUST show item-level error treatment for interaction layer. | `state='error'`             |
+| 6   | Parent sets visual state to `idle`                      | Component MUST hide selected/upload/error-only treatments.        | `state='idle'`              |
+| 7   | User hovers/focuses item                                | Component MUST reveal quiet actions in deterministic tokenized timing. | hover/focus                 |
+| 8   | User activates select/map action                        | Component MUST emit canonical item action outputs.                | click/keyboard              |
+| 9   | `MediaDisplayComponent` changes internal delivery state | Component MUST keep `MediaItemState` unchanged and MUST NOT wait on child delivery state. | child internal state change |
+| 10  | Upload phase updates                                    | Component MUST update overlay content and progress visuals.       | upload stream               |
+
+## Normative Boundary Contract
+
+- This file MUST be the single source of truth for `MediaItemComponent` interaction-shell behavior.
+- `docs/specs/component/media-display.md` MUST remain the single source of truth for media delivery/render FSM behavior.
+- This file MUST NOT redefine route-shell lifecycle state transitions.
+- This file MUST NOT redefine toolbar/query command ownership.
 
 ## Component Hierarchy
 
@@ -347,3 +371,10 @@ Mandatory rule:
 - Portrait media: shell height reaches slot limit while width shrinks to ratio.
 - `icon-only` media: shell remains square-aligned with rendered media box.
 - Hover/select/click hit areas remain bound to visible media frame after ratio change.
+
+## Canonical Name Registry Gate
+
+- Every component name used in this spec MUST match a canonical entry in glossary/registry.
+- Names that do not resolve to a canonical glossary/registry entry MUST be treated as unresolved and MUST block completion.
+- This refactor pass MUST NOT create or rename glossary/registry entries outside the in-scope media-page specification set.
+- If a required canonical name cannot be resolved, documentation work MUST stop with: `⚠ SPEC GAP: [missing file or ambiguous owner]`.
