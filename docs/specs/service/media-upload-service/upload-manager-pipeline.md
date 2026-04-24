@@ -405,6 +405,9 @@ flowchart TD
 | `core/upload/upload-attach-pipeline.service.ts`                      | Attach path                                      |
 | `core/upload/upload-queue.service.ts`                                | Concurrency and running-slot management          |
 | `core/upload/upload-job-state.service.ts`                            | Job phase state and phase-change events          |
+| `core/upload/upload-conflict.service.ts`                             | Conflict-candidate lookup for photoless row matching prior to resolution |
+| `core/upload/upload-enrichment.service.ts`                           | Forward/reverse geocode enrichment orchestration and unresolvable fallback |
+| `core/upload/upload-storage.service.ts`                              | Storage upload/delete helper used by upload pipelines |
 | **Utilities & Constants**                                            |                                                  |
 | `core/location-path-parser/city-registry.const.ts`                   | City whitelist lookup table                      |
 | `core/location-path-parser/postal-code-patterns.const.ts`            | Country-specific postal code regexes             |
@@ -415,6 +418,16 @@ flowchart TD
 | `core/filename-parser.util.ts`                                       | Filename normalization utilities                 |
 | `features/upload/upload-duplicate-resolution-modal/*`                | Duplicate decision modal with batch-apply option |
 | `core/content-hash.util.ts`                                          | Content hash generation                          |
+
+## Pipeline Service Coverage Addendum (C-01)
+
+The services below are part of pipeline behavior and are covered here as partial contracts pending dedicated mirrored service specs.
+
+| Service | Implementation file | Current coverage scope in this spec |
+| --- | --- | --- |
+| `UploadConflictService` | `core/upload/upload-conflict.service.ts` | Conflict detection lifecycle (`awaiting_conflict_resolution`), candidate lookup, and conflict-resolution resume flow. |
+| `UploadEnrichmentService` | `core/upload/upload-enrichment.service.ts` | Reverse/forward geocode enrichment path, unresolvable fallback, and non-blocking enrichment semantics. |
+| `UploadStorageService` | `core/upload/upload-storage.service.ts` | Storage upload/delete role in pipeline persistence and cleanup behavior. |
 
 ## Wiring
 

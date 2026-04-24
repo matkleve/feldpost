@@ -163,12 +163,27 @@ flowchart LR
 | `core/upload/upload-new-pipeline.service.ts`                         | New upload path including missing-data and conflict branching                |
 | `core/upload/upload-replace-pipeline.service.ts`                     | Replace existing media path                                                  |
 | `core/upload/upload-attach-pipeline.service.ts`                      | Attach media to photoless row path                                           |
+| `core/upload/upload-conflict.service.ts`                             | Conflict-candidate lookup for photoless row matching                         |
+| `core/upload/upload-enrichment.service.ts`                           | Post-upload forward/reverse geocode enrichment helper                        |
+| `core/upload/upload-storage.service.ts`                              | Storage upload/delete helper for pipeline persistence                         |
+| `core/upload/upload-notification.service.ts`                         | Upload-failure toast consumer bound to manager event streams                  |
 | `core/content-hash.util.ts`                                          | `computeContentHash()` — SHA-256 from file head + EXIF                       |
 | `core/upload/upload.service.ts`                                      | Per-file storage/DB operations and EXIF handling                             |
 | `core/geocoding.service.ts`                                          | Reverse/forward geocoding adapter                                            |
 | `docs/specs/service/media-upload-service/upload-location-config.md`  | Child spec for location-confidence and disambiguation contract               |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for pipeline, deduplication, folder upload, and conflict handling |
 | `features/upload/upload-panel/upload-panel.component.ts`             | Refactor — delegate to UploadManagerService                                  |
+
+## Pipeline Service Coverage Addendum (C-01)
+
+The services below are currently covered as partial contracts through this parent spec and the pipeline child spec.
+
+| Service | Implementation file | Current coverage scope |
+| --- | --- | --- |
+| `UploadConflictService` | `core/upload/upload-conflict.service.ts` | Conflict detection trigger, paused conflict state, and resume semantics via manager orchestration. |
+| `UploadEnrichmentService` | `core/upload/upload-enrichment.service.ts` | Non-blocking enrichment behavior for reverse/forward geocoding after persistence stages. |
+| `UploadStorageService` | `core/upload/upload-storage.service.ts` | Storage-path based gating and persistence/cleanup role in upload workflows. |
+| `UploadNotificationService` | `core/upload/upload-notification.service.ts` | Manager failure-event consumption for toast notifications (`uploadFailed$`). |
 
 ## Wiring
 

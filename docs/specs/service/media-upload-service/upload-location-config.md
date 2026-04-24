@@ -47,6 +47,43 @@ UploadLocationConfigService
 | `minMeaningfulScore`                | `number`  | Minimum geocoding score for a candidate to remain meaningful               |
 | `minTopGap`                         | `number`  | Minimum score gap between top candidates for an automatic decision         |
 
+### Configurable Algorithm Constants (Canonical)
+
+All algorithm variables of `UploadLocationConfigService` are configurable constants.
+Source of truth: `apps/web/src/app/core/upload/upload-location-config.ts`.
+
+| Constant | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `exifAssistRadiusMeters` | `number` | `300` | EXIF assist radius for narrowing ambiguous geocode candidates. |
+| `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |
+| `minTopGap` | `number` | `0.1` | Minimum score gap between rank 1 and rank 2 for automatic selection. |
+| `titleConfidenceThreshold` | `number` | `0.8` | Minimum parser confidence needed to treat filename/folder text as resolvable location input. |
+| `folderHierarchyTraversalOrder` | `'leaf-to-root' \| 'root-to-leaf'` | `'leaf-to-root'` | Traversal direction for directory segment scoring. |
+| `folderHintRequireHighConfidence` | `boolean` | `true` | Restricts folder hints to high-confidence segment matches. |
+| `folderHintUseRootFallback` | `boolean` | `true` | Allows root-level folder hint only as fallback. |
+| `filenameAlwaysOverridesFolder` | `boolean` | `true` | Enforces file-level textual location precedence over folder-level hints. |
+| `maxDirectorySegmentsForHint` | `number` | `32` | Guardrail for maximum directory depth considered during hint extraction. |
+| `clusterAssistWeight.project` | `number` | `0.7` | Ranking weight for project cluster proximity in disambiguation. |
+| `clusterAssistWeight.company` | `number` | `0.3` | Ranking weight for company cluster proximity in disambiguation. |
+| `geocodeCacheTtlMs` | `number` | `300000` | TTL for cached geocoding responses. |
+| `geocodeMaxProxyAttempts` | `number` | `3` | Maximum retry attempts for proxied geocode requests. |
+| `geocodeLogDedupWindowMs` | `number` | `30000` | Deduplication window for repeated geocode error logs. |
+| `geocodeAuthFailureCooldownMs` | `number` | `120000` | Cooldown after auth-related geocode failures before retrying. |
+| `parserBaseConfidence` | `number` | `0.5` | Baseline confidence used by filename/path parser scoring. |
+| `parserCityStreetIncrement` | `number` | `0.2` | Confidence increment for city+street signals in parser scoring. |
+| `parserZipIncrement` | `number` | `0.25` | Confidence increment when postal code signal is present. |
+| `disambiguationAutoAssignThreshold` | `number` | `0.95` | Probability threshold for automatic city/address assignment. |
+| `disambiguationReviewLowerBound` | `number` | `0.7` | Lower probability bound for candidate review instead of immediate rejection. |
+| `disambiguationZipCandidateProbability` | `number` | `0.8` | Base probability for candidates with matching ZIP evidence. |
+| `disambiguationDefaultCandidateProbability` | `number` | `0.2` | Base probability for candidates without ZIP support. |
+| `disambiguationAlgorithm` | `'cluster-majority'` | `'cluster-majority'` | Disambiguation algorithm identifier used by city ranking flow. |
+| `filenameSingleWordMinLength` | `number` | `8` | Minimum length for single-word street fallback parsing. |
+| `filenameSingleWordCityMinLength` | `number` | `3` | Minimum city token length in single-word fallback parsing. |
+| `filenameMultiWordTokenMinLength` | `number` | `3` | Minimum token length in multi-word filename parsing fallback. |
+| `filenameTrailingArtifactMinDigits` | `number` | `3` | Lower bound for numeric trailing artifact stripping in filenames. |
+| `filenameTrailingArtifactMaxDigits` | `number` | `6` | Upper bound for numeric trailing artifact stripping in filenames. |
+| `geocodeSearchDefaultLimit` | `number` | `10` | Default forward-geocode result limit. |
+
 ## State
 
 No mutable user-facing state is owned here. The service exposes a deterministic configuration object.
