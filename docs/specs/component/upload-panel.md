@@ -137,7 +137,7 @@ stateDiagram-v2
 | Menu labels still show outdated wording (`Click on map`, etc.) for uploaded documents                  | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `apps/web/src/app/features/upload/upload-panel-item.component.html`, `docs/i18n/translation-workbench.csv`                                                | Replace with contextual wording: `Change GPS` / `Change address` on uploaded rows, `Add GPS` / `Add address` only when values are missing.                 | P1       |
 | `Assign project` is missing in some already-bound contexts                                             | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `apps/web/src/app/features/upload/upload-panel.component.ts`                                                                                              | Keep project assignment action always available as `Assign project` (opens selector with current project preselected when already bound).                  | P1       |
 | Destructive action label `Remove from project` is wrong for uploaded media row action intent           | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `apps/web/src/app/features/upload/upload-panel.component.ts`, `docs/i18n/translation-workbench.csv`                                                       | If the action actually deletes media, label must be `Delete photo`/`Delete media`; keep `Remove from project` only for explicit membership-removal action. | P1       |
-| Missing user-facing explanation of why options appear/disappear in row dropdown                        | `docs/specs/component/upload-panel.md`, `apps/web/src/app/features/upload/upload-panel-item.component.ts`                                                                                                                      | Add explicit visibility/rationale matrix per lane/issue/state to make option gating transparent and testable.                                              | P1       |
+| Missing user-facing explanation of why options appear/disappear in row dropdown                        | `docs/specs/component/upload-panel.md`, `apps/web/src/app/features/upload/upload-panel-item.component.ts`                                                                                                                    | Add explicit visibility/rationale matrix per lane/issue/state to make option gating transparent and testable.                                              | P1       |
 | Context menu currently opens upward first; should prefer downward opening                              | `apps/web/src/app/features/upload/upload-panel-item.component.ts`, `apps/web/src/app/features/upload/upload-panel-item.component.html`, `apps/web/src/app/features/upload/upload-panel.component.scss`                       | Use down-first menu placement with viewport-aware fallback to upward only when bottom space is insufficient.                                               | P1       |
 | Changing address on uploaded photos can restart upload path                                            | `apps/web/src/app/features/upload/upload-panel.component.ts`, `apps/web/src/app/features/map/map-shell/map-shell.component.ts`, `apps/web/src/app/core/upload/upload-manager.service.ts`                                     | Persist location updates on existing media only; MUST call location update flow and MUST NOT requeue/reupload files.                                       | P0       |
 | Hover thumbnail preview is missing on media rows                                                       | `apps/web/src/app/features/upload/upload-panel-item.component.html`, `apps/web/src/app/features/upload/upload-panel-item.component.scss`                                                                                     | Enforce deterministic thumbnail rendering for rows with preview-capable media; hover must reveal media thumbnail reliably.                                 | P1       |
@@ -584,6 +584,29 @@ sequenceDiagram
 - Keeps lane selection stable, including empty lanes.
 - Surfaces RLS permission denies as user-facing feedback while relying on backend enforcement.
 
+## Planned Changes
+
+The next implementation pass must treat these changes as spec-first and verify them against the listed acceptance criteria before any code changes land.
+
+| Planned change                                                                                  | Why it is needed                                                              | Acceptance criteria to re-check                            |
+| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Normalize uploaded-row location labels to `Add/Change GPS` and `Add/Change address`             | Keeps location editing language explicit and future code checks deterministic | `Change location` suboption labels, GPS/address edit flows |
+| Keep `Assign project` on uploaded and unresolved-document rows through one shared selector flow | Prevents feature-local project selection variants                             | `Assign project` visibility and shared dropdown reuse      |
+| Preserve attachment-only `Download` behavior                                                    | Prevents inline browser preview regressions                                   | `Download` file behavior                                   |
+| Preserve down-first menu placement with viewport fallback                                       | Matches shared dropdown conventions and avoids clipping                       | 3-dot row menu placement                                   |
+| Keep Upload Zone instructional copy mounted during all panel states                             | Prevents flicker during drag/lane/batch transitions                           | Upload Zone text persistence                               |
+| Keep lane switch labels readable on compact surfaces                                            | Prevents icon-only ambiguity in the lane switch                               | segmented switch label readability                         |
+
+The later code pass must revalidate at least these existing acceptance-criteria items:
+
+- Uploaded rows expose `Assign project` in all states (assign and reassign through one selector flow).
+- Project assignment UI in upload panel reuses the same shared dropdown primitive/pattern as toolbar project selection.
+- `Change location` exposes exactly two suboptions with contextual labels: `Add/Change GPS` and `Add/Change address`.
+- `Add/Change GPS` enters map-pick mode and commits the clicked location for the selected media item.
+- Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only.
+- `Download` always triggers file download behavior and never opens inline browser preview tabs.
+- The segmented switch keeps Queue / Uploaded / Issues readable and distinguishable.
+
 ## Acceptance Criteria
 
 - [ ] Panel appears as compact container expansion from Upload Button
@@ -619,17 +642,17 @@ sequenceDiagram
 - [ ] Destructive bottom action uses danger styling for both label and icon
 - [x] Clicking the map-marker action on a `missing_data` row emits a placement request
 - [x] Clicking an uploaded row with coordinates emits a zoom-to-location request
-- [ ] Uploaded rows expose `Assign project` in all states (assign and reassign through one selector flow)
+- [x] Uploaded rows expose `Assign project` in all states (assign and reassign through one selector flow)
 - [ ] Project assignment UI in upload panel reuses the same shared dropdown primitive/pattern as toolbar project selection
 - [x] Uploaded rows expose `Prioritize` for saved media follow-up workflows
 - [x] Uploaded rows expose `Open in /media`, `Change location`, and `Download` when persisted media data is available
-- [ ] `Change location` exposes exactly two suboptions with contextual labels: `Add/Change GPS` and `Add/Change address`
+- [x] `Change location` exposes exactly two suboptions with contextual labels: `Add/Change GPS` and `Add/Change address`
 - [x] `Add/Change address` opens a vertically extended address-finder overlay with suggestions under the input
 - [x] Hovering a location suggestion previews that location on the map without committing the update
 - [x] Selecting a location suggestion persists both address and coordinates for the media item
 - [ ] `Add/Change GPS` enters map-pick mode and commits the clicked location for the selected media item
 - [ ] Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only
-- [ ] `Download` always triggers file download behavior and never opens inline browser preview tabs
+- [x] `Download` always triggers file download behavior and never opens inline browser preview tabs
 - [ ] Uploaded rows with EXIF/text mismatch (>15m) expose a clear mismatch indicator for follow-up in media details.
 - [ ] Duplicate-photo rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
 - [ ] Duplicate-resolution modal appears for duplicate-photo issues with `use existing`, `upload anyway`, and `reject` options.

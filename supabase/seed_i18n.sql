@@ -21300,6 +21300,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.assignProject', 'Assign project', 'en', 'apps/web/src/app/features/upload/upload-panel-item-helpers.ts actionLabel menu item and assignment dialog title')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Assign project', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.assignProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekt zuweisen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.assignProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Assegna progetto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.assignProject'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.item.menu.location.addGps', 'Add GPS', 'en', 'apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel issue action')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -21326,6 +21357,99 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Aggiungi GPS', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.item.menu.location.addGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.location.changeGps', 'Change GPS', 'en', 'apps/web/src/app/features/upload/upload-panel-item-helpers.ts actionLabel for rows with existing coordinates')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.changeGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'GPS aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.changeGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica GPS', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.changeGps'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.location.addAddress', 'Add address', 'en', 'apps/web/src/app/features/upload/upload-panel-item-helpers.ts actionLabel for rows without address')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.addAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse hinzufuegen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.addAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.addAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.location.changeAddress', 'Change address', 'en', 'apps/web/src/app/features/upload/upload-panel-item-helpers.ts actionLabel for rows with existing address')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.changeAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adresse aendern', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.changeAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Modifica indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.location.changeAddress'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

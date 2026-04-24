@@ -186,16 +186,6 @@
     flex: 0 0 auto;
   }
 
-  &__location-mode-label {
-    flex: 1 1 auto;
-    font-size: var(--font-size-sm-soft);
-    color: var(--color-text-primary);
-    line-height: var(--line-height-snug);
-    font-weight: var(--font-weight-medium);
-    text-align: right;
-    user-select: none;
-  }
-
   &__folder-unsupported-hint {
     margin: 0;
     font-size: var(--font-size-xs);

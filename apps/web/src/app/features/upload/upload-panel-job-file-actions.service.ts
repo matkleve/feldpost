@@ -140,7 +140,7 @@ export class UploadPanelJobFileActionsService {
       const selected = await this.mapProjectDialogService.openProjectSelectionDialog(
         this.dialogSignals,
         options,
-        this.t('auto.0013.add_to_project', 'Add to project'),
+        this.t('upload.item.menu.project.open', 'Open project'),
         job.file.name,
       );
       if (selected) {

@@ -7,6 +7,7 @@ The `app-segmented-switch` is a stylized, accessible single-choice control that 
 ## What It Looks Like
 
 The control renders as a horizontal segmented track with evenly styled segment buttons. Active segment has emphasized foreground/background contrast; inactive segments keep neutral styling with hover affordance. Icon-only items render as perfect squares, while text and icon-with-text items use standard horizontal padding.
+For upload-related lane/state switches, text labels MUST remain legible alongside icons; icon-only presentation is not acceptable for those surfaces.
 
 ## Where It Lives
 
@@ -54,7 +55,7 @@ No direct Supabase access is required for this component.
 
 | File                                                                       | Purpose                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| `docs/specs/component/segmented-switch.md`                                   | Segmented-switch behavior contract               |
+| `docs/specs/component/segmented-switch.md`                                 | Segmented-switch behavior contract               |
 | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`   | Inputs/outputs and keyboard interaction logic    |
 | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.html` | Segment structure and bindings                   |
 | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss` | Layout variants (`fit`/`fill`) and visual states |
@@ -85,6 +86,7 @@ None.
 - [ ] `fit` mode wraps content width; `fill` mode distributes width evenly.
 - [ ] `icon-only` segments remain perfect squares.
 - [ ] Active/inactive/hover states are visually distinct without geometry shifts.
+- [ ] Upload-related lane/state switches keep icon + text labels visible and legible.
 
 ## Variation Axes
 

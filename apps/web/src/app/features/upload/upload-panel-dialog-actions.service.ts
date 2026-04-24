@@ -22,7 +22,10 @@
  */
 
 import { Injectable, inject, signal } from '@angular/core';
-import { GeocodingService, type ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
+import {
+  GeocodingService,
+  type ForwardGeocodeResult,
+} from '../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
@@ -33,6 +36,7 @@ import { MapProjectActionsService } from '../map/map-shell/map-project-actions.s
 import { MapProjectDialogService } from '../map/map-shell/map-project-dialog.service';
 import { UploadPanelDialogSignals } from './upload-panel-dialog-signals.service';
 import { mapSearchResultsToForwardSuggestions } from './upload-panel-helpers';
+import { getBoundProjectIds } from './upload-panel-project-bindings.util';
 import type { ImageUploadedEvent, UploadLocationPreviewEvent } from './upload-panel.types';
 
 export type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
@@ -343,10 +347,11 @@ export class UploadPanelDialogActionsService {
     }
 
     this.dialogSignals.pendingProjectAssignmentJob.set(job);
+    const prioritizedOptions = this.prioritizeBoundProjectOptions(job, optionsResult.options);
     void this.mapProjectDialogService.openProjectSelectionDialog(
       this.projectDialogSignals,
-      optionsResult.options,
-      this.t('auto.0013.add_to_project', 'Add to project'),
+      prioritizedOptions,
+      this.t('upload.item.menu.assignProject', 'Assign project'),
       job.file.name,
     );
   }
@@ -402,5 +407,23 @@ export class UploadPanelDialogActionsService {
     return this.uploadManager
       .jobs()
       .filter((job) => job.phase === 'skipped' && job.existingImageId === seed.existingImageId);
+  }
+
+  private prioritizeBoundProjectOptions(
+    job: UploadJob,
+    options: ReadonlyArray<{ id: string; name: string }>,
+  ): ReadonlyArray<{ id: string; name: string }> {
+    const boundProjectIds = new Set(getBoundProjectIds(job));
+    if (boundProjectIds.size === 0) {
+      return options;
+    }
+
+    const preferred = options.filter((option) => boundProjectIds.has(option.id));
+    if (preferred.length === 0) {
+      return options;
+    }
+
+    const remaining = options.filter((option) => !boundProjectIds.has(option.id));
+    return [...preferred, ...remaining];
   }
 }

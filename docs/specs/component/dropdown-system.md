@@ -5,6 +5,7 @@
 ## What It Is
 
 A composable CSS class system (`dd-*`) for all floating dropdown/menu surfaces in Feldpost. Every dropdown picks the pieces it needs — search, items, drag handles, section labels, action rows — from a shared global class library in `styles.scss`. Component SCSS only contains what's truly unique to that dropdown.
+Shared project-selector and upload-row menus MUST reuse this primitive system instead of feature-local dropdown variants.
 
 ## What It Looks Like
 
@@ -146,7 +147,7 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 
 | File                                                                                              | Purpose                                                   |
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `docs/specs/component/dropdown-system.md`                                                 | Shared dropdown visual contract                           |
+| `docs/specs/component/dropdown-system.md`                                                         | Shared dropdown visual contract                           |
 | `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
@@ -182,4 +183,5 @@ None - delegated to consumer feature services.
 - [x] Filter dropdown uses `dd-empty` and `dd-action-row`, form rules stay component-specific
 - [x] Media detail context menu uses `dd-items` and `dd-item`/`dd-item--danger`
 - [x] Danger items preserve `--color-danger` on both label and icon
+- [ ] Shared project-selector flows reuse the same `dd-*` action-row and search primitives as toolbar dropdowns
 - [ ] Metadata Key Suggestion dropdown uses `dd-item` + type badge (future)

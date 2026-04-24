@@ -13,7 +13,7 @@ This is mostly invisible infrastructure. Users experience it through stable phas
 ## Where It Lives
 
 - **Parent spec**: `docs/specs/service/media-upload-service/upload-manager.md`
-- **Child/related specs**: `docs/specs/service/folder-scan/folder-scan.md`, `docs/specs/service/filename-parser/filename-parser.md`, `docs/specs/service/location-path-parser/location-path-parser.md`
+- **Child/related specs**: `docs/specs/service/folder-scan/folder-scan.md`, `docs/specs/service/filename-parser/filename-parser.md`, `docs/specs/service/location-path-parser/location-path-parser.md`, `docs/specs/service/media-upload-service/upload-location-config.md`
 - **Primary implementation**: `core/upload/upload-manager.service.ts` plus pipeline services in `core/upload/` and shared utility services in `core/`
 - **Consumed by**: upload panel, media detail replace/attach flows, map shell, thumbnail views, folder import entry points
 
@@ -385,36 +385,36 @@ flowchart TD
 
 ## File Map
 
-| File                                                              | Purpose                                          |
-| ----------------------------------------------------------------- | ------------------------------------------------ |
-| **Specs**                                                         |                                                  |
-| `docs/specs/service/media-upload-service/upload-manager.md`             | Parent contract                                  |
-| `docs/specs/service/media-upload-service/upload-manager-pipeline.md`    | Child spec for deep operational behavior         |
-| `docs/specs/service/location-path-parser/location-path-parser.md` | Address extraction from path hierarchy           |
-| `docs/specs/service/folder-scan/folder-scan.md`                   | Folder scanning and per-file aggregation         |
-| `docs/specs/service/filename-parser/filename-parser.md`           | Per-file metadata extraction (address, date)     |
-| `docs/implementation-blueprints/upload-manager.md`                | Blueprint for implementation-level rollout notes |
-| **Services**                                                      |                                                  |
-| `core/upload/upload-manager.service.ts`                           | Batch submission, queue draining, event fan-out  |
-| `core/upload/upload-new-pipeline.service.ts`                      | New-upload path                                  |
-| `core/upload/folder-scan.service.ts`                              | Folder scan + folder-address-hint extraction     |
-| `core/filename-parser.service.ts`                                 | File-level metadata (address, date) extraction   |
-| `core/location-path-parser.service.ts`                            | Address component parsing and validation         |
-| `core/geocoding.service.ts`                                       | Forward geocoding for text-derived coordinates   |
-| `core/upload/upload-replace-pipeline.service.ts`                  | Replace path                                     |
-| `core/upload/upload-attach-pipeline.service.ts`                   | Attach path                                      |
-| `core/upload/upload-queue.service.ts`                             | Concurrency and running-slot management          |
-| `core/upload/upload-job-state.service.ts`                         | Job phase state and phase-change events          |
-| **Utilities & Constants**                                         |                                                  |
-| `core/location-path-parser/city-registry.const.ts`                | City whitelist lookup table                      |
-| `core/location-path-parser/postal-code-patterns.const.ts`         | Country-specific postal code regexes             |
-| `core/location-path-parser/street-keywords.const.ts`              | Street type keywords (Gasse, Str., etc.)         |
-| `core/filename-parser/date-patterns.const.ts`                     | ISO, timestamp, German date format regexes       |
-| `core/filename-parser/metadata-keywords.const.ts`                 | DRAFT, THUMB, TEMP metadata keyword set          |
-| `core/location-path-parser.util.ts`                               | Shared validation utilities                      |
-| `core/filename-parser.util.ts`                                    | Filename normalization utilities                 |
-| `features/upload/upload-duplicate-resolution-modal/*`             | Duplicate decision modal with batch-apply option |
-| `core/content-hash.util.ts`                                       | Content hash generation                          |
+| File                                                                 | Purpose                                          |
+| -------------------------------------------------------------------- | ------------------------------------------------ |
+| **Specs**                                                            |                                                  |
+| `docs/specs/service/media-upload-service/upload-manager.md`          | Parent contract                                  |
+| `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for deep operational behavior         |
+| `docs/specs/service/location-path-parser/location-path-parser.md`    | Address extraction from path hierarchy           |
+| `docs/specs/service/folder-scan/folder-scan.md`                      | Folder scanning and per-file aggregation         |
+| `docs/specs/service/filename-parser/filename-parser.md`              | Per-file metadata extraction (address, date)     |
+| `docs/implementation-blueprints/upload-manager.md`                   | Blueprint for implementation-level rollout notes |
+| **Services**                                                         |                                                  |
+| `core/upload/upload-manager.service.ts`                              | Batch submission, queue draining, event fan-out  |
+| `core/upload/upload-new-pipeline.service.ts`                         | New-upload path                                  |
+| `core/upload/folder-scan.service.ts`                                 | Folder scan + folder-address-hint extraction     |
+| `core/filename-parser.service.ts`                                    | File-level metadata (address, date) extraction   |
+| `core/location-path-parser.service.ts`                               | Address component parsing and validation         |
+| `core/geocoding.service.ts`                                          | Forward geocoding for text-derived coordinates   |
+| `core/upload/upload-replace-pipeline.service.ts`                     | Replace path                                     |
+| `core/upload/upload-attach-pipeline.service.ts`                      | Attach path                                      |
+| `core/upload/upload-queue.service.ts`                                | Concurrency and running-slot management          |
+| `core/upload/upload-job-state.service.ts`                            | Job phase state and phase-change events          |
+| **Utilities & Constants**                                            |                                                  |
+| `core/location-path-parser/city-registry.const.ts`                   | City whitelist lookup table                      |
+| `core/location-path-parser/postal-code-patterns.const.ts`            | Country-specific postal code regexes             |
+| `core/location-path-parser/street-keywords.const.ts`                 | Street type keywords (Gasse, Str., etc.)         |
+| `core/filename-parser/date-patterns.const.ts`                        | ISO, timestamp, German date format regexes       |
+| `core/filename-parser/metadata-keywords.const.ts`                    | DRAFT, THUMB, TEMP metadata keyword set          |
+| `core/location-path-parser.util.ts`                                  | Shared validation utilities                      |
+| `core/filename-parser.util.ts`                                       | Filename normalization utilities                 |
+| `features/upload/upload-duplicate-resolution-modal/*`                | Duplicate decision modal with batch-apply option |
+| `core/content-hash.util.ts`                                          | Content hash generation                          |
 
 ## Wiring
 

@@ -136,7 +136,7 @@ export class UploadPanelComponent {
   readonly locationModeSwitchOptions = computed<ReadonlyArray<SegmentedSwitchOption>>(() => [
     {
       id: 'required',
-      type: 'icon-only',
+      type: 'icon-with-text',
       icon: 'verified_user',
       label: this.t('upload.location.mode.required', 'Location required'),
       title: this.t('upload.location.mode.required', 'Location required'),
@@ -144,7 +144,7 @@ export class UploadPanelComponent {
     },
     {
       id: 'optional',
-      type: 'icon-only',
+      type: 'icon-with-text',
       icon: 'gpp_maybe',
       label: this.t('upload.location.mode.optional', 'Location not required'),
       title: this.t('upload.location.mode.optional', 'Location not required'),
@@ -216,11 +216,5 @@ export class UploadPanelComponent {
     if (value === 'required' || value === 'optional') {
       this.signals.setLocationRequirementMode(value);
     }
-  }
-
-  locationModeLabel(): string {
-    return this.locationRequirementMode() === 'required'
-      ? this.t('upload.location.mode.required', 'Location required')
-      : this.t('upload.location.mode.optional', 'Location not required');
   }
 }

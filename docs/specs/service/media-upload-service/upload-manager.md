@@ -14,6 +14,7 @@ This parent spec owns the top-level contract. Deep pipeline behavior is split in
 
 | Child Spec                                            | Covers                                                                                                 |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [upload-location-config](upload-location-config.md)   | Canonical upload location thresholds, confidence gates, and disambiguation parameters                  |
 | [upload-manager-pipeline](upload-manager-pipeline.md) | Folder upload flow, deduplication, location-conflict detection, and replace/attach event orchestration |
 
 ## What It Looks Like
@@ -152,21 +153,22 @@ flowchart LR
 
 ## File Map
 
-| File                                                           | Purpose                                                                      |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `core/upload/upload-manager.service.ts`                        | Queue management, concurrency, pipeline orchestration                        |
-| `core/upload/upload-manager.types.ts`                          | Shared upload domain types and event contracts                               |
-| `core/upload/upload-job-state.service.ts`                      | Job state signal store + phase events                                        |
-| `core/upload/upload-batch.service.ts`                          | Batch lifecycle and progress computation                                     |
-| `core/upload/upload-queue.service.ts`                          | Running-slot tracking and concurrency guard                                  |
-| `core/upload/upload-new-pipeline.service.ts`                   | New upload path including missing-data and conflict branching                |
-| `core/upload/upload-replace-pipeline.service.ts`               | Replace existing media path                                                  |
-| `core/upload/upload-attach-pipeline.service.ts`                | Attach media to photoless row path                                           |
-| `core/content-hash.util.ts`                                    | `computeContentHash()` — SHA-256 from file head + EXIF                       |
-| `core/upload/upload.service.ts`                                | Per-file storage/DB operations and EXIF handling                             |
-| `core/geocoding.service.ts`                                    | Reverse/forward geocoding adapter                                            |
+| File                                                                 | Purpose                                                                      |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `core/upload/upload-manager.service.ts`                              | Queue management, concurrency, pipeline orchestration                        |
+| `core/upload/upload-manager.types.ts`                                | Shared upload domain types and event contracts                               |
+| `core/upload/upload-job-state.service.ts`                            | Job state signal store + phase events                                        |
+| `core/upload/upload-batch.service.ts`                                | Batch lifecycle and progress computation                                     |
+| `core/upload/upload-queue.service.ts`                                | Running-slot tracking and concurrency guard                                  |
+| `core/upload/upload-new-pipeline.service.ts`                         | New upload path including missing-data and conflict branching                |
+| `core/upload/upload-replace-pipeline.service.ts`                     | Replace existing media path                                                  |
+| `core/upload/upload-attach-pipeline.service.ts`                      | Attach media to photoless row path                                           |
+| `core/content-hash.util.ts`                                          | `computeContentHash()` — SHA-256 from file head + EXIF                       |
+| `core/upload/upload.service.ts`                                      | Per-file storage/DB operations and EXIF handling                             |
+| `core/geocoding.service.ts`                                          | Reverse/forward geocoding adapter                                            |
+| `docs/specs/service/media-upload-service/upload-location-config.md`  | Child spec for location-confidence and disambiguation contract               |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for pipeline, deduplication, folder upload, and conflict handling |
-| `features/upload/upload-panel/upload-panel.component.ts`       | Refactor — delegate to UploadManagerService                                  |
+| `features/upload/upload-panel/upload-panel.component.ts`             | Refactor — delegate to UploadManagerService                                  |
 
 ## Wiring
 

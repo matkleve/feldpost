@@ -35,7 +35,7 @@ const STATIC_ACTION_LABELS: Partial<Record<UploadItemMenuAction, [string, string
   open_existing_media: ['upload.item.menu.issue.openExisting', 'Open existing media'],
   upload_anyway: ['upload.item.menu.issue.uploadAnyway', 'Upload anyway'],
   open_project: ['upload.item.menu.project.open', 'Open project'],
-  assign_to_project: ['auto.0013.add_to_project', 'Add to project'],
+  assign_to_project: ['upload.item.menu.assignProject', 'Assign project'],
   retry: ['projects.page.error.retry', 'Retry'],
   cancel_upload: ['upload.item.menu.destructive.cancelUpload', 'Cancel upload'],
   delete_media: ['workspace.imageDetail.action.delete', 'Delete media'],
@@ -120,8 +120,8 @@ export function actionLabel(
         : t('upload.item.menu.priority.add', 'Prioritize');
     case 'change_location_map':
       return job.coords
-        ? t('upload.item.menu.location.changeGps', 'Change GPS location')
-        : t('upload.item.menu.location.addGps', 'Add GPS location');
+        ? t('upload.item.menu.location.changeGps', 'Change GPS')
+        : t('upload.item.menu.location.addGps', 'Add GPS');
     case 'change_location_address':
       return job.titleAddress
         ? t('upload.item.menu.location.changeAddress', 'Change address')
