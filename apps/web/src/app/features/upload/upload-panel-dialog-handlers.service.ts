@@ -1,6 +1,8 @@
 /**
  * UploadPanelDialogHandlersService — delegates all dialog I/O and state management.
  *
+ * @see docs/specs/ui/upload/upload-panel-system.md — UI FSM boundaries vs `UploadManagerService` (dialog chrome only; outcomes via manager/core APIs).
+ *
  * Extracts location, project, and duplicate resolution dialog handling from
  * the component to reduce its size and improve testability.
  *

@@ -7,6 +7,8 @@
 
 The Upload Panel is the compact upload workspace that appears from the Upload Button Zone. It lets users add mixed media files and triage uploads by state (uploading, uploaded, issues).
 
+> **UI system parent:** [upload-panel-system](../../ui/upload/upload-panel-system.md) (governance boundary vs `core/upload`).
+
 ## What It Looks Like
 
 The panel is a **fixed-width section shell** of **three stacked blocks** (intake, lane switch, file list) with the same left/right edges. The root is **layout-only and unstyled** (no padding, border, or card shell); inner blocks own surface treatment. Gaps between blocks are **see-through** to the map. The lane switch has **no extra card wrapper**—the tab list is the only container. File rows use **surface** backgrounds with status tints; the list area uses a **transparent overflow wrapper** (max **5** visible rows, internal scroll). Row **3-dot** menus open **downward first** with viewport fallback. **Reference tree and state diagram:** [upload-panel.layout-and-states.md](upload-panel.layout-and-states.md). **Row menus and status text:** [upload-panel.lane-and-row-actions.md](upload-panel.lane-and-row-actions.md).

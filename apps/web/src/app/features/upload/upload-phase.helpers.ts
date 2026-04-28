@@ -1,5 +1,11 @@
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 
+/**
+ * Lane / issue-kind helpers for upload panel presentation.
+ *
+ * @see docs/specs/ui/upload/upload-panel-system.md — UI lane FSM vs `UploadPhase` in media-upload-service specs.
+ * @see docs/specs/service/media-upload-service/upload-manager.md — normative job phases and events.
+ */
 export type UploadLane = 'uploading' | 'uploaded' | 'issues';
 export type UploadIssueKind =
   | 'duplicate_photo'

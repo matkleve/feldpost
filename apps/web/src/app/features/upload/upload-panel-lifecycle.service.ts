@@ -7,6 +7,9 @@ import type { ImageUploadedEvent } from './upload-panel.component';
 
 /**
  * UploadPanelLifecycleService — Manage panel lifecycle subscriptions & issue attention pulse.
+ *
+ * @see docs/specs/ui/upload/upload-panel-system.md — event bridge and host callbacks vs manager-owned streams.
+ *
  * Encapsulates:
  * - Event bridging from UploadManagerService (imageUploaded$, jobPhaseChanged$)
  * - Issue attention pulse animation trigger (UI feedback on new issues)

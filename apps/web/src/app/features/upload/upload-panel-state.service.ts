@@ -1,6 +1,8 @@
 /**
  * UploadPanelStateService — Panel-specific state signals and computed properties.
  *
+ * @see docs/specs/ui/upload/upload-panel-system.md — panel-owned presentation state vs manager-owned job signals.
+ *
  * Transforms UploadManagerService.jobs into panel view model:
  *  - Buckets jobs by lane (uploading | uploaded | issues)
  *  - Computes lane counts and effective lane (current switch selection)

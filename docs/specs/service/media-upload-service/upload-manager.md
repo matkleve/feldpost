@@ -1,6 +1,6 @@
 # Upload Manager
 
-> **Related specs:** [media-download-service](../media-download/media-download-service.md), [upload-panel](../upload-panel.md)
+> **Related specs:** [media-download-service](../media-download-service/media-download-service.md), [upload-panel-system](../../ui/upload/upload-panel-system.md), [upload-panel (component)](../../component/upload/upload-panel.md)
 
 ## What It Is
 

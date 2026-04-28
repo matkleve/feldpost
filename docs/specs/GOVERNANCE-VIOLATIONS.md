@@ -7,7 +7,7 @@ Last updated: 2026-04-28
 | docs/specs subfolder README missing | 0     | resolved                  |
 | module registry spec-gap            | 19    | open                      |
 | module registry readme-gap          | 0     | resolved (PATCH-02)       |
-| module registry exception-open      | 2     | open                      |
+| module registry exception-open      | 1     | open                      |
 | traceability unresolved refs        | 1     | open                      |
 | traceability ambiguous refs         | 2     | resolved via context rule |
 
@@ -54,5 +54,4 @@ Last updated: 2026-04-28
 - shared/snap-size-slider (spec-gap)
 - shared/text-input-dialog (spec-gap)
 - shared/view-toggle (spec-gap)
-- features/upload (exception-open)
 - shared/ui-primitives (exception-open)

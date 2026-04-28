@@ -9,11 +9,11 @@
   },
   {
     "module_slug": "features/upload",
-    "module_type": "exception-module",
+    "module_type": "ui-bound-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/ui/upload/upload-panel-system.md",
     "code_path": "apps/web/src/app/features/upload",
-    "status": "exception-open"
+    "status": "active"
   },
   {
     "module_slug": "features/settings-overlay",
