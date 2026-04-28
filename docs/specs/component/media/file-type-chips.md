@@ -225,7 +225,7 @@ fileTypeChips = computed(() => {
 
 | File                                                              | Purpose                                           |
 | ----------------------------------------------------------------- | ------------------------------------------------- |
-| `docs/specs/component/file-type-chips.md`                           | Contract for upload file-type chip behavior       |
+| `docs/specs/component/media/file-type-chips.md`                           | Contract for upload file-type chip behavior       |
 | `apps/web/src/app/features/map/upload/upload-area.component.ts`   | Computes and exposes deduplicated chip view-model |
 | `apps/web/src/app/features/map/upload/upload-area.component.html` | Renders chip section and list                     |
 | `apps/web/src/app/features/map/upload/upload-area.component.scss` | Chip row layout, wrap/scroll behavior             |
@@ -254,7 +254,7 @@ None - this feature is local to queue visualization.
 
 ## Acceptance Criteria
 
-- [x] Spec document created: `docs/specs/component/file-type-chips.md`
+- [x] Spec document created: `docs/specs/component/media/file-type-chips.md`
 - [x] File type → color mapping table defined (as above)
 - [x] Deduplication logic handles common variants (jpg/jpeg, doc/docx, etc.)
 - [x] Chip display placed correctly in upload panel (after dropzone)

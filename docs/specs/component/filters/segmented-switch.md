@@ -55,7 +55,7 @@ No direct Supabase access is required for this component.
 
 | File                                                                       | Purpose                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| `docs/specs/component/segmented-switch.md`                                 | Segmented-switch behavior contract               |
+| `docs/specs/component/filters/segmented-switch.md`                                 | Segmented-switch behavior contract               |
 | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`   | Inputs/outputs and keyboard interaction logic    |
 | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.html` | Segment structure and bindings                   |
 | `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss` | Layout variants (`fit`/`fill`) and visual states |

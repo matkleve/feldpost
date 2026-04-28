@@ -10,15 +10,15 @@ It MUST NOT own media list lifecycle, toolbar commands, or pane orchestration.
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -31,7 +31,7 @@ The count row MUST render loading text while header state is `loading`, then ren
 
 - Runtime file: `apps/web/src/app/features/media/media-page-header.component.ts`
 - Template file: `apps/web/src/app/features/media/media-page-header.component.html`
-- Parent shell contract: `docs/specs/component/media.component.md`
+- Parent shell contract: `docs/specs/component/media/media.component.md`
 - Parent route contract: `docs/specs/page/media-page.md`
 
 ## Actions & Interactions
@@ -47,7 +47,7 @@ The count row MUST render loading text while header state is `loading`, then ren
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaPageHeaderComponent` presentation behavior.
-- `docs/specs/component/media.component.md` MUST remain the single source of truth for media shell FSM and list lifecycle.
+- `docs/specs/component/media/media.component.md` MUST remain the single source of truth for media shell FSM and list lifecycle.
 - This file MUST NOT define toolbar command ownership.
 - This file MUST NOT define item-grid/media-render ownership.
 
@@ -97,7 +97,7 @@ State ownership rule:
 | `apps/web/src/app/features/media/media-page-header.component.ts` | Header inputs and derived summary helpers |
 | `apps/web/src/app/features/media/media-page-header.component.html` | Breadcrumb, title, and summary template |
 | `apps/web/src/app/features/media/media-page-header.component.scss` | Header-only visuals |
-| `docs/specs/component/media.component.md` | Parent shell lifecycle contract |
+| `docs/specs/component/media/media.component.md` | Parent shell lifecycle contract |
 
 ## Wiring
 

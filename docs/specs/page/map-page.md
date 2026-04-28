@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Full-screen **map route host** after login: sidebar, map zone, workspace pane (when that route subtree includes it), and floating controls. **`MapShellComponent`** is used for **`/`**, **`/map`**, and **`/settings/**`** in `app.routes.ts` — it bundles **map UX** and **map-adjacent chrome**; it is **not** the canonical long-term **sole** owner of the global workspace split (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload-button-zone.md), [drag-divider](../component/drag-divider.md); product UCs 1–3 in use-case docs.
+Full-screen **map route host** after login: sidebar, map zone, workspace pane (when that route subtree includes it), and floating controls. **`MapShellComponent`** is used for **`/`**, **`/map`**, and **`/settings/**`** in `app.routes.ts` — it bundles **map UX** and **map-adjacent chrome**; it is **not** the canonical long-term **sole** owner of the global workspace split (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
 
 ## What It Looks Like
 

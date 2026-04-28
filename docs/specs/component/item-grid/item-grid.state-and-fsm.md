@@ -12,7 +12,7 @@ Enumerated visual states and transitions apply to item shells; media **delivery*
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/item-grid.state-and-fsm.md`
+- **Specs:** `docs/specs/component/item-grid/item-grid.state-and-fsm.md`
 - **Code:** `apps/web/src/app/shared/item-grid/` (layout/state-frame base); domain items under `features/*`
 
 ## Actions
@@ -131,8 +131,8 @@ FSM scope rule for this spec family:
 
 FSM ownership mapping for media route surfaces:
 
-- MediaPage FSM is defined in `docs/specs/component/media.component.md`.
-- MediaContent FSM is defined in `docs/specs/component/media-content.md`.
+- MediaPage FSM is defined in `docs/specs/component/media/media.component.md`.
+- MediaContent FSM is defined in `docs/specs/component/media/media-content.md`.
 - ItemGrid must consume these contracts without redefining their state enums locally.
 
 ### State Enum

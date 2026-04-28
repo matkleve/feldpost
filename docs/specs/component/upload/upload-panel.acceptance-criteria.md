@@ -12,7 +12,7 @@ Checkbox lists and a short planned-change table referencing which AC rows must b
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/upload-panel.acceptance-criteria.md`
+- **Specs:** `docs/specs/component/upload/upload-panel.acceptance-criteria.md`
 
 ## Actions
 

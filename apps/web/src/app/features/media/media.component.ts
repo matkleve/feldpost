@@ -315,7 +315,7 @@ export class MediaComponent implements OnDestroy {
   }
 
   // Resolves deterministic /media batch size contract: current columns x 3.
-  // @see docs/specs/component/item-grid.md#actions
+  // @see docs/specs/component/item-grid/item-grid.md#actions
   private resolveBatchInsertSize(): number {
     const mode = this.cardVariant();
     if (mode === 'row') {
@@ -332,7 +332,7 @@ export class MediaComponent implements OnDestroy {
   }
 
   // Uses rendered media container width when available, with stable fallback for first-load fetches.
-  // @see docs/specs/component/item-grid.md#actions
+  // @see docs/specs/component/item-grid/item-grid.md#actions
   private resolveMediaContainerWidthPx(): number {
     if (typeof document !== 'undefined') {
       const container = document.querySelector('.media-content');
@@ -353,7 +353,7 @@ export class MediaComponent implements OnDestroy {
   }
 
   // Mirrors item-grid mode column minimums used by media-content placeholder geometry.
-  // @see docs/specs/component/item-grid.md#data
+  // @see docs/specs/component/item-grid/item-grid.md#data
   private resolveColumnMinPx(variant: CardVariant): number {
     switch (variant) {
       case 'small':

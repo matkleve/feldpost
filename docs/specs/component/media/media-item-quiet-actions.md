@@ -9,15 +9,15 @@ It MUST remain an overlay-layer control surface that reveals via parent hover/fo
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -43,7 +43,7 @@ The component exposes two compact icon-only buttons: select (top-left) and map (
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaItemQuietActionsComponent` visual/action-surface behavior.
-- `docs/specs/component/media-item.md` MUST remain the single source of truth for item-level orchestration and parent reveal gates.
+- `docs/specs/component/media/media-item.md` MUST remain the single source of truth for item-level orchestration and parent reveal gates.
 - This file MUST NOT own route-shell lifecycle behavior.
 - This file MUST NOT own upload overlay behavior.
 

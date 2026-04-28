@@ -1,10 +1,10 @@
 <div class="media-display__viewport">
   <!-- Stable state: loading-surface-visible -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div class="media-display__layer media-display__layer--loading-surface" aria-hidden="true"></div>
 
   <!-- Stable state: media-ready (staged content) -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div
     class="media-display__layer media-display__layer--staged-content"
     aria-hidden="true"
@@ -16,7 +16,7 @@
   </div>
 
   <!-- Stable state: content-fade-in/content-visible -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div
     class="media-display__layer media-display__layer--content"
     (transitionend)="onLayerTransitionEnd($event, 'content')"
@@ -27,19 +27,19 @@
   </div>
 
   <!-- Stable state: icon-only -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div class="media-display__layer media-display__layer--icon-only" aria-hidden="true">
     <span class="material-icons media-display__icon">{{ icon() }}</span>
   </div>
 
   <!-- Stable state: error -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div class="media-display__layer media-display__layer--error" aria-hidden="true">
     <span class="material-icons media-display__icon" aria-hidden="true">broken_image</span>
   </div>
 
   <!-- Stable state: no-media -->
-  <!-- @see docs/specs/component/media-display.md#state-rendering-matrix -->
+  <!-- @see docs/specs/component/media/media-display.md#state-rendering-matrix -->
   <div class="media-display__layer media-display__layer--no-media" aria-hidden="true">
     <span class="material-icons media-display__icon" aria-hidden="true">hide_image</span>
     <span class="media-display__no-media-label">{{ noMediaLabel() }}</span>

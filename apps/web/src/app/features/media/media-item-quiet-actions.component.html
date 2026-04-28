@@ -1,9 +1,9 @@
 <!-- Hosts absolute corner actions for media-item hover/focus affordances. -->
-<!-- @see docs/specs/component/media-item.md#component-hierarchy -->
+<!-- @see docs/specs/component/media/media-item.md#component-hierarchy -->
 <!-- Stable states: interactive-unselected | interactive-selected | interactive-map-disabled | interactive-selected-map-disabled | disabled. -->
-<!-- @see docs/specs/component/media-item-quiet-actions.md#state-machine -->
+<!-- @see docs/specs/component/media/media-item-quiet-actions.md#state-machine -->
 <!-- Renders top-left select toggle button for media item selection state. -->
-<!-- @see docs/specs/component/media-item.md#actions--interactions -->
+<!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
 <button
   type="button"
   class="media-item-quiet-actions__button media-item-quiet-actions__button--select"
@@ -16,16 +16,16 @@
   (click)="onSelectClick($event)"
 >
   <!-- Stable states: interactive-selected | interactive-selected-map-disabled render selected checkmark. -->
-  <!-- @see docs/specs/component/media-item-quiet-actions.md#state-machine -->
+  <!-- @see docs/specs/component/media/media-item-quiet-actions.md#state-machine -->
   @if (selected()) {
     <!-- Shows check glyph when item is currently selected. -->
-    <!-- @see docs/specs/component/media-item.md#actions--interactions -->
+    <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
     <span class="material-icons" aria-hidden="true">check</span>
   }
 </button>
 
 <!-- Renders top-right map quick action as icon-only control. -->
-<!-- @see docs/specs/component/media-item.md#what-it-looks-like -->
+<!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
 <button
   type="button"
   class="media-item-quiet-actions__button media-item-quiet-actions__button--map"
@@ -38,6 +38,6 @@
   (click)="onMapClick($event)"
 >
   <!-- Shows map glyph for jump-to-location quick action. -->
-  <!-- @see docs/specs/component/media-item.md#what-it-looks-like -->
+  <!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
   <span class="material-icons" aria-hidden="true">map</span>
 </button>

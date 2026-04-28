@@ -120,7 +120,7 @@ flowchart LR
 | `apps/web/src/app/core/map/map-adapter.ts`                         | Add marker-context intent event contract                 |
 | `apps/web/src/app/core/map/leaflet-map.adapter.ts`                 | Emit normalized marker secondary-click/long-press events |
 | `docs/specs/ui/media-marker/media-marker.md`                  | Cross-reference marker menu behavior from marker spec    |
-| `docs/specs/component/map-context-menu.md`                 | Define precedence between map and marker context menus   |
+| `docs/specs/component/map/map-context-menu.md`                 | Define precedence between map and marker context menus   |
 
 ## Wiring
 

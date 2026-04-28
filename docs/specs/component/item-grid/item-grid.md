@@ -21,13 +21,13 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 
 - Shared location: `apps/web/src/app/shared/item-grid/`
 - Child specs:
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/project-item.md`
-  - `docs/specs/component/item-state-frame.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/project/project-item.md`
+  - `docs/specs/component/item-grid/item-state-frame.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
   - `docs/specs/service/media-download-service/media-download-service.md`
 - Domain consumers:
   - Media page (`/media`) via media domain item adapter
@@ -60,9 +60,9 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for shared `ItemGridComponent` and `ItemComponent` layout/state-frame contracts.
-- Media route shell lifecycle behavior MUST remain owned by `docs/specs/component/media.component.md`.
-- Media content render lifecycle behavior MUST remain owned by `docs/specs/component/media-content.md`.
-- Media delivery/render lifecycle behavior MUST remain owned by `docs/specs/component/media-display.md`.
+- Media route shell lifecycle behavior MUST remain owned by `docs/specs/component/media/media.component.md`.
+- Media content render lifecycle behavior MUST remain owned by `docs/specs/component/media/media-content.md`.
+- Media delivery/render lifecycle behavior MUST remain owned by `docs/specs/component/media/media-display.md`.
 - This file MUST NOT redefine route-shell tab/orchestration ownership.
 
 ## Component Hierarchy

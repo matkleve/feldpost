@@ -10,15 +10,15 @@ It MUST delegate content rendering behavior to `MediaContentComponent`.
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -33,7 +33,7 @@ Visual geometry details MAY evolve independently as long as the behavior contrac
 - Runtime file: apps/web/src/app/features/media/media.component.ts
 - Template file: apps/web/src/app/features/media/media.component.html
 - Parent route contract: docs/specs/page/media-page.md
-- Child renderer contract: docs/specs/component/media-content.md
+- Child renderer contract: docs/specs/component/media/media-content.md
 - Trigger: route entry to /media and user interactions that change list loading lifecycle
 
 ## Actions & Interactions
@@ -57,7 +57,7 @@ Visual geometry details MAY evolve independently as long as the behavior contrac
 
 - This file MUST be the single source of truth for `/media` shell behavior and FSM transitions.
 - `docs/specs/page/media-page.md` MUST remain the single source of truth for route composition/orchestration.
-- `docs/specs/component/media-content.md` MUST remain the single source of truth for content rendering behavior.
+- `docs/specs/component/media/media-content.md` MUST remain the single source of truth for content rendering behavior.
 - This file MUST NOT redefine item/domain tile visuals.
 
 ## Component Hierarchy
@@ -162,10 +162,10 @@ Canonical naming rule:
 | apps/web/src/app/features/media/media.component.ts   | route shell orchestration and pagination |
 | apps/web/src/app/features/media/media.component.html | header plus content composition          |
 | apps/web/src/app/features/media/media.component.scss | page-level shell styling                 |
-| docs/specs/component/media-page-header.md            | header presentation contract             |
-| docs/specs/component/media-toolbar.md                | toolbar intent-only contract             |
+| docs/specs/component/media/media-page-header.md            | header presentation contract             |
+| docs/specs/component/media/media-toolbar.md                | toolbar intent-only contract             |
 | docs/specs/page/media-page.md                        | route-level product contract             |
-| docs/specs/component/media-content.md                | child renderer state contract            |
+| docs/specs/component/media/media-content.md                | child renderer state contract            |
 
 ## Wiring
 

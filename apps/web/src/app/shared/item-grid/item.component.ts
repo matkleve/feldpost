@@ -34,7 +34,7 @@ export abstract class ItemComponent {
   readonly contextActionRequested = output<ItemContextActionEvent>();
 
   // Computes canonical item state precedence used by every domain item.
-  // @see docs/specs/component/item-grid.md#state
+  // @see docs/specs/component/item-grid/item-grid.md#state
   readonly showErrorState = computed(() => this.error());
   readonly showEmptyState = computed(() => !this.showErrorState() && this.empty());
   readonly showLoadingState = computed(

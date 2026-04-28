@@ -14,15 +14,15 @@ Canonical `/media` route: page-level layout, **layout-host** pane integration, a
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## Layer Ownership Contract
@@ -157,8 +157,8 @@ flowchart LR
 ### Page-Level Ownership (Mandatory)
 
 - This page spec MUST own route composition and cross-route pane orchestration only.
-- Route-shell lifecycle FSM behavior MUST be owned by `docs/specs/component/media.component.md`.
-- Content-render FSM behavior MUST be owned by `docs/specs/component/media-content.md`.
+- Route-shell lifecycle FSM behavior MUST be owned by `docs/specs/component/media/media.component.md`.
+- Content-render FSM behavior MUST be owned by `docs/specs/component/media/media-content.md`.
 - Tile visuals and per-item UI mapping MUST be owned by domain-level specs (`MediaItemComponent` and related item contracts).
 
 ### Deterministic Tab Entry Policy (Mandatory)

@@ -28,7 +28,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Invite Management | ui/settings-overlay/settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
 | Language / Locale | ui/settings-overlay/language-locale-settings.md | UI language switch between English, German, and Italian with locale-specific formatting and runtime translation fallback behavior. |
 | Language / Locale | ui/settings-overlay/settings-overlay.md | UI language and regional formatting defaults; language switch labels stay native (`English`, `Deutsch`, `Italiano`) regardless of active UI language. |
-| Map Basemap | component/map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
+| Map Basemap | component/map/map-zone.md | sets the default map layer (`default` or `satellite`) and whether the last user choice is persisted across sessions. |
 | Map Marker Motion | ui/media-marker/media-marker.md | toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`). |
 | Map Preferences | ui/settings-overlay/settings-overlay.md | map tile and map-behavior defaults. |
 | Notifications | ui/settings-overlay/settings-overlay.md | preference defaults for in-app feedback and alerts. |
@@ -36,7 +36,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Password Recovery | ui/settings-overlay/account-settings-section.md | reset email trigger behavior and redirect target handling. |
 | Password Security | ui/settings-overlay/account-page.md | policy messaging and re-auth requirement handling. |
 | Password Security | ui/settings-overlay/account-settings-section.md | change policy, re-auth requirement behavior, and minimum validation messaging. |
-| Project Color Palette | component/project-color-picker.md | temporary one-click random brand-hue generation (`brand-hue-###`) derived from brand orange by varying hue. |
+| Project Color Palette | component/project/project-color-picker.md | temporary one-click random brand-hue generation (`brand-hue-###`) derived from brand orange by varying hue. |
 | Project Color Palette | page/projects-page.md | enabled semantic project color options and default fallback color. |
 | Projects View Mode | page/projects-page.md | default layout mode (`list` or `cards`) and persistence behavior. |
 | QR Invite Preferences | ui/settings-overlay/qr-invite-flow.md | default target role, auto-generate-on-open behavior, invite expiration window, and enabled share channels. |

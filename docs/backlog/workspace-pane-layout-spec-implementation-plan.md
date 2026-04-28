@@ -48,7 +48,7 @@ Execute in order: parent pane contract first, then consumers that reference it.
 | 1.1.5 | **Component hierarchy** block: show **Layout host** → `WorkspacePaneShell` / `WorkspacePane` + `router-outlet` for route content (if auth layout is canonical). |
 | 1.1.6 | Cross-links: ensure `map-page`, `media-page`, `projects-page`, `drag-divider` link back here for split ownership. |
 
-### 1.2 `docs/specs/component/drag-divider.md`
+### 1.2 `docs/specs/component/workspace/drag-divider.md`
 
 | Task | Detail |
 | --- | --- |
@@ -79,7 +79,7 @@ Execute in order: parent pane contract first, then consumers that reference it.
 | 1.5.1 | Reconcile **state tables** (`workspacePaneOpen`, etc.) with **projects** UI: either define **project workspace chrome** signals explicitly **or** point to **layout host** pane visibility (do not imply a boolean on `ProjectsPageComponent` unless it exists). |
 | 1.5.2 | Cross-link `workspace-pane.md` and `project-details-view.md` for pane vs in-page project UI. |
 
-### 1.6 `docs/specs/component/project-details-view.md`
+### 1.6 `docs/specs/component/project/project-details-view.md`
 
 | Task | Detail |
 | --- | --- |
@@ -178,7 +178,7 @@ Execute in order: parent pane contract first, then consumers that reference it.
 | --- | --- |
 | 4.1.1 | “**Photo-only** deduplication” → accurate **media-type / hash** scoped wording (camera still vs document, etc.). |
 
-### 4.2 `docs/specs/component/active-selection-view.md`
+### 4.2 `docs/specs/component/workspace/active-selection-view.md`
 
 | Task | Detail |
 | --- | --- |

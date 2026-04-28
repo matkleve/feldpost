@@ -12,7 +12,7 @@ Process gates and checkbox tracking for the grid migration; not a runtime UI sur
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/item-grid.migration-acceptance-and-gates.md`
+- **Specs:** `docs/specs/component/item-grid/item-grid.migration-acceptance-and-gates.md`
 
 ## Actions
 

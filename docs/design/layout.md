@@ -90,7 +90,7 @@ flowchart TB
 - Workspace pane default width is 22.5rem (360px); minimum width is 17.5rem (280px).
 - There is no fixed maximum workspace width. Instead, divider movement is constrained by a minimum map-width rule: the divider cannot move further left once the map pane would shrink below a safe interaction width of approximately 20rem (320px).
 - The map pane uses `flex: 1` and absorbs all remaining horizontal space after workspace width and divider position are resolved.
-- The **Sidebar** and **Search Bar** are positioned inside the map pane as floating component-level elements, not as separate layout columns. Their behavior and dimensions are defined in [sidebar.md](../specs/component/sidebar.md) and [search-bar.md](../specs/ui/search-bar/search-bar.md).
+- The **Sidebar** and **Search Bar** are positioned inside the map pane as floating component-level elements, not as separate layout columns. Their behavior and dimensions are defined in [sidebar.md](../specs/component/workspace/sidebar.md) and [search-bar.md](../specs/ui/search-bar/search-bar.md).
 - This layout section defines pane structure and resizing only; component behavior belongs in the component specifications.
 
 ### 4.2 Tablet Layout (768–1023px / 48rem–63.9375rem)

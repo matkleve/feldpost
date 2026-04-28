@@ -171,7 +171,7 @@ export class ThumbnailCardComponent implements AfterViewInit {
 
   // Stable state: loading while thumbnail is unresolved or currently decoding;
   // loaded when signed thumbnail is ready and image decode completed; icon-only as fallback.
-  // @see docs/specs/component/item-grid.md (thumbnail grid behavior)
+  // @see docs/specs/component/item-grid/item-grid.md (thumbnail grid behavior)
   readonly mediaState = computed<ThumbnailCardMediaState>(() => {
     const image = this.image();
     const hasSignedThumbnail = !!image.signedThumbnailUrl;

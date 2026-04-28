@@ -12,7 +12,7 @@ Layering follows the ownership matrix; ItemGrid owns grid geometry only; state-f
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/item-grid.visual-behavior-and-scss.md`
+- **Specs:** `docs/specs/component/item-grid/item-grid.visual-behavior-and-scss.md`
 
 ## Actions
 
@@ -177,7 +177,7 @@ img {
 Example:
 
 - `// Defines column layout for grid-md mode with token-based spacing`
-- `// @see docs/specs/component/item-grid.visual-behavior-and-scss.md#scss-responsibilities`
+- `// @see docs/specs/component/item-grid/item-grid.visual-behavior-and-scss.md#scss-responsibilities`
 
 ## Wiring
 

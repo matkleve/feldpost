@@ -12,7 +12,7 @@ Three stacked blocks (intake → lane switch → file list), transparent shell g
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/upload-panel.layout-and-states.md`
+- **Specs:** `docs/specs/component/upload/upload-panel.layout-and-states.md`
 
 ## Actions
 

@@ -10,15 +10,15 @@ It MUST delegate all media download and rendering lifecycle responsibilities to 
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -28,11 +28,11 @@ When `item` is `null`, the host renders an icon-free skeleton rectangle in the e
 
 ## Where It Lives
 
-- Spec location: `docs/specs/component/media-item.md`
-- Parent spec: `docs/specs/component/item-grid.md`
-- Media renderer dependency: `docs/specs/component/media-display.md`
-- Upload overlay dependency: `docs/specs/component/media-item-upload-overlay.md`
-- Quiet-actions dependency: `docs/specs/component/media-item-quiet-actions.md`
+- Spec location: `docs/specs/component/media/media-item.md`
+- Parent spec: `docs/specs/component/item-grid/item-grid.md`
+- Media renderer dependency: `docs/specs/component/media/media-display.md`
+- Upload overlay dependency: `docs/specs/component/media/media-item-upload-overlay.md`
+- Quiet-actions dependency: `docs/specs/component/media/media-item-quiet-actions.md`
 - Service contract reference: `docs/specs/service/media-download-service/media-download-service.md`
 - Runtime location: `apps/web/src/app/features/media/media-item.component.ts`
 
@@ -54,7 +54,7 @@ When `item` is `null`, the host renders an icon-free skeleton rectangle in the e
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaItemComponent` interaction-shell behavior.
-- `docs/specs/component/media-display.md` MUST remain the single source of truth for media delivery/render FSM behavior.
+- `docs/specs/component/media/media-display.md` MUST remain the single source of truth for media delivery/render FSM behavior.
 - This file MUST NOT redefine route-shell lifecycle state transitions.
 - This file MUST NOT redefine toolbar/query command ownership.
 

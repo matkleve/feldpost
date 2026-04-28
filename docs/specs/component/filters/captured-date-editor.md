@@ -63,7 +63,7 @@ flowchart LR
 
 | File                                                                            | Purpose                       |
 | ------------------------------------------------------------------------------- | ----------------------------- |
-| `docs/specs/component/captured-date-editor.md`                          | Captured Date Editor contract |
+| `docs/specs/component/filters/captured-date-editor.md`                          | Captured Date Editor contract |
 | `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`   | Inline edit logic host        |
 | `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html` | Captured date row markup      |
 

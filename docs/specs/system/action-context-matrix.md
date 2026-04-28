@@ -1,6 +1,6 @@
 # Action Context Matrix
 
-> **Related specs:** [upload-panel](component/upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-actions-bar](workspace/workspace-actions-bar.md), [media-detail-actions](media-detail-actions.md), [upload-manager-pipeline](upload-manager-pipeline.md)
+> **Related specs:** [upload-panel](component/upload/upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-actions-bar](workspace/workspace-actions-bar.md), [media-detail-actions](media-detail-actions.md), [upload-manager-pipeline](upload-manager-pipeline.md)
 
 ## What It Is
 
@@ -200,7 +200,7 @@ flowchart TD
 | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `docs/specs/system/action-context-matrix.md`                  | Canonical cross-context action contract                                     |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Full upload location-resolution algorithm and upload-internal issue routing |
-| `docs/specs/component/upload-panel.md`                           | Upload row consumer of the matrix                                           |
+| `docs/specs/component/upload/upload-panel.md`                           | Upload row consumer of the matrix                                           |
 | `docs/specs/system/map-secondary-click-system.md`             | Map consumer of the matrix                                                  |
 | `docs/specs/ui/media-detail/media-detail-actions.md`      | Media detail consumer of the matrix                                         |
 | `docs/specs/ui/workspace/workspace-actions-bar.md`        | Workspace footer multi-selection consumer                                   |

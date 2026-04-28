@@ -12,7 +12,7 @@ Tabular audit: issue statement, file paths, contract direction, P0/P1.
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/upload-panel.feedback-triage.md`
+- **Specs:** `docs/specs/component/upload/upload-panel.feedback-triage.md`
 
 ## Actions
 

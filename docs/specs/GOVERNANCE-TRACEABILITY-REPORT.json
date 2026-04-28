@@ -14,71 +14,71 @@
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/auth-map-background.md",
-                        "new_ref":  "docs/specs/component/auth-map-background.md",
+                        "old_ref":  "docs/element-specs/component/map/auth-map-background.md",
+                        "new_ref":  "docs/specs/component/map/auth-map-background.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/captured-date-editor.md",
-                        "new_ref":  "docs/specs/component/captured-date-editor.md",
+                        "old_ref":  "docs/element-specs/component/filters/captured-date-editor.md",
+                        "new_ref":  "docs/specs/component/filters/captured-date-editor.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/dropdown-system.md",
-                        "new_ref":  "docs/specs/component/dropdown-system.md",
+                        "old_ref":  "docs/element-specs/component/filters/dropdown-system.md",
+                        "new_ref":  "docs/specs/component/filters/dropdown-system.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/file-type-chips.md",
-                        "new_ref":  "docs/specs/component/file-type-chips.md",
+                        "old_ref":  "docs/element-specs/component/media/file-type-chips.md",
+                        "new_ref":  "docs/specs/component/media/file-type-chips.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/item-grid.md",
-                        "new_ref":  "docs/specs/component/item-grid.md",
+                        "old_ref":  "docs/element-specs/component/item-grid/item-grid.md",
+                        "new_ref":  "docs/specs/component/item-grid/item-grid.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/map-context-menu.md",
-                        "new_ref":  "docs/specs/component/map-context-menu.md",
+                        "old_ref":  "docs/element-specs/component/map/map-context-menu.md",
+                        "new_ref":  "docs/specs/component/map/map-context-menu.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/map-zone.md",
-                        "new_ref":  "docs/specs/component/map-zone.md",
+                        "old_ref":  "docs/element-specs/component/map/map-zone.md",
+                        "new_ref":  "docs/specs/component/map/map-zone.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/radius-selection.md",
-                        "new_ref":  "docs/specs/component/radius-selection.md",
+                        "old_ref":  "docs/element-specs/component/map/radius-selection.md",
+                        "new_ref":  "docs/specs/component/map/radius-selection.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/segmented-switch.md",
-                        "new_ref":  "docs/specs/component/segmented-switch.md",
+                        "old_ref":  "docs/element-specs/component/filters/segmented-switch.md",
+                        "new_ref":  "docs/specs/component/filters/segmented-switch.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
-                        "old_ref":  "docs/element-specs/component/upload-panel.md",
-                        "new_ref":  "docs/specs/component/upload-panel.md",
+                        "old_ref":  "docs/element-specs/component/upload/upload-panel.md",
+                        "new_ref":  "docs/specs/component/upload/upload-panel.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
@@ -99,14 +99,14 @@
                     {
                         "source":  "docs/specs+app scopes",
                         "old_ref":  "docs/element-specs/item-grid.md",
-                        "new_ref":  "docs/specs/component/item-grid.md",
+                        "new_ref":  "docs/specs/component/item-grid/item-grid.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
                         "old_ref":  "docs/element-specs/item-state-frame.md",
-                        "new_ref":  "docs/specs/component/item-state-frame.md",
+                        "new_ref":  "docs/specs/component/item-grid/item-state-frame.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
@@ -176,14 +176,14 @@
                     {
                         "source":  "docs/specs+app scopes",
                         "old_ref":  "docs/element-specs/media-item.md",
-                        "new_ref":  "docs/specs/component/media-item.md",
+                        "new_ref":  "docs/specs/component/media/media-item.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },
                     {
                         "source":  "docs/specs+app scopes",
                         "old_ref":  "docs/element-specs/media-item-quiet-actions.md",
-                        "new_ref":  "docs/specs/component/media-item-quiet-actions.md",
+                        "new_ref":  "docs/specs/component/media/media-item-quiet-actions.md",
                         "status":  "resolved",
                         "rationale":  "deterministic single-candidate mapping"
                     },

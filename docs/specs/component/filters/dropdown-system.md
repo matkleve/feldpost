@@ -108,7 +108,7 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 
 | File                                                                                              | Purpose                                                   |
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `docs/specs/component/dropdown-system.md`                                                         | Shared dropdown visual contract                           |
+| `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual contract                           |
 | `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |

@@ -1,5 +1,5 @@
 // Defines vertical stack layout for breadcrumb, title, and count summary.
-// @see docs/specs/component/item-grid.md#wiring
+// @see docs/specs/component/item-grid/item-grid.md#wiring
 :host {
   display: flex;
   flex-direction: column;
@@ -7,7 +7,7 @@
 }
 
 // Styles breadcrumb row typography and alignment for media route context.
-// @see docs/specs/component/item-grid.md#wiring
+// @see docs/specs/component/item-grid/item-grid.md#wiring
 .media-page-header__breadcrumb {
   display: flex;
   align-items: center;
@@ -19,7 +19,7 @@
 }
 
 // Styles breadcrumb anchor link appearance while inheriting breadcrumb color.
-// @see docs/specs/component/item-grid.md#wiring
+// @see docs/specs/component/item-grid/item-grid.md#wiring
 .media-page-header__breadcrumb a {
   color: inherit;
   text-decoration: underline;
@@ -28,13 +28,13 @@
 }
 
 // Styles breadcrumb anchor hover state for improved pointer affordance.
-// @see docs/specs/component/item-grid.md#wiring
+// @see docs/specs/component/item-grid/item-grid.md#wiring
 .media-page-header__breadcrumb a:hover {
   color: var(--color-text-primary);
 }
 
 // Styles page-level heading typography for media title.
-// @see docs/specs/component/item-grid.md#wiring
+// @see docs/specs/component/item-grid/item-grid.md#wiring
 .media-page-header__title {
   margin: 0;
   font-size: var(--font-size-2xl);
@@ -44,7 +44,7 @@
 }
 
 // Styles media count summary typography below the main title.
-// @see docs/specs/component/item-grid.md#data
+// @see docs/specs/component/item-grid/item-grid.md#data
 .media-page-header__count {
   margin: 0;
   font-size: var(--font-size-md);

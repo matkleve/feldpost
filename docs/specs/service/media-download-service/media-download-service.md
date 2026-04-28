@@ -1,6 +1,6 @@
 # Media Download Service
 
-> Related specs: [item-grid](../../component/item-grid.md), [media-item](../../component/media-item.md), [media-detail-media-viewer](../../ui/media-detail/media-detail-media-viewer.md), [workspace-actions-bar](../../ui/workspace/workspace-actions-bar.md), [upload-manager](../media-upload-service/upload-manager.md), [action-context-matrix](../../system/action-context-matrix.md)
+> Related specs: [item-grid](../../component/item-grid/item-grid.md), [media-item](../../component/media/media-item.md), [media-detail-media-viewer](../../ui/media-detail/media-detail-media-viewer.md), [workspace-actions-bar](../../ui/workspace/workspace-actions-bar.md), [upload-manager](../media-upload-service/upload-manager.md), [action-context-matrix](../../system/action-context-matrix.md)
 > Adapter sub-specs: [tier-resolver.adapter](adapters/tier-resolver.adapter.md), [signed-url-cache.adapter](adapters/signed-url-cache.adapter.md), [edge-export-orchestrator.adapter](adapters/edge-export-orchestrator.adapter.md)
 
 ## Terminology (symbols)
@@ -48,14 +48,14 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 
 | Existing spec                                         | Covered concern                                                 | Target adapter or facade ownership            | Decision                                     |
 | ----------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------- | -------------------------------------------- |
-| `docs/specs/component/item-grid.md`                   | Cross-surface preview consistency and tier/fallback consumption | Facade + Tier Resolver                        | Keep, reference new parent                   |
-| `docs/specs/component/media-item.md`                  | `/media` preview state mapping and tier usage                   | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/specs/component/media-detail-media-viewer.md`   | Detail progressive loading and shared cache contract            | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/specs/component/media-marker.md`                | Marker preview loading runtime dependency                       | Facade + Signed URL Cache                     | Keep, point to runtime file/service boundary |
-| `docs/specs/component/workspace-actions-bar.md`       | Export trigger behavior and UX expectations                     | Facade + Edge Export Orchestrator             | Keep, consume edge export contract           |
+| `docs/specs/component/item-grid/item-grid.md`                   | Cross-surface preview consistency and tier/fallback consumption | Facade + Tier Resolver                        | Keep, reference new parent                   |
+| `docs/specs/component/media/media-item.md`                  | `/media` preview state mapping and tier usage                   | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/specs/ui/media-detail/media-detail-media-viewer.md`   | Detail progressive loading and shared cache contract            | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/specs/ui/media-marker/media-marker.md`                | Marker preview loading runtime dependency                       | Facade + Signed URL Cache                     | Keep, point to runtime file/service boundary |
+| `docs/specs/ui/workspace/workspace-actions-bar.md`       | Export trigger behavior and UX expectations                     | Facade + Edge Export Orchestrator             | Keep, consume edge export contract           |
 | `docs/specs/service/upload-manager/upload-manager.md` | Upload attach/replace blob bridge into media retrieval          | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/specs/component/upload-panel.md`                | Upload area file actions and integration context                | Facade + Signed URL Cache                     | Keep, reference new parent                   |
-| `docs/specs/component/file-type-chips.md`             | Upload area architecture parent linkage                         | Facade                                        | Keep, reference new parent                   |
+| `docs/specs/component/upload/upload-panel.md`                | Upload area file actions and integration context                | Facade + Signed URL Cache                     | Keep, reference new parent                   |
+| `docs/specs/component/media/file-type-chips.md`             | Upload area architecture parent linkage                         | Facade                                        | Keep, reference new parent                   |
 | `media-delivery-orchestrator (legacy spec)`           | Legacy combined tier+delivery policy contract                   | Replaced by facade + adapter split            | Archived as deprecated                       |
 | `photo-load-service (legacy spec)`                    | Legacy signed URL/cache headless contract                       | Replaced by signed-url-cache adapter contract | Archived as deprecated                       |
 

@@ -25,5 +25,5 @@ applyTo: "apps/web/src/app/features/map/**"
 ## References
 
 - Map Shell spec: [docs/specs/page/map-page.md](../../docs/specs/page/map-page.md) (Map Shell contract)
-- Map Zone spec: [docs/specs/component/map-zone.md](../../docs/specs/component/map-zone.md)
+- Map Zone spec: [docs/specs/component/map/map-zone.md](../../docs/specs/component/map/map-zone.md)
 - Architecture: [docs/architecture.md](../../docs/architecture.md) (Map Rendering Layer section)

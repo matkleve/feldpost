@@ -10,15 +10,15 @@ It MUST NOT write shell query/operator state directly.
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -29,9 +29,9 @@ The toolbar MAY be omitted when route configuration suppresses operator UI.
 
 ## Where It Lives
 
-- Contract owner: `docs/specs/component/media-toolbar.md`
-- Parent shell contract: `docs/specs/component/media.component.md`
-- Content reference contract: `docs/specs/component/media-content.md`
+- Contract owner: `docs/specs/component/media/media-toolbar.md`
+- Parent shell contract: `docs/specs/component/media/media.component.md`
+- Content reference contract: `docs/specs/component/media/media-content.md`
 - Runtime composition boundary: media shell toolbar region in `apps/web/src/app/features/media/media.component.html`
 
 ## Actions & Interactions
@@ -47,7 +47,7 @@ The toolbar MAY be omitted when route configuration suppresses operator UI.
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaToolbar` intent-only behavior.
-- `docs/specs/component/media.component.md` MUST remain the single source of truth for operator/query write ownership.
+- `docs/specs/component/media/media.component.md` MUST remain the single source of truth for operator/query write ownership.
 - `MediaToolbar` MUST be intent-only and MUST NOT mutate `groupingMode`, `sortMode`, or `activeFilters` directly.
 - This file MUST NOT define route-shell lifecycle FSM transitions.
 
@@ -96,9 +96,9 @@ State ownership rule:
 
 | File | Purpose |
 | --- | --- |
-| `docs/specs/component/media-toolbar.md` | Canonical toolbar intent-only contract |
-| `docs/specs/component/media.component.md` | Shell query/operator write ownership |
-| `docs/specs/component/media-content.md` | Child content contract that consumes shell effects |
+| `docs/specs/component/media/media-toolbar.md` | Canonical toolbar intent-only contract |
+| `docs/specs/component/media/media.component.md` | Shell query/operator write ownership |
+| `docs/specs/component/media/media-content.md` | Child content contract that consumes shell effects |
 
 ## Wiring
 

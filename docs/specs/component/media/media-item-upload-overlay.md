@@ -9,15 +9,15 @@ It MUST remain a passive layer and MUST NOT own selection or quiet-action behavi
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -42,7 +42,7 @@ The overlay fills the media frame bounds and displays a subtle tinted surface wh
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaItemUploadOverlayComponent` overlay rendering behavior.
-- `docs/specs/component/media-item.md` MUST remain the single source of truth for item-level orchestration.
+- `docs/specs/component/media/media-item.md` MUST remain the single source of truth for item-level orchestration.
 - This file MUST NOT define route-shell lifecycle behavior.
 - This file MUST NOT define quiet-actions ownership.
 

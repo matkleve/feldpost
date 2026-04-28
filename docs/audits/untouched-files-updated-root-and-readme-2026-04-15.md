@@ -70,44 +70,44 @@
 | docs/settings-registry.md | PROTECTED | PROTECTED: Governance/control-plane document. |
 | docs/setup-guide.md | PROTECTED | PROTECTED: Default fallback (no deletion decision without clear supersession). |
 | docs/skills/feldpost-component/SKILL.md | PROTECTED | PROTECTED: Path under docs/skills/. |
-| docs/specs/component/active-filter-chips.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/active-selection-view.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/auth-map-background.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/captured-date-editor.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/chip.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/drag-divider.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/dropdown-system.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/file-type-chips.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/filter-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/gps-button.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/grouping-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/group-tab-bar.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/item-grid.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/item-grid-filter-operator.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/item-state-frame.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/map-context-menu.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/map-zone.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media.component.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-content.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-display.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-item.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-item-quiet-actions.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-item-upload-overlay.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-page-header.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/media-toolbar.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/placement-mode.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/project-color-picker.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/project-details-view.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/project-item.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/projects-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/radius-selection.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/active-filter-chips.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/workspace/active-selection-view.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/auth-map-background.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/captured-date-editor.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/chip.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/workspace/drag-divider.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/dropdown-system.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/file-type-chips.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/filter-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/gps-button.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/grouping-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/workspace/group-tab-bar.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/item-grid/item-grid.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/item-grid-filter-operator.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/item-grid/item-state-frame.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/map-context-menu.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/map-zone.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media.component.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-content.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-display.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-item.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-item-quiet-actions.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-item-upload-overlay.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-page-header.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/media/media-toolbar.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/placement-mode.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/project/project-color-picker.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/project/project-details-view.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/project/project-item.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/project/projects-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/radius-selection.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
 | docs/specs/component/README.md | PROTECTED | PROTECTED: README defines folder structure/navigation contract and should remain as documentation entrypoint. |
-| docs/specs/component/segmented-switch.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/sidebar.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/sort-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/upload-button-zone.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/upload-panel.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
-| docs/specs/component/user-location-marker.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/segmented-switch.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/workspace/sidebar.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/filters/sort-dropdown.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/upload/upload-button-zone.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/upload/upload-panel.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
+| docs/specs/component/map/user-location-marker.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
 | docs/specs/GOVERNANCE-DUPLICATION-REPORT.md | PROTECTED | PROTECTED: Governance/control-plane document. |
 | docs/specs/GOVERNANCE-MATRIX.md | PROTECTED | PROTECTED: Governance/control-plane document. |
 | docs/specs/GOVERNANCE-MODULE-REGISTRY.json | PROTECTED | PROTECTED: Governance/control-plane document. |

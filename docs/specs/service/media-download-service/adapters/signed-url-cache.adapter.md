@@ -1,7 +1,7 @@
 # Media Download Adapter - Signed URL Cache
 
 > Parent spec: [../media-download-service.md](../media-download-service.md)
-> Related specs: [../../media-marker/media-marker.md](../../media-marker/media-marker.md), [../../media-item.md](../../media-item.md), [../../media-detail/media-detail-media-viewer.md](../../media-detail/media-detail-media-viewer.md)
+> Related specs: [media-marker](../../../ui/media-marker/media-marker.md), [media-item](../../../component/media/media-item.md), [media-detail-media-viewer](../../../ui/media-detail/media-detail-media-viewer.md)
 
 ## What It Is
 

@@ -59,13 +59,13 @@ app-universal-media {
   */
 
 // Stable state: linked-hover adds relationship emphasis ring.
-// @see docs/specs/component/item-grid.md (thumbnail grid behavior)
+// @see docs/specs/component/item-grid/item-grid.md (thumbnail grid behavior)
 :host-context(.thumbnail-card--linked-hover) {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-clay) 26%, transparent);
 }
 
 // Stable state: selected + linked-hover composes selection shadow and linked-hover ring.
-// @see docs/specs/component/item-grid.md (thumbnail grid behavior)
+// @see docs/specs/component/item-grid/item-grid.md (thumbnail grid behavior)
 :host-context(.thumbnail-card--selected.thumbnail-card--linked-hover) {
   box-shadow:
     var(--shadow-md),

@@ -188,7 +188,7 @@ Media-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 | `statusFilter`                | `'all' \| 'active' \| 'archived'`            | `'all'`                  | Status scoping                                                |
 | `viewMode`                    | `'list' \| 'cards'`                          | stored value or `'list'` | Active layout mode                                            |
 | `sortMode`                    | `'name' \| 'updated' \| 'image-count'`       | `'updated'`              | Fallback/base project ordering                                |
-| `selectedProjectId`           | `string \| null`                             | `null`                   | Active project opened in project-scoped workspace surface — see [workspace-pane](../ui/workspace/workspace-pane.md), [project-details-view](../component/project-details-view.md) |
+| `selectedProjectId`           | `string \| null`                             | `null`                   | Active project opened in project-scoped workspace surface — see [workspace-pane](../ui/workspace/workspace-pane.md), [project-details-view](../component/project/project-details-view.md) |
 | `workspacePaneOpen`           | `boolean`                                    | `false`                  | **Projects route:** visibility of project-scoped workspace UI (naming TBD if collides with layout-host signal) |
 | `editingProjectId`            | `string \| null`                             | `null`                   | Inline rename row                                             |
 | `workspaceTitleEditProjectId` | `string \| null`                             | `null`                   | Enables workspace header title input for the selected project |

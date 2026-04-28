@@ -1,7 +1,7 @@
 # Map Context Menu — Use Cases & Interaction Scenarios
 
-> **Element spec:** [specs/component/map-context-menu.md](../specs/component/map-context-menu.md)
-> **Related specs:** [map-secondary-click-system](../specs/system/map-secondary-click-system.md), [radius-selection](../specs/component/radius-selection.md), [photo-marker-context-menu](../specs/ui/media-marker/media-marker-context-menu.md), [workspace-pane](../specs/ui/workspace/workspace-pane.md), [upload-panel](../specs/component/upload-panel.md)
+> **Element spec:** [specs/component/map/map-context-menu.md](../specs/component/map/map-context-menu.md)
+> **Related specs:** [map-secondary-click-system](../specs/system/map-secondary-click-system.md), [radius-selection](../specs/component/map/radius-selection.md), [photo-marker-context-menu](../specs/ui/media-marker/media-marker-context-menu.md), [workspace-pane](../specs/ui/workspace/workspace-pane.md), [upload-panel](../specs/component/upload/upload-panel.md)
 
 ---
 

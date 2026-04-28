@@ -10,15 +10,15 @@ It MUST NOT own route-shell transitions or cross-route pane orchestration.
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -32,8 +32,8 @@ Selection and context actions MUST be emitted as typed intents to the parent she
 
 - Runtime file: apps/web/src/app/features/media/media-content.component.ts
 - Template file: apps/web/src/app/features/media/media-content.component.html
-- Parent shell contract: docs/specs/component/media.component.md
-- Item system contract: docs/specs/component/item-grid.md
+- Parent shell contract: docs/specs/component/media/media.component.md
+- Item system contract: docs/specs/component/item-grid/item-grid.md
 - Trigger: MediaComponent updates state or list payload for /media content area
 
 ## Actions & Interactions
@@ -54,7 +54,7 @@ Selection and context actions MUST be emitted as typed intents to the parent she
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaContentComponent` render-state behavior.
-- `docs/specs/component/media.component.md` MUST remain the single source of truth for `/media` shell FSM behavior.
+- `docs/specs/component/media/media.component.md` MUST remain the single source of truth for `/media` shell FSM behavior.
 - This file MUST NOT redefine route-shell state transitions.
 - This file MUST NOT define item/domain tile visual details beyond content-level projection contracts.
 
@@ -96,7 +96,7 @@ Typed output intents (intent-only child contract):
 
 ### MediaToolbar Visual Contract Reference (Owned Spec)
 
-- `docs/specs/component/media-toolbar.md` MUST be the single source of truth for `MediaToolbar` visual and intent behavior.
+- `docs/specs/component/media/media-toolbar.md` MUST be the single source of truth for `MediaToolbar` visual and intent behavior.
 - This file MUST reference `MediaToolbar` ownership and MUST NOT duplicate per-control behavior tables owned by the toolbar spec.
 - `MediaToolbar` remains intent-only; `MediaComponent` remains the single writer for `groupingMode`, `sortMode`, and `activeFilters`.
 - Toolbar references for `/media` MUST use `MediaToolbar`; non-canonical aliases such as `PaneToolbar` and `ActionToolbar` MUST NOT be used.
@@ -131,8 +131,8 @@ flowchart TD
 | apps/web/src/app/features/media/media-content.component.ts   | content state orchestration and outputs |
 | apps/web/src/app/features/media/media-content.component.html | render switch and projected item slots  |
 | apps/web/src/app/features/media/media-content.component.scss | content-region visuals and transitions  |
-| docs/specs/component/media.component.md                      | parent shell FSM ownership              |
-| docs/specs/component/item-grid.md                            | projected grid system contract          |
+| docs/specs/component/media/media.component.md                      | parent shell FSM ownership              |
+| docs/specs/component/item-grid/item-grid.md                            | projected grid system contract          |
 
 ## Wiring
 
@@ -171,7 +171,7 @@ sequenceDiagram
 - [x] MediaContent emits typed intents only and does not directly mutate `groupingMode`, `sortMode`, or `activeFilters`.
 - [x] Selection changes are emitted as parent intents (`selectionToggleRequested`, `selectionClearRequested`) and not written directly by the child.
 - [x] Systemic escalation is forwarded only as coalesced intent events; per-item failure storms are forbidden.
-- [ ] This file MUST reference `docs/specs/component/media-toolbar.md` as the owning visual/intent contract for `MediaToolbar`.
+- [ ] This file MUST reference `docs/specs/component/media/media-toolbar.md` as the owning visual/intent contract for `MediaToolbar`.
 - [ ] This file MUST NOT duplicate per-control toolbar behavior tables owned by the dedicated toolbar spec.
 - [ ] All enforceable statements in this file MUST use RFC 2119 language (`MUST`, `SHOULD`, `MAY`).
 

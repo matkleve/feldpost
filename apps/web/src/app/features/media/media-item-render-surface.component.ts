@@ -4,7 +4,7 @@ import { MEDIA_NO_MEDIA_ICON } from '../../core/media-download/media-download.se
 import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
 
 // Stable states: loading, content, content-selected, error, no-media.
-// @see docs/specs/component/media-item.md#state-machine
+// @see docs/specs/component/media/media-item.md#state-machine
 export type MediaItemRenderState = 'loading' | 'content' | 'error' | 'no-media';
 export type MediaItemRenderSurfaceState = MediaItemRenderState | 'content-selected';
 
@@ -42,7 +42,7 @@ export class MediaItemRenderSurfaceComponent {
   readonly fileTypeChipVariant = input<ChipVariant>('default');
 
   // Stable state normalization: content-selected uses content rendering plus selected visual emphasis in SCSS.
-  // @see docs/specs/component/media-item.md#visual-behavior-contract
+  // @see docs/specs/component/media/media-item.md#visual-behavior-contract
   readonly renderLayerState = computed<MediaItemRenderState>(() => {
     const state = this.state();
     return state === 'content-selected' ? 'content' : state;

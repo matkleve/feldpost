@@ -1,18 +1,18 @@
 <!-- Defines plain square slot geometry without decorative frame styling. -->
-<!-- @see docs/specs/component/media-item.md#what-it-looks-like -->
+<!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
 <!-- Defines media-frame bounds where border/radius/hover/actions/chip are anchored. -->
-<!-- @see docs/specs/component/media-item.md#what-it-looks-like -->
+<!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
 <div
   class="media-item-render-surface__media-frame"
   [class.media-item-render-surface__media-frame--top]="isDocument()"
 >
   <!-- Stable state: content | content-selected -> render loaded asset or icon-only fallback. -->
-  <!-- @see docs/specs/component/media-item.md#state-machine -->
+  <!-- @see docs/specs/component/media/media-item.md#state-machine -->
   <!-- Renders loaded media asset with fit-contain behavior when image content exists. -->
-  <!-- @see docs/specs/component/media-item.md#actions--interactions -->
+  <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
   @if (renderLayerState() === 'content' && isImage() && thumbnailUrl().length > 0) {
     <!-- Renders actual signed thumbnail asset and captures natural ratio on load. -->
-    <!-- @see docs/specs/component/media-item.md#aspect-ratio-behavior-by-mode -->
+    <!-- @see docs/specs/component/media/media-item.md#aspect-ratio-behavior-by-mode -->
     <img
       class="media-item-render-surface__asset"
       [class.media-item-render-surface__asset--document]="isDocument()"
@@ -22,39 +22,39 @@
     />
   } @else if (renderLayerState() === 'content') {
     <!-- Renders non-image icon fallback in canonical content state. -->
-    <!-- @see docs/specs/component/media-item.md#state-normalization-decision-mandatory -->
+    <!-- @see docs/specs/component/media/media-item.md#state-normalization-decision-mandatory -->
     <div class="media-item-render-surface__fallback media-item-render-surface__fallback--icon-only">
       <!-- Displays file-type icon glyph for non-image content in icon-only content state. -->
-      <!-- @see docs/specs/component/media-item.md#state-normalization-decision-mandatory -->
+      <!-- @see docs/specs/component/media/media-item.md#state-normalization-decision-mandatory -->
       <span class="material-icons media-item-render-surface__icon" aria-hidden="true">{{
         icon()
       }}</span>
     </div>
     <!-- Stable state: error | no-media -> render deterministic no-photo fallback. -->
-    <!-- @see docs/specs/component/media-item.md#state-machine -->
+    <!-- @see docs/specs/component/media/media-item.md#state-machine -->
   } @else if (renderLayerState() === 'error' || renderLayerState() === 'no-media') {
     <!-- Renders deterministic no-media/error fallback surface. -->
-    <!-- @see docs/specs/component/media-item.md#actions--interactions -->
+    <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
     <div class="media-item-render-surface__fallback media-item-render-surface__fallback--no-photo">
       <!-- Shows no-photo fallback icon when media is missing or failed. -->
-      <!-- @see docs/specs/component/media-item.md#actions--interactions -->
+      <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
       <img class="media-item-render-surface__no-photo-icon" [src]="noPhotoIconUrl" alt="" />
     </div>
     <!-- Stable state: loading -> render icon-free pulse placeholder block. -->
-    <!-- @see docs/specs/component/media-item.md#state-machine -->
+    <!-- @see docs/specs/component/media/media-item.md#state-machine -->
   } @else {
     <!-- Renders loading/default placeholder pulse block (no spinner, no icon). -->
-    <!-- @see docs/specs/component/media-item.md#acceptance-criteria -->
+    <!-- @see docs/specs/component/media/media-item.md#acceptance-criteria -->
     <div
       class="media-item-render-surface__fallback media-item-render-surface__fallback--loading"
     ></div>
   }
 
   <!-- Anchors file-type chip in lower-right corner of rendered media frame. -->
-  <!-- @see docs/specs/component/media-item.md#what-it-looks-like -->
+  <!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
   @if (fileTypeText().length > 0) {
     <!-- Renders semantic file-type chip with icon and localized type text. -->
-    <!-- @see docs/specs/component/media-item.md#what-it-looks-like -->
+    <!-- @see docs/specs/component/media/media-item.md#what-it-looks-like -->
     <app-chip
       class="media-item-render-surface__chip"
       [icon]="fileTypeIcon()"

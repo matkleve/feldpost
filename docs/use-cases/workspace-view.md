@@ -1,6 +1,6 @@
 # Workspace View — Use Cases & Interaction Scenarios
 
-> **Related specs:** [workspace-pane](../specs/ui/workspace/workspace-pane.md), [workspace-view-system](../specs/service/workspace-view/workspace-view-system.md), [workspace-toolbar](../specs/ui/workspace/workspace-toolbar.md), [thumbnail-grid](../specs/component/item-grid.md), [group-tab-bar](../specs/component/group-tab-bar.md), [filter-dropdown](../specs/component/filter-dropdown.md), [sort-dropdown](../specs/component/sort-dropdown.md), [grouping-dropdown](../specs/component/grouping-dropdown.md), [projects-dropdown](../specs/component/projects-dropdown.md)
+> **Related specs:** [workspace-pane](../specs/ui/workspace/workspace-pane.md), [workspace-view-system](../specs/service/workspace-view/workspace-view-system.md), [workspace-toolbar](../specs/ui/workspace/workspace-toolbar.md), [thumbnail-grid](../specs/component/item-grid/item-grid.md), [group-tab-bar](../specs/component/workspace/group-tab-bar.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [projects-dropdown](../specs/component/project/projects-dropdown.md)
 > **Product use cases:** [UC1](../archive/use-cases-README.md#uc1--technician-on-site-view-history) §6–7, [UC2](../archive/use-cases-README.md#uc2--clerk-preparing-a-quote) §6–10
 > **Related interaction scenarios:** [map-shell IS-2](map-shell.md#is-2-open-workspace-pane-via-marker-click)
 

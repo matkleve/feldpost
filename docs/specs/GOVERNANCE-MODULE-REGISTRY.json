@@ -123,7 +123,7 @@
     "module_slug": "shared/segmented-switch",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "docs/specs/component/segmented-switch.md",
+    "spec_path": "docs/specs/component/filters/segmented-switch.md",
     "code_path": "apps/web/src/app/shared/segmented-switch",
     "status": "readme-gap"
   },
@@ -171,7 +171,7 @@
     "module_slug": "shared/media-display",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "docs/specs/component/media-display.md",
+    "spec_path": "docs/specs/component/media/media-display.md",
     "code_path": "apps/web/src/app/shared/media-display",
     "status": "readme-gap"
   },
@@ -187,7 +187,7 @@
     "module_slug": "shared/item-grid",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "docs/specs/component/item-grid.md",
+    "spec_path": "docs/specs/component/item-grid/item-grid.md",
     "code_path": "apps/web/src/app/shared/item-grid",
     "status": "readme-gap"
   },

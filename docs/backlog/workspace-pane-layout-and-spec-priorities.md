@@ -36,7 +36,7 @@
 
 | Priority | Area | Spec / code focus | Action |
 |----------|------|-------------------|--------|
-| P0 | Layout | `docs/specs/ui/workspace/workspace-pane.md`, `page/map-page.md`, `page/media-page.md`, `page/projects-page.md`, `component/drag-divider.md` | Define **canonical host**: shared auth layout or per-page composition; **split** and pane width owned there. Remove or qualify “AppShell-only” / “MapShell-only” as **interim** once code moves. |
+| P0 | Layout | `docs/specs/ui/workspace/workspace-pane.md`, `page/map-page.md`, `page/media-page.md`, `page/projects-page.md`, `component/workspace/drag-divider.md` | Define **canonical host**: shared auth layout or per-page composition; **split** and pane width owned there. Remove or qualify “AppShell-only” / “MapShell-only” as **interim** once code moves. |
 | P0 | Layout | `apps/web` routing + templates | Implement **hoisted** `WorkspacePane` + split (layout component wrapping `router-outlet` or equivalent); keep **one** pane implementation. |
 | P0 | Signals / naming | Same specs + `map-shell.state.ts` / template | Until rename: tables use **`photoPanelOpen`** with footnote **Workspace Pane**, or dual column **prose / symbol**. |
 | P0 | Media delivery | `docs/specs/ui/media-detail/media-detail-media-viewer.md`, `.progressive-loading.supplement.md` | Replace **`PhotoLoadService`** / **`photoLoad`** / **`PHOTO_*`** with **`MediaDownloadService`** + **`MEDIA_*`**; add **Terminology (symbols)** for viewer inputs (`hasPhoto`, `imageReady`, streams). |
@@ -44,7 +44,7 @@
 | P1 | DB / resolver | `docs/specs/service/location-resolver/address-resolver.md` | **`media_items`** in normative paths; legacy **`images`** footnote if any RPC still references it. |
 | P1 | Upload streams | `docs/specs/ui/media-detail/media-detail-actions.md`, `service/media-upload-service/*.md` | Quote **`imageReplaced$`** etc.; prose = **media item**; link symbol-rename roadmap. |
 | P2 | Copy | `docs/specs/service/media-upload-service/upload-manager.md` | “Photo-only” → **media-type / hash** scoped wording where accurate. |
-| P2 | Workspace view | `docs/specs/component/active-selection-view.md` | Footnote **`rawImages`** / **`WorkspaceImage`**. |
+| P2 | Workspace view | `docs/specs/component/workspace/active-selection-view.md` | Footnote **`rawImages`** / **`WorkspaceImage`**. |
 
 ---
 

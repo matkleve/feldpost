@@ -1,5 +1,5 @@
 // Defines error-state card surface for media loading failures.
-// @see docs/specs/component/item-grid.md#state
+// @see docs/specs/component/item-grid/item-grid.md#state
 :host {
   border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
   border-radius: var(--container-radius-panel);
@@ -10,7 +10,7 @@
 }
 
 // Styles error-state heading typography.
-// @see docs/specs/component/item-grid.md#state
+// @see docs/specs/component/item-grid/item-grid.md#state
 .media-error__title {
   margin: 0;
   color: var(--color-text-primary);
@@ -18,14 +18,14 @@
 }
 
 // Styles error-state helper text body.
-// @see docs/specs/component/item-grid.md#state
+// @see docs/specs/component/item-grid/item-grid.md#state
 .media-error__body {
   margin: 0;
   color: var(--color-text-secondary);
 }
 
 // Aligns error-state retry button to card start edge.
-// @see docs/specs/component/item-grid.md#actions
+// @see docs/specs/component/item-grid/item-grid.md#actions
 .media-error__retry {
   justify-self: start;
 }

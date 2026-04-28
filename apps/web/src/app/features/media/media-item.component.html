@@ -1,10 +1,10 @@
 @if (item()) {
   <!-- Delegates media rendering lifecycle to shared media display. -->
-  <!-- @see docs/specs/component/media-item.md#component-hierarchy -->
+  <!-- @see docs/specs/component/media/media-item.md#component-hierarchy -->
   <app-media-display class="media-item__preview" [mediaId]="mediaIdentity()" />
 
   <!-- Renders selected emphasis around media frame only, above media content. -->
-  <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
+  <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
   <div
     class="media-item__frame"
     [class.media-item__frame--selected]="selected()"
@@ -12,13 +12,13 @@
   ></div>
 
   <!-- Renders upload overlay as host-aligned absolute layer below quiet actions. -->
-  <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
+  <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
   @if (uploadOverlay(); as overlay) {
     <app-media-item-upload-overlay class="media-item__upload-overlay" [overlay]="overlay" />
   }
 
   <!-- Renders quiet actions as the top-most overlay layer for hover/focus interactions. -->
-  <!-- @see docs/specs/component/media-item.md#visual-behavior-contract -->
+  <!-- @see docs/specs/component/media/media-item.md#visual-behavior-contract -->
   <app-media-item-quiet-actions
     class="media-item__quiet-actions"
     [state]="quietActionsState()"
@@ -29,7 +29,7 @@
   />
 
   <!-- Defines primary open action region so quiet-action buttons remain reachable above it. -->
-  <!-- @see docs/specs/component/media-item.md#actions--interactions -->
+  <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
   <button
     type="button"
     class="media-item__open"

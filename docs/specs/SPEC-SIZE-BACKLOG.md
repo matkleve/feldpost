@@ -12,12 +12,12 @@
 | `service/media-upload-service/upload-manager-pipeline.md` | `upload-manager-pipeline.data.md` |
 | `service/media-download-service/media-download-service.md` | `media-download-service.data-requirements.supplement.md` |
 | `ui/media-marker/media-marker.md` | `media-marker.viewport-and-clustering.supplement.md` |
-| `component/media-display.md` | `media-display.rendering-matrix.supplement.md` |
-| `component/grouping-dropdown.md` | `grouping-dropdown.drag-and-state-machine.supplement.md` |
-| `component/file-type-chips.md` | `file-type-chips.lookup-table.supplement.md` |
+| `component/media/media-display.md` | `media-display.rendering-matrix.supplement.md` |
+| `component/filters/grouping-dropdown.md` | `grouping-dropdown.drag-and-state-machine.supplement.md` |
+| `component/media/file-type-chips.md` | `file-type-chips.lookup-table.supplement.md` |
 | `ui/search-bar/search-bar-data-and-service.md` | `search-bar-data-and-service.ranking-metrics.supplement.md` |
 | `ui/workspace/workspace-actions-bar.md` | `workspace-actions-bar.sql-contracts.supplement.md` |
 | `ui/media-detail/media-detail-media-viewer.md` | `media-detail-media-viewer.progressive-loading.supplement.md` |
-| `component/dropdown-system.md` | `dropdown-system.class-library.supplement.md` |
+| `component/filters/dropdown-system.md` | `dropdown-system.class-library.supplement.md` |
 
 Refresh: `npm run lint:specs`.

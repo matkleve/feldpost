@@ -58,7 +58,7 @@ flowchart LR
 
 | File                                                              | Purpose                                     |
 | ----------------------------------------------------------------- | ------------------------------------------- |
-| `docs/specs/component/auth-map-background.md`                       | Contract for auth background map behavior   |
+| `docs/specs/component/map/auth-map-background.md`                       | Contract for auth background map behavior   |
 | `apps/web/src/app/features/auth/auth.styles.scss`                 | Shared auth styles for map background layer |
 | `apps/web/src/app/features/auth/login/login.component.html`       | Enables map background on login             |
 | `apps/web/src/app/features/auth/register/register.component.html` | Enables map background on register          |

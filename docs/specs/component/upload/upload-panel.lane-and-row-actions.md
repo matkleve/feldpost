@@ -12,7 +12,7 @@ Row surfaces use white/surface backgrounds with status tints; 3-dot menus follow
 
 ## Where It Lives
 
-- **Specs:** `docs/specs/component/upload-panel.lane-and-row-actions.md`
+- **Specs:** `docs/specs/component/upload/upload-panel.lane-and-row-actions.md`
 - **Code:** `features/upload/upload-panel/` (`UploadPanelComponent`, `UploadPanelItemComponent`)
 
 ## Actions

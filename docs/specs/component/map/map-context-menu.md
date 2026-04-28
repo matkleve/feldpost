@@ -134,8 +134,8 @@ No direct Supabase query is required to open the menu. Actions may trigger exist
 | `apps/web/src/app/core/map/map-adapter.ts`                         | Add context-click/long-press event contract                  |
 | `apps/web/src/app/core/map/leaflet-map.adapter.ts`                 | Emit normalized map context events + target hit metadata     |
 | `docs/specs/ui/media-marker/media-marker-draft-flow.md`                    | Define draft lifecycle from create action to persist/remove  |
-| `docs/specs/component/map-zone.md`                         | Cross-reference gesture precedence (menu vs radius drag)     |
-| `docs/specs/component/radius-selection.md`                 | Clarify drag-threshold behavior when secondary press is used |
+| `docs/specs/component/map/map-zone.md`                         | Cross-reference gesture precedence (menu vs radius drag)     |
+| `docs/specs/component/map/radius-selection.md`                 | Clarify drag-threshold behavior when secondary press is used |
 
 ## Wiring
 

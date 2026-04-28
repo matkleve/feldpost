@@ -10,15 +10,15 @@ It MUST render deterministic states (`idle`, `loading-surface-visible`, `ratio-k
 
 - This refactoring pass MUST modify only the `/media` page specification set:
   - `docs/specs/page/media-page.md`
-  - `docs/specs/component/media.component.md`
-  - `docs/specs/component/media-content.md`
-  - `docs/specs/component/media-item.md`
-  - `docs/specs/component/media-display.md`
-  - `docs/specs/component/media-item-quiet-actions.md`
-  - `docs/specs/component/media-item-upload-overlay.md`
-  - `docs/specs/component/item-grid.md` (media-path constraints only)
-  - `docs/specs/component/media-page-header.md`
-  - `docs/specs/component/media-toolbar.md`
+  - `docs/specs/component/media/media.component.md`
+  - `docs/specs/component/media/media-content.md`
+  - `docs/specs/component/media/media-item.md`
+  - `docs/specs/component/media/media-display.md`
+  - `docs/specs/component/media/media-item-quiet-actions.md`
+  - `docs/specs/component/media/media-item-upload-overlay.md`
+  - `docs/specs/component/item-grid/item-grid.md` (media-path constraints only)
+  - `docs/specs/component/media/media-page-header.md`
+  - `docs/specs/component/media/media-toolbar.md`
 - Broader documentation cleanup MUST be deferred to later phases.
 
 ## What It Looks Like
@@ -27,7 +27,7 @@ The component renders one stable media viewport and keeps geometry stable from f
 
 ## Where It Lives
 
-- Spec location: `docs/specs/component/media-display.md`
+- Spec location: `docs/specs/component/media/media-display.md`
 - Service contract dependency: `docs/specs/service/media-download-service/media-download-service.md`
 - Primary code location: `apps/web/src/app/shared/media-display/`
 - Initial consumers:
@@ -60,7 +60,7 @@ The component renders one stable media viewport and keeps geometry stable from f
 ## Normative Boundary Contract
 
 - This file MUST be the single source of truth for `MediaDisplayComponent` delivery/render state behavior.
-- `docs/specs/component/media-item.md` MUST remain the single source of truth for media-item interaction-shell behavior.
+- `docs/specs/component/media/media-item.md` MUST remain the single source of truth for media-item interaction-shell behavior.
 - This file MUST NOT define route-shell lifecycle behavior.
 - This file MUST NOT define upload-lane state ownership.
 

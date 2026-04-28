@@ -1,15 +1,15 @@
 <!-- Hosts the /media content state machine that switches between loading, error, empty, and loaded grid branches. -->
-<!-- @see docs/specs/component/item-grid.md#state -->
+<!-- @see docs/specs/component/item-grid/item-grid.md#state -->
 @if (state() === 'error') {
   <!-- Renders media error state branch when page-level load failed. -->
-  <!-- @see docs/specs/component/item-grid.md#state -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
   <app-media-error (retry)="retry.emit()" />
 } @else if (showGrid()) {
   <app-item-grid [mode]="itemMode()" [role]="gridRole()">
     @for (slot of gridSlots(); track slot.trackId) {
       @if (slot.item; as item) {
         <!-- Renders one media-domain item component per normalized media record. -->
-        <!-- @see docs/specs/component/item-grid.md#component-hierarchy -->
+        <!-- @see docs/specs/component/item-grid/item-grid.md#component-hierarchy -->
         <app-media-item
           [itemId]="item.id"
           [item]="item"
@@ -31,10 +31,10 @@
   </app-item-grid>
 } @else if (showEmptyState()) {
   <!-- Renders media empty state branch when no items are available. -->
-  <!-- @see docs/specs/component/item-grid.md#state -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
   <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
 } @else {
   <!-- Keeps fallback empty branch for unreachable state combinations. -->
-  <!-- @see docs/specs/component/item-grid.md#state -->
+  <!-- @see docs/specs/component/item-grid/item-grid.md#state -->
   <app-media-empty [reason]="emptyReason()" (retry)="retry.emit()" />
 }

@@ -76,7 +76,7 @@
 }
 
 /* Stable state: loading-surface-visible */
-/* @see docs/specs/component/media-display.md#state-rendering-matrix */
+/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='loading-surface-visible'] .media-display__layer--loading-surface,
 [data-state='ratio-known-contain'] .media-display__layer--loading-surface {
   opacity: 1;
@@ -85,7 +85,7 @@
 }
 
 /* Stable state: media-ready (staged content) */
-/* @see docs/specs/component/media-display.md#state-rendering-matrix */
+/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='media-ready'] .media-display__layer--staged-content,
 [data-state='content-fade-in'] .media-display__layer--staged-content,
 [data-state='content-visible'] .media-display__layer--staged-content {
@@ -94,7 +94,7 @@
 }
 
 /* Stable state: content-fade-in/content-visible */
-/* @see docs/specs/component/media-display.md#state-rendering-matrix */
+/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='content-fade-in'] .media-display__layer--content,
 [data-state='content-visible'] .media-display__layer--content {
   opacity: 1;
@@ -108,21 +108,21 @@
 }
 
 /* Stable state: icon-only */
-/* @see docs/specs/component/media-display.md#state-rendering-matrix */
+/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='icon-only'] .media-display__layer--icon-only {
   opacity: 1;
   transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
 }
 
 /* Stable state: error */
-/* @see docs/specs/component/media-display.md#state-rendering-matrix */
+/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='error'] .media-display__layer--error {
   opacity: 1;
   transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);
 }
 
 /* Stable state: no-media */
-/* @see docs/specs/component/media-display.md#state-rendering-matrix */
+/* @see docs/specs/component/media/media-display.md#state-rendering-matrix */
 [data-state='no-media'] .media-display__layer--no-media {
   opacity: 1;
   transition: opacity var(--transition-fade-in) var(--transition-reveal-delay);

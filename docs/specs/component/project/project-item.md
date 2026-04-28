@@ -10,7 +10,7 @@ The component renders a tokenized project frame with name, counts, status, and a
 
 ## Where It Lives
 
-- Parent spec: `docs/specs/component/item-grid.md`
+- Parent spec: `docs/specs/component/item-grid/item-grid.md`
 - Related page contract: `docs/specs/page/projects-page.md`
 - Child component root: `apps/web/src/app/features/projects/project-item.component.ts`
 - Route consumers:

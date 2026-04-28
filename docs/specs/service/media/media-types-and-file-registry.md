@@ -11,7 +11,7 @@ Upload rows and metadata surfaces show consistent **file type chips** and aspect
 ## Where It Lives
 
 - **Runtime module:** `apps/web/src/app/core/media/`
-- **UI:** [file-type-chips](../../component/file-type-chips.md) (component spec)
+- **UI:** [file-type-chips](../../component/media/file-type-chips.md) (component spec)
 
 ## Actions
 

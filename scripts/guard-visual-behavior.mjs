@@ -65,8 +65,8 @@ function parseZIndex(block) {
 function main() {
   const agents = readText("AGENTS.md");
   const webAgents = readText("apps/web/AGENTS.md");
-  const itemGridSpec = readText("docs/specs/component/item-grid.md");
-  const mediaItemSpec = readText("docs/specs/component/media-item.md");
+  const itemGridSpec = readText("docs/specs/component/item-grid/item-grid.md");
+  const mediaItemSpec = readText("docs/specs/component/media/media-item.md");
 
   const mediaContentHtml = readText(
     "apps/web/src/app/features/media/media-content.component.html",
@@ -112,8 +112,8 @@ function main() {
 
   // Spec guards for the current media/item-grid contract.
   for (const [path, content] of [
-    ["docs/specs/component/item-grid.md", itemGridSpec],
-    ["docs/specs/component/media-item.md", mediaItemSpec],
+    ["docs/specs/component/item-grid/item-grid.md", itemGridSpec],
+    ["docs/specs/component/media/media-item.md", mediaItemSpec],
   ]) {
     expectContains(
       path,

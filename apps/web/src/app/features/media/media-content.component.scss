@@ -1,19 +1,19 @@
 // Defines media page content stack spacing around item-grid and state sections.
-// @see docs/specs/component/item-grid.md#scss-responsibilities
+// @see docs/specs/component/item-grid/item-grid.md#scss-responsibilities
 :host {
   display: grid;
   gap: var(--spacing-3);
 }
 
 // Fades trailing loading placeholders out when fewer real items are returned.
-// @see docs/specs/component/item-grid.md#pulse-placeholder-contract-mandatory
+// @see docs/specs/component/item-grid/item-grid.md#pulse-placeholder-contract-mandatory
 .media-content__placeholder-item--exiting {
   animation: media-content-placeholder-exit var(--transition-fade-out) forwards;
   pointer-events: none;
 }
 
 // Defines opacity exit choreography for trailing placeholder slots.
-// @see docs/specs/component/item-grid.md#transition-choreography-table-required-before-css
+// @see docs/specs/component/item-grid/item-grid.md#transition-choreography-table-required-before-css
 @keyframes media-content-placeholder-exit {
   from {
     opacity: 1;
