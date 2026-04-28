@@ -16,7 +16,7 @@ The panel is a **fixed-width section shell** of **three stacked blocks** (intake
 ## Where It Lives
 
 - **Parent**: Upload Button Zone in `MapShellComponent`
-- **Component**: `UploadPanelComponent` at `features/upload/upload-panel/`
+- **Component**: `UploadPanelComponent` at `features/upload/`
 - **Appears when**: user toggles Upload Button open
 
 ## Actions
@@ -268,9 +268,9 @@ flowchart LR
 
 | File                                                       | Purpose                                                              |
 | ---------------------------------------------------------- | -------------------------------------------------------------------- |
-| `features/upload/upload-panel/upload-panel.component.ts`   | Upload panel orchestration, lane filters, row actions                |
-| `features/upload/upload-panel/upload-panel.component.html` | Compact panel UI: drop zone, segmented switch, lane list             |
-| `features/upload/upload-panel/upload-panel.component.scss` | Lane switch visuals, transparent section surfaces, status tokens     |
+| `features/upload/upload-panel.component.ts`   | Upload panel orchestration, lane filters, row actions                |
+| `features/upload/upload-panel.component.html` | Compact panel UI: drop zone, segmented switch, lane list             |
+| `features/upload/upload-panel.component.scss` | Lane switch visuals, transparent section surfaces, status tokens     |
 | `core/upload/upload-manager.service.ts`                    | Root upload lifecycle, per-job phases, batch tracking, event streams |
 | `features/map/map-shell/map-shell.component.ts`            | Consumes placement and zoom outputs from the panel                   |
 

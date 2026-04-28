@@ -172,7 +172,7 @@ flowchart LR
 | `core/geocoding.service.ts`                                          | Reverse/forward geocoding adapter                                            |
 | `docs/specs/service/media-upload-service/upload-location-config.md`  | Child spec for location-confidence and disambiguation contract               |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for pipeline, deduplication, folder upload, and conflict handling |
-| `features/upload/upload-panel/upload-panel.component.ts`             | Refactor — delegate to UploadManagerService                                  |
+| `features/upload/upload-panel.component.ts`                          | Panel UI; delegates ingestion to `UploadManagerService`                      |
 
 ## Pipeline Service Coverage Addendum (C-01)
 

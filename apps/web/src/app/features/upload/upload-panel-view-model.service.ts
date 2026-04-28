@@ -24,6 +24,8 @@ export interface UploadPanelViewModelRegisterOptions {
 /**
  * UploadPanelViewModelService — Presentation logic and UI helper functions.
  *
+ * @see docs/specs/ui/upload/upload-panel-system.md — view-model vs manager-owned job signals.
+ *
  * Purpose: Provide computed UI state for template rendering:
  *  - Lane switch options (labels, badge counts)
  *  - File list sorting (uploaded by priority, issues by phase)

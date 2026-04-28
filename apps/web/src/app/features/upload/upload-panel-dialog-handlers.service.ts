@@ -80,6 +80,8 @@ export class UploadPanelDialogHandlersService {
   // ── Location Address Dialog ────────────────────────────────────────────
 
   openLocationAddressDialog(job: UploadJob): void {
+    // missing_data jobs may lack imageId until placement; uploaded rows require persisted id.
+    // @see docs/specs/ui/upload/upload-panel-system.md — Actions (dialog outcomes via core APIs)
     if (!job.imageId && job.phase !== 'missing_data') {
       return;
     }

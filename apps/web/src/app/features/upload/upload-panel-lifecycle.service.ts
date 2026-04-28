@@ -9,16 +9,12 @@ import type { ImageUploadedEvent } from './upload-panel.component';
  * UploadPanelLifecycleService — Manage panel lifecycle subscriptions & issue attention pulse.
  *
  * @see docs/specs/ui/upload/upload-panel-system.md — event bridge and host callbacks vs manager-owned streams.
+ * @see docs/specs/component/upload/upload-panel.feedback-triage.md — lane stability after resolution (do not auto-switch lanes here).
  *
  * Encapsulates:
  * - Event bridging from UploadManagerService (imageUploaded$, jobPhaseChanged$)
- * - Issue attention pulse animation trigger (UI feedback on new issues)
- * - **AUTO-SWITCH CALLBACK** (SPEC VIOLATION — see Action 8g in upload-manager-pipeline.md)
- *
- * ⚠️ VIOLATION: setAutoSwitchCallback() is registered by upload-panel-setup.service.ts (line 51)
- * and executed when jobPhaseChanged$ reports error/missing_data phase. Spec requires lane
- * stability; never auto-switch after resolution actions. TODO: Remove auto-switch callback
- * and rely on explicit user lane selection.
+ * - Issue attention pulse when a job newly enters error or missing_data (UI-only; does not change manager phase)
+ * - Optional setAutoSwitchCallback (legacy hook; not invoked from initializeSubscriptions — prefer explicit lane UX per feedback-triage)
  */
 @Injectable({ providedIn: 'root' })
 export class UploadPanelLifecycleService {
@@ -47,10 +43,8 @@ export class UploadPanelLifecycleService {
   }
 
   setAutoSwitchCallback(cb: () => void): void {
-    // ⚠️ SPEC VIOLATION: This callback is used to implement auto-switch on error.
-    // Registered in upload-panel-setup.service.ts (line 51) to trigger lane='issues' on phase error.
-    // Violates spec Action 8g: "Keep currently selected lane stable after resolution actions."
-    // TODO: Remove this method and callback execution; rely on manual user lane selection only.
+    // Legacy hook: nothing in this service invokes the callback today; avoid wiring lane auto-switch here.
+    // @see docs/specs/component/upload/upload-panel.feedback-triage.md
     this.autoSwitchCallback = cb;
   }
 
@@ -75,6 +69,8 @@ export class UploadPanelLifecycleService {
     });
 
     this.uploadManager.jobPhaseChanged$.subscribe((event) => {
+      // Stable state: pulse only when a job newly enters issue-class phases (not on every phase tick).
+      // @see docs/specs/ui/upload/upload-panel-system.md — State / Panel UI transition choreography
       const becameIssue =
         (event.currentPhase === 'error' || event.currentPhase === 'missing_data') &&
         event.previousPhase !== 'error' &&
