@@ -8,6 +8,8 @@ Folder-specific rules:
 - UI specs may link to page/component/service/system docs for dependencies and boundaries.
 - UI specs must avoid owning service adapter internals.
 
+**App nav:** [nav/nav-system.md](nav/nav-system.md)
+
 **Workspace Pane (split host, `photoPanelOpen` interim):** [workspace/workspace-pane.md](workspace/workspace-pane.md) — [layout priorities backlog](../../backlog/workspace-pane-layout-and-spec-priorities.md).
 
 **Upload panel (UI over `core/upload`):** [upload/upload-panel-system.md](upload/upload-panel-system.md) — component detail under [../component/upload/](../component/upload/).

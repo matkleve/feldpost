@@ -51,9 +51,9 @@
     "module_slug": "features/settings",
     "module_type": "ui-bound-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/page/settings-routes.md",
     "code_path": "apps/web/src/app/features/settings",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/map",
@@ -67,17 +67,17 @@
     "module_slug": "features/groups",
     "module_type": "thin-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/page/groups-feature.md",
     "code_path": "apps/web/src/app/features/groups",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/auth",
     "module_type": "ui-bound-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/page/auth-pages.md",
     "code_path": "apps/web/src/app/features/auth",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/projects",
@@ -91,9 +91,9 @@
     "module_slug": "features/nav",
     "module_type": "ui-bound-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/ui/nav/nav-system.md",
     "code_path": "apps/web/src/app/features/nav",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/media",
@@ -219,9 +219,9 @@
     "module_slug": "features/action-system",
     "module_type": "thin-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/system/action-engine-system.md",
     "code_path": "apps/web/src/app/features/action-system",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/map",
@@ -363,9 +363,9 @@
     "module_slug": "features/account",
     "module_type": "ui-bound-module",
     "owner": "features",
-    "spec_path": "",
+    "spec_path": "docs/specs/page/account-feature.md",
     "code_path": "apps/web/src/app/features/account",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/workspace-view",

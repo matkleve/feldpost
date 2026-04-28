@@ -1,6 +1,6 @@
 # Action Context Matrix
 
-> **Related specs:** [upload-panel](component/upload/upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-actions-bar](workspace/workspace-actions-bar.md), [media-detail-actions](media-detail-actions.md), [upload-manager-pipeline](upload-manager-pipeline.md)
+> **Related specs:** [action-engine-system](action-engine-system.md), [upload-panel](../component/upload/upload-panel.md), [map-secondary-click-system](map-secondary-click-system.md), [workspace-actions-bar](../ui/workspace/workspace-actions-bar.md), [media-detail-actions](../ui/media-detail/media-detail-actions.md), [upload-manager-pipeline](../service/media-upload-service/upload-manager-pipeline.md)
 
 ## What It Is
 
