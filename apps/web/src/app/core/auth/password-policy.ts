@@ -1,4 +1,5 @@
-import { ValidatorFn, Validators } from '@angular/forms';
+import type { ValidatorFn} from '@angular/forms';
+import { Validators } from '@angular/forms';
 
 export const PASSWORD_MIN_LENGTH = 12;
 

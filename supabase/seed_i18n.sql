@@ -127,7 +127,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0001.none', '� None �', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0001.none', '� None �', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -313,7 +313,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0008.actions', 'Actions', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0008.actions', 'Actions', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -375,7 +375,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0011.add_metadata', 'Add metadata', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0011.add_metadata', 'Add metadata', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -437,7 +437,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0013.add_to_project', 'Add to project', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0013.add_to_project', 'Add to project', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -778,7 +778,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0026.all_projects', 'All projects', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0026.all_projects', 'All projects', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -902,7 +902,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.pane.tabs.aria', 'Workspace tabs', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html attr:aria-label')
+values (null, 'workspace.pane.tabs.aria', 'Workspace tabs', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -933,7 +933,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.pane.tab.selectedItems', 'Selected Items', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html text-node')
+values (null, 'workspace.pane.tab.selectedItems', 'Selected Items', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -964,7 +964,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.pane.tab.upload', 'Upload', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane.component.html text-node')
+values (null, 'workspace.pane.tab.upload', 'Upload', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -995,7 +995,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.mediaDetail.toast.addressMissing', 'No address available.', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message')
+values (null, 'workspace.mediaDetail.toast.addressMissing', 'No address available.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1026,7 +1026,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.mediaDetail.toast.addressCopied', 'Address copied', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message')
+values (null, 'workspace.mediaDetail.toast.addressCopied', 'Address copied', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1057,7 +1057,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.mediaDetail.toast.detailsAlreadyOpen', 'Details are already open.', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts ts-prop:message')
+values (null, 'workspace.mediaDetail.toast.detailsAlreadyOpen', 'Details are already open.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1181,7 +1181,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0037.available', 'Available', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0037.available', 'Available', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1367,7 +1367,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0044.captured', 'Captured', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0044.captured', 'Captured', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1491,7 +1491,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0051.city', 'City', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0051.city', 'City', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1522,7 +1522,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0052.clear', 'Clear', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0052.clear', 'Clear', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1553,7 +1553,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0053.clear_filters', 'Clear filters', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
+values (null, 'auto.0053.clear_filters', 'Clear filters', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1708,7 +1708,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0059.close_workspace_pane', 'Close workspace pane', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
+values (null, 'auto.0059.close_workspace_pane', 'Close workspace pane', 'en', 'apps/web/src/app/shared/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1894,7 +1894,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0068.coordinates', 'Coordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0068.coordinates', 'Coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1925,7 +1925,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0069.copy_coordinates', 'Copy coordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0069.copy_coordinates', 'Copy coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1956,7 +1956,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0071.corrected', 'Corrected', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0071.corrected', 'Corrected', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -1987,7 +1987,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0075.country', 'Country', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0075.country', 'Country', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2018,7 +2018,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0076.create', 'Create', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0076.create', 'Create', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2111,7 +2111,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0082.dd_mm_yyyy', 'DD.MM.YYYY', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
+values (null, 'auto.0082.dd_mm_yyyy', 'DD.MM.YYYY', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2173,7 +2173,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0085.delete', 'delete', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:confirmLabel')
+values (null, 'auto.0085.delete', 'delete', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html bound-attr:confirmLabel')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2204,7 +2204,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0086.delete_image', 'Delete image', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0086.delete_image', 'Delete image', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2235,7 +2235,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0087.delete_this_image', 'Delete this image?', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:title')
+values (null, 'auto.0087.delete_this_image', 'Delete this image?', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2514,7 +2514,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0096.district', 'District', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0096.district', 'District', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2793,7 +2793,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0098.done', 'Done', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0098.done', 'Done', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2824,7 +2824,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0099.download', 'Download', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0099.download', 'Download', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2855,7 +2855,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0100.download_selection', 'Download selection', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0100.download_selection', 'Download selection', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2886,7 +2886,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0101.download_zip', 'Download ZIP', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0101.download_zip', 'Download ZIP', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -2979,7 +2979,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0104.drop_here_to_group', 'Drop here to group', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0104.drop_here_to_group', 'Drop here to group', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -3072,7 +3072,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0108.edit', 'Edit', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template bound-attr:title')
+values (null, 'auto.0108.edit', 'Edit', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -3537,7 +3537,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0131.gps_assignment_disabled_for_this_file_type', 'GPS assignment disabled for this file type.', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0131.gps_assignment_disabled_for_this_file_type', 'GPS assignment disabled for this file type.', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -3568,7 +3568,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0132.gps_assignment_is_disabled_for_this_file_type', 'GPS assignment is disabled for this file type.', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0132.gps_assignment_is_disabled_for_this_file_type', 'GPS assignment is disabled for this file type.', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -3661,7 +3661,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0135.grouped_by', 'Grouped by', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0135.grouped_by', 'Grouped by', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -3754,7 +3754,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0142.image_unavailable', 'Image unavailable', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0142.image_unavailable', 'Image unavailable', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -3785,7 +3785,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0143.images_may_not_have_been_uploaded_yet_for_this_area', 'Images may not have been uploaded yet for this area.', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
+values (null, 'auto.0143.images_may_not_have_been_uploaded_yet_for_this_area', 'Images may not have been uploaded yet for this area.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -4157,7 +4157,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0162.key', 'Key', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0162.key', 'Key', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -4374,7 +4374,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0169.link_kopieren', 'Link kopieren', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0169.link_kopieren', 'Link kopieren', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -4436,7 +4436,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0173.loading', 'Loading...', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0173.loading', 'Loading...', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -4498,7 +4498,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0175.location', 'Location', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0175.location', 'Location', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -4870,7 +4870,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0187.metadata', 'Metadata', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0187.metadata', 'Metadata', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5242,7 +5242,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0201.no_filters_applied', 'No filters applied', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0201.no_filters_applied', 'No filters applied', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5273,7 +5273,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0202.no_gps', 'No GPS', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0202.no_gps', 'No GPS', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5304,7 +5304,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0203.no_gps_this_item_can_only_belong_to_one_project', 'No GPS: this item can only belong to one project.', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0203.no_gps_this_item_can_only_belong_to_one_project', 'No GPS: this item can only belong to one project.', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5335,7 +5335,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0204.no_grouping_applied', 'No grouping applied', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0204.no_grouping_applied', 'No grouping applied', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5366,7 +5366,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0205.no_images_match_the_current_filters', 'No images match the current filters', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
+values (null, 'auto.0205.no_images_match_the_current_filters', 'No images match the current filters', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5397,7 +5397,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0206.no_matching_properties', 'No matching properties', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0206.no_matching_properties', 'No matching properties', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5428,7 +5428,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0207.no_photo_attached', 'No photo attached', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0207.no_photo_attached', 'No photo attached', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5459,7 +5459,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0208.no_photos_at_this_location', 'No photos at this location', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
+values (null, 'auto.0208.no_photos_at_this_location', 'No photos at this location', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5490,7 +5490,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0212.no_time', 'No time', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
+values (null, 'auto.0212.no_time', 'No time', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5645,7 +5645,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0217.operator', 'Operator', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0217.operator', 'Operator', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5738,7 +5738,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0220.original_exif', 'Original EXIF', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0220.original_exif', 'Original EXIF', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -5955,7 +5955,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0232.photos', 'Photos', 'en', 'apps/web/src/app/features/map/workspace-pane/group-header.component.ts inline-template interpolation-literal')
+values (null, 'auto.0232.photos', 'Photos', 'en', 'apps/web/src/app/shared/workspace-pane/group-header.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6079,7 +6079,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0237.preparing', 'Preparing...', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0237.preparing', 'Preparing...', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6110,7 +6110,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0238.primary', 'Primary', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0238.primary', 'Primary', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6203,7 +6203,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0247.projects', 'Projects', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0247.projects', 'Projects', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6327,7 +6327,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0253.property', 'Property', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0253.property', 'Property', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6544,7 +6544,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0262.rename_project', 'Rename project', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
+values (null, 'auto.0262.rename_project', 'Rename project', 'en', 'apps/web/src/app/shared/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6637,7 +6637,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0268.search_address', 'Search address...', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0268.search_address', 'Search address...', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6730,7 +6730,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0271.searching', 'Searching...', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0271.searching', 'Searching...', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6792,7 +6792,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0273.select_a_marker_on_the_map_to_see_photos', 'Select a marker on the map to see photos.', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template text-node')
+values (null, 'auto.0273.select_a_marker_on_the_map_to_see_photos', 'Select a marker on the map to see photos.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6823,7 +6823,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0274.select_all', 'Select all', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0274.select_all', 'Select all', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6854,7 +6854,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0275.select_an_option_or_create_one', 'Select an option or create one', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0275.select_an_option_or_create_one', 'Select an option or create one', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6885,7 +6885,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0276.select_none', 'Select none', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0276.select_none', 'Select none', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6916,7 +6916,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0277.select_project_or_create_one', 'Select project or create one', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
+values (null, 'auto.0277.select_project_or_create_one', 'Select project or create one', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -6947,7 +6947,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0278.selected', 'selected', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0278.selected', 'selected', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8404,7 +8404,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0326.share', 'Share', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0326.share', 'Share', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8652,7 +8652,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.emptySelection.title', 'No photos at this location', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template empty-selection title')
+values (null, 'workspace.thumbnailGrid.emptySelection.title', 'No photos at this location', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8683,7 +8683,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.emptySelection.hint', 'Images may not have been uploaded yet for this area.', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template empty-selection hint')
+values (null, 'workspace.thumbnailGrid.emptySelection.hint', 'Images may not have been uploaded yet for this area.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty-selection hint')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8714,7 +8714,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.empty.selectMarker', 'Select a marker on the map to see photos.', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template empty marker hint')
+values (null, 'workspace.thumbnailGrid.empty.selectMarker', 'Select a marker on the map to see photos.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template empty marker hint')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8745,7 +8745,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.filterEmpty.title', 'No images match the current filters', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template filter empty title')
+values (null, 'workspace.thumbnailGrid.filterEmpty.title', 'No images match the current filters', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template filter empty title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8776,7 +8776,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.thumbnailGrid.filterEmpty.clear', 'Clear filters', 'en', 'apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts inline-template filter empty action')
+values (null, 'workspace.thumbnailGrid.filterEmpty.clear', 'Clear filters', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts inline-template filter empty action')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8807,7 +8807,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0341.sorted_by_grouping', 'Sorted by grouping', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0341.sorted_by_grouping', 'Sorted by grouping', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -8869,7 +8869,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0343.star', 'star', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0343.star', 'star', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9148,7 +9148,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0353.this_will_permanently_remove_the_image_and_all_its_metadata_this', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:message')
+values (null, 'auto.0353.this_will_permanently_remove_the_image_and_all_its_metadata_this', 'This will permanently remove the image and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html bound-attr:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9179,7 +9179,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0354.title', 'Title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0354.title', 'Title', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9210,7 +9210,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0355.today', 'Today', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0355.today', 'Today', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9303,7 +9303,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0360.type', 'Type', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0360.type', 'Type', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9644,7 +9644,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0371.upload_photo', 'Upload photo', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0371.upload_photo', 'Upload photo', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9768,7 +9768,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0375.uploaded', 'Uploaded', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0375.uploaded', 'Uploaded', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9830,7 +9830,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0377.value', 'Value', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0377.value', 'Value', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9861,7 +9861,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0378.value', 'Value�', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
+values (null, 'auto.0378.value', 'Value�', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -9985,7 +9985,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0385.workspace_addresssearch_loading', 'workspace.addressSearch.loading', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0385.workspace_addresssearch_loading', 'workspace.addressSearch.loading', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10016,7 +10016,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0386.workspace_addresssearch_placeholder', 'workspace.addressSearch.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/address-search/address-search.component.html interpolation-literal')
+values (null, 'auto.0386.workspace_addresssearch_placeholder', 'workspace.addressSearch.placeholder', 'en', 'apps/web/src/app/shared/workspace-pane/address-search/address-search.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10047,7 +10047,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0387.workspace_captureddate_action_clear', 'workspace.capturedDate.action.clear', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0387.workspace_captureddate_action_clear', 'workspace.capturedDate.action.clear', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10078,7 +10078,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0388.workspace_captureddate_action_done', 'workspace.capturedDate.action.done', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0388.workspace_captureddate_action_done', 'workspace.capturedDate.action.done', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10109,7 +10109,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0389.workspace_captureddate_action_today', 'workspace.capturedDate.action.today', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html interpolation-literal')
+values (null, 'auto.0389.workspace_captureddate_action_today', 'workspace.capturedDate.action.today', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10140,7 +10140,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0390.workspace_captureddate_placeholder_date', 'workspace.capturedDate.placeholder.date', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
+values (null, 'auto.0390.workspace_captureddate_placeholder_date', 'workspace.capturedDate.placeholder.date', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10171,7 +10171,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0391.workspace_captureddate_placeholder_time', 'workspace.capturedDate.placeholder.time', 'en', 'apps/web/src/app/features/map/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
+values (null, 'auto.0391.workspace_captureddate_placeholder_time', 'workspace.capturedDate.placeholder.time', 'en', 'apps/web/src/app/shared/workspace-pane/captured-date-editor.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10202,7 +10202,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0392.workspace_detailactions_action_addtoproject', 'workspace.detailActions.action.addToProject', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0392.workspace_detailactions_action_addtoproject', 'workspace.detailActions.action.addToProject', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10233,7 +10233,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0393.workspace_detailactions_action_copycoordinates', 'workspace.detailActions.action.copyCoordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0393.workspace_detailactions_action_copycoordinates', 'workspace.detailActions.action.copyCoordinates', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10264,7 +10264,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0394.workspace_detailactions_action_deleteimage', 'workspace.detailActions.action.deleteImage', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0394.workspace_detailactions_action_deleteimage', 'workspace.detailActions.action.deleteImage', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10295,7 +10295,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0395.workspace_detailactions_action_zoomtolocation', 'workspace.detailActions.action.zoomToLocation', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0395.workspace_detailactions_action_zoomtolocation', 'workspace.detailActions.action.zoomToLocation', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10326,7 +10326,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0396.workspace_detailactions_section_title', 'workspace.detailActions.section.title', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0396.workspace_detailactions_section_title', 'workspace.detailActions.section.title', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10357,7 +10357,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0397.workspace_editablerow_action_editprefix', 'workspace.editableRow.action.editPrefix', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template bound-attr:title')
+values (null, 'auto.0397.workspace_editablerow_action_editprefix', 'workspace.editableRow.action.editPrefix', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10388,7 +10388,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0398.workspace_editablerow_option_none', 'workspace.editableRow.option.none', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0398.workspace_editablerow_option_none', 'workspace.editableRow.option.none', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10419,7 +10419,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0399.workspace_editablerow_value_empty', 'workspace.editableRow.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0399.workspace_editablerow_value_empty', 'workspace.editableRow.value.empty', 'en', 'apps/web/src/app/shared/workspace-pane/editable-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10450,7 +10450,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0400.workspace_export_action_copylink', 'workspace.export.action.copyLink', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0400.workspace_export_action_copylink', 'workspace.export.action.copyLink', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10481,7 +10481,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0401.workspace_export_action_downloadzip', 'workspace.export.action.downloadZip', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0401.workspace_export_action_downloadzip', 'workspace.export.action.downloadZip', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10512,7 +10512,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0402.workspace_export_action_selectall', 'workspace.export.action.selectAll', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0402.workspace_export_action_selectall', 'workspace.export.action.selectAll', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10543,7 +10543,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0403.workspace_export_action_selectnone', 'workspace.export.action.selectNone', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0403.workspace_export_action_selectnone', 'workspace.export.action.selectNone', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10574,7 +10574,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0404.workspace_export_action_share', 'workspace.export.action.share', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0404.workspace_export_action_share', 'workspace.export.action.share', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10605,7 +10605,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0405.workspace_export_dialog_cancel', 'workspace.export.dialog.cancel', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0405.workspace_export_dialog_cancel', 'workspace.export.dialog.cancel', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10636,7 +10636,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0406.workspace_export_dialog_confirm', 'workspace.export.dialog.confirm', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0406.workspace_export_dialog_confirm', 'workspace.export.dialog.confirm', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10667,7 +10667,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0407.workspace_export_dialog_field_title', 'workspace.export.dialog.field.title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0407.workspace_export_dialog_field_title', 'workspace.export.dialog.field.title', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10698,7 +10698,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0408.workspace_export_dialog_pending', 'workspace.export.dialog.pending', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0408.workspace_export_dialog_pending', 'workspace.export.dialog.pending', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10729,7 +10729,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0409.workspace_export_dialog_title', 'workspace.export.dialog.title', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0409.workspace_export_dialog_title', 'workspace.export.dialog.title', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10760,7 +10760,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0410.workspace_export_summary_selected', 'workspace.export.summary.selected', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-export-bar.component.html interpolation-literal')
+values (null, 'auto.0410.workspace_export_summary_selected', 'workspace.export.summary.selected', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-export-bar.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10791,7 +10791,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0411.workspace_filter_empty', 'workspace.filter.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0411.workspace_filter_empty', 'workspace.filter.empty', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10822,7 +10822,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0412.workspace_filter_operator', 'workspace.filter.operator', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0412.workspace_filter_operator', 'workspace.filter.operator', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10853,7 +10853,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0413.workspace_filter_property', 'workspace.filter.property', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0413.workspace_filter_property', 'workspace.filter.property', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10884,7 +10884,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0414.workspace_filter_value_placeholder', 'workspace.filter.value.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
+values (null, 'auto.0414.workspace_filter_value_placeholder', 'workspace.filter.value.placeholder', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/filter-dropdown.component.ts inline-template bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10915,7 +10915,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0415.workspace_groupheader_count_photos', 'workspace.groupHeader.count.photos', 'en', 'apps/web/src/app/features/map/workspace-pane/group-header.component.ts inline-template interpolation-literal')
+values (null, 'auto.0415.workspace_groupheader_count_photos', 'workspace.groupHeader.count.photos', 'en', 'apps/web/src/app/shared/workspace-pane/group-header.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10946,7 +10946,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0416.workspace_grouping_empty_default', 'workspace.grouping.empty.default', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0416.workspace_grouping_empty_default', 'workspace.grouping.empty.default', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -10977,7 +10977,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0417.workspace_grouping_empty_dragging', 'workspace.grouping.empty.dragging', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0417.workspace_grouping_empty_dragging', 'workspace.grouping.empty.dragging', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11008,7 +11008,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0418.workspace_grouping_section_available', 'workspace.grouping.section.available', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0418.workspace_grouping_section_available', 'workspace.grouping.section.available', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11039,7 +11039,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0419.workspace_grouping_section_groupedby', 'workspace.grouping.section.groupedBy', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0419.workspace_grouping_section_groupedby', 'workspace.grouping.section.groupedBy', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11070,7 +11070,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0420.workspace_imagedetail_action_copycoordinates', 'workspace.imageDetail.action.copyCoordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0420.workspace_imagedetail_action_copycoordinates', 'workspace.imageDetail.action.copyCoordinates', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11101,7 +11101,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0421.workspace_imagedetail_action_delete', 'Delete media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-inline-section/media-detail-inline-section.component.html bound-attr:title')
+values (null, 'auto.0421.workspace_imagedetail_action_delete', 'Delete media', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-inline-section/media-detail-inline-section.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11132,7 +11132,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0422.workspace_imagedetail_action_uploadmedia', 'Upload media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html interpolation-literal')
+values (null, 'auto.0422.workspace_imagedetail_action_uploadmedia', 'Upload media', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11163,7 +11163,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0423.workspace_imagedetail_badge_corrected', 'workspace.imageDetail.badge.corrected', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0423.workspace_imagedetail_badge_corrected', 'workspace.imageDetail.badge.corrected', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11194,7 +11194,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0424.workspace_imagedetail_correction_originalexif', 'workspace.imageDetail.correction.originalExif', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0424.workspace_imagedetail_correction_originalexif', 'workspace.imageDetail.correction.originalExif', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11225,7 +11225,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0425.workspace_imagedetail_deletedialog_confirm', 'workspace.imageDetail.deleteDialog.confirm', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:confirmLabel')
+values (null, 'auto.0425.workspace_imagedetail_deletedialog_confirm', 'workspace.imageDetail.deleteDialog.confirm', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html bound-attr:confirmLabel')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11256,7 +11256,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0426.workspace_imagedetail_deletedialog_message', 'This will permanently remove the media item and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html bound-attr:message')
+values (null, 'auto.0426.workspace_imagedetail_deletedialog_message', 'This will permanently remove the media item and all its metadata. This cannot be undone.', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-view.component.html bound-attr:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11287,7 +11287,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0427.workspace_imagedetail_deletedialog_title', 'Delete this media?', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-view.component.html bound-attr:title')
+values (null, 'auto.0427.workspace_imagedetail_deletedialog_title', 'Delete this media?', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-view.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11318,7 +11318,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0428.workspace_imagedetail_field_captured', 'workspace.imageDetail.field.captured', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0428.workspace_imagedetail_field_captured', 'workspace.imageDetail.field.captured', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11349,7 +11349,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0429.workspace_imagedetail_field_city', 'workspace.imageDetail.field.city', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0429.workspace_imagedetail_field_city', 'workspace.imageDetail.field.city', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11380,7 +11380,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0430.workspace_imagedetail_field_coordinates', 'workspace.imageDetail.field.coordinates', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0430.workspace_imagedetail_field_coordinates', 'workspace.imageDetail.field.coordinates', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11411,7 +11411,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0431.workspace_imagedetail_field_country', 'workspace.imageDetail.field.country', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0431.workspace_imagedetail_field_country', 'workspace.imageDetail.field.country', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11442,7 +11442,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0432.workspace_imagedetail_field_district', 'workspace.imageDetail.field.district', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0432.workspace_imagedetail_field_district', 'workspace.imageDetail.field.district', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11473,7 +11473,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0433.workspace_imagedetail_field_projects', 'workspace.imageDetail.field.projects', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0433.workspace_imagedetail_field_projects', 'workspace.imageDetail.field.projects', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11504,7 +11504,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0434.workspace_imagedetail_field_street', 'workspace.imageDetail.field.street', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0434.workspace_imagedetail_field_street', 'workspace.imageDetail.field.street', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11535,7 +11535,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0435.workspace_imagedetail_field_type', 'workspace.imageDetail.field.type', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0435.workspace_imagedetail_field_type', 'workspace.imageDetail.field.type', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11566,7 +11566,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0436.workspace_imagedetail_field_uploaded', 'workspace.imageDetail.field.uploaded', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0436.workspace_imagedetail_field_uploaded', 'workspace.imageDetail.field.uploaded', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11597,7 +11597,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0437.workspace_imagedetail_imageunavailable', 'workspace.imageDetail.imageUnavailable', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0437.workspace_imagedetail_imageunavailable', 'workspace.imageDetail.imageUnavailable', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11628,7 +11628,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0438.workspace_imagedetail_loading_text', 'workspace.imageDetail.loading.text', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0438.workspace_imagedetail_loading_text', 'workspace.imageDetail.loading.text', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11659,7 +11659,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0439.workspace_imagedetail_nomediaattached', 'No media attached', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html interpolation-literal')
+values (null, 'auto.0439.workspace_imagedetail_nomediaattached', 'No media attached', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11690,7 +11690,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
+values (null, 'workspace.imageDetail.action.viewFullSizeMedia.aria', 'View full-size media', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11721,7 +11721,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.mediaPreview.alt', 'Media preview', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.ts computed fallback alt')
+values (null, 'workspace.imageDetail.mediaPreview.alt', 'Media preview', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.ts computed fallback alt')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11752,7 +11752,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.replaceMedia.aria', 'Replace media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
+values (null, 'workspace.imageDetail.action.replaceMedia.aria', 'Replace media', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11783,7 +11783,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.replaceMedia.title', 'Replace media', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:title')
+values (null, 'workspace.imageDetail.action.replaceMedia.title', 'Replace media', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11814,7 +11814,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.toast.mediaReplaced', 'Media replaced', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-events.helper.ts ts-prop:message')
+values (null, 'workspace.imageDetail.toast.mediaReplaced', 'Media replaced', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-events.helper.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11845,7 +11845,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.toast.mediaAttached', 'Media attached', 'en', 'apps/web/src/app/features/map/workspace-pane/media-detail-media-events.helper.ts ts-prop:message')
+values (null, 'workspace.imageDetail.toast.mediaAttached', 'Media attached', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail-media-events.helper.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11876,7 +11876,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0440.workspace_imagedetail_projects_create', 'workspace.imageDetail.projects.create', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0440.workspace_imagedetail_projects_create', 'workspace.imageDetail.projects.create', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11907,7 +11907,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0441.workspace_imagedetail_projects_gpsdisabled', 'workspace.imageDetail.projects.gpsDisabled', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0441.workspace_imagedetail_projects_gpsdisabled', 'workspace.imageDetail.projects.gpsDisabled', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11938,7 +11938,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0442.workspace_imagedetail_projects_hint', 'workspace.imageDetail.projects.hint', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0442.workspace_imagedetail_projects_hint', 'workspace.imageDetail.projects.hint', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -11969,7 +11969,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0443.workspace_imagedetail_projects_nogpsnote', 'workspace.imageDetail.projects.noGpsNote', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0443.workspace_imagedetail_projects_nogpsnote', 'workspace.imageDetail.projects.noGpsNote', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12000,7 +12000,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0444.workspace_imagedetail_projects_primary', 'workspace.imageDetail.projects.primary', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0444.workspace_imagedetail_projects_primary', 'workspace.imageDetail.projects.primary', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12031,7 +12031,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0445.workspace_imagedetail_projects_search_placeholder', 'workspace.imageDetail.projects.search.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
+values (null, 'auto.0445.workspace_imagedetail_projects_search_placeholder', 'workspace.imageDetail.projects.search.placeholder', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12062,7 +12062,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0446.workspace_imagedetail_section_location', 'workspace.imageDetail.section.location', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0446.workspace_imagedetail_section_location', 'workspace.imageDetail.section.location', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12093,7 +12093,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0447.workspace_imagedetail_value_empty', 'workspace.imageDetail.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0447.workspace_imagedetail_value_empty', 'workspace.imageDetail.value.empty', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12124,7 +12124,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0448.workspace_imagedetail_value_nogps', 'workspace.imageDetail.value.noGps', 'en', 'apps/web/src/app/features/map/workspace-pane/image-detail-view.component.html interpolation-literal')
+values (null, 'auto.0448.workspace_imagedetail_value_nogps', 'workspace.imageDetail.value.noGps', 'en', 'apps/web/src/app/shared/workspace-pane/image-detail-view.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12155,7 +12155,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0449.workspace_metadata_action_add', 'workspace.metadata.action.add', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0449.workspace_metadata_action_add', 'workspace.metadata.action.add', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12186,7 +12186,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0450.workspace_metadata_input_key_placeholder', 'workspace.metadata.input.key.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0450.workspace_metadata_input_key_placeholder', 'workspace.metadata.input.key.placeholder', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12217,7 +12217,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0451.workspace_metadata_input_value_placeholder', 'workspace.metadata.input.value.placeholder', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
+values (null, 'auto.0451.workspace_metadata_input_value_placeholder', 'workspace.metadata.input.value.placeholder', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html bound-attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12248,7 +12248,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0452.workspace_metadata_row_editprefix', 'workspace.metadata.row.editPrefix', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-property-row.component.ts inline-template bound-attr:title')
+values (null, 'auto.0452.workspace_metadata_row_editprefix', 'workspace.metadata.row.editPrefix', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-property-row.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12279,7 +12279,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0453.workspace_metadata_row_value_empty', 'workspace.metadata.row.value.empty', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-property-row.component.ts inline-template interpolation-literal')
+values (null, 'auto.0453.workspace_metadata_row_value_empty', 'workspace.metadata.row.value.empty', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-property-row.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12310,7 +12310,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0454.workspace_metadata_section_title', 'workspace.metadata.section.title', 'en', 'apps/web/src/app/features/map/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
+values (null, 'auto.0454.workspace_metadata_section_title', 'workspace.metadata.section.title', 'en', 'apps/web/src/app/shared/workspace-pane/metadata-section/metadata-section.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12341,7 +12341,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0455.workspace_pane_close_title', 'workspace.pane.close.title', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
+values (null, 'auto.0455.workspace_pane_close_title', 'workspace.pane.close.title', 'en', 'apps/web/src/app/shared/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12372,7 +12372,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0456.workspace_pane_rename_title', 'workspace.pane.rename.title', 'en', 'apps/web/src/app/features/map/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
+values (null, 'auto.0456.workspace_pane_rename_title', 'workspace.pane.rename.title', 'en', 'apps/web/src/app/shared/workspace-pane/pane-header.component.ts inline-template bound-attr:title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12403,7 +12403,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0457.workspace_projects_all', 'workspace.projects.all', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0457.workspace_projects_all', 'workspace.projects.all', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12434,7 +12434,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0458.workspace_sort_empty_nomatchingproperties', 'workspace.sort.empty.noMatchingProperties', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0458.workspace_sort_empty_nomatchingproperties', 'workspace.sort.empty.noMatchingProperties', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12465,7 +12465,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0459.workspace_sort_section_groupedby', 'workspace.sort.section.groupedBy', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
+values (null, 'auto.0459.workspace_sort_section_groupedby', 'workspace.sort.section.groupedBy', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-toolbar/sort-dropdown.component.ts inline-template interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -12527,7 +12527,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'auto.0461.zoom_to_location', 'Zoom to location', 'en', 'apps/web/src/app/features/map/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
+values (null, 'auto.0461.zoom_to_location', 'Zoom to location', 'en', 'apps/web/src/app/shared/workspace-pane/detail-actions/detail-actions.component.html interpolation-literal')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14821,7 +14821,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.projectDialog.title', 'Select project', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.projectDialog.title', 'Select project', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14852,7 +14852,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.projectDialog.message', 'Choose a project for selected media.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.projectDialog.message', 'Choose a project for selected media.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14883,7 +14883,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.projectDialog.confirm', 'Assign', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.projectDialog.confirm', 'Assign', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14914,7 +14914,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.addressDialog.title', 'Change address', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.addressDialog.title', 'Change address', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14945,7 +14945,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.addressDialog.message', 'Apply one address to all selected media.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.addressDialog.message', 'Apply one address to all selected media.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -14976,7 +14976,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.addressDialog.placeholder', 'Enter address', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html attr:placeholder')
+values (null, 'workspace.export.addressDialog.placeholder', 'Enter address', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html attr:placeholder')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15007,7 +15007,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.addressDialog.confirm', 'Apply', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.addressDialog.confirm', 'Apply', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15038,7 +15038,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.deleteDialog.aria', 'Delete selection', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html attr:aria-label')
+values (null, 'workspace.export.deleteDialog.aria', 'Delete selection', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15069,7 +15069,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.deleteDialog.title', 'Delete selected media', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.deleteDialog.title', 'Delete selected media', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15100,7 +15100,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.deleteDialog.message', 'This action cannot be undone. All selected media will be deleted.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.deleteDialog.message', 'This action cannot be undone. All selected media will be deleted.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15131,7 +15131,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.deleteDialog.confirm', 'Delete', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
+values (null, 'workspace.export.deleteDialog.confirm', 'Delete', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html text-node')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15162,7 +15162,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.success.projectAssigned', 'Assigned to project.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+values (null, 'workspace.export.success.projectAssigned', 'Assigned to project.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15193,7 +15193,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.error.addressNotFound', 'Address could not be resolved.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+values (null, 'workspace.export.error.addressNotFound', 'Address could not be resolved.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15224,7 +15224,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.error.addressUpdateFailed', 'Address update failed.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+values (null, 'workspace.export.error.addressUpdateFailed', 'Address update failed.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15255,7 +15255,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.success.addressUpdated', 'Address updated.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+values (null, 'workspace.export.success.addressUpdated', 'Address updated.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15286,7 +15286,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.success.deleted', 'Selected media deleted.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+values (null, 'workspace.export.success.deleted', 'Selected media deleted.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
@@ -15317,7 +15317,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.export.error.noProjectsAvailable', 'No projects available.', 'en', 'apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
+values (null, 'workspace.export.error.noProjectsAvailable', 'No projects available.', 'en', 'apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,

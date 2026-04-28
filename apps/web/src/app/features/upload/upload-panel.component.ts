@@ -51,7 +51,6 @@ import type {
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
-import type { UploadLocationRequirementMode } from '../../core/upload/upload-manager.types';
 export type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,

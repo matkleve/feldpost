@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as L from 'leaflet';
+import type * as L from 'leaflet';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface ViewportMarkerQueryResult<T> {

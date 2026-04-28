@@ -1,6 +1,7 @@
+import type {
+  OnDestroy} from '@angular/core';
 import {
   Component,
-  OnDestroy,
   computed,
   effect,
   inject,
@@ -11,38 +12,39 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { DateSaveEvent } from './captured-date-editor.component';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { MetadataService } from '../../../core/metadata/metadata.service';
-import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload/upload.service';
-import { ProjectsService } from '../../../core/projects/projects.service';
-import {
+import type { DateSaveEvent } from './captured-date-editor.component';
+import { SupabaseService } from '../../core/supabase/supabase.service';
+import { MetadataService } from '../../core/metadata/metadata.service';
+import { UploadService, ALLOWED_MIME_TYPES } from '../../core/upload/upload.service';
+import { ProjectsService } from '../../core/projects/projects.service';
+import type {
   ImageAttachedEvent,
   ImageReplacedEvent,
-  UploadFailedEvent,
+  UploadFailedEvent} from '../../core/upload/upload-manager.service';
+import {
   UploadManagerService,
-} from '../../../core/upload/upload-manager.service';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { ToastService } from '../../../core/toast/toast.service';
+} from '../../core/upload/upload-manager.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { ToastService } from '../../core/toast/toast.service';
 import {
   MEDIA_NO_MEDIA_ICON,
   MEDIA_PLACEHOLDER_ICON,
   MediaDownloadService,
-} from '../../../core/media-download/media-download.service';
-import type { MediaTier } from '../../../core/media/media-renderer.types';
-import type { MediaLoadState } from '../../../core/media-download/media-download.types';
-import { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
-import {
+} from '../../core/media-download/media-download.service';
+import type { MediaTier } from '../../core/media/media-renderer.types';
+import type { MediaLoadState } from '../../core/media-download/media-download.types';
+import type { ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
+import type {
   DetailEditingField,
   ImageRecord,
   MetadataEntry,
   SelectOption,
 } from './media-detail-view.types';
-import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
-import { QuickInfoChipsComponent } from '../../../shared/quick-info-chips/quick-info-chips.component';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { QuickInfoChipsComponent } from '../../shared/quick-info-chips/quick-info-chips.component';
 import { MetadataSectionComponent } from './metadata-section/metadata-section.component';
 import { DetailActionsComponent } from './detail-actions/detail-actions.component';
-import { I18nService } from '../../../core/i18n/i18n.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import {
   buildInfoChips,
   canCreateProjectOption,
@@ -66,15 +68,15 @@ import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
 import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
 import { ImageDetailUploadHelper } from './media-detail-upload.helper';
 import { ImageDetailDeleteHelper } from './media-detail-delete.helper';
-import { ActionEngineService } from '../../action-system/action-engine.service';
-import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
-import type { ResolvedAction } from '../../action-system/action-types';
+import { ActionEngineService } from '../../core/action/action-engine.service';
+import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
+import type { ResolvedAction } from '../../core/action/action-types';
 import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from './workspace-detail-actions.registry';
 import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
-import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
-import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
+import type { UploadLocationMapPickRequest } from '../../core/workspace-pane/workspace-pane-shell-events.types';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
+import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
+import { LocationResolverService } from '../../core/location-resolver/location-resolver.service';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 

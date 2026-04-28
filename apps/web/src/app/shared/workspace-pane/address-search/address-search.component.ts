@@ -1,10 +1,11 @@
 import { Component, inject, input, output, signal } from '@angular/core';
-import { ForwardGeocodeResult, GeocodingService } from '../../../../core/geocoding/geocoding.service';
-import { I18nService } from '../../../../core/i18n/i18n.service';
+import type { ForwardGeocodeResult} from '../../../core/geocoding/geocoding.service';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-address-search',

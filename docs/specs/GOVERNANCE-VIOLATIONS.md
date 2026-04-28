@@ -13,9 +13,7 @@ Last updated: 2026-04-28
 
 ## Open SPEC GAP Items
 
-- ambiguity: legacy `thumbnail-grid` spec has no single file; see `docs/specs/component/item-grid/item-grid.md` and related workspace specs.
-- impacted scope: apps/web/src/app/features/map/workspace-pane/thumbnail-card/\*
-- proposed resolution direction: either create docs/specs/component/thumbnail-grid.md or formally map references to docs/specs/component/item-grid/item-grid.md after owner decision.
+- ~~legacy `thumbnail-grid` / thumbnail-card ambiguity~~ — **resolved:** workspace selected-items runtime uses `ItemGridComponent` + `MediaItemComponent` per `docs/specs/component/item-grid/item-grid.md`; code lives under `apps/web/src/app/shared/workspace-pane/` (see `workspace-selected-items-grid.component.ts`).
 
 ## Approved Remediation Plan
 

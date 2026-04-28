@@ -1,6 +1,6 @@
 import type { UploadOverlayState } from '../../core/media/media-renderer.types';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
-import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
+import type { ImageRecord } from '../../core/media-query/media-query.types';
 
 export function isMediaItemUploadOverlayPhase(phase: UploadPhase): boolean {
   return (

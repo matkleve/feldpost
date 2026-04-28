@@ -1,12 +1,12 @@
-import { WritableSignal } from '@angular/core';
-import {
+import type { WritableSignal } from '@angular/core';
+import type {
   ImageAttachedEvent,
   ImageReplacedEvent,
-} from '../../../core/upload/upload-manager.service';
-import { MediaDownloadService } from '../../../core/media-download/media-download.service';
-import { ToastService } from '../../../core/toast/toast.service';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { ImageRecord } from './media-detail-view.types';
+} from '../../core/upload/upload-manager.service';
+import type { MediaDownloadService } from '../../core/media-download/media-download.service';
+import type { ToastService } from '../../core/toast/toast.service';
+import type { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import type { ImageRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 

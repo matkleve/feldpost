@@ -22,13 +22,12 @@ import {
   ImageReplacedEvent,
   ImageAttachedEvent,
   UploadFailedEvent,
-} from '../../../core/upload/upload-manager.service';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { GeocodingService } from '../../../core/geocoding/geocoding.service';
-import { AuthService } from '../../../core/auth/auth.service';
-import { UploadService } from '../../../core/upload/upload.service';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { MediaDownloadService } from '../../../core/media-download/media-download.service';
+} from '../../core/upload/upload-manager.service';
+import { SupabaseService } from '../../core/supabase/supabase.service';
+import { GeocodingService } from '../../core/geocoding/geocoding.service';
+import { UploadService } from '../../core/upload/upload.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { MediaDownloadService } from '../../core/media-download/media-download.service';
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 

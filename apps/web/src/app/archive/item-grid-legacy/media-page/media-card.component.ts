@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { PhotoLoadService } from '../../core/media-download/media-download.service'; // TODO: Migrate to MediaDownloadService
 import { MediaOrchestratorService } from '../../core/media/media-orchestrator.service'; // TODO: Migrate to MediaDownloadService
-import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
+import type { ImageRecord } from '../../../core/media-query/media-query.types';
 import type { CardVariant } from '../../shared/ui-primitives/card-variant.types';
 import type { MediaRenderState } from '../../core/media/media-renderer.types';
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';

@@ -22,6 +22,12 @@ Product copy and this spec say **Workspace Pane**, **media item**, **media**. Im
 
 Right-hand **Workspace Pane** for selection + upload: persists across routes with **Selected** and **Upload** tabs; shares **`MediaDownloadService`** delivery cache with map markers, workspace grid, and `/media`.
 
+## Selected-items grid (canonical implementation)
+
+**Normative:** For the **Selected Items** tab, any **grid/list of selectable media tiles** inside the workspace pane MUST be implemented with **`ItemGridComponent`** from `apps/web/src/app/shared/item-grid/` and MUST follow the contract in **[`docs/specs/component/item-grid/item-grid.md`](../../component/item-grid/item-grid.md)** (ownership, states, and projection rules).
+
+**Non-normative / legacy:** `ThumbnailGridComponent` (`app-thumbnail-grid`), `ThumbnailCardComponent`, and related thumbnail-only wrappers are **not** part of the canonical workspace-pane contract. They MUST NOT remain as the long-lived runtime host for selected-items content; cut over to `ItemGridComponent` per acceptance criteria below (single top-level migration, no permanent dual-path).
+
 ## What It Looks Like
 
 **Desktop:** right-side pane rendered by the **layout host** (see [Layout host](#layout-host-canonical)), not by an individual feature page in isolation. It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between item-grid mode and media-detail mode.
@@ -46,8 +52,8 @@ If the app reverts to mounting **`app-workspace-pane`** only under **`MapShellCo
 
 | #       | User Action                                              | System Response                                                                                                                                                         | Triggers                                                 |
 | ------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| 1       | Clicks a single media marker on map                      | Workspace pane opens with media detail view for that marker; thumbnail grid loads in background                                                                         | `photoPanelOpen.set(true)` on **`AuthenticatedAppLayoutComponent` / `MapShellState`**, `detailMediaId` set |
-| 1b      | Clicks a cluster marker on map                           | Workspace pane opens showing thumbnail grid with all media items in the cluster; any open detail view is dismissed (`detailMediaId` → null)                             | `photoPanelOpen.set(true)`, `detailMediaId` → null — **layout host** |
+| 1       | Clicks a single media marker on map                      | Workspace pane opens with media detail view for that marker; **item grid** (canonical) loads in background when returning from detail                                                                 | `photoPanelOpen.set(true)` on **`AuthenticatedAppLayoutComponent` / `MapShellState`**, `detailMediaId` set |
+| 1b      | Clicks a cluster marker on map                           | Workspace pane opens showing **item grid** with all media items in the cluster; any open detail view is dismissed (`detailMediaId` → null)                                                              | `photoPanelOpen.set(true)`, `detailMediaId` → null — **layout host** |
 | **NEW** | **Clicks "Upload" tab button**                           | **Tab switches to Upload; UploadPanelComponent fully visible; all upload jobs/lanes visible**                                                                           | **`activeTab` → `'upload'`**                             |
 | **NEW** | **Clicks "Selected Items" tab button**                   | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
 | **NEW** | **Navigates from /map → /media**                         | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
@@ -64,7 +70,7 @@ If the app reverts to mounting **`app-workspace-pane`** only under **`MapShellCo
 | 3       | Clicks close button                                      | Workspace pane slides out (can be reopened from any page)                                                                                                               | `photoPanelOpen.set(false)` on **layout host** |
 | 4       | Swipes down on bottom sheet handle (mobile)              | Snaps to lower position or closes                                                                                                                                       | Snap point logic                                         |
 | 5       | Swipes up on bottom sheet handle (mobile)                | Snaps to higher position                                                                                                                                                | Snap point logic                                         |
-| 6       | Clicks a thumbnail in the grid                           | Media Detail View replaces grid, back arrow to return                                                                                                                   | Detail view state                                        |
+| 6       | Clicks a tile in the **item grid**                       | Media Detail View replaces grid, back arrow to return                                                                                                                   | Detail view state                                        |
 | 7       | Updates workspace toolbar controls                       | Workspace view re-groups, re-sorts, or re-filters current raw media items                                                                                               | `WorkspaceViewService` reactive recompute                |
 | 8       | Clicks pane-header close button                          | Workspace pane emits `closed` to parent shell                                                                                                                           | `closed` output                                          |
 | 10      | Selects one or more media items                          | Workspace Actions Bar animates in at pane bottom                                                                                                                        | `selectedMediaIds.size > 0`                              |
@@ -79,7 +85,7 @@ If the app reverts to mounting **`app-workspace-pane`** only under **`MapShellCo
 ```mermaid
 flowchart TD
     A[Workspace opened] --> B{Content mode}
-    B -- Grid --> C[Thumbnail grid visible]
+    B -- Grid --> C[Item grid visible]
     B -- Detail --> D[Media detail visible]
     C --> E{Header actions}
     D --> E
@@ -230,14 +236,14 @@ export interface WorkspacePaneHostPort {
 | File                                                                 | Purpose                                                                  |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | `layout/authenticated-app-layout.component.ts`                     | Authenticated route layout: horizontal split, `router-outlet`, pane host |
-| `features/map/workspace-pane/workspace-pane.component.ts`            | Main pane component                                                      |
-| `features/map/workspace-pane/workspace-pane.component.html`          | Template                                                                 |
-| `features/map/workspace-pane/workspace-pane.component.scss`          | Desktop pane styles                                                      |
+| `shared/workspace-pane/workspace-pane.component.ts`            | Main pane component                                                      |
+| `shared/workspace-pane/workspace-pane.component.html`          | Template                                                                 |
+| `shared/workspace-pane/workspace-pane.component.scss`          | Desktop pane styles                                                      |
 | `core/workspace-pane-context.port.ts`                                | Selected-items provider contract per route context                       |
 | `core/workspace-pane-host.port.ts`                                   | Host ownership contract for pane lifecycle and tab state                 |
 | `core/workspace-pane-observer.adapter.ts`                            | Route/upload observer lifecycle orchestration                            |
-| `features/map/workspace-pane/drag-divider/drag-divider.component.ts` | Resize handle (see [drag-divider spec](../../component/workspace/drag-divider.md)) |
-| `features/map/workspace-pane/pane-header.component.ts`               | Header actions and title surface                                         |
+| `shared/workspace-pane/drag-divider/drag-divider.component.ts` | Resize handle (see [drag-divider spec](../../component/workspace/drag-divider.md)) |
+| `shared/workspace-pane/pane-header.component.ts`               | Header actions and title surface                                         |
 | `core/workspace-selection.service.ts`                                | Selection state used by export bar visibility/actions                    |
 
 ## Wiring
@@ -307,9 +313,9 @@ sequenceDiagram
 - [ ] **NEW:** Pane persists across all route changes (`/map` → `/media` → `/projects` → etc.)
 - [ ] **NEW:** Tab selector visible at top of pane with two buttons: "Selected Items" | "Upload"
 - [ ] **NEW:** "Selected Items" tab displays context-aware content (workspace grid on `/map`, media grid on `/media`, etc.)
-- [ ] **NEW:** Selected-items grid on `/map` uses `ItemGridComponent` as the runtime grid container (not `ThumbnailGridComponent`).
-- [ ] **NEW:** Workspace pane selected-items runtime wiring contains no active `app-thumbnail-grid` path after migration cutover.
-- [ ] **NEW:** Workspace selected-items migration is executed as one top-level cutover (no long-lived intermediate `app-thumbnail-grid` host runtime).
+- [x] **NEW:** Selected-items grid on `/map` uses `ItemGridComponent` as the runtime grid container (not `ThumbnailGridComponent`).
+- [x] **NEW:** Workspace pane selected-items runtime wiring contains no active `app-thumbnail-grid` path after migration cutover.
+- [x] **NEW:** Workspace selected-items migration is executed as one top-level cutover (no long-lived intermediate `app-thumbnail-grid` host runtime).
 - [ ] **NEW:** "Upload" tab displays UploadPanelComponent 1:1 (same on every page)
 - [ ] **NEW:** Switching tabs preserves both tab state and page content
 - [ ] **NEW:** Navigating to different page rebinds selected-items context while preserving global tab state
@@ -327,7 +333,7 @@ sequenceDiagram
 - [ ] Mobile: drag handle works for snapping
 - [x] Map stays interactive when pane is open
 - [x] Close button hides the pane
-- [x] Content switches between thumbnail grid and media detail
+- [x] Content switches between **item grid** (canonical) / legacy grid host and media detail — **target:** item grid only; see [Selected-items grid](#selected-items-grid-canonical-implementation) and unchecked migration ACs below
 - [ ] Group Tab Bar is mounted as part of the workspace-pane contract where group tabs are active
 - [ ] Header includes fullscreen button at top-right
 - [ ] Fullscreen mode expands workspace pane right→left until it spans full content width and disables divider drag while active

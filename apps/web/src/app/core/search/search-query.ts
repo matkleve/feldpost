@@ -1,4 +1,4 @@
-import { GeocoderSearchResult } from '../geocoding/geocoding.service';
+import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
 
 // ── Scoring ────────────────────────────────────────────────────────────────
 

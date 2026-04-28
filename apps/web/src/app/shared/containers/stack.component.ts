@@ -27,18 +27,10 @@ import { Component, input } from '@angular/core';
   host: {
     '[style.--stack-spacing]': "'var(--spacing-' + (spacing() || 4) + ')'",
   },
-  styles: [
-    `
-      :host {
-        display: flex;
-        flex-direction: column;
-        gap: var(--stack-spacing);
-      }
-    `,
-  ],
+  styleUrl: './vstack.component.scss',
 })
 export class VStackComponent {
-  spacing = input<number>(4);
+  readonly spacing = input<number>(4);
 }
 
 /**
@@ -61,18 +53,9 @@ export class VStackComponent {
     '[style.--stack-spacing]': "'var(--spacing-' + (spacing() || 4) + ')'",
     '[style.--stack-align]': 'align() || "stretch"',
   },
-  styles: [
-    `
-      :host {
-        display: flex;
-        flex-direction: row;
-        gap: var(--stack-spacing);
-        align-items: var(--stack-align);
-      }
-    `,
-  ],
+  styleUrl: './hstack.component.scss',
 })
 export class HStackComponent {
-  spacing = input<number>(4);
-  align = input<'center' | 'start' | 'end' | 'stretch'>('stretch');
+  readonly spacing = input<number>(4);
+  readonly align = input<'center' | 'start' | 'end' | 'stretch'>('stretch');
 }

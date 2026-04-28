@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
+import type {
+  EffectRef,
+  OnDestroy,
+  OnInit} from '@angular/core';
 import {
   Component,
   ElementRef,
-  EffectRef,
   HostListener,
-  OnDestroy,
-  OnInit,
   computed,
   effect,
   input,
@@ -18,10 +19,11 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { SearchDropdownItemComponent } from './search-dropdown-item.component';
 import { SearchOrchestratorService } from '../../../core/search/search-orchestrator.service';
-import { SearchBarService, GhostTrieEntry } from '../../../core/search/search-bar.service';
+import type { GhostTrieEntry } from '../../../core/search/search-bar.service';
+import { SearchBarService } from '../../../core/search/search-bar.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
-import {
+import type {
   SearchCandidate,
   SearchQueryContext,
   SearchRecentCandidate,

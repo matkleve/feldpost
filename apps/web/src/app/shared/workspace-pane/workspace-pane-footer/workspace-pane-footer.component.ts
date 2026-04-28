@@ -1,16 +1,16 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import type { WorkspaceImage } from '../../../../core/workspace-view/workspace-view.types';
-import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
-import { ShareSetService } from '../../../../core/share-set/share-set.service';
-import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
-import { ToastService } from '../../../../core/toast/toast.service';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import { SupabaseService } from '../../../../core/supabase/supabase.service';
-import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
-import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
-import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
-import { ActionEngineService } from '../../../action-system/action-engine.service';
-import { ACTION_CONTEXT_IDS } from '../../../action-system/action-context-ids';
+import type { WorkspaceImage } from '../../../core/workspace-view/workspace-view.types';
+import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
+import { ShareSetService } from '../../../core/share-set/share-set.service';
+import { MediaDownloadService } from '../../../core/media-download/media-download.service';
+import { ToastService } from '../../../core/toast/toast.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
+import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { ActionEngineService } from '../../../core/action/action-engine.service';
+import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
@@ -18,15 +18,15 @@ import {
   UiButtonIconOnlyDirective,
   UiButtonIconWithTextDirective,
   UiInputControlDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
-import { PaneFooterComponent } from '../../../../shared/pane-footer/pane-footer.component';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
+import { PaneFooterComponent } from '../../../shared/pane-footer/pane-footer.component';
 import { WORKSPACE_EXPORT_ACTION_DEFINITIONS } from '../workspace-export-actions.registry';
 import type { WorkspaceExportActionId } from '../workspace-export-actions.types';
 import {
   ProjectSelectDialogComponent,
   type ProjectSelectOption,
-} from '../../../../shared/project-select-dialog/project-select-dialog.component';
-import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
+} from '../../../shared/project-select-dialog/project-select-dialog.component';
+import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
 
 const WORKSPACE_EXPORT_LABEL_FALLBACKS: Record<string, string> = {
   'workspace.export.action.selectAll': 'Select all',

@@ -1,4 +1,4 @@
-import { SearchQueryContext } from './search.models';
+import type { SearchQueryContext } from './search.models';
 import { isInViewport } from './search-bar-helpers';
 import { computeTextMatchScore } from './search-query';
 

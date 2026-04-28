@@ -1,5 +1,4 @@
 import type { SegmentedSwitchOption } from '../../shared/segmented-switch/segmented-switch.component';
-import type { LanguageCode } from '../../core/i18n/translation-catalog';
 
 /**
  * Factory for creating language options array.

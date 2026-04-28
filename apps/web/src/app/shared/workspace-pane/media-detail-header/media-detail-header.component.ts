@@ -9,15 +9,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
   UiStatusBadgeDirective,
   UiStatusBadgeSizeSmDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
-import type { ResolvedAction } from '../../../action-system/action-types';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
+import type { ResolvedAction } from '../../../core/action/action-types';
 import type { WorkspaceSingleActionId } from '../workspace-detail-actions.types';
 
 @Component({

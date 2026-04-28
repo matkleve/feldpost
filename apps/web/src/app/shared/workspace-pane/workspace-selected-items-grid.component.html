@@ -1,0 +1,220 @@
+<div
+  class="thumbnail-grid"
+  [class.thumbnail-grid--row]="viewService.thumbnailSizePreset() === 'row'"
+  [class.thumbnail-grid--small]="viewService.thumbnailSizePreset() === 'small'"
+  [class.thumbnail-grid--medium]="viewService.thumbnailSizePreset() === 'medium'"
+  [class.thumbnail-grid--large]="viewService.thumbnailSizePreset() === 'large'"
+  [attr.data-language]="languageTick()"
+  #scrollContainer
+  (scroll)="onScroll()"
+  [style.--thumbnail-grid-card-size.px]="thumbnailCardSizePx()"
+>
+  @if (viewService.isLoading()) {
+    <div class="thumbnail-grid__skeleton">
+      @for (i of skeletonCards; track i) {
+        <div class="thumbnail-grid__skeleton-card"></div>
+      }
+    </div>
+  } @else if (viewService.emptySelection()) {
+    <div class="thumbnail-grid__empty-selection">
+      <span class="thumbnail-grid__empty-icon" aria-hidden="true">📷</span>
+      <p>
+        {{ t('workspace.thumbnailGrid.emptySelection.title', 'No photos at this location') }}
+      </p>
+      <p class="thumbnail-grid__empty-hint">
+        {{
+          t(
+            'workspace.thumbnailGrid.emptySelection.hint',
+            'Images may not have been uploaded yet for this area.'
+          )
+        }}
+      </p>
+    </div>
+  } @else if (viewService.rawImages().length === 0) {
+    <p class="thumbnail-grid__empty">
+      {{
+        t(
+          'workspace.thumbnailGrid.empty.selectMarker',
+          'Select a marker on the map to see photos.'
+        )
+      }}
+    </p>
+  } @else if (viewService.totalImageCount() === 0) {
+    <div class="thumbnail-grid__filter-empty">
+      <p>
+        {{
+          t('workspace.thumbnailGrid.filterEmpty.title', 'No images match the current filters')
+        }}
+      </p>
+      <button class="thumbnail-grid__clear-btn" type="button" (click)="clearFilters()">
+        {{ t('workspace.thumbnailGrid.filterEmpty.clear', 'Clear filters') }}
+      </button>
+    </div>
+  } @else if (hasGrouping()) {
+    @for (item of renderItems(); track $index) {
+      @if (!isItemHidden($index)) {
+        @if (item.type === 'header') {
+          <app-group-header
+            [heading]="item.heading"
+            [imageCount]="item.imageCount"
+            [level]="item.level"
+            [collapsed]="isCollapsed(item.heading)"
+            (toggle)="viewService.toggleGroupCollapsed(item.heading)"
+          />
+        } @else {
+          <app-item-grid
+            class="thumbnail-grid__cards"
+            [class.thumbnail-grid__cards--start]="isUnderfilled(item.images.length)"
+            [mode]="itemGridMode()"
+          >
+            @for (img of item.images; track img.id) {
+              <div
+                (mouseenter)="onCellHoverStarted(img)"
+                (mouseleave)="hoverEnded.emit(img.id)"
+                (contextmenu.capture)="onWorkspaceCellContextMenu($event, img.id)"
+              >
+                <app-media-item
+                  [itemId]="img.id"
+                  [item]="workspaceMediaToImageRecord(img)"
+                  [mode]="itemGridMode()"
+                  [state]="selectionService.isSelected(img.id) ? 'selected' : 'idle'"
+                  [actionContextId]="MEDIA_ITEM_ACTION_CONTEXT"
+                  (opened)="thumbnailClicked.emit($event)"
+                  (selectedChange)="onMediaItemSelectedChange(img.id, $event)"
+                  (contextActionRequested)="onMediaItemContextAction(img, $event)"
+                />
+              </div>
+            }
+          </app-item-grid>
+        }
+      }
+    }
+  } @else {
+    <app-item-grid
+      class="thumbnail-grid__cards"
+      [class.thumbnail-grid__cards--start]="isUnderfilled(flatImages().length)"
+      [mode]="itemGridMode()"
+    >
+      @for (img of flatImages(); track img.id) {
+        <div
+          (mouseenter)="onCellHoverStarted(img)"
+          (mouseleave)="hoverEnded.emit(img.id)"
+          (contextmenu.capture)="onWorkspaceCellContextMenu($event, img.id)"
+        >
+          <app-media-item
+            [itemId]="img.id"
+            [item]="workspaceMediaToImageRecord(img)"
+            [mode]="itemGridMode()"
+            [state]="selectionService.isSelected(img.id) ? 'selected' : 'idle'"
+            [actionContextId]="MEDIA_ITEM_ACTION_CONTEXT"
+            (opened)="thumbnailClicked.emit($event)"
+            (selectedChange)="onMediaItemSelectedChange(img.id, $event)"
+            (contextActionRequested)="onMediaItemContextAction(img, $event)"
+          />
+        </div>
+      }
+    </app-item-grid>
+  }
+
+  @if (thumbnailContextMenuOpen() && thumbnailContextMenuPosition(); as menuPos) {
+    <app-dropdown-shell
+      class="map-context-menu"
+      [top]="menuPos.y"
+      [left]="menuPos.x"
+      [minWidth]="224"
+      [panelClass]="'map-context-menu option-menu-surface'"
+      (closeRequested)="closeThumbnailContextMenu()"
+    >
+      <div
+        class="dd-items"
+        role="menu"
+        tabindex="-1"
+        [attr.aria-label]="t('workspace.thumbnailGrid.menu.aria', 'Thumbnail context menu')"
+      >
+        @for (action of thumbnailPrimaryActions(); track action.id) {
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (click)="onThumbnailContextActionSelected(action.id)"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{
+              action.icon
+            }}</span>
+            <span class="dd-item__label">{{ action.label }}</span>
+          </button>
+        }
+
+        @if (thumbnailPrimaryActions().length > 0 && thumbnailSecondaryActions().length > 0) {
+          <div class="dd-divider" aria-hidden="true"></div>
+        }
+
+        @for (action of thumbnailSecondaryActions(); track action.id) {
+          <button
+            class="dd-item"
+            type="button"
+            role="menuitem"
+            [disabled]="action.disabled"
+            (click)="onThumbnailContextActionSelected(action.id)"
+          >
+            <span class="material-icons dd-item__icon" aria-hidden="true">{{
+              action.icon
+            }}</span>
+            <span class="dd-item__label">{{ action.label }}</span>
+          </button>
+        }
+
+        @if (thumbnailDestructiveActions().length > 0) {
+          <div class="dd-divider" aria-hidden="true"></div>
+
+          @for (action of thumbnailDestructiveActions(); track action.id) {
+            <button
+              class="dd-item dd-item--danger"
+              type="button"
+              role="menuitem"
+              [disabled]="action.disabled"
+              (click)="onThumbnailContextActionSelected(action.id)"
+            >
+              <span class="material-icons dd-item__icon" aria-hidden="true">{{
+                action.icon
+              }}</span>
+              <span class="dd-item__label">{{ action.label }}</span>
+            </button>
+          }
+        }
+      </div>
+    </app-dropdown-shell>
+  }
+
+  @if (projectDialogOpen()) {
+    <app-project-select-dialog
+      [title]="t('workspace.export.projectDialog.title', 'Select project')"
+      [message]="
+        t('workspace.export.projectDialog.message', 'Choose a project for selected media.')
+      "
+      [options]="projectOptions()"
+      [selectedId]="projectDialogSelectedId()"
+      [confirmLabel]="t('workspace.export.projectDialog.confirm', 'Assign')"
+      [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+      (selectedIdChange)="onProjectDialogSelected($event)"
+      (confirmed)="confirmProjectDialog($event)"
+      (cancelled)="closeProjectDialog()"
+    />
+  }
+
+  @if (addressDialogOpen()) {
+    <app-text-input-dialog
+      [title]="t('workspace.export.addressDialog.title', 'Change address')"
+      [message]="
+        t('workspace.export.addressDialog.message', 'Apply one address to all selected media.')
+      "
+      [placeholder]="t('workspace.export.addressDialog.placeholder', 'Enter address')"
+      [confirmLabel]="t('workspace.export.addressDialog.confirm', 'Apply')"
+      [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
+      (confirmed)="confirmAddressDialog($event)"
+      (cancelled)="closeAddressDialog()"
+    />
+  }
+</div>
+  

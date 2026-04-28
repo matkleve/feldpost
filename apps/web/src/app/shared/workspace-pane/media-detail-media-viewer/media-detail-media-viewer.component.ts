@@ -1,5 +1,6 @@
+import type {
+  AfterViewInit} from '@angular/core';
 import {
-  AfterViewInit,
   Component,
   DestroyRef,
   ElementRef,
@@ -11,16 +12,16 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import type { MediaLoadState } from '../../../../core/media-download/media-download.types';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import { PhotoLightboxComponent } from '../../../../shared/photo-lightbox/photo-lightbox.component';
-import { UniversalMediaComponent } from '../../../../shared/media/universal-media.component';
-import type { MediaRenderState } from '../../../../core/media/media-renderer.types';
+import type { MediaLoadState } from '../../../core/media-download/media-download.types';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { PhotoLightboxComponent } from '../../../shared/photo-lightbox/photo-lightbox.component';
+import { UniversalMediaComponent } from '../../../shared/media/universal-media.component';
+import type { MediaRenderState } from '../../../core/media/media-renderer.types';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
   UiIconButtonGhostDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 @Component({
   selector: 'app-media-detail-media-viewer',
   standalone: true,

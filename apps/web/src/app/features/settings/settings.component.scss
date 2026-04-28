@@ -1,0 +1,13 @@
+.page-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.page-placeholder h1 {
+  color: var(--color-text-primary);
+}

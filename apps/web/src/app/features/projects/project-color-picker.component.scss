@@ -1,0 +1,18 @@
+.project-color-picker {
+  min-width: 14rem;
+}
+
+.project-color-picker .dd-items {
+  max-height: none;
+}
+
+.project-color-picker .dd-item {
+  width: 100%;
+}
+
+.project-color-picker__swatch {
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--field-border);
+}

@@ -1,4 +1,5 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
+import type { Signal} from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 import type {
   SelectedItemsContextPort,
   WorkspacePageContextKey,
@@ -43,7 +44,8 @@ export class WorkspacePaneObserverAdapter implements WorkspacePaneHostPort {
     this.bindSelectedItemsContext(context);
   }
 
-  onRouteLeave(_contextKey: WorkspacePageContextKey): void {
+  onRouteLeave(contextKey: WorkspacePageContextKey): void {
+    void contextKey;
     this.unbindSelectedItemsContext();
   }
 

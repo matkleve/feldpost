@@ -263,8 +263,8 @@ export interface WorkspacePaneHostPort {
 
 | File                                                        | Change                                                 |
 | ----------------------------------------------------------- | ------------------------------------------------------ |
-| `features/map/workspace-pane/workspace-pane.component.ts`   | Add `activeTab` signal + tab container logic + imports |
-| `features/map/workspace-pane/workspace-pane.component.html` | Add tab selector UI at top before content              |
+| `shared/workspace-pane/workspace-pane.component.ts`   | Add `activeTab` signal + tab container logic + imports |
+| `shared/workspace-pane/workspace-pane.component.html` | Add tab selector UI at top before content              |
 | `app-shell.component.ts`                                    | Add `/media` route option (if not already present)     |
 | Routing config                                              | Wire `/media` → MediaComponent                         |
 

@@ -60,7 +60,7 @@
       />
     } @else if (activeTab() === 'selected-items') {
       <app-workspace-pane-toolbar />
-      <app-thumbnail-grid
+      <app-workspace-selected-items-grid
         [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
         (thumbnailClicked)="onThumbnailClick($event)"
         (zoomToLocationRequested)="onZoomToLocation($event)"
@@ -80,16 +80,7 @@
         class="workspace-pane__upload-tab"
         [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
       >
-        <app-upload-panel
-          [visible]="true"
-          [embeddedInPane]="true"
-          (imageUploaded)="onImageUploaded($event)"
-          (zoomToLocationRequested)="onZoomToLocation($event)"
-          (placementRequested)="onPlacementRequested($event)"
-          (locationPreviewRequested)="onUploadLocationPreviewRequested($event)"
-          (locationPreviewCleared)="onUploadLocationPreviewCleared()"
-          (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
-        />
+        <ng-content select="[data-workspace-upload-tab]" />
       </section>
     }
   </div>

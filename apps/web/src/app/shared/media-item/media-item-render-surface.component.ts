@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 import type { MediaTier } from '../../core/media/media-renderer.types';
 import { MEDIA_NO_MEDIA_ICON } from '../../core/media-download/media-download.service';
-import { ChipComponent, type ChipVariant } from '../../shared/components/chip/chip.component';
+import { ChipComponent, type ChipVariant } from '../components/chip/chip.component';
 
 // Stable states: loading, content, content-selected, error, no-media.
 // @see docs/specs/component/media/media-item.md#state-machine

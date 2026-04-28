@@ -1,9 +1,9 @@
-import { WritableSignal } from '@angular/core';
-import { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { ToastService } from '../../../core/toast/toast.service';
-import { DateSaveEvent } from './captured-date-editor.component';
-import { DetailEditingField, ImageRecord } from './media-detail-view.types';
+import type { WritableSignal } from '@angular/core';
+import type { ForwardGeocodeResult } from '../../core/geocoding/geocoding.service';
+import type { SupabaseService } from '../../core/supabase/supabase.service';
+import type { ToastService } from '../../core/toast/toast.service';
+import type { DateSaveEvent } from './captured-date-editor.component';
+import type { DetailEditingField, ImageRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 

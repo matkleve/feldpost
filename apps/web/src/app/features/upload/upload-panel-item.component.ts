@@ -1,4 +1,5 @@
-import { Component, OnDestroy, computed, inject, input, output, signal } from '@angular/core';
+import type { OnDestroy} from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import {

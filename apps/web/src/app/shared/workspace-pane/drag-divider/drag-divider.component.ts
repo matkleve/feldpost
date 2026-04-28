@@ -1,4 +1,5 @@
-import { Component, HostListener, OnDestroy, input, output, signal } from '@angular/core';
+import type { OnDestroy} from '@angular/core';
+import { Component, HostListener, input, output, signal } from '@angular/core';
 
 /**
  * DragDividerComponent — vertical resize handle between Map Zone and Workspace Pane.

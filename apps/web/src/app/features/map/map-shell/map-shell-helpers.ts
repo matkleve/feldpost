@@ -1,10 +1,11 @@
 import * as L from 'leaflet';
+import type {
+  PhotoMarkerZoomLevel} from '../../../core/map/marker-factory';
 import {
   buildPhotoMarkerHtml,
   PHOTO_MARKER_ICON_ANCHOR,
   PHOTO_MARKER_ICON_SIZE,
-  PHOTO_MARKER_POPUP_ANCHOR,
-  PhotoMarkerZoomLevel,
+  PHOTO_MARKER_POPUP_ANCHOR
 } from '../../../core/map/marker-factory';
 
 export type MarkerVisualSnapshot = {

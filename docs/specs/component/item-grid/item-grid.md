@@ -7,9 +7,12 @@ This system is a full replacement contract: once a surface is migrated, legacy g
 
 ## Documentation Phase Boundary
 
-- This refactoring pass MUST modify only the `/media` page specification set.
+- Workspace pane selected-items grid is migrated to `ItemGridComponent` + `MediaItemComponent` (`apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`).
+- Non-media item-grid cleanup elsewhere MUST still follow phased rollout notes below where applicable.
+
+- This refactoring pass MUST modify only the `/media` page specification set **when** the change is scoped to the media route shell exclusively.
 - In this shared spec, edits MUST stay limited to media-path ownership, FSM boundary, and naming consistency constraints.
-- Non-media item-grid cleanup MUST be deferred to later phases.
+- Non-media item-grid cleanup MUST be deferred to later phases when not covered by the workspace-pane migration.
 
 ## What It Looks Like
 
@@ -19,7 +22,8 @@ All media consumers (map marker, workspace selected-items, `/media`, and detail 
 
 ## Where It Lives
 
-- Shared location: `apps/web/src/app/shared/item-grid/`
+- Shared layout: `apps/web/src/app/shared/item-grid/`
+- Shared media item implementation: `apps/web/src/app/shared/media-item/` (`MediaItemComponent` and overlays)
 - Child specs:
   - `docs/specs/component/media/media.component.md`
   - `docs/specs/component/media/media-content.md`
@@ -84,8 +88,8 @@ ItemGridSystem
 │   │   ├── Delivery states: idle/loading-surface-visible/ratio-known-contain/media-ready/content-fade-in/content-visible/icon-only/error/no-media
 │   │   ├── Contain path includes ratio-known-contain
 │   │   ├── Cover path skips ratio-known-contain
-│   ├── MediaItemUploadOverlayComponent (features/media)
-│   └── MediaItemQuietActionsComponent (features/media; ws_grid_thumbnail actions)
+│   ├── MediaItemUploadOverlayComponent (shared/media-item)
+│   └── MediaItemQuietActionsComponent (shared/media-item; ws_grid_thumbnail actions)
 ├── DocumentItemComponent (extends ItemComponent)
 │   └── filetype-suitability contract: A4 behavior for eligible document-like previews
 ├── ProjectItemComponent (extends ItemComponent)
@@ -162,18 +166,18 @@ flowchart TD
 | `apps/web/src/app/shared/item-grid/item-state-frame.component.ts`          | Shared non-overridable state renderer used by ItemComponent                                   |
 | `apps/web/src/app/shared/item-grid/item-state-frame.component.html`        | Loading/error/empty state-frame template                                                      |
 | `apps/web/src/app/shared/item-grid/item-state-frame.component.scss`        | Unified state visuals including pulse placeholder behavior                                    |
-| `apps/web/src/app/features/media/media-item.component.ts`                  | Domain media item extending ItemComponent                                                     |
-| `apps/web/src/app/features/media/media-item.component.html`                | Media-specific content projection region                                                      |
-| `apps/web/src/app/features/media/media-item.component.scss`                | Media item local styling only                                                                 |
-| `apps/web/src/app/features/media/media-item-render-surface.component.ts`   | Legacy reference only; not part of active runtime render contract                             |
-| `apps/web/src/app/features/media/media-item-render-surface.component.html` | Legacy reference only; not part of active runtime render contract                             |
-| `apps/web/src/app/features/media/media-item-render-surface.component.scss` | Legacy reference only; not part of active runtime render contract                             |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.ts`   | Upload overlay presenter for media item                                                       |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.html` | Upload overlay template (progress fill/icon/label)                                            |
-| `apps/web/src/app/features/media/media-item-upload-overlay.component.scss` | Upload overlay visuals and layering                                                           |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.ts`    | Quiet-actions presenter for media item actions                                                |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.html`  | Quiet-actions template with keyboard-accessible controls                                      |
-| `apps/web/src/app/features/media/media-item-quiet-actions.component.scss`  | Quiet-actions reveal transitions without layout shift                                         |
+| `apps/web/src/app/shared/media-item/media-item.component.ts`                  | Domain media item extending ItemComponent                                                     |
+| `apps/web/src/app/shared/media-item/media-item.component.html`                | Media-specific content projection region                                                      |
+| `apps/web/src/app/shared/media-item/media-item.component.scss`                | Media item local styling only                                                                 |
+| `apps/web/src/app/shared/media-item/media-item-render-surface.component.ts`   | Legacy reference only; not part of active runtime render contract                             |
+| `apps/web/src/app/shared/media-item/media-item-render-surface.component.html` | Legacy reference only; not part of active runtime render contract                             |
+| `apps/web/src/app/shared/media-item/media-item-render-surface.component.scss` | Legacy reference only; not part of active runtime render contract                             |
+| `apps/web/src/app/shared/media-item/media-item-upload-overlay.component.ts`   | Upload overlay presenter for media item                                                       |
+| `apps/web/src/app/shared/media-item/media-item-upload-overlay.component.html` | Upload overlay template (progress fill/icon/label)                                            |
+| `apps/web/src/app/shared/media-item/media-item-upload-overlay.component.scss` | Upload overlay visuals and layering                                                           |
+| `apps/web/src/app/shared/media-item/media-item-quiet-actions.component.ts`    | Quiet-actions presenter for media item actions                                                |
+| `apps/web/src/app/shared/media-item/media-item-quiet-actions.component.html`  | Quiet-actions template with keyboard-accessible controls                                      |
+| `apps/web/src/app/shared/media-item/media-item-quiet-actions.component.scss`  | Quiet-actions reveal transitions without layout shift                                         |
 | `apps/web/src/app/features/projects/project-item.component.ts`             | Domain project item extending ItemComponent                                                   |
 | `apps/web/src/app/features/projects/project-item.component.html`           | Project-specific content projection region                                                    |
 | `apps/web/src/app/features/projects/project-item.component.scss`           | Project item local styling only                                                               |

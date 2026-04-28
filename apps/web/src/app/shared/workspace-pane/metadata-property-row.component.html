@@ -1,0 +1,52 @@
+<div
+  uiRowShell
+  uiRowShellSizeSm
+  class="meta-row ui-row-shell ui-row-shell--sm"
+  [class.meta-row--editing]="editing()"
+>
+  <button
+    uiIconButtonGhost
+    class="detail-row-action icon-btn-ghost detail-row-action--left"
+    type="button"
+    [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+    [title]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+    (click)="startEdit()"
+  >
+    <span class="material-icons" aria-hidden="true">edit</span>
+  </button>
+
+  <span class="meta-row__label" data-i18n-skip [title]="metaKey()">{{ metaKey() }}</span>
+
+  @if (editing()) {
+    <input
+      #editInput
+      uiInputControl
+      class="meta-row__input"
+      type="text"
+      [value]="metaValue()"
+      [attr.aria-label]="t('workspace.metadata.row.editPrefix', 'Edit') + ' ' + metaKey()"
+      (keydown.enter)="commitEdit($event)"
+      (keydown.escape)="cancelEdit()"
+      (blur)="commitEdit($event)"
+    />
+  } @else {
+    <span
+      class="meta-row__value"
+      data-i18n-skip
+      [title]="metaValue() || t('workspace.metadata.row.value.empty', '-')"
+    >
+      {{ metaValue() || t('workspace.metadata.row.value.empty', '-') }}
+    </span>
+  }
+
+  <button
+    uiIconButtonGhost
+    class="detail-row-action icon-btn-ghost detail-row-action--right detail-row-action--danger"
+    type="button"
+    [attr.aria-label]="t('workspace.metadata.row.removePrefix', 'Remove') + ' ' + metaKey()"
+    [attr.title]="t('workspace.metadata.row.removeTitle', 'Remove metadata')"
+    (click)="deleteRequested.emit()"
+  >
+    <span class="material-icons" aria-hidden="true">close</span>
+  </button>
+</div>

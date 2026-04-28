@@ -1,9 +1,9 @@
 import type { WritableSignal } from '@angular/core';
-import type { UploadService } from '../../../core/upload/upload.service';
+import type { UploadService } from '../../core/upload/upload.service';
 import type {
   UploadFailedEvent,
   UploadManagerService,
-} from '../../../core/upload/upload-manager.service';
+} from '../../core/upload/upload-manager.service';
 import type { ImageRecord } from './media-detail-view.types';
 
 interface ImageDetailUploadHelperDeps {

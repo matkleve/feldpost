@@ -1,8 +1,8 @@
-import { WritableSignal } from '@angular/core';
-import { ProjectsService } from '../../../core/projects/projects.service';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { ToastService } from '../../../core/toast/toast.service';
-import { ImageRecord, MediaContextRow, SelectOption } from './media-detail-view.types';
+import type { WritableSignal } from '@angular/core';
+import type { ProjectsService } from '../../core/projects/projects.service';
+import type { SupabaseService } from '../../core/supabase/supabase.service';
+import type { ToastService } from '../../core/toast/toast.service';
+import type { ImageRecord, MediaContextRow, SelectOption } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
 

@@ -1,10 +1,9 @@
 /** IS OUTDATED, USE ITEM GRID, MOVE TO ARCHIVE WHEN NO WHERE IN USE ANYMORE */
 
+import type { ElementRef, OnDestroy } from '@angular/core';
 import {
   Component,
-  ElementRef,
   HostListener,
-  OnDestroy,
   afterNextRender,
   computed,
   effect,
@@ -14,38 +13,39 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { FilterService } from '../../../core/filter/filter.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import { SupabaseService } from '../../../core/supabase/supabase.service';
-import { ToastService } from '../../../core/toast/toast.service';
-import { I18nService } from '../../../core/i18n/i18n.service';
-import { GeocodingService } from '../../../core/geocoding/geocoding.service';
-import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
-import { ShareSetService } from '../../../core/share-set/share-set.service';
-import { MediaDownloadService } from '../../../core/media-download/media-download.service';
-import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { FilterService } from '../../core/filter/filter.service';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
+import { SupabaseService } from '../../core/supabase/supabase.service';
+import { ToastService } from '../../core/toast/toast.service';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { GeocodingService } from '../../core/geocoding/geocoding.service';
+import { MediaLocationUpdateService } from '../../core/media-location-update/media-location-update.service';
+import { ShareSetService } from '../../core/share-set/share-set.service';
+import { MediaDownloadService } from '../../core/media-download/media-download.service';
+import { LocationResolverService } from '../../core/location-resolver/location-resolver.service';
 import type {
   GroupedSection,
   WorkspaceImage,
-} from '../../../core/workspace-view/workspace-view.types';
+} from '../../core/workspace-view/workspace-view.types';
+import type { ThumbnailCardHoverEvent } from '../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
+import type { ItemContextActionEvent } from '../../shared/item-grid/item.component';
 import {
-  ThumbnailCardComponent,
-  ThumbnailCardContextMenuEvent,
-  ThumbnailCardHoverEvent,
-  ThumbnailCardInteraction,
-} from './thumbnail-card/thumbnail-card.component';
-import { GroupHeaderComponent } from '../../../shared/ui-primitives/group-header.component';
-import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+  MEDIA_ITEM_ACTION_CONTEXT,
+  MediaItemComponent,
+} from '../media-item/media-item.component';
+import { workspaceMediaToImageRecord } from './workspace-media-mapper';
+import { GroupHeaderComponent } from '../../shared/ui-primitives/group-header.component';
+import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   ProjectSelectDialogComponent,
   type ProjectSelectOption,
-} from '../../../shared/project-select-dialog/project-select-dialog.component';
-import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
-import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
-import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
-import { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
-import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
+} from '../../shared/project-select-dialog/project-select-dialog.component';
+import { TextInputDialogComponent } from '../../shared/text-input-dialog/text-input-dialog.component';
+import { ItemGridComponent } from '../../shared/item-grid/item-grid.component';
+import type { ItemDisplayMode } from '../../shared/item-grid/item.component';
+import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
+import type { UploadLocationMapPickRequest } from '../../core/workspace-pane/workspace-pane-shell-events.types';
 
 /** Flat renderable item â€” either a group header or a grid of images. */
 type RenderItem =
@@ -238,223 +238,11 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
 ];
 
 @Component({
-  selector: 'app-thumbnail-grid',
-  template: `
-    <div
-      class="thumbnail-grid"
-      [class.thumbnail-grid--row]="viewService.thumbnailSizePreset() === 'row'"
-      [class.thumbnail-grid--small]="viewService.thumbnailSizePreset() === 'small'"
-      [class.thumbnail-grid--medium]="viewService.thumbnailSizePreset() === 'medium'"
-      [class.thumbnail-grid--large]="viewService.thumbnailSizePreset() === 'large'"
-      [attr.data-language]="languageTick()"
-      #scrollContainer
-      (scroll)="onScroll()"
-      [style.--thumbnail-grid-card-size.px]="thumbnailCardSizePx()"
-    >
-      @if (viewService.isLoading()) {
-        <div class="thumbnail-grid__skeleton">
-          @for (i of skeletonCards; track i) {
-            <div class="thumbnail-grid__skeleton-card"></div>
-          }
-        </div>
-      } @else if (viewService.emptySelection()) {
-        <div class="thumbnail-grid__empty-selection">
-          <span class="thumbnail-grid__empty-icon">ðŸ“·</span>
-          <p>
-            {{ t('workspace.thumbnailGrid.emptySelection.title', 'No photos at this location') }}
-          </p>
-          <p class="thumbnail-grid__empty-hint">
-            {{
-              t(
-                'workspace.thumbnailGrid.emptySelection.hint',
-                'Images may not have been uploaded yet for this area.'
-              )
-            }}
-          </p>
-        </div>
-      } @else if (viewService.rawImages().length === 0) {
-        <p class="thumbnail-grid__empty">
-          {{
-            t(
-              'workspace.thumbnailGrid.empty.selectMarker',
-              'Select a marker on the map to see photos.'
-            )
-          }}
-        </p>
-      } @else if (viewService.totalImageCount() === 0) {
-        <div class="thumbnail-grid__filter-empty">
-          <p>
-            {{
-              t('workspace.thumbnailGrid.filterEmpty.title', 'No images match the current filters')
-            }}
-          </p>
-          <button class="thumbnail-grid__clear-btn" type="button" (click)="clearFilters()">
-            {{ t('workspace.thumbnailGrid.filterEmpty.clear', 'Clear filters') }}
-          </button>
-        </div>
-      } @else if (hasGrouping()) {
-        @for (item of renderItems(); track $index) {
-          @if (!isItemHidden($index)) {
-            @if (item.type === 'header') {
-              <app-group-header
-                [heading]="item.heading"
-                [imageCount]="item.imageCount"
-                [level]="item.level"
-                [collapsed]="isCollapsed(item.heading)"
-                (toggle)="viewService.toggleGroupCollapsed(item.heading)"
-              />
-            } @else {
-              <app-item-grid
-                class="thumbnail-grid__cards"
-                [class.thumbnail-grid__cards--start]="isUnderfilled(item.images.length)"
-                [mode]="itemGridMode()"
-              >
-                @for (img of item.images; track img.id) {
-                  <app-thumbnail-card
-                    [image]="img"
-                    [viewMode]="viewService.thumbnailSizePreset()"
-                    [selected]="selectionService.isSelected(img.id)"
-                    [linkedHovered]="isLinkedHovered(img.id)"
-                    (clicked)="thumbnailClicked.emit($event)"
-                    (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
-                    (selectionToggled)="onSelectionToggled($event)"
-                    (hoverStarted)="hoverStarted.emit($event)"
-                    (hoverEnded)="hoverEnded.emit($event)"
-                    (contextMenuRequested)="onThumbnailContextMenuRequested($event)"
-                  />
-                }
-              </app-item-grid>
-            }
-          }
-        }
-      } @else {
-        <app-item-grid
-          class="thumbnail-grid__cards"
-          [class.thumbnail-grid__cards--start]="isUnderfilled(flatImages().length)"
-          [mode]="itemGridMode()"
-        >
-          @for (img of flatImages(); track img.id) {
-            <app-thumbnail-card
-              [image]="img"
-              [viewMode]="viewService.thumbnailSizePreset()"
-              [selected]="selectionService.isSelected(img.id)"
-              [linkedHovered]="isLinkedHovered(img.id)"
-              (clicked)="thumbnailClicked.emit($event)"
-              (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
-              (selectionToggled)="onSelectionToggled($event)"
-              (hoverStarted)="hoverStarted.emit($event)"
-              (hoverEnded)="hoverEnded.emit($event)"
-              (contextMenuRequested)="onThumbnailContextMenuRequested($event)"
-            />
-          }
-        </app-item-grid>
-      }
-
-      @if (thumbnailContextMenuOpen() && thumbnailContextMenuPosition(); as menuPos) {
-        <app-dropdown-shell
-          class="map-context-menu"
-          [top]="menuPos.y"
-          [left]="menuPos.x"
-          [minWidth]="224"
-          [panelClass]="'map-context-menu option-menu-surface'"
-          (closeRequested)="closeThumbnailContextMenu()"
-        >
-          <div
-            class="dd-items"
-            role="menu"
-            tabindex="-1"
-            [attr.aria-label]="t('workspace.thumbnailGrid.menu.aria', 'Thumbnail context menu')"
-          >
-            @for (action of thumbnailPrimaryActions(); track action.id) {
-              <button
-                class="dd-item"
-                type="button"
-                role="menuitem"
-                [disabled]="action.disabled"
-                (click)="onThumbnailContextActionSelected(action.id)"
-              >
-                <span class="material-icons dd-item__icon" aria-hidden="true">{{
-                  action.icon
-                }}</span>
-                <span class="dd-item__label">{{ action.label }}</span>
-              </button>
-            }
-
-            @if (thumbnailPrimaryActions().length > 0 && thumbnailSecondaryActions().length > 0) {
-              <div class="dd-divider" aria-hidden="true"></div>
-            }
-
-            @for (action of thumbnailSecondaryActions(); track action.id) {
-              <button
-                class="dd-item"
-                type="button"
-                role="menuitem"
-                [disabled]="action.disabled"
-                (click)="onThumbnailContextActionSelected(action.id)"
-              >
-                <span class="material-icons dd-item__icon" aria-hidden="true">{{
-                  action.icon
-                }}</span>
-                <span class="dd-item__label">{{ action.label }}</span>
-              </button>
-            }
-
-            @if (thumbnailDestructiveActions().length > 0) {
-              <div class="dd-divider" aria-hidden="true"></div>
-
-              @for (action of thumbnailDestructiveActions(); track action.id) {
-                <button
-                  class="dd-item dd-item--danger"
-                  type="button"
-                  role="menuitem"
-                  [disabled]="action.disabled"
-                  (click)="onThumbnailContextActionSelected(action.id)"
-                >
-                  <span class="material-icons dd-item__icon" aria-hidden="true">{{
-                    action.icon
-                  }}</span>
-                  <span class="dd-item__label">{{ action.label }}</span>
-                </button>
-              }
-            }
-          </div>
-        </app-dropdown-shell>
-      }
-
-      @if (projectDialogOpen()) {
-        <app-project-select-dialog
-          [title]="t('workspace.export.projectDialog.title', 'Select project')"
-          [message]="
-            t('workspace.export.projectDialog.message', 'Choose a project for selected media.')
-          "
-          [options]="projectOptions()"
-          [selectedId]="projectDialogSelectedId()"
-          [confirmLabel]="t('workspace.export.projectDialog.confirm', 'Assign')"
-          [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
-          (selectedIdChange)="onProjectDialogSelected($event)"
-          (confirmed)="confirmProjectDialog($event)"
-          (cancelled)="closeProjectDialog()"
-        />
-      }
-
-      @if (addressDialogOpen()) {
-        <app-text-input-dialog
-          [title]="t('workspace.export.addressDialog.title', 'Change address')"
-          [message]="
-            t('workspace.export.addressDialog.message', 'Apply one address to all selected media.')
-          "
-          [placeholder]="t('workspace.export.addressDialog.placeholder', 'Enter address')"
-          [confirmLabel]="t('workspace.export.addressDialog.confirm', 'Apply')"
-          [cancelLabel]="t('workspace.export.dialog.cancel', 'Cancel')"
-          (confirmed)="confirmAddressDialog($event)"
-          (cancelled)="closeAddressDialog()"
-        />
-      }
-    </div>
-  `,
-  styleUrl: './thumbnail-grid.component.scss',
+  selector: 'app-workspace-selected-items-grid',
+  templateUrl: './workspace-selected-items-grid.component.html',
+  styleUrl: './workspace-selected-items-grid.component.scss',
   imports: [
-    ThumbnailCardComponent,
+    MediaItemComponent,
     ItemGridComponent,
     GroupHeaderComponent,
     DropdownShellComponent,
@@ -462,7 +250,7 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
     TextInputDialogComponent,
   ],
 })
-export class ThumbnailGridComponent implements OnDestroy {
+export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   protected readonly viewService = inject(WorkspaceViewService);
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
@@ -476,6 +264,9 @@ export class ThumbnailGridComponent implements OnDestroy {
   private readonly mediaDownloadService = inject(MediaDownloadService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
   readonly currentLanguage = this.i18nService.language;
+
+  readonly MEDIA_ITEM_ACTION_CONTEXT = MEDIA_ITEM_ACTION_CONTEXT;
+  readonly workspaceMediaToImageRecord = workspaceMediaToImageRecord;
 
   readonly thumbnailCardSizePx = computed(() => {
     switch (this.viewService.thumbnailSizePreset()) {
@@ -687,23 +478,56 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.updateMaxColumns();
   }
 
-  onSelectionToggled(event: ThumbnailCardInteraction): void {
-    this.selectionService.toggle(event.imageId, { additive: event.additive });
+  onMediaItemSelectedChange(imageId: string, selected: boolean): void {
+    const currentlySelected = this.selectionService.isSelected(imageId);
+    if (currentlySelected === selected) {
+      return;
+    }
+    this.selectionService.toggle(imageId, { additive: false });
   }
 
-  onThumbnailContextMenuRequested(event: ThumbnailCardContextMenuEvent): void {
+  onCellHoverStarted(img: WorkspaceImage): void {
+    if (!Number.isFinite(img.latitude) || !Number.isFinite(img.longitude)) {
+      return;
+    }
+    this.hoverStarted.emit({ mediaId: img.id, lat: img.latitude, lng: img.longitude });
+  }
+
+  onWorkspaceCellContextMenu(event: Event, mediaId: string): void {
+    if (!(event instanceof MouseEvent)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
     const selected = this.selectionService.selectedMediaIds();
-    if (!selected.has(event.mediaId)) {
+    if (!selected.has(mediaId)) {
       this.selectionService.clearSelection();
-      this.selectionService.toggle(event.mediaId, { additive: true });
+      this.selectionService.toggle(mediaId, { additive: true });
     }
 
-    this.thumbnailContextMenuMediaId.set(event.mediaId);
+    this.thumbnailContextMenuMediaId.set(mediaId);
     this.thumbnailContextMenuPosition.set({
       x: Math.max(8, Math.min(event.clientX, window.innerWidth - 232)),
       y: Math.max(8, Math.min(event.clientY, window.innerHeight - 360)),
     });
     this.thumbnailContextMenuOpen.set(true);
+  }
+
+  onMediaItemContextAction(img: WorkspaceImage, event: ItemContextActionEvent): void {
+    if (event.actionId === 'zoom_house' || event.actionId === 'zoom_street') {
+      if (!Number.isFinite(img.latitude) || !Number.isFinite(img.longitude)) {
+        return;
+      }
+      this.zoomToLocationRequested.emit({
+        mediaId: img.id,
+        lat: img.latitude,
+        lng: img.longitude,
+      });
+      return;
+    }
+    if (event.actionId === 'open_in_media') {
+      this.thumbnailClicked.emit(img.id);
+    }
   }
 
   closeThumbnailContextMenu(): void {
@@ -897,11 +721,6 @@ export class ThumbnailGridComponent implements OnDestroy {
     this.closeProjectDialog();
   }
 
-  isLinkedHovered(mediaId: string): boolean {
-    return this.linkedHoveredMediaIds().has(mediaId);
-  }
-
-  /** Batch-sign thumbnails for currently visible images after a debounce. */
   private scheduleThumbnailSigning(): void {
     if (this.signBatchTimer) clearTimeout(this.signBatchTimer);
     this.signBatchTimer = setTimeout(() => {
@@ -916,9 +735,7 @@ export class ThumbnailGridComponent implements OnDestroy {
     }, 200);
   }
 
-  private collectImages(
-    section: GroupedSection,
-  ): import('../../../core/workspace-view/workspace-view.types').WorkspaceImage[] {
+  private collectImages(section: GroupedSection): WorkspaceImage[] {
     const result = [...section.images];
     if (section.subGroups) {
       for (const sub of section.subGroups) {

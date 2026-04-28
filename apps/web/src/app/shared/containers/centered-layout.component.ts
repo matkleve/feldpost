@@ -17,17 +17,6 @@ import { Component } from '@angular/core';
   selector: 'app-centered-layout',
   standalone: true,
   template: `<div class="centered-layout"><ng-content></ng-content></div>`,
-  styles: [
-    `
-      .centered-layout {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        min-height: 200px;
-      }
-    `,
-  ],
+  styleUrl: './centered-layout.component.scss',
 })
 export class CenteredLayoutComponent {}

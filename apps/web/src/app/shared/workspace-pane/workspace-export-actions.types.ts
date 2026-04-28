@@ -1,4 +1,4 @@
-import type { ACTION_CONTEXT_IDS } from '../../action-system/action-context-ids';
+import type { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 
 export interface WorkspaceExportActionContext {
   contextType: typeof ACTION_CONTEXT_IDS.wsFooter;

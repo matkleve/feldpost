@@ -1,12 +1,14 @@
+import type {
+  OnInit} from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { AuthService, MfaFactorViewModel } from '../../core/auth/auth.service';
+import type { MfaFactorViewModel } from '../../core/auth/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { UserProfileService } from '../../core/user-profile/user-profile.service';
 import { ToastService } from '../../core/toast/toast.service';

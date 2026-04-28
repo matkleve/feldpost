@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, from, of, tap } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { catchError, from, of, tap } from 'rxjs';
 import { SupabaseService } from '../supabase/supabase.service';
+import type {
+  GeocoderSearchResult} from '../geocoding/geocoding.service';
 import {
-  GeocodingService,
-  GeocoderSearchOptions,
-  GeocoderSearchResult,
+  GeocodingService
 } from '../geocoding/geocoding.service';
-import {
+import type {
   SearchAddressCandidate,
   SearchContentCandidate,
   SearchQueryContext,
@@ -31,9 +32,10 @@ import {
 } from './search-geocoder-scoring';
 import { logGeocoderDiagnostics, logSearchEvent } from './search-debug';
 import { fetchDbContentCandidates, fetchGeocoderCandidates } from './search-bar-resolvers';
-import {
+import type {
   AddressGroup,
-  StoredRecentSearch,
+  StoredRecentSearch} from './search-bar-helpers';
+import {
   buildCityPart,
   compareRecents,
   computeCountryBoost,
@@ -41,7 +43,6 @@ import {
   computeRecencyDecay,
   normalizeStreetPart,
   sanitizeRecentLabel,
-  toSizeSignal,
 } from './search-bar-helpers';
 
 export type { DetectedCoordinates } from './coordinate-detection';
@@ -65,11 +66,6 @@ interface DbAddressRow {
   latitude: number | string | null;
   longitude: number | string | null;
   created_at: string | null;
-}
-
-interface DbContentRow {
-  id: string;
-  name: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -287,14 +283,13 @@ export class SearchBarService {
 
     if (!Array.isArray(response.data)) return [];
 
-    const grouped = this.groupAddressRows(response.data as DbAddressRow[], trimmedQuery, context);
+    const grouped = this.groupAddressRows(response.data as DbAddressRow[], trimmedQuery);
     return this.rankedAddressCandidates(grouped, context);
   }
 
   private groupAddressRows(
     rows: DbAddressRow[],
     trimmedQuery: string,
-    context: SearchQueryContext,
   ): Map<string, AddressGroup> {
     const grouped = new Map<string, AddressGroup>();
 

@@ -8,7 +8,7 @@
  *  - The root redirect sends unauthenticated users through authGuard → /auth/login.
  */
 
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [

@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { UiToolbarButtonDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { UiToolbarButtonDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 
 type SortOption = 'date-desc' | 'date-asc' | 'distance' | 'name';
 

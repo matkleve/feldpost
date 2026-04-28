@@ -43,14 +43,14 @@
 | src/app/core/upload/upload-storage.service.ts | 69 | none | no | no | - | P3 |
 | src/app/core/upload/upload-attach-finalize.util.ts | 68 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel-bulk-actions.service.ts | 67 | none | no | no | - | P3 |
-| src/app/features/map/workspace-pane/media-detail-upload.helper.spec.ts | 64 | none | no | no | - | P3 |
+| src/app/shared/workspace-pane/media-detail-upload.helper.spec.ts | 64 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel.constants.ts | 59 | none | no | no | - | P3 |
 | src/app/core/upload/upload-enrichment.service.ts | 57 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel-row-interactions.service.ts | 54 | none | no | no | - | P3 |
 | src/app/core/upload/upload-conflict.service.ts | 53 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel-registration.service.ts | 53 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel-row-handlers.ts | 53 | none | no | no | - | P3 |
-| src/app/features/map/workspace-pane/media-detail-upload.helper.ts | 51 | none | no | no | - | P3 |
+| src/app/shared/workspace-pane/media-detail-upload.helper.ts | 51 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel.intake.spec.ts | 49 | none | no | no | - | P3 |
 | src/app/features/upload/upload-panel-state.service.ts | 49 | none | no | no | - | P3 |
 | src/app/core/upload/upload-enrichment.service.spec.ts | 47 | none | no | no | - | P3 |

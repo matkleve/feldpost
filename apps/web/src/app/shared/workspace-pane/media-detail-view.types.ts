@@ -1,4 +1,4 @@
-export type { ImageRecord } from '../../../core/media-query/media-query.types';
+export type { ImageRecord } from '../../core/media-query/media-query.types';
 
 export interface MetadataEntry {
   metadataKeyId: string;

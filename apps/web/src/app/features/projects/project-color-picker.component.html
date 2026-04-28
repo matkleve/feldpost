@@ -1,0 +1,12 @@
+<div class="project-color-picker option-menu-surface" role="menu" aria-label="Project color">
+  <div class="dd-items">
+    <button type="button" class="dd-item" (click)="pickRandomBrandHue()">
+      <span class="material-icons dd-item__icon" aria-hidden="true">palette</span>
+      <span class="dd-item__label">Random brand hue</span>
+      <span
+        class="dd-item__trailing project-color-picker__swatch"
+        [style.background]="previewColor()"
+      ></span>
+    </button>
+  </div>
+</div>

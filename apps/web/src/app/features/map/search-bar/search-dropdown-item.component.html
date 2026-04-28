@@ -1,0 +1,24 @@
+<button
+  class="search-dropdown-item ui-item"
+  type="button"
+  role="option"
+  [id]="optionId()"
+  [class.search-dropdown-item--active]="active()"
+  [attr.aria-selected]="active()"
+  (mousedown)="$event.preventDefault()"
+  (click)="selected.emit(candidate())"
+>
+  <span class="search-dropdown-item__media ui-item-media" aria-hidden="true">
+    <span class="material-icons search-dropdown-item__icon">{{ iconName() }}</span>
+  </span>
+
+  <span class="search-dropdown-item__content ui-item-label">
+    <span class="search-dropdown-item__label">{{ candidate().label }}</span>
+
+    @if (candidate().secondaryLabel) {
+      <span class="search-dropdown-item__secondary">{{ candidate().secondaryLabel }}</span>
+    } @else if (metaText()) {
+      <span class="search-dropdown-item__meta">{{ metaText() }}</span>
+    }
+  </span>
+</button>

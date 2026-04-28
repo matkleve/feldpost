@@ -17,9 +17,9 @@ import {
   signal,
 } from '@angular/core';
 import type { OnDestroy, OnInit } from '@angular/core';
-import { parseTimeInput } from '../../../shared/ui-primitives/parse-time-input';
-import { I18nService } from '../../../core/i18n/i18n.service';
-import { UiInputControlDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { parseTimeInput } from '../../shared/ui-primitives/parse-time-input';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { UiInputControlDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 
 export interface DateSaveEvent {
   date: string | null; // YYYY-MM-DD or null

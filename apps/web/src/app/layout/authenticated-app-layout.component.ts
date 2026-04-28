@@ -11,8 +11,9 @@ import {
   signal,
 } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { WorkspacePaneComponent } from '../features/map/workspace-pane/workspace-pane.component';
-import { WorkspacePaneShellComponent } from '../features/map/workspace-pane/workspace-pane-shell.component';
+import { WorkspacePaneComponent } from '../shared/workspace-pane/workspace-pane.component';
+import { WorkspacePaneShellComponent } from '../shared/workspace-pane/workspace-pane-shell.component';
+import { UploadPanelComponent } from '../features/upload/upload-panel.component';
 import { MapShellState } from '../features/map/map-shell/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
 import { WorkspacePaneLayoutMapEffectsService } from '../core/workspace-pane/workspace-pane-layout-map-effects.service';
@@ -35,7 +36,7 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
 @Component({
   selector: 'app-authenticated-app-layout',
   standalone: true,
-  imports: [RouterOutlet, WorkspacePaneComponent, WorkspacePaneShellComponent],
+  imports: [RouterOutlet, WorkspacePaneComponent, WorkspacePaneShellComponent, UploadPanelComponent],
   templateUrl: './authenticated-app-layout.component.html',
   styleUrl: './authenticated-app-layout.component.scss',
   providers: [

@@ -1,12 +1,12 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import { ProjectsService } from '../../../../core/projects/projects.service';
-import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
-import { StandardDropdownComponent } from '../../../../shared/dropdown-trigger/standard-dropdown.component';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { ProjectsService } from '../../../core/projects/projects.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { StandardDropdownComponent } from '../../../shared/dropdown-trigger/standard-dropdown.component';
 import {
   UiChoiceControlDirective,
   UiChoiceRowDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 interface Project {
   id: string;

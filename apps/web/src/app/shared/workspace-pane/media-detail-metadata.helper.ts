@@ -1,6 +1,6 @@
-import { WritableSignal } from '@angular/core';
-import { MetadataService } from '../../../core/metadata/metadata.service';
-import { ImageRecord, MetadataEntry } from './media-detail-view.types';
+import type { WritableSignal } from '@angular/core';
+import type { MetadataService } from '../../core/metadata/metadata.service';
+import type { ImageRecord, MetadataEntry } from './media-detail-view.types';
 
 interface ImageDetailMetadataHelperDeps {
   services: {

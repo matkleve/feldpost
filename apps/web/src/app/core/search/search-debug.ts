@@ -1,4 +1,4 @@
-import { SearchAddressCandidate, SearchQueryContext } from './search.models';
+import type { SearchAddressCandidate, SearchQueryContext } from './search.models';
 
 const SEARCH_DEBUG_STORAGE_KEY = 'feldpost-search-debug';
 const SEARCH_DEBUG_LOG_STORAGE_KEY = 'feldpost-search-debug-log';

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { SearchBarService, DetectedCoordinates } from './search-bar.service';
+import { SearchBarService } from './search-bar.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';

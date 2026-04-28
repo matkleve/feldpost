@@ -10,9 +10,10 @@
  *  - Add new global providers here, not in individual feature modules.
  */
 
+import type {
+  ApplicationConfig} from '@angular/core';
 import {
   APP_INITIALIZER,
-  ApplicationConfig,
   inject,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';

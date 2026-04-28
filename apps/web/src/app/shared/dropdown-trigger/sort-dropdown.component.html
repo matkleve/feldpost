@@ -1,0 +1,82 @@
+<app-standard-dropdown
+  class="sort-dropdown"
+  [searchTerm]="searchTerm()"
+  [searchPlaceholder]="t('workspace.sort.search.placeholder', 'Search properties...')"
+  [showDefaultClearAction]="false"
+  (searchTermChange)="searchTerm.set($event)"
+  (clearRequested)="searchTerm.set('')"
+>
+  @if (searchTerm() || hasCustomSort()) {
+    <button
+      dropdown-search-action
+      class="dd-search__action icon-btn-ghost"
+      type="button"
+      (click)="onSearchActionClick()"
+      [attr.aria-label]="searchActionAriaLabel()"
+    >
+      <span class="material-icons" aria-hidden="true">{{ searchActionIcon() }}</span>
+    </button>
+  }
+
+  <div dropdown-items>
+    @if (groupedOptions().length > 0) {
+      <div class="dd-section-label">
+        {{ t('workspace.sort.section.groupedBy', 'Sorted by grouping') }}
+      </div>
+      @for (opt of groupedOptions(); track opt.id) {
+        <button
+          class="dd-item dd-item--active"
+          type="button"
+          [class.dd-item--hovered]="isRowHovered(opt.id)"
+          (mouseenter)="setHoveredSort(opt.id)"
+          (mouseleave)="clearHoveredSort(opt.id)"
+          (focus)="setHoveredSort(opt.id)"
+          (blur)="clearHoveredSort(opt.id)"
+          (click)="toggleSort(opt.id); $event.stopPropagation()"
+        >
+          <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
+          <span class="dd-item__label">{{ opt.label }}</span>
+          <span
+            class="sort-direction sort-direction--visible"
+            [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
+            [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
+            [class.sort-direction--preview]="isRowHovered(opt.id)"
+            aria-hidden="true"
+            [textContent]="getDisplayedDirectionSymbol(opt.id)"
+          ></span>
+        </button>
+      }
+      <div class="dd-divider"></div>
+    }
+    @for (opt of filteredOptions(); track opt.id) {
+      <button
+        class="dd-item"
+        type="button"
+        [class.dd-item--active]="isSortActive(opt.id)"
+        [class.dd-item--hovered]="isRowHovered(opt.id)"
+        (mouseenter)="setHoveredSort(opt.id)"
+        (mouseleave)="clearHoveredSort(opt.id)"
+        (focus)="setHoveredSort(opt.id)"
+        (blur)="clearHoveredSort(opt.id)"
+        (click)="toggleSort(opt.id); $event.stopPropagation()"
+      >
+        <span class="material-icons dd-item__icon" aria-hidden="true">{{ opt.icon }}</span>
+        <span class="dd-item__label">{{ opt.label }}</span>
+        <span
+          class="sort-direction"
+          [class.sort-direction--visible]="isSortActive(opt.id)"
+          [attr.data-current-symbol]="getDirectionSymbol(opt.id)"
+          [attr.data-next-symbol]="getNextDirectionSymbol(opt.id)"
+          [class.sort-direction--preview]="isRowHovered(opt.id)"
+          aria-hidden="true"
+          [textContent]="getDisplayedDirectionSymbol(opt.id)"
+        ></span>
+      </button>
+    }
+    @if (filteredOptions().length === 0 && groupedOptions().length === 0) {
+      <div class="dd-empty">
+        {{ t('workspace.sort.empty.noMatchingProperties', 'No matching properties') }}
+      </div>
+    }
+  </div>
+</app-standard-dropdown>

@@ -1,21 +1,16 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { WorkspacePaneHeaderComponent } from './workspace-pane-header/workspace-pane-header.component';
 import { WorkspacePaneToolbarComponent } from './workspace-pane-toolbar/workspace-pane-toolbar.component';
-import { ThumbnailGridComponent } from './thumbnail-grid.component';
+import { WorkspaceSelectedItemsGridComponent } from './workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from './media-detail-view.component';
 import { WorkspacePaneFooterComponent } from './workspace-pane-footer/workspace-pane-footer.component';
-import { UploadPanelComponent } from '../../upload/upload-panel.component';
-import type {
-  ImageUploadedEvent,
-  UploadLocationMapPickRequest,
-  UploadLocationPreviewEvent,
-} from '../../../core/workspace-pane/workspace-pane-shell-events.types';
-import { MaxWidthContainerComponent } from '../../../shared/containers';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
-import { I18nService } from '../../../core/i18n/i18n.service';
-import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pane-host.port';
+import type { UploadLocationMapPickRequest } from '../../core/workspace-pane/workspace-pane-shell-events.types';
+import { MaxWidthContainerComponent } from '../../shared/containers';
+import { WorkspaceViewService } from '../../core/workspace-view/workspace-view.service';
+import { WorkspaceSelectionService } from '../../core/workspace-selection/workspace-selection.service';
+import type { ThumbnailCardHoverEvent } from '../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
+import { I18nService } from '../../core/i18n/i18n.service';
+import type { WorkspacePaneTab } from '../../core/workspace-pane/workspace-pane-host.port';
 
 @Component({
   selector: 'app-workspace-pane',
@@ -23,10 +18,9 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
     MaxWidthContainerComponent,
     WorkspacePaneHeaderComponent,
     WorkspacePaneToolbarComponent,
-    ThumbnailGridComponent,
+    WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
     WorkspacePaneFooterComponent,
-    UploadPanelComponent,
   ],
   templateUrl: './workspace-pane.component.html',
   styleUrl: './workspace-pane.component.scss',
@@ -63,10 +57,6 @@ export class WorkspacePaneComponent {
     lng: number;
     zoomMode?: 'house' | 'street';
   }>();
-  readonly imageUploaded = output<ImageUploadedEvent>();
-  readonly placementRequested = output<string>();
-  readonly uploadLocationPreviewRequested = output<UploadLocationPreviewEvent>();
-  readonly uploadLocationPreviewCleared = output<void>();
   readonly uploadLocationMapPickRequested = output<UploadLocationMapPickRequest>();
   readonly titleEditValueChange = output<string>();
   readonly titleSubmitRequested = output<string>();
@@ -137,22 +127,6 @@ export class WorkspacePaneComponent {
 
   setActiveTab(tab: WorkspacePaneTab): void {
     this.activeTabChange.emit(tab);
-  }
-
-  onImageUploaded(event: ImageUploadedEvent): void {
-    this.imageUploaded.emit(event);
-  }
-
-  onPlacementRequested(jobId: string): void {
-    this.placementRequested.emit(jobId);
-  }
-
-  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
-    this.uploadLocationPreviewRequested.emit(event);
-  }
-
-  onUploadLocationPreviewCleared(): void {
-    this.uploadLocationPreviewCleared.emit();
   }
 
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {

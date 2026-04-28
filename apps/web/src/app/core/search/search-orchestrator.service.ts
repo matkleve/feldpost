@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import type {
+  Observable} from 'rxjs';
 import {
-  Observable,
   catchError,
   combineLatest,
   concat,
@@ -15,8 +16,7 @@ import {
   take,
   tap,
 } from 'rxjs';
-import {
-  DEFAULT_SEARCH_ORCHESTRATOR_OPTIONS,
+import type {
   SearchAddressCandidate,
   SearchCandidate,
   SearchCommandCandidate,
@@ -26,7 +26,9 @@ import {
   SearchQueryContext,
   SearchRecentCandidate,
   SearchResultSet,
-  SearchSection,
+  SearchSection} from './search.models';
+import {
+  DEFAULT_SEARCH_ORCHESTRATOR_OPTIONS
 } from './search.models';
 import { buildFallbackQueries, normalizeSearchQuery } from './search-query';
 import { isInViewport } from './search-bar-helpers';

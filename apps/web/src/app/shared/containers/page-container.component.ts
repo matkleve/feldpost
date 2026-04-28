@@ -23,29 +23,9 @@ import { Component, input } from '@angular/core';
       <ng-content></ng-content>
     </div>
   </main>`,
-  styles: [
-    `
-      .page-container {
-        min-height: 100%;
-        padding: var(--spacing-4);
-      }
-
-      .page-container__content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-4);
-      }
-
-      /* Optional: constrained width for centered pages */
-      .page-container--constrained {
-        width: 100%;
-        max-width: clamp(320px, 90vw, 1200px);
-        margin-inline: auto;
-      }
-    `,
-  ],
+  styleUrl: './page-container.component.scss',
 })
 export class PageContainerComponent {
   /** Optionally constrain width to max-width with centering */
-  constrained = input(false);
+  readonly constrained = input(false);
 }

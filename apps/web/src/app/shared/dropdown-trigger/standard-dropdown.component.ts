@@ -5,66 +5,8 @@ import { UiIconButtonGhostDirective } from '../ui-primitives/ui-primitives.direc
   selector: 'app-standard-dropdown',
   standalone: true,
   imports: [UiIconButtonGhostDirective],
-  template: `
-    <div class="standard-dropdown">
-      @if (showSearch()) {
-        <div class="dd-search">
-          <input
-            class="dd-search__input"
-            type="text"
-            [placeholder]="searchPlaceholder()"
-            [value]="searchTerm()"
-            (input)="searchTermChange.emit($any($event.target).value)"
-          />
-
-          @if (showDefaultClearAction() && searchTerm()) {
-            <button
-              uiIconButtonGhost
-              class="dd-search__action icon-btn-ghost"
-              type="button"
-              [attr.aria-label]="clearSearchAriaLabel()"
-              (click)="clearRequested.emit()"
-            >
-              <span class="material-icons" aria-hidden="true">close</span>
-            </button>
-          }
-
-          <ng-content select="[dropdown-search-action]" />
-        </div>
-      }
-
-      <div [class]="itemsHostClass()">
-        <ng-content select="[dropdown-items]" />
-      </div>
-
-      @if (actionLabel()) {
-        <button class="dd-action-row" type="button" (click)="actionRequested.emit()">
-          <span class="material-icons" aria-hidden="true">{{ actionIcon() }}</span>
-          {{ actionLabel() }}
-        </button>
-      }
-    </div>
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-        min-height: 0;
-      }
-
-      .standard-dropdown {
-        display: flex;
-        flex-direction: column;
-        max-height: inherit;
-        min-height: 0;
-      }
-
-      .standard-dropdown .dd-items {
-        min-height: 0;
-        overflow-y: auto;
-      }
-    `,
-  ],
+  templateUrl: './standard-dropdown.component.html',
+  styleUrl: './standard-dropdown.component.scss',
 })
 export class StandardDropdownComponent {
   readonly showSearch = input(true);

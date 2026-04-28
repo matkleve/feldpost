@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import type { Router } from '@angular/router';
 
 export interface MapFocusPayload {
   mediaId: string;

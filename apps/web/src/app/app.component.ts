@@ -1,4 +1,5 @@
-import { Component, computed, effect, inject, OnInit } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';

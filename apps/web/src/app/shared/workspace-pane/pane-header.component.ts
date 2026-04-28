@@ -1,5 +1,6 @@
-import { Component, ElementRef, effect, inject, input, output, viewChild } from '@angular/core';
-import { I18nService } from '../../../core/i18n/i18n.service';
+import type { ElementRef} from '@angular/core';
+import { Component, effect, inject, input, output, viewChild } from '@angular/core';
+import { I18nService } from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-pane-header',

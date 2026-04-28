@@ -27,7 +27,7 @@ export class GpsButtonComponent {
   readonly gpsState = signal<'idle' | 'seeking' | 'active'>('idle');
 
   private toast = inject(ToastService);
-  constructor(private map: MapAdapter) {}
+  private readonly map = inject(MapAdapter);
 
   async onClick() {
     if (this.gpsState() === 'idle') {
@@ -37,10 +37,10 @@ export class GpsButtonComponent {
         this.map.panTo(coords);
         // User Location Marker handled by MapAdapter
         this.gpsState.set('active');
-      } catch (e) {
+      } catch (e: unknown) {
         let msg = 'Unable to get your location.';
-        if (typeof e === 'object' && e && 'message' in e) {
-          msg = (e as any).message;
+        if (e instanceof Error && e.message) {
+          msg = e.message;
         }
         this.toast.show({ message: msg, type: 'error' });
         this.gpsState.set('idle');

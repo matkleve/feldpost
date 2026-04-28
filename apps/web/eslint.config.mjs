@@ -142,6 +142,7 @@ export default tseslint.config(
       'node_modules/**',
       '**/archive/**', // Ignoriert alle Ordner namens archive überall
       'src/app/core/archive/**', // Spezifischer Pfad, falls nötig
+      'scripts/**',
     ],
     linterOptions: {
       noInlineConfig: false,

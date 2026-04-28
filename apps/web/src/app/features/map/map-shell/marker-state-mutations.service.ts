@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as L from 'leaflet';
+import type * as L from 'leaflet';
 
 interface MarkerStateLike {
   marker: L.Marker;

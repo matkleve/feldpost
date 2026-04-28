@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { UiTabDirective, UiTabListDirective } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { UiTabDirective, UiTabListDirective } from '../../shared/ui-primitives/ui-primitives.directive';
 
 @Component({
   selector: 'app-group-tab-bar',

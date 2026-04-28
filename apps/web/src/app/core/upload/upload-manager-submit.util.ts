@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ProjectListItem } from '../projects/projects.types';
 import type { FileScanProgress, ScannedFileEntry } from '../folder-scan/folder-scan.service';
 import type { UploadLocationConfig } from './upload-location-config';

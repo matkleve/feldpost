@@ -1,10 +1,10 @@
-import {
+import type {
   GeocodingService,
   GeocoderSearchOptions,
   GeocoderSearchResult,
 } from '../geocoding/geocoding.service';
-import { SupabaseService } from '../supabase/supabase.service';
-import {
+import type { SupabaseService } from '../supabase/supabase.service';
+import type {
   SearchAddressCandidate,
   SearchContentCandidate,
   SearchQueryContext,

@@ -1,28 +1,29 @@
+import type { OnInit } from '@angular/core';
 import { Component, signal, computed, HostListener, inject } from '@angular/core';
 import {
   GroupingDropdownComponent,
   type GroupingProperty,
-} from '../../../../shared/dropdown-trigger/grouping-dropdown.component';
-import { FilterDropdownComponent } from '../../../../shared/dropdown-trigger/filter-dropdown.component';
-import { SortDropdownComponent } from '../../../../shared/dropdown-trigger/sort-dropdown.component';
+} from '../../../shared/dropdown-trigger/grouping-dropdown.component';
+import { FilterDropdownComponent } from '../../../shared/dropdown-trigger/filter-dropdown.component';
+import { SortDropdownComponent } from '../../../shared/dropdown-trigger/sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
-import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
-import { FilterService } from '../../../../core/filter/filter.service';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import { MetadataService } from '../../../../core/metadata/metadata.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
+import { FilterService } from '../../../core/filter/filter.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { MetadataService } from '../../../core/metadata/metadata.service';
 import type {
   MetadataFieldRef,
   SortConfig,
   ThumbnailSizePreset,
-} from '../../../../core/workspace-view/workspace-view.types';
-import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
-import { UiDropdownTriggerDirective } from '../../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
-import { CardVariantSwitchComponent } from '../../../../shared/ui-primitives/card-variant-switch.component';
-import { CardVariantSettingsService } from '../../../../shared/ui-primitives/card-variant-settings.service';
+} from '../../../core/workspace-view/workspace-view.types';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
+import { UiDropdownTriggerDirective } from '../../../shared/dropdown-trigger/ui-dropdown-trigger.directive';
+import { CardVariantSwitchComponent } from '../../../shared/ui-primitives/card-variant-switch.component';
+import { CardVariantSettingsService } from '../../../shared/ui-primitives/card-variant-settings.service';
 import {
   CARD_VARIANTS,
   type CardVariant,
-} from '../../../../shared/ui-primitives/card-variant.types';
+} from '../../../shared/ui-primitives/card-variant.types';
 
 export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null;
 
@@ -40,7 +41,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
     CardVariantSwitchComponent,
   ],
 })
-export class WorkspaceToolbarComponent {
+export class WorkspaceToolbarComponent implements OnInit {
   private readonly viewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);

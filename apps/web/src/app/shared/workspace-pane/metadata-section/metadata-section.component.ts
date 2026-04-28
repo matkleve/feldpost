@@ -1,7 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { MetadataPropertyRowComponent } from '../metadata-property-row.component';
-import { MetadataEntry } from '../media-detail-view.types';
-import { I18nService } from '../../../../core/i18n/i18n.service';
+import type { MetadataEntry } from '../media-detail-view.types';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-metadata-section',

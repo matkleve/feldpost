@@ -15,7 +15,7 @@ Exclusions:
 - Must not own route/page orchestration.
 - Must not embed feature-specific business orchestration in shared modules.
 
-**Layout:** `ui-primitives/` = low-level building blocks; `components/` = composed patterns (e.g. chips). **`shared/media`** = reusable media widgets; **`features/media`** = the `/media` route — same domain name, different layer.
+**Layout:** `ui-primitives/` = low-level building blocks; `components/` = composed patterns (e.g. chips). **`shared/media`** = reusable media widgets; **`shared/media-item/`** = `MediaItem` + overlays; **`shared/workspace-pane/`** = layout-mounted workspace pane UI (see `docs/specs/ui/workspace/workspace-pane.md`); **`features/media`** = the `/media` route — same domain name, different layer.
 
 **Toast:** `shared/toast/` hosts `ss-toast-container` / `ss-toast-item`; `core/toast/` owns `ToastService` and types.
 

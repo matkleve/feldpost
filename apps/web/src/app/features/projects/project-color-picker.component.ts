@@ -4,42 +4,8 @@ import type { ProjectColorKey } from '../../core/projects/projects.types';
 @Component({
   selector: 'app-project-color-picker',
   standalone: true,
-  template: `
-    <div class="project-color-picker option-menu-surface" role="menu" aria-label="Project color">
-      <div class="dd-items">
-        <button type="button" class="dd-item" (click)="pickRandomBrandHue()">
-          <span class="material-icons dd-item__icon" aria-hidden="true">palette</span>
-          <span class="dd-item__label">Random brand hue</span>
-          <span
-            class="dd-item__trailing project-color-picker__swatch"
-            [style.background]="previewColor()"
-          ></span>
-        </button>
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      .project-color-picker {
-        min-width: 14rem;
-      }
-
-      .project-color-picker .dd-items {
-        max-height: none;
-      }
-
-      .project-color-picker .dd-item {
-        width: 100%;
-      }
-
-      .project-color-picker__swatch {
-        inline-size: 1rem;
-        block-size: 1rem;
-        border-radius: 999px;
-        border: 1px solid var(--field-border);
-      }
-    `,
-  ],
+  templateUrl: './project-color-picker.component.html',
+  styleUrl: './project-color-picker.component.scss',
 })
 export class ProjectColorPickerComponent {
   readonly selectedColor = input.required<ProjectColorKey>();

@@ -1,4 +1,5 @@
-import { Injectable, WritableSignal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import type { ProjectSelectOption } from '../../../shared/project-select-dialog/project-select-dialog.component';
 
 interface ProjectDialogSignals {

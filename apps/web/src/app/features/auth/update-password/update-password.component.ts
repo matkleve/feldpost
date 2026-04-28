@@ -11,11 +11,12 @@
  */
 
 import { Component, inject, signal } from '@angular/core';
-import {
+import type {
   AbstractControl,
+  ValidationErrors} from '@angular/forms';
+import {
   FormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';

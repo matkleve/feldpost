@@ -44,14 +44,14 @@
 | [src/app/core/upload/upload-storage.service.ts](src/app/core/upload/upload-storage.service.ts) | none | 69 | no | no | - | P3 |
 | [src/app/core/upload/upload-attach-finalize.util.ts](src/app/core/upload/upload-attach-finalize.util.ts) | none | 68 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel-bulk-actions.service.ts](src/app/features/upload/upload-panel-bulk-actions.service.ts) | none | 67 | no | no | - | P3 |
-| [src/app/features/map/workspace-pane/media-detail-upload.helper.spec.ts](src/app/features/map/workspace-pane/media-detail-upload.helper.spec.ts) | none | 64 | no | no | - | P3 |
+| [src/app/shared/workspace-pane/media-detail-upload.helper.spec.ts](src/app/shared/workspace-pane/media-detail-upload.helper.spec.ts) | none | 64 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel.constants.ts](src/app/features/upload/upload-panel.constants.ts) | none | 59 | no | no | - | P3 |
 | [src/app/core/upload/upload-enrichment.service.ts](src/app/core/upload/upload-enrichment.service.ts) | none | 57 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel-row-interactions.service.ts](src/app/features/upload/upload-panel-row-interactions.service.ts) | none | 54 | no | no | - | P3 |
 | [src/app/core/upload/upload-conflict.service.ts](src/app/core/upload/upload-conflict.service.ts) | none | 53 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel-registration.service.ts](src/app/features/upload/upload-panel-registration.service.ts) | none | 53 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel-row-handlers.ts](src/app/features/upload/upload-panel-row-handlers.ts) | none | 53 | no | no | - | P3 |
-| [src/app/features/map/workspace-pane/media-detail-upload.helper.ts](src/app/features/map/workspace-pane/media-detail-upload.helper.ts) | none | 51 | no | no | - | P3 |
+| [src/app/shared/workspace-pane/media-detail-upload.helper.ts](src/app/shared/workspace-pane/media-detail-upload.helper.ts) | none | 51 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel.intake.spec.ts](src/app/features/upload/upload-panel.intake.spec.ts) | none | 49 | no | no | - | P3 |
 | [src/app/features/upload/upload-panel-state.service.ts](src/app/features/upload/upload-panel-state.service.ts) | none | 49 | no | no | - | P3 |
 | [src/app/core/upload/upload-enrichment.service.spec.ts](src/app/core/upload/upload-enrichment.service.spec.ts) | none | 47 | no | no | - | P3 |

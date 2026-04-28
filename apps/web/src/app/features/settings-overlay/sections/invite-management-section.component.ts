@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
+import type {
+  ElementRef,
+  OnDestroy,
+  OnInit} from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
   effect,
   inject,
   input,
@@ -15,7 +16,7 @@ import {
 import { toCanvas } from 'qrcode';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { InviteService } from '../../../core/invites/invite.service';
-import {
+import type {
   InviteOpenContext,
   InvitePanelMode,
   InviteTargetRole,

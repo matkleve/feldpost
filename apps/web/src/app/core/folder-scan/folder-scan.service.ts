@@ -11,7 +11,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { Subject } from 'rxjs';
 
 export interface FileScanProgress {
   fileCount: number;
@@ -111,7 +112,7 @@ export class FolderScanService {
     entries: ScannedFileEntry[],
     pathSegments: readonly string[],
   ): Promise<void> {
-    for await (const entry of (dirHandle as any).values()) {
+    for await (const entry of dirHandle.values()) {
       if (entry.kind === 'file') {
         const fileHandle = entry as FileSystemFileHandle;
         const file = await fileHandle.getFile();

@@ -23,15 +23,23 @@
         (detailClosed)="closeDetailView()"
         (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
         (detailRequested)="openDetailView($event)"
-        (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
         (zoomToLocationRequested)="onZoomToLocationRequested($event)"
-        (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
-        (uploadLocationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
-        (uploadLocationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
         (uploadLocationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
         (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
         (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
-      />
+      >
+        <app-upload-panel
+          data-workspace-upload-tab
+          [visible]="true"
+          [embeddedInPane]="true"
+          (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
+          (zoomToLocationRequested)="onZoomToLocationRequested($event)"
+          (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
+          (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
+          (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
+          (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+        />
+      </app-workspace-pane>
     </app-workspace-pane-shell>
   }
 </div>

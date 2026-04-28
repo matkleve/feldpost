@@ -192,6 +192,22 @@
     "status": "active"
   },
   {
+    "module_slug": "shared/workspace-pane",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/ui/workspace/workspace-pane.md",
+    "code_path": "apps/web/src/app/shared/workspace-pane",
+    "status": "active"
+  },
+  {
+    "module_slug": "shared/media-item",
+    "module_type": "ui-bound-module",
+    "owner": "shared",
+    "spec_path": "docs/specs/component/media/media-item.md",
+    "code_path": "apps/web/src/app/shared/media-item",
+    "status": "active"
+  },
+  {
     "module_slug": "shared/photo-lightbox",
     "module_type": "ui-bound-module",
     "owner": "shared",
@@ -221,6 +237,14 @@
     "owner": "features",
     "spec_path": "docs/specs/system/action-engine-system.md",
     "code_path": "apps/web/src/app/features/action-system",
+    "status": "deprecated"
+  },
+  {
+    "module_slug": "core/action",
+    "module_type": "thin-module",
+    "owner": "core",
+    "spec_path": "docs/specs/system/action-engine-system.md",
+    "code_path": "apps/web/src/app/core/action",
     "status": "active"
   },
   {

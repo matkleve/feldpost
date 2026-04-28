@@ -1,0 +1,6 @@
+:host {
+  display: flex;
+  flex-direction: row;
+  gap: var(--stack-spacing);
+  align-items: var(--stack-align);
+}

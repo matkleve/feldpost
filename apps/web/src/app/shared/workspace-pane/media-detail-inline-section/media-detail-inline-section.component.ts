@@ -9,13 +9,14 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { CapturedDateEditorComponent, DateSaveEvent } from '../captured-date-editor.component';
+import type { DateSaveEvent } from '../captured-date-editor.component';
+import { CapturedDateEditorComponent } from '../captured-date-editor.component';
 import { AddressSearchComponent } from '../address-search/address-search.component';
-import { ForwardGeocodeResult } from '../../../../core/geocoding/geocoding.service';
-import { I18nService } from '../../../../core/i18n/i18n.service';
+import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { formatCoordinate } from '../media-detail-view.utils';
-import { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
-import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/dropdown-shell.component';
+import type { DetailEditingField, ImageRecord, SelectOption } from '../media-detail-view.types';
+import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
 import {
   UiIconButtonGhostDirective,
   UiInputControlDirective,
@@ -24,7 +25,7 @@ import {
   UiStatusBadgeDirective,
   UiStatusBadgeInfoDirective,
   UiStatusBadgeSizeSmDirective,
-} from '../../../../shared/ui-primitives/ui-primitives.directive';
+} from '../../../shared/ui-primitives/ui-primitives.directive';
 
 interface AddressFieldDefinition {
   name: 'street' | 'city' | 'district' | 'country';

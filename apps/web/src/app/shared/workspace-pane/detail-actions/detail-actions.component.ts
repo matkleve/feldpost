@@ -1,6 +1,6 @@
 import { Component, inject, input, output } from '@angular/core';
-import { I18nService } from '../../../../core/i18n/i18n.service';
-import type { ResolvedAction } from '../../../action-system/action-types';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import type { ResolvedAction } from '../../../core/action/action-types';
 import type { WorkspaceSingleActionId } from '../workspace-detail-actions.types';
 
 @Component({

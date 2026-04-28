@@ -1,5 +1,5 @@
-import { ChipDef } from '../../../shared/quick-info-chips/quick-info-chips.component';
-import { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
+import type { ChipDef } from '../../shared/quick-info-chips/quick-info-chips.component';
+import type { ImageRecord, MetadataEntry, SelectOption } from './media-detail-view.types';
 
 export type DetailTranslateFn = (key: string, fallback: string) => string;
 

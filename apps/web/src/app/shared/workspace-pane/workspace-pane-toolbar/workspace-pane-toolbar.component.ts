@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { PaneToolbarComponent } from '../../../../shared/pane-toolbar/pane-toolbar.component';
+import { PaneToolbarComponent } from '../../../shared/pane-toolbar/pane-toolbar.component';
 import { WorkspaceToolbarComponent } from '../workspace-toolbar/workspace-toolbar.component';
 
 @Component({

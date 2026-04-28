@@ -5,14 +5,14 @@ import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import type {
   ItemContextActionEvent,
   ItemDisplayMode,
-} from '../../shared/item-grid/item.component';
-import type { ImageRecord } from '../map/workspace-pane/media-detail-view.types';
-import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
+} from '../item-grid/item.component';
+import type { ImageRecord } from '../../core/media-query/media-query.types';
+import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 import { MediaItemQuietActionsComponent } from './media-item-quiet-actions.component';
 import type { MediaItemQuietActionsState } from './media-item-quiet-actions.component';
 import { MediaItemUploadOverlayComponent } from './media-item-upload-overlay.component';
 import { resolveMediaItemUploadOverlay } from './media-item-upload.utils';
-import { MediaDisplayComponent } from '../../shared/media-display/media-display.component';
+import { MediaDisplayComponent } from '../media-display/media-display.component';
 
 export const MEDIA_ITEM_ACTION_CONTEXT = ACTION_CONTEXT_IDS.wsGridThumbnail;
 
