@@ -4,9 +4,9 @@ Index for adapter-level contracts within media-download-service.
 
 ## Files
 
-- edge-export-orchestrator.adapter.md
-- signed-url-cache.adapter.md
 - tier-resolver.adapter.md
+- signed-url-cache.adapter.md (runtime also uses `supabase-storage.adapter.ts` — see parent **File Map**)
+- edge-export-orchestrator.adapter.md
 
 Folder-specific rules:
 

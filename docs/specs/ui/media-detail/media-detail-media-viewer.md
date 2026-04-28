@@ -1,8 +1,8 @@
 # Media Detail — Media Viewer
 
 > **Parent spec:** [media-detail-view](media-detail-view.md)
-> **Architecture parent:** [media-download-service](../media-download/media-download-service.md)
-> **Media loading service (runtime class):** `apps/web/src/app/core/media-download/media-download.service.ts` (`MediaDownloadService`; signing/cache via `SignedUrlCacheAdapter`)
+> **Architecture parent:** [media-download-service](../../service/media-download-service/media-download-service.md)
+> **Media loading service (runtime class):** `apps/web/src/app/core/media-download/media-download.service.ts` (`MediaDownloadService`; signing/cache via `SignedUrlCacheAdapter` → `SupabaseStorageAdapter`)
 > **Media loading use cases:** [use-cases/media-loading.md](../../../use-cases/media-loading.md)
 > **Media editing use cases:** [use-cases/image-editing.md](../../../use-cases/image-editing.md) (IE-10)
 
@@ -12,7 +12,9 @@
 | --- | --- |
 | `hasPhoto`, `imageReady`, `isImageLoading` | **Viewer inputs** — legacy names; prose: **media** present / ready / loading. |
 | `imageReplaced$`, `imageAttached$` | **`UploadManagerService`** streams — ids refer to **media items**; see [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md). |
-| `mediaDownload` | Injected **`MediaDownloadService`** (parent/detail wiring); facade delegates to signed-url cache. |
+| `mediaDownload` | Injected **`MediaDownloadService`** (parent/detail wiring); facade delegates signing/cache to **`SignedUrlCacheAdapter`** (via **`SupabaseStorageAdapter`**). |
+| `MediaLoadState`, `'no-media'`, `'loaded'`, … | Per-tier load signals from **`getLoadState`** (`media-download.types.ts`); canonical **no storage path** value is **`'no-media'`** (not legacy `'no-photo'`). |
+| `MEDIA_PLACEHOLDER_ICON`, `MEDIA_NO_MEDIA_ICON` | Canonical placeholder / broken-media glyphs exported from **`MediaDownloadService`** module. |
 
 ## What It Is Handles progressive media loading (placeholder → thumbnail/preview → full-res), lightbox enlargement, and media replacement/upload for records without a media file. For document-like media and sufficiently large viewer slots, it can render generated first-page thumbnails through the same progressive pipeline before deterministic fallback. Delegates all signed-URL generation and load-state tracking to `MediaDownloadService`; delegates file uploads to `UploadManagerService`.
 It uses the same `MediaDownloadService` cache namespace as map markers and `/media` tiles, so previously loaded media can be shown immediately without surface-local reload logic.
@@ -204,7 +206,7 @@ sequenceDiagram
 - [x] Component reads `mediaDownload.getLoadState(mediaId, 'thumb')` and `mediaDownload.getLoadState(mediaId, 'full')` signals — no local `thumbLoaded` / `fullResLoaded` booleans
 - [ ] Cache namespace is shared with map markers and `/media` items so the same media identity resolves to the same cached URL set across surfaces.
 - [ ] For document-like media with `document_preview_path`, signed URL generation and load-state resolution use the same `MediaDownloadService` flow (tier, cache, staleness, re-signing).
-- [x] When `storage_path IS NULL`: `mediaDownload.getLoadState()` returns `'no-photo'` → upload prompt shown immediately, no signed URL requests
+- [x] When `storage_path IS NULL`: `mediaDownload.getLoadState()` returns `'no-media'` → upload prompt shown immediately, no signed URL requests
 - [x] Loading/idle placeholder supports neutral media surface baseline; optional `MEDIA_PLACEHOLDER_ICON` usage is allowed for consistency where needed
 - [x] Uses `MEDIA_NO_MEDIA_ICON` from `MediaDownloadService` for error/no-media state (crossed-out image, 0.55 opacity)
 - [ ] Placeholder visuals are identical across media detail viewer, thumbnail cards, and map markers

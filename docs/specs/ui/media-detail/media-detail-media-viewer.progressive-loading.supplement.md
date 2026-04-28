@@ -4,11 +4,11 @@
 
 ## Progressive Media Loading
 
-Three-tier strategy to show content as fast as possible, fully delegated to `MediaDownloadService`. **Only invoked when `storage_path` exists.** When `storage_path IS NULL`, `mediaDownload.getLoadState()` returns `'no-photo'` immediately and the component shows the upload prompt (see [No-Media Fast Path](#no-media-fast-path) above).
+Three-tier strategy to show content as fast as possible, fully delegated to `MediaDownloadService`. **Only invoked when `storage_path` exists.** When `storage_path IS NULL`, `mediaDownload.getLoadState()` returns `'no-media'` immediately and the component shows the upload prompt (see [No-Media Fast Path](#no-media-fast-path) in the parent spec).
 
 Adaptive tier policy: the component measures the active viewer slot, converts dimensions to `rem`, and forwards them to `MediaOrchestratorService.selectRequestedTierForSlot(...)` to derive the requested tier for this render cycle. Service logic remains UI-agnostic and must not access DOM directly.
 
-1. **Check** → `mediaDownload.getLoadState(mediaId, 'thumb')` returns `'no-photo'` → skip to upload prompt
+1. **Check** → `mediaDownload.getLoadState(mediaId, 'thumb')` returns `'no-media'` → skip to upload prompt
 2. **Warm cache lookup** → `MediaDownloadService` shared tier cache / `resolvePreview` (exact API per [media-download-service](../../service/media-download-service/media-download-service.md)); if a URL is already resolved for the requested tier, render immediately as warm preview
 3. **View opens with media and no cache hit** → neutral CSS placeholder shown (no network)
 4. **Tier 2** → `mediaDownload.getSignedUrl(thumbPath, 'thumb')` → service returns cached or freshly signed URL
@@ -24,7 +24,7 @@ stateDiagram-v2
 
     state hasMedia <<choice>>
     CheckMedia --> hasMedia
-    hasMedia --> UploadPrompt : mediaDownload.getLoadState() = 'no-photo'
+    hasMedia --> UploadPrompt : mediaDownload.getLoadState() = 'no-media'
     hasMedia --> Placeholder : storage_path exists
 
     state UploadPrompt {
@@ -138,7 +138,7 @@ sequenceDiagram
 When `imageAttached$` fires:
 
 1. `UploadManagerService` calls `mediaDownload.setLocalUrl(mediaId, blobUrl)` → blob URL injected at all sizes, `loadState` → `'loaded'`
-2. Component detects state transition from `'no-photo'` → `'loaded'` → switches from upload prompt to media display
+2. Component detects state transition from `'no-media'` → `'loaded'` → switches from upload prompt to media display
 3. All surfaces see the new media instantly via the service's shared cache
 4. On next access, service re-signs from new `storagePath` and calls `revokeLocalUrl()` to free memory
 
@@ -151,7 +151,7 @@ sequenceDiagram
     participant MDS as MediaDownloadService
     participant Storage as Supabase Storage
 
-    Note over Viewer: mediaDownload.getLoadState(id, 'thumb') = 'no-photo' → showing UploadPrompt
+    Note over Viewer: mediaDownload.getLoadState(id, 'thumb') = 'no-media' → showing UploadPrompt
     User->>Viewer: Click upload button on placeholder
     Viewer->>Upload: validateFile(file)
     Viewer->>Manager: attachFile(mediaId, file)
@@ -160,7 +160,7 @@ sequenceDiagram
         Manager->>MDS: setLocalUrl(mediaId, blobUrl)
         MDS->>MDS: Cache blobUrl for all sizes, loadState → 'loaded'
         Manager-->>Viewer: imageAttached$ {mediaId, newStoragePath}
-        Note over Viewer: loadState signal transitions 'no-photo' → 'loaded'
+        Note over Viewer: loadState signal transitions 'no-media' → 'loaded'
         Note over Viewer: Upload placeholder vanishes, real media preview appears (~0ms)
         Note over MDS: Next getSignedUrl() call:
         MDS->>MDS: revokeLocalUrl(mediaId)

@@ -15,7 +15,7 @@ Headless adapter with route-stable cache behavior. It supports warm preview reus
 
 - Spec: `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`
-- Runtime: `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` (logic originated in pre-facade signed-url work; **no** separate `photo-load.service.ts` in tree)
+- Runtime: `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` (injects `SupabaseStorageAdapter` for Storage signing; no legacy parallel signing service in tree)
 
 ## Actions & Interactions
 
@@ -32,8 +32,9 @@ Headless adapter with route-stable cache behavior. It supports warm preview reus
 
 ```text
 SignedUrlCacheAdapter
+├── SupabaseStorageAdapter (createSignedUrl + bucket fallback)
 ├── CacheStore (mediaId:tier entries)
-├── Signer (bucket fallback media -> images)
+├── Signer coordination (delegates to SupabaseStorageAdapter)
 ├── StateEmitter (signals + events)
 ├── LocalBlobBridge (inject/revoke)
 └── StalenessPolicy
@@ -72,13 +73,13 @@ flowchart TD
 | File                                                                        | Purpose                           |
 | --------------------------------------------------------------------------- | --------------------------------- |
 | `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`    | Signed URL/cache adapter contract |
-| `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` | New adapter file                  |
-| `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` | Adapter implementation (replaces legacy monolithic photo-load module) |
+| `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` | Adapter implementation            |
+| `apps/web/src/app/core/media-download/adapters/supabase-storage.adapter.ts`   | Storage client signing + bucket fallback (`media` → `images`) |
 
 ## Wiring
 
 - Adapter is called by facade only.
-- Consumers call **`MediaDownloadService`** only; the facade delegates signing/cache to this adapter (no `PhotoLoadService` bridge).
+- Consumers call **`MediaDownloadService`** only; the facade delegates signing/cache to this adapter (single signing pipeline).
 - Error mapping sets `isRetryable` to drive terminal/transient transitions.
 
 ## Acceptance Criteria
