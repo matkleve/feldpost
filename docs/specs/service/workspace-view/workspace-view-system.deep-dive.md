@@ -4,7 +4,7 @@
 
 > **Spec type:** Same as parent — system architecture / orchestration reference.
 
-> **Diagram symbols:** In code, `photoPanelOpen` means the **Workspace Pane** is open. Prose and UX copy use **Workspace Pane**; the signal name is unchanged in `MapShellComponent`.
+> **Diagram symbols:** In code, `photoPanelOpen` means the **Workspace Pane** is open. Prose and UX copy use **Workspace Pane**. **Interim:** the signal lives on `MapShellComponent` for routes that mount the pane there today. **Target:** same visibility flag on the **authenticated app layout** host after hoist — see [workspace-pane § Layout host](../../ui/workspace/workspace-pane.md#layout-host-canonical) and [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md).
 
 ## 1. System Architecture
 

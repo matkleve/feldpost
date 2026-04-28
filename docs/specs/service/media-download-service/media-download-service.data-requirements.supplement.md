@@ -36,26 +36,26 @@ flowchart TD
 sequenceDiagram
   participant UI as Consumer UI
   participant DS as MediaDownloadService
-  participant OR as MediaOrchestratorService
-  participant PL as PhotoLoadService
+  participant TR as TierResolverAdapter
+  participant Cache as SignedUrlCacheAdapter
   participant EF as Edge Function media-export-zip
   participant ST as Supabase Storage
 
   UI->>DS: resolvePreview(request)
-  DS->>OR: selectRequestedTierForSlot(request)
-  OR-->>DS: effectiveTier
+  DS->>TR: selectRequestedTierForSlot(request)
+  TR-->>DS: effectiveTier
   DS-->>UI: state loading-surface-visible
-  DS->>PL: getSignedUrl(path, effectiveTier)
-  PL->>ST: createSignedUrl(...)
-  ST-->>PL: signedUrl or error
+  DS->>Cache: getSignedUrl(path, effectiveTier)
+  Cache->>ST: createSignedUrl(...)
+  ST-->>Cache: signedUrl or error
   alt signed URL success and contain path
-    PL-->>DS: signed result + ratio metadata
+    Cache-->>DS: signed result + ratio metadata
     DS-->>UI: ratio-known-contain
     DS-->>UI: media-ready
     UI->>UI: content-fade-in
     UI->>UI: content-visible
   else signed URL success and cover path
-    PL-->>DS: signed result
+    Cache-->>DS: signed result
     DS-->>UI: media-ready
     UI->>UI: content-fade-in
     UI->>UI: content-visible

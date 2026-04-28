@@ -10,8 +10,8 @@ A thin vertical bar (2px visual width, `--color-border` at rest) occupying the f
 
 ## Where It Lives
 
-- **Parent**: `MapShellComponent` template, between Map Zone and Workspace Pane
-- **Appears when**: `workspacePaneOpen` is `true` (desktop only, hidden at `< 768px`)
+- **Parent (canonical):** **Authenticated app layout** (split host) — renders the divider between the **main column** (e.g. Map Zone on map routes) and **Workspace Pane**. **Interim:** parent may be `MapShellComponent` between Map Zone and pane until layout hoist; see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical).
+- **Appears when**: `photoPanelOpen()` is `true` (desktop only, hidden at `< 768px`) — product: Workspace Pane open. **Target:** same visibility flag on layout host after hoist ([symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md)).
 - **Component**: `DragDividerComponent` at `features/map/workspace-pane/drag-divider/`
 
 ## Actions
@@ -108,9 +108,9 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Imported in `MapShellComponent`, rendered between Map Zone and Workspace Pane when `workspacePaneOpen` is `true`
-- `MapShellComponent` passes `currentWidth`, `minWidth`, `maxWidth`, `defaultWidth` as inputs
-- `MapShellComponent` listens to `widthChange` output and applies the new width to the Workspace Pane flex-basis
+- Imported by the **layout host** (canonical), between main content and Workspace Pane when **`photoPanelOpen()`** is true. **Interim:** `MapShellComponent` performs this wiring on map/settings routes.
+- Parent passes `currentWidth`, `minWidth`, `maxWidth`, `defaultWidth` as inputs
+- Parent listens to `widthChange` output and applies the new width to the Workspace Pane flex-basis
 - Hidden at `< 768px` — mobile layout uses bottom sheet snap points instead
 - During drag, the component adds `user-select: none` to `document.body` and sets `cursor: col-resize` on the root element to prevent text selection and cursor flicker
 - On `pointerup` or `pointercancel` (even outside the component), drag ends and cleanup runs

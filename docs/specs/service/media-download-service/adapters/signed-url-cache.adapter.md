@@ -15,7 +15,7 @@ Headless adapter with route-stable cache behavior. It supports warm preview reus
 
 - Spec: `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`
-- Initial implementation source: `apps/web/src/app/core/photo-load.service.ts`
+- Runtime: `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` (logic originated in pre-facade signed-url work; **no** separate `photo-load.service.ts` in tree)
 
 ## Actions & Interactions
 
@@ -73,13 +73,12 @@ flowchart TD
 | --------------------------------------------------------------------------- | --------------------------------- |
 | `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`    | Signed URL/cache adapter contract |
 | `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` | New adapter file                  |
-| `apps/web/src/app/core/photo-load.service.ts`                               | Source logic to migrate           |
-| `apps/web/src/app/core/photo-load.model.ts`                                 | Source types to migrate/alias     |
+| `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` | Adapter implementation (replaces legacy monolithic photo-load module) |
 
 ## Wiring
 
 - Adapter is called by facade only.
-- Existing consumers are rerouted through facade while `PhotoLoadService` remains compatibility bridge.
+- Consumers call **`MediaDownloadService`** only; the facade delegates signing/cache to this adapter (no `PhotoLoadService` bridge).
 - Error mapping sets `isRetryable` to drive terminal/transient transitions.
 
 ## Acceptance Criteria

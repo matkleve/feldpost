@@ -3,6 +3,10 @@
 > Related specs: [item-grid](../../component/item-grid.md), [media-item](../../component/media-item.md), [media-detail-media-viewer](../../ui/media-detail/media-detail-media-viewer.md), [workspace-actions-bar](../../ui/workspace/workspace-actions-bar.md), [upload-manager](../media-upload-service/upload-manager.md), [action-context-matrix](../../system/action-context-matrix.md)
 > Adapter sub-specs: [tier-resolver.adapter](adapters/tier-resolver.adapter.md), [signed-url-cache.adapter](adapters/signed-url-cache.adapter.md), [edge-export-orchestrator.adapter](adapters/edge-export-orchestrator.adapter.md)
 
+## Terminology (symbols)
+
+Upload pipeline streams such as **`imageReplaced$`** use **image** in the TypeScript symbol only; payloads refer to **media items**. See [symbol rename backlog](../../../../backlog/media-photo-symbol-rename-roadmap.md).
+
 ## What It Is
 
 Media Download Service is the unified facade contract for all media retrieval concerns: signed URL loading, high/low-resolution tier selection, cache reuse, preloading, binary download, edge-orchestrated ZIP export, and canonical error signaling.
@@ -20,9 +24,9 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 
 - Contract doc: `docs/specs/service/media-download-service/media-download-service.md`
 - Runtime ownership target (service facade + adapters):
-  - `apps/web/src/app/core/media-download/media-download.service.ts` (target facade)
-  - `apps/web/src/app/core/photo-load.service.ts` (existing signed-url/cache backend)
-  - `supabase/functions/media-export-zip/index.ts` (target edge export orchestrator)
+  - `apps/web/src/app/core/media-download/media-download.service.ts` (facade)
+  - `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts` (signing + cache)
+  - `supabase/functions/media-export-zip/index.ts` (edge export orchestrator)
 - Adapter spec split:
   - `docs/specs/service/media-download-service/adapters/tier-resolver.adapter.md`
   - `docs/specs/service/media-download-service/adapters/signed-url-cache.adapter.md`
@@ -59,8 +63,8 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 
 | Current file                                                                                            | Concern                               | Target destination or integration path           |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------ |
-| `apps/web/src/app/core/photo-load.service.ts`                                                           | Signed URL, cache, load states        | Signed URL Cache adapter behind facade           |
-| `apps/web/src/app/core/media/media-orchestrator.service.ts`                                             | Former tier and fallback policy       | Tier Resolver adapter behind facade              |
+| `apps/web/src/app/core/photo-load.service.ts` (removed)                                               | Signed URL, cache, load states        | **Done:** `SignedUrlCacheAdapter` + `MediaDownloadService`                          |
+| `apps/web/src/app/core/media/media-orchestrator.service.ts` (removed)                                 | Former tier and fallback policy       | **Done:** `TierResolverAdapter` + `MediaDownloadService`                             |
 | `apps/web/src/app/core/zip-export/zip-export.service.ts`                                                | Former client ZIP orchestration       | Edge Export Orchestrator adapter + edge function |
 | `apps/web/src/app/core/zip-export/zip-export.helpers.ts`                                                | Former ZIP helper ownership           | Media-download helper ownership                  |
 | `apps/web/src/app/core/upload/upload.service.ts`                                                        | Direct download/sign helpers          | Facade delegation and API consolidation          |
@@ -108,11 +112,10 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 ```text
 MediaDownloadServiceContract
 ├── MediaDownloadService (pure facade only)
-│   ├── TierResolver adapter (existing MediaOrchestratorService; static path + dynamic transformation URL strategy)
-│   ├── SignedUrlCache adapter (existing PhotoLoadService)
-│   ├── BinaryDownload adapter (storage fetch/download)
-│   ├── EdgeExportOrchestrator adapter (edge function POST + stream)
-│   └── StateStore (per-media identity + tier)
+│   ├── TierResolverAdapter (`apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`)
+│   ├── SignedUrlCacheAdapter (`apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`)
+│   ├── EdgeExportOrchestratorAdapter (`apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts`)
+│   └── StateStore (per-media identity + tier; facade-internal)
 ├── Consumer surfaces
 │   ├── Map marker preview flow
 │   ├── Workspace selected-items grid
@@ -218,17 +221,20 @@ stateDiagram-v2
 | File                                                                                                    | Purpose                                                                             |
 | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `docs/specs/service/media-download-service/media-download-service.md`                                   | Canonical unified contract for media loading/download/export/caching/error handling |
-| `apps/web/src/app/core/photo-load.service.ts`                                                           | Existing signed URL and cache backend to be adapted behind unified facade           |
-| `supabase/functions/media-export-zip/index.ts`                                                          | Target edge orchestrator for ZIP assembly and streaming                             |
-| `apps/web/src/app/core/upload/upload.service.ts`                                                        | Existing direct download method to be re-routed through unified service contract    |
-| `apps/web/src/app/core/workspace-view.service.ts`                                                       | Existing batch thumbnail signing consumer                                           |
-| `apps/web/src/app/features/map/map-shell/map-shell.component.ts`                                        | Existing marker signing and preload consumer                                        |
-| `apps/web/src/app/features/media/media-item.component.ts`                                               | Existing `/media` preview consumer                                                  |
-| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`                           | Existing detail preview consumer                                                    |
-| `apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts`                              | Existing ZIP export trigger consumer                                                |
-| `apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts` | Existing ZIP export dialog and trigger consumer                                     |
-| `apps/web/src/app/core/photo-load.model.ts`                                                             | Existing state and event types to evolve toward unified item state vocabulary       |
-| `apps/web/src/app/core/media-download/media-download.service.spec.ts`                                   | Target unified contract tests (new)                                                 |
+| `apps/web/src/app/core/media-download/media-download.service.ts`                                       | Facade: preview, signing, cache, export, `setLocalUrl` / `revokeLocalUrl`          |
+| `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`                            | Signed URL + load-state cache implementation                                       |
+| `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`                              | Tier / transform policy                                                            |
+| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts`                    | Client edge ZIP stream orchestration                                              |
+| `supabase/functions/media-export-zip/index.ts`                                                          | Edge ZIP assembly and streaming                                                    |
+| `apps/web/src/app/core/upload/upload.service.ts`                                                        | Upload surface helpers (download migration per ledger)                              |
+| `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                      | Batch preview signing consumer                                                      |
+| `apps/web/src/app/features/map/map-shell/map-shell.component.ts`                                        | Marker signing, preload, staleness consumer                                         |
+| `apps/web/src/app/features/media/media-item.component.ts`                                               | `/media` preview consumer                                                           |
+| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts`                           | Detail preview consumer                                                           |
+| `apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts`                              | ZIP export trigger consumer                                                         |
+| `apps/web/src/app/features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts` | ZIP export dialog and trigger consumer                                              |
+| `apps/web/src/app/core/media-download/media-download.types.ts`                                         | Shared `MediaLoadState`, delivery, and export types                                 |
+| `apps/web/src/app/core/media-download/media-download.service.spec.ts`                                   | Facade + adapter contract tests                                                     |
 
 ## Phase 3 - Migration Ledger
 
@@ -237,8 +243,8 @@ stateDiagram-v2
 | Current File Name                                                                                       | Target File Name / Target Location                                                                                                                     | Migration Status | Breaking Changes                                                                                                        |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `(new)` `apps/web/src/app/core/media-download/media-download.service.ts`                                | `apps/web/src/app/core/media-download/media-download.service.ts` (facade bridge phase)                                                                 | Done             | New facade exists and bridges to legacy services; consumer imports remain unchanged in this phase                       |
-| `apps/web/src/app/core/photo-load.service.ts`                                                           | `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`                                                                            | RETIRED          | `PhotoLoadService` remains as thin deprecated compatibility wrapper; runtime ownership moved to media-download adapters |
-| `apps/web/src/app/core/photo-load.model.ts`                                                             | `apps/web/src/app/core/media-download/media-download.types.ts` (shared module contracts)                                                               | In Progress      | `MediaDelivery*` facade types introduced; alias extraction into module types still pending                              |
+| `apps/web/src/app/core/photo-load.service.ts`                                                           | `apps/web/src/app/core/media-download/adapters/signed-url-cache.adapter.ts`                                                                            | RETIRED          | File removed; signing/cache lives in adapter behind `MediaDownloadService` only                                         |
+| `apps/web/src/app/core/photo-load.model.ts`                                                             | `apps/web/src/app/core/media-download/media-download.types.ts` (shared module contracts)                                                               | Done             | Types consolidated into media-download module                                                                           |
 | `apps/web/src/app/core/media/media-orchestrator.service.ts`                                             | `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`                                                                               | RETIRED          | Deprecated compatibility wrapper removed after all runtime consumers were migrated                                      |
 | `apps/web/src/app/core/media/media-renderer.types.ts`                                                   | `apps/web/src/app/core/media-download/media-download.types.ts` (shared module contracts)                                                               | Pending          | `MediaTier` ownership shifts; exports kept via barrel during transition                                                 |
 | `apps/web/src/app/core/zip-export/zip-export.service.ts`                                                | `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` (client) + `supabase/functions/media-export-zip/index.ts` (server) | RETIRED          | Deprecated compatibility wrapper removed after all runtime consumers were migrated                                      |
@@ -269,23 +275,15 @@ MediaDownloadService is a pure facade. It must contain orchestration and contrac
 
 ## Phase 4 - Practical Refactoring Instructions
 
-## Refactoring Instructions
+## Refactoring Instructions (historical)
 
-1. Create facade and adapter files first while keeping existing services intact.
-2. Introduce compatibility wrappers:
+Legacy `PhotoLoadService` / `MediaOrchestratorService` / `ZipExportService` migration is **complete** in runtime: consumers use **`MediaDownloadService`** and adapters only. Remaining work: optional cleanup of upload download pass-throughs (see ledger **Pending** rows).
 
-- `PhotoLoadService` delegates internally to signed-url-cache adapter.
-- `MediaOrchestratorService` delegates to tier-resolver adapter.
-- `ZipExportService` delegates to edge-export-orchestrator adapter where available.
-
-3. Re-route consumers incrementally by feature slice (map -> media grid -> detail -> export UI -> upload file actions).
-4. After each slice, run `get_errors()` and `ng build` before continuing.
-5. Only when all call sites use facade APIs, mark legacy service classes as deprecated in code and remove direct imports.
-6. Final cleanup:
-
-- remove dead helper methods,
-- collapse compatibility aliases,
-- update tests to target facade + adapter boundaries.
+1. ~~Create facade and adapter files~~ **Done.**
+2. ~~Introduce compatibility wrappers~~ **Removed** — no separate `PhotoLoadService` wrapper in tree.
+3. Re-route any remaining non-facade callers (see Implementation Tracking **Pending**).
+4. After each slice, run `ng build` and tests.
+5. Final cleanup: remove dead helpers; update tests to facade + adapter boundaries.
 
 ## Acceptance Criteria
 

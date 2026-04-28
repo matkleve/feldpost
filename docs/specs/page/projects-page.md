@@ -119,7 +119,7 @@ ProjectsPage                                ← route root, full width
 │           ├── [status=active] ArchiveButton  ← moves project to Archived after confirmation
 │           ├── [status=archived] RestoreButton ← removes project from Archived after confirmation
 │           └── [status=archived] DeleteButton ← permanently deletes archived project after confirmation
-├── [projectSelected] WorkspacePaneComponent    ← in-page details surface, no route change
+├── [projectSelected] WorkspacePaneComponent    ← project-scoped media + detail; **canonical:** same component as global pane under [layout host](../ui/workspace/workspace-pane.md#layout-host-canonical); **interim:** may be in-page only until hoist
 │   ├── ProjectScopedMediaGrid                  ← selected project media
 │   └── MediaDetailView                          ← includes MapButton to `/map`
 │   └── WorkspacePaneTitleBinding                ← shows selected project name
@@ -179,6 +179,8 @@ Media-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 
 ## State
 
+**Workspace visibility:** **`workspacePaneOpen`** in this table is **projects-page UI state** (“project details / scoped workspace surface visible”). It is **not** required to be the same field as map-route **`photoPanelOpen`** (see [workspace-pane § Terminology](../ui/workspace/workspace-pane.md#terminology-symbols-and-product-language)). **Canonical:** global pane open/width owned by **authenticated app layout**; projects page participates via **`WorkspacePaneObserverAdapter`** and/or shared pane host.
+
 | Name                          | Type                                         | Default                  | Controls                                                      |
 | ----------------------------- | -------------------------------------------- | ------------------------ | ------------------------------------------------------------- |
 | `projects`                    | `ProjectListItem[]`                          | `[]`                     | Rendered project rows/cards                                   |
@@ -186,8 +188,8 @@ Media-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 | `statusFilter`                | `'all' \| 'active' \| 'archived'`            | `'all'`                  | Status scoping                                                |
 | `viewMode`                    | `'list' \| 'cards'`                          | stored value or `'list'` | Active layout mode                                            |
 | `sortMode`                    | `'name' \| 'updated' \| 'image-count'`       | `'updated'`              | Fallback/base project ordering                                |
-| `selectedProjectId`           | `string \| null`                             | `null`                   | Active project opened in workspace pane                       |
-| `workspacePaneOpen`           | `boolean`                                    | `false`                  | In-page workspace visibility                                  |
+| `selectedProjectId`           | `string \| null`                             | `null`                   | Active project opened in project-scoped workspace surface — see [workspace-pane](../ui/workspace/workspace-pane.md), [project-details-view](../component/project-details-view.md) |
+| `workspacePaneOpen`           | `boolean`                                    | `false`                  | **Projects route:** visibility of project-scoped workspace UI (naming TBD if collides with layout-host signal) |
 | `editingProjectId`            | `string \| null`                             | `null`                   | Inline rename row                                             |
 | `workspaceTitleEditProjectId` | `string \| null`                             | `null`                   | Enables workspace header title input for the selected project |
 | `workspaceTitleEditValue`     | `string`                                     | `''`                     | Live value for workspace header title input                   |

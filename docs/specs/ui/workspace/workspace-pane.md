@@ -1,12 +1,30 @@
 # Workspace Pane
 
+## Layout host (canonical)
+
+The **Workspace Pane** is hosted by a **layout-level shell** that owns the horizontal **split** between main route content and the pane (including drag-divider width and pane open/close). **Canonical contract:** a single **authenticated app layout** (placeholder name: `AuthenticatedAppLayoutComponent` — exact Angular selector TBD) wraps `router-outlet` **and** mounts **`WorkspacePaneShell` / `WorkspacePaneComponent`** so the **same** pane implementation appears on **`/`**, **`/map`**, **`/media`**, **`/projects`**, and **`/settings/**`** (or an explicitly listed subset), with consistent resize and tab behavior.
+
+**See:** [workspace-pane layout backlog](../../../backlog/workspace-pane-layout-and-spec-priorities.md).
+
+## Terminology (symbols and product language)
+
+Product copy and this spec say **Workspace Pane**, **media item**, **media**. Implementation symbols may still use legacy names until the [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md) ships.
+
+| Symbol | Role |
+| --- | --- |
+| `photoPanelOpen` | **Workspace Pane** visibility signal (**interim:** owned on `MapShellComponent` for routes that use it today). **Target:** same signal (or renamed `workspacePaneOpen`) on the **layout host** after hoist. |
+| `detailMediaId` | Which **media item** is shown in pane detail (null = grid). |
+| `activeTab` | `'selected-items' \| 'upload'` — global pane tab. |
+| `WorkspacePaneObserverAdapter` | Binds **selected-items context** per route; **does not** render the pane (coordination only). |
+| `setDetailImageId` (observer) | Sets focused **media id** for detail routing (legacy method name; id is **media**). |
+
 ## What It Is
 
-AppShell right-hand pane for selection + upload: persists across routes with **Selected** and **Upload** tabs; shares **`MediaDownloadService`** delivery cache with map markers and `/media`.
+Right-hand **Workspace Pane** for selection + upload: persists across routes with **Selected** and **Upload** tabs; shares **`MediaDownloadService`** delivery cache with map markers, workspace grid, and `/media`.
 
 ## What It Looks Like
 
-**Desktop:** right-side pane rendered by the App Shell layout (not map-specific). It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between item-grid mode and media-detail mode.
+**Desktop:** right-side pane rendered by the **layout host** (see [Layout host](#layout-host-canonical)), not by an individual feature page in isolation. It uses the shared `.ui-container` shell with `--color-bg-surface`, full-height column layout, and an internal switch between item-grid mode and media-detail mode.
 
 The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or `WorkspaceToolbarComponent` plus `ItemGridComponent` with projected domain items. When one or more media items are selected, `WorkspaceFooterComponent` appears at the bottom.
 
@@ -14,18 +32,22 @@ The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or 
 
 ## Where It Lives
 
-- **Parent**: `AppShellComponent` template (NOT page-specific)
-- **Position**: Right side of main content area, always visible (unless user closes it)
-- **Scope**: Seitenübergreifend — persists across route navigation (`/map`, `/media`, `/projects`, etc.)
-- **Lifespan**: Survives page unmount/remount; upload queue never interrupted
-- **Pages it appears on**: ALL pages that render into MainContentArea
+- **Parent (canonical):** **Authenticated app layout** — owns the split between `router-outlet` (route content: map, media, projects, settings) and **`WorkspacePaneShell` / `WorkspacePaneComponent`**.
+- **Position:** Right side of the main content region (split); visible when the pane is open (unless user closes it).
+- **Scope:** Seitenübergreifend — persists across route navigation (`/`, `/map`, `/media`, `/projects`, `/settings/**`, etc.) per layout contract.
+- **Lifespan:** Survives route changes inside the layout; upload queue never interrupted.
+- **Pages:** Any route rendered **inside** the layout host that includes the pane (canonical: all primary authenticated routes above).
+
+## Interim implementation (until layout hoist)
+
+Today **`app-workspace-pane`** is mounted only under **`MapShellComponent`** (`features/map/map-shell/`). Routes **`/media`** and **`/projects`** currently load standalone page components **without** the pane in the DOM; `WorkspacePaneObserverAdapter` coordinates intent for when the user returns to a route that hosts the pane. **Remove this section** when the authenticated layout hoist matches the canonical [Layout host](#layout-host-canonical) contract.
 
 ## Actions
 
 | #       | User Action                                              | System Response                                                                                                                                                         | Triggers                                                 |
 | ------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| 1       | Clicks a single media marker on map                      | Workspace pane opens with media detail view for that marker; thumbnail grid loads in background                                                                         | `workspacePaneOpen` → true, `detailMediaId` set          |
-| 1b      | Clicks a cluster marker on map                           | Workspace pane opens showing thumbnail grid with all media items in the cluster; any open detail view is dismissed (`detailMediaId` → null)                             | `workspacePaneOpen` → true, `detailMediaId` → null       |
+| 1       | Clicks a single media marker on map                      | Workspace pane opens with media detail view for that marker; thumbnail grid loads in background                                                                         | `photoPanelOpen.set(true)` **(interim: `MapShellComponent`)**, `detailMediaId` set — **target:** layout host signal |
+| 1b      | Clicks a cluster marker on map                           | Workspace pane opens showing thumbnail grid with all media items in the cluster; any open detail view is dismissed (`detailMediaId` → null)                             | `photoPanelOpen.set(true)` **(interim)**, `detailMediaId` → null — **target:** layout host |
 | **NEW** | **Clicks "Upload" tab button**                           | **Tab switches to Upload; UploadPanelComponent fully visible; all upload jobs/lanes visible**                                                                           | **`activeTab` → `'upload'`**                             |
 | **NEW** | **Clicks "Selected Items" tab button**                   | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
 | **NEW** | **Navigates from /map → /media**                         | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
@@ -39,7 +61,7 @@ The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or 
 | **NEW** | **Clicks bulk `clear` in Upload tab**                    | **Clears upload-row selection while preserving queue state**                                                                                                            | **`selectedUploadJobIds.clear()`**                       |
 | **NEW** | **Uses Upload-tab selection in compact map overlay**     | **Not available; compact overlay remains menu-first without row checkboxes**                                                                                            | **`embeddedInPane === false`**                           |
 | 2       | Drags the Drag Divider                                   | Resizes workspace pane width                                                                                                                                            | Parent shell layout change                               |
-| 3       | Clicks close button                                      | Workspace pane slides out (can be reopened from any page)                                                                                                               | `workspacePaneOpen` → false                              |
+| 3       | Clicks close button                                      | Workspace pane slides out (can be reopened from any page)                                                                                                               | `photoPanelOpen.set(false)` **(interim)** — **target:** layout host |
 | 4       | Swipes down on bottom sheet handle (mobile)              | Snaps to lower position or closes                                                                                                                                       | Snap point logic                                         |
 | 5       | Swipes up on bottom sheet handle (mobile)                | Snaps to higher position                                                                                                                                                | Snap point logic                                         |
 | 6       | Clicks a thumbnail in the grid                           | Media Detail View replaces grid, back arrow to return                                                                                                                   | Detail view state                                        |
@@ -85,32 +107,35 @@ stateDiagram-v2
 **STRICT PRIMITIVE REQUIREMENT:** The Workspace Pane architecture must explicitly use `src/styles/primitives/container.scss`. The root element MUST be a `.ui-container`. Content areas (grid items, lists, export bar) MUST rely on `.ui-item` where row-based layouts are needed. No custom flex/grid wrapper `div`s should be generated; use standard `ng-content` slot projection for headers, footers, and standard dropdowns to keep the DOM flat.
 
 ```text
-WorkspacePane                              ← `.ui-container` right panel rendered by `WorkspacePaneComponent`
-├── PaneHeaderComponent                    ← standard slot projection
-├── TabSelectorComponent                  ← standard segmented switch primitive
-└── ContentArea @switch(activeTab)        ← flat routing container
-    ├── [activeTab === 'selected-items'] SelectedItemsContentComponent
-    │   └── Page-specific content
-    │       ├── [/map route] WorkspaceToolbarComponent + ItemGridComponent + MediaItemComponent
-    │       ├── [/media route] ItemGridComponent + MediaItemComponent (media grid for this page)
-    │       └── [/projects route] ProjectSelectionGrid / etc.
-    │
-    └── [activeTab === 'upload'] UploadTabComponent
-        └── UploadPanelComponent (1:1 embed, uses its own .ui-container primitive)
-            ├── Drop Zone
-            ├── Lane Tab Selector
-        ├── Upload Job List
-        ├── [row hover/focus] RowSelectionCheckbox
-        └── [selection > 0] UploadSelectionFooter (`app-pane-footer`)
-          ├── SelectedCount
-          ├── RetrySelectionAction
-          ├── DownloadSelectionAction
-          ├── RemoveSelectionAction (cancel active, dismiss terminal)
-          └── ClearSelectionAction
+AuthenticatedAppLayout (canonical)       ← owns flex split: main + pane; wraps router-outlet + pane chrome
+├── MainColumn                             ← router-outlet: MapShell / MediaComponent / ProjectsPage / …
+└── WorkspacePaneShell                     ← resize + clip region (interim: may live under MapShell only)
+    └── WorkspacePane                      ← `.ui-container` right panel (`WorkspacePaneComponent`)
+        ├── PaneHeaderComponent            ← standard slot projection
+        ├── TabSelectorComponent           ← standard segmented switch primitive
+        └── ContentArea @switch(activeTab)
+            ├── [activeTab === 'selected-items'] SelectedItemsContentComponent
+            │   └── Page-specific content
+            │       ├── [/map route] WorkspaceToolbarComponent + ItemGridComponent + MediaItemComponent
+            │       ├── [/media route] ItemGridComponent + MediaItemComponent (media grid for this page)
+            │       └── [/projects route] ProjectSelectionGrid / etc.
+            │
+            └── [activeTab === 'upload'] UploadTabComponent
+                └── UploadPanelComponent (1:1 embed, uses its own .ui-container primitive)
+                    ├── Drop Zone
+                    ├── Lane Tab Selector
+                    ├── Upload Job List
+                    ├── [row hover/focus] RowSelectionCheckbox
+                    └── [selection > 0] UploadSelectionFooter (`app-pane-footer`)
+                        ├── SelectedCount
+                        ├── RetrySelectionAction
+                        ├── DownloadSelectionAction
+                        ├── RemoveSelectionAction (cancel active, dismiss terminal)
+                        └── ClearSelectionAction
 
-[In both tabs]
-├── [detailMediaId set] MediaDetailViewComponent (overlay on top, full-pane modal)
-└── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (slot-based footer)
+        [In both tabs]
+        ├── [detailMediaId set] MediaDetailViewComponent (overlay on top, full-pane modal)
+        └── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (slot-based footer)
 ```
 
 ### Bottom Sheet (mobile variant)
@@ -194,10 +219,10 @@ export interface WorkspacePaneHostPort {
 
 | Hook                        | Owner           | Input         | Output                                     | Cleanup                       |
 | --------------------------- | --------------- | ------------- | ------------------------------------------ | ----------------------------- |
-| `onRouteEnter(contextKey)`  | app shell host  | route key     | bind page context to selected-items tab    | unbind previous context first |
-| `onRouteLeave(contextKey)`  | app shell host  | route key     | detach context, keep global tab state      | clear transient hover only    |
+| `onRouteEnter(contextKey)`  | layout host     | route key     | bind page context to selected-items tab    | unbind previous context first |
+| `onRouteLeave(contextKey)`  | layout host     | route key     | detach context, keep global tab state      | clear transient hover only    |
 | `onUploadJobsChanged(jobs)` | upload observer | `UploadJob[]` | update upload lane state, counts, progress | unsubscribe in pane destroy   |
-| `onContextRebind()`         | app shell host  | none          | unbind previous + bind new context         | must be atomic                |
+| `onContextRebind()`         | layout host     | none          | unbind previous + bind new context         | must be atomic                |
 | `onPaneDestroyed()`         | pane            | none          | release all observer subscriptions         | must be idempotent            |
 
 ## File Map
@@ -221,7 +246,7 @@ export interface WorkspacePaneHostPort {
 ```mermaid
 sequenceDiagram
   participant User
-  participant Shell as AppShellComponent
+  participant Shell as AuthenticatedAppLayout
   participant Pane as WorkspacePaneComponent
   participant Ctx as SelectedItemsContextPort
   participant View as WorkspaceViewService
@@ -269,15 +294,15 @@ sequenceDiagram
   Shell-->>Pane: clear hovered marker state
 ```
 
-- Mounted by `AppShellComponent`, independent from page route components
+- Mounted by the **layout host** (canonical); **interim:** pane subtree may mount under `MapShellComponent` only — see [Interim implementation](#interim-implementation-until-layout-hoist).
 - Receives selected-items context via `SelectedItemsContextPort`
-- Emits pane-level events to shell host through `WorkspacePaneHostPort`
+- Emits pane-level events to layout host through `WorkspacePaneHostPort`
 - Uses `WorkspaceViewService` for current media scope and `WorkspaceSelectionService` for selection/export state
 
 ## Acceptance Criteria
 
 - [x] Desktop pane is implemented as `WorkspacePaneComponent`
-- [ ] **NEW:** Pane is mounted by `AppShellComponent` (not page-specific, seitenübergreifend)
+- [ ] **NEW:** Pane is mounted by **authenticated app layout** (split owner), not only by `MapShellComponent` — **interim** exception documented in [Interim implementation](#interim-implementation-until-layout-hoist).
 - [ ] **NEW:** Pane persists across all route changes (`/map` → `/media` → `/projects` → etc.)
 - [ ] **NEW:** Tab selector visible at top of pane with two buttons: "Selected Items" | "Upload"
 - [ ] **NEW:** "Selected Items" tab displays context-aware content (workspace grid on `/map`, media grid on `/media`, etc.)

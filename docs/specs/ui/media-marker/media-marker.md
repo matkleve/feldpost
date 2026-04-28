@@ -9,7 +9,7 @@ The domain is **media** (`media_items`). The following **implementation symbols*
 
 | Symbol | Role |
 | --- | --- |
-| `photoPanelOpen` | **Workspace Pane** visibility on the map route (`MapShellComponent` signal). |
+| `photoPanelOpen` | **Workspace Pane** visibility signal (**interim:** on `MapShellComponent` for routes using that shell; **target:** authenticated app layout host). |
 | `handlePhotoMarkerClick`, `buildPhotoMarkerHtml`, `refreshPhotoMarker`, `lazyLoadThumbnail` | Click handling, DivIcon HTML, and thumbnail scheduling for **media markers**. |
 | `uploadedPhotoMarkers`, `refreshAllPhotoMarkers` | Map Shell maps/routines for on-map markers (symbol names unchanged). |
 | `.map-photo-marker*`, `--photo-marker-body-size` | **Media marker** styling: BEM namespace and size token as implemented in SCSS (renaming selectors is a separate refactor). |

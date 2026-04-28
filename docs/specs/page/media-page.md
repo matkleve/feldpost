@@ -2,13 +2,13 @@
 
 **Status:** Element Spec  
 **Route:** `/media`  
-**Parent:** `AppShellComponent` main content area (flex 1)
+**Parent:** **Authenticated app layout** (split host) — see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical). **`MediaComponent`** renders **inside** the layout’s `router-outlet` main column.
 
 ---
 
 ## What It Is
 
-Canonical `/media` route: page-level layout, pane integration, and persistence only; child component specs own grid, items, and media chrome (this phase: `media.component.md`, `media-content.md`, `media-item.md`, `item-grid.md` media path, etc.).
+Canonical `/media` route: page-level layout, **layout-host** pane integration, and persistence only; child component specs own grid, items, and media chrome (this phase: `media.component.md`, `media-content.md`, `media-item.md`, `item-grid.md` media path, etc.).
 
 ## Documentation Phase Boundary
 
@@ -36,28 +36,26 @@ Canonical `/media` route: page-level layout, pane integration, and persistence o
 
 ## What It Looks Like
 
-**Desktop Layout:**
+**Desktop Layout (canonical):**
 
 ```
-AppShell (top-level, persistent across routes)
-├── SideMenuComponent (AppShell-owned, rendered independent from MediaComponent)
-├── Main Content
-│   ├── MediaComponent (flex 1)
-│   │   ├── MediaPageHeaderComponent
-│   │   ├── [Optional] MediaToolbar
-│   │   └── MediaContentComponent
-│   │
-│   └── WorkspacePaneComponent (right side, always visible unless closed)
-│       ├── PaneHeaderComponent (title, close button, width control)
-│       ├── TabSelectorComponent: "Selected Items" | "Upload"
-│       └── ContentArea @switch(activeTab)
-│           ├── Tab: "Selected Items"
-│           │   └── Selected-items provider bound by current route context
-│           └── Tab: "Upload"
-│               └── [UploadPanelComponent 1:1 embed]
+AuthenticatedAppLayout (split host)
+├── SideMenuComponent (or shared chrome — exact app structure TBD)
+├── MainColumn (flex 1) — router-outlet
+│   └── MediaComponent
+│       ├── MediaPageHeaderComponent
+│       ├── [Optional] MediaToolbar
+│       └── MediaContentComponent
 │
-└── Footer (optional)
+└── WorkspacePaneShell + WorkspacePaneComponent   ← same pane as map route; right column
+    ├── PaneHeaderComponent
+    ├── TabSelectorComponent: "Selected Items" | "Upload"
+    └── ContentArea @switch(activeTab)
+        ├── Tab: "Selected Items" → context from `WorkspacePaneObserverAdapter` + `MediaComponent`
+        └── Tab: "Upload" → UploadPanelComponent (1:1 embed)
 ```
+
+**Interim (until layout hoist):** `/media` may load **`MediaComponent`** without **`WorkspacePaneComponent`** in the DOM; `WorkspacePaneObserverAdapter` coordinates context for when the user returns to a route that mounts the pane. See [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
 
 **Mobile Layout (Phase 2):**
 
@@ -68,11 +66,15 @@ AppShell (top-level, persistent across routes)
 
 ## Where It Lives
 
-- **Route:** `/media` (routed by AppRouter → MediaComponent)
-- **Parent Container:** `AppShellComponent` main content flex area
-- **Workspace Pane:** Mounted by AppShellComponent (seitenübergreifend, not media-specific)
-- **Trigger:** Navigation via AppShell side menu, or view-all-media action
+- **Route:** `/media` (routed by AppRouter → `MediaComponent` in main column)
+- **Parent Container:** **Authenticated app layout** main column (canonical); **interim:** standalone `MediaComponent` host — see [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist)
+- **Workspace Pane:** Sibling column of the **same** `WorkspacePaneComponent` tree as other routes (canonical); **interim:** may be absent on `/media` until hoist
+- **Trigger:** Navigation via app menu, or view-all-media action
 - **Persistence:** Media page state (filters, sort, group) saved to localStorage; media list snapshots and pagination cursor are cache-retained per user/query (no forced clear on normal revisit); workspace pane state (tab, selection, uploads) is independent
+
+## Terminology (symbols)
+
+- **`WorkspacePaneObserverAdapter.setDetailImageId`:** legacy method name — argument is **media id** (not “image” as a domain term). Prefer **`detailMediaId`** / **requestOpenDetail** in new contracts.
 
 ---
 
@@ -80,13 +82,13 @@ AppShell (top-level, persistent across routes)
 
 | #  | Trigger | Orchestration Response | Ownership |
 | --- | --- | --- | --- |
-| 1 | Route enters `/media` without persisted tab state | Page composition MUST mount `MediaComponent` and bind `WorkspacePaneComponent` context with default tab `selected-items`. | Page |
-| 2 | Route re-enters `/media` with persisted tab state | Page composition MUST restore the last active tab unless an explicit URL anchor/intent overrides it. | Page |
-| 3 | Explicit URL anchor/intent requests a tab | Page composition MUST prioritize explicit URL anchor/intent over persisted tab state. | Page |
-| 4 | User switches to `upload` tab | Pane host MUST render `UploadPanelComponent` without remounting the route shell. | AppShell + pane host |
-| 5 | User navigates between `/media` and `/map` | Pane host MUST preserve upload continuity and tab state across route transitions. | AppShell + pane host |
-| 6 | User invokes grouping/sorting/filtering via toolbar | Page composition MUST forward intent routing to `MediaComponent` command methods; toolbar MUST remain intent-only. | Page + shell component |
-| 7 | Child emits selection/detail intents | Page composition MUST bind and forward typed intents through selected-items context ports. | Page + pane host |
+| 1 | Route enters `/media` without persisted tab state | Layout host MUST mount `MediaComponent` in the outlet and bind **Workspace Pane** selected-items context with default tab `selected-items` (via `WorkspacePaneObserverAdapter` / ports). | Layout host + page |
+| 2 | Route re-enters `/media` with persisted tab state | Same as today: restore last active tab unless URL anchor overrides. | Layout host + page |
+| 3 | Explicit URL anchor/intent requests a tab | Prioritize anchor over persisted tab state. | Layout host + page |
+| 4 | User switches to `upload` tab | Pane host renders `UploadPanelComponent` without remounting the route outlet content. | Layout host + pane |
+| 5 | User navigates between `/media` and `/map` | Pane host MUST preserve upload continuity and tab state across route transitions. | Layout host + pane |
+| 6 | User invokes grouping/sorting/filtering via toolbar | `MediaComponent` command methods; toolbar intent-only. | Page + layout |
+| 7 | Child emits selection/detail intents | Forward through selected-items context ports to **Workspace Pane**. | Page + pane host |
 
 Page contract note:
 
@@ -97,19 +99,20 @@ Page contract note:
 ## Component Hierarchy
 
 ```text
-MediaComponent (route shell)
-├── MediaPageHeaderComponent
-├── [Optional] MediaToolbar
-└── MediaContentComponent
+AuthenticatedAppLayout
+├── MainColumn — router-outlet
+│   └── MediaComponent (route shell)
+│       ├── MediaPageHeaderComponent
+│       ├── [Optional] MediaToolbar
+│       └── MediaContentComponent
+└── WorkspacePaneComponent (same instance contract as other routes)
 
-[Workspace Pane is mounted by AppShellComponent, not MediaComponent]
-WorkspacePaneComponent (seitenübergreifend)
+WorkspacePaneComponent
 ├── PaneHeaderComponent
 ├── TabSelectorComponent ("Selected Items" | "Upload")
 └── ContentArea @switch(activeTab)
-    ├── "Selected Items" tab (context-bound provider)
-    └── "Upload" tab
-        └── UploadPanelComponent
+    ├── "Selected Items" tab (context-bound provider via observer)
+    └── "Upload" tab → UploadPanelComponent
 ```
 
 ---

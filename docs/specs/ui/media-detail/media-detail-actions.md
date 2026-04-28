@@ -4,6 +4,10 @@
 > **Upload manager use cases:** [use-cases/upload-manager.md](../../../use-cases/upload-manager.md)
 > **Map shell use cases:** [use-cases/map-shell.md](../../../use-cases/map-shell.md)
 
+## Terminology (upload streams)
+
+**`imageReplaced$`**, **`imageAttached$`**, and payload fields like **`imageId`** are **TypeScript implementation symbols**; they refer to **media items** in the domain. Stream renames are deferred — see [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md).
+
 ## What It Is
 
 The actions section at the bottom of the Media Detail View and the marker synchronization system that keeps map markers up to date when media properties change. The same single-media action contract is available in the detail header 3-dot menu and via right-click on the detail thumbnail surface.

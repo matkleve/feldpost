@@ -178,6 +178,7 @@ The services below are part of pipeline behavior and are covered here as partial
 ### Subscriptions
 
 - Manager-owned consumers subscribe to `imageUploaded$`, `imageReplaced$`, `imageAttached$`, `uploadSkipped$`, `locationConflict$`, `jobPhaseChanged$`, `batchProgress$`, and `batchComplete$`.
+- **Domain note:** **`image*` stream names** are legacy symbols; events carry **media item** identities. See [symbol rename backlog](../../../../backlog/media-photo-symbol-rename-roadmap.md).
 - Folder scan progress updates batch totals during `submitFolder()`.
 
 ### Supabase Calls

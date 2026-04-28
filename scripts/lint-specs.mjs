@@ -11,6 +11,13 @@
  *   what-it-looks-like-len "What It Looks Like" section max lines (default: 40)
  *   has-acceptance-criteria At least one acceptance criterion checkbox
  *
+ * Excluded from element-spec rules (see shouldIncludeSpecFile):
+ *   - readme.md, *.bak, spec-*audit* notes
+ *   - governance-*.md (matrices/reports; not UI/service element contracts)
+ *   - docs/specs/system/security/** (security analysis writeups)
+ *   - Listed technical/service paths without element-spec skeleton (address resolver, search algorithm, user-lifecycle)
+ *   - Meta: spec-size-backlog.md; certain *.deep-dive.md / *.data.md splits; *.supplement.md
+ *
  * Usage:
  *   node scripts/lint-specs.mjs [--fix] [--max-lines=N] [--warn-lines=N] [glob]
  *

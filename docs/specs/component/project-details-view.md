@@ -2,6 +2,10 @@
 
 > **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
 
+## Terminology (layout vs projects page)
+
+**Workspace Pane** (product) reuses **`WorkspacePaneComponent`**. **Canonical:** pane mounts under **authenticated app layout** with a global split — [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical). **Interim:** pane may mount only under map routes; `/projects` may use **page-local visibility** (e.g. `workspacePaneOpen` on `ProjectsPageComponent`) until the layout hoist. See [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
+
 ## What It Is
 
 A project-scoped workspace detail mode inside the Projects Page. It opens when a project is selected and reuses the existing workspace/media-detail experience to browse only that project's media while remaining on `/projects`.
@@ -124,7 +128,7 @@ sequenceDiagram
 | Name                | Type                                                    | Default | Controls                                 |
 | ------------------- | ------------------------------------------------------- | ------- | ---------------------------------------- |
 | `selectedProjectId` | `string \| null`                                        | `null`  | Active project scope                     |
-| `workspacePaneOpen` | `boolean`                                               | `false` | Workspace visibility                     |
+| `workspacePaneOpen` | `boolean`                                               | `false` | **Projects page:** scoped workspace surface visible (not necessarily identical to map-route `photoPanelOpen`; see [workspace-pane § Terminology](../ui/workspace/workspace-pane.md#terminology-symbols-and-product-language)) |
 | `selectedMediaId`   | `string \| null`                                        | `null`  | Active media details                     |
 | `mapFocusPayload`   | `{ mediaId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus      |
 | `isProjectFullView` | `boolean`                                               | `false` | Right→left full-width workspace mode     |

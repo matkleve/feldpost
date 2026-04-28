@@ -4,7 +4,7 @@
 
 ## What It Is
 
-A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, photo-only deduplication, duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
+A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, **per-file hash deduplication scoped to comparable media types** (camera-still / raster-centric paths per policy), duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
 
 Queue management and concurrency are implemented inside `UploadManagerService` through `UploadQueueService` and pipeline services under `core/upload/`.
 

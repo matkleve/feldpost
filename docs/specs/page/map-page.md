@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Full-screen host after login: sidebar, map zone, workspace pane, and floating controls. **See:** [map-shell use cases](../use-cases/map-shell.md), [blueprint](../implementation-blueprints/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload-button-zone.md), [drag-divider](../component/drag-divider.md); product UCs 1–3 in use-case docs.
+Full-screen **map route host** after login: sidebar, map zone, workspace pane (when that route subtree includes it), and floating controls. **`MapShellComponent`** is used for **`/`**, **`/map`**, and **`/settings/**`** in `app.routes.ts` — it bundles **map UX** and **map-adjacent chrome**; it is **not** the canonical long-term **sole** owner of the global workspace split (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [blueprint](../implementation-blueprints/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload-button-zone.md), [drag-divider](../component/drag-divider.md); product UCs 1–3 in use-case docs.
 
 ## What It Looks Like
 
@@ -23,7 +23,7 @@ Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remai
 | 3   | Opens workspace pane                    | Drag Divider appears, map zone shrinks via clip-path reveal                                                                    | Workspace Pane slides in; see [workspace-pane spec](../workspace/workspace-pane.md) §1/1b |
 | 4   | Enters placement mode                   | Map Container gets crosshair cursor, Placement Banner appears                                                                  | `placementActive` signal                                                                  |
 | 5   | Requests pin-drop from search bar       | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")                               | `searchPlacementActive` signal                                                            |
-| 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                          | `workspacePaneOpen` → false; see [workspace-pane spec](../workspace/workspace-pane.md) §3 |
+| 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                          | `photoPanelOpen.set(false)` **(interim: `MapShellComponent` signal)**; **target:** layout host — see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical) |
 | 7   | Clicks empty map area                   | Deselects the active marker (selection highlight clears); workspace pane stays open                                            | `selectedMarkerKey` → null                                                                |
 | 8   | GPS geolocation resolves during startup | Stores/updates user position and marker without forced recenter                                                                | startup geolocation flow                                                                  |
 | 9   | GPS toggle is active                    | Runs periodic GPS refresh (~60s) and keeps user marker above media markers                                                     | `gpsTrackingActive` signal + Leaflet z-index offset                                       |
@@ -69,7 +69,7 @@ flowchart LR
 | `placementActive`       | `boolean`                                                                    | `false` | Crosshair cursor on map, placement banner visibility                       |
 | `searchPlacementActive` | `boolean`                                                                    | `false` | Crosshair cursor on map for search pin-drop                                |
 | `uploadPanelOpen`       | `boolean`                                                                    | `false` | Upload panel expanded/collapsed                                            |
-| `workspacePaneOpen`     | `boolean`                                                                    | `false` | Workspace pane visibility + drag divider                                   |
+| `photoPanelOpen`        | `boolean`                                                                    | `false` | Workspace pane visibility + drag divider (**interim** on `MapShellComponent`; product: Workspace Pane open) |
 | `gpsLocating`           | `boolean`                                                                    | `false` | GPS spinner state while awaiting fix                                       |
 | `gpsTrackingActive`     | `boolean`                                                                    | `false` | GPS toggle active state and periodic refresh loop                          |
 | `userPosition`          | `[number, number] \| null`                                                   | `null`  | Latest known user coordinates                                              |
@@ -102,7 +102,7 @@ sequenceDiagram
 - Initializes Leaflet in `afterNextRender` (browser-only)
 - All child floating components are positioned via CSS within Map Zone
 - Never calls Leaflet directly from template — uses `MapAdapter`
-- WorkspacePane close button emits `(closed)` → MapShell sets `workspacePaneOpen` → false
+- WorkspacePane close button emits `(closed)` → host sets **`photoPanelOpen`** false (**interim:** `MapShellComponent`; **target:** authenticated layout host — [workspace-pane](../ui/workspace/workspace-pane.md))
 - Clicking empty map deselects the active marker but does **not** close the workspace pane
 - Detail zoom intent (`zoomToLocationRequested`) stores a pending highlight request and retries spotlight after viewport marker reconciliation when needed
 

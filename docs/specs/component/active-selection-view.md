@@ -101,6 +101,8 @@ ActiveSelectionView                        ← content area within WorkspacePane
 
 All state lives in `WorkspaceViewService` (shared) and is consumed reactively.
 
+**`rawImages`:** runtime signal name in `WorkspaceViewService`; element type **`WorkspaceImage`** is a **TypeScript alias** of **`WorkspaceMedia`** (`workspace-view.types.ts`). Prose: **workspace media list** / **raw workspace media**.
+
 | Name                 | Type                               | Default                                   | Controls                                     |
 | -------------------- | ---------------------------------- | ----------------------------------------- | -------------------------------------------- |
 | `rawImages`          | `WritableSignal<WorkspaceMedia[]>` | `[]`                                      | Source media items from cluster/radius query |

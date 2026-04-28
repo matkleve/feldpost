@@ -14,10 +14,10 @@ Users experience this system as a responsive workspace pane that immediately ope
 
 ## Where It Lives
 
-- Route: `/`
-- Parent: `MapShellComponent` and `WorkspacePane`
-- Core orchestrator: `WorkspaceViewService`
-- Triggered by: marker clicks, toolbar state changes, and active project/filter context
+- **Routes:** All routes that host **Workspace Pane** + selected-items (canonical: **`/`**, **`/map`**, **`/media`**, **`/projects`**, **`/settings/**`** under [authenticated app layout](../../ui/workspace/workspace-pane.md#layout-host-canonical)).
+- **Parent (interim):** `MapShellComponent` + `WorkspacePane` for map/settings routes until layout hoist; **target:** authenticated app layout owns split + pane.
+- **Core orchestrator:** `WorkspaceViewService`
+- **Triggered by:** marker clicks, toolbar state changes, and active project/filter context
 
 ## Actions
 

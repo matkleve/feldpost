@@ -14,9 +14,9 @@ The `AddressResolverService` is a **reusable, application-wide service** that tr
 It is used in:
 
 - The **main map search bar** (autocomplete as the user types).
-- The **upload panel** when a user manually enters an address for an image without GPS.
+- The **upload panel** when a user manually enters an address for **media** without GPS.
 - The **folder import review phase** when a filename hint is resolved to coordinates.
-- The **marker-correction workflow** when a user re-enters an address for a misplaced image.
+- The **marker-correction workflow** when a user re-enters an address for misplaced **media**.
 
 Because the same resolver is used everywhere, the ranking behaviour and UI presentation are consistent across the entire application.
 
@@ -99,9 +99,10 @@ interface AddressCandidate {
   source: "database" | "geocoder";
 
   /**
-   * DB candidates only: how many images in the database are
+   * DB candidates only: how many **media items** in the database are
    * at or near this address. Used for ranking and for the UI
-   * badge ("12 photos here").
+   * badge (e.g. "12 items here"). Legacy field name **`imageCount`** may
+   * match RPC columns still named `image_count`; prefer **media count** in product copy.
    */
   imageCount?: number;
 
@@ -128,7 +129,7 @@ flowchart TD
     Q --> S2["Step 2: Query Geocoder\n(parallel via GeocodingAdapter)"]
 
     S1 --> DB_INDEX["Materialized address index\nGROUP BY address_label\nST_Centroid + COUNT(*)"]
-    DB_INDEX --> TRGM["pg_trgm fuzzy match\nORDER BY similarity DESC,\nimage_count DESC"]
+    DB_INDEX --> TRGM["pg_trgm fuzzy match\nORDER BY similarity DESC,\nmedia_item_count DESC"]
     TRGM --> DB_OUT["DB Candidates\n(max 3)"]
 
     S2 --> GEO_OUT["Geocoder Candidates\n(max 5)"]
@@ -143,26 +144,26 @@ flowchart TD
     DROP --> RESULT["Step 4: Return\nAddressCandidateGroup"]
     KEEP --> RESULT
 
-    RESULT --> UI_DB["databaseCandidates[]\n(shown first, bold, with photo count)"]
+    RESULT --> UI_DB["databaseCandidates[]\n(shown first, bold, with media count)"]
     RESULT --> UI_SEP["--- separator ---"]
     RESULT --> UI_GEO["geocoderCandidates[]\n(shown after, normal weight)"]
 ```
 
 ### Step 1 — Query the Database
 
-The resolver queries a **materialized address index** derived from the `images` table. This index contains:
+The resolver queries a **materialized address index** derived from the **`media_items`** table (legacy docs may reference `images`; treat `media_items` as normative for new work). This index contains:
 
-- The unique human-readable address labels for images already in the organization's database.
-- The associated coordinates (centroid of images at each address).
-- The image count at each address.
+- The unique human-readable address labels for **media items** already in the organization's database.
+- The associated coordinates (centroid of **media items** at each address).
+- The **media item** count at each address.
 
 ```sql
--- Materialized view (or function) for address index
+-- Materialized view (or function) for address index (normative: media_items)
 SELECT
   address_label,          -- human-readable, stored on insert
   ST_Centroid(ST_Collect(geog::geometry))::geography AS centroid,
-  COUNT(*) AS image_count
-FROM images
+  COUNT(*) AS media_item_count
+FROM media_items
 WHERE organization_id = :org_id
   AND location_unresolved IS NOT TRUE
 GROUP BY address_label;
@@ -173,7 +174,7 @@ Fuzzy matching uses PostgreSQL's `pg_trgm` extension (trigram similarity) or a `
 Results are ordered by:
 
 1. Trigram similarity score (descending — best match first).
-2. Image count (descending — more-documented addresses rank higher for equally similar labels).
+2. **Media item** count (descending — more-documented addresses rank higher for equally similar labels).
 
 Up to `maxDbResults` candidates are included (default: 3).
 
@@ -217,7 +218,7 @@ The address input renders an autocomplete dropdown with this structure:
 
 **Visual details:**
 
-- DB candidates: pin icon (📍), address label, image count badge (e.g., "12 📷"). Bold font.
+- DB candidates: pin icon (📍), address label, **media count** badge (e.g., "12 📷"). Bold font.
 - Separator: a horizontal rule with a muted label ("Other locations" or "External results"). Not a selectable item.
 - Geocoder candidates: globe icon (🌐), address label. Normal font weight.
 - If zero DB results: the separator and its label are not rendered; the list shows only geocoder results.
@@ -227,7 +228,7 @@ The address input renders an autocomplete dropdown with this structure:
 
 - The dropdown is a `role="listbox"` with `role="option"` items. The separator has `role="presentation"`.
 - Keyboard navigation: `↑`/`↓` to move between candidates (the separator row is skipped). `Enter` to select. `Escape` to dismiss.
-- Screen reader announcement on open: "Address suggestions, [N] results". DB candidates are announced with their image count: "Burgstraße 7, 12 photos at this location".
+- Screen reader announcement on open: "Address suggestions, [N] results". DB candidates are announced with **media item** count, e.g. "Burgstraße 7, 12 items at this location" (exact i18n keys may differ).
 
 ### 5.3 Folder Import Review
 
@@ -236,14 +237,14 @@ In the folder import review phase, the same `AddressCandidateGroup` is rendered 
 ```
 Best location matches for "Burgstraße_7":
 
-◉ Burgstraße 7, 8001 Zürich          (12 photos already here)
-○ Burgstraße 7, 8400 Winterthur       (1 photo already here)
+◉ Burgstraße 7, 8001 Zürich          (12 items already here)
+○ Burgstraße 7, 8400 Winterthur       (1 item already here)
 ○ Burgstraße 7, 4051 Basel            (from external search)
 ○ Enter a different address…
 ○ Place on map manually…
 ```
 
-No separator line is needed in this view; instead DB results carry a "(N photos already here)" annotation and external results have no annotation.
+No separator line is needed in this view; instead DB results carry a "(N items already here)" annotation and external results have no annotation.
 
 ---
 
@@ -265,33 +266,34 @@ Debounce and caching are implemented internally:
 
 ## 7. Address Label Storage
 
-For DB-first ranking to work, images must have a human-readable `address_label` stored alongside their coordinates. This label is:
+For DB-first ranking to work, **media items** must have a human-readable `address_label` stored alongside their coordinates. This label is:
 
 - Set during upload (from resolved address, filename hint, or user-entered value).
-- Updated when the user corrects an image's location later.
+- Updated when the user corrects **media** location later.
 - Used in the materialized address index query (§4 Step 1).
 
-The `images` table gains a new column:
+**Normative table:** `media_items.address_label` (and related address fields). **Legacy migration narrative** (pre–`media_items` primary table):
 
 ```sql
+-- Historical: legacy `images` table migration example only
 ALTER TABLE images
   ADD COLUMN address_label text;   -- nullable; populated on insert when known
 ```
 
-If `address_label` is NULL (e.g., images imported before this feature shipped, or images resolved only via raw coordinates), those images are excluded from the DB candidate pool.
+If `address_label` is NULL (e.g., **media** imported before this feature shipped, or rows resolved only via raw coordinates), those rows are excluded from the DB candidate pool.
 
-Reverse geocoding (`AddressResolverService.reverse()`) can be used to back-fill `address_label` for images where it is NULL — either on a background job or when the user opens the image detail view ("Address: Resolving…").
+Reverse geocoding (`AddressResolverService.reverse()`) can be used to back-fill `address_label` for **media items** where it is NULL — either on a background job or when the user opens **media** detail ("Address: Resolving…").
 
 ### On-Load Background Resolution (Implemented)
 
-The `WorkspaceViewService` proactively resolves addresses when images are loaded into the workspace. After every `loadClusterImages()` or `setActiveSelectionImages()` call, it:
+The `WorkspaceViewService` proactively resolves addresses when **workspace media** is loaded. After every `loadClusterImages()` or `setActiveSelectionImages()` call, it:
 
-1. Filters images where GPS coordinates exist but `city`/`district`/`street` are NULL.
+1. Filters **media items** where GPS coordinates exist but `city`/`district`/`street` are NULL.
 2. Groups by **exact** GPS coordinates (lat,lng) — only identical coordinates share a single geocode call.
 3. Calls `GeocodingService.reverse(lat, lng)` per unique coordinate.
-4. Updates the DB (`images` table) and patches the local signal so grouping headers reflect the resolved address immediately.
+4. Updates the DB (**`media_items`**; legacy migrations may still reference `images`) and patches the local signal so grouping headers reflect the resolved address immediately.
 
-This pattern incrementally back-fills address data for all existing images as users browse clusters, without requiring a one-time bulk migration.
+This pattern incrementally back-fills address data for existing **media** as users browse clusters, without requiring a one-time bulk migration.
 
 ### Upload-Time Resolution (Implemented)
 
@@ -320,7 +322,7 @@ flowchart TD
     MCR["Marker Correction\nEdit Location"] -->|"resolve(query)"| ARS
     REV["Detail View\nReverse geocode"] -->|"reverse(lat, lng)"| ARS
 
-    ARS --> DB[("DB: images.address_label\npg_trgm similarity")]
+    ARS --> DB[("DB: media_items.address_label\npg_trgm similarity")]
     ARS --> GEO["GeocodingAdapter\n(Nominatim default)"]
 
     ARS -->|"Cache: 5min TTL\nDebounce: 300ms\nAbort previous"| ARS
@@ -340,7 +342,7 @@ flowchart TD
 
     GCS -->|"Serial queue\nCache: 5min TTL"| EF["Supabase Edge Function\n/functions/v1/geocode"]
     EF -->|"Server-side rate limit\n1 req/1.1s\nUser-Agent header"| NOM["Nominatim API\n/reverse · /search"]
-    LRS --> DB_UPD[("DB: UPDATE images\nSET city, district, street,\ncountry, address_label")]
+    LRS --> DB_UPD[("DB: UPDATE media_items\nSET city, district, street,\ncountry, address_label")]
 ```
 
 **Why a proxy?** Direct browser→Nominatim calls fail with CORS errors when Nominatim rate-limits (HTTP 429 responses lack CORS headers). The edge function:
