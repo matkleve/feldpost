@@ -7,7 +7,7 @@ Module index for workspace UI contracts.
 - workspace-pane.md
 - workspace-toolbar.md
 - workspace-actions-bar.md
-- workspace-view-system.md (UI navigation entry; links to [service workspace-view-system](../../service/workspace-view/workspace-view-system.md); do not duplicate the full contract)
+- workspace-view-system.md — **UI overview stub (links only)** → [service workspace-view-system](../../service/workspace-view/workspace-view-system.md) (canonical contract; do not duplicate)
 
 Folder-specific rules:
 

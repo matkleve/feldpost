@@ -1,8 +1,8 @@
-# Workspace View System — UI entry
+# Workspace View System — UI overview stub (links only)
 
 ## What It Is
 
-A **navigation stub** for the workspace feature area. The **canonical** orchestration contract for `WorkspaceViewService`, data flow, and pipeline lives under the service spec—linked below. This file must not duplicate that contract.
+A **navigation stub** (non-normative): discovery entry for the workspace feature area. The **canonical** orchestration contract for `WorkspaceViewService`, data flow, and pipeline lives under the service spec—linked below. This file must not duplicate that contract.
 
 ## What It Looks Like
 

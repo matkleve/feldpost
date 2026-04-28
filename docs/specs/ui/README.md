@@ -8,6 +8,8 @@ Folder-specific rules:
 - UI specs may link to page/component/service/system docs for dependencies and boundaries.
 - UI specs must avoid owning service adapter internals.
 
+**Workspace Pane (split host, `photoPanelOpen` interim):** [workspace/workspace-pane.md](workspace/workspace-pane.md) — [layout priorities backlog](../../backlog/workspace-pane-layout-and-spec-priorities.md).
+
 Global governance references:
 
 - ../README.md

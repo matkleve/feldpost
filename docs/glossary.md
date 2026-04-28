@@ -26,10 +26,10 @@
   - Used in Row-Level Security (RLS) checks.
 
 - **Technician**  
-  A field user documenting construction sites with photos. Typically has role `user`.
+  A field user documenting construction sites (product copy often says “photos”; domain rows are **media items** on `media_items`). Typically has role `user`.
 
 - **Clerk**  
-  An office user preparing quotes and documentation from historical images. May have role `user` or `viewer`.
+  An office user preparing quotes and documentation from historical field documentation (same “photos” wording note as Technician). May have role `user` or `viewer`.
 
 - **Admin**  
   User with elevated permissions (see `security-boundaries.md`), including broader visibility and management tasks.
@@ -74,11 +74,11 @@
 
 - **Radius Selection**  
   A spatial interaction: right-click + drag on desktop (long-press + drag on mobile) to draw a circle on the map.
-  - All images within the circle are added to the Active Selection.
+  - All **media items** within the circle are added to the Active Selection.
 
 - **Location / Coordinates**  
-  The latitude and longitude representing where the photo was taken or is anchored on the map.
-  - Stored as numeric fields in `images`.
+  The latitude and longitude representing where a **media item** was captured or is anchored on the map.
+  - Stored on **`media_items`** (`latitude`, `longitude`, generated `geog`). Legacy migration-era reads may still reference **`images`** in some SQL/RPC names; treat **`media_items`** as canonical for new contracts.
   - Used for all spatial queries and map rendering.
 
 - **EXIF Coordinates**  
@@ -104,7 +104,7 @@
   Whether an image is considered relevant given a viewer’s position and facing direction.
   - Depends on distance (e.g., 50m radius) and bearing tolerance (e.g., ±30°).
 - **Address Label**  
-  A human-readable address string stored alongside an image's coordinates (e.g., "Burgstraße 7, 8001 Zürich").
+  A human-readable address string stored alongside a **media item's** coordinates (e.g., "Burgstraße 7, 8001 Zürich").
   - Column: `media_items.address_label`.
   - Populated on upload from (a) a user-entered address, (b) a filename hint resolved via `AddressResolverService`, or (c) reverse geocoding of the EXIF coordinates.
   - Used by `AddressResolverService` to build the DB-first address index for autocomplete ranking.
@@ -122,7 +122,7 @@
   - See `use-cases/folder-import.md` §4.3.
 
 - **Manual Review Queue**  
-  A holding area in the folder import review UI for images that could not be automatically resolved to a location.
+  A holding area in the folder import review UI for **media items** that could not be automatically resolved to a location.
   - The user can enter an address, use drag-to-map placement, assign a batch location, or skip.
   - Skipped images are stored with `location_unresolved = TRUE` and do not appear on the map.
   - See `use-cases/folder-import.md` §5.3.
@@ -137,9 +137,9 @@
   - All RLS policies use `organization_id` to enforce data isolation between orgs (see security-boundaries.md §2.1).
 
 - **Project**  
-  A logical grouping of images that belong to the same construction job, site, or contract.
+  A logical grouping of **media items** that belong to the same construction job, site, or contract.
   - Scoped to an organization.
-  - Used to filter and organize photos across time and space.
+  - Used to filter and organize field documentation across time and space.
 
 - **Group (Saved Group)**  
   Legacy concept for named, user-created collections.
@@ -147,7 +147,7 @@
   - Current product flow uses Active Selection and project membership (`media_projects`) instead of persisted group tabs.
 
 - **Active Selection**  
-  A transient, in-memory set that holds images currently selected on the map (via click, Ctrl+click, or radius selection).
+  A transient, in-memory set that holds **media items** currently selected on the map (via click, Ctrl+click, or radius selection).
   - Not persisted to the database; cleared on page reload.
 
 - **Workspace**  
@@ -156,15 +156,15 @@
   - See architecture.md §11.
 
 - **Metadata Key**  
-  A user-defined property name attached to an image, such as “Fang”, “Türe”, “Material”.
-  - Represents a dimension along which images can be searched or filtered.
+  A user-defined property name attached to a **media item**, such as “Fang”, “Türe”, “Material”.
+  - Represents a dimension along which media items can be searched or filtered.
 
 - **Metadata Value**  
-  The concrete value assigned to a metadata key for a given image.
+  The concrete value assigned to a metadata key for a given **media item**.
   - Example: key `Material`, value `Beton`.
 
 - **Custom Properties**  
-  The end-user feature for defining and managing metadata keys and their values on images. Encompasses the UI for creating new keys, assigning values, and filtering by metadata. Built on the `metadata_keys` and `metadata_values` tables.
+  The end-user feature for defining and managing metadata keys and their values on **media items**. Encompasses the UI for creating new keys, assigning values, and filtering by metadata. Built on the `metadata_keys` and `metadata_values` tables.
 
 ---
 
@@ -172,7 +172,7 @@
 
 - **Row-Level Security (RLS)**  
   PostgreSQL mechanism that restricts which rows a given authenticated user can see or modify.
-  - Enforces ownership, role-based, and organization-scoped access in tables such as `images`.
+  - Enforces ownership, role-based, and organization-scoped access on **`media_items`** and related tables (legacy **`images`** only where migration-era policies or views still reference it).
 
 - **JWT (JSON Web Token)**  
   Token issued by Supabase upon login.
@@ -185,9 +185,9 @@
   - The frontend never constructs storage paths directly; it always requests a signed URL.
 
 - **Storage Path**  
-  The relative path to an image file within Supabase Storage.
+  The relative path to a media file within Supabase Storage.
   - Format: `{org_id}/{user_id}/{uuid}.jpg`.
-  - Stored in `images.storage_path` — not a full URL. URLs are generated at runtime via signed-URL APIs.
+  - Stored on **`media_items.storage_path`** — not a full URL. URLs are generated at runtime via signed-URL APIs (see **Media Download Service**).
 
 ---
 
@@ -198,7 +198,7 @@
   - Enabled by `CREATE EXTENSION postgis;` in the Supabase SQL editor.
 - **GiST Index**  
   Generalized Search Tree index used by PostGIS for efficient spatial queries.
-  - Applied to `images.geog` for bounding-box and distance queries.
+  - Applied to **`media_items.geog`** for bounding-box and distance queries (legacy **`images.geog`** only in historical migrations).
 
 - **MapAdapter**  
   An abstraction layer over the map library (Leaflet).
@@ -207,9 +207,8 @@
 
 - **Media Download Service**  
   Canonical headless media retrieval boundary for preview/download/export flows.
-  - Unifies signed URL loading, tier fallback, cache reuse, binary download, and ZIP export orchestration.
+  - Unifies signed URL loading, tier fallback, cache reuse, binary download, and ZIP export orchestration via **`MediaDownloadService`** and its adapters (e.g. signed-URL cache).
   - Active contract: `docs/specs/service/media-download-service/media-download-service.md`.
-  - Runtime currently composes `PhotoLoadService`, `MediaOrchestratorService`, and `ZipExportService` until facade consolidation lands.
 
 - **AddressResolverService**  
   An Angular service (`providedIn: 'root'`) that resolves address queries to a ranked list of geographic candidates.

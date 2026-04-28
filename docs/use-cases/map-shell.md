@@ -42,7 +42,7 @@ sequenceDiagram
 - `placementActive` = false
 - `searchPlacementActive` = false
 - `uploadPanelOpen` = false
-- `workspacePaneOpen` = false
+- `photoPanelOpen` = false (Workspace Pane closed; **interim:** signal on `MapShellComponent` — see [Workspace Pane visibility](#workspace-pane-visibility-canonical-vs-interim))
 - Map renders with markers from viewport query
 
 ---
@@ -111,7 +111,7 @@ sequenceDiagram
 
 **Expected state after:**
 
-- `workspacePaneOpen / photoPanelOpen` = false
+- `photoPanelOpen` = false (same as Workspace Pane closed; **target** rename `workspacePaneOpen` on layout host per [symbol rename backlog](../backlog/media-photo-symbol-rename-roadmap.md))
 - `detailImageId` = null
 - `selectedMarkerKey` = null
 
@@ -196,6 +196,12 @@ No JS needed — CSS media queries handle the reflow. `NavComponent` handles sid
 
 ---
 
-## Signal naming note
+## Workspace Pane visibility (canonical vs interim)
 
-The spec uses `workspacePaneOpen` as the canonical signal name. The current code uses `photoPanelOpen`. These refer to the same state. A rename is planned but deferred to avoid unnecessary churn during active development.
+**Canonical:** The **authenticated layout host** owns the horizontal split and mounts **Workspace Pane** alongside route content. See [workspace-pane § Layout host](../specs/ui/workspace/workspace-pane.md#layout-host-canonical).
+
+**Interim:** The pane DOM is still mounted under **`MapShellComponent`** on map and settings routes until the layout hoist matches that contract. See [workspace-pane § Interim implementation](../specs/ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
+
+**Symbols:** Product language is **Workspace Pane** / **media item**. The shipped visibility signal is **`photoPanelOpen`** on `MapShellComponent` today; a post-hoist rename (e.g. `workspacePaneOpen` on the layout host) is deferred — [workspace-pane § Terminology](../specs/ui/workspace/workspace-pane.md#terminology-symbols-and-product-language), [media-photo-symbol-rename-roadmap](../backlog/media-photo-symbol-rename-roadmap.md).
+
+Sequence diagrams above use **`photoPanelOpen`** to match current TypeScript.

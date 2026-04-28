@@ -81,7 +81,7 @@ SELECT * FROM viewport_markers(-90, -180, 90, 180, 16);
 
 **Prerequisites:**
 
-- Select 1-3 images in the workspace
+- Select 1–3 **media items** in the workspace
 - Access the "Share" or "Export" UI (usually list workspace selection menu)
 
 **Steps:**
@@ -111,25 +111,25 @@ SELECT * FROM viewport_markers(-90, -180, 90, 180, 16);
 
 ---
 
-## Test 4: Photo Signing & Load (`photo-load.service.getSignedUrl()`)
+## Test 4: Media signing & load (`MediaDownloadService`)
 
-**What to Test:** Dual-read storage pattern (media → images fallback).
+**What to Test:** Signed URL retrieval and tier/cache behavior for thumbnails and full-res (dual-read storage pattern media → legacy bucket fallback remains a runtime concern where applicable).
 
 **Prerequisites:**
 
 - Dev tools → Network tab **filter by `blob` or `/storage/`**
-- At least 1 image visible on map
+- At least one **media item** visible on the map
 
 **Steps:**
 
-1. Open map with media visible (triggers `photoad.getSignedUrl()` for thumbnails)
+1. Open map with media visible (map markers / grid paths call **`MediaDownloadService.getSignedUrl(...)`** (and related preview resolution) per `apps/web/src/app/core/media-download/`)
 2. Observe Network tab:
    - Look for requests to `/storage/...` URLs
-   - Note: If bucket is `media`, request should be `/storage/buckets/media/...`
-   - If media-signed-URL fails, fallback should be `/storage/buckets/images/...`
+   - If bucket is `media`, request should be `/storage/buckets/media/...`
+   - If a media-signed URL fails, observe whether fallback hits `/storage/buckets/images/...` where still configured
 3. Verify thumbnail loads (no broken image icon)
-4. Open detail view of an image (triggers full-resolution signing)
-5. Verify console for any error logs from `PhotoLoadService`
+4. Open detail view for a media item (full-resolution / tier upgrade path)
+5. Verify console for errors from the **media-download** stack (not legacy `PhotoLoadService`)
 
 **Check in Code:**
 
@@ -137,20 +137,14 @@ SELECT * FROM viewport_markers(-90, -180, 90, 180, 16);
 - Run: `window.JSON.stringify(await fetch('/auth/v1/token?grant_type=refresh_token').json())`
 - Verify auth is valid (no 401)
 
-**Verify Service Cache:**
-
-```typescript
-// In browser console (if service is injectable):
-// This is manual verification only — ignore if not accessible
-// Services are internal, not exposed to console
-```
+**Verify caching (conceptual):** Signing and URL reuse are implemented via **`MediaDownloadService`** and its **signed-URL cache adapter** — manual QA confirms network behavior; services are not exposed on `window`.
 
 **Expected Outcome:**
 
-- ✅ Thumbnails load from `media` bucket
-- ✅ No persistent 404 or 403 errors for fallback images
-- ✅ Detail view image loads with signed URL
-- ✅ Photo-loading cycle completes (loading → loaded, no errors)
+- ✅ Thumbnails load from `media` bucket where expected
+- ✅ No persistent 404 or 403 errors for fallback assets
+- ✅ Detail view loads with signed URL / tier progression
+- ✅ Load cycle completes (loading → loaded, no errors)
 
 ---
 
@@ -201,7 +195,7 @@ SELECT * FROM viewport_markers(-90, -180, 90, 180, 16);
 | Clusters don't render / count is 0                                 | `viewport_markers()` not returning rows                                | Check query filters (zoom level, bbox), verify PostGIS extension is enabled                      |
 | Address update fails (RPC returns error)                           | `resolve_image_location()` has NULL parameter or invalid media_item_id | Verify UUID format, ensure media_item exists, check RLS policy allows UPDATE                     |
 | Share link 404                                                     | `share_set_items` not creating or image missing from storage           | Verify `create_or_reuse_share_set()` succeeded, check storage bucket permissions                 |
-| Photo shows broken icon                                            | `PhotoLoadService` signing failed OR fallback bucket has no image      | Check Supabase Storage policies for `media` and `images` buckets; verify `storage_path` is valid |
+| Photo shows broken icon                                            | **`MediaDownloadService`** / adapter signing failed OR fallback bucket has no object | Check Supabase Storage policies for `media` and `images` buckets; verify `storage_path` on `media_items` |
 | Console error: "policy coordinate_corrections depends on image_id" | Phase-4 column drop attempted (should be deferred)                     | Do NOT drop `image_id` columns yet; RLS policies use them for fallback                           |
 
 ---

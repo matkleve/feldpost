@@ -1,6 +1,8 @@
-# Workspace View System — Architecture Overview
+# Workspace View System — canonical service contract
 
-> **Spec type:** System architecture (cross-cutting). This is NOT a standard element spec — it describes the data-flow and service orchestration across multiple components. For the standard element spec sections, see [workspace-pane.md](workspace-pane.md), [workspace-toolbar.md](workspace-toolbar.md), and [thumbnail-grid.md](thumbnail-grid.md).
+> **Spec type:** System architecture (cross-cutting). **Canonical normative contract** for `WorkspaceViewService` orchestration lives in this file and [workspace-view-system.deep-dive.md](./workspace-view-system.deep-dive.md). **Non-normative UI entry / navigation stub:** [workspace-view-system.md (UI)](../../ui/workspace/workspace-view-system.md) — links here only; must not duplicate this body.
+>
+> For pane layout ownership (split host vs interim `MapShellComponent`), see [workspace-pane § Layout host / Interim](../../ui/workspace/workspace-pane.md#layout-host-canonical).
 
 This document describes the complete data flow and component interaction for the Workspace Pane's view system: how media items are loaded, grouped, sorted, filtered, and displayed. It covers the cluster-click flow, the toolbar controls, and the `WorkspaceViewService` that orchestrates everything.
 
@@ -30,6 +32,8 @@ Users experience this system as a responsive workspace pane that immediately ope
 | 5   | Cluster path               | Clears detail selection and renders grouped thumbnail content        | Grid-first display                |
 
 ## Component Hierarchy
+
+**Diagram (interim wiring):** reflects pane DOM under **`MapShellComponent`** today. **Canonical** composition is **authenticated layout host** → split → main column + **Workspace Pane** — see [workspace-pane § Layout host](../../ui/workspace/workspace-pane.md#layout-host-canonical) and [§ Interim implementation](../../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
 
 ```
 MapShellComponent

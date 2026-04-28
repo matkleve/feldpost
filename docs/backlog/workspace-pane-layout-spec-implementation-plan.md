@@ -8,6 +8,21 @@
 
 ---
 
+## Spec updates completed (2026-04-28)
+
+Normative spec/doc alignment for workspace layout, media delivery naming, and cross-links (this batch and prior passes) is **done in docs**. **Code: still pending** — authenticated layout hoist (pane + split owned outside `MapShellComponent` only), `photoPanelOpen` → layout-host / optional `workspacePaneOpen` rename per [`media-photo-symbol-rename-roadmap.md`](./media-photo-symbol-rename-roadmap.md).
+
+| Phase (this plan) | Spec / doc status |
+| --- | --- |
+| 0 — Preconditions | Recorded in `workspace-pane.md` (Layout host, Interim implementation, Terminology). |
+| 1 — P0 layout / split | `workspace-pane`, `drag-divider`, `map-page`, `media-page`, `projects-page`, `project-details-view` — updated. |
+| 2 — P0 media delivery | `media-detail-media-viewer` (+ progressive supplement), `media-download-service/*` — updated. |
+| 3 — P1 address + upload footnotes | `address-resolver`, upload pipeline specs, related — updated. |
+| 4 — P2 polish | `upload-manager`, `active-selection-view` — updated as listed in plan. |
+| 5 — Cross-cutting | `workspace-view-system` (service vs UI stub), `media-marker`, `docs/specs/README` backlog links — updated. |
+
+---
+
 ## 0 — Preconditions (one-time)
 
 | Step | Action |
