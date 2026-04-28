@@ -19,7 +19,7 @@ Your job is to create structured element specs that agents can implement precise
 3. Read `docs/design/constitution.md` and `docs/design/README.md`
 4. Load the relevant task-specific design files from `docs/design/`
 5. Read `docs/architecture.md` for layer constraints
-6. Review related element specs in `docs/element-specs/` for consistency
+6. Review related element specs in `docs/specs/` for consistency
 7. Write the spec following the template in `docs/agent-workflows/element-spec-format.md`
 
 ## Required Sections (in this order)
@@ -55,7 +55,7 @@ When the user provides one or more existing spec files and describes features to
    - Add entries to the **File Map** for new files
    - Add items to **Acceptance Criteria** for the new features
    - Update **What It Looks Like** and **Wiring** if the visual layout or integration changes
-4. **Cross-spec impact analysis** — search `docs/element-specs/` for other specs that reference or are referenced by the updated spec. For each related spec, check whether the new features require changes there too (e.g., new signals a parent must provide, new child components a sibling must accommodate, shared state changes). List any required cross-spec updates and apply them.
+4. **Cross-spec impact analysis** — search `docs/specs/` for other specs that reference or are referenced by the updated spec. For each related spec, check whether the new features require changes there too (e.g., new signals a parent must provide, new child components a sibling must accommodate, shared state changes). List any required cross-spec updates and apply them.
 5. Validate the updated spec the same way as a new spec (Step 4 of the normal procedure)
 
 ## Constraints

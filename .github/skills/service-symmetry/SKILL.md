@@ -12,7 +12,7 @@ Use this skill when creating or refactoring services.
 
 1. Mirror docs and code:
 
-- `docs/element-specs/[service-name]/`
+- `docs/specs/service/[service-name]/`
 - `apps/web/src/app/core/[service-name]/`
 
 2. Required files inside code module:

@@ -16,7 +16,7 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage)
 
 ### Implementing Features?
 
-1. **[Element Specs](element-specs/)** - UI implementation contracts (**SOURCE OF TRUTH**)
+1. **[Specs (`specs/`)](specs/)** - UI + service implementation contracts (**SOURCE OF TRUTH**)
 2. **[Implementation Blueprints](implementation-blueprints/)** - Service signatures & data flow
 3. **[Agent Workflows](agent-workflows/)** - Checklists & guides
 4. **[Security Boundaries](security-boundaries.md)** - RLS & security model
@@ -59,7 +59,7 @@ feldpost/
 
 ### **Implement a UI Element**
 
-1. [Find the spec](element-specs/README.md#elements) → Read contract
+1. [Find the spec](specs/README.md) → Read contract
 2. [Check implementation blueprint](implementation-blueprints/) if exists
 3. [Follow agent workflow](agent-workflows/element-spec-format.md)
 4. [Verify with checklist](agent-workflows/implementation-checklist.md)
@@ -109,7 +109,7 @@ See [Agent Quick Reference](agent-workflows/agent-quick-reference.md#development
 
 ### Core Contracts (Must Read)
 
-- **[Element Specs](element-specs/)** - UI implementation contracts (**SOURCE OF TRUTH**)
+- **[Specs (`specs/`)](specs/)** - Implementation contracts (**SOURCE OF TRUTH**)
 - **[Glossary](glossary.md)** - Canonical terminology
 - **[Security Boundaries](security-boundaries.md)** - RLS security model
 - **[Architecture](architecture.md)** - System design patterns

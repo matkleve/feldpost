@@ -16,7 +16,7 @@ Rule: this file is a design-system contract. New page-level UI should map to one
 
 Authority and relationship to element specs:
 
-- Element specs in `docs/element-specs/` remain the implementation source of truth for feature behavior and wiring.
+- Element specs in `docs/specs/` are the implementation source of truth for feature behavior and wiring.
 - This page maps those feature contracts onto reusable design-system primitives and composition geometry.
 - If this map and an element spec diverge, update this map to match the element spec contract.
 

@@ -9,7 +9,7 @@ applyTo: "**/*.{service.ts,service.spec.ts}"
 For every new service module and every service refactor:
 
 - Mirror docs and code paths:
-  - `docs/element-specs/[service-name]/`
+  - `docs/specs/service/[service-name]/`
   - `apps/web/src/app/core/[service-name]/`
 - Required module files:
   - `[service-name].service.ts` (facade, single UI entrypoint)

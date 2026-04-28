@@ -4,15 +4,24 @@
 
 ---
 
+## Agents: when to stop discovering and edit
+
+- **Simple fix** — If the change is a few lines or one conditional, implement it; do not expand scope into unrelated refactors.
+- **Anti-loop** — If the same search repeats without new signal, switch tactic or ask one precise question instead of re-running identical lookups.
+- **SPEC GAP** — If ownership, naming, or behavior is ambiguous in specs, stop and record a SPEC GAP per `docs/agent-workflows/element-spec-format.md` instead of inventing domain rules.
+- **Database-first** — For overlaps, uniqueness, immutability, or publication bugs, check PostgreSQL constraints and RLS (`supabase/migrations/`) before blaming UI code.
+
+---
+
 ## 🚀 Quick Start: "I want to..."
 
 ### Implement a new UI element
 
-1. **Find spec**: `docs/element-specs/[element].md` (check `docs/element-specs/README.md` for list)
+1. **Find spec**: Under `docs/specs/` (see `component/`, `ui/`, `service/`, `page/`, `system/` — index at `docs/specs/README.md`)
 2. **Check blueprint**: `docs/implementation-blueprints/[element].md` (if exists)
 3. **Read glossary**: `docs/glossary.md` for exact terminology
 4. **Follow spec contract**: Use `docs/agent-workflows/element-spec-format.md`
-5. **Verify**: Run `docs/agent-workflows/implementation-checklist.md`
+5. **Verify**: Walk `docs/agent-workflows/implementation-checklist.md`
 
 ### Debug existing code
 
@@ -51,8 +60,8 @@ apps/web/src/app/
 
 ```
 docs/
-├── element-specs/          # UI implementation contracts (SOURCE OF TRUTH)
-├── implementation-blueprints/ # Service signatures & data flow
+├── specs/                   # UI + service implementation contracts (SOURCE OF TRUTH)
+├── implementation-blueprints/ # Service signatures & rollout notes
 ├── agent-workflows/         # Agent guides & checklists
 ├── design/                  # Design tokens & layout rules
 ├── glossary.md              # Canonical terminology
@@ -176,6 +185,7 @@ npm run design-system:check
 # Individual design system gates
 node scripts/validate-design-system-registry.mjs
 node scripts/audit-panel-breakpoints.mjs
+node scripts/guard-visual-behavior.mjs
 
 # Lint specs
 node scripts/lint-specs.mjs
@@ -239,7 +249,7 @@ node scripts/import-i18n-csv-to-sql.mjs
 
 ## 📞 Need Help?
 
-1. **Check the spec first** - `docs/element-specs/[element].md`
+1. **Check the spec first** — `docs/specs/` (index: `docs/specs/README.md`)
 2. **Check the glossary** - `docs/glossary.md`
 3. **Check security docs** - `docs/security-boundaries.md`
 4. **Check implementation blueprint** - `docs/implementation-blueprints/[element].md`

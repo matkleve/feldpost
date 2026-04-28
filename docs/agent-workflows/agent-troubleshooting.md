@@ -397,7 +397,7 @@ DROP TABLE IF EXISTS old_table;
 ## 📞 Getting Help
 
 ### Before Asking for Help
-1. **Check the spec**: `docs/element-specs/[element].md`
+1. **Check the spec**: `docs/specs/...` (index at [`docs/specs/README.md`](specs/README.md))
 2. **Check the glossary**: `docs/glossary.md`
 3. **Check this guide**: Look for similar issues
 4. **Search the codebase**: Use grep for similar patterns

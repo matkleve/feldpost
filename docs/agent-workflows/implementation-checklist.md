@@ -1,7 +1,7 @@
 # Implementation Checklist
 
 Run through this after every agent-generated feature. Compare against the element spec.
-This file is a verification aid only; project rules live in `AGENTS.md` and spec governance lives in `docs/element-specs/README.md`.
+This file is a verification aid only; project rules live in `AGENTS.md` and spec governance lives in `docs/specs/README.md`.
 
 ## Structure
 

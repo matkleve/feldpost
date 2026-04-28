@@ -1,5 +1,5 @@
 # Media Loading — Use Cases & Interaction Scenarios
-> **Related specs:** [photo-marker](../element-specs/media-marker/media-marker.md), [thumbnail-card](../element-specs/thumbnail-card.md), [thumbnail-grid](../element-specs/thumbnail-grid.md), [image-detail-view](../element-specs/media-detail/media-detail-view.md)
+> **Related specs:** [photo-marker](../specs/ui/media-marker/media-marker.md), [thumbnail-card](../specs/component/item-grid.md), [thumbnail-grid](../specs/component/item-grid.md), [image-detail-view](../specs/ui/media-detail/media-detail-view.md)
 > **Storage docs:** Supabase Storage Image Transformations (signed URLs with `transform` options)
 
 ---

@@ -189,7 +189,7 @@ Required handling at callsites:
 - Keep feature component public visual API as one local enum state input.
 - Map local enum states to `MediaRenderState` in a computed adapter mapping.
 - Do not pass multiple boolean visual-state flags to emulate state at the boundary.
-- Document mapping with `Stable state:` comment blocks and `@see docs/element-specs/...` references.
+- Document mapping with `Stable state:` comment blocks and `@see docs/specs/...` references.
 
 ### Stable State Comment Segmentation (Non-Negotiable)
 
@@ -199,7 +199,7 @@ Required format:
 
 - Prefix each block with `Stable state:`
 - Briefly describe what the user sees in that stable state
-- Add a spec reference line: `@see docs/element-specs/...`
+- Add a spec reference line: `@see docs/specs/...`
 
 Placement contract:
 
@@ -395,7 +395,7 @@ Do not create one-off component-local treatments for shared semantic states.
 - [ ] Public visual state input is enum, not multiple booleans
 - [ ] Component root binds [attr.data-state]
 - [ ] No boolean flags drive visual output in template or SCSS
-- [ ] Stable-state comments exist in TS/HTML/SCSS with `Stable state:` prefix and `@see docs/element-specs/...` references
+- [ ] Stable-state comments exist in TS/HTML/SCSS with `Stable state:` prefix and `@see docs/specs/...` references
 
 ### Ownership
 

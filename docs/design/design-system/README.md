@@ -37,7 +37,7 @@ It consolidates component taxonomy, variants/states, responsive layout scale, go
 - `docs/design/components/action-interaction-kernel.md`
 - `docs/design/components/action-interaction-standard.md`
 - `docs/design/components/website-building-blocks-catalog.md`
-- `docs/element-specs/README.md`
+- `docs/specs/README.md`
 - `docs/agent-workflows/implementation-checklist.md`
 - `apps/web/src/styles.scss`
 
@@ -58,7 +58,7 @@ Out of scope:
 
 ## Authority Model
 
-- Element specs (`docs/element-specs/`) are the feature behavior source of truth.
+- Element specs (`docs/specs/`) are the feature behavior source of truth.
 - Design-system docs (`docs/design-system/`) are the reusable UI primitive, variant, and composition source of truth.
 - Composition docs in this folder must map to element-spec contracts and not redefine feature behavior.
 - If divergence appears, align design-system docs to the element spec contract.

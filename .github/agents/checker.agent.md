@@ -21,7 +21,7 @@ Your job is to compare code against its element spec and report what matches, wh
 
 ## Procedure
 
-1. Read the element spec from `docs/element-specs/`
+1. Read the element spec from `docs/specs/`
 2. Read the implementation blueprint from `docs/implementation-blueprints/` if it exists
 3. Open each file from the spec's **File Map** and **Wiring** section
 4. Compare every spec section against the code: File Map, Hierarchy, Actions, State, Diagrams, Data, Wiring

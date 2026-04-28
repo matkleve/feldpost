@@ -1,6 +1,6 @@
 # Project Mixed Media - Use Cases
 
-> Related specs: [projects-page](../element-specs/projects-page.md), [project-details-view](../element-specs/component/project-details-view.md), [upload-panel](../element-specs/component/upload-panel.md), [filter-panel](../element-specs/component/item-grid-filter-operator.md)
+> Related specs: [projects-page](../specs/page/projects-page.md), [project-details-view](../specs/component/project-details-view.md), [upload-panel](../specs/component/upload-panel.md), [filter-panel](../specs/component/item-grid-filter-operator.md)
 
 ## Overview
 

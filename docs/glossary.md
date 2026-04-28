@@ -208,7 +208,7 @@
 - **Media Download Service**  
   Canonical headless media retrieval boundary for preview/download/export flows.
   - Unifies signed URL loading, tier fallback, cache reuse, binary download, and ZIP export orchestration.
-  - Active contract: `docs/element-specs/media-download/media-download-service.md`.
+  - Active contract: `docs/specs/service/media-download-service/media-download-service.md`.
   - Runtime currently composes `PhotoLoadService`, `MediaOrchestratorService`, and `ZipExportService` until facade consolidation lands.
 
 - **AddressResolverService**  

@@ -1,6 +1,6 @@
 # Image Editing — Use Cases & Interaction Scenarios
 
-> **Related specs:** [image-detail-view](../element-specs/media-detail/media-detail-view.md), [workspace-view](workspace-view.md)
+> **Related specs:** [image-detail-view](../specs/ui/media-detail/media-detail-view.md), [workspace-view](workspace-view.md)
 > **Database:** [database-schema](../architecture/database-schema.md) — `images`, `image_metadata`, `metadata_keys`, `projects`
 
 ---

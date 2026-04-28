@@ -1,6 +1,6 @@
 ---
 name: write-element-spec
-description: "Write a structured element spec for a UI element. Use when planning a new feature before implementation, creating spec documents in docs/element-specs/."
+description: "Write a structured element spec for a UI element. Use when planning a new feature before implementation, creating spec documents in docs/specs/."
 argument-hint: "Element name and brief description"
 ---
 
@@ -23,14 +23,14 @@ argument-hint: "Element name and brief description"
 ### Step 2: Research Context
 
 1. Read `docs/design/constitution.md` for non-negotiable design rules
-2. Read related specs in `docs/element-specs/` for consistency
+2. Read related specs in `docs/specs/` for consistency
 3. Check `docs/architecture/database-schema.md` for available data sources
 4. Only load specific design docs (`docs/design/tokens.md`, `docs/design/layout.md`, `docs/design/motion.md`) if you need them for the spec's "What It Looks Like" section — do NOT load them all by default
 5. Check `apps/web/src/styles.scss` for shared primitives (`.ui-container`, `.ui-item`, `.ui-spacer`) the spec should reference
 
 ### Step 3: Write the Spec
 
-Create `docs/element-specs/{element-name}.md` following the [element spec format](./references/element-spec-format.md):
+Create `docs/specs/<component|ui|service|page|system>/<element-name>.md` (pick the folder per `docs/specs/README.md` taxonomy) following the [element spec format](./references/element-spec-format.md):
 
 1. **Title + What It Is** — 1–2 sentences
 2. **What It Looks Like** — 3–5 sentences, reference tokens
@@ -92,7 +92,7 @@ For each feature the user describes, update the relevant spec sections:
 
 ### Step U3: Cross-Spec Impact Analysis
 
-1. Search `docs/element-specs/` for every spec that references or is referenced by the updated spec (look for component names, signal names, shared state, parent/child relationships)
+1. Search `docs/specs/` for every spec that references or is referenced by the updated spec (look for component names, signal names, shared state, parent/child relationships)
 2. For each related spec, determine if the new features require changes:
    - Does a parent spec need to pass new inputs or handle new outputs?
    - Does a sibling spec need to accommodate new layout or z-index changes?

@@ -26,12 +26,12 @@ See `architecture.md` for technical constraints that affect layout decisions.
 
 Archived design/components/ files have been superseded by their element specs:
 
-- marker ? `docs/element-specs/photo-marker.md`
-- filter-panel ? `docs/element-specs/filter-panel.md`
-- workspace-pane ? `docs/element-specs/workspace/workspace-pane.md`
-- image-detail ? `docs/element-specs/media-detail/media-detail-view.md`
-- upload-flow ? `docs/element-specs/component/upload-panel.md` + `upload-button-zone.md`
-- radius-selection ? `docs/element-specs/component/radius-selection.md`
+- marker → `docs/specs/ui/media-marker/media-marker.md`
+- filter-panel → `docs/specs/component/item-grid-filter-operator.md`
+- workspace-pane → `docs/specs/ui/workspace/workspace-pane.md`
+- image-detail → `docs/specs/ui/media-detail/media-detail-view.md`
+- upload-flow → `docs/specs/component/upload-panel.md` + `docs/specs/component/upload-button-zone.md`
+- radius-selection → `docs/specs/component/radius-selection.md`
 
 ---
 

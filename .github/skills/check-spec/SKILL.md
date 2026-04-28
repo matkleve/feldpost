@@ -16,7 +16,7 @@ argument-hint: "Element spec name or path (e.g., search-bar)"
 
 ### 1. Read the spec
 
-1. Read `docs/element-specs/{element}.md` — all sections
+1. Read the element spec markdown under `docs/specs/` (exact path from the task, or locate via `docs/specs/README.md`) — all sections
 2. Read `docs/implementation-blueprints/{element}.md` if it exists
 
 ### 2. Read the implementation

@@ -21,7 +21,7 @@ Your job is to build UI elements **exactly** as specified in element specs. Spec
 
 ## Procedure
 
-1. Read the element spec from `docs/element-specs/`
+1. Read the element spec from `docs/specs/`
 2. Read the implementation blueprint from `docs/implementation-blueprints/` if it exists
 3. Check what already exists in the files from the spec's **File Map** — continue from the current state, don't start over
 4. Create any missing infrastructure listed in the blueprint's **Missing Infrastructure** table

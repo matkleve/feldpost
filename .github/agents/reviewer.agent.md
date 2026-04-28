@@ -20,7 +20,7 @@ Your job is to compare an implementation against its element spec, report deviat
 
 ### Phase 1: Audit
 
-1. Read the element spec from `docs/element-specs/`
+1. Read the element spec from `docs/specs/`
 2. Read the implementation blueprint from `docs/implementation-blueprints/` (if one exists) — use it to verify correct service signatures, data flows, and database queries
 3. Open each file listed in the spec's **File Map**
 4. Check every item below in order
@@ -70,7 +70,7 @@ For every ❌ or ⚠️ finding, determine the root cause:
 
 After the audit, update the element spec's **Acceptance Criteria** checkboxes:
 
-1. Open `docs/element-specs/{element}.md`
+1. Open `docs/specs/{element}.md`
 2. For each acceptance criterion:
    - Mark `[x]` if the implementation verifiably satisfies it
    - Mark `[ ]` if it is missing, broken, or unverifiable

@@ -35,7 +35,7 @@ Feldpost is a geo-temporal image management system for construction companies. I
 ```
 apps/web/src/app/   → Angular components, services, routing
 supabase/           → Migrations, RLS policies, edge functions
-docs/               → Element specs, design tokens, glossary
+docs/               → Specs (`docs/specs/`), design tokens, glossary
 ```
 
 ## Service Symmetry Standard (Mandatory)

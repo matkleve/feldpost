@@ -39,7 +39,7 @@ Every UI element must have a spec before implementation. Follow the template exa
 
 ## Governance Operations
 
-- Active references from `docs/element-specs/...` must be normalized to `docs/specs/...`.
+- Any remaining references to the legacy path `docs/element-specs/...` must be rewritten to the correct `docs/specs/...` target (see governance artifacts under `docs/specs/`).
 - Deterministic (single-candidate) legacy targets must be updated directly.
 - Multi-target legacy references must follow context routing:
   - `ui/page/component/system` context -> `docs/specs/ui/...`.

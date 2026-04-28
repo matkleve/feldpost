@@ -62,11 +62,11 @@
 ### 2.1 LocationPathParser Implementation (P1 — High Impact)
 
 - **Status**: UNIMPLEMENTED (0 matches in codebase)
-- **Spec Reference**: `docs/element-specs/location-path-parser.md` (50+ lines)
+- **Spec Reference**: `docs/specs/service/location-path-parser/location-path-parser.md` (50+ lines)
 - **Purpose**: Parse address string into components (city, zip, street) + validate against city registry
 - **Current State**: FilenameParserService extracts raw address string; no component parsing
 - **What Needs to Happen**:
-  1. **Read spec**: `docs/element-specs/location-path-parser.md`
+  1. **Read spec**: `docs/specs/service/location-path-parser/location-path-parser.md`
   2. **Design API**:
      -createService: `LocationPathParserService`
      - `parseAddressComponent(address: string): Promise<ParsedAddress>` (interfaces: city, zip, street, confidence)
@@ -82,7 +82,7 @@
 ### 2.2 FolderScanService Observable Refactor (P1 — Architectural)
 
 - **Status**: PARTIAL — Uses callback instead of Observable
-- **Spec Reference**: `docs/element-specs/folder-scan.md` § Entry Points
+- **Spec Reference**: `docs/specs/service/folder-scan/folder-scan.md` § Entry Points
 - **Current Pattern**:
   ```typescript
   walkDirectory(onFileFound?: (file: File, count: number) => void)

@@ -8,7 +8,7 @@ You are reviewing an implemented UI element against its spec in Feldpost.
 
 ## Instructions
 
-1. Open the element spec from `docs/element-specs/`
+1. Open the element spec from `docs/specs/`
 2. Open each file listed in the spec's **File Map**
 3. Check every item below in order:
 

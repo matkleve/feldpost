@@ -1,9 +1,11 @@
-# Spec Format
+# Spec Format (deprecated alias)
+
+**Use [`element-spec-format.md`](element-spec-format.md)** for all new and updated element specs. This file remains only so older links keep resolving; do not duplicate edits—change **`element-spec-format.md`** instead.
+
+---
 
 Practical writing and refactoring template for specs in docs/specs/.
 This file is guidance. Governance and mandatory policy are owned by docs/specs/README.md.
-
----
 
 ## Source Of Truth Hierarchy
 

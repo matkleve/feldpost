@@ -3,6 +3,17 @@
 Feldpost is a geo-temporal image management system for construction companies.
 Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage).
 
+## Instruction precedence (resolve conflicts in this order)
+
+1. **Data and security** — Row-Level Security, migrations, and `supabase/AGENTS.md` (frontend is untrusted).
+2. **This file** — `AGENTS.md` at repository root (global engineering rules).
+3. **Spec system** — `docs/specs/README.md` and governance artifacts under `docs/specs/`.
+4. **Concrete specs** — implementation contracts under `docs/specs/...` for the feature or module you are changing.
+5. **Package `AGENTS.md`** — `apps/web/`, `supabase/`, or `docs/` only where they **narrow** scope; they must not contradict 1–4.
+6. **Tool overlays** — `.github/instructions/`, `.github/copilot-instructions.md`, and similar: shortcuts only; if something disagrees with 1–4, **1–4 win**.
+
+Implementation contracts live under **`docs/specs/`** (not `docs/element-specs/`). Treat any legacy `element-specs` path as a rename unless explicitly archived.
+
 ## Project Structure
 
 ```
@@ -51,6 +62,7 @@ This command runs:
 
 - `node scripts/validate-design-system-registry.mjs`
 - `node scripts/audit-panel-breakpoints.mjs`
+- `node scripts/guard-visual-behavior.mjs`
 
 Reference workflow and checklist:
 
@@ -177,6 +189,7 @@ Example:
 - **Adapter pattern** — never call Leaflet, Supabase, or Nominatim directly from components; use `MapAdapter`, `GeocodingAdapter`, `SupabaseService`
 - **Element specs are contracts** — implement features from `docs/specs/...`; spec governance itself lives in `docs/specs/README.md`
 - **Glossary is canonical** — use exact names from `docs/glossary.md`
+- **Database-first debugging** — for overlaps, feasibility, uniqueness, publication, immutability, or history: inspect PostgreSQL constraints, triggers, and RLS **before** assuming frontend or adapter bugs (`supabase/migrations/`, `docs/architecture/database-schema.md`).
 
 ## Component Structure Rules (Hard Blockers)
 
@@ -185,7 +198,7 @@ Example:
 - No interactive element inside interactive element. No button inside button.
 - No aria-hidden on nodes with interactive descendants.
 - Every CSS property defined exactly once per purpose. Duplicate ownership is a blocker.
-- Per component: decide Tailwind or SCSS before implementing. No mixing without explicit plan.
+- **Styling stack (default):** Tailwind utility classes in templates **and** component SCSS are both standard. The “no mixing” rule means **do not solve the same visual concern twice** (e.g. duplicating spacing in Tailwind and SCSS) without an explicit plan—not “never use both languages.”
 - Loading/Error/Empty are mutually exclusive. Each has exactly one visual owner.
 
 ## Visual Behavior Contract (Mandatory per Component Spec)
@@ -247,22 +260,9 @@ If the three owners cannot be the same element, the exception must be:
 2. Solved via `position: absolute; inset: 0` on the visual owner relative to the geometry owner's stacking context
 3. Never solved by duplicating geometry on multiple layers
 
-### Stacking Context Rule
+### Stacking context rule
 
-Exactly one element per component declares `position: relative`.
-This element is the Geometry Owner for all absolutely positioned children.
-All overlays, badges, and action layers use `position: absolute; inset: 0`
-relative to this single stacking context owner.
-
-### Stacking Context
-
-Exactly one element per component declares `position: relative`.
-All absolutely positioned children (overlays, badges, actions) are
-children of this element. No exceptions.
-
-Stacking context ownership must be defined separately from visual geometry ownership.
-The stacking owner can differ from the visual owner when overlays are anchored to a
-nested geometry surface.
+Exactly one element per component declares `position: relative`. That element owns the stacking context for overlays, badges, and actions; those children use `position: absolute; inset: 0` relative to it. **Stacking context ownership** (which element establishes `position: relative`) must be declared separately from **visual geometry ownership** when they differ — for example when an overlay is anchored to a nested geometry surface.
 
 ### Layer Order (z-index)
 
@@ -372,10 +372,6 @@ Required steps for any new/changed visible text:
 
 Translation data in DB (`app_texts` + `app_text_translations`) is part of the feature definition, not an optional follow-up.
 
-```
-
-```
-
 ## UI State Machine Contract
 
 - FSM is required whenever a component has programmatic state — state that cannot be expressed purely through CSS pseudo-classes (`:hover`, `:focus`, `:disabled`, `:checked`).
@@ -469,17 +465,21 @@ Follow this sequence for every stateful component:
 
 No HTML/CSS implementation starts before steps 1-3 are complete.
 
-## ESLint / Stylelint Gates
+## ESLint / Stylelint and visual-contract enforcement
 
-### Required rules
+### Contract rules (must hold in shipped code)
 
-1. No public boolean input for visual state on stateful components.
-2. Stateful component root must bind `[attr.data-state]`.
-3. State selectors must not own geometry properties.
-4. No magic-number timing values in transitions/animations.
+These follow from the UI state machine and animation contracts above. Enforce via **code review** until dedicated lint rules exist:
 
-### Rule ownership and location
+1. No public `@Input()` boolean solely for visual state on stateful components (use one typed visual API / `[attr.data-state]`).
+2. Stateful component roots expose `[attr.data-state]` where the FSM contract applies.
+3. State-driven selectors must not introduce layout geometry (`width`, `height`, `aspect-ratio`, etc.); geometry stays in `@layer components`.
+4. Transitions and animations use design tokens — no unexplained duration or easing literals.
 
-- ESLint custom gate rules live in `apps/web/eslint.config.mjs`.
-- Stylelint custom gate rules live in `apps/web/stylelint.config.cjs` (create this file when stylelint gates are introduced if it does not exist yet).
-- Rule names and severities must be documented in the same file where they are registered.
+### What is automated today
+
+- **`apps/web/eslint.config.mjs`** — TypeScript and Angular template rules (including `feldpost-template/no-nested-interactive`: interactive elements must not nest inside other interactive elements). Document additional custom rules in that file when added.
+
+### Stylelint
+
+- Optional future gate: `apps/web/stylelint.config.cjs` when Stylelint rules are introduced. Until then, SCSS contracts rely on review and `npm run design-system:check`.

@@ -27,8 +27,8 @@
 |                          | `apps/web/src/app/features/projects/projects-toolbar.component.ts`     | Toolbar: grouping, filter, sort, view-mode toggle                   | ✅ Reference   | MEDIUM   |
 |                          | `apps/web/src/app/features/media/media.component.ts`                  | NEW: Media page (refactored from photos), same layout pattern       | ✅ Implemented | HIGH     |
 |                          | `apps/web/src/app/features/media/media-page-header.component.ts`      | Media page header with breadcrumb + count                           | ✅ Implemented | MEDIUM   |
-| **Element Specs**        | `docs/element-specs/projects-page.md`                                  | Spec contract for projects page                                     | ✅ Reference   | HIGH     |
-|                          | `docs/element-specs/media-page.md`                                     | Spec contract for media page                                        | ✅ Reference   | HIGH     |
+| **Element Specs**        | `docs/specs/page/projects-page.md`                                    | Spec contract for projects page                                     | ✅ Reference   | HIGH     |
+|                          | `docs/specs/page/media-page.md`                                     | Spec contract for media page                                        | ✅ Reference   | HIGH     |
 | **UI Standards**         | `docs/design-system/`                                                  | Design system folder (structure, components, usage)                 | 🔶 Partial     | MEDIUM   |
 | **Shared Components**    | `apps/web/src/app/shared/ui-primitives/`                               | Button, text, icon components                                       | ✅ Reference   | MEDIUM   |
 |                          | `apps/web/src/app/shared/dropdown-trigger/`                            | Dropdown, segmented, grouping/filter/sort                           | ✅ Reference   | MEDIUM   |
@@ -240,7 +240,7 @@ import {
 6. **Reuse shared primitives** (.ui-container, .ui-item, etc.)
 7. **Create dedicated components** for header, toolbar, grid
 8. **Use i18n keys** for all user-visible text (media.page._, common._)
-9. **Add to element spec** (docs/element-specs/) BEFORE implementation
+9. **Add to element spec** (`docs/specs/`) BEFORE implementation
 
 ### ❌ DON'T:
 

@@ -8,8 +8,7 @@
 
 ### Step 1: Find & Read the Spec
 
-1. **Locate spec**: `docs/element-specs/[element].md`
-   - Check `docs/element-specs/README.md` for complete list
+1. **Locate spec** under `docs/specs/` (`component/`, `ui/`, `service/`, `page/`, `system/` — see `docs/specs/README.md`)
    - Use the exact name from the glossary
 
 2. **Read spec completely**:
@@ -283,21 +282,21 @@ import { createClient } from "@supabase/supabase-js";
 ### Essential Reading
 
 - [Agent Quick Reference](agent-quick-reference.md) - Daily cheat sheet
-- [Element Spec Format](agent-workflows/element-spec-format.md) - Spec structure
-- [Implementation Checklist](agent-workflows/implementation-checklist.md) - Verification
-- [Security Boundaries](security-boundaries.md) - RLS rules
+- [Element Spec Format](element-spec-format.md) - Spec structure
+- [Implementation Checklist](implementation-checklist.md) - Verification
+- [Security Boundaries](../security-boundaries.md) - RLS rules
 
 ### Design Reference
 
-- [Design Tokens](design/tokens.md) - CSS variables
-- [Layout Rules](design/layout.md) - Layout patterns
-- [Design Constitution](design/constitution.md) - Non-negotiable rules
+- [Design Tokens](../design/tokens.md) - CSS variables
+- [Layout Rules](../design/layout.md) - Layout patterns
+- [Design Constitution](../design/constitution.md) - Non-negotiable rules
 
 ### Code Reference
 
-- [Glossary](glossary.md) - Terminology
-- [Architecture](architecture.md) - System design
-- [Database Schema](database-schema.md) - Data model
+- [Glossary](../glossary.md) - Terminology
+- [Architecture](../architecture.md) - System design
+- [Database Schema](../architecture/database-schema.md) - Data model
 
 ---
 

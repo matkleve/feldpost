@@ -8,7 +8,7 @@ Define one enforceable source for component standardization, variant/state contr
 
 Contract hierarchy:
 
-- `docs/element-specs/` defines feature-level behavior and wiring contracts (implementation source of truth).
+- `docs/specs/` defines feature-level behavior and wiring contracts (implementation source of truth).
 - `docs/design-system/` defines reusable primitives, variants, and composition/layout standards used to implement those features consistently.
 - When a design-system page conflicts with an element spec, the design-system documentation must be updated to match the element spec.
 
@@ -28,7 +28,7 @@ Foundational rules:
 Inventory and migration context:
 
 - `docs/design/components/website-building-blocks-catalog.md`
-- `docs/element-specs/README.md`
+- `docs/specs/README.md`
 - `apps/web/src/styles.scss`
 - `apps/web/src/app/features/map/map-shell/map-shell.component.ts`
 - `apps/web/src/app/features/map/map-shell/map-shell.component.scss`

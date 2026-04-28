@@ -8,7 +8,7 @@ Before writing code, create an implementation plan for the element spec.
 
 ## Instructions
 
-1. Read the element spec from `docs/element-specs/`
+1. Read the element spec from `docs/specs/`
 2. Read `docs/architecture.md` and `docs/glossary.md` for context
 3. Produce this plan:
 

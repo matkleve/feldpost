@@ -1,6 +1,6 @@
 # Property Registry — Use Cases & Interaction Scenarios
 
-> **Related specs:** [custom-properties](../element-specs/custom-properties.md), [sort-dropdown](../element-specs/component/sort-dropdown.md), [grouping-dropdown](../element-specs/component/grouping-dropdown.md), [filter-dropdown](../element-specs/component/filter-dropdown.md), [search-bar](../element-specs/search-bar/search-bar.md)
+> **Related specs:** [custom-properties](../specs/service/metadata-service.md), [sort-dropdown](../specs/component/sort-dropdown.md), [grouping-dropdown](../specs/component/grouping-dropdown.md), [filter-dropdown](../specs/component/filter-dropdown.md), [search-bar](../specs/ui/search-bar/search-bar.md)
 > **Related use cases:** [workspace-view WV-3, WV-4, WV-6](workspace-view.md)
 
 ---

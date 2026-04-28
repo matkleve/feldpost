@@ -89,7 +89,7 @@ No logic changes — only the delivery mechanism changes. No new features.
 You are working on the Feldpost Angular codebase.
 
 AUDIT FIRST. Read:
-- docs/element-specs/location-path-parser.md (full spec)
+- docs/specs/service/location-path-parser/location-path-parser.md (full spec)
 - apps/web/src/app/core/filename-parser.service.ts
 
 Produce a table of all methods the spec requires vs. what exists today.
@@ -101,7 +101,7 @@ No template changes. No API surface changes beyond what the spec defines.
 
 **Execution Plan**:
 
-1. Read `docs/element-specs/location-path-parser.md`
+1. Read `docs/specs/service/location-path-parser/location-path-parser.md`
 2. Read `apps/web/src/app/core/filename-parser.service.ts`
 3. Create spec-vs-code table
 4. Create `LocationPathParserService` in `apps/web/src/app/core/location-path-parser.service.ts`
