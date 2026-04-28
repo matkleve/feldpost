@@ -2,16 +2,15 @@
 
 ## What It Is
 
-Full-screen **map route host** after login: sidebar, map zone, workspace pane (when that route subtree includes it), and floating controls. **`MapShellComponent`** is used for **`/`**, **`/map`**, and **`/settings/**`** in `app.routes.ts` — it bundles **map UX** and **map-adjacent chrome**; it is **not** the canonical long-term **sole** owner of the global workspace split (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
+Full-screen **map route host** after login: **map zone** (Leaflet), floating controls, and map-specific dialogs. **`MapShellComponent`** is loaded as the **child** of **`app-authenticated-app-layout`** for **`/`**, **`/map`**, and **`/settings/**`** (`app.routes.ts`). **Workspace Pane** + horizontal split are **not** owned here — they live on **`AuthenticatedAppLayoutComponent`** (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
 
 ## What It Looks Like
 
-Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remaining space). Right: Workspace Pane (slides in when opened). Background: `--color-bg-base`. No chrome, no header bar — the map dominates.
+Full viewport inside the layout **main column** (the layout host owns sidebar + split + pane). **Map zone** fills the column: background `--color-bg-base`. No chrome, no header bar — the map dominates.
 
 ## Where It Lives
 
-- **Route**: `/` (default route, guarded by auth)
-- **Parent**: `AppComponent` via router outlet
+- **Parent**: **`AuthenticatedAppLayoutComponent`** main column via `router-outlet` (see [workspace-pane](../ui/workspace/workspace-pane.md))
 - **Component**: `MapShellComponent` at `features/map/map-shell/`
 
 ## Actions
@@ -20,10 +19,10 @@ Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remai
 | --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | 1   | Navigates to `/` (authenticated)        | Renders full map shell with sidebar, map, floating controls                                                                    | Map init via `MapAdapter`                                                                 |
 | 2   | Resizes browser window                  | Layout reflows: sidebar collapses to bottom bar on mobile (<768px), workspace pane becomes bottom sheet                        | Responsive breakpoint                                                                     |
-| 3   | Opens workspace pane                    | Drag Divider appears, map zone shrinks via clip-path reveal                                                                    | Workspace Pane slides in; see [workspace-pane spec](../workspace/workspace-pane.md) §1/1b |
+| 3   | Opens workspace pane                    | Drag Divider appears, map zone shrinks via clip-path reveal                                                                    | **`photoPanelOpen.set(true)`** on layout host (`MapShellState`); see [workspace-pane](../ui/workspace/workspace-pane.md) §1/1b |
 | 4   | Enters placement mode                   | Map Container gets crosshair cursor, Placement Banner appears                                                                  | `placementActive` signal                                                                  |
 | 5   | Requests pin-drop from search bar       | Map enters pin-drop mode (crosshair cursor, placement banner with "Click the map to drop a pin")                               | `searchPlacementActive` signal                                                            |
-| 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                          | `photoPanelOpen.set(false)` **(interim: `MapShellComponent` signal)**; **target:** layout host — see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical) |
+| 6   | Closes workspace pane                   | Workspace pane slides out (clip-path reverse), Drag Divider removed, map zone expands                                          | **`photoPanelOpen.set(false)`** on layout host — [workspace-pane § Terminology](../ui/workspace/workspace-pane.md#terminology-symbols-and-product-language) |
 | 7   | Clicks empty map area                   | Deselects the active marker (selection highlight clears); workspace pane stays open                                            | `selectedMarkerKey` → null                                                                |
 | 8   | GPS geolocation resolves during startup | Stores/updates user position and marker without forced recenter                                                                | startup geolocation flow                                                                  |
 | 9   | GPS toggle is active                    | Runs periodic GPS refresh (~60s) and keeps user marker above media markers                                                     | `gpsTrackingActive` signal + Leaflet z-index offset                                       |
@@ -32,18 +31,18 @@ Full viewport, horizontal flex row. Left: Sidebar. Center: Map Zone (fills remai
 ## Component Hierarchy
 
 ```
-MapShell                                   ← full viewport, flex row, --color-bg-base
-├── [future] Sidebar                       ← left rail (desktop) or bottom bar (mobile)
-├── UploadButtonZone                       ← fixed top-right, z-20 (visually over map)
-├── MapZone                                ← flex-1, holds map + all floating elements
-│   ├── MapContainer                       ← div where Leaflet mounts
-│   ├── SearchBar                          ← floating top-center, z-30
-│   ├── GPSButton                          ← floating bottom-right
-│   ├── [future] ActiveFilterChips         ← strip below search bar (when filters active)
-│   └── [placement] PlacementBanner        ← bottom-center pill
-├── [workspace open] DragDivider           ← resize handle (see drag-divider spec)
-└── [workspace open] WorkspacePane         ← right panel (desktop) or bottom sheet (mobile)
+MapShell                                    ← fills layout main column; map-only
+├── MapZone                                 ← fills host height/width
+│   ├── Map style switch (top-left)
+│   ├── UploadButtonZone                    ← fixed top-right, z-20 (visually over map)
+│   ├── MapContainer                        ← div where Leaflet mounts
+│   ├── SearchBar                           ← floating top-center, z-30
+│   ├── GPSButton                           ← floating bottom-right
+│   ├── [future] ActiveFilterChips          ← strip below search bar (when filters active)
+│   └── [placement] PlacementBanner         ← bottom-center pill
 ```
+
+**Workspace split** (drag divider + `WorkspacePane`) is rendered by **`app-authenticated-app-layout`**, not inside this tree — see [workspace-pane](../ui/workspace/workspace-pane.md).
 
 ## Data
 
@@ -69,7 +68,7 @@ flowchart LR
 | `placementActive`       | `boolean`                                                                    | `false` | Crosshair cursor on map, placement banner visibility                       |
 | `searchPlacementActive` | `boolean`                                                                    | `false` | Crosshair cursor on map for search pin-drop                                |
 | `uploadPanelOpen`       | `boolean`                                                                    | `false` | Upload panel expanded/collapsed                                            |
-| `photoPanelOpen`        | `boolean`                                                                    | `false` | Workspace pane visibility + drag divider (**interim** on `MapShellComponent`; product: Workspace Pane open) |
+| `photoPanelOpen`        | `boolean`                                                                    | `false` | **Layout host** (`MapShellState` on authenticated route): Workspace pane visibility (product: Workspace Pane) |
 | `gpsLocating`           | `boolean`                                                                    | `false` | GPS spinner state while awaiting fix                                       |
 | `gpsTrackingActive`     | `boolean`                                                                    | `false` | GPS toggle active state and periodic refresh loop                          |
 | `userPosition`          | `[number, number] \| null`                                                   | `null`  | Latest known user coordinates                                              |
@@ -79,7 +78,8 @@ flowchart LR
 
 | File                                              | Purpose                         |
 | ------------------------------------------------- | ------------------------------- |
-| `features/map/map-shell/map-shell.component.ts`   | Host component (already exists) |
+| `layout/authenticated-app-layout.component.ts` | Authenticated split host + `router-outlet` |
+| `features/map/map-shell/map-shell.component.ts`   | Map route component (map zone only) |
 | `features/map/map-shell/map-shell.component.html` | Template (already exists)       |
 | `features/map/map-shell/map-shell.component.scss` | Layout styles (already exists)  |
 
@@ -98,11 +98,11 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Loaded via Angular Router at `/` with `authGuard`
+- Loaded via Angular Router as a **child** of **`app-authenticated-app-layout`** at `/`, `/map`, and `/settings/**` with `authGuard`
 - Initializes Leaflet in `afterNextRender` (browser-only)
 - All child floating components are positioned via CSS within Map Zone
 - Never calls Leaflet directly from template — uses `MapAdapter`
-- WorkspacePane close button emits `(closed)` → host sets **`photoPanelOpen`** false (**interim:** `MapShellComponent`; **target:** authenticated layout host — [workspace-pane](../ui/workspace/workspace-pane.md))
+- WorkspacePane close button emits `(closed)` → **layout host** sets **`photoPanelOpen`** false ([workspace-pane](../ui/workspace/workspace-pane.md))
 - Clicking empty map deselects the active marker but does **not** close the workspace pane
 - Detail zoom intent (`zoomToLocationRequested`) stores a pending highlight request and retries spotlight after viewport marker reconciliation when needed
 

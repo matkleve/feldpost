@@ -55,7 +55,11 @@ AuthenticatedAppLayout (split host)
         └── Tab: "Upload" → UploadPanelComponent (1:1 embed)
 ```
 
-**Interim (until layout hoist):** `/media` may load **`MediaComponent`** without **`WorkspacePaneComponent`** in the DOM; `WorkspacePaneObserverAdapter` coordinates context for when the user returns to a route that mounts the pane. See [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
+**Settings:** **`/settings/**`** uses the same authenticated layout and **`MapShellComponent`** in the main column (settings overlay behavior unchanged). No separate settings-only layout fork in this phase.
+
+---
+
+**Rollback note:** If the pane is reverted to map-only mounting, restore the prior **interim** paragraph here and in [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-rollback--partial-landing).
 
 **Mobile Layout (Phase 2):**
 
@@ -67,8 +71,8 @@ AuthenticatedAppLayout (split host)
 ## Where It Lives
 
 - **Route:** `/media` (routed by AppRouter → `MediaComponent` in main column)
-- **Parent Container:** **Authenticated app layout** main column (canonical); **interim:** standalone `MediaComponent` host — see [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist)
-- **Workspace Pane:** Sibling column of the **same** `WorkspacePaneComponent` tree as other routes (canonical); **interim:** may be absent on `/media` until hoist
+- **Parent Container:** **`app-authenticated-app-layout`** main column (canonical); `WorkspacePaneObserverAdapter` coordinates selected-items context; pane DOM is a **sibling** column on the same layout host.
+- **Workspace Pane:** Same `WorkspacePane` tree as map/projects routes (mounted by layout host).
 - **Trigger:** Navigation via app menu, or view-all-media action
 - **Persistence:** Media page state (filters, sort, group) saved to localStorage; media list snapshots and pagination cursor are cache-retained per user/query (no forced clear on normal revisit); workspace pane state (tab, selection, uploads) is independent
 

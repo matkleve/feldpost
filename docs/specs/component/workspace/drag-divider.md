@@ -10,8 +10,8 @@ A thin vertical bar (2px visual width, `--color-border` at rest) occupying the f
 
 ## Where It Lives
 
-- **Parent (canonical):** **Authenticated app layout** (split host) — renders the divider between the **main column** (e.g. Map Zone on map routes) and **Workspace Pane**. **Interim:** parent may be `MapShellComponent` between Map Zone and pane until layout hoist; see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical).
-- **Appears when**: `photoPanelOpen()` is `true` (desktop only, hidden at `< 768px`) — product: Workspace Pane open. **Target:** same visibility flag on layout host after hoist ([symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md)).
+- **Parent (canonical):** **`app-authenticated-app-layout`** (split host) — renders the divider between the **main column** (route outlet: map, media, projects, …) and **Workspace Pane**. **Rollback:** divider may return under `MapShellComponent` only if layout hoist is reverted; see [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-rollback--partial-landing).
+- **Appears when**: `photoPanelOpen()` is `true` (desktop only, hidden at `< 768px`) — product: Workspace Pane open ([symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md) for future `workspacePaneOpen`).
 - **Component**: `DragDividerComponent` at `features/map/workspace-pane/drag-divider/`
 
 ## Actions
@@ -108,7 +108,7 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Imported by the **layout host** (canonical), between main content and Workspace Pane when **`photoPanelOpen()`** is true. **Interim:** `MapShellComponent` performs this wiring on map/settings routes.
+- Imported by **`app-authenticated-app-layout`**, between main `router-outlet` content and Workspace Pane when **`photoPanelOpen()`** is true.
 - Parent passes `currentWidth`, `minWidth`, `maxWidth`, `defaultWidth` as inputs
 - Parent listens to `widthChange` output and applies the new width to the Workspace Pane flex-basis
 - Hidden at `< 768px` — mobile layout uses bottom sheet snap points instead

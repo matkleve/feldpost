@@ -13,7 +13,7 @@ Full-width page with a single top header row. The header places a primary `New p
 ## Where It Lives
 
 - **Route**: `/projects`
-- **Parent**: App shell
+- **Parent**: **`app-authenticated-app-layout`** (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical))
 - **Sidebar link**: Projects icon
 - **Appears when**: User navigates via sidebar or deep link
 

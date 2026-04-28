@@ -10,7 +10,7 @@
 
 ## Spec updates completed (2026-04-28)
 
-Normative spec/doc alignment for workspace layout, media delivery naming, and cross-links (this batch and prior passes) is **done in docs**. **Code: still pending** — authenticated layout hoist (pane + split owned outside `MapShellComponent` only), `photoPanelOpen` → layout-host / optional `workspacePaneOpen` rename per [`media-photo-symbol-rename-roadmap.md`](./media-photo-symbol-rename-roadmap.md).
+Normative spec/doc alignment for workspace layout, media delivery naming, and cross-links (this batch and prior passes) is **done in docs**. **Code:** authenticated layout hoist (`app-authenticated-app-layout` + `app.routes.ts` children) **landed 2026-04-28**; `photoPanelOpen` → `workspacePaneOpen` rename remains per [`media-photo-symbol-rename-roadmap.md`](./media-photo-symbol-rename-roadmap.md).
 
 | Phase (this plan) | Spec / doc status |
 | --- | --- |

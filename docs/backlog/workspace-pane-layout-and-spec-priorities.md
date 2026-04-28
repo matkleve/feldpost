@@ -14,7 +14,7 @@
 - **Renders from the active experience**, not only from map-specific code: each **page** (or a **single authenticated layout** parent) composes the **split** — main content + optional pane — when the pane is open.
 - **Split is owned at layout level** (page or shared `AppShell`/auth layout): map zone / media list / projects list shares width with the pane; not “map shell happens to include a pane.”
 
-**Current implementation (as of this note):** `app-workspace-pane` is mounted only under `MapShellComponent` (`features/map/map-shell/`). Routes `/media` and `/projects` load standalone components **without** that pane in the DOM; `WorkspacePaneObserverAdapter` coordinates intent across routes but does not render the pane.
+**Current implementation:** `app-authenticated-app-layout` hosts **`app-workspace-pane`** + split for **`/`**, **`/map`**, **`/media`**, **`/projects`**, and **`/settings/**`**; **`MapShellComponent`** is map-only inside the layout main column. `WorkspacePaneObserverAdapter` coordinates selected-items context per route.
 
 **Direction:** Hoist the pane (and split chrome) to a **shared authenticated layout** *or* repeat the same split + `WorkspacePane` composition on each route — prefer **one layout** to avoid drift. Then align specs to that as the **canonical** story; keep a short “migration / interim” note only if needed.
 
