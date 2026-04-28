@@ -38,6 +38,7 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 ## References
 
 - docs/glossary.md
+- docs/audits/README.md — historical move/inventory notes (**not** normative contracts)
 - docs/agent-workflows/element-spec-format.md
 - docs/backlog/workspace-pane-layout-and-spec-priorities.md — target: Workspace Pane on any route (layout host); interim vs canonical notes.
 - docs/backlog/workspace-pane-layout-spec-implementation-plan.md — checklist for aligning specs to that target.

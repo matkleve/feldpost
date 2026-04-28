@@ -339,7 +339,7 @@ Legacy `PhotoLoadService` / `MediaOrchestratorService` / `ZipExportService` migr
 - [x] Legacy `media-delivery-orchestrator.md` is archived after this spec is introduced.
 - [x] Legacy archived `photo-load-service.md` remains archived and is treated as historical reference only.
 - [x] Active docs no longer point to `media-delivery-orchestrator.md` as canonical parent.
-- [x] Spec and implementation blueprints reference this contract as active replacement.
+- [x] Spec and implementation docs reference this contract as the active replacement.
 
 ## Ratio Binding Stream Addendum (2026-04-05)
 

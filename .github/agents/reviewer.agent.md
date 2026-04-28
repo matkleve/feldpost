@@ -21,7 +21,7 @@ Your job is to compare an implementation against its element spec, report deviat
 ### Phase 1: Audit
 
 1. Read the element spec from `docs/specs/`
-2. Read the implementation blueprint from `docs/implementation-blueprints/` (if one exists) — use it to verify correct service signatures, data flows, and database queries
+2. Read the **service facade spec** in `docs/specs/service/` when verifying signatures, queries, or adapter boundaries (index: `docs/specs/service/README.md`).
 3. Open each file listed in the spec's **File Map**
 4. Check every item below in order
 

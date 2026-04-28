@@ -87,7 +87,7 @@ Reference workflow and checklist:
   - Keep facade slim and delegate heavy logic to local `adapters/`
   - Forbid global adapter folders like `apps/web/src/app/core/adapters/`
   - Archive replaced code only as a last resort, using dated refactor snapshot folders and `.legacy.ts` suffix
-  - Do not reference archived files/specs from active specs, blueprints, or implementation docs
+  - Do not reference archived files/specs from active specs or service contracts
 - For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`).
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
 - Always run `ng build` to verify changes compile before submitting
@@ -324,8 +324,8 @@ Any implementation that deviates from this contract is a blocker.
 ## Required Feature Workflow
 
 1. Read the target element spec: `docs/specs/...`
-2. Read the implementation blueprint if it exists: `docs/implementation-blueprints/[element].md`
-3. Read additional design docs only if the spec or blueprint does not answer the question
+2. Read the relevant **service facade spec** under `docs/specs/service/<module>/` when the feature depends on that boundary (see `docs/specs/service/README.md` index).
+3. Read additional design docs only if the spec or service contract does not answer the question
 4. Reuse shared UI and adapter abstractions before introducing new structure
 5. Verify the result against `docs/agent-workflows/implementation-checklist.md`
 

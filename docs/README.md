@@ -17,7 +17,7 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage)
 ### Implementing Features?
 
 1. **[Specs (`specs/`)](specs/)** - UI + service implementation contracts (**SOURCE OF TRUTH**)
-2. **[Implementation Blueprints](implementation-blueprints/)** - Service signatures & data flow
+2. **[Service specs (`specs/service/`)](specs/service/README.md)** - Facades, adapters, RPC boundaries (`docs/specs/service/README.md` index)
 3. **[Agent Workflows](agent-workflows/)** - Checklists & guides
 4. **[Security Boundaries](security-boundaries.md)** - RLS & security model
 
@@ -44,8 +44,8 @@ feldpost/
 │   ├── migrations/              # SQL schema changes
 │   └── seed_i18n.sql           # Translation data
 ├── docs/                         # Documentation (this folder)
-│   ├── specs/           # UI implementation contracts
-│   ├── implementation-blueprints/ # Service patterns
+│   ├── specs/                   # UI + service contracts (source of truth)
+│   ├── audits/                  # Historical inventories (see audits/README.md)
 │   ├── design/                  # Design tokens & layout
 │   ├── agent-workflows/         # Agent guides
 │   └── glossary.md              # Terminology
@@ -60,7 +60,7 @@ feldpost/
 ### **Implement a UI Element**
 
 1. [Find the spec](specs/README.md) → Read contract
-2. [Check implementation blueprint](implementation-blueprints/) if exists
+2. [Service module index](specs/service/README.md) for facades touching the change
 3. [Follow agent workflow](agent-workflows/element-spec-format.md)
 4. [Verify with checklist](agent-workflows/implementation-checklist.md)
 
@@ -125,7 +125,7 @@ See [Agent Quick Reference](agent-workflows/agent-quick-reference.md#development
 
 - **[Agent Quick Reference](agent-workflows/agent-quick-reference.md)** - Daily work cheat sheet
 - **[Agent Workflows](agent-workflows/)** - Detailed guides & checklists
-- **[Implementation Blueprints](implementation-blueprints/)** - Service patterns
+- **[Service specs index](specs/service/README.md)** - `core/` ↔ service contracts
 - **[Setup Guide](playbooks/setup-guide.md)** - Environment setup
 
 ### Reference

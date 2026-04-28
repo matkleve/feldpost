@@ -1,6 +1,6 @@
 # Upload Panel
 
-> **Related specs:** [media-download-service](media-download/media-download-service.md), [upload-manager](upload-manager.md), [file-type-chips](file-type-chips.md), [action-context-matrix](action-context-matrix.md)  
+> **Related specs:** [media-download-service](../service/media-download-service/media-download-service.md), [upload-manager](../service/media-upload-service/upload-manager.md), [geocoding-service](../service/geocoding/geocoding-service.md), [media-preview-service](../service/media-preview/media-preview-service.md), [file-type-chips](file-type-chips.md), [action-context-matrix](action-context-matrix.md)  
 > **Split contracts:** [Layout & visual states](upload-panel.layout-and-states.md) · [Lane & row actions](upload-panel.lane-and-row-actions.md) · [Feedback triage](upload-panel.feedback-triage.md) · [Acceptance criteria](upload-panel.acceptance-criteria.md)
 
 ## What It Is

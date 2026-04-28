@@ -1,3 +1,5 @@
+> **Audits:** Reference / investigation (**not normative**). Verify against current `docs/specs/` and `docs/design/` before acting. [How to read `docs/audits/`](README.md).
+
 # UI Container Audit & Implementation Plan
 
 **Date:** 2026-03-25  

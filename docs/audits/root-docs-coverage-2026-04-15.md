@@ -1,4 +1,6 @@
-﻿| File path | In previous untouched table | In updated untouched table | Action |
+﻿> **Audits:** Historical inventory (**not normative**). Current contracts: [`docs/specs/`](../specs/README.md) · [How to read `docs/audits/`](README.md).
+
+| File path | In previous untouched table | In updated untouched table | Action |
 | --- | --- | --- | --- |
 | docs/agent-daily-workflow.md | Yes | Yes | Already present |
 | docs/agent-quick-reference.md | Yes | Yes | Already present |

@@ -1,6 +1,6 @@
 # Item Grid Filter Operator
 
-> **Blueprint:** [implementation-blueprints/filter-panel.md](../../implementation-blueprints/filter-panel.md)
+> **Related:** [filter-dropdown](filter-dropdown.md) — composable filter builder (legacy `implementation-blueprints/filter-panel` removed).
 
 ## What It Is
 

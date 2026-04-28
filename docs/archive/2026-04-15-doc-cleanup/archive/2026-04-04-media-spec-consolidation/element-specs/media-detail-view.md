@@ -1,6 +1,6 @@
 # Media Detail View
 
-> **Blueprint:** [implementation-blueprints/media-detail-view.md](../implementation-blueprints/media-detail-view.md)
+> **Archive:** Historical. **Contracts:** [media-detail-view](../../../../../specs/ui/media-detail/media-detail-view.md), [media-download-service](../../../../../specs/service/media-download-service/media-download-service.md). `implementation-blueprints/` removed.
 > **Media loading use cases:** [use-cases/photo-loading.md](../use-cases/photo-loading.md)
 > **Media editing use cases:** [use-cases/image-editing.md](../use-cases/image-editing.md)
 

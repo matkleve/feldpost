@@ -62,7 +62,7 @@ When replacing old code during symmetry refactors:
 - Never hard-delete immediately.
 - Move snapshots only as a last resort, using dated refactor snapshot folders.
 - Use `.legacy.ts` filenames to avoid import conflicts.
-- Do not reference archived files or archived specs from active specs/blueprints/implementation docs.
+- Do not reference archived files or archived specs from active specs or service contracts.
 
 Scalable Symmetry rule:
 

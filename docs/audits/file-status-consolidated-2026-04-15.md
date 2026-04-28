@@ -1,4 +1,6 @@
-﻿| File path | Category | Note |
+﻿> **Audits:** Historical inventory (**not normative**). Current contracts: [`docs/specs/`](../specs/README.md) · [How to read `docs/audits/`](README.md).
+
+| File path | Category | Note |
 | --- | --- | --- |
 | docs/address-resolver.md | MOVED |  |
 | docs/agent-daily-workflow.md | PROTECTED |  |

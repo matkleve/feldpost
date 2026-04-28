@@ -29,7 +29,7 @@ Use this skill when creating or refactoring services.
 - Move only as a last resort into dated refactor snapshot folders
 - Keep `.legacy.ts` suffix
 - Never hard-delete immediately
-- Do not reference archived files/specs from active specs, blueprints, or implementation docs
+- Do not reference archived files/specs from active specs or service contracts
 
 ## Scalable Symmetry Rules
 

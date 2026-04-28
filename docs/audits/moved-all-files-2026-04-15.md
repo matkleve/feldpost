@@ -1,4 +1,6 @@
-﻿| File path | Status |
+﻿> **Audits:** Historical inventory (**not normative**). Current contracts: [`docs/specs/`](../specs/README.md) · [How to read `docs/audits/`](README.md).
+
+| File path | Status |
 | --- | --- |
 | docs/address-resolver.md | MOVED |
 | docs/archive/2026-04-04-core-service-symmetry-pass/filename-parser.service.legacy.ts | MOVED |

@@ -1,6 +1,6 @@
 # Workspace Actions Bar
 
-> **Blueprint:** [implementation-blueprints/workspace-actions-bar.md](../../../implementation-blueprints/workspace-actions-bar.md)
+> **Service contracts:** [upload-manager](../../service/media-upload-service/upload-manager.md), [upload-manager-pipeline](../../service/media-upload-service/upload-manager-pipeline.md)
 > **Use cases:** [use-cases/workspace-export.md](../../../use-cases/workspace-export.md)
 
 ## What It Is
@@ -190,7 +190,7 @@ Share-set SQL, RLS, RPC stubs, and ER diagram (after Schema notes table): **[wor
 | `core/media-download/media-download.service.ts`                                          | Fetch signed URLs/files, build ZIP blob, trigger download    |
 | `supabase/migrations/20260318090000_share_sets.sql`                                      | `share_sets` + `share_set_items` tables, indexes, RLS, RPC   |
 | `docs/use-cases/workspace-export.md`                                                     | Behavioral scenarios and validation checklist                |
-| `docs/implementation-blueprints/workspace-actions-bar.md`                                | Delivery plan with file-level implementation tasks           |
+| `docs/specs/service/media-upload-service/upload-manager.md`                                | Upload manager facade contract           |
 
 ## Wiring
 

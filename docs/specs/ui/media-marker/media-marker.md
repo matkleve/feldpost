@@ -1,6 +1,6 @@
 # Media Marker
 
-> **Blueprint:** [implementation-blueprints/media-marker.md](../../../implementation-blueprints/media-marker.md)
+> **Related:** [marker-factory HTML](../../service/map/marker-factory.md) (map `DivIcon` builder)
 > **Media delivery:** [media-download-service](../../service/media-download-service/media-download-service.md) — `MediaDownloadService` (marker tier, shared signed-URL + tier cache across map, workspace, detail, `/media`). Low-level signing may use the `SignedUrlCache` adapter; the facade is `MediaDownloadService`.
 
 ## Terminology (symbols and product language)

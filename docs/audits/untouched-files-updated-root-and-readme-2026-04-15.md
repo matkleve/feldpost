@@ -1,4 +1,6 @@
-﻿| File path | Verdict | Justification (rule + target path if MOVE or MERGE) |
+﻿> **Audits:** Historical verdict table (**not normative**). Current contracts: [`docs/specs/`](../specs/README.md) · [How to read `docs/audits/`](README.md).
+
+| File path | Verdict | Justification (rule + target path if MOVE or MERGE) |
 | --- | --- | --- |
 | docs/agent-daily-workflow.md | PROTECTED | PROTECTED: Default fallback (no deletion decision without clear supersession). |
 | docs/agent-quick-reference.md | PROTECTED | PROTECTED: Default fallback (no deletion decision without clear supersession). |

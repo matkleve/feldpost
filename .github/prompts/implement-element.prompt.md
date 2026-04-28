@@ -16,7 +16,7 @@ You are implementing a UI element for Feldpost (Angular + Leaflet + Supabase).
 ## Instructions
 
 1. Read the element spec from `docs/specs/`
-2. Read the implementation blueprint from `docs/implementation-blueprints/` if it exists
+2. Read relevant **service specs** under `docs/specs/service/` (see `docs/specs/service/README.md`) alongside the element spec.
 3. Check what's already implemented — continue from there
 4. Create every missing file from the **File Map**
 5. Match the **Component Hierarchy** exactly

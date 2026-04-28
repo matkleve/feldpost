@@ -1,7 +1,7 @@
 # Search Bar — Use Cases
 
 > **Element spec:** [specs/search-bar.md](../specs/ui/search-bar/search-bar.md)
-> **Blueprint:** [implementation-blueprints/search-bar.md](../implementation-blueprints/search-bar.md)
+> **Contracts:** [search-bar spec](../specs/ui/search-bar/search-bar.md), [search-bar-service](../specs/service/search/search-bar-service.md)
 
 Use cases are the source of truth. The state machine, actions table, component hierarchy, and technical details in the element spec all exist to serve these scenarios.
 

@@ -1,6 +1,6 @@
 # Thumbnail Grid
 
-> **Blueprint:** [implementation-blueprints/thumbnail-grid.md](../implementation-blueprints/thumbnail-grid.md)
+> **Archive:** Historical. **Contracts:** [item-grid](../../specs/component/item-grid.md). `implementation-blueprints/` removed — use `docs/specs/`.
 > **Photo loading use cases:** [use-cases/media-loading.md](../use-cases/media-loading.md)
 
 ## What It Is

@@ -1,6 +1,5 @@
 # Group Tab Bar
 
-> **Blueprint:** [implementation-blueprints/group-tab-bar.md](../implementation-blueprints/group-tab-bar.md)
 
 ## What It Is
 

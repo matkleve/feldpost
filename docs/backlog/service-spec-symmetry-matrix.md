@@ -39,4 +39,4 @@
 
 - Adapter-level specs under `geocoding/adapters/` when adapter files ship beyond `.gitkeep`.
 - Split **search-bar-service** spec if line count grows (ranking / DB resolver slices).
-- Align `apps/web/src/app/core/media/README.md` with actual files (`file-type-registry`, types) in a code hygiene PR.
+- **`docs/implementation-blueprints/`** was intentionally removed; all links now target **`docs/specs/`** (see `docs/audits/README.md`).

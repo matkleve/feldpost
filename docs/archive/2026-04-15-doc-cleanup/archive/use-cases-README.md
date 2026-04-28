@@ -774,7 +774,7 @@ Import an entire folder of field photos in one operation, resolving their locati
 | ------------------------- | ---------------------------------------------- | ----------------------------------- |
 | Product use cases         | End-to-end user stories                        | `docs/use-cases/README.md`          |
 | Element specs             | Component contract (Actions, State, Hierarchy) | `docs/element-specs/`               |
-| Implementation blueprints | Code-level details (service sigs, queries)     | `docs/implementation-blueprints/`   |
+| Implementation contracts | `docs/specs/` (UI + service) | `docs/specs/README.md` |
 | **Interaction scenarios** | **Click-by-click flows per element**           | **`docs/use-cases/` (this folder)** |
 
 Interaction scenarios bridge the gap: they are specific enough to drive implementation and test cases, but written in terms of user intent rather than code.
@@ -800,15 +800,15 @@ Implementation Blueprints         ← Service signatures, queries, type defs
 Each interaction scenario file must link to:
 
 - The element spec it covers
-- The implementation blueprint (if one exists)
+- The **service facade spec** in `docs/specs/service/` when the flow crosses that boundary
 - The product use cases it satisfies
 - Related element specs that participate in the flow
 
 ## Index
 
-| File                         | Element Spec                               | Blueprint                                              | Status |
+| File                         | Element Spec                               | Related page / service specs                                              | Status |
 | ---------------------------- | ------------------------------------------ | ------------------------------------------------------ | ------ |
-| [map-shell.md](map-shell.md) | [map-shell](../element-specs/map-shell.md) | [map-shell](../implementation-blueprints/map-shell.md) | Active |
+| [map-shell.md](map-shell.md) | [map-shell](../element-specs/map-shell.md) | [map-page](../../specs/page/map-page.md) | Active |
 
 ## Files needed (priority order)
 

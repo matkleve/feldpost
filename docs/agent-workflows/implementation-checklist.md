@@ -24,7 +24,7 @@ This file is a verification aid only; project rules live in `AGENTS.md` and spec
 ## Data
 
 - [ ] Correct Supabase tables/queries match the Data section
-- [ ] Service method signatures match the implementation blueprint (if one exists in `docs/implementation-blueprints/`)
+- [ ] Service method signatures match the **facade spec** under `docs/specs/service/<module>/` (see `docs/specs/service/README.md`)
 - [ ] TypeScript types come from generated schema (no `any`)
 - [ ] No hardcoded dummy data left behind
 - [ ] Service abstractions used (not direct Supabase calls from components)

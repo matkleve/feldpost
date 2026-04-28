@@ -27,12 +27,11 @@
    - Large specs are split into parent + child specs
    - Read all child specs linked in "Child Specs" section
 
-### Step 2: Check Implementation Blueprint
+### Step 2: Read related service contracts (when applicable)
 
-1. **Look for blueprint**: `docs/implementation-blueprints/[element].md`
-2. **Read service signatures** - Method names & parameters
-3. **Check data flow diagrams** - How data moves through services
-4. **Note any special patterns** - Unique implementation approaches
+1. **Open the service index**: `docs/specs/service/README.md`
+2. **Read the facade spec** for each `apps/web/src/app/core/<module>/` you change (Actions, Data, Wiring, Acceptance Criteria).
+3. **Cross-link** UI specs already point here for search, geocoding, media download, upload, etc.
 
 ### Step 3: Understand the Context
 

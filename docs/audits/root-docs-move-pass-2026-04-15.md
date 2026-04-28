@@ -1,4 +1,6 @@
-﻿# Root Docs Move Pass Report (2026-04-15)
+﻿> **Audits:** Historical move pass (**not normative**). Current contracts: [`docs/specs/`](../specs/README.md) · [How to read `docs/audits/`](README.md).
+
+# Root Docs Move Pass Report (2026-04-15)
 
 | Source | Target | Status |
 |---|---|---|

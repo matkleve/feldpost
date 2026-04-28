@@ -18,7 +18,7 @@
 ### Implement a new UI element
 
 1. **Find spec**: Under `docs/specs/` (see `component/`, `ui/`, `service/`, `page/`, `system/` — index at `docs/specs/README.md`)
-2. **Check blueprint**: `docs/implementation-blueprints/[element].md` (if exists)
+2. **Service boundary (if any)**: `docs/specs/service/README.md` → open the facade spec for modules you touch (`apps/web/src/app/core/<name>/`)
 3. **Read glossary**: `docs/glossary.md` for exact terminology
 4. **Follow spec contract**: Use `docs/agent-workflows/element-spec-format.md`
 5. **Verify**: Walk `docs/agent-workflows/implementation-checklist.md`
@@ -61,7 +61,7 @@ apps/web/src/app/
 ```
 docs/
 ├── specs/                   # UI + service implementation contracts (SOURCE OF TRUTH)
-├── implementation-blueprints/ # Service signatures & rollout notes
+├── audits/                  # Historical move/inventory notes (see audits/README.md)
 ├── agent-workflows/         # Agent guides & checklists
 ├── design/                  # Design tokens & layout rules
 ├── glossary.md              # Canonical terminology
@@ -252,7 +252,7 @@ node scripts/import-i18n-csv-to-sql.mjs
 1. **Check the spec first** — `docs/specs/` (index: `docs/specs/README.md`)
 2. **Check the glossary** - `docs/glossary.md`
 3. **Check security docs** - `docs/security-boundaries.md`
-4. **Check implementation blueprint** - `docs/implementation-blueprints/[element].md`
+4. **Check service contracts** — `docs/specs/service/README.md` when behavior crosses a `core/` module
 5. **Ask for clarification** - Better than guessing
 
 ---

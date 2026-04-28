@@ -118,7 +118,7 @@ Full field matrices, location-resolution algorithm, duplicate/issue contracts, a
 | `docs/specs/service/location-path-parser/location-path-parser.md`    | Address extraction from path hierarchy           |
 | `docs/specs/service/folder-scan/folder-scan.md`                      | Folder scanning and per-file aggregation         |
 | `docs/specs/service/filename-parser/filename-parser.md`              | Per-file metadata extraction (address, date)     |
-| `docs/implementation-blueprints/upload-manager.md`                   | Blueprint for implementation-level rollout notes |
+| `docs/specs/service/media-upload-service/upload-manager.md`                   | Upload manager facade contract |
 | **Services**                                                         |                                                  |
 | `core/upload/upload-manager.service.ts`                              | Batch submission, queue draining, event fan-out  |
 | `core/upload/upload-new-pipeline.service.ts`                         | New-upload path                                  |
@@ -274,5 +274,5 @@ sequenceDiagram
 - [x] Conflict handling pauses the job and emits `locationConflict$` instead of silently choosing a row.
 - [x] Jobs in `awaiting_conflict_resolution` do not permanently consume a concurrency slot.
 - [x] Resolved conflicts resume the same job rather than creating a new job identity.
-- [x] Dedup and conflict behavior remain part of the upload contract even if implementation details move to blueprint/services.
+- [x] Dedup and conflict behavior remain part of the upload contract even if implementation details move to service specs.
 

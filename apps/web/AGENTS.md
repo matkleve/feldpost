@@ -33,7 +33,7 @@ src/app/
   - Keep one shared `types.ts` per module and keep facade orchestration slim
   - Do not create global adapter folders like `src/app/core/adapters/`
   - Move replaced code snapshots only as a last resort, using dated refactor snapshot folders and `.legacy.ts` suffix
-  - Do not reference archived files/specs from active specs, blueprints, or implementation docs
+  - Do not reference archived files/specs from active specs or service contracts
 - Match the component hierarchy in the element spec exactly
 - Every production component must have its own dedicated spec in `docs/specs/component/` or `docs/specs/ui/` (parent specs can reference child specs, but not replace them)
 - Use glossary names from `docs/glossary.md`

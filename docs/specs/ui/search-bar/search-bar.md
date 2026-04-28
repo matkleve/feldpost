@@ -1,6 +1,6 @@
 # Search Bar
 
-> **Blueprint:** [implementation-blueprints/search-bar.md](../../../implementation-blueprints/search-bar.md)
+> **Service contract:** [search-bar-service](../../service/search/search-bar-service.md)
 
 ## What It Is
 

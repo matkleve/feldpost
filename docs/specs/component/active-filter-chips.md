@@ -1,6 +1,6 @@
 # Active Filter Chips
 
-> **Blueprint:** [implementation-blueprints/active-filter-chips.md](../implementation-blueprints/active-filter-chips.md)
+> **Service contract:** [filter-service](../service/filter/filter-service.md)
 
 ## What It Is
 

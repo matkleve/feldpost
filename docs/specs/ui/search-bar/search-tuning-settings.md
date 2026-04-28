@@ -1,6 +1,7 @@
 # Search Tuning Settings
 
-> **Formula reference:** [search-algorithm-addresses-and-places.md](../../../search-algorithm-addresses-and-places.md)
+> **Facade / runtime search:** [search-bar-service](../../service/search/search-bar-service.md)  
+> **Algorithm reference:** [search-algorithm-addresses-and-places](../../service/location-resolver/search-algorithm-addresses-and-places.md)
 
 ## What It Is
 

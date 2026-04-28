@@ -15,7 +15,7 @@ Your job is to create a detailed implementation plan from an element spec — **
 ## Procedure
 
 1. Read the element spec from `docs/specs/`
-2. Read the implementation blueprint from `docs/implementation-blueprints/` (if one exists) — it contains service contracts, data-flow diagrams, and missing infrastructure lists that should inform the plan
+2. Read relevant **service facade specs** in `docs/specs/service/` (see `docs/specs/service/README.md`) when the plan touches those boundaries.
 3. Read `docs/architecture.md` for layer constraints and adapter patterns
 4. Read `docs/glossary.md` for canonical component names
 5. Read `docs/design/constitution.md` and `docs/design/README.md`

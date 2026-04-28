@@ -1,6 +1,6 @@
 # Media Detail View
 
-> **Blueprint:** [implementation-blueprints/media-detail-view.md](../../../implementation-blueprints/media-detail-view.md)
+> **Service contract:** [media-download-service](../../service/media-download-service/media-download-service.md)
 > **Media loading use cases:** [use-cases/media-loading.md](../../../use-cases/media-loading.md)
 > **Media editing use cases:** [use-cases/image-editing.md](../../../use-cases/image-editing.md)
 

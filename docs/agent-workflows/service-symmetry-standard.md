@@ -33,4 +33,4 @@ When replacing older code with symmetry modules:
 1. Do not hard-delete replaced code.
 2. Move legacy snapshots only as a last resort into dated refactor snapshot folders.
 3. Keep `.legacy.ts` suffix for TypeScript snapshots.
-4. Do not reference archived files/specs from active specs, blueprints, or implementation docs.
+4. Do not reference archived files/specs from active specs or service contracts.

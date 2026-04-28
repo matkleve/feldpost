@@ -1,6 +1,5 @@
 # Radius Selection
 
-> **Blueprint:** [implementation-blueprints/radius-selection.md](../implementation-blueprints/radius-selection.md)
 > **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
 
 ## What It Is
