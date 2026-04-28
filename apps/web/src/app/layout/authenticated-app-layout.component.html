@@ -1,0 +1,37 @@
+<div class="authenticated-app-layout">
+  <div class="authenticated-app-layout__main">
+    <router-outlet />
+  </div>
+
+  @if (photoPanelOpen()) {
+    <app-workspace-pane-shell
+      [open]="true"
+      [currentWidth]="workspacePaneWidth()"
+      [minWidth]="workspacePaneMinWidth()"
+      [maxWidth]="workspacePaneMaxWidth()"
+      [defaultWidth]="workspacePaneDefaultWidth()"
+      (widthChange)="onWorkspaceWidthChange($event)"
+    >
+      <app-workspace-pane
+        [activeTab]="workspacePaneActiveTab()"
+        [detailMediaId]="detailMediaId()"
+        [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"
+        [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
+        [linkedHoveredMediaIds]="linkedHoveredWorkspaceMediaIds()"
+        (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
+        (closed)="closeWorkspacePane()"
+        (detailClosed)="closeDetailView()"
+        (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
+        (detailRequested)="openDetailView($event)"
+        (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
+        (zoomToLocationRequested)="onZoomToLocationRequested($event)"
+        (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
+        (uploadLocationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
+        (uploadLocationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
+        (uploadLocationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+        (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
+        (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
+      />
+    </app-workspace-pane-shell>
+  }
+</div>

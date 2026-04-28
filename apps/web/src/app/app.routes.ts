@@ -51,8 +51,11 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    loadComponent: () =>
+      import('./layout/authenticated-app-layout.component').then(
+        (m) => m.AuthenticatedAppLayoutComponent,
+      ),
     children: [
-      // M-IMPL3: map shell — the main authenticated view
       {
         path: '',
         loadComponent: () =>
@@ -64,8 +67,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/map/map-shell/map-shell.component').then((m) => m.MapShellComponent),
       },
-
-      // M-UI2: placeholder routes — full pages implemented in M-UI6–9
       {
         path: 'media',
         loadComponent: () =>

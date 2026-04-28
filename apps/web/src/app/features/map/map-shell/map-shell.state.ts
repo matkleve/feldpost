@@ -48,4 +48,7 @@ export class MapShellState {
   readonly batchAddressTargetMediaIds = signal<ReadonlyArray<string>>([]);
 
   readonly detailMediaId = signal<string | null>(null);
+
+  /** Detail view address-search handoff (map shell consumes in media detail flow). */
+  readonly detailAddressSearchRequest = signal<{ mediaId: string; requestId: number } | null>(null);
 }

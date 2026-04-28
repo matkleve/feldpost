@@ -1,12 +1,14 @@
 /**
- * MapShellComponent — the main application shell after authentication.
+ * MapShellComponent — map route content (Leaflet map zone) after authentication.
  *
- * Full-screen map with:
+ * Renders inside **`AuthenticatedAppLayoutComponent`** main column. Includes:
  *  - UploadButton: fixed top-right, click-toggles the UploadPanel.
  *  - SearchBar: floating top-center with Nominatim geocoding.
  *  - GPSButton: floating bottom-right, re-centres map on user position.
- *  - PhotoPanel: slides in from right (desktop) / bottom (mobile) on marker click.
- *  - DragDivider: resize handle shown when PhotoPanel is open.
+ *  - Placement mode banner when placing uploads or search pins.
+ *
+ * **Workspace pane** (drag divider + right panel) is **not** in this template — it is owned by
+ * `AuthenticatedAppLayoutComponent` (`layout/authenticated-app-layout.component.ts`).
  *
  * Ground rules:
  *  - Leaflet is initialised in afterNextRender so it only runs in the browser.
@@ -55,8 +57,6 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
-import { WorkspacePaneComponent } from '../workspace-pane/workspace-pane.component';
-import { WorkspacePaneShellComponent } from '../workspace-pane/workspace-pane-shell.component';
 import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card/thumbnail-card.component';
 import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
@@ -110,6 +110,9 @@ import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-obser
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
+import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane-shell-host.token';
+import type { WorkspacePaneLayoutMapEffects } from '../../../core/workspace-pane-layout-map-effects.service';
+import { WorkspacePaneLayoutMapEffectsService } from '../../../core/workspace-pane-layout-map-effects.service';
 import { getLaneForJob } from '../../upload/upload-phase.helpers';
 import {
   MAP_MENU_ACTION_DEFINITIONS,
@@ -165,15 +168,12 @@ type MarkerRenderSnapshot = {
 const MAP_MARKER_MOTION_STORAGE_KEY = 'sitesnap.settings.map.markerMotion';
 const MAP_MARKER_MOTION_EVENT = 'sitesnap:map-marker-motion-changed';
 const MAP_BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
-const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePaneWidth';
 
 @Component({
   selector: 'app-map-shell',
   imports: [
     UploadPanelComponent,
     SearchBarComponent,
-    WorkspacePaneComponent,
-    WorkspacePaneShellComponent,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
     SegmentedSwitchComponent,
@@ -184,7 +184,6 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
   ],
   templateUrl: './map-shell.component.html',
   styleUrl: './map-shell.component.scss',
-  providers: [MapShellState],
   host: {
     '[style.--placeholder-icon]': 'placeholderIconUrl',
     '(document:keydown.escape)': 'onMapMenuCloseRequested()',
@@ -259,6 +258,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
+  private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly actionEngineService = inject(ActionEngineService);
@@ -288,7 +289,6 @@ export class MapShellComponent implements OnDestroy {
 
   /** Final visibility state: click-pinned open only. */
   readonly uploadPanelOpen = this.uploadPanelPinned;
-  readonly workspacePaneActiveTab = this.workspacePaneObserver.activeTab$;
   readonly uploadBatch = this.uploadManagerService.activeBatch;
   readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
   readonly uploadBatchActive = computed(() => {
@@ -552,7 +552,7 @@ export class MapShellComponent implements OnDestroy {
   readonly batchAddressDialogOpen = this.state.batchAddressDialogOpen;
   readonly batchAddressDialogTitle = this.state.batchAddressDialogTitle;
   readonly batchAddressDialogMessage = this.state.batchAddressDialogMessage;
-  readonly detailAddressSearchRequest = signal<{ mediaId: string; requestId: number } | null>(null);
+  readonly detailAddressSearchRequest = this.state.detailAddressSearchRequest;
 
   /**
    * When non-null, the Image Detail View is shown inside the photo panel.
@@ -707,7 +707,7 @@ export class MapShellComponent implements OnDestroy {
     requestedAt: number;
   } | null = null;
   private shareTokenResolved = false;
-  private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
+  private workspacePaneMapEffectsRegistration: WorkspacePaneLayoutMapEffects | null = null;
   private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
     contextKey: 'map',
     selectedMediaIds$: this.workspaceSelectionService.selectedMediaIds,
@@ -724,6 +724,22 @@ export class MapShellComponent implements OnDestroy {
   constructor() {
     this.workspacePaneObserver.onContextRebind(this.mapSelectedItemsContext);
 
+    this.workspacePaneMapEffectsRegistration = {
+      onZoomToLocation: (event) => this.onZoomToLocation(event),
+      onImageUploaded: (event) => this.onImageUploaded(event),
+      enterPlacementMode: (key) => this.enterPlacementMode(key),
+      onUploadLocationPreviewRequested: (event) => this.onUploadLocationPreviewRequested(event),
+      onUploadLocationPreviewCleared: () => this.onUploadLocationPreviewCleared(),
+      onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
+      onWorkspaceItemHoverStarted: (event) => this.onWorkspaceItemHoverStarted(event),
+      onWorkspaceItemHoverEnded: (mediaId) => this.onWorkspaceItemHoverEnded(mediaId),
+      onWorkspacePaneClosing: () => this.applyWorkspacePaneClosingMapSideEffects(),
+      invalidateMapSize: () => this.map?.invalidateSize(),
+    };
+    this.workspacePaneLayoutMapEffectsService.registerMapEffects(
+      this.workspacePaneMapEffectsRegistration,
+    );
+
     afterNextRender(() => {
       const isJsdom =
         typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom');
@@ -731,7 +747,6 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      this.restoreWorkspacePaneWidthPreference();
       this.markerMotionPreference.set(
         this.markerMotionService.readMarkerMotionPreference(MAP_MARKER_MOTION_STORAGE_KEY),
       );
@@ -746,6 +761,12 @@ export class MapShellComponent implements OnDestroy {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
+    if (this.workspacePaneMapEffectsRegistration) {
+      this.workspacePaneLayoutMapEffectsService.unregisterMapEffects(
+        this.workspacePaneMapEffectsRegistration,
+      );
+      this.workspacePaneMapEffectsRegistration = null;
+    }
     this.workspacePaneObserver.onRouteLeave('map');
     this.cleanupGpsAndTracking();
     this.cleanupDeferredAndQueryState();
@@ -887,7 +908,7 @@ export class MapShellComponent implements OnDestroy {
       this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
@@ -1144,7 +1165,7 @@ export class MapShellComponent implements OnDestroy {
 
   onRadiusContextOpenSelection(): void {
     this.ensurePhotoPanelOpen();
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
     this.onMapMenuCloseRequested();
   }
 
@@ -1244,7 +1265,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     if (deletedCount > 0) {
-      this.detailMediaId.set(null);
+      this.patchDetailMediaId(null);
       this.setSelectedMarker(null);
       this.setSelectedMarkerKeys(new Set());
       this.workspaceSelectionService.clearSelection();
@@ -1322,8 +1343,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.workspaceSelectionService.setSingle(mediaId);
-    this.workspacePaneObserver.setDetailImageId(mediaId);
-    this.workspacePaneObserver.setOpen(true);
+    this.workspacePaneShellHost.openDetailView(mediaId);
     await this.router.navigate(['/media']);
     this.onMapMenuCloseRequested();
   }
@@ -1503,12 +1523,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onDetailAddressSearchRequestConsumed(requestId: number): void {
-    const currentRequest = this.detailAddressSearchRequest();
-    if (!currentRequest || currentRequest.requestId !== requestId) {
-      return;
-    }
-
-    this.detailAddressSearchRequest.set(null);
+    this.workspacePaneShellHost.onDetailAddressSearchRequestConsumed(requestId);
   }
 
   async onMarkerContextAssignToProject(): Promise<void> {
@@ -1738,7 +1753,7 @@ export class MapShellComponent implements OnDestroy {
       }
 
       if (deletedCount > 0) {
-        this.detailMediaId.set(null);
+        this.patchDetailMediaId(null);
         this.setSelectedMarker(null);
         this.setSelectedMarkerKeys(new Set());
         this.workspaceSelectionService.clearSelection();
@@ -1791,21 +1806,22 @@ export class MapShellComponent implements OnDestroy {
       cancelMarkerMoveAnimation: (marker) => this.cancelMarkerMoveAnimation(marker),
       setSelectedMarker: (markerKey) => this.setSelectedMarker(markerKey),
       setSelectedMarkerKeys: (markerKeys) => this.setSelectedMarkerKeys(markerKeys),
-      setDetailImageId: (mediaId) => this.detailMediaId.set(mediaId),
+      setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
     });
 
     this.toastService.show({ message: 'Foto geloescht.', type: 'success', dedupe: true });
     this.onMapMenuCloseRequested();
   }
 
-  // ── Workspace pane resize ─────────────────────────────────────────────────
+  // ── Workspace pane (DOM + split owned by AuthenticatedAppLayoutComponent) ─
 
-  onWorkspaceWidthChange(newWidth: number): void {
-    const clampedWidth = this.clampWorkspacePaneWidth(newWidth);
-    this.workspacePaneWidth.set(clampedWidth);
-    this.persistWorkspacePaneWidthPreference(clampedWidth);
-    // After resize, invalidate the Leaflet map size so tiles re-render.
-    this.map?.invalidateSize();
+  private applyWorkspacePaneClosingMapSideEffects(): void {
+    if ((this.draftMediaMarker()?.uploadCount ?? 0) === 0) {
+      this.removeDraftMediaMarker();
+    }
+    this.setSelectedMarker(null);
+    this.setSelectedMarkerKeys(new Set());
+    this.clearRadiusSelectionVisuals();
   }
 
   onQrInviteCommandRequested(): void {
@@ -1814,23 +1830,7 @@ export class MapShellComponent implements OnDestroy {
 
   /** Closes the Image Detail View and returns to the thumbnail grid. */
   closeDetailView(): void {
-    this.detailMediaId.set(null);
-  }
-
-  /** Closes the workspace pane entirely and clears selection state. */
-  closeWorkspacePane(): void {
-    if ((this.draftMediaMarker()?.uploadCount ?? 0) === 0) {
-      this.removeDraftMediaMarker();
-    }
-    this.photoPanelOpen.set(false);
-    this.detailMediaId.set(null);
-    this.setSelectedMarker(null);
-    this.setSelectedMarkerKeys(new Set());
-    this.workspaceViewService.clearActiveSelection();
-    this.workspaceSelectionService.clearSelection();
-    this.clearRadiusSelectionVisuals();
-    // Let Angular remove the pane from the DOM, then tell Leaflet to reclaim the space.
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    this.workspacePaneShellHost.closeDetailView();
   }
 
   /**
@@ -1838,11 +1838,12 @@ export class MapShellComponent implements OnDestroy {
    * Also ensures the photo panel is open.
    */
   openDetailView(mediaId: string): void {
-    if (!this.photoPanelOpen()) {
-      this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
-    }
-    this.detailMediaId.set(mediaId);
-    this.photoPanelOpen.set(true);
+    this.workspacePaneShellHost.openDetailView(mediaId);
+  }
+
+  private patchDetailMediaId(mediaId: string | null): void {
+    this.state.detailMediaId.set(mediaId);
+    this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
   private clampWorkspacePaneWidth(width: number): number {
@@ -1850,39 +1851,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private getWorkspacePaneOpeningWidth(): number {
-    const preferredWidth = this.preferredWorkspacePaneWidth();
-    if (typeof preferredWidth === 'number') {
-      return this.clampWorkspacePaneWidth(preferredWidth);
-    }
-    return this.workspacePaneDefaultWidth();
-  }
-
-  private restoreWorkspacePaneWidthPreference(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const rawValue = window.localStorage.getItem(WORKSPACE_PANE_WIDTH_STORAGE_KEY);
-    if (!rawValue) {
-      return;
-    }
-
-    const parsedWidth = Number.parseInt(rawValue, 10);
-    if (Number.isNaN(parsedWidth)) {
-      return;
-    }
-
-    const clampedWidth = this.clampWorkspacePaneWidth(parsedWidth);
-    this.preferredWorkspacePaneWidth.set(clampedWidth);
-    this.workspacePaneWidth.set(clampedWidth);
-  }
-
-  private persistWorkspacePaneWidthPreference(width: number): void {
-    this.preferredWorkspacePaneWidth.set(width);
-    if (typeof window === 'undefined') {
-      return;
-    }
-    window.localStorage.setItem(WORKSPACE_PANE_WIDTH_STORAGE_KEY, String(width));
+    return this.clampWorkspacePaneWidth(this.workspacePaneWidth());
   }
 
   /**
@@ -1936,10 +1905,6 @@ export class MapShellComponent implements OnDestroy {
       this.activeWorkspaceHover = null;
     }
     this.setLinkedHoverMarkerFromWorkspace(null);
-  }
-
-  onWorkspacePaneActiveTabChange(tab: 'selected-items' | 'upload'): void {
-    this.workspacePaneObserver.setActiveTab(tab);
   }
 
   private highlightZoomTargetMarker(mediaId: string, lat: number, lng: number, attempt = 0): void {
@@ -2415,7 +2380,7 @@ export class MapShellComponent implements OnDestroy {
         return;
       }
 
-      this.detailMediaId.set(null);
+      this.patchDetailMediaId(null);
       this.setSelectedMarker(null);
       this.setSelectedMarkerKeys(new Set());
       this.searchPlacementActive.set(false);
@@ -2504,7 +2469,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.uploadPanelPinned.set(false);
     this.removeDraftMediaMarker();
-    this.closeWorkspacePane();
+    this.workspacePaneShellHost.closeWorkspacePane();
     return true;
   }
 
@@ -2536,7 +2501,7 @@ export class MapShellComponent implements OnDestroy {
     // The pane is closed only via its own close button.
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
     this.clearRadiusSelectionVisuals();
@@ -2967,7 +2932,7 @@ export class MapShellComponent implements OnDestroy {
       this.workspacePaneWidth.set(this.getWorkspacePaneOpeningWidth());
     }
     this.photoPanelOpen.set(true);
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
     this.setSelectedMarker(null);
   }
 
@@ -3507,7 +3472,7 @@ export class MapShellComponent implements OnDestroy {
     selectedKeys.add(markerKey);
     this.setSelectedMarkerKeys(selectedKeys);
     void this.addMarkerCellsToSelection(cells, zoom);
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
   }
 
   private handleExclusiveMarkerSelection(
@@ -3528,7 +3493,7 @@ export class MapShellComponent implements OnDestroy {
     }
 
     // Cluster click: ensure detail view is dismissed so thumbnail grid shows.
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
   }
 
   /** Attach click + touch long-press interactions consistently for each new marker. */
@@ -3567,32 +3532,41 @@ export class MapShellComponent implements OnDestroy {
         this.pendingSecondaryPress = null;
       },
       onOpen: (event: MouseEvent) => {
-        if (this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals)) {
-          const state = this.uploadedPhotoMarkers.get(markerKey);
-          if (state) {
-            const markerLatLng = L.latLng(state.lat, state.lng);
-            const isInsideCommittedRadius = this.radiusSelectionService.isInsideAnyCommittedRadius(
-              this.map,
-              this.radiusCommittedVisuals,
-              markerLatLng,
-            );
-
-            if (isInsideCommittedRadius) {
-              this.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
-              return;
-            }
-
-            // Clicking a marker outside the active radius exits radius mode
-            // and falls through to marker/cluster context for that marker.
-            this.clearActiveRadiusSelection();
-          }
-        }
-
-        this.markerContextMenuSuppressUntil =
-          Date.now() + MapShellComponent.MARKER_CONTEXT_MENU_SUPPRESS_MS;
-        this.openMarkerContextMenu(markerKey, event);
+        this.handleMarkerSecondaryOpen(markerKey, event);
       },
     });
+  }
+
+  /**
+   * Marker right-click and touch long-press must share the same precedence as
+   * map-secondary-click-system (radius-inside → radius menu; outside → dismiss
+   * radius then marker menu).
+   */
+  private handleMarkerSecondaryOpen(markerKey: string, event: MouseEvent | PointerEvent): void {
+    if (this.radiusSelectionService.hasCommittedSelection(this.radiusCommittedVisuals)) {
+      const state = this.uploadedPhotoMarkers.get(markerKey);
+      if (state) {
+        const markerLatLng = L.latLng(state.lat, state.lng);
+        const isInsideCommittedRadius = this.radiusSelectionService.isInsideAnyCommittedRadius(
+          this.map,
+          this.radiusCommittedVisuals,
+          markerLatLng,
+        );
+
+        if (isInsideCommittedRadius) {
+          this.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
+          return;
+        }
+
+        // Clicking a marker outside the active radius exits radius mode
+        // and falls through to marker/cluster context for that marker.
+        this.clearActiveRadiusSelection();
+      }
+    }
+
+    this.markerContextMenuSuppressUntil =
+      Date.now() + MapShellComponent.MARKER_CONTEXT_MENU_SUPPRESS_MS;
+    this.openMarkerContextMenu(markerKey, event);
   }
 
   private bindMarkerHoverInteraction(markerKey: string, marker: L.Marker): void {
@@ -3664,7 +3638,7 @@ export class MapShellComponent implements OnDestroy {
       MapShellComponent.MARKER_LONG_PRESS_MS,
       (event: PointerEvent) => {
         el.classList.add('map-photo-marker--long-pressed');
-        this.openMarkerContextMenu(markerKey, event);
+        this.handleMarkerSecondaryOpen(markerKey, event);
       },
     );
 
@@ -4175,7 +4149,7 @@ export class MapShellComponent implements OnDestroy {
     this.clearRadiusSelectionVisuals();
     this.setSelectedMarker(null);
     this.setSelectedMarkerKeys(new Set());
-    this.detailMediaId.set(null);
+    this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
   }

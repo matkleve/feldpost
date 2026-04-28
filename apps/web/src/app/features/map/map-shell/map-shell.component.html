@@ -1,14 +1,13 @@
 <!--
-  MapShellComponent — full-screen map shell.
+  MapShellComponent — map route content inside AuthenticatedAppLayout main column.
 
-  Layout (left→right):
-    MapZone (flex-fill)
-      UploadButton (absolute, top-right, z-upload-button, visually over map)
-      SearchBar (floating, top-center)
-      GPSButton (floating, bottom-right)
-      PlacementBanner (conditional)
-    DragDivider (hidden when PhotoPanel closed)
-    PhotoPanel (slides in from right / bottom)
+  Map zone:
+    UploadButton (absolute, top-right, z-upload-button, visually over map)
+    SearchBar (floating, top-center)
+    GPSButton (floating, bottom-right)
+    PlacementBanner (conditional)
+
+  Workspace pane + drag divider: hosted by app-authenticated-app-layout (see layout/).
 -->
 
 <!-- Map zone — fills remaining space -->
@@ -364,35 +363,3 @@
     />
   }
 </div>
-
-@if (photoPanelOpen()) {
-  <app-workspace-pane-shell
-    [open]="true"
-    [currentWidth]="workspacePaneWidth()"
-    [minWidth]="workspacePaneMinWidth()"
-    [maxWidth]="workspacePaneMaxWidth()"
-    [defaultWidth]="workspacePaneDefaultWidth()"
-    (widthChange)="onWorkspaceWidthChange($event)"
-  >
-    <app-workspace-pane
-      [activeTab]="workspacePaneActiveTab()"
-      [detailMediaId]="detailMediaId()"
-      [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"
-      [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
-      [linkedHoveredMediaIds]="linkedHoveredWorkspaceMediaIds()"
-      (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
-      (closed)="closeWorkspacePane()"
-      (detailClosed)="closeDetailView()"
-      (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
-      (detailRequested)="openDetailView($event)"
-      (imageUploaded)="onImageUploaded($event)"
-      (zoomToLocationRequested)="onZoomToLocation($event)"
-      (placementRequested)="enterPlacementMode($event)"
-      (uploadLocationPreviewRequested)="onUploadLocationPreviewRequested($event)"
-      (uploadLocationPreviewCleared)="onUploadLocationPreviewCleared()"
-      (uploadLocationMapPickRequested)="onUploadLocationMapPickRequested($event)"
-      (workspaceItemHoverStarted)="onWorkspaceItemHoverStarted($event)"
-      (workspaceItemHoverEnded)="onWorkspaceItemHoverEnded($event)"
-    />
-  </app-workspace-pane-shell>
-}

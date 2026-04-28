@@ -1,7 +1,7 @@
 /**
  * MediaComponent — /media page shell.
  * Displays all media (images, videos, documents) with grid layout.
- * Workspace pane is mounted globally by AppShell, not here.
+ * Workspace pane is mounted by AuthenticatedAppLayoutComponent (global split), not here.
  *
  * Flat host-owned layout:
  * app-media host > content-clamp stack > header + content

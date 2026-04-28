@@ -10,6 +10,18 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapShellComponent } from './map-shell.component';
+import { MapShellState } from './map-shell.state';
+import {
+  WORKSPACE_PANE_SHELL_HOST,
+  type WorkspacePaneShellHost,
+} from '../../../core/workspace-pane-shell-host.token';
+import type { WorkspacePaneTab } from '../../../core/workspace-pane-host.port';
+import type {
+  ImageUploadedEvent,
+  UploadLocationMapPickRequest,
+  UploadLocationPreviewEvent,
+} from '../../upload/upload-panel.types';
+import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card/thumbnail-card.component';
 import { UploadService } from '../../../core/upload/upload.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
@@ -29,6 +41,38 @@ function createJsonResponse(body: unknown, status = 200): Response {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+function createWorkspacePaneShellHostStub(state: MapShellState): WorkspacePaneShellHost {
+  return {
+    openDetailView(mediaId: string): void {
+      state.photoPanelOpen.set(true);
+      state.detailMediaId.set(mediaId);
+    },
+    closeDetailView(): void {
+      state.detailMediaId.set(null);
+    },
+    closeWorkspacePane(): void {
+      state.photoPanelOpen.set(false);
+      state.detailMediaId.set(null);
+    },
+    onWorkspaceWidthChange(_newWidth: number): void {},
+    onWorkspacePaneActiveTabChange(_tab: WorkspacePaneTab): void {},
+    onDetailAddressSearchRequestConsumed(_requestId: number): void {},
+    onZoomToLocationRequested(_event: {
+      mediaId: string;
+      lat: number;
+      lng: number;
+      zoomMode?: 'house' | 'street';
+    }): void {},
+    onImageUploadedFromWorkspacePane(_event: ImageUploadedEvent): void {},
+    enterPlacementModeFromWorkspacePane(_key: string): void {},
+    onUploadLocationPreviewRequestedFromWorkspacePane(_event: UploadLocationPreviewEvent): void {},
+    onUploadLocationPreviewClearedFromWorkspacePane(): void {},
+    onUploadLocationMapPickRequestedFromWorkspacePane(_event: UploadLocationMapPickRequest): void {},
+    onWorkspaceItemHoverStartedFromPane(_event: ThumbnailCardHoverEvent): void {},
+    onWorkspaceItemHoverEndedFromPane(_mediaId: string): void {},
+  };
 }
 
 function createSupabaseQueryMock() {
@@ -53,6 +97,12 @@ function buildTestBed() {
   return TestBed.configureTestingModule({
     imports: [MapShellComponent],
     providers: [
+      MapShellState,
+      {
+        provide: WORKSPACE_PANE_SHELL_HOST,
+        useFactory: (state: MapShellState) => createWorkspacePaneShellHostStub(state),
+        deps: [MapShellState],
+      },
       {
         provide: UploadService,
         useValue: {
@@ -1998,27 +2048,28 @@ describe('MapShellComponent', () => {
     expect(fixture.componentInstance.photoPanelOpen()).toBe(false);
   });
 
-  it('photo panel is not rendered when photoPanelOpen is false', () => {
+  it('photo panel DOM is not mounted on MapShellComponent (hosted by AuthenticatedAppLayout)', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
     const panel = (fixture.nativeElement as HTMLElement).querySelector('app-workspace-pane');
     expect(panel).toBeNull();
   });
 
-  it('photo panel is rendered when photoPanelOpen is true', () => {
+  it('photoPanelOpen signal can be set true for layout-hosted workspace pane', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
     fixture.componentInstance.photoPanelOpen.set(true);
     fixture.detectChanges();
 
+    expect(fixture.componentInstance.photoPanelOpen()).toBe(true);
     const panelShell = (fixture.nativeElement as HTMLElement).querySelector(
       'app-workspace-pane-shell',
     );
-    expect(panelShell).not.toBeNull();
+    expect(panelShell).toBeNull();
   });
 
-  it('workspace pane shell is visible when photoPanelOpen is true', () => {
+  it('workspace pane shell is not a child of MapShellComponent (layout host)', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
@@ -2028,6 +2079,6 @@ describe('MapShellComponent', () => {
     const panelShell = (fixture.nativeElement as HTMLElement).querySelector(
       'app-workspace-pane-shell',
     );
-    expect(panelShell).not.toBeNull();
+    expect(panelShell).toBeNull();
   });
 });
