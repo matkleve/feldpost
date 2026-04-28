@@ -31,7 +31,7 @@ Composable class table, hover token, and item geometry: **[dropdown-system.class
 - **Grouping**: `workspace-toolbar/grouping-dropdown.component.ts` + `.scss`
 - **Projects**: `workspace-toolbar/projects-dropdown.component.ts` + `.scss`
 - **Filter**: `workspace-toolbar/filter-dropdown.component.ts` + `.scss`
-- **Context menu**: `workspace-pane/media-detail-view.component.html` + `.scss`
+- **Context menu**: `apps/web/src/app/shared/workspace-pane/media-detail-view.component.html` + `.scss`
 
 ## Actions
 
@@ -110,11 +110,11 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `docs/specs/component/filters/dropdown-system.md`                                                         | Shared dropdown visual contract                           |
 | `apps/web/src/styles.scss`                                                                        | Global `dd-*` primitive class definitions                 |
-| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
-| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
-| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
-| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
-| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
+| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.scss`     | Sort-specific styling exceptions                          |
+| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
+| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
 
 ## Wiring
 

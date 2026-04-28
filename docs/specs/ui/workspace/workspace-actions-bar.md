@@ -16,7 +16,7 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 ## Where It Lives
 
 - **Route**: `/`
-- **Parent**: `WorkspacePaneComponent` content stack in `features/map/workspace-pane/workspace-pane.component.ts`
+- **Parent**: `WorkspacePaneComponent` content stack in `apps/web/src/app/shared/workspace-pane/workspace-pane.component.ts`
 - **Appears when**: `selectedMediaIds.size > 0` in workspace selection scope
 
 ## Actions & Interactions
@@ -164,30 +164,18 @@ Share-set SQL, RLS, RPC stubs, and ER diagram (after Schema notes table): **[wor
 
 | File                                                                                     | Purpose                                                      |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts`   | Bottom action bar component                                  |
-| `features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html` | Template for selection and export actions                    |
-| `features/map/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.scss` | Bar layout, transitions, responsive behavior                 |
-| `features/map/map-shell/map-shell.component.ts`                                          | Host wiring for `?share` URL token resolve and pane opening  |
-| `features/map/workspace-pane/add-to-project-dialog.component.ts`                         | Batch add-to-project dialog behavior                         |
-| `features/map/workspace-pane/add-to-project-dialog.component.html`                       | Project picker for selected media                            |
-| `features/map/workspace-pane/add-to-project-dialog.component.scss`                       | Add-to-project dialog styles                                 |
-| `features/map/workspace-pane/change-address-dialog.component.ts`                         | Batch change-address dialog behavior                         |
-| `features/map/workspace-pane/change-address-dialog.component.html`                       | Address editor for selected media                            |
-| `features/map/workspace-pane/change-address-dialog.component.scss`                       | Change-address dialog styles                                 |
-| `features/map/workspace-pane/delete-selection-dialog.component.ts`                       | Batch delete confirmation dialog behavior                    |
-| `features/map/workspace-pane/delete-selection-dialog.component.html`                     | Destructive confirmation content                             |
-| `features/map/workspace-pane/delete-selection-dialog.component.scss`                     | Delete dialog styles                                         |
-| `features/map/workspace-pane/share-selection-dialog.component.ts`                        | Share-link dialog component                                  |
-| `features/map/workspace-pane/share-selection-dialog.component.html`                      | Share dialog template                                        |
-| `features/map/workspace-pane/share-selection-dialog.component.scss`                      | Share dialog styles                                          |
-| `features/map/workspace-pane/download-selection-dialog.component.ts`                     | ZIP download dialog component                                |
-| `features/map/workspace-pane/download-selection-dialog.component.html`                   | Download dialog template                                     |
-| `features/map/workspace-pane/download-selection-dialog.component.scss`                   | Download dialog styles                                       |
-| `core/workspace-selection.service.ts`                                                    | Selection state, toggles, select all/none, keyboard handling |
-| `core/workspace-view.service.ts`                                                         | Ordered media hydration for resolved share-set IDs           |
-| `core/media-bulk-actions.service.ts`                                                     | Batch add-to-project, change-address, and delete operations  |
-| `core/share-set.service.ts`                                                              | Create/resolve share-set tokens via Supabase                 |
-| `core/media-download/media-download.service.ts`                                          | Fetch signed URLs/files, build ZIP blob, trigger download    |
+| `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts`   | Bottom action bar component                                  |
+| `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html` | Template for selection, export, and inline dialogs                    |
+| `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.scss` | Bar layout, transitions, responsive behavior                 |
+| `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts`       | Project picker dialog (assign project)                      |
+| `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`              | Text input dialog (bulk address change)                      |
+| `apps/web/src/app/features/map/map-shell/map-shell.component.ts`                                          | Host wiring for `?share` URL token resolve and pane opening  |
+| `apps/web/src/app/core/workspace-selection/workspace-selection.service.ts`                                                    | Selection state, toggles, select all/none, keyboard handling |
+| `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                                         | Raw workspace media list updates after bulk actions           |
+| `apps/web/src/app/core/supabase/supabase.service.ts`                                                                     | Supabase client (bulk delete and other mutations)            |
+| `apps/web/src/app/core/media-location-update/media-location-update.service.ts`                                              | Batch address/location updates from geocoding                  |
+| `apps/web/src/app/core/share-set/share-set.service.ts`                                                              | Create/resolve share-set tokens via Supabase                 |
+| `apps/web/src/app/core/media-download/media-download.service.ts`                                          | Fetch signed URLs/files, build ZIP blob, trigger download    |
 | `supabase/migrations/20260318090000_share_sets.sql`                                      | `share_sets` + `share_set_items` tables, indexes, RLS, RPC   |
 | `docs/use-cases/workspace-export.md`                                                     | Behavioral scenarios and validation checklist                |
 | `docs/specs/service/media-upload-service/upload-manager.md`                                | Upload manager facade contract           |

@@ -130,8 +130,8 @@ flowchart LR
 
 | File                                                       | Purpose                   |
 | ---------------------------------------------------------- | ------------------------- |
-| `features/map/workspace-pane/sort-dropdown.component.ts`   | Sort dropdown with search |
-| `features/map/workspace-pane/sort-dropdown.component.scss` | Styles                    |
+| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts`   | Sort dropdown with search |
+| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.scss` | Styles                    |
 
 ## Wiring
 

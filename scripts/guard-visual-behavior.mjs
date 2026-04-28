@@ -72,22 +72,25 @@ function main() {
     "apps/web/src/app/features/media/media-content.component.html",
   );
   const mediaItemHtml = readText(
-    "apps/web/src/app/features/media/media-item.component.html",
+    "apps/web/src/app/shared/media-item/media-item.component.html",
   );
   const mediaItemScss = readText(
-    "apps/web/src/app/features/media/media-item.component.scss",
+    "apps/web/src/app/shared/media-item/media-item.component.scss",
   );
   const renderSurfaceTs = readText(
-    "apps/web/src/app/features/media/media-item-render-surface.component.ts",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.ts",
   );
   const renderSurfaceHtml = readText(
-    "apps/web/src/app/features/media/media-item-render-surface.component.html",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.html",
   );
   const renderSurfaceScss = readText(
-    "apps/web/src/app/features/media/media-item-render-surface.component.scss",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.scss",
   );
   const stateFrameScss = readText(
     "apps/web/src/app/shared/item-grid/item-state-frame.component.scss",
+  );
+  const mediaItemTs = readText(
+    "apps/web/src/app/shared/media-item/media-item.component.ts",
   );
 
   // Governance guards.
@@ -129,72 +132,72 @@ function main() {
     );
   }
 
-  // Runtime guards for /media behavior.
+  // Runtime guards for /media + shared media item contract.
   expectContains(
     "apps/web/src/app/features/media/media-content.component.html",
     mediaContentHtml,
-    '[slotMode]="itemMode()"',
-    "Loading render surface must bind slotMode to itemMode().",
+    '[mode]="itemMode()"',
+    "Item grid and media items must bind layout mode to itemMode().",
   );
 
   expectContains(
-    "apps/web/src/app/features/media/media-item-render-surface.component.ts",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.ts",
     renderSurfaceTs,
     "readonly state = input<MediaItemRenderSurfaceState>('loading');",
     "Render surface must expose enum state input.",
   );
   expectNotContains(
-    "apps/web/src/app/features/media/media-item-render-surface.component.ts",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.ts",
     renderSurfaceTs,
     "readonly selected = input(false);",
     "Render surface must not expose legacy selected boolean input.",
   );
   expectContains(
-    "apps/web/src/app/features/media/media-item-render-surface.component.html",
-    renderSurfaceHtml,
-    '[attr.data-state]="state()"',
-    "Render surface root must expose data-state visual driver.",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.ts",
+    renderSurfaceTs,
+    "'[attr.data-state]': 'state()'",
+    "Render surface host must expose data-state visual driver.",
   );
   expectNotContains(
-    "apps/web/src/app/features/media/media-item-render-surface.component.html",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.html",
     renderSurfaceHtml,
     '[class.media-item-render-surface__media-frame--selected]="selected()"',
     "Render surface must not use legacy selected class binding.",
   );
   expectSelector(
-    "apps/web/src/app/features/media/media-item-render-surface.component.scss",
+    "apps/web/src/app/shared/media-item/media-item-render-surface.component.scss",
     renderSurfaceScss,
     "[data-state='content-selected'] .media-item-render-surface__media-frame",
     "Missing data-state based selected frame style selector.",
   );
 
   expectContains(
-    "apps/web/src/app/features/media/media-item.component.html",
-    mediaItemHtml,
-    '[state]="renderSurfaceState()"',
-    "Media item must pass enum render-surface state.",
+    "apps/web/src/app/shared/media-item/media-item.component.ts",
+    mediaItemTs,
+    "'[attr.data-state]': 'state()'",
+    "Media item host must expose data-state visual driver.",
   );
   expectContains(
-    "apps/web/src/app/features/media/media-item.component.html",
+    "apps/web/src/app/shared/media-item/media-item.component.html",
+    mediaItemHtml,
+    '<app-media-display',
+    "Media item must delegate delivery to MediaDisplay.",
+  );
+  expectContains(
+    "apps/web/src/app/shared/media-item/media-item.component.html",
     mediaItemHtml,
     '[state]="quietActionsState()"',
     "Media item must pass enum quiet-actions state.",
   );
-  expectContains(
-    "apps/web/src/app/features/media/media-item.component.html",
-    mediaItemHtml,
-    '[state]="state()"',
-    "Media item must pass enum state to item-state-frame.",
-  );
 
   expectNotContains(
-    "apps/web/src/app/features/media/media-item.component.html",
+    "apps/web/src/app/shared/media-item/media-item.component.html",
     mediaItemHtml,
     "media-item__selected-overlay",
     "Host-level selected overlay element is forbidden; selection must be frame-level.",
   );
   expectNotContains(
-    "apps/web/src/app/features/media/media-item.component.scss",
+    "apps/web/src/app/shared/media-item/media-item.component.scss",
     mediaItemScss,
     ".media-item__selected-overlay",
     "Host-level selected overlay style is forbidden; selection must be frame-level.",
@@ -220,21 +223,21 @@ function main() {
 
   if (uploadZ === null) {
     fail(
-      "apps/web/src/app/features/media/media-item.component.scss",
+      "apps/web/src/app/shared/media-item/media-item.component.scss",
       "Unable to read z-index for .media-item__upload-overlay.",
     );
   }
 
   if (quietZ === null) {
     fail(
-      "apps/web/src/app/features/media/media-item.component.scss",
+      "apps/web/src/app/shared/media-item/media-item.component.scss",
       "Unable to read z-index for .media-item__quiet-actions.",
     );
   }
 
   if (uploadZ !== null && quietZ !== null && uploadZ >= quietZ) {
     fail(
-      "apps/web/src/app/features/media/media-item.component.scss",
+      "apps/web/src/app/shared/media-item/media-item.component.scss",
       `Upload overlay z-index (${uploadZ}) must be below quiet actions z-index (${quietZ}).`,
     );
   }

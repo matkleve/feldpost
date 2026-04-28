@@ -5,6 +5,9 @@ Module index for workspace UI contracts.
 ## Files
 
 - workspace-pane.md
+- workspace-pane-shell.md
+- workspace-selected-items-grid.md
+- pane-header.md
 - workspace-toolbar.md
 - workspace-actions-bar.md
 - workspace-view-system.md — **UI overview stub (links only)** → [service workspace-view-system](../../service/workspace-view/workspace-view-system.md) (canonical contract; do not duplicate)

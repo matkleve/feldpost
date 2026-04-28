@@ -48,10 +48,9 @@ N/A.
 
 ### Legacy Targets to Archive
 
-- Workspace pane:
-  - `apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts`
-  - `apps/web/src/app/features/map/workspace-pane/thumbnail-card/thumbnail-card.component.ts`
-  - `apps/web/src/app/features/map/workspace-pane/thumbnail-card/thumbnail-card-media/thumbnail-card-media.component.ts`
+- Workspace pane (completed cutover):
+  - Canonical selected-items host: `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts` (`ItemGridComponent` + `MediaItemComponent`).
+  - Legacy `thumbnail-grid` / `thumbnail-card` paths under `features/map/workspace-pane/` were removed; do not reintroduce as runtime hosts.
 - Media page:
   - `apps/web/src/app/features/media/media-grid.component.ts`
   - `apps/web/src/app/features/media/media-card.component.ts`

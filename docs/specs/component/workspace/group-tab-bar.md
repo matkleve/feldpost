@@ -63,7 +63,7 @@ flowchart LR
 
 | File                                                     | Purpose           |
 | -------------------------------------------------------- | ----------------- |
-| `features/map/workspace-pane/group-tab-bar.component.ts` | Tab bar component |
+| `apps/web/src/app/shared/workspace-pane/group-tab-bar.component.ts` | Tab bar component |
 
 ## Wiring
 

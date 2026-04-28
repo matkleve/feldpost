@@ -139,8 +139,8 @@ sequenceDiagram
 | File                                                                          | Purpose                                                      |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `apps/web/src/app/features/projects/projects-page.component.ts`               | Host page state for project selection + workspace visibility |
-| `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Reused pane for project-scoped media browsing                |
-| `apps/web/src/app/features/map/workspace-pane/media-detail-view.component.ts` | Reused details view with map action                          |
+| `apps/web/src/app/shared/workspace-pane/workspace-pane.component.ts`    | Reused pane for project-scoped media browsing                |
+| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Reused details view with map action                          |
 | `apps/web/src/app/features/projects/projects-page.component.spec.ts`          | Integration tests for in-page project details behavior       |
 
 ## Wiring

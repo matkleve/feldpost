@@ -17,7 +17,7 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 
 1. **Workspace Toolbar** — a row of four ghost buttons (Grouping, Filter, Sort, Projects) with active-indicator dots. `gap: 0.5rem`, `.btn-compact` height (1.75rem). `--color-bg-surface` background, matching pane.
 2. **Group Headers** (conditional) — sticky section headings when grouping is active. Collapsible with a chevron toggle. Shows group name + media count. Indented for multi-level nesting (`padding-left: 1.5rem` per level).
-3. **Thumbnail Grid** — auto-fill CSS grid of 128×128px cards, virtual-scrolled for performance. Occupies all remaining vertical space. When no grouping is active, the grid is a flat scrollable list.
+3. **Selected-items grid** — virtual-scrolled grid using `ItemGridComponent` with `MediaItemComponent` tile content (see [item-grid](../item-grid/item-grid.md)). Occupies all remaining vertical space. When no grouping is active, the grid is a flat scrollable list.
 
 **Empty state** (no media items match filters): centered message "No media items match the current filters" with a ghost button "Clear filters".
 
@@ -29,7 +29,7 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 
 - **Parent**: `WorkspacePaneComponent` content area
 - **Appears when**: Workspace Pane is open AND `activeTabId === 'selection'` AND `detailMediaId === null`
-- **Replaced by**: `MediaDetailView` when a thumbnail is clicked (detail view replaces grid)
+- **Replaced by**: `MediaDetailView` when a grid tile is clicked (detail view replaces grid)
 
 ## Actions
 
@@ -41,15 +41,15 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 | 4   | Clicks "Filter" toolbar button           | Filter dropdown opens — add Notion-style rules (property → operator → value), media items re-filter instantly | `filterRules` changed        |
 | 5   | Clicks "Sort" toolbar button             | Sort dropdown opens — pick property + direction, media items re-sort instantly                                | `activeSort` changed         |
 | 6   | Clicks "Projects" toolbar button         | Projects dropdown opens — check/uncheck projects, media items filter by project instantly                     | `selectedProjectIds` changed |
-| 7   | Scrolls the thumbnail grid               | Virtual scroll loads more rows, batch-signs thumbnail URLs for newly-visible cards                            | Viewport update              |
-| 8   | Clicks a thumbnail card                  | Media Detail View replaces grid, full-res preview loads                                                       | `detailMediaId` set          |
+| 7   | Scrolls the selected-items grid               | Virtual scroll loads more rows, batch-signs thumbnail URLs for newly-visible cards                            | Viewport update              |
+| 8   | Clicks a media tile in the grid             | Media Detail View replaces grid, full-res preview loads                                                       | `detailMediaId` set          |
 | 9   | Clicks back arrow in detail view         | Returns to grid, scroll position and all toolbar state preserved                                              | `detailMediaId` cleared      |
 | 10  | Clicks collapse toggle on a group header | Group's thumbnails collapse/expand                                                                            | Group collapsed state        |
 | 11  | Clicks "+" in Group Tab Bar              | Saves current Active Selection media items as a new named group                                               | New tab created              |
 | 12  | New cluster/radius selection on map      | Replaces current Active Selection media items, resets to unfiltered state                                     | `rawImages` replaced         |
 | 13  | Closes workspace pane                    | Active Selection cleared, all toolbar state reset                                                             | `rawImages` cleared          |
-| 14  | Hovers a thumbnail card                  | Reveals quiet actions: checkbox (multi-select), add-to-group, more (⋯)                                        | Quiet Actions pattern        |
-| 15  | Checks one or more thumbnail checkboxes  | Selection set updates and Workspace Actions Bar appears with selected count and actions                       | `selectedMediaIds.size > 0`  |
+| 14  | Hovers a media tile in the grid                  | Reveals quiet actions: checkbox (multi-select), add-to-group, more (⋯)                                        | Quiet Actions pattern        |
+| 15  | Checks one or more selection checkboxes  | Selection set updates and Workspace Actions Bar appears with selected count and actions                       | `selectedMediaIds.size > 0`  |
 | 16  | Clicks `Add to project` in export bar    | Opens bulk project picker and assigns all selected media to target project(s)                                 | Bulk curation action         |
 | 17  | Clicks `Change address` in export bar    | Opens bulk address editor and updates address fields for all selected media                                   | Bulk curation action         |
 | 18  | Clicks `Delete` in export bar            | Opens destructive confirmation and deletes all selected media on confirm                                      | Bulk curation action         |
@@ -69,8 +69,8 @@ ActiveSelectionView                        ← content area within WorkspacePane
 │
 ├── [no matches] EmptyFilterState          ← "No media items match" + "Clear filters" ghost button
 │
-├── [no grouping] ThumbnailGrid            ← virtual-scrolled flat grid (see thumbnail-grid spec)
-│   └── ThumbnailCard × N                  ← 128×128 each (see thumbnail-card spec)
+├── [no grouping] WorkspaceSelectedItemsGrid   ← hosts ItemGrid + MediaItem tiles ([item-grid](../item-grid/item-grid.md))
+│   └── MediaItem × N                          ← domain tiles per item-grid contract
 │       └── SelectionCheckbox              ← top-left on hover/focus, always visible when selected
 │
 └── [grouping active] GroupedContent       ← virtual scroll with interleaved headers + grids
@@ -80,7 +80,7 @@ ActiveSelectionView                        ← content area within WorkspacePane
         │   ├── GroupName                  ← e.g., "Zürich"
         │   ├── ImageCount                 ← e.g., "4 media items"
         │   └── .ui-spacer
-        ├── ThumbnailGrid                  ← grid of this section's media items
+        ├── ItemGrid (section)               ← grid of this section's media items
         └── [nested] GroupedSection × N    ← multi-level grouping (indented 1.5rem per level)
 
     [selectedMediaIds.size > 0] WorkspaceExportBar  ← bottom action surface for share/copy/download
@@ -318,16 +318,16 @@ flowchart TD
 
 | File                                                                          | Purpose                                       | Spec Reference                                              |
 | ----------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `core/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group          | [workspace-view-system](../service/workspace-view/workspace-view-system.md) |
-| `core/filter.service.ts`                                                      | Filter rule state + predicate builder         | [filter-dropdown](filter-dropdown.md)                       |
-| `core/metadata.service.ts`                                                    | Property CRUD + metadata field/value contract | [metadata-service](../service/metadata/metadata-service.md)          |
-| `features/map/workspace-pane/workspace-toolbar.component.ts/html/scss`        | Toolbar with 4 buttons                        | [workspace-toolbar](workspace/workspace-toolbar.md)         |
-| `features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.*` | Grouping dropdown with drag-reorder           | [grouping-dropdown](grouping-dropdown.md)                   |
-| `features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.*`     | Sort dropdown with search                     | [sort-dropdown](sort-dropdown.md)                           |
-| `features/map/workspace-pane/workspace-toolbar/filter-dropdown.component.*`   | Notion-style filter builder                   | [filter-dropdown](filter-dropdown.md)                       |
-| `features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.*` | Projects checklist dropdown                   | [projects-dropdown](projects-dropdown.md)                   |
-| `features/map/workspace-pane/group-header.component.ts`                       | Collapsible group heading                     | (this spec)                                                 |
-| `features/map/workspace-pane/thumbnail-grid.component.*`                      | Virtual-scrolled media grid                   | [thumbnail-grid](thumbnail-grid.md)                         |
+| `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group          | [workspace-view-system](../service/workspace-view/workspace-view-system.md) |
+| `apps/web/src/app/core/filter/filter.service.ts`                                                      | Filter rule state + predicate builder         | [filter-dropdown](../filters/filter-dropdown.md)                       |
+| `apps/web/src/app/core/metadata/metadata.service.ts`                                                    | Property CRUD + metadata field/value contract | [metadata-service](../service/metadata/metadata-service.md)          |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` (+ `.html`/`.scss`)        | Toolbar with controls                        | [workspace-toolbar](../../ui/workspace/workspace-toolbar.md)         |
+| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.*` | Grouping dropdown with drag-reorder           | [grouping-dropdown](../filters/grouping-dropdown.md)                   |
+| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.*`     | Sort dropdown with search                     | [sort-dropdown](../filters/sort-dropdown.md)                           |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.*`   | Notion-style filter builder                   | [filter-dropdown](../filters/filter-dropdown.md)                       |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.*` | Projects checklist dropdown                   | [projects-dropdown](../project/projects-dropdown.md)                   |
+| `apps/web/src/app/shared/ui-primitives/group-header.component.ts`                       | Collapsible group heading                     | [ui-primitives.group-header](../ui-primitives/ui-primitives.group-header.md)                                                 |
+| `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.*`                      | Selected-items grid host (`ItemGrid` + `MediaItem`)                   | [item-grid](../item-grid/item-grid.md)                         |
 | `supabase/migrations/XXXXX_cluster_images_rpc.sql`                            | RPC for cluster media loading                 | [workspace-view-system](../service/workspace-view/workspace-view-system.md) |
 
 ## Wiring

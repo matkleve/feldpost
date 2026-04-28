@@ -34,12 +34,14 @@ const projectRoot = process.cwd();
 const registryPath = resolve(
   projectRoot,
   "docs",
+  "design",
   "design-system",
   "registry.json",
 );
 const schemaPath = resolve(
   projectRoot,
   "docs",
+  "design",
   "design-system",
   "registry.schema.json",
 );

@@ -73,9 +73,9 @@ flowchart LR
 
 | File                                                           | Purpose                     |
 | -------------------------------------------------------------- | --------------------------- |
-| `features/map/workspace-pane/projects-dropdown.component.ts`   | Projects checklist dropdown |
-| `features/map/workspace-pane/projects-dropdown.component.html` | Template                    |
-| `features/map/workspace-pane/projects-dropdown.component.scss` | Styles                      |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.ts`   | Projects checklist dropdown |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.html` | Template                    |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.scss` | Styles                      |
 
 ## Wiring
 

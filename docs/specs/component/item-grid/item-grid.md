@@ -7,12 +7,23 @@ This system is a full replacement contract: once a surface is migrated, legacy g
 
 ## Documentation Phase Boundary
 
-- Workspace pane selected-items grid is migrated to `ItemGridComponent` + `MediaItemComponent` (`apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`).
+- Workspace pane selected-items grid is migrated to `ItemGridComponent` + `MediaItemComponent` (`apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts`).
 - Non-media item-grid cleanup elsewhere MUST still follow phased rollout notes below where applicable.
 
 - This refactoring pass MUST modify only the `/media` page specification set **when** the change is scoped to the media route shell exclusively.
 - In this shared spec, edits MUST stay limited to media-path ownership, FSM boundary, and naming consistency constraints.
 - Non-media item-grid cleanup MUST be deferred to later phases when not covered by the workspace-pane migration.
+
+## Visual Behavior Contract
+
+### Ownership Matrix
+
+| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
+| --- | --- | --- | --- | --- | --- | --- |
+| Grid layout columns/gaps | `.item-grid` | `.item-grid` | `.item-grid` | `.item-grid--grid-sm`, `.item-grid--grid-md`, `.item-grid--grid-lg`, `.item-grid--row`, `.item-grid--card` | layout tokens only | mode switch preserves stable outer bounds |
+| Item slot projection | `ItemGridComponent` content host | `ItemGridComponent` | domain item root | projected domain items | n/a (child owns layer order) | domain item fills slot; grid does not paint domain text |
+
+Domain item visuals (media, project) are owned by their dedicated specs; this matrix covers the shared `ItemGridComponent` shell only.
 
 ## What It Looks Like
 

@@ -11,8 +11,8 @@ import {
   signal,
 } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { WorkspacePaneComponent } from '../shared/workspace-pane/workspace-pane.component';
-import { WorkspacePaneShellComponent } from '../shared/workspace-pane/workspace-pane-shell.component';
+import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
+import { WorkspacePaneShellComponent } from '../shared/workspace-pane/shell/workspace-pane-shell.component';
 import { UploadPanelComponent } from '../features/upload/upload-panel.component';
 import { MapShellState } from '../features/map/map-shell/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';

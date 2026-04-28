@@ -35,6 +35,7 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | media-preview | [media-preview/media-preview-service.md](media-preview/media-preview-service.md) |
 | media-query | [media-query/media-query-service.md](media-query/media-query-service.md) |
 | media-upload | [media-upload-service/README.md](media-upload-service/README.md) |
+| media-detail-data | [media-detail-data/README.md](media-detail-data/README.md) |
 | metadata | [metadata/metadata-service.md](metadata/metadata-service.md) |
 | projects | [projects/projects-service.md](projects/projects-service.md) |
 | search | [search/search-bar-service.md](search/search-bar-service.md) |

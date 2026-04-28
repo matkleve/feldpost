@@ -12,7 +12,7 @@ A thin vertical bar (2px visual width, `--color-border` at rest) occupying the f
 
 - **Parent (canonical):** **`app-authenticated-app-layout`** (split host) — renders the divider between the **main column** (route outlet: map, media, projects, …) and **Workspace Pane**. **Rollback:** divider may return under `MapShellComponent` only if layout hoist is reverted; see [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-rollback--partial-landing).
 - **Appears when**: `photoPanelOpen()` is `true` (desktop only, hidden at `< 768px`) — product: Workspace Pane open ([symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md) for future `workspacePaneOpen`).
-- **Component**: `DragDividerComponent` at `features/map/workspace-pane/drag-divider/`
+- **Component**: `DragDividerComponent` at `apps/web/src/app/shared/workspace-pane/drag-divider/`
 
 ## Actions
 
@@ -89,9 +89,9 @@ None — the Drag Divider is purely a layout interaction component with no data 
 
 | File                                                                   | Purpose                                          |
 | ---------------------------------------------------------------------- | ------------------------------------------------ |
-| `features/map/workspace-pane/drag-divider/drag-divider.component.ts`   | Component with pointer tracking + keyboard logic |
-| `features/map/workspace-pane/drag-divider/drag-divider.component.html` | Template: hit zone, bar, grip indicator          |
-| `features/map/workspace-pane/drag-divider/drag-divider.component.scss` | Styles: rest/hover/active states, grip lines     |
+| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.ts`   | Component with pointer tracking + keyboard logic |
+| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.html` | Template: hit zone, bar, grip indicator          |
+| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.scss` | Styles: rest/hover/active states, grip lines     |
 
 ## Wiring
 

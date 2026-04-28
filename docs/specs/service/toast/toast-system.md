@@ -254,9 +254,9 @@ Each consumer injects `ToastService` and calls `show()` with appropriate options
 | ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------- |
 | `features/map/map-shell/map-shell.component.ts`              | `uploadFailed$` subscription                 | `toast.show({ message: event.error, type: 'error' })`         |
 | `features/map/map-shell/map-shell.component.ts`              | `imageUploaded$` (already handled via panel) | `toast.show({ message: 'Photo uploaded', type: 'success' })`  |
-| `features/map/workspace-pane/media-detail-view.component.ts` | Replace/attach success                       | `toast.show({ message: 'Photo replaced', type: 'success' })`  |
-| `features/map/workspace-pane/media-detail-view.component.ts` | Replace/attach failure via `uploadFailed$`   | `toast.show({ message: event.error, type: 'error' })`         |
-| `features/map/workspace-pane/media-detail-view.component.ts` | Copy coordinates                             | `toast.show({ message: 'Coordinates copied', type: 'info' })` |
+| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Replace/attach success                       | `toast.show({ message: 'Photo replaced', type: 'success' })`  |
+| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Replace/attach failure via `uploadFailed$`   | `toast.show({ message: event.error, type: 'error' })`         |
+| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts` | Copy coordinates                             | `toast.show({ message: 'Coordinates copied', type: 'info' })` |
 | `features/map/gps-button/gps-button.component.ts`            | GPS failure                                  | Already uses `ToastService` — update call signature           |
 
 ### Backward compatibility

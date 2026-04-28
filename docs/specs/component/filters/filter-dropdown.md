@@ -114,10 +114,10 @@ Where `FilterRule` = `{ id: string; conjunction: 'and' | 'or'; property: Propert
 
 | File                                                         | Purpose                             |
 | ------------------------------------------------------------ | ----------------------------------- |
-| `features/map/workspace-pane/filter-dropdown.component.ts`   | Main filter builder                 |
-| `features/map/workspace-pane/filter-dropdown.component.html` | Template                            |
-| `features/map/workspace-pane/filter-dropdown.component.scss` | Styles                              |
-| `features/map/workspace-pane/filter-rule-row.component.ts`   | Single filter rule row (inline tpl) |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`   | Main filter builder                 |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.html` | Template                            |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.scss` | Styles                              |
+| *(embedded in `filter-dropdown` template)*   | Single filter rule row              |
 | `core/filter.service.ts`                                     | Filter state + query builder        |
 
 ## Wiring

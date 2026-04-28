@@ -17,6 +17,9 @@ Feature-specific behavior is owned by these child specs:
 | ------------------------------------------------------------- | ------------------------------------------------------ |
 | [media-detail-media-viewer](media-detail-media-viewer.md)     | Progressive loading, lightbox, replace/upload media    |
 | [media-detail-inline-editing](media-detail-inline-editing.md) | Click-to-edit fields, address search, property rows    |
+| [media-detail-header](media-detail-header.md)                 | Back, title edit, overflow actions                     |
+| [address-search](address-search.md)                           | Address autocomplete control                           |
+| [metadata-section](metadata-section.md)                       | Custom metadata list + add flow                      |
 | [metadata-service](../../service/metadata/metadata-service.md)         | Metadata field/value service contract and CRUD surface |
 | [media-detail-actions](media-detail-actions.md)               | Actions section, delete, marker sync, correction mode  |
 
@@ -109,14 +112,15 @@ The parent spec owns the mapping contract only; concrete action semantics remain
 
 | File                                                                    | Purpose                                                              |
 | ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `features/map/workspace-pane/media-detail-view.component.ts`            | Parent coordinator: load record, own shared state, wire child events |
-| `features/map/workspace-pane/media-detail-view.component.html`          | Composition shell for header, viewer, details, metadata, and actions |
-| `features/map/workspace-pane/image-detail-header/*`                     | Header UI and context menu                                           |
-| `features/map/workspace-pane/media-detail-photo-viewer/*`               | Photo/upload surface and lightbox                                    |
-| `features/map/workspace-pane/image-detail-inline-section/*`             | Details and location editing UI                                      |
-| `features/map/workspace-pane/image-detail-project-membership.helper.ts` | Project membership persistence rules                                 |
-| `features/map/workspace-pane/metadata-section/*`                        | Custom metadata section                                              |
-| `features/map/workspace-pane/detail-actions/*`                          | Actions section                                                      |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts`            | Parent coordinator: load record, own shared state, wire child events |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.html`          | Composition shell for header, viewer, details, metadata, and actions |
+| `apps/web/src/app/core/media-detail-data/media-detail-data.facade.ts`                           | Load/query facade for detail pane                                    |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-header/*`                     | Header UI and context menu                                           |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-media-viewer/*`               | Media preview, upload surface and lightbox                                    |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/*`             | Details and location editing UI                                      |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-project-membership.helper.ts` | Project membership persistence rules                                 |
+| `apps/web/src/app/shared/workspace-pane/media-detail/metadata-section/*`                        | Custom metadata section                                              |
+| `apps/web/src/app/shared/workspace-pane/media-detail/detail-actions/*`                          | Actions section                                                      |
 
 ## Acceptance Criteria
 

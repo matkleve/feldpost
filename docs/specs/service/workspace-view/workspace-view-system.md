@@ -19,6 +19,7 @@ Users experience this system as a responsive workspace pane that immediately ope
 - **Routes:** All routes that host **Workspace Pane** + selected-items (canonical: **`/`**, **`/map`**, **`/media`**, **`/projects`**, **`/settings/**`** under [authenticated app layout](../../ui/workspace/workspace-pane.md#layout-host-canonical)).
 - **Parent (interim):** `MapShellComponent` + `WorkspacePane` for map/settings routes until layout hoist; **target:** authenticated app layout owns split + pane.
 - **Core orchestrator:** `WorkspaceViewService`
+- **Workspace → ImageRecord mapper:** `workspaceMediaToImageRecord` in `apps/web/src/app/core/workspace-view/workspace-media-mapper.ts` (selected-items grid / item adapters)
 - **Triggered by:** marker clicks, toolbar state changes, and active project/filter context
 
 ## Actions
@@ -46,7 +47,7 @@ MapShellComponent
 │   │   └── ProjectsDropdown
 │   └── WorkspaceContent
 │       ├── GroupHeader(s)
-│       └── ThumbnailGrid
+│       └── ItemGrid (+ WorkspaceSelectedItemsGrid host)
 └── WorkspaceViewService (orchestration)
     ├── Raw media state
     ├── FilterService integration
@@ -93,10 +94,10 @@ Location status compatibility note:
 | `docs/specs/service/workspace-view/workspace-view-system.md`                                 | System-level orchestration contract        |
 | `docs/specs/service/workspace-view/workspace-view-system.deep-dive.md`                        | Mermaid + extended architecture (lint: supplement only) |
 | `docs/specs/ui/workspace/workspace-view-system.md`                              | UI navigation entry; links to this file only |
-| `apps/web/src/app/features/map/workspace-pane/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
-| `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Parent host integration with map shell     |
-| `apps/web/src/app/features/map/workspace-pane/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |
-| `apps/web/src/app/features/map/workspace-pane/thumbnail-grid.component.ts`    | Section/grid render consumer               |
+| `apps/web/src/app/core/workspace-view/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
+| `apps/web/src/app/shared/workspace-pane/workspace-pane.component.ts`    | Parent host integration (authenticated layout)     |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |
+| `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`    | Item grid host + section/grid render consumer               |
 
 ## Wiring
 

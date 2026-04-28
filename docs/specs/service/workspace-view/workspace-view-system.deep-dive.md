@@ -360,18 +360,15 @@ flowchart TD
 
 | File                                                                   | Purpose                             | Spec                 |
 | ---------------------------------------------------------------------- | ----------------------------------- | -------------------- |
-| `features/map/workspace-pane/workspace-toolbar.component.ts/html/scss` | Toolbar with 4 buttons              | workspace-toolbar.md |
-| `features/map/workspace-pane/grouping-dropdown.component.ts/html/scss` | Grouping dropdown with drag-reorder | grouping-dropdown.md |
-| `features/map/workspace-pane/sort-dropdown.component.ts/html/scss`     | Sort dropdown with search           | sort-dropdown.md     |
-| `features/map/workspace-pane/filter-dropdown.component.ts/html/scss`   | Notion-style filter builder         | filter-dropdown.md   |
-| `features/map/workspace-pane/filter-rule-row.component.ts`             | Single filter rule row              | filter-dropdown.md   |
-| `features/map/workspace-pane/projects-dropdown.component.ts/html/scss` | Projects checklist dropdown         | projects-dropdown.md |
-| `features/map/workspace-pane/group-header.component.ts`                | Collapsible group heading           | (this doc)           |
-| `features/map/workspace-pane/property-picker.component.ts`             | Floating property picker            | docs/specs/service/metadata/metadata-service.md  |
-| `features/settings/property-manager/property-manager.component.*`      | Settings page property CRUD         | docs/specs/service/metadata/metadata-service.md  |
-| `core/workspace-view.service.ts`                                       | Media pipeline: filter→sort→group   | (this doc)           |
-| `core/filter.service.ts`                                               | Filter rule state + query building  | filter-dropdown.md   |
-| `core/metadata.service.ts`                                             | Property CRUD + value management    | docs/specs/service/metadata/metadata-service.md  |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` (+ `.html`/`.scss`) | Toolbar with controls              | workspace-toolbar.md |
+| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts` (+ `.html`/`.scss`) | Grouping dropdown with drag-reorder | grouping-dropdown.md |
+| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts` (+ `.html`/`.scss`)     | Sort dropdown with search           | sort-dropdown.md     |
+| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts` (+ `.html`/`.scss`)   | Notion-style filter builder (includes rule rows)         | filter-dropdown.md   |
+| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.ts` (+ `.html`/`.scss`) | Projects checklist dropdown         | projects-dropdown.md |
+| `apps/web/src/app/shared/ui-primitives/group-header.component.ts`                | Collapsible group heading           | active-selection-view.md / ui-primitives |
+| `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                       | Media pipeline: filter→sort→group   | workspace-view-system.md           |
+| `apps/web/src/app/core/filter/filter.service.ts`                                               | Filter rule state + query building  | filter-dropdown.md   |
+| `apps/web/src/app/core/metadata/metadata.service.ts`                                             | Property CRUD + value management    | docs/specs/service/metadata/metadata-service.md  |
 | `supabase/migrations/XXXXX_cluster_images_rpc.sql`                     | New RPC for cluster media loading   | (this doc)           |
 | `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | docs/specs/service/metadata/metadata-service.md  |
 
