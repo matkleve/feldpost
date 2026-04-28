@@ -5,8 +5,8 @@ Last updated: 2026-04-28
 | Violation                           | Count | Status                    |
 | ----------------------------------- | ----- | ------------------------- |
 | docs/specs subfolder README missing | 0     | resolved                  |
-| module registry spec-gap            | 26    | open                      |
-| module registry readme-gap          | 9     | open                      |
+| module registry spec-gap            | 19    | open                      |
+| module registry readme-gap          | 0     | resolved (PATCH-02)       |
 | module registry exception-open      | 2     | open                      |
 | traceability unresolved refs        | 1     | open                      |
 | traceability ambiguous refs         | 2     | resolved via context rule |
@@ -35,13 +35,6 @@ Last updated: 2026-04-28
 
 ## Open Module-Level Gaps
 
-- core/auth (spec-gap)
-- core/i18n (spec-gap)
-- core/invites (spec-gap)
-- core/search (spec-gap)
-- core/settings-pane (spec-gap)
-- core/supabase (spec-gap)
-- core/user-profile (spec-gap)
 - features/account (spec-gap)
 - features/action-system (spec-gap)
 - features/auth (spec-gap)
@@ -61,14 +54,5 @@ Last updated: 2026-04-28
 - shared/snap-size-slider (spec-gap)
 - shared/text-input-dialog (spec-gap)
 - shared/view-toggle (spec-gap)
-- core/map (readme-gap)
-- features/map (readme-gap)
-- features/media (readme-gap)
-- features/projects (readme-gap)
-- features/settings-overlay (readme-gap)
-- shared/item-grid (readme-gap)
-- shared/media (readme-gap)
-- shared/media-display (readme-gap)
-- shared/segmented-switch (readme-gap)
 - features/upload (exception-open)
 - shared/ui-primitives (exception-open)

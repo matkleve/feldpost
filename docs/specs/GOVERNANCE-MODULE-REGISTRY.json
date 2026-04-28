@@ -21,7 +21,7 @@
     "owner": "features",
     "spec_path": "docs/specs/ui/settings-overlay",
     "code_path": "apps/web/src/app/features/settings-overlay",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/containers",
@@ -61,7 +61,7 @@
     "owner": "features",
     "spec_path": "docs/specs/ui/workspace",
     "code_path": "apps/web/src/app/features/map",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/groups",
@@ -85,7 +85,7 @@
     "owner": "features",
     "spec_path": "docs/specs/page/projects-page.md",
     "code_path": "apps/web/src/app/features/projects",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/nav",
@@ -101,7 +101,7 @@
     "owner": "features",
     "spec_path": "docs/specs/page/media-page.md",
     "code_path": "apps/web/src/app/features/media",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/dropdown-trigger",
@@ -125,7 +125,7 @@
     "owner": "shared",
     "spec_path": "docs/specs/component/filters/segmented-switch.md",
     "code_path": "apps/web/src/app/shared/segmented-switch",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/quick-info-chips",
@@ -173,7 +173,7 @@
     "owner": "shared",
     "spec_path": "docs/specs/component/media/media-display.md",
     "code_path": "apps/web/src/app/shared/media-display",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/media",
@@ -181,7 +181,7 @@
     "owner": "shared",
     "spec_path": "docs/specs/page/media-page.md",
     "code_path": "apps/web/src/app/shared/media",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/item-grid",
@@ -189,7 +189,7 @@
     "owner": "shared",
     "spec_path": "docs/specs/component/item-grid/item-grid.md",
     "code_path": "apps/web/src/app/shared/item-grid",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/photo-lightbox",
@@ -227,9 +227,9 @@
     "module_slug": "core/map",
     "module_type": "thin-module",
     "owner": "core",
-    "spec_path": "docs/specs/page/map-page.md",
+    "spec_path": "docs/specs/service/map",
     "code_path": "apps/web/src/app/core/map",
-    "status": "readme-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/location-resolver",
@@ -275,9 +275,9 @@
     "module_slug": "core/invites",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/invites",
     "code_path": "apps/web/src/app/core/invites",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/filter",
@@ -299,17 +299,17 @@
     "module_slug": "core/auth",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/auth",
     "code_path": "apps/web/src/app/core/auth",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/i18n",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/i18n",
     "code_path": "apps/web/src/app/core/i18n",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/geocoding",
@@ -339,9 +339,9 @@
     "module_slug": "core/user-profile",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/user-profile",
     "code_path": "apps/web/src/app/core/user-profile",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/upload",
@@ -387,15 +387,15 @@
     "module_slug": "core/supabase",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/supabase",
     "code_path": "apps/web/src/app/core/supabase",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/projects",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "docs/specs/page/projects-page.md",
+    "spec_path": "docs/specs/service/projects",
     "code_path": "apps/web/src/app/core/projects",
     "status": "active"
   },
@@ -427,16 +427,16 @@
     "module_slug": "core/settings-pane",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/settings-pane",
     "code_path": "apps/web/src/app/core/settings-pane",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/search",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/search",
     "code_path": "apps/web/src/app/core/search",
-    "status": "spec-gap"
+    "status": "active"
   }
 ]
