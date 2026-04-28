@@ -5,11 +5,7 @@
 
 ## What It Is
 
-The Workspace Actions Bar is a bottom action surface in the Workspace Pane that appears when at least one media item is selected. It enables batch actions for the current selection across three areas: selection controls (select all/none), curation actions (assign project, change address, delete), and export actions (share as stable link, copy link, download as ZIP).
-
-This bar is the `ws_footer_multi` consumer in the action-context-matrix, so its buttons keep the matrix action IDs even when labels stay localized.
-
-The bar follows the same shared action ordering as the upload-panel contract: primary actions first, secondary utility actions next, and destructive actions last. In practice that means selection and curation lead the bar, export utilities come after them, and delete stays visually and semantically separated.
+Selection bar at the bottom of the Workspace Pane when at least one item is selected: scope, curation (project, address, delete), and export (share, copy, ZIP). **ws_footer_multi** in the action-context-matrix; primary first, export next, delete last.
 
 ## What It Looks Like
 
@@ -135,167 +131,8 @@ flowchart LR
 | Export title default  | `ProjectService` + media metadata           | `string`        | Project name or heuristic `bestLabel + yyyy-mm-dd`         |
 | ZIP blob              | `MediaDownloadService`                      | `Blob`          | Mixed media archive download                               |
 
-### SQL Contract (Share Sets)
+Share-set SQL, RLS, RPC stubs, and ER diagram (after Schema notes table): **[workspace-actions-bar.sql-contracts.supplement.md](./workspace-actions-bar.sql-contracts.supplement.md)**.
 
-```sql
--- share_sets: one logical shared selection
-CREATE TABLE public.share_sets (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  organization_id uuid NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
-  created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  token_hash text NOT NULL UNIQUE,
-  token_prefix text NOT NULL,
-  fingerprint text NOT NULL,
-  expires_at timestamptz,
-  revoked_at timestamptz,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE UNIQUE INDEX idx_share_sets_org_fingerprint_active
-  ON public.share_sets (organization_id, fingerprint)
-  WHERE revoked_at IS NULL;
-
-CREATE INDEX idx_share_sets_lookup_active
-  ON public.share_sets (organization_id, token_hash)
-  WHERE revoked_at IS NULL;
-
--- share_set_items: explicit ordered membership for deterministic rendering
-CREATE TABLE public.share_set_items (
-  share_set_id uuid NOT NULL REFERENCES public.share_sets(id) ON DELETE CASCADE,
-  media_item_id uuid NOT NULL REFERENCES public.media_items(id) ON DELETE CASCADE,
-  item_order int NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (share_set_id, media_item_id)
-);
-
-CREATE INDEX idx_share_set_items_share_order
-  ON public.share_set_items (share_set_id, item_order);
-```
-
-### RLS Contract (Share Sets)
-
-```sql
-ALTER TABLE public.share_sets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.share_set_items ENABLE ROW LEVEL SECURITY;
-
--- Org-scoped read for authenticated members.
-CREATE POLICY share_sets_select_org
-  ON public.share_sets
-  FOR SELECT
-  TO authenticated
-  USING (
-    organization_id = public.user_org_id()
-    AND revoked_at IS NULL
-    AND (expires_at IS NULL OR expires_at > now())
-  );
-
--- Create only within own org, creator tied to auth.uid().
-CREATE POLICY share_sets_insert_own_org
-  ON public.share_sets
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    organization_id = public.user_org_id()
-    AND created_by = auth.uid()
-    AND NOT public.is_viewer()
-  );
-
--- Revoke/delete only by creator or admin inside org.
-CREATE POLICY share_sets_update_owner_or_admin
-  ON public.share_sets
-  FOR UPDATE
-  TO authenticated
-  USING (organization_id = public.user_org_id() AND (created_by = auth.uid() OR public.is_admin()))
-  WITH CHECK (organization_id = public.user_org_id());
-
-CREATE POLICY share_sets_delete_owner_or_admin
-  ON public.share_sets
-  FOR DELETE
-  TO authenticated
-  USING (organization_id = public.user_org_id() AND (created_by = auth.uid() OR public.is_admin()));
-
--- Item table inherits access from parent share_set.
-CREATE POLICY share_set_items_select_via_parent
-  ON public.share_set_items
-  FOR SELECT
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1
-      FROM public.share_sets s
-      WHERE s.id = share_set_id
-        AND s.organization_id = public.user_org_id()
-        AND s.revoked_at IS NULL
-        AND (s.expires_at IS NULL OR s.expires_at > now())
-    )
-  );
-
-CREATE POLICY share_set_items_write_owner_or_admin
-  ON public.share_set_items
-  FOR ALL
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1
-      FROM public.share_sets s
-      WHERE s.id = share_set_id
-        AND s.organization_id = public.user_org_id()
-        AND (s.created_by = auth.uid() OR public.is_admin())
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1
-      FROM public.share_sets s
-      WHERE s.id = share_set_id
-        AND s.organization_id = public.user_org_id()
-        AND (s.created_by = auth.uid() OR public.is_admin())
-    )
-  );
-```
-
-### RPC Contract
-
-```sql
--- create_or_reuse_share_set(p_image_ids uuid[], p_expires_at timestamptz)
--- returns: token, share_set_id, expires_at
--- behavior:
--- 1) sort ids, derive fingerprint
--- 2) reuse active set for same org+fingerprint or create new row
--- 3) upsert ordered members in share_set_items
-
--- resolve_share_set(p_token text)
--- returns: share_set_id, media_item_id, item_order
--- behavior:
--- 1) hash incoming token and look up token_hash
--- 2) enforce org, revoked_at, expires_at checks
--- 3) return ordered ids for deterministic UI rendering
-```
-
-### Data Model (Mermaid)
-
-```mermaid
-erDiagram
-  share_sets ||--o{ share_set_items : contains
-  media_items ||--o{ share_set_items : referenced
-
-  share_sets {
-    uuid id PK
-    uuid organization_id
-    uuid created_by
-    text token UK
-    text fingerprint
-    timestamptz expires_at
-    timestamptz created_at
-  }
-
-  share_set_items {
-    uuid share_set_id FK
-    uuid media_item_id FK
-    int item_order
-    timestamptz created_at
-  }
-```
 
 ## State
 
@@ -408,3 +245,4 @@ sequenceDiagram
 - [x] ZIP export includes mixed media items (photos, PDFs, and supported files) and starts a browser download.
 - [x] Copy link uses Clipboard API in secure contexts and shows success/error feedback.
 - [x] Native share action uses Web Share API only when feature support and activation constraints are met.
+

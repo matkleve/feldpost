@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "lint:specs": "node scripts/lint-specs.mjs",
     "design-system:check": "node scripts/validate-design-system-registry.mjs && node scripts/audit-panel-breakpoints.mjs && node scripts/guard-visual-behavior.mjs",
     "design-system:audit-breakpoints": "node scripts/audit-panel-breakpoints.mjs",
     "design-system:validate-registry": "node scripts/validate-design-system-registry.mjs",

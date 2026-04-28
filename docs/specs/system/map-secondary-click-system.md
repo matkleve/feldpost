@@ -6,12 +6,7 @@
 
 ## What It Is
 
-A unified interaction system for secondary-click (right-click / long-press) behavior on the map. It defines which menu opens for map, marker, and active-radius targets and prevents conflicting behavior.
-
-This system is the source of truth for precedence, gesture arbitration, and option sets across all three context menus.
-Its labels stay surface-specific, but the canonical action IDs still map to `map_single`, `map_cluster`, and `map_point` in the action-context-matrix.
-
-It also follows the shared action-section contract from the upload panel: `primary` actions come first, `secondary` actions follow, and any destructive action is always last.
+Secondary-click / long-press orchestration for map, marker, and radius targets (menus, precedence, action IDs → action-context-matrix); ordering matches upload panel (primary → secondary → destructive last).
 
 ## What It Looks Like
 

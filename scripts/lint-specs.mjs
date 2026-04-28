@@ -406,7 +406,7 @@ function parseArgs(argv) {
   return config;
 }
 
-function shouldIncludeSpecFile(filePath) {
+function shouldIncludeSpecFile(filePath, specRootDir) {
   const lowerName = basename(filePath).toLowerCase();
   if (!lowerName.endsWith(".md")) {
     return false;
@@ -418,6 +418,45 @@ function shouldIncludeSpecFile(filePath) {
   // Keep audit notes out of spec lint and generated settings registry.
   if (lowerName.startsWith("spec-") && lowerName.includes("audit")) {
     return false;
+  }
+
+  // Governance artifacts are matrices/reports, not element-spec contracts.
+  if (lowerName.startsWith("governance-")) {
+    return false;
+  }
+
+  // Security analysis docs under system/security are not element specs.
+  if (specRootDir) {
+    const rel = relative(specRootDir, filePath).replace(/\\/g, "/");
+    if (rel.toLowerCase().startsWith("system/security/")) {
+      return false;
+    }
+
+    // Technical/service docs that intentionally omit element-spec headings (algorithm, lifecycle).
+    const technicalDocProfiles = new Set([
+      "service/location-resolver/address-resolver.md",
+      "service/location-resolver/search-algorithm-addresses-and-places.md",
+      "system/user-lifecycle.md",
+    ]);
+    if (technicalDocProfiles.has(rel)) {
+      return false;
+    }
+
+    // Meta index and split-child supplements (not standalone element specs).
+    const relLower = rel.toLowerCase();
+    if (relLower === "spec-size-backlog.md") {
+      return false;
+    }
+    if (relLower.endsWith("workspace-view-system.deep-dive.md")) {
+      return false;
+    }
+    if (relLower.endsWith("upload-manager-pipeline.data.md")) {
+      return false;
+    }
+    // Split-out reference bodies (linked from parent specs; avoid duplicate element-spec skeleton).
+    if (relLower.endsWith(".supplement.md")) {
+      return false;
+    }
   }
 
   return true;
@@ -435,7 +474,7 @@ function collectSpecFiles(specDir) {
       const fullPath = join(currentDir, entry.name);
       if (entry.isDirectory()) {
         stack.push(fullPath);
-      } else if (entry.isFile() && shouldIncludeSpecFile(fullPath)) {
+      } else if (entry.isFile() && shouldIncludeSpecFile(fullPath, specDir)) {
         files.push(fullPath);
       }
     }

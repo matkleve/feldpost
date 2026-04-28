@@ -2,10 +2,7 @@
 
 ## What It Is
 
-The workspace pane is a cross-page, AppShell-owned panel for selected-items context and upload operations.
-It persists across route changes and exposes two tabs: `selected-items` (context-bound) and `upload` (global queue visibility).
-Current detail/grid behavior remains map-compatible while the same contract is reused by `/media`, `/projects`, and future routes.
-Media preview/detail rendering inside the pane uses the same shared `PhotoLoadService` cache namespace as map markers and `/media` page consumers.
+AppShell right-hand pane for selection + upload: persists across routes with **Selected** and **Upload** tabs; shares **`MediaDownloadService`** delivery cache with map markers and `/media`.
 
 ## What It Looks Like
 
@@ -33,7 +30,7 @@ The pane shows `PaneHeaderComponent`, then either `MediaDetailViewComponent` or 
 | **NEW** | **Clicks "Selected Items" tab button**                   | **Tab switches to Selected Items; grid or page-specific content visible (workspace grid on /map, media grid on /media, etc.)**                                          | **`activeTab` → `'selected-items'`**                     |
 | **NEW** | **Navigates from /map → /media**                         | **Pane stays open, "Selected Items" tab active, content switches to media grid for /media; "Upload" tab preserves all jobs in queue**                                   | **Route change, no pane close, upload context survives** |
 | **NEW** | **Navigates from /media → /map**                         | **Pane stays open on globally persisted tab; selected-items content rebinds to map context only if selected-items tab is active; upload queue continues in background** | **Route change, no pane close, context rebind hook**     |
-| **NEW** | **Opens pane detail for media already loaded elsewhere** | **Detail/media item renderers reuse existing shared cache entry (marker/detail/grid) before any background tier refresh**                                               | **Shared `PhotoLoadService` cache hit**                  |
+| **NEW** | **Opens pane detail for media already loaded elsewhere** | **Detail/media item renderers reuse existing shared cache entry (marker/detail/grid) before any background tier refresh**                                               | **`MediaDownloadService` cache hit**                  |
 | **NEW** | **Hovers an upload row in Upload tab**                   | **Selection checkbox appears on that row without changing compact row geometry**                                                                                        | **`activeTab === 'upload'` + hover/focus state**         |
 | **NEW** | **Checks one or more upload rows**                       | **Upload footer toolbar appears with count and bulk actions (`retry`, `download`, `remove`, `clear`)**                                                                  | **`selectedUploadJobIds.size > 0`**                      |
 | **NEW** | **Clicks bulk `retry` in Upload tab**                    | **Retries only selected retryable jobs and keeps non-retryable rows unchanged**                                                                                         | **`UploadManagerService.retryJob()` per selected row**   |
@@ -252,7 +249,7 @@ sequenceDiagram
   participant User
   participant Pane as WorkspacePaneComponent
   participant Shell as MapShellComponent
-  participant Markers as PhotoMarker Layer
+  participant Markers as Media marker layer
 
   User->>Pane: Hover workspace item
   Pane-->>Shell: hoverWorkspaceImage(mediaId)

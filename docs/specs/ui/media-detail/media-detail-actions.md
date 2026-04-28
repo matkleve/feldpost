@@ -52,7 +52,7 @@ When the user makes changes in the detail view, the corresponding **media marker
 | Change Type                | Channel                                  | Marker Effect                                        |
 | -------------------------- | ---------------------------------------- | ---------------------------------------------------- |
 | Media replaced             | `UploadManagerService.imageReplaced$`    | Marker DivIcon rebuilt with new thumbnail            |
-| Media uploaded (photoless) | `UploadManagerService.imageAttached$`    | Marker DivIcon updated: placeholder → real thumbnail |
+| Media uploaded (row had no file yet) | `UploadManagerService.imageAttached$`    | Marker DivIcon updated: placeholder → real thumbnail |
 | Coordinate correction      | Correction mode in MapShell (user drags) | Marker already at new position from drag             |
 | Address / metadata edits   | DB update only                           | No marker update needed                              |
 
@@ -131,7 +131,7 @@ flowchart TD
 - [x] Copy coordinates writes to clipboard with toast confirmation
 - [x] Delete confirmation dialog shown before removal
 - [x] Replace media triggers marker thumbnail update via `UploadManagerService.imageReplaced$` (not direct output events)
-- [x] Media upload to photoless row triggers marker update via `UploadManagerService.imageAttached$`
+- [x] Attaching a file to a **media row that had no file yet** triggers a marker update via `UploadManagerService.imageAttached$`
 - [x] Coordinate edit handled by MapShell directly — marker already at new position from drag
 - [x] No output events for marker sync — flows through service layer
 - [x] Metadata edits saved to DB only — no immediate marker visual change needed

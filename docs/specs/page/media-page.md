@@ -8,11 +8,7 @@
 
 ## What It Is
 
-The **Media Page** is the canonical composition contract for the `/media` route.
-It MUST define routing, top-level layout composition, pane integration boundaries, and page-level persistence rules.
-It MUST NOT define child-level rendering details that are owned by component or domain-layer specs.
-
----
+Canonical `/media` route: page-level layout, pane integration, and persistence only; child component specs own grid, items, and media chrome (this phase: `media.component.md`, `media-content.md`, `media-item.md`, `item-grid.md` media path, etc.).
 
 ## Documentation Phase Boundary
 

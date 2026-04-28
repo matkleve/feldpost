@@ -2,14 +2,7 @@
 
 ## What It Is
 
-The top-level full-screen host component for the map page. It's the main screen of Feldpost — everything the user sees after login lives inside Map Shell.
-
-**Related docs:**
-
-- Interaction scenarios: [use-cases/map-shell.md](../use-cases/map-shell.md)
-- Implementation blueprint: [implementation-blueprints/map-shell.md](../implementation-blueprints/map-shell.md)
-- Child specs: [workspace-pane](../workspace/workspace-pane.md), [drag-divider](../component/drag-divider.md), [search-bar](../search-bar/search-bar.md), [upload-button-zone](../component/upload-button-zone.md), [media-marker](../media-marker/media-marker.md)
-- Product use cases: UC1 (Technician on Site — view nearby history), UC2 (Clerk Preparing a Quote — evidence gathering), UC3 (Upload and Correct a New Media Item)
+Full-screen host after login: sidebar, map zone, workspace pane, and floating controls. **See:** [map-shell use cases](../use-cases/map-shell.md), [blueprint](../implementation-blueprints/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload-button-zone.md), [drag-divider](../component/drag-divider.md); product UCs 1–3 in use-case docs.
 
 ## What It Looks Like
 

@@ -98,7 +98,7 @@ MediaDetailView
   - `pending`: retry-capable unresolved state (eligible for one-shot resolve trigger where defined by child action specs).
   - `resolved`: location complete state.
   - `unresolvable`: terminal unresolved state; no automatic background retry.
-- Transitional legacy read normalization (deprecated):
+- Transitional read normalization for pre-canonical backend values (deprecated):
   - `gps` -> `resolved`
   - `no_gps` -> `pending`
   - `unresolved` -> `unresolvable`
