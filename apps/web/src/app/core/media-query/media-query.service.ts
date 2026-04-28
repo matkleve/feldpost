@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
-import type { ImageRecord } from '../../features/map/workspace-pane/media-detail-view.types';
+import type { ImageRecord } from './media-query.types';
 
 interface MediaItemRow {
   id: string;
