@@ -5,9 +5,9 @@ Last updated: 2026-04-28
 | Violation                           | Count | Status                    |
 | ----------------------------------- | ----- | ------------------------- |
 | docs/specs subfolder README missing | 0     | resolved                  |
-| module registry spec-gap            | 19    | open                      |
+| module registry spec-gap            | 6     | open                      |
 | module registry readme-gap          | 0     | resolved (PATCH-02)       |
-| module registry exception-open      | 1     | open                      |
+| module registry exception-open      | 0     | resolved (PATCH-05)      |
 | traceability unresolved refs        | 1     | open                      |
 | traceability ambiguous refs         | 2     | resolved via context rule |
 
@@ -41,17 +41,3 @@ Last updated: 2026-04-28
 - features/groups (spec-gap)
 - features/nav (spec-gap)
 - features/settings (spec-gap)
-- shared/account (spec-gap)
-- shared/components (spec-gap)
-- shared/confirm-dialog (spec-gap)
-- shared/containers (spec-gap)
-- shared/dropdown-trigger (spec-gap)
-- shared/pane-footer (spec-gap)
-- shared/pane-toolbar (spec-gap)
-- shared/photo-lightbox (spec-gap)
-- shared/project-select-dialog (spec-gap)
-- shared/quick-info-chips (spec-gap)
-- shared/snap-size-slider (spec-gap)
-- shared/text-input-dialog (spec-gap)
-- shared/view-toggle (spec-gap)
-- shared/ui-primitives (exception-open)

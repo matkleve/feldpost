@@ -3,9 +3,9 @@
     "module_slug": "shared/account",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/account/account.md",
     "code_path": "apps/web/src/app/shared/account",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/upload",
@@ -27,25 +27,25 @@
     "module_slug": "shared/containers",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/containers/containers.md",
     "code_path": "apps/web/src/app/shared/containers",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/confirm-dialog",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/confirm-dialog/confirm-dialog.md",
     "code_path": "apps/web/src/app/shared/confirm-dialog",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/components",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/filters/chip.md",
     "code_path": "apps/web/src/app/shared/components",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/settings",
@@ -107,17 +107,17 @@
     "module_slug": "shared/dropdown-trigger",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/filters/dropdown-system.md",
     "code_path": "apps/web/src/app/shared/dropdown-trigger",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/snap-size-slider",
     "module_type": "thin-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/workspace/snap-size-slider.md",
     "code_path": "apps/web/src/app/shared/snap-size-slider",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/segmented-switch",
@@ -131,41 +131,41 @@
     "module_slug": "shared/quick-info-chips",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/workspace/quick-info-chips.md",
     "code_path": "apps/web/src/app/shared/quick-info-chips",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/view-toggle",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/project/projects-view-toggle.md",
     "code_path": "apps/web/src/app/shared/view-toggle",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/ui-primitives",
-    "module_type": "exception-module",
+    "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/ui-primitives/ui-primitives.md",
     "code_path": "apps/web/src/app/shared/ui-primitives",
-    "status": "exception-open"
+    "status": "active"
   },
   {
     "module_slug": "shared/text-input-dialog",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/text-input-dialog/text-input-dialog.md",
     "code_path": "apps/web/src/app/shared/text-input-dialog",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/project-select-dialog",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/project-select-dialog/project-select-dialog.md",
     "code_path": "apps/web/src/app/shared/project-select-dialog",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/media-display",
@@ -195,25 +195,25 @@
     "module_slug": "shared/photo-lightbox",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/media/photo-lightbox.md",
     "code_path": "apps/web/src/app/shared/photo-lightbox",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/pane-toolbar",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/workspace/pane-toolbar.md",
     "code_path": "apps/web/src/app/shared/pane-toolbar",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "shared/pane-footer",
     "module_type": "ui-bound-module",
     "owner": "shared",
-    "spec_path": "",
+    "spec_path": "docs/specs/component/workspace/pane-footer.md",
     "code_path": "apps/web/src/app/shared/pane-footer",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "features/action-system",

@@ -42,6 +42,7 @@ Map chrome, placement, and location affordances.
 
 Media surfaces, items, toolbar, and file-type UI.
 
+- [photo-lightbox](media/photo-lightbox.md)
 - [file-type-chips](media/file-type-chips.md) (+ [lookup supplement](media/file-type-chips.lookup-table.supplement.md))
 - [media.component](media/media.component.md)
 - [media-content](media/media-content.md)
@@ -56,6 +57,7 @@ Media surfaces, items, toolbar, and file-type UI.
 
 Project list and details UI.
 
+- [projects-view-toggle](project/projects-view-toggle.md)
 - [project-color-picker](project/project-color-picker.md)
 - [project-details-view](project/project-details-view.md)
 - [project-item](project/project-item.md)
@@ -76,7 +78,39 @@ Upload entry points and upload panel contract splits.
 
 Workspace chrome adjacent to the map/workspace split.
 
+- [pane-toolbar](workspace/pane-toolbar.md)
+- [pane-footer](workspace/pane-footer.md)
+- [quick-info-chips](workspace/quick-info-chips.md)
+- [snap-size-slider](workspace/snap-size-slider.md)
 - [active-selection-view](workspace/active-selection-view.md)
 - [drag-divider](workspace/drag-divider.md)
 - [group-tab-bar](workspace/group-tab-bar.md)
 - [sidebar](workspace/sidebar.md)
+
+## account/
+
+- [account (shared)](account/account.md)
+
+## confirm-dialog/
+
+- [confirm-dialog](confirm-dialog/confirm-dialog.md)
+
+## containers/
+
+- [layout containers](containers/containers.md)
+
+## project-select-dialog/
+
+- [project-select-dialog](project-select-dialog/project-select-dialog.md)
+
+## text-input-dialog/
+
+- [text-input-dialog](text-input-dialog/text-input-dialog.md)
+
+## ui-primitives/
+
+- [ui-primitives (parent index)](ui-primitives/ui-primitives.md)
+- [card grid](ui-primitives/ui-primitives.card-grid.md)
+- [card variant switch](ui-primitives/ui-primitives.card-variant-switch.md)
+- [group header](ui-primitives/ui-primitives.group-header.md)
+- [directives, click-outside, parse-time-input](ui-primitives/ui-primitives.directives-and-utils.md)
