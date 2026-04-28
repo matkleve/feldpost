@@ -3,8 +3,8 @@ import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
-} from '../features/upload/upload-panel.types';
-import type { ThumbnailCardHoverEvent } from '../features/map/workspace-pane/thumbnail-card/thumbnail-card.component';
+} from './workspace-pane-shell-events.types';
+import type { ThumbnailCardHoverEvent } from './workspace-pane-thumbnail-hover.types';
 import type { WorkspacePaneTab } from './workspace-pane-host.port';
 
 /**

@@ -73,7 +73,7 @@ import { WORKSPACE_SINGLE_ACTION_DEFINITIONS } from './workspace-detail-actions.
 import type { WorkspaceSingleActionId } from './workspace-detail-actions.types';
 import type { UploadLocationMapPickRequest } from '../../upload/upload-panel.component';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
+import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 
 export type { ImageRecord, MetadataEntry } from './media-detail-view.types';

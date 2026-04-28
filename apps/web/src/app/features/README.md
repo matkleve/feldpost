@@ -19,3 +19,5 @@ Module classification guidance:
 - Prefer ui-bound-module for route or feature components.
 - Use thin-module only for narrow composition wrappers with explicit dependencies.
 - Mark mixed service+UI modules as exception-module in governance registry until decomposed.
+
+**`features/map/`** is intentionally large (map shell, workspace pane, search, GPS): primary field experience; deeper splits would be separate feature roots, not required for routing.

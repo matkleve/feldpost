@@ -1,4 +1,4 @@
-import { evaluateRulesForItem } from '../../core/filter-rule-evaluator';
+import { evaluateRulesForItem } from '../../core/filter/filter-rule-evaluator';
 import type { ProjectListItem } from '../../core/projects/projects.types';
 import { getProjectFieldValue } from './projects-fields.logic';
 

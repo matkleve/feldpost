@@ -1,5 +1,5 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../core/filter-rule-evaluator';
+import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../core/filter/filter-rule-evaluator';
 import { FilterService } from '../../core/filter/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MetadataService } from '../../core/metadata/metadata.service';

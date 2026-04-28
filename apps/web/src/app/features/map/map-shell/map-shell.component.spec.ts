@@ -14,14 +14,14 @@ import { MapShellState } from './map-shell.state';
 import {
   WORKSPACE_PANE_SHELL_HOST,
   type WorkspacePaneShellHost,
-} from '../../../core/workspace-pane-shell-host.token';
-import type { WorkspacePaneTab } from '../../../core/workspace-pane-host.port';
+} from '../../../core/workspace-pane/workspace-pane-shell-host.token';
+import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pane-host.port';
 import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
-} from '../../upload/upload-panel.types';
-import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card/thumbnail-card.component';
+} from '../../../core/workspace-pane/workspace-pane-shell-events.types';
+import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { UploadService } from '../../../core/upload/upload.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';

@@ -20,17 +20,14 @@ import {
   ThumbnailCardMediaComponent,
   type ThumbnailCardMediaState,
 } from './thumbnail-card-media/thumbnail-card-media.component';
+import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 
 export interface ThumbnailCardInteraction {
   imageId: string;
   additive: boolean;
 }
 
-export interface ThumbnailCardHoverEvent {
-  mediaId: string;
-  lat: number;
-  lng: number;
-}
+export type { ThumbnailCardHoverEvent };
 
 export interface ThumbnailCardContextMenuEvent {
   mediaId: string;

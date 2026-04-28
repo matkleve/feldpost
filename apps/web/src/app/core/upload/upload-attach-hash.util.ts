@@ -1,4 +1,4 @@
-import { computeContentHash, readFileHead } from '../content-hash.util';
+import { computeContentHash, readFileHead } from './content-hash.util';
 import type { ParsedExif } from './upload.service';
 
 export async function computeAttachContentHash(

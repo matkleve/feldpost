@@ -13,7 +13,9 @@ Link Scope:
 Exclusions:
 
 - Must not own route-level composition or page rendering contracts.
-- Must not define component-level visual behavior contracts.
+- Must not define component-level visual behavior contracts (toast **presentation** lives in `shared/toast/`; this folder keeps `toast` **service** + types only).
+
+Workspace pane shell (ports, observer, layout bridge) lives in `core/workspace-pane/` — layout host and map shell consume it; see `docs/specs/ui/workspace/workspace-pane.md`.
 
 Module classification guidance:
 

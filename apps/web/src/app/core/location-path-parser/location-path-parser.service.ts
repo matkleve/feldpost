@@ -19,7 +19,7 @@ import {
   splitPathSegments,
   stripFileExtension,
   detectCountryCode,
-} from '../location-path-parser.util';
+} from './location-path-parser.util';
 
 export interface AddressContext {
   country: string | null;

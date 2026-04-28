@@ -1,6 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MapAdapter } from '../../../core/map-adapter';
+import { MapAdapter } from '../../../core/map/map-adapter';
 import { ToastService } from '../../../core/toast/toast.service';
 
 /**

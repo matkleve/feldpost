@@ -8,8 +8,8 @@ import { FilterService } from '../../core/filter/filter.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ProjectsService } from '../../core/projects/projects.service';
 import { ToastService } from '../../core/toast/toast.service';
-import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane-observer.adapter';
-import type { SelectedItemsContextPort } from '../../core/workspace-pane-context.port';
+import { WorkspacePaneObserverAdapter } from '../../core/workspace-pane/workspace-pane-observer.adapter';
+import type { SelectedItemsContextPort } from '../../core/workspace-pane/workspace-pane-context.port';
 import type {
   ProjectColorKey,
   ProjectListItem,

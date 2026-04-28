@@ -1,6 +1,6 @@
-import { Component, inject, input, output } from '@angular/core';
-import type { ToastItem } from './toast.model';
-import { ToastService } from './toast/toast.service';
+import { Component, inject, input } from '@angular/core';
+import type { ToastItem } from '../../core/toast.model';
+import { ToastService } from '../../core/toast/toast.service';
 
 const ICON_MAP: Record<string, string> = {
   success: 'check_circle',

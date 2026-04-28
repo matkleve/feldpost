@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { NavComponent } from './features/nav/nav.component';
-import { ToastContainerComponent } from './core/toast-container.component';
+import { ToastContainerComponent } from './shared/toast/toast-container.component';
 import { LocationResolverService } from './core/location-resolver/location-resolver.service';
 import { AuthService } from './core/auth/auth.service';
 import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';

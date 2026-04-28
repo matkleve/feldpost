@@ -4,18 +4,18 @@ import { WorkspacePaneToolbarComponent } from './workspace-pane-toolbar/workspac
 import { ThumbnailGridComponent } from './thumbnail-grid.component';
 import { MediaDetailViewComponent } from './media-detail-view.component';
 import { WorkspacePaneFooterComponent } from './workspace-pane-footer/workspace-pane-footer.component';
-import {
-  UploadPanelComponent,
-  type ImageUploadedEvent,
-  type UploadLocationMapPickRequest,
-  type UploadLocationPreviewEvent,
-} from '../../upload/upload-panel.component';
+import { UploadPanelComponent } from '../../upload/upload-panel.component';
+import type {
+  ImageUploadedEvent,
+  UploadLocationMapPickRequest,
+  UploadLocationPreviewEvent,
+} from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { MaxWidthContainerComponent } from '../../../shared/containers';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
-import type { ThumbnailCardHoverEvent } from './thumbnail-card/thumbnail-card.component';
+import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import type { WorkspacePaneTab } from '../../../core/workspace-pane-host.port';
+import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pane-host.port';
 
 @Component({
   selector: 'app-workspace-pane',

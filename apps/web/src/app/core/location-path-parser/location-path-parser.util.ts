@@ -1,5 +1,5 @@
-import { COUNTRY_NAMES, CITY_REGISTRY } from './location-path-parser/city-registry.const';
-import { STREET_KEYWORDS } from './location-path-parser/street-keywords.const';
+import { COUNTRY_NAMES, CITY_REGISTRY } from './city-registry.const';
+import { STREET_KEYWORDS } from './street-keywords.const';
 
 export const NOISE_SEGMENTS = new Set([
   'fotos',

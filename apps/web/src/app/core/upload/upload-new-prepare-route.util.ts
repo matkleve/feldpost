@@ -1,4 +1,4 @@
-import { computeContentHash, readFileHead } from '../content-hash.util';
+import { computeContentHash, readFileHead } from './content-hash.util';
 import type { FilenameParserService } from '../filename-parser/filename-parser.service';
 import type { UploadAttachPipelineService } from './upload-attach-pipeline.service';
 import { handleDedupSkip } from './upload-dedup-skip.util';

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { GeocodingService } from './geocoding/geocoding.service';
-import { SupabaseService } from './supabase/supabase.service';
+import { GeocodingService } from './geocoding.service';
+import { SupabaseService } from '../supabase/supabase.service';
 
 function nominatimResponse(overrides: Record<string, unknown> = {}) {
   return {
@@ -136,4 +136,3 @@ describe('GeocodingService resilience', () => {
     expect(invokeSpy).toHaveBeenCalledTimes(1);
   });
 });
-

@@ -23,7 +23,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-import { computeContentHash, readFileHead } from '../content-hash.util';
+import { computeContentHash, readFileHead } from './content-hash.util';
 import { MediaDownloadService } from '../media-download/media-download.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { isCancelledUploadJob } from './upload-cancelled.util';

@@ -31,12 +31,12 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as L from 'leaflet';
-import {
-  UploadPanelComponent,
+import { UploadPanelComponent } from '../../upload/upload-panel.component';
+import type {
   ImageUploadedEvent,
-  type UploadLocationMapPickRequest,
-  type UploadLocationPreviewEvent,
-} from '../../upload/upload-panel.component';
+  UploadLocationMapPickRequest,
+  UploadLocationPreviewEvent,
+} from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { ExifCoords } from '../../../core/upload/upload.service';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
@@ -57,7 +57,7 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { SearchQueryContext } from '../../../core/search/search.models';
-import type { ThumbnailCardHoverEvent } from '../workspace-pane/thumbnail-card/thumbnail-card.component';
+import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { SettingsPaneService } from '../../../core/settings-pane/settings-pane.service';
 import { ProjectSelectDialogComponent } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
@@ -106,13 +106,13 @@ import { DeferredStartupHandles, MapDeferredStartupService } from './map-deferre
 import { MapProjectActionsService } from './map-project-actions.service';
 import { MapProjectDialogService } from './map-project-dialog.service';
 import { MarkerStateMutationsService } from './marker-state-mutations.service';
-import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane-observer.adapter';
+import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
-import type { SelectedItemsContextPort } from '../../../core/workspace-pane-context.port';
-import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane-shell-host.token';
-import type { WorkspacePaneLayoutMapEffects } from '../../../core/workspace-pane-layout-map-effects.service';
-import { WorkspacePaneLayoutMapEffectsService } from '../../../core/workspace-pane-layout-map-effects.service';
+import type { SelectedItemsContextPort } from '../../../core/workspace-pane/workspace-pane-context.port';
+import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane/workspace-pane-shell-host.token';
+import type { WorkspacePaneLayoutMapEffects } from '../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
+import { WorkspacePaneLayoutMapEffectsService } from '../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import { getLaneForJob } from '../../upload/upload-phase.helpers';
 import {
   MAP_MENU_ACTION_DEFINITIONS,

@@ -14,21 +14,21 @@ import { Router, RouterOutlet } from '@angular/router';
 import { WorkspacePaneComponent } from '../features/map/workspace-pane/workspace-pane.component';
 import { WorkspacePaneShellComponent } from '../features/map/workspace-pane/workspace-pane-shell.component';
 import { MapShellState } from '../features/map/map-shell/map-shell.state';
-import { WorkspacePaneObserverAdapter } from '../core/workspace-pane-observer.adapter';
-import { WorkspacePaneLayoutMapEffectsService } from '../core/workspace-pane-layout-map-effects.service';
+import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
+import { WorkspacePaneLayoutMapEffectsService } from '../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import {
   WORKSPACE_PANE_SHELL_HOST,
   type WorkspacePaneShellHost,
-} from '../core/workspace-pane-shell-host.token';
+} from '../core/workspace-pane/workspace-pane-shell-host.token';
 import { WorkspaceViewService } from '../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../core/workspace-selection/workspace-selection.service';
-import type { WorkspacePaneTab } from '../core/workspace-pane-host.port';
+import type { WorkspacePaneTab } from '../core/workspace-pane/workspace-pane-host.port';
 import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
-} from '../features/upload/upload-panel.types';
-import type { ThumbnailCardHoverEvent } from '../features/map/workspace-pane/thumbnail-card/thumbnail-card.component';
+} from '../core/workspace-pane/workspace-pane-shell-events.types';
+import type { ThumbnailCardHoverEvent } from '../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 
 const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePaneWidth';
 

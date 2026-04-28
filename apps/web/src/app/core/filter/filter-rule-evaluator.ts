@@ -1,4 +1,4 @@
-import type { MetadataValueType } from './metadata/metadata.types';
+import type { MetadataValueType } from '../metadata/metadata.types';
 
 export type FilterRuleLike = {
   conjunction: string;
