@@ -1,4 +1,6 @@
-# media-location-update service spec index
+# Media location update service spec index
+
+**Canonical contract:** [media-location-update-service.md](media-location-update-service.md)
 
 Code module: apps/web/src/app/core/media-location-update/
 Primary facade: apps/web/src/app/core/media-location-update/media-location-update.service.ts
