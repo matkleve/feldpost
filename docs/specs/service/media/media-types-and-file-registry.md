@@ -34,6 +34,8 @@ file-type-registry.ts + media.types.ts + media-renderer.types.ts
 | --- | --- |
 | `FILE_TYPE_DEFINITIONS` | Canonical table in `file-type-registry.ts` |
 
+**DB-backed list/grid media rows** (`ImageRecord`, pagination, project name maps) are owned by the [Media Query Service](../media-query/media-query-service.md) spec and `core/media-query/` — not duplicated here.
+
 ## State
 
 None (immutable definitions).
