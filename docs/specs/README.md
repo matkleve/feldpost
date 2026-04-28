@@ -1,6 +1,6 @@
 # Specs Index
 
-Last updated: 2026-04-15
+Last updated: 2026-04-28
 
 Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 
@@ -27,6 +27,12 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 - docs/specs/GOVERNANCE-README-COVERAGE.md
 - docs/specs/GOVERNANCE-DUPLICATION-REPORT.md
 - docs/specs/GOVERNANCE-TRACEABILITY-REPORT.json
+
+## Spec split and organization
+
+- One **canonical entry** per module/feature (parent spec); children are linked, not duplicated across `ui/` vs `service/`.
+- Line limits and required sections are enforced by `node scripts/lint-specs.mjs` (see `scripts/lint-specs.mjs` for caps).
+- **Split strategy:** adapter-shaped → `service/<module>/adapters/*.adapter.md`; AC/FSM/visual tables → concern slices in the same folder (e.g. `.acceptance-criteria.md`). Authoritative rules: root `AGENTS.md` (**Spec split and organization policy**).
 
 ## References
 

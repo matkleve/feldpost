@@ -87,6 +87,7 @@ Location status compatibility note:
 | File                                                                          | Purpose                                    |
 | ----------------------------------------------------------------------------- | ------------------------------------------ |
 | `docs/specs/service/workspace-view/workspace-view-system.md`                                 | System-level orchestration contract        |
+| `docs/specs/ui/workspace/workspace-view-system.md`                              | UI navigation entry; links to this file only |
 | `apps/web/src/app/features/map/workspace-pane/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
 | `apps/web/src/app/features/map/workspace-pane/workspace-pane.component.ts`    | Parent host integration with map shell     |
 | `apps/web/src/app/features/map/workspace-pane/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |
@@ -485,13 +486,13 @@ flowchart TD
 | `features/map/workspace-pane/filter-rule-row.component.ts`             | Single filter rule row              | filter-dropdown.md   |
 | `features/map/workspace-pane/projects-dropdown.component.ts/html/scss` | Projects checklist dropdown         | projects-dropdown.md |
 | `features/map/workspace-pane/group-header.component.ts`                | Collapsible group heading           | (this doc)           |
-| `features/map/workspace-pane/property-picker.component.ts`             | Floating property picker            | metadata-service.md  |
-| `features/settings/property-manager/property-manager.component.*`      | Settings page property CRUD         | metadata-service.md  |
+| `features/map/workspace-pane/property-picker.component.ts`             | Floating property picker            | docs/specs/service/metadata/metadata-service.md  |
+| `features/settings/property-manager/property-manager.component.*`      | Settings page property CRUD         | docs/specs/service/metadata/metadata-service.md  |
 | `core/workspace-view.service.ts`                                       | Media pipeline: filter→sort→group   | (this doc)           |
 | `core/filter.service.ts`                                               | Filter rule state + query building  | filter-dropdown.md   |
-| `core/metadata.service.ts`                                             | Property CRUD + value management    | metadata-service.md  |
+| `core/metadata.service.ts`                                             | Property CRUD + value management    | docs/specs/service/metadata/metadata-service.md  |
 | `supabase/migrations/XXXXX_cluster_images_rpc.sql`                     | New RPC for cluster media loading   | (this doc)           |
-| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | metadata-service.md  |
+| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | docs/specs/service/metadata/metadata-service.md  |
 
 ---
 

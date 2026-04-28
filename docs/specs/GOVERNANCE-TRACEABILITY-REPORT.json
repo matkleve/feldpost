@@ -276,14 +276,14 @@
                         "old_ref":  "docs/element-specs/workspace/workspace-view-system.md",
                         "new_ref":  "docs/specs/ui/workspace/workspace-view-system.md",
                         "status":  "resolved-ambiguous",
-                        "rationale":  "context routing to UI contract per policy"
+                        "rationale":  "UI-folder spec: navigation stub only; canonical contract is docs/specs/service/workspace-view/workspace-view-system.md"
                     },
                     {
                         "source":  "service/core contexts",
                         "old_ref":  "docs/element-specs/workspace-view-system.md",
                         "new_ref":  "docs/specs/service/workspace-view/workspace-view-system.md",
                         "status":  "resolved-ambiguous",
-                        "rationale":  "context routing to service contract per policy"
+                        "rationale":  "Canonical workspace view system orchestration; UI stub at docs/specs/ui/workspace/workspace-view-system.md links here"
                     },
                     {
                         "source":  "features/map thumbnail-card contexts",

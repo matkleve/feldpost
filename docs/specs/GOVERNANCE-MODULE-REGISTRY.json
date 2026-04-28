@@ -403,9 +403,9 @@
     "module_slug": "core/metadata",
     "module_type": "full-service-module",
     "owner": "core",
-    "spec_path": "",
+    "spec_path": "docs/specs/service/metadata",
     "code_path": "apps/web/src/app/core/metadata",
-    "status": "spec-gap"
+    "status": "active"
   },
   {
     "module_slug": "core/media-query",

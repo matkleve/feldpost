@@ -7,7 +7,7 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage).
 
 1. **Data and security** — Row-Level Security, migrations, and `supabase/AGENTS.md` (frontend is untrusted).
 2. **This file** — `AGENTS.md` at repository root (global engineering rules).
-3. **Spec system** — `docs/specs/README.md` and governance artifacts under `docs/specs/`.
+3. **Spec system** — `docs/specs/README.md`, governance artifacts under `docs/specs/`, and **Spec split and organization policy** in this file.
 4. **Concrete specs** — implementation contracts under `docs/specs/...` for the feature or module you are changing.
 5. **Package `AGENTS.md`** — `apps/web/`, `supabase/`, or `docs/` only where they **narrow** scope; they must not contradict 1–4.
 6. **Tool overlays** — `.github/instructions/`, `.github/copilot-instructions.md`, and similar: shortcuts only; if something disagrees with 1–4, **1–4 win**.
@@ -317,7 +317,7 @@ Any implementation that deviates from this contract is a blocker.
 ## Document Authority
 
 - **Project rules and invariants**: `AGENTS.md`
-- **Spec system, structure contract, split policy, and index**: `docs/specs/README.md`
+- **Spec system, structure contract, split policy, and index**: `docs/specs/README.md`; normative split rules also in **Spec split and organization policy** (this file).
 - **Spec writing template**: `docs/agent-workflows/element-spec-format.md`
 - **Post-implementation verification**: `docs/agent-workflows/implementation-checklist.md`
 
@@ -406,6 +406,16 @@ Use the following top-level structure in `docs/specs/`:
 - `page/` = route/page-level contracts
 
 Authoring and governance rules belong in AGENTS/instructions. `docs/specs/README.md` remains primarily an index and navigation aid.
+
+## Spec split and organization policy
+
+- **Single entry point:** Each feature or service module has **one** canonical contract parent (`docs/specs/service/<module>/` facade spec, or per-component spec under `component/` / `ui/`). Child files hold detail; the parent summarizes and links (plain Markdown links, no duplicate normative bodies across folders).
+- **Lint gate:** Run `node scripts/lint-specs.mjs`. Default caps: warn **400** lines, error **600**; oversized specs must be split (see `scripts/lint-specs.mjs`). Settings and `docs/settings-registry.md` stay in sync when specs expose `## Settings`.
+- **When to split (if / then):**
+  - **Adapter boundaries** match `apps/web/src/app/core/<module>/adapters/` → add `docs/specs/service/<module>/adapters/<name>.adapter.md` and link from the facade spec (structural mirror).
+  - **Bloat is** long acceptance criteria, FSM, transition map, or Visual Behavior / ownership tables → add concern slices in the same folder, e.g. `<name>.acceptance-criteria.md` or `<name>.visual-behavior.md`; do not duplicate checkbox lists in both parent and child.
+  - **UI vs service:** Service orchestration and facade contracts belong under `docs/specs/service/`; UI composition stays under `docs/specs/ui/` or `component/`. **Never** paste the full service contract into a UI spec—use a **stub** that links to the service entry (see `docs/specs/ui/workspace/workspace-view-system.md`).
+- **Anti-patterns:** Duplicate filenames with identical contract text in `ui/` and `service/`; flat `docs/specs/service/foo.md` without `docs/specs/service/foo/` when the module is a full service module—use a folder mirroring `core/<name>/` unless the registry documents an explicit thin-module exception.
 
 - In TypeScript: place state comment blocks above the enum/state contract and derived state helpers.
 - In HTML: place state comment blocks immediately before each state branch/region.

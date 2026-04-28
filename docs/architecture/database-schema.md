@@ -101,9 +101,9 @@ Legacy image-era tables are removed from runtime schema:
 
 | column                 | type                  | null/default                       | spec reference(s)                                                                                                           |
 | ---------------------- | --------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| id                     | uuid                  | not null/default gen_random_uuid() | docs/specs/ui/workspace/workspace-view-system.md; docs/specs/service/media-upload-service/upload-manager-pipeline.md        |
-| organization_id        | uuid                  | not null                           | docs/specs/ui/workspace/workspace-view-system.md                                                                            |
-| created_by             | uuid                  | nullable                           | docs/specs/ui/workspace/workspace-view-system.md                                                                            |
+| id                     | uuid                  | not null/default gen_random_uuid() | docs/specs/service/workspace-view/workspace-view-system.md; docs/specs/service/media-upload-service/upload-manager-pipeline.md        |
+| organization_id        | uuid                  | not null                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
+| created_by             | uuid                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
 | media_type             | text                  | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | mime_type              | text                  | nullable                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | storage_path           | text                  | nullable                           | docs/specs/ui/media-detail/media-detail-media-viewer.md; docs/specs/service/media-upload-service/upload-manager-pipeline.md |
@@ -111,7 +111,7 @@ Legacy image-era tables are removed from runtime schema:
 | poster_path            | text                  | nullable                           | docs/specs/ui/media-detail/media-detail-media-viewer.md                                                                     |
 | file_name              | text                  | nullable                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | file_size_bytes        | bigint                | nullable                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
-| captured_at            | timestamptz           | nullable                           | docs/specs/ui/workspace/workspace-view-system.md                                                                            |
+| captured_at            | timestamptz           | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
 | duration_ms            | integer               | nullable                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | page_count             | integer               | nullable                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | exif_latitude          | numeric(10,7)         | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
@@ -121,9 +121,9 @@ Legacy image-era tables are removed from runtime schema:
 | geog                   | geography(Point,4326) | nullable                           | docs/specs/ui/media-marker/media-marker.md                                                                                  |
 | location_status        | text                  | not null                           | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
 | gps_assignment_allowed | boolean               | not null/default true              | docs/specs/service/media-upload-service/upload-manager-pipeline.md                                                          |
-| source_image_id        | uuid                  | nullable                           | docs/specs/ui/workspace/workspace-view-system.md                                                                            |
-| created_at             | timestamptz           | not null/default now()             | docs/specs/ui/workspace/workspace-view-system.md                                                                            |
-| updated_at             | timestamptz           | not null/default now()             | docs/specs/ui/workspace/workspace-view-system.md                                                                            |
+| source_image_id        | uuid                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
+| created_at             | timestamptz           | not null/default now()             | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
+| updated_at             | timestamptz           | not null/default now()             | docs/specs/service/workspace-view/workspace-view-system.md                                                                            |
 | address_label          | text                  | nullable                           | docs/specs/ui/search-bar/search-bar-data-and-service.md                                                                     |
 | street                 | text                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                  |
 | city                   | text                  | nullable                           | docs/specs/service/workspace-view/workspace-view-system.md                                                                  |
@@ -178,21 +178,21 @@ Legacy image-era tables are removed from runtime schema:
 
 | column          | type        | null/default                       | spec reference(s)                      |
 | --------------- | ----------- | ---------------------------------- | -------------------------------------- |
-| id              | uuid        | not null/default gen_random_uuid() | docs/specs/service/metadata-service.md |
-| organization_id | uuid        | not null                           | docs/specs/service/metadata-service.md |
-| created_by      | uuid        | nullable                           | docs/specs/service/metadata-service.md |
-| key_name        | text        | not null                           | docs/specs/service/metadata-service.md |
-| created_at      | timestamptz | not null/default now()             | docs/specs/service/metadata-service.md |
+| id              | uuid        | not null/default gen_random_uuid() | docs/specs/service/metadata/metadata-service.md |
+| organization_id | uuid        | not null                           | docs/specs/service/metadata/metadata-service.md |
+| created_by      | uuid        | nullable                           | docs/specs/service/metadata/metadata-service.md |
+| key_name        | text        | not null                           | docs/specs/service/metadata/metadata-service.md |
+| created_at      | timestamptz | not null/default now()             | docs/specs/service/metadata/metadata-service.md |
 
 ### public.media_metadata
 
 | column          | type        | null/default                       | spec reference(s)                      |
 | --------------- | ----------- | ---------------------------------- | -------------------------------------- |
-| id              | uuid        | not null/default gen_random_uuid() | docs/specs/service/metadata-service.md |
-| media_item_id   | uuid        | not null                           | docs/specs/service/metadata-service.md |
-| metadata_key_id | uuid        | not null                           | docs/specs/service/metadata-service.md |
-| value_text      | text        | not null                           | docs/specs/service/metadata-service.md |
-| created_at      | timestamptz | not null/default now()             | docs/specs/service/metadata-service.md |
+| id              | uuid        | not null/default gen_random_uuid() | docs/specs/service/metadata/metadata-service.md |
+| media_item_id   | uuid        | not null                           | docs/specs/service/metadata/metadata-service.md |
+| metadata_key_id | uuid        | not null                           | docs/specs/service/metadata/metadata-service.md |
+| value_text      | text        | not null                           | docs/specs/service/metadata/metadata-service.md |
+| created_at      | timestamptz | not null/default now()             | docs/specs/service/metadata/metadata-service.md |
 
 ### public.coordinate_corrections
 

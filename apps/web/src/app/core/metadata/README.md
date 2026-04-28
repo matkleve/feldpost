@@ -6,3 +6,5 @@ Helpers: ./metadata.helpers.ts
 Adapters: ./adapters/
 
 This module centralizes metadata field definitions and media metadata value access for sort, grouping, filtering, and media detail flows.
+
+Spec: `docs/specs/service/metadata/metadata-service.md`

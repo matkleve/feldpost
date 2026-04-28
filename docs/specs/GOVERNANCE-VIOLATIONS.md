@@ -1,11 +1,11 @@
 # Governance Violations Report
 
-Last updated: 2026-04-15
+Last updated: 2026-04-28
 
 | Violation                           | Count | Status                    |
 | ----------------------------------- | ----- | ------------------------- |
 | docs/specs subfolder README missing | 0     | resolved                  |
-| module registry spec-gap            | 27    | open                      |
+| module registry spec-gap            | 26    | open                      |
 | module registry readme-gap          | 9     | open                      |
 | module registry exception-open      | 2     | open                      |
 | traceability unresolved refs        | 1     | open                      |
@@ -38,7 +38,6 @@ Last updated: 2026-04-15
 - core/auth (spec-gap)
 - core/i18n (spec-gap)
 - core/invites (spec-gap)
-- core/metadata (spec-gap)
 - core/search (spec-gap)
 - core/settings-pane (spec-gap)
 - core/supabase (spec-gap)

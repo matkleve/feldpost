@@ -1,9 +1,9 @@
 # README Coverage Report
 
-Last updated: 2026-04-15
+Last updated: 2026-04-28
 
-Total active subfolders: 26
-Subfolders with README.md: 26
+Total active subfolders: 28
+Subfolders with README.md: 28
 Subfolders missing README.md: 0
 
 | Subfolder | README | Status |
@@ -23,11 +23,13 @@ Subfolders missing README.md: 0
 | docs/specs/service/media-preview | present | ok |
 | docs/specs/service/media-query | present | ok |
 | docs/specs/service/media-upload-service | present | ok |
+| docs/specs/service/metadata | present | ok |
 | docs/specs/service/share-set | present | ok |
 | docs/specs/service/toast | present | ok |
 | docs/specs/service/workspace-selection | present | ok |
 | docs/specs/service/workspace-view | present | ok |
 | docs/specs/system | present | ok |
+| docs/specs/system/security | present | ok |
 | docs/specs/ui | present | ok |
 | docs/specs/ui/media-detail | present | ok |
 | docs/specs/ui/media-marker | present | ok |

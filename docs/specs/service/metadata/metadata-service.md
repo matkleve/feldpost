@@ -91,7 +91,7 @@ flowchart LR
 | apps/web/src/app/core/metadata/adapters/built-in-metadata-fields.adapter.ts | Built-in field definitions and resolvers |
 | apps/web/src/app/core/metadata/adapters/supabase-metadata.adapter.ts        | Supabase access adapter                  |
 | apps/web/src/app/core/metadata/README.md                                    | Module index                             |
-| docs/specs/service/metadata-service.md                                      | Canonical metadata service contract      |
+| docs/specs/service/metadata/metadata-service.md                             | Canonical metadata service contract      |
 
 ## Wiring
 

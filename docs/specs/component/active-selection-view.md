@@ -2,7 +2,7 @@
 
 > **Blueprint:** (pending — implement after foundation services are built)
 > **Use cases:** [use-cases/workspace-view.md](../use-cases/workspace-view.md)
-> **Architecture:** [workspace/workspace-view-system.md](workspace/workspace-view-system.md) (data pipeline, service contracts, RPC)
+> **Architecture:** [workspace-view-system (service)](../service/workspace-view/workspace-view-system.md) (data pipeline, service contracts, RPC)
 > **Export interactions:** [workspace/workspace-actions-bar.md](workspace/workspace-actions-bar.md), [use-cases/workspace-export.md](../use-cases/workspace-export.md)
 
 ## What It Is
@@ -316,9 +316,9 @@ flowchart TD
 
 | File                                                                          | Purpose                                       | Spec Reference                                              |
 | ----------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `core/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group          | [workspace-view-system](workspace/workspace-view-system.md) |
+| `core/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group          | [workspace-view-system](../service/workspace-view/workspace-view-system.md) |
 | `core/filter.service.ts`                                                      | Filter rule state + predicate builder         | [filter-dropdown](filter-dropdown.md)                       |
-| `core/metadata.service.ts`                                                    | Property CRUD + metadata field/value contract | [metadata-service](../service/metadata-service.md)          |
+| `core/metadata.service.ts`                                                    | Property CRUD + metadata field/value contract | [metadata-service](../service/metadata/metadata-service.md)          |
 | `features/map/workspace-pane/workspace-toolbar.component.ts/html/scss`        | Toolbar with 4 buttons                        | [workspace-toolbar](workspace/workspace-toolbar.md)         |
 | `features/map/workspace-pane/workspace-toolbar/grouping-dropdown.component.*` | Grouping dropdown with drag-reorder           | [grouping-dropdown](grouping-dropdown.md)                   |
 | `features/map/workspace-pane/workspace-toolbar/sort-dropdown.component.*`     | Sort dropdown with search                     | [sort-dropdown](sort-dropdown.md)                           |
@@ -326,7 +326,7 @@ flowchart TD
 | `features/map/workspace-pane/workspace-toolbar/projects-dropdown.component.*` | Projects checklist dropdown                   | [projects-dropdown](projects-dropdown.md)                   |
 | `features/map/workspace-pane/group-header.component.ts`                       | Collapsible group heading                     | (this spec)                                                 |
 | `features/map/workspace-pane/thumbnail-grid.component.*`                      | Virtual-scrolled media grid                   | [thumbnail-grid](thumbnail-grid.md)                         |
-| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                            | RPC for cluster media loading                 | [workspace-view-system](workspace/workspace-view-system.md) |
+| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                            | RPC for cluster media loading                 | [workspace-view-system](../service/workspace-view/workspace-view-system.md) |
 
 ## Wiring
 
