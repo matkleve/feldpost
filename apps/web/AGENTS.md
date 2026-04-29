@@ -42,6 +42,15 @@ src/app/
 - Prefer app dialogs/modals over browser-native `window.prompt` / `window.confirm` for product interactions
 - When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
 
+## Typography Ownership (Hard Rule)
+
+`h1`–`h6` elements get their `font-size`, `font-weight`, and `line-height` exclusively from `apps/web/src/styles.scss` (the global typography baseline after Tailwind Preflight).
+
+- **Never** override `font-size`, `font-weight`, or `line-height` on `h1`–`h6` selectors in component SCSS.
+- **Never** add a wrapper class (e.g. `.auth-title`) that re-declares those three properties to visually style a heading — use the element directly.
+- **Allowed** in component SCSS: `margin`, `padding`, `color`, `letter-spacing`, `text-align`, and other layout/context properties on heading elements.
+- If a heading genuinely needs a different typographic scale for a specific context (e.g. a compact card), use a modifier class that maps to an existing token — add the modifier to `styles.scss` so it remains globally visible and does not create hidden per-component typography forks.
+
 ## Visual Behavior Contract (Required for UI Components)
 
 - Every component spec must define a behavior-to-CSS ownership matrix before implementation.

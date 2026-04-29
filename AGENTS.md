@@ -105,6 +105,15 @@ are strictly non-overlapping across component layers.
 - Any given CSS property may be defined in exactly one component layer.
   Defining the same property in multiple layers is forbidden.
 
+### Typography ownership rule
+
+`h1`–`h6` elements receive `font-size`, `font-weight`, and `line-height` **only** from `apps/web/src/styles.scss` (the global baseline that runs after Tailwind Preflight).
+
+- Component SCSS must **never** redeclare `font-size`, `font-weight`, or `line-height` on heading element selectors.
+- A wrapper class that reproduces these three properties to style a heading is forbidden.
+- Allowed per component: `margin`, `padding`, `color`, `letter-spacing`, `text-align`, and other context properties.
+- When a specific context genuinely needs a variant typographic scale (e.g. compact card heading), add a modifier class to `styles.scss` — it must remain globally visible and reference the token scale.
+
 ### Intermediate wrapper rule
 
 Structural or functional wrapper elements — any element that exists solely for
