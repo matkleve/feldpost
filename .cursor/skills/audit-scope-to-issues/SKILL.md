@@ -71,6 +71,15 @@ Every GitHub issue must be either:
 
 Do not create GitHub issues for unclear or weakly supported suspicions. Record them in the unclear findings report instead.
 
+### Unclear findings (evidence anchor)
+
+Weak or ambiguous findings still need an anchor so the team can re-find the signal. **Every unclear finding MUST include at least one concrete pointer** to where it showed up (minimum one repository path):
+
+- Code: file path (and optional line range or symbol), migration under `supabase/migrations/`, config (`vercel.json`, `_headers`, env wiring).
+- Spec/docs: path under `docs/specs/`, `docs/`, or local feature `README.md`.
+
+If the ambiguity is a **cross-layer mismatch**, cite **at least one pointer on each side** when two artifacts disagree (spec vs code, policy vs template). If only one side exists, one pointer is enough.
+
 Every issue candidate must carry a compact evidence packet before the user checkpoint:
 
 | Field | Required content |
@@ -123,8 +132,8 @@ After collecting all specialist reports, stop and present the consolidated findi
 |---|---|---|---|---|
 
 **Unclear findings (need your input):**
-| # | Area | Suspicion | Check needed | Your call |
-|---|---|---|---|---|
+| # | Pointer(s) | Area | Suspicion | Check needed | Your call |
+|---|---|---|---|---|---|
 
 For each unclear finding, ask: "Create as `idea`, promote to `task`, or drop?" Wait for the user's response before proceeding.
 
@@ -205,7 +214,7 @@ After creating safe issues, report unclear findings separately. Use this for sus
 - Naming/glossary drift that may be intentional but needs confirmation.
 - Risky-looking code paths that need a runtime, test, or database check before an issue is justified.
 
-For each unclear finding, state the exact check or decision needed to promote it to an issue.
+For each unclear finding, state the exact check or decision needed to promote it to an issue, and include **at least one pointer** (see **Unclear findings (evidence anchor)** above); weak suspicions without a path are not allowed in this report.
 Write unclear findings before the created-issues summary table, not after.
 
 ## Coverage Ledger
@@ -221,8 +230,8 @@ Use the ledger to avoid stopping after the first few findings. Do not create low
 
 After creating safe issues, report unclear findings first:
 
-| Area | Suspicion | Evidence | Check needed |
-| --- | --- | --- | --- |
+| Pointer(s) | Area | Suspicion | Evidence | Check needed |
+| --- | --- | --- | --- | --- |
 
 Then report created or reused issues:
 
