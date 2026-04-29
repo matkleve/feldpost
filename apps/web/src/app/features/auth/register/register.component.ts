@@ -28,6 +28,7 @@ import {
   UiFieldRowDirective,
   UiInputControlDirective,
 } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.component';
 
 /** Custom validator: both password fields must match. */
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
@@ -39,6 +40,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-register',
   imports: [
+    AuthMapLayerComponent,
     ReactiveFormsModule,
     RouterLink,
     UiFieldRowDirective,

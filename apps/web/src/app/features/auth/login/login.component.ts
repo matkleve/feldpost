@@ -20,10 +20,12 @@ import {
   UiFieldRowDirective,
   UiInputControlDirective,
 } from '../../../shared/ui-primitives/ui-primitives.directive';
+import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.component';
 
 @Component({
   selector: 'app-login',
   imports: [
+    AuthMapLayerComponent,
     ReactiveFormsModule,
     RouterLink,
     UiFieldRowDirective,

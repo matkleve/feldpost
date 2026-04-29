@@ -27,6 +27,27 @@
     var(--color-bg-base);
 }
 
+// Holds iframe + overlay; stays opacity 0 until iframe load, then fades in (token-backed motion)
+.auth-map-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.auth-map-layer--ready {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-map-layer {
+    transition: none;
+  }
+}
+
 .auth-map-bg {
   position: absolute;
   inset: -4rem;

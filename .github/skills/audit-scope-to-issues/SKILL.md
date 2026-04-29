@@ -71,6 +71,17 @@ Every GitHub issue must be either:
 
 Do not create GitHub issues for unclear or weakly supported suspicions. Record them in the unclear findings report instead.
 
+Every issue candidate must carry a compact evidence packet before the user checkpoint:
+
+| Field | Required content |
+|---|---|
+| `spec` | Governing spec path, rule path, or `n/a` |
+| `code` | Code path, migration path, doc path, or `n/a` |
+| `invariant` | RLS, i18n, FSM, Ownership Triad, Adapter boundary, service symmetry, glossary, or `n/a` |
+| `mismatch` | One sentence describing the exact observed difference or risk |
+| `issue_type` | `task` or `idea` |
+| `verification` | Targeted test, build, migration/RLS check, lint, or `n/a` |
+
 Use label `task` for concrete actionable findings.
 Use label `idea` for hypotheses, product decisions, or larger refactor proposals.
 
@@ -86,6 +97,16 @@ Assign exactly one priority label to every issue:
 Default `task` findings to `priority:P2` unless evidence justifies `P0` or `P1`.
 Default `idea` findings to `priority:P3`.
 
+### Priority Normalization
+
+Specialist reports may suggest priority, but the orchestrator owns final labels.
+
+- Normalize every specialist priority through the policy above before the user checkpoint.
+- Do not pass through `P0` or `P1` for ordinary spec drift, missing docs, missing tests, module-shape drift, or cleanup.
+- Use `P0` only for proven security boundary failure, data loss/corruption risk, build-blocking failure, or release-blocking database/RLS issue.
+- Use `P1` only for confirmed user-blocking behavior or a critical workflow regression.
+- Record the normalized label in the evidence packet and checkpoint table.
+
 ## User Checkpoint
 
 After collecting all specialist reports, stop and present the consolidated findings to the user before creating any issues:
@@ -94,14 +115,20 @@ After collecting all specialist reports, stop and present the consolidated findi
 **Audit complete. Before I create issues, please confirm:**
 
 **Confirmed findings (will become issues):**
-| # | Area | Observation | Suggested priority |
-|---|---|---|---|
+| # | Type | Area | Observation | Priority |
+|---|---|---|---|---|
+
+**Verification/tracking findings (will become issues):**
+| # | Type | Area | Missing verification or tracking gap | Priority |
+|---|---|---|---|---|
 
 **Unclear findings (need your input):**
 | # | Area | Suspicion | Check needed | Your call |
 |---|---|---|---|---|
 
 For each unclear finding, ask: "Create as `idea`, promote to `task`, or drop?" Wait for the user's response before proceeding.
+
+Use **Confirmed findings** for direct code/spec/database/glossary mismatches or likely bugs. Use **Verification/tracking findings** for missing tests, unchecked acceptance criteria, incomplete audit hooks, or documentation classification work that is still actionable.
 
 Do not create any GitHub issue until the user replies with confirmation or explicit approval per finding.
 ---
@@ -123,13 +150,19 @@ gh label create "priority:P2" --description "Confirmed bounded bug, spec drift, 
 gh label create "priority:P3" --description "Hypothesis, cleanup, product decision, or larger refactor"
 ```
 
-Before creating each planned issue, check for duplicates:
+Before creating planned issues, fetch open issues once and compare locally:
+
+```bash
+gh issue list --state open --limit 200 --json number,title,labels,url
+```
+
+Use the returned title and label set to compare against each planned issue. If an existing issue already covers the finding, do not create a duplicate. Report the existing issue in the output table instead.
+
+Only fall back to targeted search when the bulk open-issue list is too large or ambiguous:
 
 ```bash
 gh issue list --state open --search "<title keywords>"
 ```
-
-If an existing issue already covers the finding, do not create a duplicate. Report the existing issue in the output table instead.
 
 Create one issue per distinct finding from the repo root:
 
