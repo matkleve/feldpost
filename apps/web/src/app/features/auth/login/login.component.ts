@@ -16,8 +16,6 @@ import { AuthService } from '../../../core/auth/auth.service';
 import {
   UiButtonDirective,
   UiButtonPrimaryDirective,
-  UiFieldLabelDirective,
-  UiFieldRowDirective,
   UiInputControlDirective,
 } from '../../../shared/ui-primitives/ui-primitives.directive';
 import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.component';
@@ -28,8 +26,6 @@ import { AuthMapLayerComponent } from '../auth-map-layer/auth-map-layer.componen
     AuthMapLayerComponent,
     ReactiveFormsModule,
     RouterLink,
-    UiFieldRowDirective,
-    UiFieldLabelDirective,
     UiInputControlDirective,
     UiButtonDirective,
     UiButtonPrimaryDirective,
@@ -42,14 +38,19 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  // Form definition — both fields required; email must be valid format
+  // Form definition — email required + valid format; password required only (server validates strength)
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', Validators.required],
   });
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly showPassword = signal(false);
+
+  protected togglePassword(): void {
+    this.showPassword.update((v) => !v);
+  }
 
   protected async submit(): Promise<void> {
     if (this.form.invalid) return;

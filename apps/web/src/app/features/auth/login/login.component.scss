@@ -1,1 +1,26 @@
 @use '../auth.styles';
+
+// Establishes stacking context so the toggle button can be positioned absolutely
+// @see login.component.html#password-field-wrapper
+.password-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+// Right-padding reserves space so typed text clears the toggle button
+// @see login.component.html#password-field-wrapper
+.password-input {
+  flex: 1 1 auto;
+  padding-right: 2.5rem;
+  min-width: 0;
+}
+
+// Positioned inside wrapper; interaction and visual owned by .icon-btn-ghost
+// @see login.component.html#password-field-wrapper
+.password-toggle {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+}

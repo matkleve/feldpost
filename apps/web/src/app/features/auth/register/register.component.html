@@ -1,9 +1,9 @@
 <div class="auth-shell auth-shell--map">
   <app-auth-map-layer />
-  <div class="auth-card">
+  <div class="auth-card ui-container">
     @if (success()) {
       <div class="auth-success">
-        <h1 class="auth-title">Check your email</h1>
+        <h1>Check your email</h1>
         <p>
           We sent a confirmation link to <strong>{{ form.controls.email.value }}</strong
           >. Click it to activate your account.
@@ -11,7 +11,7 @@
         <p class="auth-footer"><a routerLink="/auth/login">Back to sign in</a></p>
       </div>
     } @else {
-      <h1 class="auth-title">Create account</h1>
+      <h1>Create account</h1>
       <p class="auth-subtitle">Start documenting your sites</p>
 
       <div class="auth-card-scroll" role="region" aria-label="Create account form">

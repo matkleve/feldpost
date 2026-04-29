@@ -1,12 +1,10 @@
 /**
  * Shared auth layout styles.
- *
- * Ground rule: all auth component SCSS files import this partial.
- * Never duplicate these rules in individual component files.
- * M-UI1: raw hex values replaced with design-system tokens.
+ * Ground rule: all auth component SCSS files @use this partial.
  */
 
 // Full-viewport centered shell
+// @see docs/specs/page/account-feature.md
 .auth-shell {
   display: flex;
   align-items: center;
@@ -14,101 +12,52 @@
   height: 100dvh;
   min-height: 100vh;
   background: var(--color-bg-base);
-  padding: 1.5rem;
+  padding: var(--spacing-5);
   position: relative;
   overflow: hidden;
 }
 
-// Optional fixed city map background for login/register only
+// Radial gradient warm-up for login/register map-background variant
+// @see auth-map-layer.component.scss for the iframe layer
 .auth-shell--map {
   background:
-    radial-gradient(circle at 16% 20%, rgba(204, 122, 74, 0.2), transparent 46%),
+    radial-gradient(
+      circle at 16% 20%,
+      color-mix(in srgb, var(--color-accent-brand) 20%, transparent),
+      transparent 46%
+    ),
     radial-gradient(circle at 84% 84%, rgba(37, 99, 235, 0.2), transparent 40%),
     var(--color-bg-base);
 }
 
-// Holds iframe + overlay; stays opacity 0 until iframe load, then fades in (token-backed motion)
-.auth-map-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition:
-    opacity var(--motion-duration-slow) var(--motion-ease-out);
-}
-
-.auth-map-layer--ready {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .auth-map-layer {
-    transition: none;
-  }
-}
-
-.auth-map-bg {
-  position: absolute;
-  inset: -4rem;
-  z-index: 0;
-  pointer-events: none;
-  filter: saturate(0.9) contrast(1.02);
-  transform: scale(1.08);
-}
-
-.auth-map-frame {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.auth-map-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      160deg,
-      rgba(249, 247, 244, 0.75),
-      rgba(249, 247, 244, 0.35) 46%,
-      rgba(249, 247, 244, 0.72)
-    ),
-    linear-gradient(0deg, rgba(249, 247, 244, 0.22), rgba(249, 247, 244, 0.22));
-}
-
-:root.dark .auth-map-overlay,
-[data-theme='dark'] .auth-map-overlay {
-  background:
-    linear-gradient(
-      160deg,
-      rgba(15, 14, 12, 0.74),
-      rgba(15, 14, 12, 0.4) 46%,
-      rgba(15, 14, 12, 0.78)
-    ),
-    linear-gradient(0deg, rgba(15, 14, 12, 0.26), rgba(15, 14, 12, 0.26));
-}
-
-// Card container
+// Auth modal surface — composes ui-container; owns only auth-specific constraints.
+// padding and border-radius come from ui-container via CSS var overrides below.
 .auth-card {
+  --ui-container-padding-inline: 2rem;
+  --ui-container-padding-block: 2.5rem;
+
   background: var(--color-bg-surface);
-  border-radius: var(--radius-lg);
   box-shadow: var(--elevation-dropdown);
-  padding: 2.5rem 2rem;
   width: 100%;
   max-width: 420px;
   max-height: calc(100dvh - 3rem);
-  position: relative;
   z-index: 2;
   overflow: hidden;
 }
 
+// Subtitle paragraph — secondary color directly below the page h1
+.auth-subtitle {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  margin-bottom: 1.75rem;
+}
+
+// Scrollable form region for long forms (register) — shadows indicate overflow
 .auth-card-scroll {
   max-height: calc(100dvh - 3rem - 8.25rem);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: 0.25rem;
+  padding-right: var(--spacing-1);
   position: relative;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-strong) transparent;
@@ -156,163 +105,80 @@
       center bottom;
 }
 
-// Headings
-.auth-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 0.25rem;
-  color: var(--color-text-primary);
-}
-
-.auth-subtitle {
-  font-size: var(--font-size-md-soft);
-  color: var(--color-text-secondary);
-  margin: 0 0 1.75rem;
-}
-
-// Form fields: stacked layout only when not using global `.ui-field-row` grid (form.scss)
+// Stacked field wrapper: label above, control below, error below that
 .field {
-  margin-bottom: 1.1rem;
-
-  &:not(.ui-field-row) {
-    display: flex;
-    flex-direction: column;
-  }
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--spacing-4);
 
   label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: var(--font-size-md-compact);
+    font-size: var(--font-size-md);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
-    margin-bottom: 0.35rem;
-  }
-
-  &.ui-field-row > label {
-    margin-bottom: 0;
-  }
-
-  input {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0.6rem 0.75rem;
-    font-size: var(--font-size-md-emphasis);
-    outline: none;
-    transition: border-color 0.15s;
-    background: var(--color-bg-surface);
-    color: var(--color-text-primary);
-
-    &:focus {
-      border-color: var(--color-primary);
-      box-shadow: var(--shadow-focus);
-    }
-
-    &::placeholder {
-      color: var(--color-text-disabled);
-    }
+    margin-bottom: var(--spacing-1);
   }
 }
 
-.field-error {
-  font-size: var(--font-size-sm-compact);
-  color: var(--color-danger);
-  margin-top: 0.3rem;
-}
-
-// Span both grid columns so validation text sits under label + control (ui-field-row grid)
+// Span both grid columns when field uses ui-field-row (register / reset / update)
 .field.ui-field-row > .field-error {
   grid-column: 1 / -1;
 }
 
-// Forgot password link inside label
-.forgot-link {
-  font-size: var(--font-size-sm-tight);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-primary);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-// Alert banners
-.alert {
-  border-radius: var(--radius-md);
-  padding: 0.65rem 0.85rem;
-  font-size: var(--font-size-md);
-  margin-bottom: 1rem;
-}
-
-.alert-error {
-  background: #fee2e2; // derived from --color-danger; no exact token for tinted backgrounds
+.field-error {
+  font-size: var(--font-size-sm);
   color: var(--color-danger);
-  border: 1px solid #fca5a5;
+  margin-top: var(--spacing-1);
 }
 
-// Primary button
+// Layout-only: full-width and top gap; visual treatment owned by .ui-button--primary
 .btn-primary {
   width: 100%;
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 0.7rem 1rem;
-  font-size: var(--font-size-md-emphasis);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-top: 0.5rem;
-
-  &:hover:not(:disabled) {
-    background: var(--color-primary-hover);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  margin-top: var(--spacing-2);
 }
 
-// Footer links
+// Error alert banner
+.alert-error {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-md);
+  margin-bottom: var(--spacing-4);
+  background: var(--state-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+}
+
+// Centered footer navigation text
 .auth-footer {
   text-align: center;
-  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
-  margin-top: 1.5rem;
-
-  a {
-    color: var(--color-primary);
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+  margin-top: var(--spacing-5);
 }
 
-@media (max-width: 640px) {
-  .auth-shell {
-    padding: 1rem;
-  }
-
-  .auth-card {
-    padding: 1.5rem 1rem;
-    max-height: calc(100dvh - 2rem);
-  }
-
-  .auth-card-scroll {
-    max-height: calc(100dvh - 2rem - 7.25rem);
-  }
-}
-
-// Success state
+// Success confirmation state
 .auth-success {
   text-align: center;
 
   p {
     color: var(--color-text-secondary);
     line-height: var(--line-height-relaxed);
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-shell {
+    padding: var(--spacing-4);
+  }
+
+  .auth-card {
+    --ui-container-padding-inline: var(--spacing-4);
+    --ui-container-padding-block: var(--spacing-5);
+
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .auth-card-scroll {
+    max-height: calc(100dvh - 2rem - 7.25rem);
   }
 }
