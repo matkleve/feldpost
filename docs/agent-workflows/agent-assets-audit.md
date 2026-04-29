@@ -37,7 +37,7 @@ Inventory Feldpost agent-facing assets, remove proven duplicate prompt entrypoin
 
 ## Audit Pipeline
 
-Specialist skills produce structured reports only:
+Specialist skills support two modes. In Standalone mode, they run the audit, checkpoint with the user, and create issues using the same flow as `audit-scope-to-issues`. In Orchestrated mode, they produce structured reports only and return control to `audit-scope-to-issues`:
 
 - `spec-audit`
 - `check-spec`

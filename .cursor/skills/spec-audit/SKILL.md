@@ -7,6 +7,16 @@ description: Audits component spec files (markdown) for unclear responsibility b
 
 > **Role:** Specialist skill. Produces a structured findings report. Does not create GitHub issues. Returns output to `audit-scope-to-issues` for issue creation.
 
+## Mode
+
+**Standalone** (invoked directly by user):
+Run the full audit, then behave like `audit-scope-to-issues`: present findings checkpoint, wait for confirmation, create issues.
+
+**Orchestrated** (invoked by `audit-scope-to-issues`):
+Run the audit, return the structured findings report only. Do not create issues. Do not checkpoint with the user.
+
+Detect mode by context: if the user invoked this skill directly, use Standalone. If called as part of an orchestrated audit, use Orchestrated.
+
 Analyzes one or more component spec files (`.md`) and produces a structured audit report identifying unclear responsibility boundaries, ownership conflicts, and internal inconsistencies — with concrete fix proposals for each finding.
 
 ---
@@ -102,7 +112,7 @@ End with:
 
 ## Output (Report to Orchestrator)
 
-Return findings in this structure — do not create issues:
+In Orchestrated mode, return findings in this structure — do not create issues:
 
 ### Confirmed Findings
 | Area/File | Spec | Observation | Suggested priority |

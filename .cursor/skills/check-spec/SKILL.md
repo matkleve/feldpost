@@ -8,6 +8,16 @@ argument-hint: "Element spec name or path (e.g., search-bar)"
 
 > **Role:** Specialist skill. Produces a structured findings report. Does not create GitHub issues. Returns output to `audit-scope-to-issues` for issue creation.
 
+## Mode
+
+**Standalone** (invoked directly by user):
+Run the full audit, then behave like `audit-scope-to-issues`: present findings checkpoint, wait for confirmation, create issues.
+
+**Orchestrated** (invoked by `audit-scope-to-issues`):
+Run the audit, return the structured findings report only. Do not create issues. Do not checkpoint with the user.
+
+Detect mode by context: if the user invoked this skill directly, use Standalone. If called as part of an orchestrated audit, use Orchestrated.
+
 ## Rules
 
 1. **Read-only for code.** You check code but do not modify it.
@@ -53,7 +63,7 @@ Update existing Acceptance Criteria checkboxes in the spec when evidence is clea
 
 ## Output (Report to Orchestrator)
 
-Return findings in this structure — do not create issues:
+In Orchestrated mode, return findings in this structure — do not create issues:
 
 ### Confirmed Findings
 | Area/File | Spec | Observation | Suggested priority |
