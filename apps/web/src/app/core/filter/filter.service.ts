@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import type { FilterRule, WorkspaceImage } from '../workspace-view/workspace-view.types';
+import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
+import type { FilterRule } from './filter.types';
 import { evaluateRulesForItem } from './filter-rule-evaluator';
 import { MetadataService } from '../metadata/metadata.service';
 

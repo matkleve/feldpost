@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Deep-linkable settings under `/settings` and optional `/settings/:section/:subsection` segments. The visible UI is the **settings overlay** (not the legacy `SettingsComponent` placeholder). `AppComponent` parses the URL, drives `SettingsPaneService.openFromRoute`, and keeps the user on the prior map/app URL when the overlay closes while still on a settings path.
+Deep-linkable settings under `/settings` and optional `/settings/:section/:subsection` segments. The visible UI is the **settings overlay**. `AppComponent` parses the URL, drives `SettingsPaneService.openFromRoute`, and keeps the user on the prior map/app URL when the overlay closes while still on a settings path.
 
 ## What It Looks Like
 
@@ -61,7 +61,6 @@ Section bodies (account, appearance, etc.) are specified under [settings-overlay
 
 - `SettingsPaneService.openFromRoute(section, subsection)` centralizes open + selection.
 - Invalid section slug: `normalizeSettingsSection` returns `null`; service still receives normalized input from `openFromRoute` implementation (see code).
-- **Placeholder:** `features/settings/settings.component.ts` is not routed; do not use it as the contract for current product behavior.
 
 ## Acceptance Criteria
 

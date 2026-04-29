@@ -1,4 +1,4 @@
-import type { ActionDefinition } from '../../action-system/action-types';
+import type { ActionDefinition } from '../../../core/action/action-types';
 import type { RadiusActionContext, RadiusMenuActionId } from './map-workspace-actions.types';
 
 export const RADIUS_SELECTION_ACTION_DEFINITIONS: ReadonlyArray<

@@ -20,7 +20,7 @@ import type { UploadItemActionContext, UploadItemMenuAction } from './upload-pan
 import { getIssueKind } from './upload-phase.helpers';
 import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
 import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
-import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
+import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 
 export interface UploadPanelMenuActionRouterOptions {
   placementRequested: (jobId: string) => void;

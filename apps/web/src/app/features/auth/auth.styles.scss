@@ -170,11 +170,14 @@
   margin: 0 0 1.75rem;
 }
 
-// Form fields
+// Form fields: stacked layout only when not using global `.ui-field-row` grid (form.scss)
 .field {
-  display: flex;
-  flex-direction: column;
   margin-bottom: 1.1rem;
+
+  &:not(.ui-field-row) {
+    display: flex;
+    flex-direction: column;
+  }
 
   label {
     display: flex;
@@ -184,6 +187,10 @@
     font-weight: var(--font-weight-medium);
     color: var(--color-text-primary);
     margin-bottom: 0.35rem;
+  }
+
+  &.ui-field-row > label {
+    margin-bottom: 0;
   }
 
   input {
@@ -211,6 +218,11 @@
   font-size: var(--font-size-sm-compact);
   color: var(--color-danger);
   margin-top: 0.3rem;
+}
+
+// Span both grid columns so validation text sits under label + control (ui-field-row grid)
+.field.ui-field-row > .field-error {
+  grid-column: 1 / -1;
 }
 
 // Forgot password link inside label

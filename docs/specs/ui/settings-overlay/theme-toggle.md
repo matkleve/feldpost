@@ -80,7 +80,7 @@ sequenceDiagram
 - Import `ThemeToggleComponent` in `SidebarComponent`
 - Place at bottom of sidebar rail, above account icon
 - Inject `ThemeService` in component constructor
-- Also import in `SettingsComponent` for settings page theme control
+- Settings-route theme controls live in the settings overlay, not in a separate `SettingsComponent`
 
 ## Acceptance Criteria
 

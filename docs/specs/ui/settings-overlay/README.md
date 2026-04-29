@@ -5,7 +5,6 @@ Module index for settings-overlay related contracts.
 ## Files
 
 - settings-overlay.md
-- settings-page.md
 - account-page.md
 - account-settings-section.md
 - language-locale-settings.md

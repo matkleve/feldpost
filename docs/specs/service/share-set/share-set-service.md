@@ -57,6 +57,10 @@ None (stateless facade).
 
 - RPC parameter names follow DB (`p_image_ids` legacy name); resolved rows map **`media_item_id`** to `mediaId` in the view model.
 
+### Security (database-first)
+
+- **`resolve_share_set`** is executable by **`anon`** and **`authenticated`**. Resolution matches the share token to a **non-revoked, non-expired** row; possession of the token is the read gate (no `user_org_id()` filter). Creation remains authenticated-only via **`create_or_reuse_share_set`**.
+
 ## Acceptance Criteria
 
 - [ ] Creation and resolution paths documented with RPC names.

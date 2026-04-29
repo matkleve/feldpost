@@ -205,7 +205,7 @@ sequenceDiagram
 | `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` | account group styling, form states, and critical action variants                 |
 | `apps/web/src/app/features/settings-overlay/settings-section-registry.ts`    | section registration entry for `account`                                         |
 | `apps/web/src/app/core/auth/auth.service.ts`                                 | auth boundary for updateUser, resetPasswordForEmail, mfa, reauth, and sign-out   |
-| `apps/web/src/app/core/user-profile.service.ts`                              | display-name lookup for identity row                                             |
+| `apps/web/src/app/core/user-profile/user-profile.service.ts`                 | display-name lookup for identity row                                             |
 
 ## Wiring
 

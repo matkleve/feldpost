@@ -97,7 +97,10 @@ export class MetadataService {
 
   async refreshMetadataFields(): Promise<void> {
     const keys = await this.adapter.fetchMetadataKeys();
-    if (keys.length === 0) return;
+    if (keys.length === 0) {
+      this.customMetadataFields.set([]);
+      return;
+    }
     this.setMetadataFieldsFromKeys(keys);
   }
 

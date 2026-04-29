@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageDetailDataFacade } from './media-detail-data.facade';
+import { MediaDetailDataFacade } from './media-detail-data.facade';
 import type { ImageRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 
 const MOCK_IMAGE: ImageRecord = {
@@ -117,7 +117,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
     loadProjectMemberships: vi.fn(async () => {}),
   } as any;
 
-  const facade = new ImageDetailDataFacade({
+  const facade = new MediaDetailDataFacade({
     services: { supabase, metadata: metadataService, mediaDownloadService, projectMemberships },
     signals: {
       image,
@@ -144,7 +144,7 @@ function createFacade(overrides?: { image?: Partial<ImageRecord> }) {
   };
 }
 
-describe('ImageDetailDataFacade', () => {
+describe('MediaDetailDataFacade', () => {
   it('loads image state and metadata', async () => {
     const { facade, signals, deps } = createFacade();
 

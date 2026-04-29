@@ -15,13 +15,13 @@ import {
 } from '@angular/core';
 import { toCanvas } from 'qrcode';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { InviteService } from '../../../core/invites/invite.service';
+import { InvitesService } from '../../../core/invites/invites.service';
 import type {
   InviteOpenContext,
   InvitePanelMode,
   InviteTargetRole,
   QrInviteViewModel,
-} from '../../../core/invites/invite.types';
+} from '../../../core/invites/invites.types';
 import {
   UiButtonDangerDirective,
   UiButtonDirective,
@@ -48,7 +48,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InviteManagementSectionComponent implements OnInit, OnDestroy {
-  private readonly inviteService = inject(InviteService);
+  private readonly inviteService = inject(InvitesService);
   private readonly i18nService = inject(I18nService);
 
   private expirationTimer: ReturnType<typeof setInterval> | null = null;

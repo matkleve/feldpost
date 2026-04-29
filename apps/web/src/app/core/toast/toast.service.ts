@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import type { ToastItem, ToastOptions } from '../toast.model';
+import type { ToastItem, ToastOptions } from './toast.types';
 
 const MAX_VISIBLE = 3;
 const DEFAULT_DURATION = 4000;

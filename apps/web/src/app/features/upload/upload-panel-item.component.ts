@@ -18,7 +18,7 @@ import { MediaDownloadService } from '../../core/media-download/media-download.s
 import { UniversalMediaComponent } from '../../shared/media/universal-media.component';
 import type { MediaRenderState, UploadOverlayState } from '../../core/media/media-renderer.types';
 import { DropdownShellComponent } from '../../shared/dropdown-trigger/dropdown-shell.component';
-import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
+import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 
 const UPLOAD_ITEM_MENU_WIDTH = 224;
 const UPLOAD_ITEM_MENU_OFFSET_Y = 4;

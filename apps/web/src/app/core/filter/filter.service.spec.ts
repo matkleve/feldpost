@@ -1,7 +1,8 @@
 ﻿import { TestBed } from '@angular/core/testing';
 import { FilterService } from './filter.service';
 import { MetadataService } from '../metadata/metadata.service';
-import type { FilterRule, WorkspaceImage } from '../workspace-view/workspace-view.types';
+import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
+import type { FilterRule } from './filter.types';
 
 function makeImage(overrides: Partial<WorkspaceImage> = {}): WorkspaceImage {
   return {

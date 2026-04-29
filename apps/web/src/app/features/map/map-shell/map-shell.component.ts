@@ -66,8 +66,8 @@ import {
   type SegmentedSwitchOption,
 } from '../../../shared/segmented-switch/segmented-switch.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/dropdown-shell.component';
-import { ActionEngineService } from '../../action-system/action-engine.service';
-import { ResolvedAction } from '../../action-system/action-types';
+import { ActionEngineService } from '../../../core/action/action-engine.service';
+import { ResolvedAction } from '../../../core/action/action-types';
 import { fileTypeBadge } from '../../../core/media/file-type-registry';
 import {
   buildPhotoMarkerHtml,

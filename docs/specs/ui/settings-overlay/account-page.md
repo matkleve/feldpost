@@ -102,11 +102,12 @@ flowchart LR
 
 | File                                      | Purpose                                              |
 | ----------------------------------------- | ---------------------------------------------------- |
-| `features/account/account.component.ts`   | Account and security page component                  |
-| `features/account/account.component.html` | Template                                             |
-| `features/account/account.component.scss` | Styles                                               |
-| `core/auth.service.ts`                    | Email/password/reset/mfa/logout/delete auth boundary |
-| `core/user-profile.service.ts`            | Display name read/update                             |
+| `shared/account/account.component.ts`      | Account and security component                       |
+| `shared/account/account.component.html`    | Template                                             |
+| `shared/account/account.component.scss`    | Styles                                               |
+| `features/account/account-feature.component.ts` | Optional feature host for standalone account mounting |
+| `core/auth/auth.service.ts`                | Email/password/reset/mfa/logout/delete auth boundary |
+| `core/user-profile/user-profile.service.ts` | Display name read/update                           |
 
 ## Wiring
 

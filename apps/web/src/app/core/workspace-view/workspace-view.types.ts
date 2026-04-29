@@ -3,6 +3,8 @@
  * Used by WorkspaceViewService, FilterService, toolbar components, and the grid.
  */
 
+export type { FilterRule } from '../filter/filter.types';
+
 /** Filename-oriented metadata attached to a media item. */
 export interface WorkspaceMediaFileMetadata {
   originalFilename?: string | null;
@@ -78,15 +80,6 @@ export interface MetadataFieldRef {
   id: string;
   label: string;
   icon: string;
-}
-
-/** A Notion-style filter rule. */
-export interface FilterRule {
-  id: string;
-  conjunction: 'where' | 'and' | 'or';
-  property: string;
-  operator: string;
-  value: string;
 }
 
 /** Discrete thumbnail size presets used by snap-slider controls. */

@@ -1,4 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { SupabaseMetadataAdapter } from './adapters/supabase-metadata.adapter';
 import { MetadataService } from './metadata.service';
 import type { WorkspaceMedia } from '../workspace-view/workspace-view.types';
 
@@ -30,6 +33,7 @@ describe('MetadataService', () => {
   let service: MetadataService;
 
   beforeEach(() => {
+    vi.restoreAllMocks();
     TestBed.configureTestingModule({ providers: [MetadataService] });
     service = TestBed.inject(MetadataService);
   });
@@ -61,5 +65,18 @@ describe('MetadataService', () => {
     expect(service.getSortableValue(media, 'floor')).toBe(12);
     expect(service.getFilterValue(media, 'floor')).toBe('12');
     expect(service.getGroupingLabel(media, 'floor')).toBe('Floor 12');
+  });
+
+  it('clears custom metadata fields when refresh returns no keys after keys existed', async () => {
+    const adapter = TestBed.inject(SupabaseMetadataAdapter);
+    vi.spyOn(adapter, 'fetchMetadataKeys')
+      .mockResolvedValueOnce([{ id: 'phase', key_name: 'Phase', key_type: 'text' }])
+      .mockResolvedValueOnce([]);
+
+    await service.refreshMetadataFields();
+    expect(service.getMetadataField('phase')).toBeDefined();
+
+    await service.refreshMetadataFields();
+    expect(service.getMetadataField('phase')).toBeUndefined();
   });
 });

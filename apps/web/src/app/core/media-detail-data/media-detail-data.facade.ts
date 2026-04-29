@@ -44,7 +44,7 @@ interface ProjectRow {
   name: string;
 }
 
-interface ImageDetailDataFacadeDeps {
+interface MediaDetailDataFacadeDeps {
   services: {
     supabase: SupabaseService;
     metadata: MetadataService;
@@ -69,8 +69,8 @@ interface ImageDetailDataFacadeDeps {
   };
 }
 
-export class ImageDetailDataFacade {
-  constructor(private readonly deps: ImageDetailDataFacadeDeps) {}
+export class MediaDetailDataFacade {
+  constructor(private readonly deps: MediaDetailDataFacadeDeps) {}
 
   async loadImage(id: string, abortSignal: AbortSignal): Promise<void> {
     this.resetLoadState();

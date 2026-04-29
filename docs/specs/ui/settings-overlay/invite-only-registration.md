@@ -111,7 +111,7 @@ erDiagram
 | ----------------------------------------------------------------- | ----------------------------------------------- |
 | `apps/web/src/app/features/auth/register/register.component.ts`   | query-prefill + invite field + submit wiring    |
 | `apps/web/src/app/features/auth/register/register.component.html` | invite field and validation feedback            |
-| `apps/web/src/app/core/auth.service.ts`                           | include invite hash in signup metadata          |
+| `apps/web/src/app/core/auth/auth.service.ts`                      | include invite hash in signup metadata          |
 | `supabase/migrations/20260317170000_invite_only_signup.sql`       | trigger-level invite enforcement and acceptance |
 | `apps/web/src/app/core/auth/password-policy.ts`                   | shared password-strength validators             |
 

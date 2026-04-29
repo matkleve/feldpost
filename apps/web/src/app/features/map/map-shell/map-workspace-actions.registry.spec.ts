@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ActionEngineService } from '../../action-system/action-engine.service';
+import { ActionEngineService } from '../../../core/action/action-engine.service';
 import { MARKER_MENU_ACTION_DEFINITIONS } from './map-workspace-actions.registry';
 import type { MarkerActionContext } from './map-workspace-actions.types';
 

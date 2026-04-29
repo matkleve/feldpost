@@ -10,7 +10,7 @@ Identical to [shared Account](../component/account/account.md): stacked cards, M
 
 ## Where It Lives
 
-- **Code**: `apps/web/src/app/features/account/account.component.ts` (`app-account-feature`).
+- **Code**: `apps/web/src/app/features/account/account-feature.component.ts` (`app-account-feature`).
 - **Primary UX**: [account-page.md](../ui/settings-overlay/account-page.md) and [account-settings-section.md](../ui/settings-overlay/account-settings-section.md) inside the overlay.
 - **Normative component contract**: [account.md](../component/account/account.md).
 
@@ -40,7 +40,7 @@ No feature-local state; shared `app-account` FSM and signals apply.
 
 | File                                   | Purpose              |
 | -------------------------------------- | -------------------- |
-| `features/account/account.component.ts` | Standalone wrapper |
+| `features/account/account-feature.component.ts` | Standalone wrapper |
 | `shared/account/*`                     | Implementation       |
 
 ## Wiring

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { UploadJob } from '../../core/upload/upload-manager.service';
 import { UploadManagerService } from '../../core/upload/upload-manager.service';
 import { ToastService } from '../../core/toast/toast.service';
-import { ACTION_CONTEXT_IDS } from '../action-system/action-context-ids';
+import { ACTION_CONTEXT_IDS } from '../../core/action/action-context-ids';
 import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
 import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
 import {

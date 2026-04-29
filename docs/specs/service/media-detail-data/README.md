@@ -6,7 +6,7 @@ Thin orchestration for loading a media row, wiring metadata, signed URLs, and pr
 
 | File | Role |
 | --- | --- |
-| `apps/web/src/app/core/media-detail-data/media-detail-data.facade.ts` | `ImageDetailDataFacade` — load/query helpers |
+| `apps/web/src/app/core/media-detail-data/media-detail-data.facade.ts` | `MediaDetailDataFacade` — load/query helpers |
 | `apps/web/src/app/core/media-detail-data/media-detail-data.facade.spec.ts` | Vitest coverage |
 
 Domain-specific helpers (`media-detail-view.utils`, project membership helper, types) remain under `apps/web/src/app/shared/workspace-pane/media-detail/` per UI boundary.

@@ -62,7 +62,7 @@ import { ImageDetailHeaderComponent } from './media-detail-header/media-detail-h
 import { MediaDetailMediaViewerComponent } from './media-detail-media-viewer/media-detail-media-viewer.component';
 import { ImageDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
-import { ImageDetailDataFacade } from '../../../core/media-detail-data/media-detail-data.facade';
+import { MediaDetailDataFacade } from '../../../core/media-detail-data/media-detail-data.facade';
 import { ImageDetailMetadataHelper } from './media-detail-metadata.helper';
 import { ImageDetailFieldsHelper } from './media-detail-fields.helper';
 import { MediaDetailMediaEventsHelper } from './media-detail-media-events.helper';
@@ -329,7 +329,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     canAssignMultipleProjects: () => this.canAssignMultipleProjects(),
   });
 
-  private readonly dataFacade = new ImageDetailDataFacade({
+  private readonly dataFacade = new MediaDetailDataFacade({
     services: {
       supabase: this.supabaseService,
       metadata: this.metadataService,

@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import type { ToastItem } from '../../core/toast.model';
+import type { ToastItem } from '../../core/toast/toast.types';
 import { ToastService } from '../../core/toast/toast.service';
 
 const ICON_MAP: Record<string, string> = {
