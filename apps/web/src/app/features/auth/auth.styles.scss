@@ -30,12 +30,9 @@
     var(--color-bg-base);
 }
 
-// Auth modal surface — composes ui-container; owns only auth-specific constraints.
-// padding and border-radius come from ui-container via CSS var overrides below.
+// Auth modal surface — composes ui-container; size geometry comes from ui-container--md.
+// @see container.scss#size-md
 .auth-card {
-  --ui-container-padding-inline: var(--spacing-6);
-  --ui-container-padding-block: var(--spacing-6);
-
   background: var(--color-bg-surface);
   box-shadow: var(--elevation-dropdown);
   width: 100%;
@@ -172,9 +169,6 @@
   }
 
   .auth-card {
-    --ui-container-padding-inline: var(--spacing-4);
-    --ui-container-padding-block: var(--spacing-5);
-
     max-height: calc(100dvh - var(--spacing-6));
   }
 

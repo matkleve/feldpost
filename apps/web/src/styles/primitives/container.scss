@@ -1,15 +1,17 @@
 // ---------------------------------------------
 // UI CONTAINER & ITEM PRIMITIVE
 // Responsibilities:
-//   Size Modifiers (uiContainerCompact, uiItem):
-//     ? min-height, padding, gap, radius
-//   Emphasis Modifiers:
-//     ? background, color, hover/active states
-//   Layout Modifiers:
-//     ? flex-direction, grid-template, component specific variables
-//     ? NEVER height, font-size
+//   Size Modifiers (--sm, --md, --lg): padding, gap, radius
+//   Emphasis Modifiers: background, color, hover/active states
+//   Layout Modifiers: flex-direction, grid-template, component-specific vars
+//     NEVER height, font-size
+// @see docs/specs/component/
 // ---------------------------------------------
 
+// Base reads geometry exclusively through local CSS vars — no hard-coded values.
+// Unsized containers keep the legacy tight defaults (--spacing-1) so panel/overlay
+// components that rely on those values are not affected. Apply --sm/--md/--lg explicitly.
+// @see container.scss#size-system
 .ui-container {
   --ui-container-padding-inline: var(--container-padding-inline-panel);
   --ui-container-padding-block: var(--container-padding-block-panel);
@@ -25,14 +27,34 @@
   border-radius: var(--ui-container-radius);
 }
 
-// Size: defines height and spacing � never overridden by Layout Modifiers
-.ui-container--compact {
-  --ui-container-padding-inline: var(--container-padding-inline-compact);
-  --ui-container-padding-block: var(--container-padding-block-compact);
+// Tight — inline controls, compact panels
+// @see container.scss#size-sm
+.ui-container--sm {
+  --ui-container-padding-inline: var(--spacing-3);
+  --ui-container-padding-block: var(--spacing-2);
+  --ui-container-gap: var(--spacing-1);
+  --ui-container-radius: var(--container-radius-control);
 }
 
-// Layout: arrangement only � NO size or font properties
-// (Container steuert Layout �ber Flex-Modifier in sich selbst)
+// Default — sidebar panels, auth card, settings sections
+// @see container.scss#size-md
+.ui-container--md {
+  --ui-container-padding-inline: var(--spacing-6);
+  --ui-container-padding-block: var(--spacing-6);
+  --ui-container-gap: var(--spacing-2);
+  --ui-container-radius: var(--container-radius-panel);
+}
+
+// Wide — modal surfaces, full-width overlays
+// @see container.scss#size-lg
+.ui-container--lg {
+  --ui-container-padding-inline: var(--spacing-7);
+  --ui-container-padding-block: var(--spacing-7);
+  --ui-container-gap: var(--spacing-3);
+  --ui-container-radius: var(--radius-lg-plus);
+}
+
+// Layout: arrangement only — NO size or font properties
 
 // ---------------------------------------------
 // UI ITEM PRIMITIVE
@@ -51,7 +73,7 @@
   grid-template-columns: var(--ui-item-media-size) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--ui-item-gap);
-  min-height: var(--ui-item-min-height); // Container/Items content w�chst
+  min-height: var(--ui-item-min-height); // Container/Items content wächst
   padding-block: var(--ui-item-padding-block);
   padding-inline: var(--ui-item-padding-inline);
   border-radius: var(--ui-item-radius);
@@ -67,7 +89,7 @@
   }
 }
 
-// Layout: arrangement only � NO size or font properties
+// Layout: arrangement only — NO size or font properties
 .ui-item-media {
   display: inline-flex;
   align-items: center;

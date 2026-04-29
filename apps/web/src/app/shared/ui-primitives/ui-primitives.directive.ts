@@ -4,11 +4,25 @@ import { Directive } from '@angular/core';
 export class UiContainerDirective {}
 
 @Directive({
-  selector: '[uiContainerCompact]',
+  selector: '[uiContainerSizeSm]',
   standalone: true,
-  host: { class: 'ui-container--compact' },
+  host: { class: 'ui-container--sm' },
 })
-export class UiContainerCompactDirective {}
+export class UiContainerSizeSmDirective {}
+
+@Directive({
+  selector: '[uiContainerSizeMd]',
+  standalone: true,
+  host: { class: 'ui-container--md' },
+})
+export class UiContainerSizeMdDirective {}
+
+@Directive({
+  selector: '[uiContainerSizeLg]',
+  standalone: true,
+  host: { class: 'ui-container--lg' },
+})
+export class UiContainerSizeLgDirective {}
 
 @Directive({ selector: '[uiSectionCard]', standalone: true, host: { class: 'ui-section-card' } })
 export class UiSectionCardDirective {}
@@ -513,7 +527,9 @@ export class UiCardShellSizeLgDirective {}
 
 export const UI_PRIMITIVE_DIRECTIVES = [
   UiContainerDirective,
-  UiContainerCompactDirective,
+  UiContainerSizeSmDirective,
+  UiContainerSizeMdDirective,
+  UiContainerSizeLgDirective,
   UiSectionCardDirective,
   UiItemDirective,
   UiItemMediaDirective,

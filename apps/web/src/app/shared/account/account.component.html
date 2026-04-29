@@ -2,7 +2,7 @@
   class="account-page ui-container content-clamp content-clamp--text"
   [attr.aria-label]="tr('Account page')"
 >
-  <header class="account-card account-card--identity ui-container ui-container--compact">
+  <header class="account-card account-card--identity ui-container ui-container--sm">
     <div class="account-card__avatar" aria-hidden="true">
       @if (loading()) {
         <span class="account-skeleton account-skeleton--avatar"></span>
@@ -33,7 +33,7 @@
   </header>
 
   <section
-    class="account-card ui-container ui-container--compact"
+    class="account-card ui-container ui-container--sm"
     data-settings-subsection="profile"
   >
     <h2>{{ tr('Profil') }}</h2>
@@ -62,7 +62,7 @@
   </section>
 
   <section
-    class="account-card ui-container ui-container--compact"
+    class="account-card ui-container ui-container--sm"
     data-settings-subsection="password"
   >
     <h2>{{ tr('Anmeldung') }}</h2>
@@ -148,7 +148,7 @@
     </div>
   </section>
 
-  <section class="account-card ui-container ui-container--compact" data-settings-subsection="mfa">
+  <section class="account-card ui-container ui-container--sm" data-settings-subsection="mfa">
     <h2>{{ tr('2FA') }}</h2>
     <p>{{ tr('Aktive Faktoren und TOTP-Setup.') }}</p>
 
@@ -224,7 +224,7 @@
   </section>
 
   <section
-    class="account-card ui-container ui-container--compact"
+    class="account-card ui-container ui-container--sm"
     data-settings-subsection="session"
   >
     <h2>{{ tr('Sitzung') }}</h2>
@@ -242,7 +242,7 @@
   </section>
 
   <section
-    class="account-card account-card--danger ui-container ui-container--compact"
+    class="account-card account-card--danger ui-container ui-container--sm"
     data-settings-subsection="delete"
   >
     <h2>{{ tr('Konto löschen') }}</h2>
@@ -279,7 +279,7 @@
     aria-modal="true"
     [attr.aria-label]="tr('Konto löschen bestätigen')"
   >
-    <div class="account-delete-dialog ui-container ui-container--compact">
+    <div class="account-delete-dialog ui-container ui-container--sm">
       <h3>{{ tr('Konto löschen') }}</h3>
       <p>{{ tr('Bitte gib DELETE ein, um die Löschung zu bestätigen.') }}</p>
       <label uiFieldRow uiFieldRowStacked class="account-field ui-field-row ui-field-row--stacked">
