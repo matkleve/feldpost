@@ -1,5 +1,12 @@
 # Specs Index
 
+## Quick Orientation (Session Context)
+
+- Glossary: [docs/glossary.md](../glossary.md) (source of truth for terminology)
+- Spec format: [docs/agent-workflows/element-spec-format.md](../agent-workflows/element-spec-format.md)
+- For the area you are touching, read the local README in that subfolder.
+- Active specs index is per-area — do not maintain a global flat table.
+
 Last updated: 2026-04-28
 
 Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
