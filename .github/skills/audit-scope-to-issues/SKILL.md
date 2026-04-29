@@ -8,6 +8,10 @@ argument-hint: "Path to audit, for example apps/web/src/app/core or apps/web/src
 
 Audit a requested folder or file and create GitHub issues for confirmed findings.
 
+## Role
+
+Router, orchestrator, and user checkpoint. Detects scope, dispatches specialist skills, collects their reports, presents a consolidated finding list to the user for confirmation, resolves unclear items interactively, then creates GitHub issues. This is the only skill that creates GitHub issues.
+
 ## Inputs
 
 - Required: one file or folder path.
@@ -26,9 +30,22 @@ Before judging code, read:
 
 For database/security findings involving overlaps, feasibility, immutability, uniqueness, publication, or history, inspect migrations, constraints, triggers, and RLS before opening an issue.
 
-## Audit Targets
+## Scope Routing
 
-Look only for:
+Detect scope type from the path and apply matching specialist skills before judging any finding:
+
+| Scope type | Specialist skills to apply |
+|---|---|
+| `docs/specs/**` | `spec-audit` |
+| `apps/web/src/app/core/**` | `service-symmetry` |
+| Angular component (`.component.ts`) | `check-spec` + `component-structure` |
+| Large refactor candidate | `safe-file-split` |
+| Any scope | Always ends with issue creation after checkpoint |
+
+If a path matches multiple types, apply all matching specialist skills in order.
+<!-- spec-hierarchy-audit: planned, not yet available -->
+
+Look only for findings returned by specialist reports:
 
 - Spec/code mismatch: behavior, state, boundaries, File Map, FSM, Ownership Triad, i18n, or adapter rules differ from specs.
 - Likely bugs/risk: clear logic errors, unsafe assumptions, lost error context, broken edge cases, or missing verification hooks.
@@ -68,6 +85,26 @@ Assign exactly one priority label to every issue:
 
 Default `task` findings to `priority:P2` unless evidence justifies `P0` or `P1`.
 Default `idea` findings to `priority:P3`.
+
+## User Checkpoint
+
+After collecting all specialist reports, stop and present the consolidated findings to the user before creating any issues:
+
+---
+**Audit complete. Before I create issues, please confirm:**
+
+**Confirmed findings (will become issues):**
+| # | Area | Observation | Suggested priority |
+|---|---|---|---|
+
+**Unclear findings (need your input):**
+| # | Area | Suspicion | Check needed | Your call |
+|---|---|---|---|---|
+
+For each unclear finding, ask: "Create as `idea`, promote to `task`, or drop?" Wait for the user's response before proceeding.
+
+Do not create any GitHub issue until the user replies with confirmation or explicit approval per finding.
+---
 
 ## GitHub Issue Creation
 
