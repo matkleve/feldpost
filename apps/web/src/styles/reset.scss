@@ -38,42 +38,6 @@ body {
   color: var(--color-text-primary);
 }
 
-// ── Typography baseline — Tailwind Preflight removes browser heading defaults ──
-h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-}
-
-h2 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-}
-
-h3 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-snug);
-}
-
-h4,
-h5,
-h6 {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-snug);
-}
-
-// ── Link baseline ──────────────────────────────────────────────────────────────
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
 
 html {
   scrollbar-gutter: stable;

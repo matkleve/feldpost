@@ -6,26 +6,33 @@
     <p class="auth-subtitle">Welcome back to Feldpost</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-
       <!-- Email field -->
       <div class="field">
         <label for="login-email" class="auth-field-label">Email</label>
         <input
           uiInputControl
-          [class.ui-input-control--error]="form.controls.email.touched && form.controls.email.invalid"
+          [class.ui-input-control--error]="
+            form.controls.email.touched && form.controls.email.invalid
+          "
           id="login-email"
           class="ui-input-control"
           type="email"
           formControlName="email"
           autocomplete="email"
           placeholder="you@example.com"
-          [attr.aria-invalid]="(form.controls.email.touched && form.controls.email.invalid) ? 'true' : null"
-          [attr.aria-describedby]="(form.controls.email.touched && form.controls.email.invalid) ? 'login-email-error' : null"
+          [attr.aria-invalid]="
+            form.controls.email.touched && form.controls.email.invalid ? 'true' : null
+          "
+          [attr.aria-describedby]="
+            form.controls.email.touched && form.controls.email.invalid ? 'login-email-error' : null
+          "
         />
         @if (form.controls.email.touched && form.controls.email.hasError('required')) {
           <span id="login-email-error" class="field-error" role="alert">Email is required.</span>
         } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
-          <span id="login-email-error" class="field-error" role="alert">Enter a valid email address.</span>
+          <span id="login-email-error" class="field-error" role="alert"
+            >Enter a valid email address.</span
+          >
         }
       </div>
 
@@ -38,15 +45,23 @@
         <div class="password-field-wrapper">
           <input
             uiInputControl
-            [class.ui-input-control--error]="form.controls.password.touched && form.controls.password.invalid"
+            [class.ui-input-control--error]="
+              form.controls.password.touched && form.controls.password.invalid
+            "
             id="login-password"
             class="ui-input-control password-input"
             [type]="showPassword() ? 'text' : 'password'"
             formControlName="password"
             autocomplete="current-password"
             placeholder="••••••••"
-            [attr.aria-invalid]="(form.controls.password.touched && form.controls.password.invalid) ? 'true' : null"
-            [attr.aria-describedby]="(form.controls.password.touched && form.controls.password.invalid) ? 'login-password-error' : null"
+            [attr.aria-invalid]="
+              form.controls.password.touched && form.controls.password.invalid ? 'true' : null
+            "
+            [attr.aria-describedby]="
+              form.controls.password.touched && form.controls.password.invalid
+                ? 'login-password-error'
+                : null
+            "
           />
           <button
             type="button"
@@ -61,7 +76,9 @@
           </button>
         </div>
         @if (form.controls.password.touched && form.controls.password.hasError('required')) {
-          <span id="login-password-error" class="field-error" role="alert">Password is required.</span>
+          <span id="login-password-error" class="field-error" role="alert"
+            >Password is required.</span
+          >
         }
       </div>
 
@@ -85,8 +102,6 @@
       </button>
     </form>
 
-    <p class="auth-footer">
-      Don't have an account? <a routerLink="/auth/register">Create one</a>
-    </p>
+    <p class="auth-footer">Don't have an account? <a routerLink="/auth/register">Create one</a></p>
   </div>
 </div>

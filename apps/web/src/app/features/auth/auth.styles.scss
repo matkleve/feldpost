@@ -33,28 +33,28 @@
 // Auth modal surface — composes ui-container; owns only auth-specific constraints.
 // padding and border-radius come from ui-container via CSS var overrides below.
 .auth-card {
-  --ui-container-padding-inline: 2rem;
-  --ui-container-padding-block: 2.5rem;
+  --ui-container-padding-inline: var(--spacing-6);
+  --ui-container-padding-block: var(--spacing-6);
 
   background: var(--color-bg-surface);
   box-shadow: var(--elevation-dropdown);
   width: 100%;
   max-width: 420px;
-  max-height: calc(100dvh - 3rem);
+  max-height: calc(100dvh - var(--spacing-7));
   z-index: 2;
   overflow: hidden;
 }
 
 // Subtitle paragraph — secondary color directly below the page h1
 .auth-subtitle {
-  font-size: var(--font-size-md);
   color: var(--color-text-secondary);
-  margin-bottom: 1.75rem;
+  margin-bottom: var(--spacing-6);
 }
 
 // Scrollable form region for long forms (register) — shadows indicate overflow
 .auth-card-scroll {
-  max-height: calc(100dvh - 3rem - 8.25rem);
+  // 8.25rem = approximate height of h1 + .auth-subtitle + top padding above scroll region
+  max-height: calc(100dvh - var(--spacing-7) - 8.25rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-right: var(--spacing-1);
@@ -175,10 +175,10 @@
     --ui-container-padding-inline: var(--spacing-4);
     --ui-container-padding-block: var(--spacing-5);
 
-    max-height: calc(100dvh - 2rem);
+    max-height: calc(100dvh - var(--spacing-6));
   }
 
   .auth-card-scroll {
-    max-height: calc(100dvh - 2rem - 7.25rem);
+    max-height: calc(100dvh - var(--spacing-6) - 7.25rem);
   }
 }
