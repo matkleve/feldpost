@@ -128,17 +128,17 @@ export class WorkspaceToolbarComponent implements OnInit {
   onGroupingsChanged(active: GroupingProperty[]): void {
     this.activeGroupings.set(active);
     // Push to WorkspaceViewService
-    this.viewService.activeGroupings.set(
+    this.viewService.setActiveGroupings(
       active.map((g) => ({ id: g.id, label: g.label, icon: g.icon }) as MetadataFieldRef),
     );
   }
 
   onSortChanged(sortConfigs: SortConfig[]): void {
-    this.viewService.activeSorts.set(sortConfigs);
+    this.viewService.setActiveSorts(sortConfigs);
   }
 
   onProjectsChanged(selectedIds: Set<string>): void {
-    this.viewService.selectedProjectIds.set(selectedIds);
+    this.viewService.setSelectedProjectIds(selectedIds);
   }
 
   toggleDropdown(id: ToolbarDropdown, event: MouseEvent): void {

@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { UploadLocationConfigService } from '../upload/upload-location-config.service';
 import { CITY_REGISTRY } from './city-registry.const';
 import { POSTAL_CODE_PATTERNS } from './postal-code-patterns.const';
@@ -77,13 +77,9 @@ function uniq(values: readonly string[]): string[] {
 
 @Injectable({ providedIn: 'root' })
 export class LocationPathParserService {
-  private readonly disambiguationAlgorithm: DisambiguationAlgorithm;
-
-  constructor(
-    private readonly locationConfig: UploadLocationConfigService = new UploadLocationConfigService(),
-  ) {
-    this.disambiguationAlgorithm = this.locationConfig.getConfig().disambiguationAlgorithm;
-  }
+  private readonly locationConfig = inject(UploadLocationConfigService);
+  private readonly disambiguationAlgorithm: DisambiguationAlgorithm =
+    this.locationConfig.getConfig().disambiguationAlgorithm;
 
   parsePathSegments(fullPath: string): AddressExtractionResult {
     const context = emptyContext();

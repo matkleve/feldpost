@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ProjectSelectOption } from '../../../shared/project-select-dialog/project-select-dialog.component';
 
 export interface CreateProjectFromImageResult {
@@ -23,6 +24,8 @@ export interface ProjectAssignmentResultLike {
 
 @Injectable({ providedIn: 'root' })
 export class MapProjectActionsService {
+  private readonly supabaseService = inject(SupabaseService);
+
   getAssignmentFailureMessage(result: ProjectAssignmentResultLike): string | null {
     if (result.ok) {
       return null;
@@ -41,10 +44,15 @@ export class MapProjectActionsService {
       : `${imageCount} Medien dem Projekt "${projectName}" zugewiesen.`;
   }
 
-  async loadProjectOptions(client: SupabaseClient): Promise<LoadProjectOptionsResult> {
-    const { data, error } = await client.from('projects').select('id,name').order('name', {
-      ascending: true,
-    });
+  async loadProjectOptions(): Promise<LoadProjectOptionsResult>;
+  async loadProjectOptions(_client: SupabaseClient): Promise<LoadProjectOptionsResult>;
+  async loadProjectOptions(_client?: SupabaseClient): Promise<LoadProjectOptionsResult> {
+    const { data, error } = await this.supabaseService.client
+      .from('projects')
+      .select('id,name')
+      .order('name', {
+        ascending: true,
+      });
 
     if (error) {
       return { ok: false, reason: 'error', options: [] };
@@ -72,19 +80,15 @@ export class MapProjectActionsService {
   }
 
   async createProjectFromFirstImage(params: {
-    client: SupabaseClient;
     projectName: string;
     firstImageId: string;
   }): Promise<CreateProjectFromImageResult> {
-    const organizationId = await this.resolveOrganizationIdForImage(
-      params.client,
-      params.firstImageId,
-    );
+    const organizationId = await this.resolveOrganizationIdForImage(params.firstImageId);
     if (!organizationId) {
       return { ok: false, reason: 'organization-missing' };
     }
 
-    const { data: projectData, error: projectError } = await params.client
+    const { data: projectData, error: projectError } = await this.supabaseService.client
       .from('projects')
       .insert({ name: params.projectName, organization_id: organizationId })
       .select('id,name')
@@ -108,11 +112,8 @@ export class MapProjectActionsService {
     };
   }
 
-  private async resolveOrganizationIdForImage(
-    client: SupabaseClient,
-    mediaId: string,
-  ): Promise<string | null> {
-    const { data, error } = await client
+  private async resolveOrganizationIdForImage(mediaId: string): Promise<string | null> {
+    const { data, error } = await this.supabaseService.client
       .from('media_items')
       .select('organization_id')
       .or(`id.eq.${mediaId},source_image_id.eq.${mediaId}`)

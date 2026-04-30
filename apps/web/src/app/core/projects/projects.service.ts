@@ -3,7 +3,9 @@ import { SupabaseService } from '../supabase/supabase.service';
 import type {
   ProjectColorKey,
   ProjectListItem,
+  ProjectMutationResult,
   ProjectSearchCounts,
+  ProjectSelectOption,
   ProjectStatusFilter,
   ProjectScopedWorkspaceImage,
 } from './projects.types';
@@ -134,6 +136,25 @@ export class ProjectsService {
     } finally {
       this.projectsLoadPromise = null;
     }
+  }
+
+  async loadProjectSelectOptions(): Promise<ProjectSelectOption[]> {
+    const { data, error } = await this.supabase.client
+      .from('projects')
+      .select('id,name')
+      .order('name', { ascending: true });
+
+    if (error || !Array.isArray(data)) {
+      return [];
+    }
+
+    return (data as Array<{ id: string; name: string | null }>)
+      .filter((row): row is { id: string; name: string } => {
+        return (
+          typeof row.id === 'string' && typeof row.name === 'string' && row.name.length > 0
+        );
+      })
+      .map((row) => ({ id: row.id, name: row.name }));
   }
 
   private async loadProjectsFresh(): Promise<ProjectListItem[]> {
@@ -417,6 +438,32 @@ export class ProjectsService {
     return ok;
   }
 
+  async assignMediaItemsToProject(
+    mediaItemIds: readonly string[],
+    projectId: string,
+  ): Promise<ProjectMutationResult> {
+    const uniqueMediaItemIds = this.normalizeIds(mediaItemIds);
+    if (uniqueMediaItemIds.length === 0) {
+      return { ok: true, errorMessage: null };
+    }
+
+    const rows = uniqueMediaItemIds.map((mediaItemId) => ({
+      media_item_id: mediaItemId,
+      project_id: projectId,
+    }));
+    const { error } = await this.supabase.client
+      .from('media_projects')
+      .upsert(rows, { onConflict: 'media_item_id,project_id', ignoreDuplicates: true });
+
+    if (error) {
+      return { ok: false, errorMessage: error.message };
+    }
+
+    this.invalidateProjectsReadCaches();
+    this.projectWorkspaceImagesCache.clear();
+    return { ok: true, errorMessage: null };
+  }
+
   async removeMediaFromProject(mediaItemId: string, projectId: string): Promise<boolean> {
     const { error } = await this.supabase.client
       .from('media_projects')
@@ -433,6 +480,28 @@ export class ProjectsService {
     return ok;
   }
 
+  async removeMediaItemsFromProjects(
+    mediaItemIds: readonly string[],
+  ): Promise<ProjectMutationResult> {
+    const uniqueMediaItemIds = this.normalizeIds(mediaItemIds);
+    if (uniqueMediaItemIds.length === 0) {
+      return { ok: true, errorMessage: null };
+    }
+
+    const { error } = await this.supabase.client
+      .from('media_projects')
+      .delete()
+      .in('media_item_id', uniqueMediaItemIds);
+
+    if (error) {
+      return { ok: false, errorMessage: error.message };
+    }
+
+    this.invalidateProjectsReadCaches();
+    this.projectWorkspaceImagesCache.clear();
+    return { ok: true, errorMessage: null };
+  }
+
   // No "primary project" concept — memberships only via media_projects.
 
   private invalidateProjectsReadCaches(): void {
@@ -442,6 +511,10 @@ export class ProjectsService {
 
   private invalidateProjectWorkspaceCache(projectId: string): void {
     this.projectWorkspaceImagesCache.delete(projectId);
+  }
+
+  private normalizeIds(ids: readonly string[]): string[] {
+    return Array.from(new Set(ids.filter((id) => typeof id === 'string' && id.length > 0)));
   }
 
   private async fetchProjects(): Promise<ProjectRow[]> {

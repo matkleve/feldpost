@@ -5,10 +5,11 @@ import { ShareSetService } from '../../../../core/share-set/share-set.service';
 import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
-import { SupabaseService } from '../../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
+import { MediaQueryService } from '../../../../core/media-query/media-query.service';
+import { ProjectsService } from '../../../../core/projects/projects.service';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ACTION_CONTEXT_IDS } from '../../../../core/action/action-context-ids';
 import {
@@ -60,10 +61,11 @@ export class WorkspacePaneFooterComponent {
   protected readonly selectionService = inject(WorkspaceSelectionService);
   private readonly actionEngine = inject(ActionEngineService);
   private readonly i18nService = inject(I18nService);
-  private readonly supabaseService = inject(SupabaseService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
+  private readonly mediaQueryService = inject(MediaQueryService);
+  private readonly projectsService = inject(ProjectsService);
   private readonly shareSetService = inject(ShareSetService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
@@ -146,17 +148,14 @@ export class WorkspacePaneFooterComponent {
 
     this.pending.set(true);
     try {
-      const rows = selectedMediaItemIds.map((mediaItemId) => ({
-        media_item_id: mediaItemId,
-        project_id: projectId,
-      }));
-      const { error } = await this.supabaseService.client
-        .from('media_projects')
-        .upsert(rows, { onConflict: 'media_item_id,project_id', ignoreDuplicates: true });
+      const result = await this.projectsService.assignMediaItemsToProject(
+        selectedMediaItemIds,
+        projectId,
+      );
 
-      if (error) {
+      if (!result.ok) {
         this.toastService.show({
-          message: error.message,
+          message: result.errorMessage ?? '',
           type: 'error',
         });
         return;
@@ -236,7 +235,7 @@ export class WorkspacePaneFooterComponent {
       }
 
       const selectedImageIds = this.selectionService.selectedMediaIds();
-      this.workspaceViewService.rawImages.update((images) =>
+      this.workspaceViewService.updateRawImages((images) =>
         images.map((image) =>
           selectedImageIds.has(image.id)
             ? {
@@ -285,18 +284,15 @@ export class WorkspacePaneFooterComponent {
 
     this.pending.set(true);
     try {
-      const { error } = await this.supabaseService.client
-        .from('media_items')
-        .delete()
-        .in('id', selectedMediaItemIds);
+      const result = await this.mediaQueryService.deleteMediaItems(selectedMediaItemIds);
 
-      if (error) {
-        this.toastService.show({ message: error.message, type: 'error' });
+      if (!result.ok) {
+        this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
         return;
       }
 
       const selectedIds = this.selectionService.selectedMediaIds();
-      this.workspaceViewService.rawImages.update((images) =>
+      this.workspaceViewService.updateRawImages((images) =>
         images.filter((image) => !selectedIds.has(image.id)),
       );
       this.selectionService.clearSelection();
@@ -442,12 +438,9 @@ export class WorkspacePaneFooterComponent {
   private async openProjectDialog(): Promise<void> {
     this.pending.set(true);
     try {
-      const { data, error } = await this.supabaseService.client
-        .from('projects')
-        .select('id,name')
-        .order('name', { ascending: true });
+      const projectOptions = await this.projectsService.loadProjectSelectOptions();
 
-      if (error || !Array.isArray(data) || data.length === 0) {
+      if (projectOptions.length === 0) {
         this.toastService.show({
           message: this.t('workspace.export.error.noProjectsAvailable', 'No projects available.'),
           type: 'warning',
@@ -455,14 +448,7 @@ export class WorkspacePaneFooterComponent {
         return;
       }
 
-      this.projectOptions.set(
-        data
-          .filter(
-            (row): row is { id: string; name: string } =>
-              typeof row.id === 'string' && typeof row.name === 'string' && row.name.length > 0,
-          )
-          .map((row) => ({ id: row.id, name: row.name })),
-      );
+      this.projectOptions.set(projectOptions);
       this.projectDialogSelectedId.set(this.projectOptions()[0]?.id ?? null);
       this.projectDialogOpen.set(true);
     } finally {
@@ -472,27 +458,7 @@ export class WorkspacePaneFooterComponent {
 
   private async resolveSelectedMediaItemIds(): Promise<string[]> {
     const selectedIds = Array.from(this.selectionService.selectedMediaIds());
-    if (selectedIds.length === 0) {
-      return [];
-    }
-
-    const idList = selectedIds.join(',');
-    const { data, error } = await this.supabaseService.client
-      .from('media_items')
-      .select('id,source_image_id')
-      .or(`id.in.(${idList}),source_image_id.in.(${idList})`);
-
-    if (error || !Array.isArray(data)) {
-      return [];
-    }
-
-    return Array.from(
-      new Set(
-        data
-          .map((row) => (typeof row.id === 'string' ? row.id : null))
-          .filter((id): id is string => !!id),
-      ),
-    );
+    return this.mediaQueryService.resolveMediaItemIdsByLookupIds(selectedIds);
   }
 
   private async removeFromProject(): Promise<void> {
@@ -507,18 +473,15 @@ export class WorkspacePaneFooterComponent {
 
     this.pending.set(true);
     try {
-      const { error } = await this.supabaseService.client
-        .from('media_projects')
-        .delete()
-        .in('media_item_id', selectedMediaItemIds);
+      const result = await this.projectsService.removeMediaItemsFromProjects(selectedMediaItemIds);
 
-      if (error) {
-        this.toastService.show({ message: error.message, type: 'error' });
+      if (!result.ok) {
+        this.toastService.show({ message: result.errorMessage ?? '', type: 'error' });
         return;
       }
 
       const selectedImageIds = this.selectionService.selectedMediaIds();
-      this.workspaceViewService.rawImages.update((images) =>
+      this.workspaceViewService.updateRawImages((images) =>
         images.map((image) =>
           selectedImageIds.has(image.id)
             ? {

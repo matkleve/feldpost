@@ -27,14 +27,15 @@ export class MetadataService {
   private readonly i18nService = inject(I18nService);
   private readonly adapter = inject(SupabaseMetadataAdapter);
 
-  readonly customMetadataFields = signal<MetadataFieldDefinition[]>([]);
+  private readonly _customMetadataFields = signal<MetadataFieldDefinition[]>([]);
+  readonly customMetadataFields = this._customMetadataFields.asReadonly();
 
   readonly allMetadataFields = computed<MetadataFieldDefinition[]>(() => [
     ...BUILT_IN_METADATA_FIELDS.map((field) => ({
       ...field,
       label: this.i18nService.translateOriginal(field.label, field.label),
     })),
-    ...this.customMetadataFields(),
+    ...this._customMetadataFields(),
   ]);
 
   readonly sortableMetadataFields = computed(() =>
@@ -92,13 +93,13 @@ export class MetadataService {
   }
 
   setMetadataFieldsFromKeys(keys: MetadataKeyRecord[]): void {
-    this.customMetadataFields.set(mapMetadataKeysToFieldDefinitions(keys, METADATA_TYPE_ICONS));
+    this._customMetadataFields.set(mapMetadataKeysToFieldDefinitions(keys, METADATA_TYPE_ICONS));
   }
 
   async refreshMetadataFields(): Promise<void> {
     const keys = await this.adapter.fetchMetadataKeys();
     if (keys.length === 0) {
-      this.customMetadataFields.set([]);
+      this._customMetadataFields.set([]);
       return;
     }
     this.setMetadataFieldsFromKeys(keys);

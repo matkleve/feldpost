@@ -14,52 +14,86 @@ import type { UploadJob } from '../../core/upload/upload-manager.service';
 export class UploadPanelDialogSignals {
   // ── Location Address Dialog ────────────────────────────────────────────
 
-  readonly locationAddressDialogOpen = signal(false);
-  readonly locationAddressDialogQuery = signal('');
-  readonly locationAddressDialogLoading = signal(false);
-  readonly locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
-  readonly pendingLocationAddressJob = signal<UploadJob | null>(null);
+  private readonly _locationAddressDialogOpen = signal(false);
+  readonly locationAddressDialogOpen = this._locationAddressDialogOpen.asReadonly();
+
+  private readonly _locationAddressDialogQuery = signal('');
+  readonly locationAddressDialogQuery = this._locationAddressDialogQuery.asReadonly();
+
+  private readonly _locationAddressDialogLoading = signal(false);
+  readonly locationAddressDialogLoading = this._locationAddressDialogLoading.asReadonly();
+
+  private readonly _locationAddressDialogSuggestions = signal<ForwardGeocodeResult[]>([]);
+  readonly locationAddressDialogSuggestions = this._locationAddressDialogSuggestions.asReadonly();
+
+  private readonly _pendingLocationAddressJob = signal<UploadJob | null>(null);
+  readonly pendingLocationAddressJob = this._pendingLocationAddressJob.asReadonly();
+
   private locationAddressSearchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // ── Project Selection Dialog ───────────────────────────────────────────
 
-  readonly projectSelectionDialogOpen = signal(false);
-  readonly projectSelectionDialogTitle = signal('');
-  readonly projectSelectionDialogMessage = signal('');
-  readonly projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
-  readonly projectSelectionDialogSelectedId = signal<string | null>(null);
-  readonly pendingProjectAssignmentJob = signal<UploadJob | null>(null);
-  readonly projectNameDialogOpen = signal(false);
-  readonly projectNameDialogTitle = signal('');
-  readonly projectNameDialogMessage = signal('');
-  readonly projectNameDialogInitialValue = signal('');
+  private readonly _projectSelectionDialogOpen = signal(false);
+  readonly projectSelectionDialogOpen = this._projectSelectionDialogOpen.asReadonly();
+
+  private readonly _projectSelectionDialogTitle = signal('');
+  readonly projectSelectionDialogTitle = this._projectSelectionDialogTitle.asReadonly();
+
+  private readonly _projectSelectionDialogMessage = signal('');
+  readonly projectSelectionDialogMessage = this._projectSelectionDialogMessage.asReadonly();
+
+  private readonly _projectSelectionDialogOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
+  readonly projectSelectionDialogOptions = this._projectSelectionDialogOptions.asReadonly();
+
+  private readonly _projectSelectionDialogSelectedId = signal<string | null>(null);
+  readonly projectSelectionDialogSelectedId = this._projectSelectionDialogSelectedId.asReadonly();
+
+  private readonly _pendingProjectAssignmentJob = signal<UploadJob | null>(null);
+  readonly pendingProjectAssignmentJob = this._pendingProjectAssignmentJob.asReadonly();
+
+  private readonly _projectNameDialogOpen = signal(false);
+  readonly projectNameDialogOpen = this._projectNameDialogOpen.asReadonly();
+
+  private readonly _projectNameDialogTitle = signal('');
+  readonly projectNameDialogTitle = this._projectNameDialogTitle.asReadonly();
+
+  private readonly _projectNameDialogMessage = signal('');
+  readonly projectNameDialogMessage = this._projectNameDialogMessage.asReadonly();
+
+  private readonly _projectNameDialogInitialValue = signal('');
+  readonly projectNameDialogInitialValue = this._projectNameDialogInitialValue.asReadonly();
 
   // ── Duplicate Resolution Dialog ────────────────────────────────────────
 
-  readonly duplicateResolutionDialogOpen = signal(false);
-  readonly duplicateResolutionApplyToBatch = signal(false);
-  readonly pendingDuplicateResolutionJob = signal<UploadJob | null>(null);
+  private readonly _duplicateResolutionDialogOpen = signal(false);
+  readonly duplicateResolutionDialogOpen = this._duplicateResolutionDialogOpen.asReadonly();
+
+  private readonly _duplicateResolutionApplyToBatch = signal(false);
+  readonly duplicateResolutionApplyToBatch = this._duplicateResolutionApplyToBatch.asReadonly();
+
+  private readonly _pendingDuplicateResolutionJob = signal<UploadJob | null>(null);
+  readonly pendingDuplicateResolutionJob = this._pendingDuplicateResolutionJob.asReadonly();
 
   // ── Location Address Dialog Setters ────────────────────────────────────
 
   setLocationAddressDialogOpen(value: boolean): void {
-    this.locationAddressDialogOpen.set(value);
+    this._locationAddressDialogOpen.set(value);
   }
 
   setLocationAddressDialogQuery(value: string): void {
-    this.locationAddressDialogQuery.set(value);
+    this._locationAddressDialogQuery.set(value);
   }
 
   setLocationAddressDialogLoading(value: boolean): void {
-    this.locationAddressDialogLoading.set(value);
+    this._locationAddressDialogLoading.set(value);
   }
 
   setLocationAddressDialogSuggestions(value: ForwardGeocodeResult[]): void {
-    this.locationAddressDialogSuggestions.set(value);
+    this._locationAddressDialogSuggestions.set(value);
   }
 
   setPendingLocationAddressJob(job: UploadJob | null): void {
-    this.pendingLocationAddressJob.set(job);
+    this._pendingLocationAddressJob.set(job);
   }
 
   getLocationAddressSearchTimeout(): ReturnType<typeof setTimeout> | null {
@@ -73,56 +107,56 @@ export class UploadPanelDialogSignals {
   // ── Project Selection Dialog Setters ───────────────────────────────────
 
   setProjectSelectionDialogOpen(value: boolean): void {
-    this.projectSelectionDialogOpen.set(value);
+    this._projectSelectionDialogOpen.set(value);
   }
 
   setProjectSelectionDialogTitle(value: string): void {
-    this.projectSelectionDialogTitle.set(value);
+    this._projectSelectionDialogTitle.set(value);
   }
 
   setProjectSelectionDialogMessage(value: string): void {
-    this.projectSelectionDialogMessage.set(value);
+    this._projectSelectionDialogMessage.set(value);
   }
 
   setProjectSelectionDialogOptions(value: ReadonlyArray<ProjectSelectOption>): void {
-    this.projectSelectionDialogOptions.set(value);
+    this._projectSelectionDialogOptions.set(value);
   }
 
   setProjectSelectionDialogSelectedId(value: string | null): void {
-    this.projectSelectionDialogSelectedId.set(value);
+    this._projectSelectionDialogSelectedId.set(value);
   }
 
   setPendingProjectAssignmentJob(job: UploadJob | null): void {
-    this.pendingProjectAssignmentJob.set(job);
+    this._pendingProjectAssignmentJob.set(job);
   }
 
   setProjectNameDialogOpen(value: boolean): void {
-    this.projectNameDialogOpen.set(value);
+    this._projectNameDialogOpen.set(value);
   }
 
   setProjectNameDialogTitle(value: string): void {
-    this.projectNameDialogTitle.set(value);
+    this._projectNameDialogTitle.set(value);
   }
 
   setProjectNameDialogMessage(value: string): void {
-    this.projectNameDialogMessage.set(value);
+    this._projectNameDialogMessage.set(value);
   }
 
   setProjectNameDialogInitialValue(value: string): void {
-    this.projectNameDialogInitialValue.set(value);
+    this._projectNameDialogInitialValue.set(value);
   }
 
   // ── Duplicate Resolution Dialog Setters ────────────────────────────────
 
   setDuplicateResolutionDialogOpen(value: boolean): void {
-    this.duplicateResolutionDialogOpen.set(value);
+    this._duplicateResolutionDialogOpen.set(value);
   }
 
   setDuplicateResolutionApplyToBatch(value: boolean): void {
-    this.duplicateResolutionApplyToBatch.set(value);
+    this._duplicateResolutionApplyToBatch.set(value);
   }
 
   setPendingDuplicateResolutionJob(job: UploadJob | null): void {
-    this.pendingDuplicateResolutionJob.set(job);
+    this._pendingDuplicateResolutionJob.set(job);
   }
 }

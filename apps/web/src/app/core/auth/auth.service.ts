@@ -51,13 +51,15 @@ export class AuthService {
   // ─── Reactive state ────────────────────────────────────────────────────────
 
   /** Current Supabase session. null = unauthenticated or not yet loaded. */
-  readonly session = signal<Session | null>(null);
+  private readonly _session = signal<Session | null>(null);
+  readonly session = this._session.asReadonly();
 
   /** Shortcut: the authenticated user from the current session. */
-  readonly user = computed<User | null>(() => this.session()?.user ?? null);
+  readonly user = computed<User | null>(() => this._session()?.user ?? null);
 
   /** True while initialize() is still resolving. Guards use this to wait. */
-  readonly loading = signal<boolean>(true);
+  private readonly _loading = signal<boolean>(true);
+  readonly loading = this._loading.asReadonly();
 
   // ─── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -69,12 +71,12 @@ export class AuthService {
   async initialize(): Promise<void> {
     // Load any existing session from storage
     const { data } = await this.supabase.client.auth.getSession();
-    this.session.set(data.session);
+    this._session.set(data.session);
 
     // Subscribe to auth state changes for the lifetime of the app.
     // This fires on: sign-in, sign-out, token refresh, password recovery.
     this.supabase.client.auth.onAuthStateChange((event, session) => {
-      this.session.set(session);
+      this._session.set(session);
 
       // After a PASSWORD_RECOVERY link is clicked, Supabase fires SIGNED_IN
       // with type 'recovery'. Route the user to the update-password form.
@@ -83,7 +85,7 @@ export class AuthService {
       }
     });
 
-    this.loading.set(false);
+    this._loading.set(false);
   }
 
   // ─── Auth actions ───────────────────────────────────────────────────────────

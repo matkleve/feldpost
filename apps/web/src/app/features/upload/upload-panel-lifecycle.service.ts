@@ -24,7 +24,9 @@ export class UploadPanelLifecycleService {
 
   // ── Issue attention pulse ──────────────────────────────────────────────────
 
-  readonly issueAttentionPulse = signal(false);
+  private readonly _issueAttentionPulse = signal(false);
+  readonly issueAttentionPulse = this._issueAttentionPulse.asReadonly();
+
   private issueAttentionTimer: ReturnType<typeof setTimeout> | null = null;
   private subscriptionsInitialized = false;
 
@@ -84,12 +86,12 @@ export class UploadPanelLifecycleService {
   // ── Private ────────────────────────────────────────────────────────────────
 
   private triggerIssueAttentionPulse(): void {
-    this.issueAttentionPulse.set(true);
+    this._issueAttentionPulse.set(true);
     if (this.issueAttentionTimer) {
       clearTimeout(this.issueAttentionTimer);
     }
     this.issueAttentionTimer = setTimeout(() => {
-      this.issueAttentionPulse.set(false);
+      this._issueAttentionPulse.set(false);
       this.issueAttentionTimer = null;
     }, UploadPanelLifecycleService.ISSUE_ATTENTION_RESET_MS);
   }
